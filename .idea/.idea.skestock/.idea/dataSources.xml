@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="dbserver" uuid="c6cdf29e-56c0-4ef0-ab53-1b9904a59307">
+      <driver-ref>sqlserver.jb</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.jetbrains.jdbc.sqlserver.SqlServerDriver</jdbc-driver>
+      <jdbc-url>Server=127.0.0.1,31558;User ID=sa;Password=D2yf9ASvyC}ty0EUPm+Pt4;TrustServerCertificate=true</jdbc-url>
+      <jdbc-additional-properties>
+        <property name="aspireResourceId" value="dbserver-e39c47f7" />
+      </jdbc-additional-properties>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+  </component>
+</project>

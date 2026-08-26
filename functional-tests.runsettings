@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Run settings for Application.FunctionalTests using Podman as the container runtime.
+  Apply with: dotnet test --settings functional-tests.runsettings
+  Or set as the default .runsettings in Rider: Run > Edit Configurations > .runsettings file.
+
+  The podman.socket user unit must be active:
+    systemctl --user start podman.socket
+-->
+<RunSettings>
+  <RunConfiguration>
+    <EnvironmentVariables>
+      <DOCKER_HOST>unix:///run/user/1000/podman/podman.sock</DOCKER_HOST>
+      <DOTNET_ASPIRE_CONTAINER_RUNTIME>podman</DOTNET_ASPIRE_CONTAINER_RUNTIME>
+    </EnvironmentVariables>
+  </RunConfiguration>
+</RunSettings>
