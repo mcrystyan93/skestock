@@ -10,20 +10,20 @@ public sealed class GoodsReceiptSortConfiguration : IKeysetSortConfiguration<Goo
         new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
         {
             ["receivedAt"] = ["ReceivedAt", "Id"],
-            ["createdDate"] = ["Created", "Id"],
+            ["createdDate"] = ["CreatedDate", "Id"],
             ["lastModifiedDate"] = ["LastModified", "Id"],
             ["id"] = ["Id"]
         };
 
-    public List<(string Key, string Direction)> DefaultSort { get; } = [("Created", "desc"), ("Id", "desc")];
+    public List<(string Key, string Direction)> DefaultSort { get; } = [("CreatedDate", "desc"), ("Id", "desc")];
 
     public Expression<Func<GoodsReceipt, dynamic>> GetPropertyExpression(string propertyName)
     {
         return propertyName switch
         {
             "ReceivedAt" => r => r.ReceivedAt,
-            "Created" => r => r.CreatedDate,
-            "LastModified" => r => r.LastModifiedDate,
+            "CreatedDate" => r => r.CreatedDate,
+            "LastModifiedDate" => r => r.LastModifiedDate,
             "Id" => r => r.Id,
             _ => r => r.Id
         };
@@ -34,8 +34,8 @@ public sealed class GoodsReceiptSortConfiguration : IKeysetSortConfiguration<Goo
         return propertyName switch
         {
             "ReceivedAt" => entity.ReceivedAt,
-            "Created" => entity.CreatedDate,
-            "LastModified" => entity.LastModifiedDate,
+            "CreatedDate" => entity.CreatedDate,
+            "LastModifiedDate" => entity.LastModifiedDate,
             "Id" => entity.Id,
             _ => null
         };

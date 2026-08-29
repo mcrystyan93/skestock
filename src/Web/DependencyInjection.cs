@@ -1,4 +1,5 @@
 using Azure.Identity;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
 using skestock.Application.Common.Interfaces;
 using skestock.Web.Services;
@@ -10,6 +11,21 @@ public static class DependencyInjection
     public static void AddWebServices(this IHostApplicationBuilder builder)
     {
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+        // Antiforgery: JS-readable "XSRF-TOKEN" cookie + "X-XSRF-TOKEN" header match Angular's
+        // built-in withXsrfConfiguration() defaults, so no custom header name is needed client-side.
+        // builder.Services.AddAntiforgery(options =>
+        // {
+        //     options.HeaderName = "X-XSRF-TOKEN";
+        //     options.Cookie.Name = "XSRF-TOKEN";
+        //     options.Cookie.HttpOnly = false;
+        //     // options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+        //     //     ? CookieSecurePolicy.None
+        //     //     : CookieSecurePolicy.Always;
+        //     
+        //     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        //     options.Cookie.SameSite = SameSiteMode.Strict;
+        // });
 
         builder.Services.AddScoped<IUser, CurrentUser>();
 

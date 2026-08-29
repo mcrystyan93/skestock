@@ -1,0 +1,16 @@
+<ske-header (onAdd)="onAdd()" />
+
+<ske-filter-container class="mx-4" />
+
+<div class="grow relative mx-4 mb-4">
+  <ske-table [items]="store.categories()"
+             [filter]="store.filter()"
+             [loading]="store.categoriesLoading()"
+             [hasNextPage]="store.hasNextPage()"
+             [isLoadingMore]="store.isLoadingMore()"
+             (onFilterChange)="onFilterChange($event)"
+             (onLoadMore)="onLoadMore()"
+             (onEdit)="onEdit($event)"
+             (onDelete)="onDelete($event)"
+             [deletingCategoryId]="store.deletingCategoryId()" />
+</div>

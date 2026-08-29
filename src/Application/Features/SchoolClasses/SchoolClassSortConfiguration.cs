@@ -12,12 +12,12 @@ public sealed class SchoolClassSortConfiguration : IKeysetSortConfiguration<Scho
             ["name"] = ["Name", "Id"],
             ["startDate"] = ["StartDate", "Id"],
             ["endDate"] = ["EndDate", "Id"],
-            ["createdDate"] = ["Created", "Id"],
-            ["lastModifiedDate"] = ["LastModified", "Id"],
+            ["createdDate"] = ["CreatedDate", "Id"],
+            ["lastModifiedDate"] = ["LastModifiedDate", "Id"],
             ["id"] = ["Id"]
         };
 
-    public List<(string Key, string Direction)> DefaultSort { get; } = [("Created", "desc"), ("Id", "desc")];
+    public List<(string Key, string Direction)> DefaultSort { get; } = [("CreatedDate", "desc"), ("Id", "desc")];
 
     public Expression<Func<SchoolClass, dynamic>> GetPropertyExpression(string propertyName)
     {
@@ -26,8 +26,8 @@ public sealed class SchoolClassSortConfiguration : IKeysetSortConfiguration<Scho
             "Name" => d => d.Name,
             "StartDate" => d => d.StartDate,
             "EndDate" => d => d.EndDate,
-            "Created" => d => d.CreatedDate,
-            "LastModified" => d => d.LastModifiedDate,
+            "CreatedDate" => d => d.CreatedDate,
+            "LastModifiedDate" => d => d.LastModifiedDate,
             "Id" => d => d.Id,
             _ => d => d.Id
         };
@@ -40,8 +40,8 @@ public sealed class SchoolClassSortConfiguration : IKeysetSortConfiguration<Scho
             "Name" => entity.Name,
             "StartDate" => entity.StartDate,
             "EndDate" => entity.EndDate,
-            "Created" => entity.CreatedDate,
-            "LastModified" => entity.LastModifiedDate,
+            "CreatedDate" => entity.CreatedDate,
+            "LastModifiedDate" => entity.LastModifiedDate,
             "Id" => entity.Id,
             _ => null
         };

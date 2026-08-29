@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+
+html, body, ske-root {
+  @apply block h-screen w-screen;
+}
+
+ske-simple, ske-full {
+  @apply flex h-screen w-screen;
+}
+
+nz-result {
+  @apply flex! flex-col! items-center! justify-center! gap-4!;
+}

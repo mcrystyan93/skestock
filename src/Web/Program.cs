@@ -29,10 +29,29 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseCors(static builder => 
-    builder.AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowAnyOrigin());
+
+// AllowAnyOrigin() is incompatible with AllowCredentials() (required for cookie-based auth) —
+// origins must be explicit. In Aspire, the Angular frontend's assigned origin is injected via
+// the "Cors:AllowedOrigins" configuration section (see AppHost/Program.cs); a localhost fallback
+// keeps `dotnet run` on Web alone usable outside Aspire orchestration.
+var corsAllowedOrigins = app.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+if (corsAllowedOrigins is not { Length: > 0 } && app.Environment.IsDevelopment())
+{
+    corsAllowedOrigins = ["https://localhost:4200", "http://localhost:4200"];
+}
+
+app.UseCors(policy => policy
+    .WithOrigins(corsAllowedOrigins ?? [])
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials());
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Must run after UseAuthentication/UseAuthorization so HttpContext.User is populated —
+// antiforgery tokens are bound to the current principal.
+// app.UseAntiforgeryValidation();
 
 app.UseFileServer();
 

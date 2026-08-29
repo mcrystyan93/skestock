@@ -1,0 +1,28 @@
+<form nz-form
+      nzNoColon
+      nzLayout="vertical">
+  <!--   name   -->
+  <nz-form-item *skeletonInputLoader="loading()">
+    <nz-form-label nzRequired>
+      Nume
+    </nz-form-label>
+    <nz-form-control [nzErrorTip]="nameErrorTemplate">
+      <nz-input-wrapper nzShowCount
+                        [nzCount]="{ max: categoryForm.name()?.maxLength() ?? 100 }">
+        <input type="text"
+               nz-input
+               [formField]="categoryForm.name" />
+      </nz-input-wrapper>
+
+      <ng-template #nameErrorTemplate>
+        @if (categoryForm.name().errors(); as errors) {
+          @for (error of errors; track $index) {
+            <div class="ant-form-item-explain-error">
+              {{ error.message }}
+            </div>
+          }
+        }
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+</form>

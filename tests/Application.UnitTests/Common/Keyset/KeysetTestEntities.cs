@@ -28,15 +28,15 @@ public sealed class KeysetTestItemSortConfiguration : IKeysetSortConfiguration<K
     public IReadOnlyDictionary<string, string[]> AllowedSortKeys { get; } =
         new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
         {
-            ["created"] = ["Created", "Id"],
+            ["createdDate"] = ["CreatedDate", "Id"],
             ["priority"] = ["Priority", "Id"]
         };
 
-    public List<(string Key, string Direction)> DefaultSort { get; } = [("Created", "desc"), ("Id", "desc")];
+    public List<(string Key, string Direction)> DefaultSort { get; } = [("CreatedDate", "desc"), ("Id", "desc")];
 
     public Expression<Func<KeysetTestItem, dynamic>> GetPropertyExpression(string propertyName) => propertyName switch
     {
-        "Created" => e => e.CreatedDate,
+        "CreatedDate" => e => e.CreatedDate,
         "Priority" => e => e.Priority!,
         "Id" => e => e.Id,
         _ => e => e.Id
@@ -44,7 +44,7 @@ public sealed class KeysetTestItemSortConfiguration : IKeysetSortConfiguration<K
 
     public object? GetPropertyValue(KeysetTestItem entity, string propertyName) => propertyName switch
     {
-        "Created" => entity.CreatedDate,
+        "CreatedDate" => entity.CreatedDate,
         "Priority" => entity.Priority,
         "Id" => entity.Id,
         _ => null

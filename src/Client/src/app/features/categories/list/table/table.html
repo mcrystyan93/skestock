@@ -1,0 +1,80 @@
+@let dimensions = tableDimensions();
+@let sortByKeyFn = sortByKey();
+
+<nz-table #table
+          nzTableLayout="auto"
+          [nzData]="itemsVirtualData()"
+          [nzVirtualItemSize]="virtualItemSize()"
+          [nzVirtualMinBufferPx]="virtualMinBufferPx()"
+          [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
+          [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          [nzPageSize]="10"
+          [nzPageIndex]="1"
+          nzSize="small"
+          [nzScroll]="{x:dimensions.width, y:dimensions.height}">
+  <thead>
+  <tr>
+    <th>
+      {{ columns.name.label }}
+    </th>
+    <th>
+      {{ columns.createdDate.label }}
+    </th>
+    <th>
+      {{ columns.createdByName.label }}
+    </th>
+    <th>
+      {{ columns.lastModifiedDate.label }}
+    </th>
+    <th>
+      {{ columns.lastModifiedByName.label }}
+    </th>
+    <th>
+      Actiuni
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <ng-template nz-virtual-scroll let-category>
+    <tr>
+      <td>
+        {{ category.name }}
+      </td>
+      <td>
+        {{ category.createdDate | date }}
+      </td>
+      <td>
+        {{ category.createdByName }}
+      </td>
+      <td>
+        {{ category.lastModifiedDate | date }}
+      </td>
+      <td>
+        {{ category.lastModifiedByName }}
+      </td>
+      <td>
+        <div class="flex items-center gap-2">
+          <button nz-button
+                  nzType="link"
+                  type="button"
+                  [attr.aria-label]="'Editeaza'"
+                  (click)="onEdit.emit(category)">
+            <nz-icon nzType="icons:pencil"></nz-icon>
+          </button>
+          <button nz-button
+                  nzDanger
+                  nzType="link"
+                  type="button"
+                  [nzLoading]="deletingCategoryId() === category.id"
+                  [attr.aria-label]="'Sterge'"
+                  (click)="onDelete.emit(category)">
+            <nz-icon nzType="icons:trash-can"></nz-icon>
+          </button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+  </tbody>
+</nz-table>

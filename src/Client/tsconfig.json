@@ -1,0 +1,45 @@
+/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
+/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "preserve",
+    "paths": {
+      "@ske/models": ["./src/app/core/models"],
+      "@ske/theme": ["./src/app/core/theme"],
+      "@ske/auth": ["./src/app/core/auth"],
+      "@ske/layouts": ["./src/app/core/layouts"],
+      "@ske/shared/errors": ["./src/app/shared/errors"],
+      "@ske/shared/loader": ["./src/app/shared/loader"],
+      "@ske/features/login": ["./src/app/features/login"],
+      "@ske/features/home": ["./src/app/features/home"],
+      "@ske/features/categories": ["./src/app/features/categories"],
+      "@ske/shared/theme": ["./src/app/shared/theme"],
+      "@ske/shared/categories": ["./src/app/shared/categories"],
+      "@ske/shared/tables": ["./src/app/shared/tables"],
+    }
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
+}
