@@ -1,0 +1,12 @@
+<div class="absolute top-[10px] right-[10px]">
+  <ske-theme-switcher />
+</div>
+
+<div class="flex items-center justify-center basis-1/2 bg-[#1c1c3e]">
+  <img src="login_image.jpg" alt="login_image">
+</div>
+<div class="flex items-center justify-center basis-1/2">
+  <nz-card>
+    <ske-login-form [loading]="store.loginLoading()" (onSubmit)="login($event)" />
+  </nz-card>
+</div>

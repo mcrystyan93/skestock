@@ -11,12 +11,12 @@ public sealed class LocationSortConfiguration : IKeysetSortConfiguration<Locatio
         {
             ["name"] = ["Name", "Id"],
             ["type"] = ["Type", "Id"],
-            ["createdDate"] = ["Created", "Id"],
+            ["createdDate"] = ["CreatedDate", "Id"],
             ["lastModifiedDate"] = ["LastModified", "Id"],
             ["id"] = ["Id"]
         };
 
-    public List<(string Key, string Direction)> DefaultSort { get; } = [("Created", "desc"), ("Id", "desc")];
+    public List<(string Key, string Direction)> DefaultSort { get; } = [("CreatedDate", "desc"), ("Id", "desc")];   
 
     public Expression<Func<Location, dynamic>> GetPropertyExpression(string propertyName)
     {
@@ -24,8 +24,8 @@ public sealed class LocationSortConfiguration : IKeysetSortConfiguration<Locatio
         {
             "Name" => d => d.Name,
             "Type" => d => d.Type,
-            "Created" => d => d.CreatedDate,
-            "LastModified" => d => d.LastModifiedDate,
+            "CreatedDate" => d => d.CreatedDate,
+            "LastModifiedDate" => d => d.LastModifiedDate,
             "Id" => d => d.Id,
             _ => d => d.Id
         };
@@ -37,7 +37,7 @@ public sealed class LocationSortConfiguration : IKeysetSortConfiguration<Locatio
         {
             "Name" => entity.Name,
             "Type" => entity.Type,
-            "Created" => entity.CreatedDate,
+            "CreatedDate" => entity.CreatedDate,
             "LastModified" => entity.LastModifiedDate,
             "Id" => entity.Id,
             _ => null

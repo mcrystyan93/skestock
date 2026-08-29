@@ -10,20 +10,20 @@ public sealed class CategorySortConfiguration : IKeysetSortConfiguration<Categor
         new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
         {
             ["name"] = ["Name", "Id"],
-            ["createdDate"] = ["Created", "Id"],
-            ["lastModifiedDate"] = ["LastModified", "Id"],
+            ["createdDate"] = ["CreatedDate", "Id"],
+            ["lastModifiedDate"] = ["LastModifiedDate", "Id"],
             ["id"] = ["Id"]
         };
 
-    public List<(string Key, string Direction)> DefaultSort { get; } = [("Created", "desc"), ("Id", "desc")];
+    public List<(string Key, string Direction)> DefaultSort { get; } = [("CreatedDate", "desc"), ("Id", "desc")];
 
     public Expression<Func<Category, dynamic>> GetPropertyExpression(string propertyName)
     {
         return propertyName switch
         {
             "Name" => d => d.Name,
-            "Created" => d => d.CreatedDate,
-            "LastModified" => d => d.LastModifiedDate,
+            "CreatedDate" => d => d.CreatedDate,
+            "LastModifiedDate" => d => d.LastModifiedDate,
             "Id" => d => d.Id,
             _ => d => d.Id
         };
@@ -34,8 +34,8 @@ public sealed class CategorySortConfiguration : IKeysetSortConfiguration<Categor
         return propertyName switch
         {
             "Name" => entity.Name,
-            "Created" => entity.CreatedDate,
-            "LastModified" => entity.LastModifiedDate,
+            "CreatedDate" => entity.CreatedDate,
+            "LastModifiedDate" => entity.LastModifiedDate,
             "Id" => entity.Id,
             _ => null
         };

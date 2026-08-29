@@ -33,5 +33,16 @@ var web = builder.AddProject<Projects.Web>(Services.WebApi)
         url.Url = "/scalar";
     });
 
+var webfrontend = builder.AddViteApp(Services.WebFrontend, "../Client", "dev")
+    .WithReference(web)
+    .WaitFor(web)
+    .WithEnvironment("ASPNETCORE_URLS", web.GetEndpoint("http"))
+    .WithNpm()
+    .WithHttpEndpoint(port: 7001, env: "PORT")
+    .WithExternalHttpEndpoints();
+
+// Feed the frontend's Aspire-assigned origin into Web's CORS policy (AllowCredentials() requires
+// an explicit origin allowlist, not AllowAnyOrigin()) so cookie-authenticated requests work.
+web.WithEnvironment("Cors__AllowedOrigins__0", webfrontend.GetEndpoint("http"));
 
 builder.Build().Run();

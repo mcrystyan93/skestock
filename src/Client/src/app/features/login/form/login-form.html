@@ -1,0 +1,54 @@
+<form nz-form
+      (ngSubmit)="submit()"
+      class="w-full">
+
+  <nz-space nzDirection="vertical"
+            nzSize="large"
+            class="w-full">
+    <!-- email -->
+    <nz-form-item *nzSpaceItem>
+      <nz-form-control [nzErrorTip]="emailErrorTemplate">
+        <nz-input-wrapper>
+          <nz-icon nzInputPrefix
+                   nzType="icons:user"></nz-icon>
+          <input type="text"
+                 placeholder="Email"
+                 nz-input
+                 [formField]="loginForm.email">
+        </nz-input-wrapper>
+        <ng-template #emailErrorTemplate>
+          @for (error of loginForm.email().errors(); track error.kind) {
+            {{ error.message }}
+          }
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!-- parola -->
+    <nz-form-item *nzSpaceItem>
+      <nz-form-control [nzErrorTip]="passwordErrorTemplate">
+        <nz-input-password [nzVisibilityToggle]="true">
+          <nz-icon nzInputPrefix nzType="icons:lock"></nz-icon>
+          <input placeholder="Parola"
+                 nz-input
+                 [formField]="loginForm.password">
+        </nz-input-password>
+        <ng-template #passwordErrorTemplate>
+          @for (error of loginForm.password().errors(); track error.kind) {
+            {{ error.message }}
+          }
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!-- Submit -->
+    <button nz-button
+            nzBlock
+            nzType="primary"
+            type="submit"
+            [nzLoading]="loading()"
+            *nzSpaceItem>
+      Login
+    </button>
+  </nz-space>
+</form>

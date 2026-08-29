@@ -1,0 +1,53 @@
+<div *nzModalTitle>
+  @if (store.categoryLoading()) {
+    Loading...
+  } @else {
+    @if (store.category()?.id) {
+      {{ store.category()?.name ?? 'Modifica categoria' }}
+    } @else {
+      Creaza o noua categorie
+    }
+  }
+</div>
+
+<ske-form [loading]="store.categoryLoading()"
+          [category]="store.category()" />
+
+<div *nzModalFooter>
+  <nz-space>
+    <button nz-button
+            *nzSpaceItem
+            nzType="default"
+            type="button"
+            (click)="close()"
+            [nzLoading]="store.categoryLoading()">
+      Inchide
+    </button>
+
+    <nz-space-compact *nzSpaceItem>
+      <button nz-button
+              nzType="primary"
+              type="button"
+              (click)="save()"
+              [nzLoading]="store.categoryLoading()">
+        Salveaza si inchide
+      </button>
+      <button nz-button
+              nzType="primary"
+              type="button"
+              nz-dropdown
+              [nzDropdownMenu]="menu">
+        <nz-icon nzType="icons:chevron-down"></nz-icon>
+      </button>
+
+      <nz-dropdown-menu #menu="nzDropdownMenu">
+        <ul nz-menu>
+          <li nz-menu-item
+              (click)="save(false)">
+            Salveaza
+          </li>
+        </ul>
+      </nz-dropdown-menu>
+    </nz-space-compact>
+  </nz-space>
+</div>

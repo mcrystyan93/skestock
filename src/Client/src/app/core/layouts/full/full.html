@@ -1,0 +1,23 @@
+<nz-layout>
+  <ske-header></ske-header>
+  <nz-layout>
+    <nz-sider>
+      <ul nz-menu
+          nzMode="inline">
+        <li nz-menu-item
+            nzMatchRouter
+            [routerLink]="['/home']">
+          Acasa
+        </li>
+        <li nz-menu-item
+            nzMatchRouter
+            [routerLink]="['/categories']">
+          Categorii
+        </li>
+      </ul>
+    </nz-sider>
+    <nz-content class="flex!">
+      <router-outlet></router-outlet>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

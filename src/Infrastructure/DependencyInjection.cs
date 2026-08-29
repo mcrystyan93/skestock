@@ -34,8 +34,12 @@ public static class DependencyInjection
 
         builder.Services.AddScoped<ApplicationDbContextInitialiser>();
 
-        builder.Services.AddAuthentication()
-            .AddBearerToken(IdentityConstants.BearerScheme);
+        // The web client uses the Identity application cookie (`useCookies=true`),
+        // and authorization needs a default scheme when it challenges an anonymous
+        // request (for example, POST /api/Users/logout).
+        builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
+            .AddBearerToken(IdentityConstants.BearerScheme)
+            .AddCookie(IdentityConstants.ApplicationScheme);
 
         builder.Services.AddAuthorizationBuilder();
 

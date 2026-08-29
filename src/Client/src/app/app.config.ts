@@ -1,0 +1,29 @@
+import { ApplicationConfig, provideAppInitializer, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { routes } from './app.routes';
+import { provideNzI18n, ro_RO } from 'ng-zorro-antd/i18n';
+import { registerLocaleData } from '@angular/common';
+import ro from '@angular/common/locales/ro';
+import { provideNzDateFnsAdapter } from 'ng-zorro-antd/core/time';
+import { provideHttpClient, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
+import { appInitializer } from './app.init';
+import { authInterceptor } from '@ske/auth';
+
+registerLocaleData(ro);
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideRouter(routes, withComponentInputBinding()),
+    // Cookie/header names match Angular's own defaults; named explicitly for clarity and to stay
+    // in lockstep with AddAntiforgery(...) in src/Web/DependencyInjection.cs.
+    provideHttpClient(
+      withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN' }),
+      withInterceptors([authInterceptor]),
+    ),
+    provideAppInitializer(appInitializer),
+    // provideAppInitializer(authInitializer),
+    provideNzI18n(ro_RO),
+    provideNzDateFnsAdapter(),
+  ],
+};

@@ -58,7 +58,7 @@ public class CursorCodecTests
     public void MatchesSort_ReturnsTrueForIdenticalSortSpec()
     {
         var entity = new KeysetTestItem { Id = 1, CreatedDate = DateTimeOffset.UtcNow };
-        var sort = new List<(string Key, string Direction)> { ("Created", "desc"), ("Id", "desc") };
+        var sort = new List<(string Key, string Direction)> { ("CreatedDate", "desc"), ("Id", "desc") };
 
         var decoded = CursorCodec<KeysetTestItem>.Decode(CursorCodec<KeysetTestItem>.Encode(entity, sort, Config))!;
 
@@ -69,8 +69,8 @@ public class CursorCodecTests
     public void MatchesSort_ReturnsFalseWhenDirectionDiffers()
     {
         var entity = new KeysetTestItem { Id = 1, CreatedDate = DateTimeOffset.UtcNow };
-        var originalSort = new List<(string Key, string Direction)> { ("Created", "desc"), ("Id", "desc") };
-        var requestedSort = new List<(string Key, string Direction)> { ("Created", "asc"), ("Id", "desc") };
+        var originalSort = new List<(string Key, string Direction)> { ("CreatedDate", "desc"), ("Id", "desc") };
+        var requestedSort = new List<(string Key, string Direction)> { ("CreatedDate", "asc"), ("Id", "desc") };
 
         var decoded = CursorCodec<KeysetTestItem>.Decode(CursorCodec<KeysetTestItem>.Encode(entity, originalSort, Config))!;
 
@@ -93,7 +93,7 @@ public class CursorCodecTests
     public void MatchesSort_ReturnsFalseWhenKeyCountDiffers()
     {
         var entity = new KeysetTestItem { Id = 1, CreatedDate = DateTimeOffset.UtcNow };
-        var originalSort = new List<(string Key, string Direction)> { ("Created", "desc"), ("Id", "desc") };
+        var originalSort = new List<(string Key, string Direction)> { ("CreatedDate", "desc"), ("Id", "desc") };
         var requestedSort = new List<(string Key, string Direction)> { ("Id", "desc") };
 
         var decoded = CursorCodec<KeysetTestItem>.Decode(CursorCodec<KeysetTestItem>.Encode(entity, originalSort, Config))!;

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using skestock.Application.Common.Models;
 using skestock.Application.Features.Categories.Commands.CreateCategory;
+using skestock.Application.Features.Categories.Commands.UpdateCategory;
 using skestock.Application.Features.Categories.Models;
 using skestock.Application.Features.Categories.Queries.GetAllCategories;
 using skestock.Application.Features.Categories.Queries.GetCategoryById;
@@ -11,9 +12,10 @@ public class Categories : IEndpointGroup
 {
     public static void Map(RouteGroupBuilder groupBuilder)
     {
-        groupBuilder.MapPost(GetAllCategories, "get-all");
-        groupBuilder.MapGet(GetCategoryById, "{id}");
-        groupBuilder.MapPost(CreateCategory, "");
+        groupBuilder.MapPost(GetAllCategories, "get-all").RequireAuthorization();
+        groupBuilder.MapGet(GetCategoryById, "{id}").RequireAuthorization();
+        groupBuilder.MapPost(CreateCategory, "").RequireAuthorization();
+        groupBuilder.MapPut(UpdateCategory, "{id}").RequireAuthorization();
     }
 
     [EndpointSummary("Get all categories")]
@@ -64,5 +66,20 @@ public class Categories : IEndpointGroup
             return result.ToProblemHttpResult();
 
         return TypedResults.Created($"/categories/{result.Value.Id}", result.Value);
+    }
+
+    [EndpointSummary("Update an existing category")]
+    [EndpointDescription("Updates an existing category in the database.")]
+    public static async Task<Results<Ok<CategoryDto>, ProblemHttpResult>> UpdateCategory(
+        ISender sender, int id, CategoryRequests.UpdateCategoryRequest request, CancellationToken cancellationToken)
+    {
+        var command = new UpdateCategoryCommand { Id = id, Name = request.Name };
+
+        var result = await sender.Send(command, cancellationToken);
+
+        if (result.IsFailed)
+            return result.ToProblemHttpResult();
+
+        return TypedResults.Ok(result.Value);
     }
 }
