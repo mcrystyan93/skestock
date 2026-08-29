@@ -26,6 +26,7 @@
       "@ske/shared/theme": ["./src/app/shared/theme"],
       "@ske/shared/categories": ["./src/app/shared/categories"],
       "@ske/shared/tables": ["./src/app/shared/tables"],
+      "@ske/shared/items": ["./src/app/shared/items"],
     }
   },
   "angularCompilerOptions": {
