@@ -19,23 +19,37 @@ Angular project referenced from `AppHost`). `Shared.Services.WebFrontend` alread
 resource name for it.
 
 The domain is a school inventory/stock system: `Category`, `Item`, `Location`, `SchoolClass`,
-`ClassBalance`, `StockBatch`, `StockTransaction`, `UserProfile` (see Domain entities below).
-**Four** feature slices are implemented so far under `Application/Features/`: `Categories`,
-`Items`, `Locations`, `SchoolClasses` (each with a matching `Web/Endpoints/<Feature>.cs`,
-`Application.UnitTests/Features/<Feature>/`, and `Application.FunctionalTests/Features/<Feature>/`
-folder). `ClassBalance`, `StockBatch`, and `StockTransaction` have **no** feature slice yet.
-**Categories** is still the best reference for the full `GetAll` pagination/filtering/caching
-stack (`GetAllCategoriesQuery` + `Handler` + `Validator`), but it only has a single `CreateCategory`
-command — it does **not** demonstrate update/disable/enable commands. Note the divergence between
-slices before copying a pattern blindly:
+`ClassBalance`, `GoodsReceipt`, `StockBatch`, `StockTransaction`, `UserProfile` (see Domain
+entities below). **Five** feature slices are implemented so far under `Application/Features/`:
+`Categories`, `Items`, `Locations`, `SchoolClasses`, `GoodsReceipts` (each with a matching
+`Web/Endpoints/<Feature>.cs` and an `Application.UnitTests/Features/<Feature>/` folder).
+`ClassBalance` and `StockTransaction` have **no** feature slice yet — `StockBatch` and
+`StockTransaction` rows are created *as a side effect* of `GoodsReceipts.CreateGoodsReceipt`
+(receiving goods creates one `StockBatch` + one `StockTransaction` per line item), not via their
+own commands. **Categories** is still the best reference for the full `GetAll`
+pagination/filtering/caching stack (`GetAllCategoriesQuery` + `Handler` + `Validator`), but it
+only has a single `CreateCategory` command — it does **not** demonstrate update/disable/enable
+commands. Note the divergence between slices before copying a pattern blindly:
 - `Items` has the richest command set: `Create`/`Edit`/`Disable`/`Enable` plus `GetAllItems` and
   `GetItemById` — use it as the reference for a full mutable-lifecycle CRUD-ish slice.
 - `Locations` and `SchoolClasses` use `Create`/`Update` (not `Edit`) naming for their mutation
   commands, and each expose a `Get<Feature>ById` query alongside `GetAll<Feature>` — check the
   existing slice's naming before assuming `Edit` vs `Update` for a new command.
-- All four implemented slices have `CacheConstants.cs`, `<Feature>SortConfiguration.cs`, and
+- `GoodsReceipts` is **create/read-only** so far: `CreateGoodsReceipt` command plus
+  `GetAllGoodsReceipts`/`GetGoodsReceiptById` queries — no update/disable/enable commands exist
+  for it (a goods receipt is treated as an immutable ledger entry once created). Its
+  `CreateGoodsReceiptCommandHandler` is the reference for a command that fans out into multiple
+  child entities (`StockBatch` + `StockTransaction` per line) inside one `SaveChangesAsync`.
+- All five implemented slices have `CacheConstants.cs`, `<Feature>SortConfiguration.cs`, and
   `<Feature>FilterConfiguration.cs` — treat these three files as required boilerplate for any
   new `GetAll<Feature>` query, not optional extras.
+- `GoodsReceipts` has **no** `Application.FunctionalTests/Features/GoodsReceipts` folder yet
+  (unlike the other four slices) — only unit tests under
+  `Application.UnitTests/Features/GoodsReceipts/` exist so far; add functional/HTTP-level
+  coverage there if you extend this slice.
+- `Web/Endpoints/Antiforgery.cs` exists but is **entirely commented out** (a planned
+  `GET /api/Antiforgery/token` endpoint for SPA XSRF-cookie seeding) — don't assume an
+  antiforgery endpoint is live; it's scaffolding for the not-yet-built frontend.
 
 ## Solution layout (file-level)
 
@@ -53,8 +67,8 @@ src/
     Common/IKeysetEntity.cs         # marker: `int Id`, `DateTimeOffset CreatedDate` — required for
                                     #   entities used with the keyset-pagination helpers below
     Constants/Roles.cs              # e.g. Roles.Administrator
-    Entities/                       # Category, ClassBalance, Item, Location, SchoolClass,
-                                    #   StockBatch, StockTransaction, UserProfile
+    Entities/                       # Category, ClassBalance, GoodsReceipt, Item, Location,
+                                    #   SchoolClass, StockBatch, StockTransaction, UserProfile
     Enums/                          # ClassStatus, StockTransactionType
     GlobalUsings.cs                 # global using skestock.Domain.Common;
   Application/                     # → references Domain only
@@ -87,7 +101,8 @@ src/
     DependencyInjection.cs         # AddInfrastructureServices() — EF Core SqlServer, Identity, Redis, HybridCache
   Web/                             # → references Application + Infrastructure + ServiceDefaults
     Endpoints/                     # IEndpointGroup implementations (Categories.cs, Items.cs, Locations.cs,
-                                    #   SchoolClasses.cs, Users.cs), auto-discovered
+                                    #   SchoolClasses.cs, GoodsReceipts.cs, Users.cs), auto-discovered
+                                    #   (Antiforgery.cs also exists but is fully commented out — inactive)
     Infrastructure/
       IEndpointGroup.cs                    # route-prefix + Map(RouteGroupBuilder) contract
       EndpointRouteBuilderExtensions.cs     # MapGet/Post/Put/Patch/Delete(Delegate, pattern) — derives
@@ -119,12 +134,13 @@ tests/
   Application.UnitTests/          # NUnit, mirrors Application/ folder layout 1:1 (Common/Behaviours,
                                    #   Common/Caching, Common/Filtering, Common/Keyset, and one folder per
                                    #   implemented slice: Features/Categories, Features/Items,
-                                   #   Features/Locations, Features/SchoolClasses)
+                                   #   Features/Locations, Features/SchoolClasses, Features/GoodsReceipts)
   Application.FunctionalTests/    # full Aspire-hosted stack via TestAppHost
     FunctionalTestSetup.cs        # [SetUpFixture]: boots TestAppHost, waits for DB health, creates WebApiFactory
     Infrastructure/                # WebApiFactory, TestApp, TestBase, DatabaseResetter (Respawn-based)
     Features/Categories/, Features/Items/, Features/Locations/, Features/SchoolClasses/  # end-to-end
-                                    #   HTTP tests per use case, mirrors Application/Features
+                                    #   HTTP tests per use case, mirrors Application/Features — GoodsReceipts
+                                    #   has NO functional-test folder yet (unit tests only, see Overview)
   Infrastructure.IntegrationTests/
   TestAppHost/                    # slimmed-down Aspire host used only by functional tests
 ```
@@ -329,14 +345,19 @@ slice as the model.
   domain logic has test coverage yet.
 - **Application.UnitTests**: NUnit + Shouldly + Moq, no external deps. Folder layout mirrors
   `Application/` 1:1, including `Common/Filtering`, `Common/Keyset`, `Common/Caching`, and
-  `Features/Categories/`, `Features/Items/`, `Features/Locations/`, `Features/SchoolClasses/` — put
-  new tests at the matching path for the feature being changed.
+  `Features/Categories/`, `Features/Items/`, `Features/Locations/`, `Features/SchoolClasses/`,
+  `Features/GoodsReceipts/` — put new tests at the matching path for the feature being changed.
+  `Features/GoodsReceipts/Commands/CreateGoodsReceipt/` also has a dedicated
+  `GoodsReceiptTestDbContext.cs` (an in-memory/test `IApplicationDbContext` fixture) — check it
+  before adding a new in-memory DB helper elsewhere for a similarly multi-entity command handler.
 - **Application.FunctionalTests**: boots the *real* app stack via `TestAppHost` using
   `DistributedApplicationTestingBuilder` (`FunctionalTestSetup`, `[OneTimeSetUp]`). Waits for
   `Services.Database` resource health before building a `WebApiFactory` (`Infrastructure/`), and
   resets the DB between tests/fixtures with `DatabaseResetter` (Respawn-based) — **do not assume
   a clean DB is provided automatically** outside that helper. Requires Docker. Tests live under
-  `Features/<FeatureName>/...` mirroring the Application feature they exercise, driving the full
+  `Features/<FeatureName>/...` mirroring the Application feature they exercise (currently
+  `Categories`, `Items`, `Locations`, `SchoolClasses` only — `GoodsReceipts` has no functional
+  tests yet), driving the full
   HTTP pipeline (`TestApp`/`TestBase`).
 - **Infrastructure.IntegrationTests**: exercises `ApplicationDbContext`/EF Core directly.
 - Run everything: `dotnet test` (needs Docker running for functional/integration tests).
