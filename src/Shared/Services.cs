@@ -30,5 +30,12 @@ public static class Services
     
     public const string Cache = "skestock-cache";
     
-    public const string CacheVolumes = "skestock-cache-data";
+    public const string CacheVolumes = "skestock-cache-data";    
+    
+    /// <summary>
+    /// The name of the Storage service.
+    /// This service is responsible for providing storage capabilities.
+    /// </summary>
+    public const string Storage = "storage";
+    public const string StorageVolumes = "storage-data";
 }

@@ -39,5 +39,7 @@ public class StockBatchConfiguration : IEntityTypeConfiguration<StockBatch>
             .HasPrincipalKey(x => x.IdentityId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
+        
+        builder.Property(b => b.UnitPrice).HasColumnType("decimal(10,2)");
     }
 }

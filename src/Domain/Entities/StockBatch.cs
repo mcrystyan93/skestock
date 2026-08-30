@@ -14,6 +14,11 @@ public class StockBatch: BaseAuditableEntity
     public int Quantity { get; set; }          // remaining quantity in this batch
     public DateOnly? ExpiryDate { get; set; }   // null when Item.IsPerishable == false
     public DateOnly ReceivedDate { get; set; }
+    public decimal UnitPrice { get; set; }      // price paid per unit for THIS delivery
+    // Convenience only - not mapped to a column, always derived from Quantity * UnitPrice
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public decimal LineTotal => Quantity * UnitPrice;
+
     
     public int? GoodsReceiptId { get; set; } // null for batches created outside a receipt (e.g. rollover)
     public GoodsReceipt? GoodsReceipt { get; set; }
