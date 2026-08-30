@@ -1,0 +1,126 @@
+@let dimensions = tableDimensions();
+@let sortByKeyFn = sortByKey();
+
+<nz-table #table
+          nzTableLayout="auto"
+          [nzData]="itemsVirtualData()"
+          [nzVirtualItemSize]="virtualItemSize()"
+          [nzVirtualMinBufferPx]="virtualMinBufferPx()"
+          [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
+          [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          nzSize="small"
+          [nzScroll]="{x:dimensions.width, y:dimensions.height}">
+  <thead>
+  <tr>
+    <th nzWidth="100px">
+      {{ columns.sku.label }}
+    </th>
+    <th nzWidth="250px">
+      {{ columns.name.label }}
+    </th>
+    <th nzWidth="200px">
+      {{ columns.categoryName.label }}
+    </th>
+    <th nzWidth="100px">
+      {{ columns.unit.label }}
+    </th>
+    <th nzWidth="100px">
+      {{ columns.minThreshold.label }}
+    </th>
+    <th nzWidth="100px">
+      {{ columns.isPerishable.label }}
+    </th>
+    <th nzWidth="100px">
+      {{ columns.isActive.label }}
+    </th>
+    <th nzWidth="100px">
+      {{ columns.createdDate.label }}
+    </th>
+    <th nzWidth="100px">
+      {{ columns.createdByName.label }}
+    </th>
+    <th nzWidth="100px">
+      {{ columns.lastModifiedDate.label }}
+    </th>
+    <th nzWidth="100px">
+      {{ columns.lastModifiedByName.label }}
+    </th>
+    <th nzWidth="100px">
+      Actiuni
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <ng-template nz-virtual-scroll let-item>
+    <tr>
+      <td>
+        {{ item.sku }}
+      </td>
+      <td>
+        {{ item.name }}
+      </td>
+      <td>
+        {{ item.categoryName }}
+      </td>
+      <td>
+        {{ item.unit }}
+      </td>
+      <td>
+        {{ item.minThreshold }}
+      </td>
+      <td>
+        @if (item.isPerishable) {
+          <nz-tag nzColor="orange">Da</nz-tag>
+        } @else {
+          <nz-tag>Nu</nz-tag>
+        }
+      </td>
+      <td>
+        @if (item.isActive) {
+          <nz-tag nzColor="green">Activ</nz-tag>
+        } @else {
+          <nz-tag nzColor="red">Inactiv</nz-tag>
+        }
+      </td>
+      <td>
+        {{ item.createdDate | date }}
+      </td>
+      <td>
+        {{ item.createdByName }}
+      </td>
+      <td>
+        {{ item.lastModifiedDate | date }}
+      </td>
+      <td>
+        {{ item.lastModifiedByName }}
+      </td>
+      <td>
+        <div class="flex items-center gap-2">
+          <button nz-button
+                  nzType="link"
+                  type="button"
+                  [attr.aria-label]="'Editeaza'"
+                  (click)="onEdit.emit(item)">
+            <nz-icon nzType="icons:pencil"></nz-icon>
+          </button>
+          <button nz-button
+                  [nzDanger]="item.isActive"
+                  nzType="link"
+                  type="button"
+                  [nzLoading]="togglingItemId() === item.id"
+                  [attr.aria-label]="item.isActive ? 'Dezactiveaza' : 'Activeaza'"
+                  (click)="onToggleActive.emit(item)">
+            @if (item.isActive) {
+              <nz-icon nzType="icons:ban"></nz-icon>
+            } @else {
+              <nz-icon nzType="icons:check"></nz-icon>
+            }
+          </button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+  </tbody>
+</nz-table>
