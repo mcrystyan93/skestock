@@ -22,16 +22,16 @@ public class GetGoodsReceiptByIdHandler(IApplicationDbContext dbContext)
                 ReceivedAt = r.ReceivedAt,
                 SupplierReference = r.SupplierReference,
                 Note = r.Note,
-                Lines = r.Batches.Select(b => new GoodsReceiptLineDto
-                {
-                    StockBatchId = b.Id,
-                    ItemId = b.ItemId,
-                    ItemName = b.Item.Name,
-                    LocationId = b.LocationId,
-                    LocationName = b.Location.Name,
-                    Quantity = b.Quantity,
-                    ExpiryDate = b.ExpiryDate
-                }).ToList(),
+                // Lines = r.Batches.Select(b => new GoodsReceiptLineDto
+                // {
+                //     StockBatchId = b.Id,
+                //     ItemId = b.ItemId,
+                //     ItemName = b.Item.Name,
+                //     LocationId = b.LocationId,
+                //     LocationName = b.Location.Name,
+                //     Quantity = b.Quantity,
+                //     ExpiryDate = b.ExpiryDate
+                // }).ToList(),
                 CreatedByName = r.CreatedBy != null ? r.CreatedBy.FullName : null,
                 LastModifiedByName = r.LastModifiedBy != null ? r.LastModifiedBy.FullName : null,
                 CreatedDate = r.CreatedDate,

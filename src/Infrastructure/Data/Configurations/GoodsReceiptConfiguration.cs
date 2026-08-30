@@ -33,5 +33,7 @@ public class GoodsReceiptConfiguration : IEntityTypeConfiguration<GoodsReceipt>
             .HasPrincipalKey(x => x.IdentityId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
+        
+        builder.Property(r => r.TotalAmount).HasColumnType("decimal(10,2)");
     }
 }
