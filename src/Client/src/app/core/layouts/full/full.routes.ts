@@ -14,6 +14,10 @@ export const fullRoutes: Routes = [
       {
         path: 'categories',
         loadChildren: () => import('@ske/features/categories').then((m) => m.categoriesRoutes)
+      },
+      {
+        path: 'items',
+        loadChildren: () => import('@ske/features/items').then((m) => m.itemsRoutes)
       }
     ]
   }

@@ -41,9 +41,9 @@ export class Form {
     });
   });
 
-  public async submit() {
+  public async submit():Promise<CategoryFormSubmit> {
     let formData: CategoryFormModel | null = null;
-    const isValid = submit(this.categoryForm, async (data) => {
+    const isValid = await submit(this.categoryForm, async (data) => {
       formData = this.categoryForm().value();
     });
 

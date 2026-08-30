@@ -1,0 +1,158 @@
+<form nz-form
+      nzNoColon
+      nzLayout="vertical">
+  <!--   sku   -->
+  <nz-form-item *skeletonInputLoader="loading()">
+    <nz-form-label>
+      Cod
+    </nz-form-label>
+    <nz-form-control [nzErrorTip]="skuErrorTemplate">
+      <nz-input-wrapper nzShowCount
+                        [nzCount]="{ max: itemForm.sku()?.maxLength() ?? 50 }">
+        <input type="text"
+               nz-input
+               [formField]="itemForm.sku" />
+      </nz-input-wrapper>
+
+      <ng-template #skuErrorTemplate>
+        @if (itemForm.sku().errors(); as errors) {
+          @for (error of errors; track $index) {
+            <div class="ant-form-item-explain-error">
+              {{ error.message }}
+            </div>
+          }
+        }
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+
+  <!--   name   -->
+  <nz-form-item *skeletonInputLoader="loading()">
+    <nz-form-label nzRequired>
+      Nume
+    </nz-form-label>
+    <nz-form-control [nzErrorTip]="nameErrorTemplate">
+      <nz-input-wrapper nzShowCount
+                        [nzCount]="{ max: itemForm.name()?.maxLength() ?? 100 }">
+        <input type="text"
+               nz-input
+               [formField]="itemForm.name" />
+      </nz-input-wrapper>
+
+      <ng-template #nameErrorTemplate>
+        @if (itemForm.name().errors(); as errors) {
+          @for (error of errors; track $index) {
+            <div class="ant-form-item-explain-error">
+              {{ error.message }}
+            </div>
+          }
+        }
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+
+  <!--   category   -->
+  <nz-form-item *skeletonInputLoader="loading()">
+    <nz-form-label nzRequired>
+      Categorie
+    </nz-form-label>
+    <nz-form-control [nzErrorTip]="categoryErrorTemplate">
+      <ske-category-dropdown [formField]="itemForm.category" />
+
+      <ng-template #categoryErrorTemplate>
+        @if (itemForm.category().errors(); as errors) {
+          @for (error of errors; track $index) {
+            <div class="ant-form-item-explain-error">
+              {{ error.message }}
+            </div>
+          }
+        }
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+
+  <!--   unit   -->
+  <nz-form-item *skeletonInputLoader="loading()">
+    <nz-form-label nzRequired>
+      Unitate de măsură
+    </nz-form-label>
+    <nz-form-control [nzErrorTip]="unitErrorTemplate">
+      <nz-input-wrapper nzShowCount
+                        [nzCount]="{ max: itemForm.unit()?.maxLength() ?? 20 }">
+        <input type="text"
+               nz-input
+               [formField]="itemForm.unit" />
+      </nz-input-wrapper>
+
+      <ng-template #unitErrorTemplate>
+        @if (itemForm.unit().errors(); as errors) {
+          @for (error of errors; track $index) {
+            <div class="ant-form-item-explain-error">
+              {{ error.message }}
+            </div>
+          }
+        }
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+
+  <!--   minThreshold   -->
+  <nz-form-item *skeletonInputLoader="loading()">
+    <nz-form-label nzRequired>
+      Prag minim
+    </nz-form-label>
+    <nz-form-control [nzErrorTip]="minThresholdErrorTemplate">
+      <nz-input-number [formField]="itemForm.minThreshold"
+                       class="w-full!"
+                       [nzMin]="0" />
+
+      <ng-template #minThresholdErrorTemplate>
+        @if (itemForm.minThreshold().errors(); as errors) {
+          @for (error of errors; track $index) {
+            <div class="ant-form-item-explain-error">
+              {{ error.message }}
+            </div>
+          }
+        }
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+
+  <!--   isPerishable   -->
+  <nz-form-item *skeletonInputLoader="loading()"
+                nzLayout="horizontal">
+    <nz-form-label class="grow!"
+                   nzLabelAlign="left"
+                   nzFor="itemIsPerishable">
+      Perisabil
+    </nz-form-label>
+    <nz-form-control class="items-end">
+      <nz-switch [formField]="itemForm.isPerishable"
+                 nzId="itemIsPerishable"/>
+    </nz-form-control>
+  </nz-form-item>
+
+  <!--   description   -->
+  <nz-form-item *skeletonInputLoader="loading()">
+    <nz-form-label>
+      Descriere
+    </nz-form-label>
+    <nz-form-control [nzErrorTip]="descriptionErrorTemplate">
+      <nz-textarea-count [nzMaxCharacterCount]="itemForm.description()?.maxLength() ?? 500 ">
+        <textarea nz-input
+                  rows="3"
+                  [formField]="itemForm.description"></textarea>
+      </nz-textarea-count>
+
+      <ng-template #descriptionErrorTemplate>
+        @if (itemForm.description().errors(); as errors) {
+          @for (error of errors; track $index) {
+            <div class="ant-form-item-explain-error">
+              {{ error.message }}
+            </div>
+          }
+        }
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+</form>

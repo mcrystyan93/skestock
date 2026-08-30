@@ -73,3 +73,5 @@ export const CATEGORY_TABLE_COLUMNS: TableColumnDefinition<CategoryTableColumn> 
     fieldType: 'string'
   }
 };
+
+export type CategoryDropdownValue = CategoryDto | Partial<CategoryDto> | null;

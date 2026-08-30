@@ -1,0 +1,5 @@
+<nz-card>
+  <ske-filter-form [loading]="store.itemsLoading()"
+                   [filter]="store.filter()"
+                   (onFilterChange)="onFilterChange($event)" />
+</nz-card>

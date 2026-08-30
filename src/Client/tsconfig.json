@@ -23,6 +23,7 @@
       "@ske/features/login": ["./src/app/features/login"],
       "@ske/features/home": ["./src/app/features/home"],
       "@ske/features/categories": ["./src/app/features/categories"],
+      "@ske/features/items": ["./src/app/features/items"],
       "@ske/shared/theme": ["./src/app/shared/theme"],
       "@ske/shared/categories": ["./src/app/shared/categories"],
       "@ske/shared/tables": ["./src/app/shared/tables"],

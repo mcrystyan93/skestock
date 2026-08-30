@@ -1,4 +1,5 @@
-import { BasePaginationFilter, ColumnFilter } from './pagination';
+import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
+import { PAGINATION_PAGE_SIZE } from './category';
 
 /** Mirrors src/Application/Features/Items/Models/ItemDto.cs. */
 export type ItemDto = {
@@ -44,3 +45,88 @@ export type EditItemRequest = {
   isPerishable: boolean;
   categoryId: number;
 };
+
+export type ItemTableColumn =
+  | 'sku'
+  | 'name'
+  | 'unit'
+  | 'minThreshold'
+  | 'isPerishable'
+  | 'categoryName'
+  | 'isActive'
+  | 'createdDate'
+  | 'lastModifiedDate'
+  | 'createdByName'
+  | 'lastModifiedByName';
+
+export const ITEM_TABLE_COLUMNS: TableColumnDefinition<ItemTableColumn> = {
+  sku: {
+    label: 'Cod',
+    value: 'sku',
+    fieldType: 'string'
+  },
+  name: {
+    label: 'Nume',
+    value: 'name',
+    fieldType: 'string'
+  },
+  unit: {
+    label: 'Unitate',
+    value: 'unit',
+    fieldType: 'string'
+  },
+  minThreshold: {
+    label: 'Prag minim',
+    value: 'minThreshold',
+    fieldType: 'number'
+  },
+  isPerishable: {
+    label: 'Perisabil',
+    value: 'isPerishable',
+    fieldType: 'boolean'
+  },
+  categoryName: {
+    label: 'Categorie',
+    value: 'categoryName',
+    fieldType: 'string'
+  },
+  isActive: {
+    label: 'Activ',
+    value: 'isActive',
+    fieldType: 'boolean'
+  },
+  createdDate: {
+    label: 'Data creare',
+    value: 'createdDate',
+    fieldType: 'date'
+  },
+  lastModifiedDate: {
+    label: 'Data modificare',
+    value: 'lastModifiedDate',
+    fieldType: 'date'
+  },
+  createdByName: {
+    label: 'Creat de',
+    value: 'createdByName',
+    fieldType: 'string'
+  },
+  lastModifiedByName: {
+    label: 'Modificat de',
+    value: 'lastModifiedByName',
+    fieldType: 'string'
+  }
+};
+
+export function buildItemListFilter(
+  currentFilter: GetAllItemsRequest,
+  partialFilter: Partial<GetAllItemsRequest>
+): GetAllItemsRequest {
+  return {
+    ...currentFilter,
+    ...partialFilter,
+    cursor: null,
+    pageSize: partialFilter.pageSize ?? currentFilter.pageSize ?? PAGINATION_PAGE_SIZE,
+    sort: prioritizeSort(currentFilter.sort ?? [], partialFilter.sort ?? [])
+  };
+}
+
