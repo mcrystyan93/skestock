@@ -66,6 +66,7 @@ export function withItemCollection() {
                       paginationData: result,
                       filter: { ...filter, cursor: null, sort: result.sort }
                     });
+                    store.setItemsLoaded();
                   },
                   error: (error) => {
                     store.handleItemsError(error);
@@ -103,6 +104,7 @@ export function withItemCollection() {
                       filter: { ...filter, cursor: null, sort: result.sort },
                       isLoadingMore: false
                     });
+                    store.setItemsLoaded();
                   },
                   error: (error) => {
                     store.handleItemsError(error);

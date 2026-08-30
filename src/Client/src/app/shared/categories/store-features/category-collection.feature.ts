@@ -67,6 +67,7 @@ export function withCategoryCollection() {
                       paginationData: result,
                       filter: { ...filter, cursor: null, sort: result.sort }
                     });
+                    store.setCategoriesLoaded();
                   },
                   error: (error) => {
                     store.handleCategoriesError(error);
@@ -104,6 +105,7 @@ export function withCategoryCollection() {
                       filter: { ...filter, cursor: null, sort: result.sort },
                       isLoadingMore: false
                     });
+                    store.setCategoriesLoaded();
                   },
                   error: (error) => {
                     store.handleCategoriesError(error);

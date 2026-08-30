@@ -1,0 +1,124 @@
+import {
+  buildSchoolClassListFilter,
+  GetAllSchoolClassesRequest,
+  PAGINATION_PAGE_SIZE,
+  PaginatedResponseData,
+  SchoolClassDto
+} from '@ske/models';
+import { patchState, signalStoreFeature, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
+import { withLoadingFeature } from '@ske/shared/loader';
+import { withProblemDetailsFeature } from '@ske/shared/errors';
+import { inject } from '@angular/core';
+import { SchoolClassesHttp } from '@ske/shared/school-classes';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
+import { mapResponse } from '@ngrx/operators';
+
+
+type SchoolClassCollectionState = {
+  schoolClasses: SchoolClassDto[];
+  paginationData: PaginatedResponseData | null;
+  filter: GetAllSchoolClassesRequest;
+  isLoadingMore: boolean;
+};
+
+const initialState: SchoolClassCollectionState = {
+  schoolClasses: [],
+  paginationData: null,
+  filter: {
+    sort: [],
+    filters: [],
+    cursor: null,
+    pageSize: PAGINATION_PAGE_SIZE,
+    searchTerm: null
+  },
+  isLoadingMore: false
+};
+
+export function withSchoolClassCollection() {
+  return signalStoreFeature(
+    withState(initialState),
+    withLoadingFeature('schoolClasses'),
+    withProblemDetailsFeature('schoolClasses'),
+    withComputed((store) => ({
+      hasNextPage: () => store.paginationData()?.hasNextPage ?? false,
+      nextCursor: () => store.paginationData()?.nextCursor ?? null
+    })),
+    withProps(() => ({
+      schoolClassHttp: inject(SchoolClassesHttp)
+    })),
+    withMethods((store) => {
+      const load = rxMethod<GetAllSchoolClassesRequest>(
+        pipe(
+          map(data => buildSchoolClassListFilter(store.filter(), data)),
+          tap((filter) => {
+            store.clearSchoolClassesErrors();
+            store.schoolClassesLoading();
+
+            patchState(store, { filter, isLoadingMore: false });
+          }),
+          switchMap(filter =>
+            store.schoolClassHttp.getAll(filter)
+              .pipe(
+                mapResponse({
+                  next: (result) => {
+                    patchState(store, {
+                      schoolClasses: result.data,
+                      paginationData: result,
+                      filter: { ...filter, cursor: null, sort: result.sort }
+                    });
+                    store.setSchoolClassesLoaded();
+                  },
+                  error: (error) => {
+                    store.handleSchoolClassesError(error);
+                    store.setSchoolClassesLoaded();
+                  }
+                })
+              )
+          )
+        )
+      );
+
+      const loadMore = rxMethod<void>(
+        pipe(
+          filter(() => store.hasNextPage() && !store.isLoadingMore()),
+          tap(() => {
+            store.clearSchoolClassesErrors();
+            patchState(store, { isLoadingMore: true });
+          }),
+          switchMap(() => {
+            const filter = store.filter();
+            const nextCursor = store.nextCursor();
+
+            if (!nextCursor) {
+              patchState(store, { isLoadingMore: false });
+              return EMPTY;
+            }
+
+            return store.schoolClassHttp.getAll({ ...filter, cursor: nextCursor })
+              .pipe(
+                mapResponse({
+                  next: (result) => {
+                    patchState(store, {
+                      schoolClasses: [...store.schoolClasses(), ...result.data],
+                      paginationData: result,
+                      filter: { ...filter, cursor: null, sort: result.sort },
+                      isLoadingMore: false
+                    });
+                    store.setSchoolClassesLoaded();
+                  },
+                  error: (error) => {
+                    store.handleSchoolClassesError(error);
+                    patchState(store, { isLoadingMore: false });
+                  }
+                })
+              );
+
+          })
+        )
+      );
+
+      return { load, loadMore };
+    })
+  );
+}

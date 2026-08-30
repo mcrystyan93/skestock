@@ -1,4 +1,5 @@
-import { BasePaginationFilter, ColumnFilter } from './pagination';
+import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
+import { PAGINATION_PAGE_SIZE } from './category';
 
 /**
  * Mirrors src/Domain/Enums/ClassStatus.cs. No JsonStringEnumConverter is registered for this
@@ -45,3 +46,90 @@ export type UpdateSchoolClassRequest = {
   endDate: string;
   status: ClassStatus;
 };
+
+export type SchoolClassTableColumn =
+  | 'name'
+  | 'startDate'
+  | 'endDate'
+  | 'status'
+  | 'createdDate'
+  | 'lastModifiedDate'
+  | 'createdByName'
+  | 'lastModifiedByName';
+
+export const SCHOOL_CLASS_TABLE_COLUMNS: TableColumnDefinition<SchoolClassTableColumn> = {
+  name: {
+    label: 'Nume',
+    value: 'name',
+    fieldType: 'string'
+  },
+  startDate: {
+    label: 'Data început',
+    value: 'startDate',
+    fieldType: 'date'
+  },
+  endDate: {
+    label: 'Data sfârșit',
+    value: 'endDate',
+    fieldType: 'date'
+  },
+  status: {
+    label: 'Stare',
+    value: 'status',
+    fieldType: 'select'
+  },
+  createdDate: {
+    label: 'Data creare',
+    value: 'createdDate',
+    fieldType: 'date'
+  },
+  lastModifiedDate: {
+    label: 'Data modificare',
+    value: 'lastModifiedDate',
+    fieldType: 'date'
+  },
+  createdByName: {
+    label: 'Creat de',
+    value: 'createdByName',
+    fieldType: 'string'
+  },
+  lastModifiedByName: {
+    label: 'Modificat de',
+    value: 'lastModifiedByName',
+    fieldType: 'string'
+  }
+};
+
+export const CLASS_STATUS_OPTIONS: Array<{ label: string; value: ClassStatus }> = [
+  { label: 'Viitoare', value: ClassStatus.Upcoming },
+  { label: 'Activă', value: ClassStatus.Active },
+  { label: 'Suspendată', value: ClassStatus.Paused },
+  { label: 'Închisă', value: ClassStatus.Closed }
+];
+
+export const CLASS_STATUS_LABELS: Record<ClassStatus, string> = {
+  [ClassStatus.Upcoming]: 'Viitoare',
+  [ClassStatus.Active]: 'Activă',
+  [ClassStatus.Paused]: 'Suspendată',
+  [ClassStatus.Closed]: 'Închisă'
+};
+
+export const CLASS_STATUS_COLORS: Record<ClassStatus, string> = {
+  [ClassStatus.Upcoming]: 'blue',
+  [ClassStatus.Active]: 'green',
+  [ClassStatus.Paused]: 'orange',
+  [ClassStatus.Closed]: 'red'
+};
+
+export function buildSchoolClassListFilter(
+  currentFilter: GetAllSchoolClassesRequest,
+  partialFilter: Partial<GetAllSchoolClassesRequest>
+): GetAllSchoolClassesRequest {
+  return {
+    ...currentFilter,
+    ...partialFilter,
+    cursor: null,
+    pageSize: partialFilter.pageSize ?? currentFilter.pageSize ?? PAGINATION_PAGE_SIZE,
+    sort: prioritizeSort(currentFilter.sort ?? [], partialFilter.sort ?? [])
+  };
+}

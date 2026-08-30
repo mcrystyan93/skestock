@@ -1,0 +1,14 @@
+<ske-header (onAdd)="onAdd()" />
+
+<ske-filter-container class="mx-4" />
+
+<div class="grow relative mx-4 mb-4">
+  <ske-table [items]="store.schoolClasses()"
+             [filter]="store.filter()"
+             [loading]="store.schoolClassesLoading()"
+             [hasNextPage]="store.hasNextPage()"
+             [isLoadingMore]="store.isLoadingMore()"
+             (onFilterChange)="onFilterChange($event)"
+             (onLoadMore)="onLoadMore()"
+             (onEdit)="onEdit($event)" />
+</div>

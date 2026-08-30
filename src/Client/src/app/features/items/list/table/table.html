@@ -10,6 +10,7 @@
           [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
           [nzFrontPagination]="false"
           [nzShowPagination]="false"
+          [nzLoading]="loading()"
           nzSize="small"
           [nzScroll]="{x:dimensions.width, y:dimensions.height}">
   <thead>

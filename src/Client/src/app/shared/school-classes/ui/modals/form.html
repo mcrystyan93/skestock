@@ -1,0 +1,102 @@
+<form nz-form
+      nzNoColon
+      nzLayout="vertical">
+  <!--   name   -->
+  <nz-form-item *skeletonInputLoader="loading()">
+    <nz-form-label nzRequired>
+      Nume
+    </nz-form-label>
+    <nz-form-control [nzErrorTip]="nameErrorTemplate">
+      <nz-input-wrapper nzShowCount
+                        [nzCount]="{ max: schoolClassForm.name()?.maxLength() ?? 100 }">
+        <input type="text"
+               nz-input
+               [formField]="schoolClassForm.name" />
+      </nz-input-wrapper>
+
+      <ng-template #nameErrorTemplate>
+        @if (schoolClassForm.name().errors(); as errors) {
+          @for (error of errors; track $index) {
+            <div class="ant-form-item-explain-error">
+              {{ error.message }}
+            </div>
+          }
+        }
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-row [nzGutter]="16">
+    <!--   startDate   -->
+    <nz-col nzSpan="12">
+      <nz-form-item *skeletonInputLoader="loading()">
+        <nz-form-label nzRequired>
+          Data început
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="startDateErrorTemplate">
+          <nz-date-picker class="w-full!"
+                          [formField]="schoolClassForm.startDate" />
+
+          <ng-template #startDateErrorTemplate>
+            @if (schoolClassForm.startDate().errors(); as errors) {
+              @for (error of errors; track $index) {
+                <div class="ant-form-item-explain-error">
+                  {{ error.message }}
+                </div>
+              }
+            }
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+
+    <!--   endDate   -->
+    <nz-col nzSpan="12">
+      <nz-form-item *skeletonInputLoader="loading()">
+        <nz-form-label nzRequired>
+          Data sfârșit
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="endDateErrorTemplate">
+          <nz-date-picker class="w-full!"
+                          [formField]="schoolClassForm.endDate" />
+
+          <ng-template #endDateErrorTemplate>
+            @if (schoolClassForm.endDate().errors(); as errors) {
+              @for (error of errors; track $index) {
+                <div class="ant-form-item-explain-error">
+                  {{ error.message }}
+                </div>
+              }
+            }
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+  </nz-row>
+
+  <!--   status   -->
+  <nz-form-item *skeletonInputLoader="loading()">
+    <nz-form-label nzRequired>
+      Stare
+    </nz-form-label>
+    <nz-form-control [nzErrorTip]="statusErrorTemplate">
+      <nz-select [formField]="schoolClassForm.status"
+                 class="w-full">
+        @for (option of statusOptions; track option.value) {
+          <nz-option [nzValue]="option.value"
+                     [nzLabel]="option.label"></nz-option>
+        }
+      </nz-select>
+
+      <ng-template #statusErrorTemplate>
+        @if (schoolClassForm.status().errors(); as errors) {
+          @for (error of errors; track $index) {
+            <div class="ant-form-item-explain-error">
+              {{ error.message }}
+            </div>
+          }
+        }
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+</form>

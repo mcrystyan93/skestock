@@ -28,6 +28,8 @@
       "@ske/shared/categories": ["./src/app/shared/categories"],
       "@ske/shared/tables": ["./src/app/shared/tables"],
       "@ske/shared/items": ["./src/app/shared/items"],
+      "@ske/shared/school-classes": ["./src/app/shared/school-classes"],
+      "@ske/features/school-classes": ["./src/app/features/school-classes"],
     }
   },
   "angularCompilerOptions": {
