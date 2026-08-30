@@ -15,43 +15,62 @@
           [nzScroll]="{x:dimensions.width, y:dimensions.height}">
   <thead>
   <tr>
-    <th>
+    <th nzWidth="250px">
       {{ columns.name.label }}
     </th>
-    <th>
+    <th nzWidth="150px">
+      {{ columns.startDate.label }}
+    </th>
+    <th nzWidth="150px">
+      {{ columns.endDate.label }}
+    </th>
+    <th nzWidth="120px">
+      {{ columns.status.label }}
+    </th>
+    <th nzWidth="100px">
       {{ columns.createdDate.label }}
     </th>
-    <th>
+    <th nzWidth="100px">
       {{ columns.createdByName.label }}
     </th>
-    <th>
+    <th nzWidth="100px">
       {{ columns.lastModifiedDate.label }}
     </th>
-    <th>
+    <th nzWidth="100px">
       {{ columns.lastModifiedByName.label }}
     </th>
-    <th>
+    <th nzWidth="100px">
       Actiuni
     </th>
   </tr>
   </thead>
   <tbody>
-  <ng-template nz-virtual-scroll let-category>
+  <ng-template nz-virtual-scroll
+               let-item>
     <tr>
       <td>
-        {{ category.name }}
+        {{ item.name }}
       </td>
       <td>
-        {{ category.createdDate | date }}
+        {{ item.startDate | date }}
       </td>
       <td>
-        {{ category.createdByName }}
+        {{ item.endDate | date }}
       </td>
       <td>
-        {{ category.lastModifiedDate | date }}
+        <nz-tag [nzColor]="statusColor(item.status)">{{ statusLabel(item.status) }}</nz-tag>
       </td>
       <td>
-        {{ category.lastModifiedByName }}
+        {{ item.createdDate | date }}
+      </td>
+      <td>
+        {{ item.createdByName }}
+      </td>
+      <td>
+        {{ item.lastModifiedDate | date }}
+      </td>
+      <td>
+        {{ item.lastModifiedByName }}
       </td>
       <td>
         <div class="flex items-center gap-2">
@@ -59,17 +78,8 @@
                   nzType="link"
                   type="button"
                   [attr.aria-label]="'Editeaza'"
-                  (click)="onEdit.emit(category)">
+                  (click)="onEdit.emit(item)">
             <nz-icon nzType="icons:pencil"></nz-icon>
-          </button>
-          <button nz-button
-                  nzDanger
-                  nzType="link"
-                  type="button"
-                  [nzLoading]="deletingCategoryId() === category.id"
-                  [attr.aria-label]="'Sterge'"
-                  (click)="onDelete.emit(category)">
-            <nz-icon nzType="icons:trash-can"></nz-icon>
           </button>
         </div>
       </td>

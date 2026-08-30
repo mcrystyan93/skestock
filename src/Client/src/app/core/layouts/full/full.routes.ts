@@ -18,6 +18,10 @@ export const fullRoutes: Routes = [
       {
         path: 'items',
         loadChildren: () => import('@ske/features/items').then((m) => m.itemsRoutes)
+      },
+      {
+        path: 'school-classes',
+        loadChildren: () => import('@ske/features/school-classes').then((m) => m.schoolClassesRoutes)
       }
     ]
   }
