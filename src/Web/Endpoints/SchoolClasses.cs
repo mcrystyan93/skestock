@@ -5,6 +5,7 @@ using skestock.Application.Features.SchoolClasses.Commands.UpdateSchoolClass;
 using skestock.Application.Features.SchoolClasses.Models;
 using skestock.Application.Features.SchoolClasses.Queries.GetAllSchoolClasses;
 using skestock.Application.Features.SchoolClasses.Queries.GetSchoolClassById;
+using skestock.Application.Features.SchoolClasses.Queries.GetSchoolClassSummary;
 
 namespace skestock.Web.Endpoints;
 
@@ -14,6 +15,7 @@ public class SchoolClasses : IEndpointGroup
     {
         groupBuilder.MapPost(GetAllSchoolClasses, "get-all");
         groupBuilder.MapGet(GetSchoolClassById, "{id}");
+        groupBuilder.MapGet(GetSchoolClassSummary, "{id}/summary");
         groupBuilder.MapPost(CreateSchoolClass, "");
         groupBuilder.MapPut(UpdateSchoolClass, "{id}");
     }
@@ -46,6 +48,19 @@ public class SchoolClasses : IEndpointGroup
         ISender sender, int id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetSchoolClassByIdQuery { Id = id }, cancellationToken);
+
+        if (result.IsFailed)
+            return result.ToProblemHttpResult();
+
+        return TypedResults.Ok(result.Value);
+    }
+
+    [EndpointSummary("Get a school class summary")]
+    [EndpointDescription("Retrieves the goods-receipt summary (count and total amount) for a school class.")]
+    public static async Task<Results<Ok<SchoolClassSummary>, ProblemHttpResult>> GetSchoolClassSummary(
+        ISender sender, int id, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetSchoolClassSummaryQuery { Id = id }, cancellationToken);
 
         if (result.IsFailed)
             return result.ToProblemHttpResult();

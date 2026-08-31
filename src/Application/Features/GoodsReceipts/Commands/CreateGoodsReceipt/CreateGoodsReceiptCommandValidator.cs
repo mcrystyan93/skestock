@@ -55,6 +55,11 @@ public class CreateGoodsReceiptCommandValidator : AbstractValidator<CreateGoodsR
             line.RuleFor(l => l.Quantity)
                 .GreaterThan(0)
                 .WithErrorCode(ValidationErrorCodes.GreaterThan);
+
+            // Zero is allowed (e.g. donated/free items); negative prices are rejected.
+            line.RuleFor(l => l.UnitPrice)
+                .GreaterThanOrEqualTo(0)
+                .WithErrorCode(ValidationErrorCodes.GreaterThanOrEqualTo);
         });
 
         // Bulk (single round-trip) checks across all lines: item/location existence, the

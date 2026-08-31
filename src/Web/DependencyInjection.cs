@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Azure.Identity;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +33,17 @@ public static class DependencyInjection
 
         builder.Services.AddHttpContextAccessor();
 
-        builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
+        builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();    
+        
+        // Fallback ProblemDetails generation for exceptions not handled by ProblemDetailsExceptionHandler,
+        // so any unhandled exception still returns an RFC 9110-compliant ProblemDetails response.
+        builder.Services.AddProblemDetails();
+        
+        builder.Services.ConfigureHttpJsonOptions(options =>
+        {
+            options.SerializerOptions.Converters.Add(
+                new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+        });
 
         // Customise default API behaviour
         builder.Services.Configure<ApiBehaviorOptions>(options =>

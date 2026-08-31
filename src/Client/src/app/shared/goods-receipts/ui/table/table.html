@@ -1,0 +1,96 @@
+@let dimensions = tableDimensions();
+@let sortByKeyFn = sortByKey();
+
+<nz-table #table
+          nzTableLayout="auto"
+          [nzData]="itemsVirtualData()"
+          [nzVirtualItemSize]="virtualItemSize()"
+          [nzVirtualMinBufferPx]="virtualMinBufferPx()"
+          [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
+          [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          [nzLoading]="loading()"
+          nzSize="small"
+          [nzScroll]="{x:dimensions.width, y:dimensions.height}">
+  <thead>
+  <tr>
+    <th>
+    </th>
+    <th>
+      {{ columns.receivedAt.label }}
+    </th>
+    <th>
+      {{ columns.supplierReference.label }}
+    </th>
+    <th>
+      {{ columns.lineCount.label }}
+    </th>
+    <th>
+      {{ columns.totalQuantity.label }}
+    </th>
+    <th>
+      {{ columns.totalAmount.label }}
+    </th>
+    <th>
+      {{ columns.createdByName.label }}
+    </th>
+    <th>
+      {{ columns.createdDate.label }}
+    </th>
+    <th>
+      Actiuni
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <ng-template nz-virtual-scroll
+               let-goodsReceipt>
+    <tr>
+      <td [nzExpand]="expandedRows().has(goodsReceipt.id)"
+          (nzExpandChange)="toggleRow(goodsReceipt.id)">
+
+      </td>
+      <td>
+        {{ goodsReceipt.receivedAt | date }}
+      </td>
+      <td>
+        {{ goodsReceipt.supplierReference }}
+      </td>
+      <td>
+        {{ goodsReceipt.lineCount }}
+      </td>
+      <td>
+        {{ goodsReceipt.totalQuantity | number:'1.0-0' }}
+      </td>
+      <td>
+        {{ goodsReceipt.totalAmount | currency:'RON' }}
+      </td>
+      <td>
+        {{ goodsReceipt.createdByName }}
+      </td>
+      <td>
+        {{ goodsReceipt.createdDate | date }}
+      </td>
+      <td>
+        <div class="flex items-center gap-2">
+          <button nz-button
+                  nzType="link"
+                  type="button"
+                  [attr.aria-label]="'Vizualizeaza'">
+            <nz-icon nzType="icons:eye"></nz-icon>
+          </button>
+        </div>
+      </td>
+    </tr>
+
+    <tr [nzExpand]="expandedRows().has(goodsReceipt.id)">
+      @defer (when expandedRows().has(goodsReceipt.id)) {
+        <div class="relative h-100">
+          <ske-stock-batches-table-container [goodsReceiptId]="goodsReceipt.id" />
+        </div>
+      }
+    </tr>
+  </ng-template>
+  </tbody>
+</nz-table>

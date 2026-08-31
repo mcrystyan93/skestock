@@ -1,4 +1,9 @@
-import { ApplicationConfig, provideAppInitializer, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  ApplicationConfig,
+  DEFAULT_CURRENCY_CODE, LOCALE_ID,
+  provideAppInitializer,
+  provideBrowserGlobalErrorListeners
+} from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 import { provideNzI18n, ro_RO } from 'ng-zorro-antd/i18n';
@@ -19,11 +24,13 @@ export const appConfig: ApplicationConfig = {
     // in lockstep with AddAntiforgery(...) in src/Web/DependencyInjection.cs.
     provideHttpClient(
       withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName: 'X-XSRF-TOKEN' }),
-      withInterceptors([authInterceptor]),
+      withInterceptors([authInterceptor])
     ),
     provideAppInitializer(appInitializer),
     // provideAppInitializer(authInitializer),
     provideNzI18n(ro_RO),
     provideNzDateFnsAdapter(),
-  ],
+    { provide: DEFAULT_CURRENCY_CODE, useValue: 'RON' },
+    { provide: LOCALE_ID, useValue: 'ro' }
+  ]
 };

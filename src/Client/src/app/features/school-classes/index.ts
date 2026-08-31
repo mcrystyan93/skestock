@@ -1,1 +1,1 @@
-export * from './list/school-classes.routes';
+export * from './school-classes.routes';

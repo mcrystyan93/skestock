@@ -57,6 +57,7 @@ public class GetAllGoodsReceiptsHandler(IApplicationDbContext dbContext)
                     Note = r.Note,
                     LineCount = r.Batches.Count,
                     TotalQuantity = r.Batches.Sum(b => (int?)b.Quantity) ?? 0,
+                    TotalAmount = r.TotalAmount,
                     CreatedByName = r.CreatedBy != null ? r.CreatedBy.FullName : null,
                     CreatedDate = r.CreatedDate
                 }

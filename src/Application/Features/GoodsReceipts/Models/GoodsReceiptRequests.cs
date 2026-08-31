@@ -16,6 +16,7 @@ public static class GoodsReceiptRequests
         public int LocationId { get; init; }
         public int Quantity { get; init; }
         public DateOnly? ExpiryDate { get; init; }
+        public decimal UnitPrice { get; init; }
     }
 
     public class CreateGoodsReceiptRequest

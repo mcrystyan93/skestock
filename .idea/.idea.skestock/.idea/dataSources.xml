@@ -11,5 +11,25 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="skestock-cache" uuid="d3d40cf7-b467-4a27-987f-feb46c4e66e2">
+      <driver-ref>redis</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>jdbc.RedisDriver</jdbc-driver>
+      <jdbc-url>jdbc:redis://parolaREDIS1!@localhost:6379?ssl=true&amp;verifyServerCertificate=false</jdbc-url>
+      <jdbc-additional-properties>
+        <property name="aspireResourceId" value="skestock-cache-ercvyvbk" />
+      </jdbc-additional-properties>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="dbserver" uuid="dc8563f0-0a32-4bc9-bd59-1dbaa2be8953">
+      <driver-ref>sqlserver.jb</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.jetbrains.jdbc.sqlserver.SqlServerDriver</jdbc-driver>
+      <jdbc-url>Server=127.0.0.1,1433;User ID=sa;Password=parolaSQL1!;TrustServerCertificate=true</jdbc-url>
+      <jdbc-additional-properties>
+        <property name="aspireResourceId" value="dbserver-fwpbdrfp" />
+      </jdbc-additional-properties>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

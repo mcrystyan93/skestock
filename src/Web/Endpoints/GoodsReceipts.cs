@@ -66,7 +66,8 @@ public class GoodsReceipts : IEndpointGroup
                 ItemId = l.ItemId,
                 LocationId = l.LocationId,
                 Quantity = l.Quantity,
-                ExpiryDate = l.ExpiryDate
+                ExpiryDate = l.ExpiryDate,
+                UnitPrice = l.UnitPrice
             }).ToList()
         };
 

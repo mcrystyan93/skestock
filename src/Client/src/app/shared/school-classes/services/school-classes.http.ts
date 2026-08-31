@@ -5,6 +5,7 @@ import {
   GetAllSchoolClassesRequest,
   PaginatedResponse,
   SchoolClassDto,
+  SchoolClassSummary,
   UpdateSchoolClassRequest
 } from '@ske/models';
 
@@ -21,6 +22,10 @@ export class SchoolClassesHttp {
 
   public getById(id: number) {
     return this._httpClient.get<SchoolClassDto>(`/api/SchoolClasses/${id}`);
+  }
+
+  public getSummary(id: number) {
+    return this._httpClient.get<SchoolClassSummary>(`/api/SchoolClasses/${id}/summary`);
   }
 
   public create(request: CreateSchoolClassRequest) {
