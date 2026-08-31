@@ -26,6 +26,13 @@ export type SchoolClassDto = {
   lastModifiedDate: string;
 };
 
+/** Mirrors src/Application/Features/SchoolClasses/Models/SchoolClassDto.cs. */
+export type SchoolClassSummary = {
+  id: number;
+  noOfGoodsReceipt: number;
+  totalAmount: number;
+};
+
 /** Mirrors src/Application/Features/SchoolClasses/Models/SchoolClassRequests.cs. */
 export type GetAllSchoolClassesRequest = BasePaginationFilter & {
   filters: ColumnFilter[];

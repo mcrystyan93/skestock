@@ -9,6 +9,8 @@ public record GoodsReceiptLineDto
     public string LocationName { get; init; } = string.Empty;
     public int Quantity { get; init; }
     public DateOnly? ExpiryDate { get; init; }
+    public decimal UnitPrice { get; init; }
+    public decimal LineTotal { get; init; }
 }
 
 public record GoodsReceiptDto
@@ -19,6 +21,7 @@ public record GoodsReceiptDto
     public DateTime ReceivedAt { get; init; }
     public string? SupplierReference { get; init; }
     public string Note { get; init; } = string.Empty;
+    public decimal TotalAmount { get; init; }
     public List<GoodsReceiptLineDto> Lines { get; init; } = [];
     public string? CreatedByName { get; init; }
     public string? LastModifiedByName { get; init; }
@@ -41,6 +44,7 @@ public record GoodsReceiptListItemDto
     public string Note { get; init; } = string.Empty;
     public int LineCount { get; init; }
     public int TotalQuantity { get; init; }
+    public decimal TotalAmount { get; init; }
     public string? CreatedByName { get; init; }
     public DateTimeOffset CreatedDate { get; init; }
 }

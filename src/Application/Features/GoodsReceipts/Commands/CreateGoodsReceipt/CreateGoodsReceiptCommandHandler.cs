@@ -36,6 +36,7 @@ public class CreateGoodsReceiptCommandHandler(IApplicationDbContext dbContext, I
                 Quantity = line.Quantity,
                 ExpiryDate = line.ExpiryDate,
                 ReceivedDate = receivedDate,
+                UnitPrice = line.UnitPrice,
                 GoodsReceipt = receipt
             };
 
@@ -53,6 +54,8 @@ public class CreateGoodsReceiptCommandHandler(IApplicationDbContext dbContext, I
 
             receipt.Batches.Add(batch);
             receipt.Transactions.Add(transaction);
+            // Captured at receipt time so later stock adjustments never retroactively change it.
+            receipt.TotalAmount += batch.LineTotal;
         }
 
         dbContext.GoodsReceipts.Add(receipt);
@@ -77,6 +80,7 @@ public class CreateGoodsReceiptCommandHandler(IApplicationDbContext dbContext, I
                 ReceivedAt = r.ReceivedAt,
                 SupplierReference = r.SupplierReference,
                 Note = r.Note,
+                TotalAmount = r.TotalAmount,
                 Lines = r.Batches.Select(b => new GoodsReceiptLineDto
                 {
                     StockBatchId = b.Id,
@@ -85,7 +89,9 @@ public class CreateGoodsReceiptCommandHandler(IApplicationDbContext dbContext, I
                     LocationId = b.LocationId,
                     LocationName = b.Location.Name,
                     Quantity = b.Quantity,
-                    ExpiryDate = b.ExpiryDate
+                    ExpiryDate = b.ExpiryDate,
+                    UnitPrice = b.UnitPrice,
+                    LineTotal = b.LineTotal
                 }).ToList(),
                 CreatedByName = r.CreatedBy != null ? r.CreatedBy.FullName : null,
                 LastModifiedByName = r.LastModifiedBy != null ? r.LastModifiedBy.FullName : null,

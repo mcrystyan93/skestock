@@ -22,6 +22,7 @@ public class GetGoodsReceiptByIdHandler(IApplicationDbContext dbContext)
                 ReceivedAt = r.ReceivedAt,
                 SupplierReference = r.SupplierReference,
                 Note = r.Note,
+                TotalAmount = r.TotalAmount,
                 // Lines = r.Batches.Select(b => new GoodsReceiptLineDto
                 // {
                 //     StockBatchId = b.Id,

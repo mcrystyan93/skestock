@@ -1,0 +1,32 @@
+<nz-page-header [nzGhost]="false">
+  <nz-page-header-title>
+    {{ schoolClass().name }}
+  </nz-page-header-title>
+  <nz-page-header-subtitle>
+    {{ schoolClass().startDate | date }} - {{ schoolClass().endDate | date }}
+  </nz-page-header-subtitle>
+
+  <nz-page-header-content>
+    <nz-row [nzGutter]="[32, 16]">
+      <nz-col nzFlex>
+        <nz-statistic nzTitle="Comenzi receptionate"
+                      [nzValue]="summary().noOfGoodsReceipt ?? 0" />
+      </nz-col>
+      <nz-col nzFlex>
+        <nz-statistic nzTitle="Totalul comenzilor"
+                      [nzValueTemplate]="totalAmountTemplate">
+          <ng-template #totalAmountTemplate>
+            {{ summary().totalAmount ?? 0| currency:'RON' }}
+          </ng-template>
+        </nz-statistic>
+      </nz-col>
+    </nz-row>
+  </nz-page-header-content>
+
+  <nz-page-header-footer>
+    <nz-tabs [(nzSelectedIndex)]="selectedTabIndex">
+      <nz-tab nzTitle="Comenzi"></nz-tab>
+      <nz-tab nzTitle="Stoc"></nz-tab>
+    </nz-tabs>
+  </nz-page-header-footer>
+</nz-page-header>

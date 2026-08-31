@@ -8,6 +8,9 @@
   "newProjectRoot": "projects",
   "projects": {
     "ske": {
+      "i18n": {
+        "sourceLocale": "ro"
+      },
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {

@@ -1,6 +1,6 @@
 namespace skestock.Domain.Entities;
 
-public class StockBatch: BaseAuditableEntity
+public class StockBatch: BaseAuditableEntity, IKeysetEntity
 {
     public int ItemId { get; set; }
     public Item Item { get; set; } = null!;

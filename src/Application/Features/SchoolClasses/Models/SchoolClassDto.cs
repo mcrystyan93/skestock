@@ -14,3 +14,5 @@ public record SchoolClassDto
     public DateTimeOffset CreatedDate { get; init; }
     public DateTimeOffset LastModifiedDate { get; init; }
 }
+
+public record SchoolClassSummary(int Id, int NoOfGoodsReceipt, decimal TotalAmount);

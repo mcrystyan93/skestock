@@ -1,0 +1,12 @@
+<ske-header-container />
+
+<nz-tabs [nzSelectedIndex]="store.selectedTabIndex()"
+         [nzTabBarStyle]="{display:'none'}"
+         class="inner-scroll grow m-4!">
+  <nz-tab>
+    <ske-goods-receipts-tab [classId]="store.schoolClass()?.id ?? null" />
+  </nz-tab>
+  <nz-tab>
+    stock
+  </nz-tab>
+</nz-tabs>

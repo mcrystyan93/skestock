@@ -1,0 +1,7 @@
+<ske-stock-batches-table [items]="store.stockBatches()"
+                         [filter]="store.filter()"
+                         [loading]="store.stockBatchesLoading()"
+                         [hasNextPage]="store.hasNextPage()"
+                         [isLoadingMore]="store.isLoadingMore()"
+                         (onFilterChange)="store.load($event)"
+                         (onLoadMore)="store.loadMore()" />

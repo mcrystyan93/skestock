@@ -1,0 +1,75 @@
+@let dimensions = tableDimensions();
+@let sortByKeyFn = sortByKey();
+
+<nz-table #table
+          nzTableLayout="auto"
+          [nzData]="itemsVirtualData()"
+          [nzVirtualItemSize]="virtualItemSize()"
+          [nzVirtualMinBufferPx]="virtualMinBufferPx()"
+          [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
+          [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          [nzLoading]="loading()"
+          nzSize="small"
+          [nzScroll]="{x:dimensions.width, y:dimensions.height}">
+  <thead>
+  <tr>
+    <th nzWidth="200px">
+      {{ columns.itemName.label }}
+    </th>
+    <th nzWidth="150px">
+      {{ columns.locationName.label }}
+    </th>
+    <th nzWidth="100px">
+      {{ columns.quantity.label }}
+    </th>
+    <th nzWidth="100px">
+      {{ columns.unitPrice.label }}
+    </th>
+    <th nzWidth="120px">
+      {{ columns.lineTotal.label }}
+    </th>
+    <th nzWidth="120px">
+      {{ columns.expiryDate.label }}
+    </th>
+    <th nzWidth="120px">
+      {{ columns.receivedDate.label }}
+    </th>
+    <th nzWidth="120px">
+      {{ columns.createdDate.label }}
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <ng-template nz-virtual-scroll
+               let-stockBatch>
+    <tr>
+      <td>
+        {{ stockBatch.itemName }}
+      </td>
+      <td>
+        {{ stockBatch.locationName }}
+      </td>
+      <td>
+        {{ stockBatch.quantity }}
+      </td>
+      <td>
+        {{ stockBatch.unitPrice }} RON
+      </td>
+      <td>
+        {{ stockBatch.lineTotal }} RON
+      </td>
+      <td>
+        {{ stockBatch.expiryDate | date }}
+      </td>
+      <td>
+        {{ stockBatch.receivedDate | date }}
+      </td>
+      <td>
+        {{ stockBatch.createdDate | date }}
+      </td>
+    </tr>
+  </ng-template>
+  </tbody>
+</nz-table>
