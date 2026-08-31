@@ -54,13 +54,14 @@
         {{ category.lastModifiedByName }}
       </td>
       <td>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center">
           <button nz-button
                   nzType="link"
                   type="button"
                   [attr.aria-label]="'Editeaza'"
                   (click)="onEdit.emit(category)">
             <nz-icon nzType="icons:pencil"></nz-icon>
+            Editeaza
           </button>
           <button nz-button
                   nzDanger
@@ -70,6 +71,7 @@
                   [attr.aria-label]="'Sterge'"
                   (click)="onDelete.emit(category)">
             <nz-icon nzType="icons:trash-can"></nz-icon>
+            Dezactiveaza
           </button>
         </div>
       </td>

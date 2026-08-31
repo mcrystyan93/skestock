@@ -16,40 +16,72 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
         if (!classExists)
             return Result.Fail(new SchoolClassErrors.SchoolClassNotFound(request.ClassId));
 
-        var location = await dbContext.Locations
-            .AsNoTracking()
-            .Where(l => l.Id == request.LocationId)
-            .Select(l => new { l.Id, l.Name })
-            .SingleOrDefaultAsync(cancellationToken);
-        if (location is null)
-            return Result.Fail(new LocationErrors.LocationNotFound(request.LocationId));
+        if (request.LocationId is { } requestedLocationId)
+        {
+            var locationExists = await dbContext.Locations
+                .AsNoTracking()
+                .AnyAsync(l => l.Id == requestedLocationId, cancellationToken);
+            if (!locationExists)
+                return Result.Fail(new LocationErrors.LocationNotFound(requestedLocationId));
+        }
 
-        // Current stock for an item = sum of the remaining Quantity across every StockBatch
-        // received by this class at this location. Items with no batches here simply don't
-        // appear (there's nothing to sum), matching the "sum of stockBatches" definition literally.
-        // Grouping and the Item lookup are done as two separate queries rather than reading
-        // Item off the group (e.g. g.First().Item) - that pattern doesn't translate to SQL.
-        var stockByItem = await dbContext.StockBatches
+        // Current stock for an item at a location = sum of the remaining Quantity across every
+        // StockBatch received by this class at that location. Items/locations with no batches
+        // simply don't appear, matching the "sum of stockBatches" definition literally.
+        // When LocationId is omitted, group by (Item, Location) instead of just Item, so the
+        // report still returns one row per item per location rather than collapsing quantities
+        // from different locations into a single, ambiguous total.
+        var batchesQuery = dbContext.StockBatches
             .AsNoTracking()
-            .Where(b => b.ReceivedClassId == request.ClassId && b.LocationId == request.LocationId)
-            .GroupBy(b => b.ItemId)
-            .Select(g => new { ItemId = g.Key, Quantity = g.Sum(b => b.Quantity) })
+            .Where(b => b.ReceivedClassId == request.ClassId);
+
+        if (request.LocationId is { } locationId)
+            batchesQuery = batchesQuery.Where(b => b.LocationId == locationId);
+
+        var stockByItemLocation = await batchesQuery
+            .GroupBy(b => new { b.ItemId, b.LocationId })
+            .Select(g => new { g.Key.ItemId, g.Key.LocationId, Quantity = g.Sum(b => b.Quantity) })
             .ToListAsync(cancellationToken);
 
-        if (stockByItem.Count == 0)
+        if (stockByItemLocation.Count == 0)
             return Result.Ok(new List<StockItemDto>());
 
-        var itemIds = stockByItem.Select(x => x.ItemId).ToList();
-        var items = await dbContext.Items
+        // Item and Location lookups are done as separate queries rather than reading them off the
+        // group (e.g. g.First().Item) - that pattern doesn't translate to SQL.
+        var itemIds = stockByItemLocation.Select(x => x.ItemId).Distinct().ToList();
+        var itemsQuery = dbContext.Items
             .AsNoTracking()
-            .Where(i => itemIds.Contains(i.Id))
+            .Where(i => itemIds.Contains(i.Id));
+
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            var term = request.SearchTerm.Trim();
+            itemsQuery = itemsQuery.Where(i => i.Name.Contains(term));
+        }
+
+        var items = await itemsQuery
             .Select(i => new { i.Id, i.Name, i.Unit, i.IsPerishable, i.MinThreshold })
             .ToDictionaryAsync(i => i.Id, cancellationToken);
 
-        var data = stockByItem
+        // Items excluded by the search term filter above must also be excluded from the stock
+        // rows, since a StockBatch row only carries the ItemId, not the item's name.
+        stockByItemLocation = stockByItemLocation.Where(x => items.ContainsKey(x.ItemId)).ToList();
+
+        if (stockByItemLocation.Count == 0)
+            return Result.Ok(new List<StockItemDto>());
+
+        var locationIds = stockByItemLocation.Select(x => x.LocationId).Distinct().ToList();
+        var locations = await dbContext.Locations
+            .AsNoTracking()
+            .Where(l => locationIds.Contains(l.Id))
+            .Select(l => new { l.Id, l.Name })
+            .ToDictionaryAsync(l => l.Id, cancellationToken);
+
+        var data = stockByItemLocation
             .Select(x =>
             {
                 var item = items[x.ItemId];
+                var location = locations[x.LocationId];
                 return new StockItemDto
                 {
                     ItemId = x.ItemId,
@@ -63,6 +95,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
                 };
             })
             .OrderBy(x => x.ItemName)
+            .ThenBy(x => x.LocationName)
             .ToList();
 
         return Result.Ok(data);

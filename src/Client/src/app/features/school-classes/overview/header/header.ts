@@ -9,6 +9,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 import { NzStatisticComponent } from 'ng-zorro-antd/statistic';
 import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 
 @Component({
   imports: [
@@ -23,7 +24,8 @@ import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
     NzPageHeaderFooterDirective,
     NzTabsComponent,
     NzTabComponent,
-    CurrencyPipe
+    CurrencyPipe,
+    NzTypographyComponent
   ],
   selector: 'ske-header',
   styles: ``,

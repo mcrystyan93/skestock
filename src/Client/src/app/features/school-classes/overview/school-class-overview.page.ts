@@ -4,13 +4,16 @@ import { SchoolClassOverviewStore } from '../services/school-class-overview.stor
 import { isNil } from 'lodash-es';
 import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
 import { GoodsReceiptsTab } from './tabs/goods-receipts/goods-receipts-tab';
+import { StockList, TableContainer } from '@ske/shared/stock';
 
 @Component({
   imports: [
     HeaderContainer,
     NzTabsComponent,
     NzTabComponent,
-    GoodsReceiptsTab
+    GoodsReceiptsTab,
+    TableContainer,
+    StockList
   ],
   selector: 'ske-school-class-overview-page',
   styles: ``,

@@ -32,6 +32,7 @@
       "@ske/features/school-classes": ["./src/app/features/school-classes"],
       "@ske/shared/goods-receipts": ["./src/app/shared/goods-receipts"],
       "@ske/shared/stock-batches": ["./src/app/shared/stock-batches"],
+      "@ske/shared/stock": ["./src/app/shared/stock"],
     }
   },
   "angularCompilerOptions": {

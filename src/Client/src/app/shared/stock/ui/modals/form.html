@@ -1,0 +1,67 @@
+<nz-space class="w-full"
+          nzDirection="vertical">
+  <form nz-form
+        nzNoColon
+        *nzSpaceItem>
+
+    <!--   actualQuantity   -->
+    <nz-form-item *skeletonInputLoader="loading()">
+      <nz-form-label nzRequired>
+        Cantitate numărată
+      </nz-form-label>
+      <nz-form-control [nzErrorTip]="actualQuantityErrorTemplate">
+        <nz-input-number [formField]="stockAdjustmentForm.actualQuantity"
+                         class="w-full!"
+                         [nzMin]="0" />
+
+        <ng-template #actualQuantityErrorTemplate>
+          @if (stockAdjustmentForm.actualQuantity().errors(); as errors) {
+            @for (error of errors; track $index) {
+              <div class="ant-form-item-explain-error">
+                {{ error.message }}
+              </div>
+            }
+          }
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <!--   reason   -->
+    <nz-form-item *skeletonInputLoader="loading()">
+      <nz-form-label nzRequired>
+        Motiv ajustare
+      </nz-form-label>
+      <nz-form-control [nzErrorTip]="reasonErrorTemplate">
+        <nz-select [formField]="stockAdjustmentForm.reason"
+                   class="w-full">
+          @for (option of reasonOptions; track option.value) {
+            <nz-option [nzValue]="option.value"
+                       [nzLabel]="option.label"></nz-option>
+          }
+        </nz-select>
+
+        <ng-template #reasonErrorTemplate>
+          @if (stockAdjustmentForm.reason().errors(); as errors) {
+            @for (error of errors; track $index) {
+              <div class="ant-form-item-explain-error">
+                {{ error.message }}
+              </div>
+            }
+          }
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+
+  @if (stockAdjustmentForm.actualQuantity().value() < item().quantity) {
+    <nz-alert nzType="warning"
+              *nzSpaceItem
+              nzShowIcon
+              [nzMessage]="'Cantitatea va fi redusa cu ' + (item().quantity - stockAdjustmentForm.actualQuantity().value()) + ' bucati'" />
+  } @else if (stockAdjustmentForm.actualQuantity().value() > item().quantity) {
+    <nz-alert nzType="success"
+              *nzSpaceItem
+              nzShowIcon
+              [nzMessage]="'Cantitatea va fi crescuta cu ' + (stockAdjustmentForm.actualQuantity().value() - item().quantity) + ' bucati'" />
+  }
+</nz-space>

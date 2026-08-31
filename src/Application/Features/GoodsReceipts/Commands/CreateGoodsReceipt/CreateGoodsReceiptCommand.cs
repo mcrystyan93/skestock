@@ -28,10 +28,12 @@ public class CreateGoodsReceiptCommand : IRequest<Result<GoodsReceiptDto>>, ICac
     // Invalidate every cached GetAllGoodsReceipts page/filter/sort combination - a new receipt
     // can affect any of them (default sort, date-range filters, etc.) - plus the current-stock
     // report for every (class, location) pair this receipt's lines touch, since each line adds a
-    // new StockBatch that changes that report's sum.
+    // new StockBatch that changes that report's sum. Also invalidate the class-wide (all
+    // locations) stock report, since it aggregates across every location too.
     public IReadOnlyCollection<string> Tags =>
         [
             CacheConstants.GoodsReceiptListTag,
+            StockCacheConstants.BuildClassTag(ClassId),
             ..Lines.Select(l => l.LocationId).Distinct().Select(locationId => StockCacheConstants.BuildTag(ClassId, locationId))
         ];
 }

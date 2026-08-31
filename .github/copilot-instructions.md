@@ -2,168 +2,159 @@
 
 > See also `/AGENTS.md` for the canonical quick-reference (layer rules, DI convention, Mediator
 > pipeline order, endpoint pattern). This file adds deeper file-by-file structure, the
-> filtering/keyset-pagination/error conventions, and frontend status that AGENTS.md doesn't
-> cover in depth. Don't contradict AGENTS.md — if anything here seems to diverge, AGENTS.md wins.
+> filtering/keyset-pagination/error conventions, Aspire resource details, and the **Angular
+> frontend** (now implemented, not just planned). Don't contradict AGENTS.md — if anything here
+> seems to diverge, AGENTS.md wins for the topics it covers.
 
 ## Overview
 
 `skestock` (school stock/inventory management) is a .NET 10 (`global.json` pins SDK
 `10.0.110`, `rollForward: latestFeature`) solution generated from the **Jason Taylor Clean
-Architecture** template, orchestrated end-to-end with **.NET Aspire 13.5.2**. There is
-currently **no frontend project** in `src/` — only a backend Web API (`src/Web`).
-`.github/instructions/angular-guidelines.instructions.md`, `ng-zorro-guidelines.instructions.md`,
-and the `angular-developer`/`ngrx-signalstore` skills are pre-staged for a **planned** Angular +
-ng-zorro + NgRx SignalStore frontend that has not been scaffolded yet — don't assume Angular
-code exists until a project appears (e.g. under `src/Web` wwwroot as a SPA, or a new `src/<name>`
-Angular project referenced from `AppHost`). `Shared.Services.WebFrontend` already reserves a
-resource name for it.
+Architecture** template, orchestrated end-to-end with **.NET Aspire 13.5.x**. A real frontend
+now exists at **`src/Client`**: an **Angular 22** app using **ng-zorro-antd**, **NgRx
+SignalStore**, and **Tailwind CSS 4**, wired into the Aspire app model via `AddViteApp` and
+built/served with `npm`/Vite (not the classic Angular CLI dev-server-via-webpack path). The
+solution file (`skestock.slnx`) includes `src/Client/Client.esproj`, so `dotnet build`/
+`dotnet test` at the solution level will also invoke the JS project build (requires Node/npm).
 
 The domain is a school inventory/stock system: `Category`, `Item`, `Location`, `SchoolClass`,
-`ClassBalance`, `GoodsReceipt`, `StockBatch`, `StockTransaction`, `UserProfile` (see Domain
-entities below). **Five** feature slices are implemented so far under `Application/Features/`:
-`Categories`, `Items`, `Locations`, `SchoolClasses`, `GoodsReceipts` (each with a matching
-`Web/Endpoints/<Feature>.cs` and an `Application.UnitTests/Features/<Feature>/` folder).
-`ClassBalance` and `StockTransaction` have **no** feature slice yet — `StockBatch` and
-`StockTransaction` rows are created *as a side effect* of `GoodsReceipts.CreateGoodsReceipt`
-(receiving goods creates one `StockBatch` + one `StockTransaction` per line item), not via their
-own commands. **Categories** is still the best reference for the full `GetAll`
-pagination/filtering/caching stack (`GetAllCategoriesQuery` + `Handler` + `Validator`), but it
-only has a single `CreateCategory` command — it does **not** demonstrate update/disable/enable
-commands. Note the divergence between slices before copying a pattern blindly:
-- `Items` has the richest command set: `Create`/`Edit`/`Disable`/`Enable` plus `GetAllItems` and
-  `GetItemById` — use it as the reference for a full mutable-lifecycle CRUD-ish slice.
-- `Locations` and `SchoolClasses` use `Create`/`Update` (not `Edit`) naming for their mutation
-  commands, and each expose a `Get<Feature>ById` query alongside `GetAll<Feature>` — check the
-  existing slice's naming before assuming `Edit` vs `Update` for a new command.
-- `GoodsReceipts` is **create/read-only** so far: `CreateGoodsReceipt` command plus
-  `GetAllGoodsReceipts`/`GetGoodsReceiptById` queries — no update/disable/enable commands exist
-  for it (a goods receipt is treated as an immutable ledger entry once created). Its
-  `CreateGoodsReceiptCommandHandler` is the reference for a command that fans out into multiple
-  child entities (`StockBatch` + `StockTransaction` per line) inside one `SaveChangesAsync`.
-- All five implemented slices have `CacheConstants.cs`, `<Feature>SortConfiguration.cs`, and
-  `<Feature>FilterConfiguration.cs` — treat these three files as required boilerplate for any
-  new `GetAll<Feature>` query, not optional extras.
-- `GoodsReceipts` has **no** `Application.FunctionalTests/Features/GoodsReceipts` folder yet
-  (unlike the other four slices) — only unit tests under
-  `Application.UnitTests/Features/GoodsReceipts/` exist so far; add functional/HTTP-level
-  coverage there if you extend this slice.
-- `Web/Endpoints/Antiforgery.cs` exists but is **entirely commented out** (a planned
-  `GET /api/Antiforgery/token` endpoint for SPA XSRF-cookie seeding) — don't assume an
-  antiforgery endpoint is live; it's scaffolding for the not-yet-built frontend.
+`ClassBalance`, `GoodsReceipt`, `StockBatch`, `StockTransaction`, `UserProfile`. **Seven**
+backend feature slices exist under `Application/Features/`: `Categories`, `Items`, `Locations`,
+`SchoolClasses`, `GoodsReceipts`, `Stock`, `StockBatches` (each with a matching
+`Web/Endpoints/<Feature>.cs`). `ClassBalance` still has no dedicated feature slice.
+`StockBatch`/`StockTransaction` rows are still created *as a side effect* of
+`GoodsReceipts.CreateGoodsReceipt` (one `StockBatch` + one `StockTransaction` per line item) —
+`StockBatches` only exposes a **read** slice (`GetAllStockBatches`) on top of those rows, and
+`Stock` exposes a **derived reporting + adjustment** slice (`GetClassLocationStock` query +
+`AdjustStock` command) that reconciles physical counts against batch totals. Neither `Stock` nor
+`StockBatches` creates `GoodsReceipt`/`Category`/etc.-style aggregate roots of their own.
+
+Slice-naming still diverges — check the existing slice before copying a pattern blindly:
+- `Items`: richest command set — `Create`/`Edit`/`Disable`/`Enable` + `GetAllItems` +
+  `GetItemById`. Reference for a full mutable-lifecycle CRUD-ish slice.
+- `Locations`/`SchoolClasses`: use `Create`/`Update` (not `Edit`), each with a
+  `Get<Feature>ById` query alongside `GetAll<Feature>`.
+- `GoodsReceipts`: create/read-only (`CreateGoodsReceipt`, `GetAllGoodsReceipts`,
+  `GetGoodsReceiptById`) — a goods receipt is an immutable ledger entry once created. Its
+  handler is the reference for a command that fans out into multiple child entities
+  (`StockBatch` + `StockTransaction` per line) inside one `SaveChangesAsync`. **Still has no
+  `Application.FunctionalTests/Features/GoodsReceipts` folder** — unit tests only.
+- `Stock`: **no** `FilterConfiguration`/`SortConfiguration`/keyset pagination — `GetClassLocationStock`
+  returns a plain `List<StockItemDto>` for one class (optionally one location), not a
+  `PaginatedResponse<T>`. `AdjustStock` is the one command in this slice: it diffs a physically
+  counted quantity against the sum of remaining batch quantities, draws down existing batches
+  (oldest expiry first) on a shortfall, or creates a new unattributed `StockBatch` on a surplus.
+  Has full unit + functional test coverage.
+- `StockBatches`: read-only `GetAllStockBatches` query, full `CacheConstants`/
+  `StockBatchSortConfiguration`/`StockBatchFilterConfiguration` boilerplate (filter by
+  `goodsReceiptId`, `itemId`, `locationId`, etc.), full unit + functional test coverage.
+- All slices with a `GetAll<Feature>` query have `CacheConstants.cs`, `<Feature>SortConfiguration.cs`,
+  and `<Feature>FilterConfiguration.cs` — required boilerplate, not optional extras (see
+  `Stock` above for the one slice that legitimately skips them because it isn't paginated).
+- `Web/Endpoints/Antiforgery.cs` is still **entirely commented out** (an SPA
+  `GET /api/Antiforgery/token` endpoint) and `app.UseAntiforgeryValidation()` in `Web/Program.cs`
+  is also commented out — but the frontend **already** configures XSRF cookie/header handling
+  (`provideHttpClient(withXsrfConfiguration(...))`, see Frontend section) in anticipation of this
+  being turned on. Don't assume server-side antiforgery enforcement is live yet.
 
 ## Solution layout (file-level)
 
 ```
-skestock.slnx                      # solution file (NOT a classic .sln)
+skestock.slnx                      # solution file (NOT a classic .sln) — includes src/Client/Client.esproj
 Directory.Build.props              # shared MSBuild props (net10.0, Nullable, TreatWarningsAsErrors)
-Directory.Packages.props           # central package management — ALL package versions live here
+Directory.Packages.props           # central package management — ALL .NET package versions live here
 global.json                        # pins .NET SDK 10.0.110
 aspire.config.json                 # Aspire CLI/tooling config (AppHost project path)
 AGENTS.md                          # canonical quick-reference for agents
 
 src/
   Domain/                          # no project references — pure C#
-    Common/BaseEntity.cs, BaseAuditableEntity.cs, BaseEvent.cs, ValueObject.cs
-    Common/IKeysetEntity.cs         # marker: `int Id`, `DateTimeOffset CreatedDate` — required for
-                                    #   entities used with the keyset-pagination helpers below
-    Constants/Roles.cs              # e.g. Roles.Administrator
-    Entities/                       # Category, ClassBalance, GoodsReceipt, Item, Location,
-                                    #   SchoolClass, StockBatch, StockTransaction, UserProfile
-    Enums/                          # ClassStatus, StockTransactionType
-    GlobalUsings.cs                 # global using skestock.Domain.Common;
-  Application/                     # → references Domain only
-    Common/
-      Behaviours/                  # Mediator pipeline behaviours (see pipeline order below)
-      Caching/                     # HybridCache tag-based cache/invalidation (see AGENTS.md)
-      Errors/                      # FluentResults error catalog — see "Errors & Result pattern" below
-      Exceptions/                  # ValidationException, NotFoundException, ForbiddenAccessException
-      Filtering/                   # column-filter (WHERE-clause) builder — see below
-      Interfaces/                  # IApplicationDbContext, IIdentityService, IUser
-      Keyset/                      # cursor-based keyset pagination — see below
-      Models/                      # BasePaginationFilter, PaginatedResponse<T>, PaginationSort
-      Security/                    # [Authorize] attribute for Mediator requests
-    DependencyInjection.cs         # AddApplicationServices() — registers FluentValidation + Mediator pipeline
-    GlobalUsings.cs                # Ardalis.GuardClauses, EF Core, FluentValidation, FluentResults, Mediator
-    Features/<FeatureName>/        # CQRS feature slices, e.g. Features/Categories/
-      <FeatureName>FilterConfiguration.cs  # IFilterConfiguration<TEntity> — whitelists filterable fields
-      <FeatureName>SortConfiguration.cs    # IKeysetSortConfiguration<TEntity> — whitelists sort keys
-      CacheConstants.cs            # per-feature cache tag/key-prefix constants
-      Models/                      # DTOs + request models (e.g. CategoryDto, CategoryRequests)
-      Commands/<UseCase>/          # <UseCase>Command.cs + Handler.cs + Validator.cs
-      Queries/<UseCase>/           # <UseCase>Query.cs + Handler.cs + Validator.cs
+  Application/                     # → references Domain only (see AGENTS.md for pipeline/DI rules)
+    Features/<FeatureName>/        # Categories, Items, Locations, SchoolClasses, GoodsReceipts,
+                                    #   Stock, StockBatches — see Overview for per-slice divergence
   Infrastructure/                  # → references Application (implements its interfaces) + Domain
-    Data/
-      ApplicationDbContext.cs      # implements IApplicationDbContext (one DbSet per entity)
-      ApplicationDbContextInitialiser.cs  # dev-time seeding, called from Web/Program.cs
-      Configurations/              # EF Core IEntityTypeConfiguration<T> classes
-      Interceptors/                # AuditableEntityInterceptor, DispatchDomainEventsInterceptor
-    Identity/                      # ApplicationUser, IdentityService, custom claims/roles
-    DependencyInjection.cs         # AddInfrastructureServices() — EF Core SqlServer, Identity, Redis, HybridCache
   Web/                             # → references Application + Infrastructure + ServiceDefaults
-    Endpoints/                     # IEndpointGroup implementations (Categories.cs, Items.cs, Locations.cs,
-                                    #   SchoolClasses.cs, GoodsReceipts.cs, Users.cs), auto-discovered
-                                    #   (Antiforgery.cs also exists but is fully commented out — inactive)
-    Infrastructure/
-      IEndpointGroup.cs                    # route-prefix + Map(RouteGroupBuilder) contract
-      EndpointRouteBuilderExtensions.cs     # MapGet/Post/Put/Patch/Delete(Delegate, pattern) — derives
-                                             #   the OpenAPI operationId from the handler METHOD NAME
-      MethodInfoExtensions.cs               # Guard.Against.AnonymousMethod — handlers must be named
-                                             #   static methods, not lambdas (needed for a stable operationId)
-      WebApplicationExtensions.cs           # MapEndpoints(assembly) — reflection-based auto-registration
-      ProblemDetailsExceptionHandler.cs     # maps thrown exceptions → ProblemDetails (see Errors section)
-      ResultProblemDetailsMapper.cs         # maps failed FluentResults `Result` → ProblemDetails
-      ApiErrorContract.cs                   # unified `error` extension on ProblemDetails (Code/Errors/Diagnostics)
-      BearerSecuritySchemeTransformer.cs, IdentityApiOperationTransformer.cs,
-      ApiExceptionOperationTransformer.cs   # OpenAPI/Scalar doc transformers
-    Services/                     # Web-layer services (e.g. CurrentUser : IUser)
-    Program.cs                    # composition root — see startup order below
-    DependencyInjection.cs        # AddWebServices()
-    GlobalUsings.cs                # Ardalis.GuardClauses, skestock.Web.Infrastructure, Mediator
-    appsettings.json / .Development.json
-    wwwroot/                      # static files served via UseFileServer()
-  AppHost/                        # .NET Aspire orchestrator (NOT part of the runtime app)
-    Program.cs                    # defines SqlServer, Redis, Web resources — see below
-    Extensions.cs                 # AddKeyVaultIfConfigured() and other builder extensions
-  ServiceDefaults/                # shared OpenTelemetry/health-check/service-discovery extensions
-    Extensions.cs                 # AddServiceDefaults(), MapDefaultEndpoints()
-  Shared/                         # cross-cutting constants shared by AppHost + app projects
-    Services.cs                  # skestock.Shared.Services — service/resource/db names (NEVER hardcode these strings)
+    Endpoints/                     # Categories, GoodsReceipts, Items, Locations, SchoolClasses,
+                                    #   Stock, StockBatches, Users (all active); Antiforgery.cs
+                                    #   (commented out)
+    Program.cs                     # composition root — see startup order below (CORS now explicit-origin)
+  AppHost/                         # .NET Aspire orchestrator — see resource graph below
+  ServiceDefaults/                 # shared OpenTelemetry/health-check/service-discovery extensions
+  Shared/                          # skestock.Shared.Services — service/resource name constants
+  Client/                          # ← Angular 22 SPA (see Frontend section) — Client.esproj, NOT Client.csproj
+    Client.esproj                  # MSBuild "JS project" wrapper so the SPA is part of the .slnx
+    angular.json, package.json, tsconfig*.json
+    src/app/
+      core/{auth,layouts,models,theme}/   # cross-cutting singletons (see Frontend section)
+      features/<name>/             # routed page composition per backend feature
+      shared/<name>/                # Http services + SignalStores + reusable UI per backend feature
+      shared/{tables,loader,errors,theme}/  # generic reusable primitives (not tied to one feature)
 
 tests/
-  Domain.UnitTests/               # project shell exists but has NO tests yet — don't assume coverage here
-  Application.UnitTests/          # NUnit, mirrors Application/ folder layout 1:1 (Common/Behaviours,
-                                   #   Common/Caching, Common/Filtering, Common/Keyset, and one folder per
-                                   #   implemented slice: Features/Categories, Features/Items,
-                                   #   Features/Locations, Features/SchoolClasses, Features/GoodsReceipts)
-  Application.FunctionalTests/    # full Aspire-hosted stack via TestAppHost
-    FunctionalTestSetup.cs        # [SetUpFixture]: boots TestAppHost, waits for DB health, creates WebApiFactory
-    Infrastructure/                # WebApiFactory, TestApp, TestBase, DatabaseResetter (Respawn-based)
-    Features/Categories/, Features/Items/, Features/Locations/, Features/SchoolClasses/  # end-to-end
-                                    #   HTTP tests per use case, mirrors Application/Features — GoodsReceipts
-                                    #   has NO functional-test folder yet (unit tests only, see Overview)
+  Domain.UnitTests/               # project shell exists but has NO tests yet
+  Application.UnitTests/          # NUnit, mirrors Application/ folder layout 1:1 — Features/ now has
+                                   #   Categories, Items, Locations, SchoolClasses, GoodsReceipts,
+                                   #   Stock, StockBatches (7 folders)
+  Application.FunctionalTests/    # full Aspire-hosted stack via TestAppHost — Features/ has
+                                   #   Categories, Items, Locations, SchoolClasses, Stock, StockBatches
+                                   #   (6 folders — GoodsReceipts still missing, see Overview)
   Infrastructure.IntegrationTests/
-  TestAppHost/                    # slimmed-down Aspire host used only by functional tests
+  TestAppHost/                    # slimmed Aspire host: SQL Server + Redis ONLY (no Storage, no Client)
 ```
+`Web/ClientApp/` also exists on disk but is now an **empty leftover directory** (no files under
+it) — the real, actively-developed frontend is `src/Client`. Don't add new frontend code under
+`Web/ClientApp`.
 
 ## Architecture & dependency direction
 
-`Domain` ← `Application` ← `Infrastructure` & `Web`. `Web` is the composition root and depends
-on both `Application` and `Infrastructure`. `Shared` is referenced by `AppHost` and the app
-projects for resource-name constants only — it has no business logic. `Application` never
-references an EF Core provider directly; it only depends on the `IApplicationDbContext`
-abstraction (`DbSet<Category>`, `DbSet<Item>`, etc. + `SaveChangesAsync`), keeping persistence
-swappable.
+`Domain` ← `Application` ← `Infrastructure` & `Web`. `Web` is the composition root. `Shared` is
+referenced by `AppHost` and app projects for resource-name constants only. `Application` never
+references an EF Core provider directly — only `IApplicationDbContext`. `src/Client` is a
+standalone npm/Angular project with **no** reference to any .NET project; it only talks to `Web`
+over HTTP (see Frontend section) and is wired into the solution purely for build orchestration
+(`Client.esproj`) and Aspire process orchestration (`AddViteApp` in `AppHost/Program.cs`).
 
 ### AppHost resource graph (`src/AppHost/Program.cs`)
 
-- `sqlserver` (`Services.DatabaseServer`) — SQL Server container, data volume
-  `Services.DatabaseVolumes`, exposes database `Services.Database` (`skestockDb`).
-- `redis` (`Services.Cache`) — Redis container, data volume `Services.CacheVolumes`.
-- `webapi` (`Services.WebApi`) — the `Web` project; `WithReference`/`WaitFor` both SQL and
-  Redis, external HTTP endpoints, and a dashboard shortcut URL to `/scalar`.
-- No local fallback connection strings exist in `appsettings.json` — everything is wired
-  through Aspire resource references. Running outside Aspire (`dotnet run` on `Web` directly)
-  will not have a working DB/cache connection.
+`AppHost.csproj` targets `Aspire.AppHost.Sdk/13.5.2` and references
+`Aspire.Hosting.{AppHost, Azure.AppContainers, Docker, JavaScript, Azure.Sql, Redis}`.
+Resources, in dependency order:
+- `compose` — `builder.AddDockerComposeEnvironment("env")` with a dashboard forwarded on port
+  `8080`. All infra resources below are attached to it via `.WithComputeEnvironment(compose)` and
+  also `.PublishAsDockerComposeService(...)` so `aspire publish`/docker-compose generation works,
+  not just `dotnet run` orchestration.
+- `databaseServer` (`Services.DatabaseServer`) — SQL Server container, secret `sql-password`
+  parameter, `WithEndpoint(targetPort: 1433, port: 1433, name: "tcp")`, data volume
+  `Services.DatabaseVolumes`, database `Services.Database` (`skestockDb`).
+- `cache` (`Services.Cache`) — Redis container, secret `redis-password` parameter, data volume
+  `Services.CacheVolumes`, `WithEndpoint(targetPort: 6379, port: 6379, name: "tcp")`.
+- `storage` (`Services.Storage`) — **`AddAzureStorage(...).RunAsEmulator(azurite => ...)`**
+  (Azurite), persistent lifetime, data volume `Services.StorageVolumes`, explicit blob/queue/table
+  ports (`10000`/`10001`/`10002`). Two blob containers are declared: `blobs` and `app-files`
+  (`blobContainerName: "app-files"`). **Not yet consumed anywhere in `Application`/`Infrastructure`/
+  `Web` code** (no `BlobServiceClient`/`BlobContainerClient` usage found) — treat this as
+  reserved/scaffolded for a future file-attachment feature, not an active integration. `Web`
+  depends on it (`WithReference(blobs).WaitFor(filesContainer)`), so it still starts even though
+  unused.
+- `web` (`Services.WebApi`) — the `Web` project; references + waits on `databaseServer`, `cache`,
+  and the blob containers; external HTTP endpoints; `WithAspNetCoreEnvironment()`; dashboard
+  shortcut to `/scalar`.
+- `webfrontend` (`Services.WebFrontend`) — **`builder.AddViteApp(Services.WebFrontend, "../Client", "dev")`**:
+  runs the Angular app's `npm run dev` (i.e. `ng serve`) script under Aspire. References + waits
+  on `web`, injects `ASPNETCORE_URLS` = the Web API's resolved HTTP endpoint, `.WithNpm()` (Aspire
+  runs `npm install` automatically), `.WithHttpEndpoint(port: 7001, env: "PORT")`, external HTTP
+  endpoints.
+- CORS wiring: `web.WithEnvironment("Cors__AllowedOrigins__0", webfrontend.GetEndpoint("http"))`
+  — the frontend's Aspire-assigned origin is fed into `Web`'s `Cors:AllowedOrigins` config at
+  orchestration time (see Program.cs below); this is required because `AllowCredentials()`
+  (needed for cookie auth) is incompatible with `AllowAnyOrigin()`.
+- No local fallback connection strings exist in `appsettings.json` for SQL/Redis/Storage —
+  everything is wired through Aspire resource references. Running `Web` standalone (`dotnet run`
+  without AppHost) has no working DB/cache/storage connection, but `Web/Program.cs` does supply a
+  `https://localhost:4200`/`http://localhost:4200` CORS fallback in Development so you can still
+  point a manually-started `ng serve` at a standalone `Web` for quick iteration.
+- Running via AppHost requires **both** Docker (SQL Server, Redis, Azurite containers) and
+  Node/npm (Vite dev server for the frontend) to be available locally.
 
 ### Web startup order (`src/Web/Program.cs`)
 
@@ -171,231 +162,192 @@ swappable.
 AddServiceDefaults() → AddKeyVaultIfConfigured() → AddApplicationServices()
   → AddInfrastructureServices() → AddWebServices()
 → (Development only) InitialiseDatabaseAsync()  else  UseHsts()
-→ UseHttpsRedirection() → UseCors(AllowAnyMethod/Header/Origin)
+→ UseHttpsRedirection()
+→ UseCors(policy => WithOrigins(<Cors:AllowedOrigins config, or localhost:4200 fallback in Dev>)
+    .AllowAnyMethod().AllowAnyHeader().AllowCredentials())
+→ UseAuthentication() → UseAuthorization()
+  // app.UseAntiforgeryValidation();  -- commented out, see Overview
 → UseFileServer() → MapOpenApi() → MapScalarApiReference()
 → UseExceptionHandler(options => { }) → Map("/", redirect to /scalar)
 → MapDefaultEndpoints() → MapEndpoints(assembly)
 ```
-Follow this same ordering when adding new middleware/DI wiring — don't insert ad hoc
-`builder.Services.AddX()` calls in `Program.cs`; add them to the owning layer's
-`DependencyInjection.cs` instead (see AGENTS.md DI convention). Each layer's
-`DependencyInjection.cs`/`Extensions.cs` lives in its own project namespace
-(`skestock.Application`, `skestock.Infrastructure`, `skestock.Web`, `skestock.ServiceDefaults`)
-— `Program.cs` pulls each in via an explicit `using` statement, not the older
-`Microsoft.Extensions.DependencyInjection`-namespace trick.
+This is a real change from a naive Clean Architecture template: CORS is **no longer**
+`AllowAnyOrigin()` — it's an explicit origin allowlist (`Cors:AllowedOrigins` config section,
+empty array by default in `appsettings.json`, populated by Aspire at run time) combined with
+`AllowCredentials()`, because auth now supports cookie sign-in for the SPA (see Auth below).
+Follow the existing ordering/DI-per-layer convention described in AGENTS.md when adding new
+middleware — don't insert ad hoc `builder.Services.AddX()` calls directly in `Program.cs`.
 
-## Mediator pipeline behaviours (`src/Application/Common/Behaviours/`)
+## Auth
 
-CQRS is implemented with the **[Mediator](https://github.com/martinothamar/Mediator)** source-generator
-library (`Mediator.Abstractions` + `Mediator.SourceGenerator`), not MediatR. Handler methods
-return `ValueTask`/`ValueTask<T>`; the pipeline delegate is `MessageHandlerDelegate<TMessage,
-TResponse> next` (called as `next(message, cancellationToken)`). Open-generic behaviours must
-constrain `TRequest` with `Mediator.IMessage` (e.g. `where TRequest : notnull, IMessage`).
+Two schemes are registered side by side in `Infrastructure/DependencyInjection.cs`:
+```csharp
+builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
+    .AddBearerToken(IdentityConstants.BearerScheme)
+    .AddCookie(IdentityConstants.ApplicationScheme);
+```
+`ApplicationScheme` (cookie) is the **default** — this is what the Angular SPA uses (credentialed
+CORS + XSRF, see Frontend section); `BearerScheme` remains available for non-browser/API clients.
+`Web/Endpoints/Users.cs` maps `MapIdentityApi<ApplicationUser>()` plus a custom `logout` POST
+(`SignInManager.SignOutAsync()`, `[RequireAuthorization]`). Roles are int-keyed
+(`IdentityRole<int>`); `Domain.Constants.Roles.Administrator` is the only role defined so far.
 
-Registered in `src/Application/DependencyInjection.cs`'s `AddMediator(options => ...)` call, with
-`ServiceLifetime.Scoped` (handlers depend on scoped `IApplicationDbContext`), in this exact order:
-1. `LoggingBehaviour<TRequest, TResponse>` — pre-processor (`MessagePreProcessor<,>`), logs request start.
-2. `UnhandledExceptionBehaviour<TRequest, TResponse>` — wraps and logs unhandled exceptions.
-3. `AuthorizationBehaviour<TRequest, TResponse>` — enforces `[Authorize]` on requests (`Common/Security`).
-4. `ValidationBehaviour<TRequest, TResponse>` — runs FluentValidation validators.
-5. `PerformanceBehaviour<TRequest, TResponse>` — logs slow requests.
-6. `CachingBehavior<TRequest, TResponse>` — intercepts `ICacheableQuery<T>` requests (HybridCache read-through).
-7. `CacheInvalidationBehavior<TRequest, TResponse>` — invalidates tags for successful `ICacheInvalidation` commands.
+## Query/filter/pagination/caching/error conventions
 
-New cross-cutting behaviours must be inserted at the correct position in this chain, not
-appended blindly — order affects whether auth/validation run before/after logging, timing, or caching.
+These conventions (column filtering, keyset/cursor pagination, `HybridCache` tag-based caching,
+the FluentResults `Result<T>` + typed `Error` pattern vs. thrown exceptions, `ValidationErrorCodes`)
+are unchanged from before and are documented in full detail in the previous revision of this file
+— see `Application/Common/{Filtering,Keyset,Models,Caching,Errors}` and use `Categories`
+(`GetAllCategoriesQuery`/`Handler`/`Validator`) as the reference implementation for a full
+paginated/filterable/cached query, and `Stock.GetClassLocationStockQuery` as the reference for a
+deliberately **non**-paginated query that skips that boilerplate. The `ApiErrorContract`
+(`Code`/`Errors[]`/`Diagnostics.CorrelationId`) produced by `ResultProblemDetailsMapper` is now
+actively consumed by the frontend — see `core/models/errors.ts` below, which mirrors this
+contract's shape exactly (`ProblemDetails`, `BackendErrorPayload`, `BackendErrorItem`,
+`isValidationProblem()` type guard keyed on `status === 400` + at least one error with a `field`).
 
-## Query/filter/pagination conventions (`src/Application/Common/{Filtering,Keyset,Models}`)
-
-These are the building blocks every "get all X" query should reuse — see `GetAllCategoriesQuery`
-+ `GetAllCategoriesHandler` + `GetAllCategoriesQueryValidator` as the reference implementation.
-
-**Column filtering** (`Common/Filtering/`):
-- `IFilterConfiguration<TEntity>` — implemented once per entity (e.g. `CategoryFilterConfiguration`)
-  to whitelist filterable fields as a `Dictionary<string, FilterField<TEntity>>` keyed by
-  case-insensitive API field name, each mapping to a typed `Expression<Func<TEntity, TValue>>` selector.
-- `ColumnFilter` — the wire-format filter item (`Field`, `Operator` (`FilterOperator` enum:
-  Equals/NotEquals/Contains/GreaterThan/LessThan/In/Between), `Value(s)`).
-- `FilterQueryBuilder<TEntity>.Apply(query, filters, configuration)` — translates a
-  `List<ColumnFilter>` into `IQueryable<TEntity>.Where(...)` expressions against the whitelisted
-  fields only (never accepts arbitrary property names from the request).
-- `FilterValueParser` — converts raw filter value strings to the target `FilterField.ValueType`.
-
-**Keyset (cursor) pagination** (`Common/Keyset/`), *not* offset/skip-take pagination:
-- `IKeysetSortConfiguration<TEntity>` — implemented once per entity (e.g. `CategorySortConfiguration`)
-  with `AllowedSortKeys` (API key → ordered EF property names, so a key can map to a composite
-  sort like `["Name", "Id"]` for stable tiebreaking), `DefaultSort`, `GetPropertyExpression`, and
-  `GetPropertyValue` (used to read values off the last entity for cursor encoding).
-- `DynamicSortBuilder<TEntity>.BuildEffectiveSort(requestedSort, configuration)` — merges the
-  caller's `List<PaginationSort>` with the configuration's `DefaultSort`/allowlist.
-- `CursorCodec<TEntity>.Encode(lastEntity, effectiveSort, configuration)` /
-  `.Decode(cursorString)` — base64-encodes/decodes an opaque `CursorState` (sort keys + key
-  values) as the `NextCursor`/`Cursor` string; `.MatchesSort(...)` guards against reusing a
-  cursor issued for a different sort order (validators call this, e.g.
-  `GetAllCategoriesQueryValidator.HaveCursorMatchingRequestedSort`).
-- `KeysetPredicateBuilder<TEntity>.ApplyKeysetPredicate(query, effectiveSort, cursorKeyValues, configuration)`
-  and `OrderByBuilder<TEntity>.ApplyOrderBy(query, effectiveSort, configuration)` — build the
-  `WHERE`/`ORDER BY` clauses for the next page. Handlers fetch `pageSize + 1` rows and trim the
-  extra one to compute `HasNextPage` (see `GetAllCategoriesHandler`).
-- `BasePaginationFilter` (`SearchTerm`, `PageSize` default `50`, `Cursor`, `Sort`) and
-  `PaginatedResponse<T>` (`Data`, `NextCursor`, `HasNextPage`, `Sort`) in `Common/Models/` are the
-  standard request/response shapes — feature request DTOs (e.g. `CategoryRequests.GetAllCategoriesRequest`)
-  extend `BasePaginationFilter` rather than redefining paging fields.
-- Entities used with these helpers should implement `Domain.Common.IKeysetEntity` (`Id`, `CreatedDate`).
-
-## Errors & the `Result<T>` pattern (`src/Application/Common/Errors/`)
-
-Two parallel, **intentionally separate** error-to-HTTP mechanisms coexist — know which one a new
-use case should use:
-
-1. **FluentResults `Result`/`Result<T>`** (preferred for expected business failures, e.g. "not
-   found", validation-adjacent domain rules): handlers return `Result.Ok(value)` /
-   `Result.Fail(new SomeError(...))`. Error classes derive from FluentResults' `Error` and stuff
-   HTTP metadata onto `Metadata` using the well-known keys in `ErrorMetadataKeys`
-   (`StatusCode`, `Title`, `Code`, `Params`) — see `CategoryErrors.CategoryNotFound` for the
-   pattern. In the endpoint, check `result.IsFailed` and call `result.ToProblemHttpResult()`
-   (`Web/Infrastructure/ResultProblemDetailsMapper.cs`) to get a `ProblemHttpResult` with a
-   unified `error` extension (`ApiErrorContract`: `Code`, `Errors[]`, `Diagnostics.CorrelationId`)
-   — this is what the (currently unbuilt) frontend is meant to consume for locale-specific error copy.
-2. **Thrown exceptions** (`ValidationException`, `NotFoundException`, `UnauthorizedAccessException`,
-   `ForbiddenAccessException` in `Application/Common/Exceptions/`): caught globally by
-   `Web/Infrastructure/ProblemDetailsExceptionHandler.cs` (registered via
-   `app.UseExceptionHandler(options => { })` + DI registration in `AddWebServices`), which maps
-   them to `ProblemDetails` (400/404/401/403) — but does **not** attach the `ApiErrorContract`
-   extension, so this path is less rich than the `Result` path. `ValidationBehaviour` still throws
-   `ValidationException` for FluentValidation failures (it does not return a `Result`), so both
-   error mechanisms will be seen from the same request pipeline.
-3. `ValidationErrorCodes` — stable `validation.*` string codes used as FluentValidation
-   `.WithErrorCode(...)` values (e.g. `Between`, `InvalidSortKey`, `InvalidCursor`,
-   `CursorSortMismatch`, `DuplicateName`) so the frontend can map codes to copy without parsing messages.
-
-When adding a new use case, prefer the `Result<T>` + typed `Error` pattern for anything the API
-consumer needs to branch on programmatically; reserve thrown exceptions for truly exceptional/
-cross-cutting cases already handled by the global exception handler.
-
-## Endpoints (`src/Web/Endpoints/`)
-
-Not controllers — each feature group is a `class : IEndpointGroup` with a static
-`Map(RouteGroupBuilder)`. Route prefix defaults to `/api/{ClassName}` (override via the static
-`RoutePrefix` property for nested resource paths, e.g. `/api/Orders/{orderId}/OrderItems`) and
-the OpenAPI tag matches the class name. Groups are auto-discovered by reflection via
-`app.MapEndpoints(typeof(Program).Assembly)` (`WebApplicationExtensions.cs`) — just add a new
-class, no manual registration.
-
-Conventions to follow (see `Categories.cs` / `Users.cs`):
-- Use the custom `groupBuilder.MapGet/MapPost/MapPut/MapPatch/MapDelete(handler, pattern)`
-  extension overloads (`EndpointRouteBuilderExtensions.cs`), **not** the built-in ASP.NET Core
-  ones directly — these derive the OpenAPI `operationId` from the handler's method name (used for
-  typed client generation, e.g. nswag) via `WithName(handler.Method.Name)`. Handlers **must** be
-  named static methods, not lambdas — `Guard.Against.AnonymousMethod` throws otherwise.
-  `pattern` is optional for `MapGet`/`MapPost` (collection-level ops) but required for
-  `MapPut`/`MapPatch`/`MapDelete` (resource-level ops, typically `"{id}"`).
-- Complex/filterable "get all" queries are exposed as `MapPost(..., "get-all")` (request body,
-  not query string) rather than `MapGet`, since the request DTO (`BasePaginationFilter` +
-  `Filters`/`Sort`) doesn't serialize cleanly to a query string — see `Categories.GetAllCategories`.
-- Handler signature pattern: `static async Task<Results<TSuccess, ProblemHttpResult>> Handler(
-  ISender sender, TRequest request, CancellationToken ct)` — map the request DTO to a Mediator
-  command/query, `await sender.Send(...)`, then `if (result.IsFailed) return result.ToProblemHttpResult();`
-  before returning the typed success result (`TypedResults.Ok(...)`, `TypedResults.Created(...)`, etc.).
-- Use `[EndpointSummary]`/`[EndpointDescription]` attributes on handler methods for OpenAPI/Scalar docs.
-- `Users.cs` maps ASP.NET Core Identity's built-in `MapIdentityApi<ApplicationUser>()` plus a
-  custom `logout` POST endpoint requiring authorization, in the same `IEndpointGroup` class.
-
-## Caching (`src/Application/Common/Caching/`)
-
-Query-side caching and command-side invalidation are cross-cutting `Behaviours`, wired into the
-Mediator pipeline last (after `PerformanceBehaviour`): `CachingBehavior<,>` then
-`CacheInvalidationBehavior<,>`. Both use `HybridCache`'s native **tag-based invalidation**:
-- A query implements `ICacheableQuery<TResponse>` (`Tags`, `BypassCache`, `SlidingExpiration`,
-  `BuildCacheKey()`) — see `GetAllCategoriesQuery` for a realistic `BuildCacheKey()` that
-  incorporates search/filters/pageSize/cursor/sort via `CacheKeyNormalization` helpers (avoid ad
-  hoc string interpolation, which risks inconsistent keys for logically-equal queries).
-  `CachingBehavior` calls `HybridCache.GetOrCreateAsync(key, factory, options, tags: message.Tags,
-  ...)`, wrapping the `Result<TResponse>` via `ResultCache`/`ResultCacheTransformer` (HybridCache
-  can't natively cache a `FluentResults.Result<T>`).
-- A command implements `ICacheInvalidation` (`Tags`) — see `CreateCategoryCommand`, which
-  invalidates the whole `CategoryListTag` (any new category can affect any cached page/filter/sort
-  combination). After a successful `Result`, `CacheInvalidationBehavior` calls
-  `HybridCache.RemoveByTagAsync(cacheInvalidation.Tags, ct)`.
-- `SlidingExpirationHelper.GetRandomizedSlidingExpiration(baseTtl, jitterPercent)` — adds jitter
-  to avoid synchronized cache stampedes; use this rather than a fixed `TimeSpan` for query TTLs.
-- Tag invalidation is lazy/logical (a watermark, not physical eviction) — always set a sensible
-  `SlidingExpiration` as a safety net too.
-- Per-feature `CacheConstants` (e.g. `Features/Categories/CacheConstants.cs`) hold the tag/key
-  prefix strings for that feature — add one alongside new feature slices rather than inlining tag
-  strings in the query/command.
-
-## Scaffolding new CQRS features
+## Scaffolding new CQRS features (backend)
 
 ```bash
 cd src/Application
 dotnet new ca-usecase --name CreateTodoList --feature-name TodoLists --usecase-type command --return-type int
 dotnet new ca-usecase -n GetTodos -fn TodoLists -ut query -rt TodosVm
 ```
-If missing: `dotnet new install Clean.Architecture.Solution.Template::10.8.0` (already installed
-in this environment — confirmed via `dotnet new list`). This scaffolds a feature folder under
-`Application/Features/<FeatureName>/` — **after scaffolding**, still add the feature-specific
-`FilterConfiguration`/`SortConfiguration`/`CacheConstants` by hand if the use case needs
-filtering/pagination/caching (the template doesn't generate those), following the `Categories`
-slice as the model.
+After scaffolding, still add `FilterConfiguration`/`SortConfiguration`/`CacheConstants` by hand
+for a paginated `GetAll<Feature>` query (the template doesn't generate those) — follow
+`Categories` or `StockBatches` as the model, or skip them entirely if the query isn't paginated
+(follow `Stock` as the model for that case).
 
 ## Testing strategy
 
-- **Domain.UnitTests**: project exists but is currently **empty** (no test files) — don't assume
-  domain logic has test coverage yet.
-- **Application.UnitTests**: NUnit + Shouldly + Moq, no external deps. Folder layout mirrors
-  `Application/` 1:1, including `Common/Filtering`, `Common/Keyset`, `Common/Caching`, and
-  `Features/Categories/`, `Features/Items/`, `Features/Locations/`, `Features/SchoolClasses/`,
-  `Features/GoodsReceipts/` — put new tests at the matching path for the feature being changed.
-  `Features/GoodsReceipts/Commands/CreateGoodsReceipt/` also has a dedicated
-  `GoodsReceiptTestDbContext.cs` (an in-memory/test `IApplicationDbContext` fixture) — check it
-  before adding a new in-memory DB helper elsewhere for a similarly multi-entity command handler.
-- **Application.FunctionalTests**: boots the *real* app stack via `TestAppHost` using
-  `DistributedApplicationTestingBuilder` (`FunctionalTestSetup`, `[OneTimeSetUp]`). Waits for
-  `Services.Database` resource health before building a `WebApiFactory` (`Infrastructure/`), and
-  resets the DB between tests/fixtures with `DatabaseResetter` (Respawn-based) — **do not assume
-  a clean DB is provided automatically** outside that helper. Requires Docker. Tests live under
-  `Features/<FeatureName>/...` mirroring the Application feature they exercise (currently
-  `Categories`, `Items`, `Locations`, `SchoolClasses` only — `GoodsReceipts` has no functional
-  tests yet), driving the full
-  HTTP pipeline (`TestApp`/`TestBase`).
+- **Domain.UnitTests**: still empty — no domain logic test coverage.
+- **Application.UnitTests**: NUnit + Shouldly + Moq. `Features/` now has 7 folders (see Overview);
+  `Features/GoodsReceipts/Commands/CreateGoodsReceipt/GoodsReceiptTestDbContext.cs` is a
+  dedicated in-memory `IApplicationDbContext` fixture — check it before adding a new in-memory DB
+  helper for another multi-entity command handler (e.g. `Stock.AdjustStock`, which also touches
+  multiple `StockBatch`/`StockTransaction` rows).
+- **Application.FunctionalTests**: boots the real stack via `TestAppHost`
+  (`DistributedApplicationTestingBuilder`), waits for `Services.Database` health, resets the DB
+  per test/fixture with `DatabaseResetter` (Respawn-based). `TestAppHost` only stands up SQL
+  Server + Redis (**no** Storage/Azurite, **no** Client/frontend) — functional tests never
+  exercise the frontend or blob storage. Currently covers `Categories`, `Items`, `Locations`,
+  `SchoolClasses`, `Stock`, `StockBatches` (not `GoodsReceipts` — add that folder if you extend it).
 - **Infrastructure.IntegrationTests**: exercises `ApplicationDbContext`/EF Core directly.
-- Run everything: `dotnet test` (needs Docker running for functional/integration tests).
-- Test framework stack: NUnit 4.6, Shouldly, Moq, Respawn 7 — not xUnit.
+- Run backend tests: `dotnet test` (needs Docker running for functional/integration tests).
+- Frontend has its own test runner (`vitest`, wired via `@angular/build`'s unit-test builder) —
+  run from `src/Client`: `npm test` (invokes `ng test`). Not currently exercised by `dotnet test`
+  at the solution level beyond the `Client.esproj` build step.
 
-## Package & SDK versions worth knowing (`Directory.Packages.props`)
+## Frontend (`src/Client`) — Angular 22 + ng-zorro-antd + NgRx SignalStore
 
-.NET 10 / ASP.NET Core 10.0.11, EF Core 10.0.11, Mediator 3.0.2 (source-generator-based, not
-MediatR), FluentValidation 12.1.1, FluentResults 4.0.0 (`Result`/`Result<T>` — see "Errors &
-Result pattern" above), Ardalis.GuardClauses 5.0.0, Aspire 13.5.2 (Hosting/AppHost/Redis/
-Azure.Sql/Testing/JavaScript/StackExchange.Redis.DistributedCaching), Microsoft.Extensions.
-Caching.Hybrid 10.9.0 (`AddHybridCache()` in `Infrastructure/DependencyInjection.cs`, backed by
-Redis distributed cache as L2), Scalar.AspNetCore 2.17.1, OpenTelemetry 1.18.0. Add new package
-versions here, never inline in a `.csproj`.
+This is a fully implemented SPA, not just scaffolding. Stack: Angular `^22.1.0` (standalone
+components, no `NgModule`s), `ng-zorro-antd ^22.0.1`, `@ngrx/signals` + `@ngrx/operators ^22.0.0`
+(SignalStore, not classic NgRx store/effects/reducers), Tailwind CSS `^4.1.12` + LESS for
+component/theme styling, `lodash-es`, `vitest` for unit tests. Package manager is npm
+(`packageManager: "npm@11.16.0"` in `package.json`); `src/Client/package.json` scripts:
+`dev` (`ng serve`, used by Aspire's `AddViteApp`), `build`, `watch`, `test` (`ng test`).
 
-## Auth
+### Project structure & conventions
 
-ASP.NET Core Identity via `MapIdentityApi<ApplicationUser>()` plus bearer tokens
-(`AddBearerToken(IdentityConstants.BearerScheme)`) — not cookie-only. `ApplicationUser`,
-`IdentityService`, and Identity DI wiring (`AddIdentityCore<ApplicationUser>().AddRoles<
-IdentityRole<int>>().AddEntityFrameworkStores<ApplicationDbContext>().AddApiEndpoints()`) live in
-`Infrastructure/DependencyInjection.cs` and `Infrastructure/Identity/`. Roles are int-keyed
-(`IdentityRole<int>`); `Domain.Constants.Roles.Administrator` is the only role defined so far.
-Custom auth-adjacent endpoints (e.g. `Users.Logout`) sit in the same `IEndpointGroup` class as
-the built-in Identity endpoints rather than a separate file.
+```
+src/app/
+  app.config.ts        # ApplicationConfig: provideRouter, provideHttpClient(withXsrfConfiguration
+                        #   + withInterceptors([authInterceptor])), provideAppInitializer,
+                        #   provideNzI18n(ro_RO) + provideNzDateFnsAdapter, locale 'ro' / currency 'RON'
+  app.routes.ts         # top-level routes just re-export layout route groups (see below)
+  app.init.ts           # app initializer (bootstrap-time auth/session check)
+  core/
+    auth/               # AuthStore (SignalStore), AuthHttp, AntiforgeryHttp, authInterceptor,
+                         #   auth.guard / guest.guard (functional route guards)
+    layouts/            # simple/ (public shell, e.g. login) and full/ (authenticated shell with
+                         #   header) — each exports its own lazy route group (simpleRoutes/fullRoutes)
+    models/             # shared DTOs/types mirroring backend contracts 1:1 (see below)
+    theme/               # theme service/tokens (dark/default LESS bundles, see styles below)
+  features/<name>/      # ROUTED PAGE composition per backend feature, e.g. features/items/:
+                         #   list/{header,filter,table}/ sub-components + list/items.page.ts +
+                         #   list/items.routes.ts (lazy loadComponent) + services/<feature>-list.store.ts
+                         #   (a thin SignalStore that composes the shared collection feature, see below)
+  shared/<name>/         # DATA LAYER + reusable UI per backend feature, e.g. shared/items/:
+                         #   services/items.http.ts (HttpClient wrapper), services/item-detail.store.ts,
+                         #   store-features/item-collection.feature.ts (signalStoreFeature — reusable
+                         #   composable, NOT a full store), ui/modals/* (create/edit modal + form)
+  shared/{tables,loader,errors,theme}/  # generic, feature-agnostic reusable primitives:
+                         #   tables/base-table.ts — generic <T, K extends BasePaginationFilter>
+                         #     Component base class (virtual scroll via NzTable + CdkScrollable,
+                         #     infinite "load more" via hasNextPage/onLoadMore, sort-map helpers)
+                         #   loader/services/loading.feature.ts — withLoadingFeature(prefix)
+                         #     signalStoreFeature generating `{prefix}Loading()`/`set{Prefix}Loading()`/
+                         #     `set{Prefix}Loaded()` etc. by naming convention
+                         #   errors/services/problem-detail.feature.ts — withProblemDetailsFeature(prefix)
+                         #     signalStoreFeature generating `{prefix}ProblemDetail`/`{prefix}ValidationErrors`
+                         #     state + `handle{Prefix}Error(error)`/`clear{Prefix}Errors()` methods that
+                         #     parse an HttpErrorResponse body into the ProblemDetails/ValidationProblemDetails
+                         #     shape from core/models/errors.ts
+```
 
-## Frontend (not yet built — planned)
+**`features/<name>` vs `shared/<name>`** is the key convention to preserve when adding a new
+feature: `shared/<name>` owns the HTTP client, the reusable SignalStore/`signalStoreFeature`
+building blocks, and any reusable UI (e.g. create/edit modals) that could be reused from more
+than one route; `features/<name>` owns the routed page itself (page component + its
+header/filter/table sub-components + its own lazy `*.routes.ts`) and composes the `shared`
+building blocks into a page-specific store (e.g. `ItemListState` in
+`features/items/services/item-list.store.ts` calls `withItemCollection()` from
+`shared/items/store-features/item-collection.feature.ts` and adds page-only state like
+`togglingItemId`).
 
-No Angular/JS project currently exists in the repo (no `package.json`/`angular.json` found
-anywhere). When one is added, follow `.github/instructions/angular-guidelines.instructions.md`
-and `ng-zorro-guidelines.instructions.md`, and use the `angular-developer`/`ngrx-signalstore`
-skills under `.github/skills/` for component/state-management conventions. `Shared.Services.
-WebFrontend` already reserves a resource name for wiring a frontend project into `AppHost` once
-it exists. The `ApiErrorContract`/`Code` error convention described above (in "Errors & the
-`Result<T>` pattern") is explicitly designed for this future frontend to map error codes to
-locale-specific copy — keep it in mind when adding new `Error` types.
+**SignalStore pattern**: stores are built with `signalStore(...)` (root stores, e.g. `AuthStore`,
+`ItemListState`) or `signalStoreFeature(...)` (reusable composables meant to be plugged into
+multiple stores, e.g. `withItemCollection()`, `withLoadingFeature()`, `withProblemDetailsFeature()`),
+composed from `withState`/`withComputed`/`withMethods`/`withProps`/`withHooks`. Async work uses
+`rxMethod<T>(pipe(tap(...), switchMap(...)))` from `@ngrx/signals/rxjs-interop`, with
+`mapResponse({ next, error })` from `@ngrx/operators` to route HTTP success/failure into
+`patchState(...)` calls — this is the standard shape for every HTTP-backed store method in this
+codebase; don't reach for manual `.subscribe()` or classic NgRx effects. Client-side keyset
+pagination mirrors the backend contract: `PaginatedResponseData` (`hasNextPage`/`nextCursor`)
+and `BasePaginationFilter`-shaped request filters (`sort`/`filters`/`cursor`/`pageSize`/`searchTerm`)
+in `core/models/pagination.ts` line up field-for-field with `Application/Common/Models`.
 
-## Custom agents available (`.github/agents/`)
+**Error handling**: `core/models/errors.ts` defines `ProblemDetails`/`ValidationProblemDetails`/
+`BackendErrorPayload`/`BackendErrorItem` matching `ApiErrorContract` exactly, plus the
+`isValidationProblem()` type guard. `withProblemDetailsFeature(prefix)` is the standard way any
+store surfaces a failed request to its template — always call the generated
+`handle<Prefix>Error(error)` in a `mapResponse({ error })` branch and `clear<Prefix>Errors()`
+before issuing a new request of that kind.
 
-- `CSharpExpert.agent.md` — general .NET/C# development assistance.
-- `csharp-dotnet-janitor.agent.md` — cleanup/modernization/tech-debt tasks on C#/.NET code.
+**Path aliases** (`tsconfig.json` → `compilerOptions.paths`): every `core/*` and `shared/*`
+folder (and each `features/<name>`) is exposed as an `@ske/...` import alias (e.g. `@ske/models`,
+`@ske/auth`, `@ske/layouts`, `@ske/shared/items`, `@ske/features/items`) — **always import via
+the alias**, never a relative `../../` path across feature/shared/core boundaries, and add a new
+alias entry here whenever you add a new `features/<name>` or `shared/<name>` folder.
+
+**Routing**: `app.routes.ts` only loads the two layout route groups (`simpleRoutes`/`fullRoutes`
+from `@ske/layouts`); each backend-feature route (e.g. `items`) is lazy-loaded
+(`loadComponent`/`loadChildren`) from inside `full.routes.ts`, guarded by `authGuard`. Login lives
+under the `simple` layout guarded by `guestGuard`.
+
+**Styling/i18n**: LESS (`src/styles/styles.less`, plus non-injected `default.less`/`dark.less`
+bundles for runtime theme switching, see `shared/theme/theme-switcher*.ts`) + Tailwind v4
+(`src/styles/tailwind.css`, configured via `@tailwindcss/postcss`). Locale is Romanian by default
+(`provideNzI18n(ro_RO)`, `registerLocaleData(ro)`, `LOCALE_ID: 'ro'`, `DEFAULT_CURRENCY_CODE: 'RON'`).
+
+**XSRF**: `provideHttpClient(withXsrfConfiguration({ cookieName: 'XSRF-TOKEN', headerName:
+'X-XSRF-TOKEN' }))` uses Angular's own default cookie/header names, named explicitly in
+`app.config.ts` to stay in lockstep with the (currently commented-out, see Overview)
+`AddAntiforgery(...)`/`Antiforgery.cs` server-side wiring — when that endpoint is turned back on,
+the frontend is already set up to consume it via `core/auth/services/antiforgery.http.ts`.
+
+**Reference docs**: `.github/instructions/llms-full.txt` is a large aggregated dump of the
+ng-zorro-antd component documentation (77 components) — consult it for component API details
+instead of guessing prop names; it is not a set of project conventions.
+
+## Custom agents & skills available
+
+- `.github/agents/CSharpExpert.agent.md` — general .NET/C# development assistance.
+- `.github/agents/csharp-dotnet-janitor.agent.md` — cleanup/modernization/tech-debt on C#/.NET code.
+- `.github/skills/angular-developer`, `.github/skills/ngrx-signalstore` — Angular/SignalStore
+  authoring guidance, now directly applicable since `src/Client` is a real, active project.
+- `.github/skills/aspire` — Aspire CLI/AppHost/dashboard guidance, applicable to `src/AppHost`.
+- `.github/instructions/angular-guidelines.instructions.md` and
+  `ng-zorro-guidelines.instructions.md` apply to `src/Web/ClientApp/**` per their front-matter
+  glob, but in practice should be treated as applying to `src/Client/**` too, since that's where
+  Angular code actually lives now.

@@ -38,9 +38,9 @@
     <th>
       {{ columns.createdDate.label }}
     </th>
-    <th>
-      Actiuni
-    </th>
+<!--    <th>-->
+<!--      Actiuni-->
+<!--    </th>-->
   </tr>
   </thead>
   <tbody>
@@ -72,16 +72,16 @@
       <td>
         {{ goodsReceipt.createdDate | date }}
       </td>
-      <td>
-        <div class="flex items-center gap-2">
-          <button nz-button
-                  nzType="link"
-                  type="button"
-                  [attr.aria-label]="'Vizualizeaza'">
-            <nz-icon nzType="icons:eye"></nz-icon>
-          </button>
-        </div>
-      </td>
+<!--      <td>-->
+<!--        <div class="flex items-center gap-2">-->
+<!--          <button nz-button-->
+<!--                  nzType="link"-->
+<!--                  type="button"-->
+<!--                  [attr.aria-label]="'Vizualizeaza'">-->
+<!--            <nz-icon nzType="icons:eye"></nz-icon>-->
+<!--          </button>-->
+<!--        </div>-->
+<!--      </td>-->
     </tr>
 
     <tr [nzExpand]="expandedRows().has(goodsReceipt.id)">

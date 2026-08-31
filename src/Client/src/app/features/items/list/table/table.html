@@ -42,13 +42,13 @@
     <th nzWidth="100px">
       {{ columns.createdByName.label }}
     </th>
-    <th nzWidth="100px">
+    <th nzWidth="150px">
       {{ columns.lastModifiedDate.label }}
     </th>
     <th nzWidth="100px">
       {{ columns.lastModifiedByName.label }}
     </th>
-    <th nzWidth="100px">
+    <th nzWidth="auto">
       Actiuni
     </th>
   </tr>
@@ -98,13 +98,14 @@
         {{ item.lastModifiedByName }}
       </td>
       <td>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center">
           <button nz-button
                   nzType="link"
                   type="button"
                   [attr.aria-label]="'Editeaza'"
                   (click)="onEdit.emit(item)">
             <nz-icon nzType="icons:pencil"></nz-icon>
+            Editeaza
           </button>
           <button nz-button
                   [nzDanger]="item.isActive"
@@ -115,8 +116,10 @@
                   (click)="onToggleActive.emit(item)">
             @if (item.isActive) {
               <nz-icon nzType="icons:ban"></nz-icon>
+              Dezactiveaza
             } @else {
               <nz-icon nzType="icons:check"></nz-icon>
+              Activeaza
             }
           </button>
         </div>

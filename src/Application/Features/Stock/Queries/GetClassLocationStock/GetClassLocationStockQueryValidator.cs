@@ -10,8 +10,9 @@ public class GetClassLocationStockQueryValidator : AbstractValidator<GetClassLoc
             .GreaterThan(0)
             .WithErrorCode(ValidationErrorCodes.GreaterThan);
 
-        RuleFor(x => x.LocationId)
+        RuleFor(x => x.LocationId!.Value)
             .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan);
+            .WithErrorCode(ValidationErrorCodes.GreaterThan)
+            .When(x => x.LocationId is not null);
     }
 }

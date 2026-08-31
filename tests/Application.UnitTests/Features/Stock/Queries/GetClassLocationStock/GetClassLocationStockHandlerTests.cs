@@ -142,6 +142,79 @@ public class GetClassLocationStockHandlerTests
     }
 
     [Test]
+    public async Task Handle_SearchTermMatchingItemName_ReturnsOnlyMatchingItems()
+    {
+        await using var context = CreateContext();
+        var (item, location, schoolClass) = await SeedBaseData(context, minThreshold: 5);
+
+        var otherItem = new Item
+        {
+            Name = "Pasta",
+            Unit = "kg",
+            MinThreshold = 5,
+            IsPerishable = false,
+            Category = item.Category
+        };
+        context.Items.Add(otherItem);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        context.StockBatches.AddRange(
+            new StockBatch { Item = item, Location = location, ReceivedClass = schoolClass, Quantity = 10, ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow) },
+            new StockBatch { Item = otherItem, Location = location, ReceivedClass = schoolClass, Quantity = 6, ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow) });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        // The InMemory provider does string.Contains matching (case-sensitive, unlike SQL
+        // Server's default case-insensitive collation used in production/functional tests), so
+        // the term's casing must match the seeded item name here.
+        var handler = new GetClassLocationStockHandler(context);
+        var result = await handler.Handle(
+            new GetClassLocationStockQuery { ClassId = schoolClass.Id, LocationId = location.Id, SearchTerm = "Ric" },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Count.ShouldBe(1);
+        result.Value.Single().ItemName.ShouldBe("Rice");
+    }
+
+    [Test]
+    public async Task Handle_SearchTermWithNoMatches_ReturnsEmptyList()
+    {
+        await using var context = CreateContext();
+        var (item, location, schoolClass) = await SeedBaseData(context, minThreshold: 5);
+
+        context.StockBatches.Add(
+            new StockBatch { Item = item, Location = location, ReceivedClass = schoolClass, Quantity = 10, ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow) });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new GetClassLocationStockHandler(context);
+        var result = await handler.Handle(
+            new GetClassLocationStockQuery { ClassId = schoolClass.Id, LocationId = location.Id, SearchTerm = "does-not-exist" },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task Handle_BlankSearchTerm_IsTreatedAsNoFilter()
+    {
+        await using var context = CreateContext();
+        var (item, location, schoolClass) = await SeedBaseData(context, minThreshold: 5);
+
+        context.StockBatches.Add(
+            new StockBatch { Item = item, Location = location, ReceivedClass = schoolClass, Quantity = 10, ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow) });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new GetClassLocationStockHandler(context);
+        var result = await handler.Handle(
+            new GetClassLocationStockQuery { ClassId = schoolClass.Id, LocationId = location.Id, SearchTerm = "   " },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Count.ShouldBe(1);
+    }
+
+    [Test]
     public async Task Handle_UnknownClassId_ReturnsSchoolClassNotFoundFailure()
     {
         await using var context = CreateContext();
@@ -169,5 +242,44 @@ public class GetClassLocationStockHandlerTests
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.Single().Message.ShouldContain("Location");
+    }
+
+    [Test]
+    public async Task Handle_NullLocationId_AggregatesAcrossEveryLocation_OneRowPerItemPerLocation()
+    {
+        await using var context = CreateContext();
+        var (item, location, schoolClass) = await SeedBaseData(context, minThreshold: 5);
+        var otherLocation = new Location { Name = "Storage Room", Type = "StorageRoom" };
+        context.Locations.Add(otherLocation);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        context.StockBatches.AddRange(
+            new StockBatch { Item = item, Location = location, ReceivedClass = schoolClass, Quantity = 10, ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow) },
+            new StockBatch { Item = item, Location = otherLocation, ReceivedClass = schoolClass, Quantity = 7, ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow) });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new GetClassLocationStockHandler(context);
+        var result = await handler.Handle(
+            new GetClassLocationStockQuery { ClassId = schoolClass.Id, LocationId = null },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Count.ShouldBe(2);
+        result.Value.ShouldContain(x => x.LocationId == location.Id && x.Quantity == 10);
+        result.Value.ShouldContain(x => x.LocationId == otherLocation.Id && x.Quantity == 7);
+    }
+
+    [Test]
+    public async Task Handle_NullLocationId_DoesNotCheckLocationExistence_UnknownClassStillFails()
+    {
+        await using var context = CreateContext();
+
+        var handler = new GetClassLocationStockHandler(context);
+        var result = await handler.Handle(
+            new GetClassLocationStockQuery { ClassId = 999, LocationId = null },
+            CancellationToken.None);
+
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.Single().Message.ShouldContain("School class");
     }
 }
