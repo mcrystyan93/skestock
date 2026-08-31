@@ -31,6 +31,7 @@ export type SchoolClassSummary = {
   id: number;
   noOfGoodsReceipt: number;
   totalAmount: number;
+  lowStockItemsCount: number;
 };
 
 /** Mirrors src/Application/Features/SchoolClasses/Models/SchoolClassRequests.cs. */
@@ -123,7 +124,7 @@ export const CLASS_STATUS_LABELS: Record<ClassStatus, string> = {
 
 export const CLASS_STATUS_COLORS: Record<ClassStatus, string> = {
   [ClassStatus.Upcoming]: 'blue',
-  [ClassStatus.Active]: 'green',
+  [ClassStatus.Active]: 'success',
   [ClassStatus.Paused]: 'orange',
   [ClassStatus.Closed]: 'red'
 };

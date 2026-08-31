@@ -2,7 +2,7 @@
 @let sortByKeyFn = sortByKey();
 
 <nz-table #table
-          nzTableLayout="auto"
+          nzTableLayout="fixed"
           [nzData]="itemsVirtualData()"
           [nzVirtualItemSize]="virtualItemSize()"
           [nzVirtualMinBufferPx]="virtualMinBufferPx()"
@@ -33,13 +33,13 @@
     <th nzWidth="100px">
       {{ columns.createdByName.label }}
     </th>
-    <th nzWidth="100px">
+    <th nzWidth="150px">
       {{ columns.lastModifiedDate.label }}
     </th>
     <th nzWidth="100px">
       {{ columns.lastModifiedByName.label }}
     </th>
-    <th nzWidth="100px">
+    <th>
       Actiuni
     </th>
   </tr>
@@ -73,13 +73,22 @@
         {{ item.lastModifiedByName }}
       </td>
       <td>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center">
+          <button nz-button
+                  nzType="link"
+                  type="button"
+                  [attr.aria-label]="'Vizualizeaza'"
+                  (click)="onView.emit(item)">
+            <nz-icon nzType="icons:eye"></nz-icon>
+            Vizualizeaza
+          </button>
           <button nz-button
                   nzType="link"
                   type="button"
                   [attr.aria-label]="'Editeaza'"
                   (click)="onEdit.emit(item)">
             <nz-icon nzType="icons:pencil"></nz-icon>
+            Editeaza
           </button>
         </div>
       </td>

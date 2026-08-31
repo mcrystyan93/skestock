@@ -11,4 +11,11 @@ public static class CacheConstants
     /// this exact tag so the cached report doesn't go stale.
     /// </summary>
     public static string BuildTag(int classId, int locationId) => $"{Stock}:class:{classId}:location:{locationId}";
+
+    /// <summary>
+    /// Cache tag for the current-stock report of a class across every location (LocationId
+    /// omitted). Commands that write a <see cref="Domain.Entities.StockBatch"/> for any location
+    /// under a given class must also invalidate this tag, since it changes the all-locations report.
+    /// </summary>
+    public static string BuildClassTag(int classId) => $"{Stock}:class:{classId}:location:all";
 }

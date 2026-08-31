@@ -20,6 +20,18 @@
           </ng-template>
         </nz-statistic>
       </nz-col>
+      <nz-col nzFlex>
+        <nz-statistic nzTitle="Articole cu stoc redus"
+                      [nzValueTemplate]="lowStockItemsCountTemplate">
+          <ng-template #lowStockItemsCountTemplate>
+            <div nz-typography
+                 nzType="warning"
+                 class="mb-0">
+              {{ summary().lowStockItemsCount ?? 0 }}
+            </div>
+          </ng-template>
+        </nz-statistic>
+      </nz-col>
     </nz-row>
   </nz-page-header-content>
 

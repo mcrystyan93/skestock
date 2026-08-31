@@ -45,6 +45,10 @@ public class ValidationErrorCodes
     /// <summary>A non-perishable item's receipt line supplied an expiry date, which isn't allowed.</summary>
     public const string ExpiryDateNotAllowed = "validation.expiry_date_not_allowed";
 
+    // ── Stock adjustment codes ─────────────────────────────────────────────
+    /// <summary>The counted quantity submitted for a stock adjustment equals the current total, so nothing would change.</summary>
+    public const string NoAdjustmentNeeded = "validation.no_adjustment_needed";
+
     // ── Fallback ───────────────────────────────────────────────────────────
     public const string Unknown = "validation.unknown";
 }

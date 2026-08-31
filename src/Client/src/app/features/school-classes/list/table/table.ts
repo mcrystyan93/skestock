@@ -13,7 +13,6 @@ import { DatePipe } from '@angular/common';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
-import { NzSpinComponent } from 'ng-zorro-antd/spin';
 
 @Component({
   imports: [
@@ -21,8 +20,7 @@ import { NzSpinComponent } from 'ng-zorro-antd/spin';
     NzButtonComponent,
     NzIconDirective,
     NzTagComponent,
-    NzTableModule,
-    NzSpinComponent
+    NzTableModule
   ],
   selector: 'ske-table',
   styles: ``,
@@ -35,6 +33,7 @@ export class Table extends BaseTable<SchoolClassDto, GetAllSchoolClassesRequest>
   public readonly loading = input.required<boolean>();
 
   public readonly onEdit = output<SchoolClassDto>();
+  public readonly onView = output<SchoolClassDto>();
   public readonly columns = SCHOOL_CLASS_TABLE_COLUMNS;
 
   constructor() {

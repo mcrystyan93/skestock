@@ -8,3 +8,4 @@ export * from './location';
 export * from './school-class';
 export * from './goods-receipt';
 export * from './stock-batch';
+export * from './stock';
