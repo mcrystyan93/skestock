@@ -1,28 +1,37 @@
 <nz-layout>
   <ske-header></ske-header>
   <nz-layout>
-    <nz-sider>
+    <nz-sider nzCollapsed>
       <ul nz-menu
-          nzMode="inline">
+          nzMode="inline"
+          [nzInlineCollapsed]="true">
         <li nz-menu-item
             nzMatchRouter
             [routerLink]="['/home']">
-          Acasa
+          <nz-icon nzType="icons:house"
+                   class="text-2xl!"></nz-icon>
+          <span>Acasa</span>
         </li>
         <li nz-menu-item
             nzMatchRouter
             [routerLink]="['/categories']">
-          Categorii
+          <nz-icon nzType="icons:list"
+                   class="text-2xl!"></nz-icon>
+          <span>Categorii</span>
         </li>
         <li nz-menu-item
             nzMatchRouter
             [routerLink]="['/items']">
-          Produse
+          <nz-icon nzType="icons:box"
+                   class="text-2xl!"></nz-icon>
+          <span>Produse</span>
         </li>
         <li nz-menu-item
             nzMatchRouter
             [routerLink]="['/school-classes']">
-          Clase
+          <nz-icon nzType="icons:school"
+                   class="text-2xl!"></nz-icon>
+          <span>Clase</span>
         </li>
       </ul>
     </nz-sider>

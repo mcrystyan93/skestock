@@ -8,7 +8,7 @@ import { ColumnFilter } from '@ske/models';
   imports: [
     Table
   ],
-  selector: 'ske-goods-receipts-tab',
+  selector: 'ske-school-class-overview-goods-receipts-tab',
   styles: ``,
   template: `
     <ske-goods-receipts-table [items]="store.goodsReceipts()"

@@ -117,6 +117,8 @@ export const ITEM_TABLE_COLUMNS: TableColumnDefinition<ItemTableColumn> = {
   }
 };
 
+export type ItemDropdownValue = ItemDto | Partial<ItemDto> | null;
+
 export function buildItemListFilter(
   currentFilter: GetAllItemsRequest,
   partialFilter: Partial<GetAllItemsRequest>

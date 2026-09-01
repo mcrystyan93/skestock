@@ -9,7 +9,7 @@ import { FilterForm } from './filter-form';
     NzCardComponent,
     FilterForm
   ],
-  selector: 'ske-filter-container',
+  selector: 'ske-item-filter-container',
   styles: ``,
   templateUrl: './filter-container.html'
 })

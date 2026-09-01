@@ -25,6 +25,17 @@ export type GetAllStockBatchesRequest = BasePaginationFilter & {
   filters: ColumnFilter[];
 };
 
+/** Mirrors src/Application/Features/StockBatches/Models/StockBatchRequests.cs. */
+export type CreateStockBatchRequest = {
+  itemId: number;
+  locationId: number;
+  receivedClassId: number;
+  quantity: number;
+  expiryDate?: string | null;
+  receivedDate: string;
+  unitPrice: number;
+};
+
 export type StockBatchTableColumn =
   | 'itemName'
   | 'locationName'
