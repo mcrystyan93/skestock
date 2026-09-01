@@ -27,7 +27,7 @@ import { NzTypographyComponent } from 'ng-zorro-antd/typography';
     CurrencyPipe,
     NzTypographyComponent
   ],
-  selector: 'ske-header',
+  selector: 'ske-school-class-overview-header',
   styles: ``,
   templateUrl: './header.html',
 })

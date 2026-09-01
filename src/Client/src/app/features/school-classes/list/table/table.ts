@@ -22,7 +22,7 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
     NzTagComponent,
     NzTableModule
   ],
-  selector: 'ske-table',
+  selector: 'ske-school-class-table',
   styles: ``,
   templateUrl: './table.html',
   host: {

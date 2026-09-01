@@ -15,7 +15,7 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
     NzTagComponent,
     NzTableModule
   ],
-  selector: 'ske-table',
+  selector: 'ske-item-table',
   styles: ``,
   templateUrl: './table.html',
   host: {

@@ -120,4 +120,14 @@ public static class TestApp
 
         return await context.Set<TEntity>().CountAsync();
     }
+
+    public static async Task<TEntity?> SingleOrDefaultAsync<TEntity>(System.Linq.Expressions.Expression<Func<TEntity, bool>> predicate)
+        where TEntity : class
+    {
+        using var scope = FunctionalTestSetup.ScopeFactory.CreateScope();
+
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        return await context.Set<TEntity>().AsNoTracking().SingleOrDefaultAsync(predicate);
+    }
 }

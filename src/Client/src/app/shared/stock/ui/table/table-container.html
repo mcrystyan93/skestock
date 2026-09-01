@@ -1,3 +1,4 @@
-<ske-stock-table [items]="store.stockItems()"
+<ske-stock-table [groupItems]="store.groupedStockItems()"
                  [loading]="store.stockItemsLoading()"
-                 (onAdjust)="onAdjust($event)" />
+                 (onAdjust)="onAdjust($event)"
+                 (onAdd)="addStock($event)" />

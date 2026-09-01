@@ -10,7 +10,7 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
     NzButtonComponent,
     NzIconDirective
   ],
-  selector: 'ske-header',
+  selector: 'ske-school-class-header',
   styles: ``,
   templateUrl: './header.html',
 })

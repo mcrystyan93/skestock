@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
-import { GetAllStockBatchesRequest, PaginatedResponse, StockBatchListItemDto } from '@ske/models';
+import { CreateStockBatchRequest, GetAllStockBatchesRequest, PaginatedResponse, StockBatchListItemDto } from '@ske/models';
 
 /**
  * HTTP client for src/Web/Endpoints/StockBatches.cs, mapped under /api/StockBatches.
@@ -11,5 +11,9 @@ export class StockBatchesHttp {
 
   public getAll(request: GetAllStockBatchesRequest | Partial<GetAllStockBatchesRequest>) {
     return this._httpClient.post<PaginatedResponse<StockBatchListItemDto>>('/api/StockBatches/get-all', request);
+  }
+
+  public create(request: CreateStockBatchRequest) {
+    return this._httpClient.post<StockBatchListItemDto>('/api/StockBatches', request);
   }
 }

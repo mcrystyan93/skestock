@@ -1,0 +1,96 @@
+<form nz-form
+      nzNoColon>
+  <!-- categorie -->
+  <nz-form-item>
+    <nz-form-label>
+      Categorie
+    </nz-form-label>
+    <nz-form-control>
+      <ske-category-dropdown [formField]="stockBatchForm.category" />
+    </nz-form-control>
+  </nz-form-item>
+
+  <!-- item -->
+  <nz-form-item>
+    <nz-form-label>
+      Produs
+    </nz-form-label>
+    <nz-form-control>
+      <ske-item-dropdown [formField]="stockBatchForm.item"
+                         [categoryId]="stockBatchForm.category().value()?.id ?? null" />
+    </nz-form-control>
+  </nz-form-item>
+
+  <!-- location -->
+  <nz-form-item>
+    <nz-form-label>
+      Locație
+    </nz-form-label>
+    <nz-form-control>
+      <ske-location-dropdown [formField]="stockBatchForm.location" />
+    </nz-form-control>
+  </nz-form-item>
+
+  <!-- quantity -->
+  <nz-form-item>
+    <nz-form-label>
+      Cantitate
+    </nz-form-label>
+    <nz-form-control>
+      <nz-space-compact class="w-full!">
+        <button nz-button
+                nzType="default"
+                (click)="decrementQuantity()">
+          <nz-icon nzType="icons:dash"></nz-icon>
+        </button>
+        <nz-input-number [formField]="stockBatchForm.quantity"
+                         nzId="stockBatchQuantity"
+                         class="grow">
+        </nz-input-number>
+        <button nz-button
+                nzType="default"
+                (click)="incrementQuantity()">
+          <nz-icon nzType="icons:plus"></nz-icon>
+        </button>
+      </nz-space-compact>
+    </nz-form-control>
+  </nz-form-item>
+
+  <!-- unit price -->
+  <nz-form-item>
+    <nz-form-label>
+      Pret unitar
+    </nz-form-label>
+    <nz-form-control>
+      <nz-input-number [formField]="stockBatchForm.unitPrice"
+                       nzId="stockBatchUnitPrice"
+                       class="w-full!">
+        <span nzInputAddonAfter>RON</span>
+      </nz-input-number>
+    </nz-form-control>
+  </nz-form-item>
+
+  <!-- receivedDate -->
+  <nz-form-item>
+    <nz-form-label>
+      Data primire
+    </nz-form-label>
+    <nz-form-control>
+      <nz-date-picker [formField]="stockBatchForm.receivedDate"
+                      nzFormat="dd.MM.yyyy"
+                      class="w-full!" />
+    </nz-form-control>
+  </nz-form-item>
+
+  <!-- expiryDate -->
+  <nz-form-item>
+    <nz-form-label>
+      Data expirare
+    </nz-form-label>
+    <nz-form-control>
+      <nz-date-picker [formField]="stockBatchForm.expiryDate"
+                      nzFormat="dd.MM.yyyy"
+                      class="w-full!" />
+    </nz-form-control>
+  </nz-form-item>
+</form>

@@ -6,7 +6,7 @@ import { Header } from './header';
   imports: [
     Header
   ],
-  selector: 'ske-header-container',
+  selector: 'ske-school-class-overview-header-container',
   styles: ``,
   templateUrl: './header-container.html',
 })

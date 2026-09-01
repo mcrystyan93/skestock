@@ -4,12 +4,19 @@ import { TableColumnDefinition } from './pagination';
 export type StockItemDto = {
   itemId: number;
   itemName: string;
+  categoryId: number;
+  categoryName: string;
   locationId: number;
   locationName: string;
   unit: string;
   isPerishable: boolean;
   quantity: number;
   isLowStock: boolean;
+};
+
+export type StockItemCategoryGroup = {
+  categoryId: number;
+  categoryName: string;
 };
 
 /**

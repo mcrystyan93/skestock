@@ -1,4 +1,4 @@
-import { GetClassLocationStockRequest, StockItemDto } from '@ske/models';
+import { GetClassLocationStockRequest, StockItemCategoryGroup, StockItemDto } from '@ske/models';
 import { patchState, signalStoreFeature, withMethods, withProps, withState } from '@ngrx/signals';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
@@ -11,6 +11,7 @@ import { mapResponse } from '@ngrx/operators';
 type StockCollectionState = {
   stockItems: StockItemDto[];
   filter: GetClassLocationStockRequest;
+  groupedStockItems: Map<StockItemCategoryGroup, StockItemDto[]>;
 };
 
 const initialState: StockCollectionState = {
@@ -19,7 +20,8 @@ const initialState: StockCollectionState = {
     classId: 0,
     locationId: null,
     searchTerm: null
-  }
+  },
+  groupedStockItems: new Map()
 };
 
 /**
@@ -48,7 +50,20 @@ export function withStockCollection() {
               .pipe(
                 mapResponse({
                   next: (result) => {
-                    patchState(store, { stockItems: result });
+                    const groupedStockItems = new Map<StockItemCategoryGroup, StockItemDto[]>();
+                    const groupsByCategoryId = new Map<number, StockItemCategoryGroup>();
+
+                    for (const item of result) {
+                      let group = groupsByCategoryId.get(item.categoryId);
+                      if (!group) {
+                        group = { categoryId: item.categoryId, categoryName: item.categoryName };
+                        groupsByCategoryId.set(item.categoryId, group);
+                        groupedStockItems.set(group, []);
+                      }
+                      groupedStockItems.get(group)!.push(item);
+                    }
+
+                    patchState(store, { stockItems: result, groupedStockItems });
                     store.setStockItemsLoaded();
                   },
                   error: (error) => {

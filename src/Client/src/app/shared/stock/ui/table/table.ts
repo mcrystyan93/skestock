@@ -1,9 +1,10 @@
 import { Component, input, output } from '@angular/core';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
-import { STOCK_TABLE_COLUMNS, StockItemDto } from '@ske/models';
+import { CategoryDto, STOCK_TABLE_COLUMNS, StockItemCategoryGroup, StockItemDto } from '@ske/models';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
+import { isNil } from 'lodash-es';
 
 /**
  * Renders the full stock report for a class in one shot - no cursor/`loadMore`, since
@@ -24,10 +25,11 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
   }
 })
 export class Table {
-  public readonly items = input.required<StockItemDto[]>();
+  public readonly groupItems = input.required<Map<StockItemCategoryGroup, StockItemDto[]>>();
   public readonly loading = input.required<boolean>();
 
   public readonly onAdjust = output<StockItemDto>();
+  public readonly onAdd = output<Partial<CategoryDto> | null>();
 
   public readonly columns = STOCK_TABLE_COLUMNS;
 
@@ -35,7 +37,7 @@ export class Table {
   public readonly sortByLocationName = (a: StockItemDto, b: StockItemDto) => a.locationName.localeCompare(b.locationName);
   public readonly sortByQuantity = (a: StockItemDto, b: StockItemDto) => a.quantity - b.quantity;
 
-  public trackByRow(_index: number, item: StockItemDto): string {
-    return `${item.itemId}-${item.locationId}`;
+  public add(category: StockItemCategoryGroup | null = null) {
+    this.onAdd.emit(!isNil(category) ? { id: category.categoryId, name: category.categoryName } : null);
   }
 }

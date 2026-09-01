@@ -1,11 +1,17 @@
-import { Component, inject, input, linkedSignal, model, untracked } from '@angular/core';
+import { Component, DestroyRef, effect, inject, input, linkedSignal, model, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { form, FormField, type FormValueControl } from '@angular/forms/signals';
-import { type CategoryDropdownValue, GetAllCategoriesRequest, PAGINATION_PAGE_SIZE } from '@ske/models';
+import { type CategoryDropdownValue, CategoryDto, GetAllCategoriesRequest, PAGINATION_PAGE_SIZE } from '@ske/models';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { CategoryDropdownStore } from '../../services/category-dropdown.store';
 import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
 import { NzSpinComponent } from 'ng-zorro-antd/spin';
+import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
+import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
+import { isNil } from 'lodash-es';
+import { CategoryDetailModal } from '../modals/category-detail-modal';
+import { NzModalService } from 'ng-zorro-antd/modal';
 
 @Component({
   selector: 'ske-category-dropdown',
@@ -13,30 +19,50 @@ import { NzSpinComponent } from 'ng-zorro-antd/spin';
     NzSelectComponent,
     FormField,
     NzSpinComponent,
-    NzOptionComponent
+    NzOptionComponent,
+    NzSpaceCompactComponent,
+    NzButtonComponent,
+    NzIconDirective
   ],
   template: `
-    <nz-select [formField]="categoryForm.category"
-               nzShowSearch
-               nzShowArrow
-               [nzLoading]="store.categoriesLoading()"
-               [nzAllowClear]="allowClear()"
-               nzServerSearch
-               class="w-full"
-               [compareWith]="(a, b) => a && b ? a.id === b.id : a === b"
-               (nzOnSearch)="onSearch($event)"
-               [nzDropdownRender]="loadingMoreTemplate"
-               (nzScrollToBottom)="loadMore()">
-      @if (value(); as category) {
-        <nz-option [nzValue]="category"
-                   [nzLabel]="category.name ?? ''"></nz-option>
-      }
+    <nz-space-compact class="w-full">
+      <nz-select [formField]="categoryForm.category"
+                 nzShowSearch
+                 nzShowArrow
+                 [nzLoading]="store.categoriesLoading()"
+                 [nzAllowClear]="allowClear()"
+                 nzServerSearch
+                 class="w-full"
+                 [compareWith]="(a, b) => a && b ? a.id === b.id : a === b"
+                 (nzOnSearch)="onSearch($event)"
+                 [nzDropdownRender]="loadingMoreTemplate"
+                 (nzScrollToBottom)="loadMore()">
+        @if (value(); as category) {
+          <nz-option [nzValue]="category"
+                     nzHide
+                     [nzLabel]="category.name ?? ''"></nz-option>
+        }
 
-      @for (category of store.categories(); track category.id) {
-        <nz-option [nzValue]="category"
-                   [nzLabel]="category.name ?? ''"></nz-option>
+        @for (category of store.categories(); track category.id) {
+          <nz-option [nzValue]="category"
+                     [nzLabel]="category.name ?? ''"></nz-option>
+        }
+      </nz-select>
+      @if (value()?.id) {
+        <button nz-button
+                nzType="primary"
+                type="button"
+                (click)="onEdit(value())">
+          <nz-icon nzType="icons:pencil"></nz-icon>
+        </button>
       }
-    </nz-select>
+      <button nz-button
+              nzType="primary"
+              type="button"
+              (click)="onAdd()">
+        <nz-icon nzType="icons:plus"></nz-icon>
+      </button>
+    </nz-space-compact>
 
     <ng-template #loadingMoreTemplate>
       @if (store.isLoadingMore()) {
@@ -44,7 +70,7 @@ import { NzSpinComponent } from 'ng-zorro-antd/spin';
       }
     </ng-template>
   `,
-  providers: [CategoryDropdownStore]
+  providers: [CategoryDropdownStore, NzModalService]
 })
 export class CategoryDropdown implements FormValueControl<CategoryDropdownValue> {
   public readonly value = model<CategoryDropdownValue>(null);
@@ -54,6 +80,8 @@ export class CategoryDropdown implements FormValueControl<CategoryDropdownValue>
 
   public readonly store = inject(CategoryDropdownStore);
   private readonly _search$ = new Subject<string>();
+  private readonly _modalService = inject(NzModalService);
+  private readonly _destroyRef = inject(DestroyRef);
 
   private readonly _formModel = linkedSignal({
     source: () => this.value(),
@@ -62,11 +90,17 @@ export class CategoryDropdown implements FormValueControl<CategoryDropdownValue>
 
   public readonly categoryForm = form(this._formModel);
 
+  private readonly _formCategoryChangeEffectRef = effect(() => {
+    const category = this.categoryForm.category().value();
+
+    untracked(() => this.value.set(category));
+  });
+
   private readonly _searchSub = this._search$
     .pipe(
       debounceTime(300),
       distinctUntilChanged(),
-      takeUntilDestroyed(),
+      takeUntilDestroyed()
     )
     .subscribe((searchTerm) => {
       this.store.load(this.buildFilter({ searchTerm }));
@@ -80,8 +114,36 @@ export class CategoryDropdown implements FormValueControl<CategoryDropdownValue>
     this._search$.next(searchTerm);
   }
 
+  public onAdd() {
+    this.openCategoryModal();
+  }
+
+  public onEdit(category: CategoryDropdownValue) {
+    if (isNil(category))
+      return;
+
+    this.openCategoryModal(category as CategoryDto);
+  }
+
+  private openCategoryModal(category: CategoryDto | null = null) {
+    const modalRef = this._modalService.create({
+      nzContent: CategoryDetailModal,
+      nzData: {
+        category
+      },
+      nzCentered: true,
+      nzMaskClosable: false
+    });
+
+    modalRef.afterClose.pipe(
+      takeUntilDestroyed(this._destroyRef)
+    ).subscribe(() => {
+      this.store.load(this.store.filter());
+    });
+  }
+
   private buildFilter(
-    partialFilter: Partial<GetAllCategoriesRequest>,
+    partialFilter: Partial<GetAllCategoriesRequest>
   ): GetAllCategoriesRequest {
     return {
       ...partialFilter,
@@ -95,6 +157,7 @@ export class CategoryDropdown implements FormValueControl<CategoryDropdownValue>
   }
 
 }
+
 type CategoryDropdownFormModel = {
   category: CategoryDropdownValue
 };

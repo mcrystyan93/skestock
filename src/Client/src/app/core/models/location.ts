@@ -1,4 +1,5 @@
-import { BasePaginationFilter, ColumnFilter } from './pagination';
+import { BasePaginationFilter, ColumnFilter, prioritizeSort } from './pagination';
+import { PAGINATION_PAGE_SIZE } from './category';
 
 /** Mirrors src/Application/Features/Locations/Models/LocationDto.cs. */
 export type LocationDto = {
@@ -31,3 +32,18 @@ export type UpdateLocationRequest = {
   type: string;
   parentLocationId?: number | null;
 };
+
+export type LocationDropdownValue = LocationDto | Partial<LocationDto> | null;
+
+export function buildLocationListFilter(
+  currentFilter: GetAllLocationsRequest,
+  partialFilter: Partial<GetAllLocationsRequest>
+): GetAllLocationsRequest {
+  return {
+    ...currentFilter,
+    ...partialFilter,
+    cursor: null,
+    pageSize: partialFilter.pageSize ?? currentFilter.pageSize ?? PAGINATION_PAGE_SIZE,
+    sort: prioritizeSort(currentFilter.sort ?? [], partialFilter.sort ?? [])
+  };
+}

@@ -24,7 +24,7 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
     NzSpaceItemDirective,
     NzButtonComponent
   ],
-  selector: 'ske-filter-form',
+  selector: 'ske-school-class-filter-form',
   styles: ``,
   templateUrl: './filter-form.html'
 })

@@ -3,6 +3,7 @@ import { NzContentComponent, NzLayoutComponent, NzSiderComponent } from 'ng-zorr
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { Header } from './header/header';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
 
 @Component({
   imports: [
@@ -13,7 +14,8 @@ import { Header } from './header/header';
     RouterLink,
     NzContentComponent,
     RouterOutlet,
-    Header
+    Header,
+    NzIconDirective
   ],
   selector: 'ske-full',
   styles: ``,

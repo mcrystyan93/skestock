@@ -1,6 +1,6 @@
 import { Component, effect, inject, input, untracked } from '@angular/core';
 import { Table } from './table';
-import { StockBatchStore } from '../../services/stock-batch.store';
+import { StockBatchListStore } from '../../services/stock-batch-list.store';
 import { isNil } from 'lodash-es';
 import { ColumnFilter } from '@ske/models';
 
@@ -14,7 +14,7 @@ import { ColumnFilter } from '@ske/models';
   host: {
     class: 'absolute block inset-0'
   },
-  providers: [StockBatchStore]
+  providers: [StockBatchListStore]
 })
 export class TableContainer {
   // public readonly items = input.required<Array<StockBatchListItemDto>>();
@@ -28,7 +28,7 @@ export class TableContainer {
   // public readonly onLoadMore = output<void>();
   public readonly goodsReceiptId = input.required<number>();
 
-  public readonly store = inject(StockBatchStore);
+  public readonly store = inject(StockBatchListStore);
 
   private readonly _goodsReceiptIdEffectRef = effect(() => {
     const goodsReceiptId = this.goodsReceiptId();

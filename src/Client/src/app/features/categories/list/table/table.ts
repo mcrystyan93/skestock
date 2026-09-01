@@ -13,7 +13,7 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
     NzButtonComponent,
     NzIconDirective
   ],
-  selector: 'ske-table',
+  selector: 'ske-category-table',
   styles: ``,
   templateUrl: './table.html',
   host: {

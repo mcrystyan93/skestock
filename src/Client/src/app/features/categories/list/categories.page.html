@@ -1,9 +1,9 @@
-<ske-header (onAdd)="onAdd()" />
+<ske-category-header (onAdd)="onAdd()" />
 
-<ske-filter-container class="mx-4" />
+<ske-category-filter-container class="mx-4" />
 
 <div class="grow relative mx-4 mb-4">
-  <ske-table [items]="store.categories()"
+  <ske-category-table [items]="store.categories()"
              [filter]="store.filter()"
              [loading]="store.categoriesLoading()"
              [hasNextPage]="store.hasNextPage()"

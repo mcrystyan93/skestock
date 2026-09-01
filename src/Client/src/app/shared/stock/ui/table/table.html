@@ -1,6 +1,6 @@
 <nz-table #table
           nzTableLayout="auto"
-          [nzData]="items()"
+          [nzTemplateMode]="true"
           [nzFrontPagination]="false"
           [nzShowPagination]="false"
           [nzLoading]="loading()"
@@ -8,10 +8,12 @@
           class="absolute inset-0 block overflow-auto">
   <thead>
   <tr>
-    <th nzColumnKey="itemName" [nzSortFn]="sortByItemName">
+    <th nzColumnKey="itemName"
+        [nzSortFn]="sortByItemName">
       {{ columns.itemName.label }}
     </th>
-    <th nzColumnKey="locationName" [nzSortFn]="sortByLocationName">
+    <th nzColumnKey="locationName"
+        [nzSortFn]="sortByLocationName">
       {{ columns.locationName.label }}
     </th>
     <th nzColumnKey="unit">
@@ -20,7 +22,8 @@
     <th nzColumnKey="isPerishable">
       {{ columns.isPerishable.label }}
     </th>
-    <th nzColumnKey="quantity" [nzSortFn]="sortByQuantity">
+    <th nzColumnKey="quantity"
+        [nzSortFn]="sortByQuantity">
       {{ columns.quantity.label }}
     </th>
     <th nzColumnKey="isLowStock">
@@ -32,45 +35,60 @@
   </tr>
   </thead>
   <tbody>
-  @for (item of table.data; track trackByRow($index, item)) {
-    <tr>
-      <td>
-        {{ item.itemName }}
-      </td>
-      <td>
-        {{ item.locationName }}
-      </td>
-      <td>
-        {{ item.unit }}
-      </td>
-      <td>
-        @if (item.isPerishable) {
-          <nz-tag nzColor="orange">Da</nz-tag>
-        } @else {
-          <nz-tag>Nu</nz-tag>
-        }
-      </td>
-      <td>
-        {{ item.quantity }}
-      </td>
-      <td>
-        @if (item.isLowStock) {
-          <nz-tag nzColor="red">Stoc redus</nz-tag>
-        } @else {
-          <nz-tag nzColor="green">OK</nz-tag>
-        }
-      </td>
-      <td>
-        <button nz-button
-                nzType="link"
-                type="button"
-                [attr.aria-label]="'Ajusteaza stoc'"
-                (click)="onAdjust.emit(item)">
-          <nz-icon nzType="icons:pencil"></nz-icon>
-          Ajusteaza
-        </button>
-      </td>
-    </tr>
-  }
+    @for (category of groupItems().keys(); track category.categoryId) {
+      <tr>
+        <td colSpan="6"><strong>{{ category.categoryName }}</strong></td>
+        <td>
+          <button nz-button
+                  nzType="link"
+                  type="button"
+                  [attr.aria-label]="'Adauga stoc'"
+                  (click)="add(category)">
+            <nz-icon nzType="icons:plus"></nz-icon>
+            Adauga
+          </button>
+        </td>
+      </tr>
+      @for (item of groupItems().get(category); track item.itemId) {
+        <tr>
+          <td [nzIndentSize]="20">
+            {{ item.itemName }}
+          </td>
+          <td>
+            {{ item.locationName }}
+          </td>
+          <td>
+            {{ item.unit }}
+          </td>
+          <td>
+            @if (item.isPerishable) {
+              <nz-tag nzColor="orange">Da</nz-tag>
+            } @else {
+              <nz-tag>Nu</nz-tag>
+            }
+          </td>
+          <td>
+            {{ item.quantity }}
+          </td>
+          <td>
+            @if (item.isLowStock) {
+              <nz-tag nzColor="red">Stoc redus</nz-tag>
+            } @else {
+              <nz-tag nzColor="green">OK</nz-tag>
+            }
+          </td>
+          <td>
+            <button nz-button
+                    nzType="link"
+                    type="button"
+                    [attr.aria-label]="'Ajusteaza stoc'"
+                    (click)="onAdjust.emit(item)">
+              <nz-icon nzType="icons:pencil"></nz-icon>
+              Ajusteaza
+            </button>
+          </td>
+        </tr>
+      }
+    }
   </tbody>
 </nz-table>

@@ -60,7 +60,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
         }
 
         var items = await itemsQuery
-            .Select(i => new { i.Id, i.Name, i.Unit, i.IsPerishable, i.MinThreshold })
+            .Select(i => new { i.Id, i.Name, i.Unit, i.IsPerishable, i.MinThreshold, i.CategoryId })
             .ToDictionaryAsync(i => i.Id, cancellationToken);
 
         // Items excluded by the search term filter above must also be excluded from the stock
@@ -77,15 +77,25 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
             .Select(l => new { l.Id, l.Name })
             .ToDictionaryAsync(l => l.Id, cancellationToken);
 
+        var categoryIds = items.Values.Select(i => i.CategoryId).Distinct().ToList();
+        var categories = await dbContext.Categories
+            .AsNoTracking()
+            .Where(c => categoryIds.Contains(c.Id))
+            .Select(c => new { c.Id, c.Name })
+            .ToDictionaryAsync(c => c.Id, cancellationToken);
+
         var data = stockByItemLocation
             .Select(x =>
             {
                 var item = items[x.ItemId];
                 var location = locations[x.LocationId];
+                var category = categories[item.CategoryId];
                 return new StockItemDto
                 {
                     ItemId = x.ItemId,
                     ItemName = item.Name,
+                    CategoryId = category.Id,
+                    CategoryName = category.Name,
                     LocationId = location.Id,
                     LocationName = location.Name,
                     Unit = item.Unit,
