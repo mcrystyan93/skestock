@@ -24,14 +24,14 @@ import { StockList, TableContainer } from '@ske/shared/stock';
   },
 })
 export class SchoolClassOverviewPage {
-  public readonly id = input.required<number>();
+  public readonly id = input.required<string>();
   public readonly store = inject(SchoolClassOverviewStore);
 
 
   private readonly _idEffectRef = effect(() => {
     const idValue = this.id();
 
-    if (isNil(idValue) || isNaN(idValue)) return;
+    if (isNil(idValue) || idValue === '') return;
 
     untracked(() => {
       this.store.load(idValue);

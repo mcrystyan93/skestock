@@ -76,7 +76,7 @@ public class EditItemCommandTests : TestBase
 
         var result = await TestApp.SendAsync(new EditItemCommand
         {
-            Id = int.MaxValue,
+            Id = Guid.NewGuid(),
             Name = $"{_prefix}-X",
             Unit = "unit",
             CategoryId = category.Id
@@ -135,7 +135,7 @@ public class EditItemCommandTests : TestBase
             Id = created.Value.Id,
             Name = $"{_prefix}-Item",
             Unit = "unit",
-            CategoryId = int.MaxValue
+            CategoryId = Guid.NewGuid()
         });
 
         var exception = await act.ShouldThrowAsync<ValidationException>();

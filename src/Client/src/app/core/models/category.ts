@@ -2,7 +2,7 @@ import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefiniti
 
 /** Mirrors src/Application/Features/Categories/Models/CategoryDto.cs. */
 export type CategoryDto = {
-  id: number;
+  id: string;
   name: string;
   createdByName?: string | null;
   lastModifiedByName?: string | null;

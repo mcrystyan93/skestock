@@ -59,7 +59,7 @@ public class UpdateLocationCommandTests : TestBase
     [Test]
     public async Task Handle_WithNonExistentId_ReturnsFailedResult()
     {
-        var result = await TestApp.SendAsync(new UpdateLocationCommand { Id = int.MaxValue, Name = $"{_prefix}-X", Type = "Room" });
+        var result = await TestApp.SendAsync(new UpdateLocationCommand { Id = Guid.NewGuid(), Name = $"{_prefix}-X", Type = "Room" });
 
         result.IsFailed.ShouldBeTrue();
     }

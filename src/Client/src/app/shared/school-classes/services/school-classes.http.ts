@@ -20,11 +20,11 @@ export class SchoolClassesHttp {
     return this._httpClient.post<PaginatedResponse<SchoolClassDto>>('/api/SchoolClasses/get-all', request);
   }
 
-  public getById(id: number) {
+  public getById(id: string) {
     return this._httpClient.get<SchoolClassDto>(`/api/SchoolClasses/${id}`);
   }
 
-  public getSummary(id: number) {
+  public getSummary(id: string) {
     return this._httpClient.get<SchoolClassSummary>(`/api/SchoolClasses/${id}/summary`);
   }
 
@@ -32,7 +32,7 @@ export class SchoolClassesHttp {
     return this._httpClient.post<SchoolClassDto>('/api/SchoolClasses', request);
   }
 
-  public update(id: number, request: UpdateSchoolClassRequest) {
+  public update(id: string, request: UpdateSchoolClassRequest) {
     return this._httpClient.put<SchoolClassDto>(`/api/SchoolClasses/${id}`, request);
   }
 }

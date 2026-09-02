@@ -14,13 +14,13 @@ public static class LocationRequests
     {
         public string Name { get; init; } = string.Empty;
         public string Type { get; init; } = string.Empty;
-        public int? ParentLocationId { get; init; }
+        public Guid? ParentLocationId { get; init; }
     }
 
     public class UpdateLocationRequest
     {
         public string Name { get; init; } = string.Empty;
         public string Type { get; init; } = string.Empty;
-        public int? ParentLocationId { get; init; }
+        public Guid? ParentLocationId { get; init; }
     }
 }

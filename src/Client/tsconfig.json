@@ -34,6 +34,7 @@
       "@ske/shared/stock-batches": ["./src/app/shared/stock-batches"],
       "@ske/shared/stock": ["./src/app/shared/stock"],
       "@ske/shared/locations": ["./src/app/shared/locations"],
+      "@ske/shared/storage": ["./src/app/shared/storage"],
     }
   },
   "angularCompilerOptions": {

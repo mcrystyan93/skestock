@@ -5,7 +5,7 @@ namespace skestock.Application.Features.Items.Commands.EnableItem;
 
 public class EnableItemCommand : IRequest<Result<ItemDto>>, ICacheInvalidation
 {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
 
     // Invalidate every cached GetAllItems page/filter/sort combination - an item's active state
     // can affect isActive-filtered results.

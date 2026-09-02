@@ -46,7 +46,7 @@ public class GetLocationByIdQueryTests : TestBase
     [Test]
     public async Task Handle_WithNonExistentId_ReturnsFailedResult()
     {
-        var result = await TestApp.SendAsync(new GetLocationByIdQuery { Id = int.MaxValue });
+        var result = await TestApp.SendAsync(new GetLocationByIdQuery { Id = Guid.NewGuid() });
 
         result.IsFailed.ShouldBeTrue();
     }
@@ -54,7 +54,7 @@ public class GetLocationByIdQueryTests : TestBase
     [Test]
     public async Task Handle_WithInvalidId_ThrowsValidationException()
     {
-        var act = async () => await TestApp.SendAsync(new GetLocationByIdQuery { Id = 0 });
+        var act = async () => await TestApp.SendAsync(new GetLocationByIdQuery { Id = Guid.Empty });
 
         var exception = await act.ShouldThrowAsync<ValidationException>();
         exception.Errors.ShouldContainKey(nameof(GetLocationByIdQuery.Id));

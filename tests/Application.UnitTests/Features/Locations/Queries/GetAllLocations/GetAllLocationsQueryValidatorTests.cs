@@ -19,7 +19,7 @@ public class GetAllLocationsQueryValidatorTests
         var effectiveSort = DynamicSortBuilder<Location>.BuildEffectiveSort(sort, SortConfiguration);
         var entity = new Location
         {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Name = "Test Location",
             Type = "Room",
             CreatedDate = DateTimeOffset.UtcNow,

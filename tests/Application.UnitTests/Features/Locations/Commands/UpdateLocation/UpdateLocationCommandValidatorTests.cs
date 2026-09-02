@@ -33,14 +33,14 @@ public class UpdateLocationCommandValidatorTests
     }
 
     [Test]
-    public async Task ShouldHaveErrorWhenIdIsZeroOrNegative()
+    public async Task ShouldHaveErrorWhenIdIsEmpty()
     {
         await using var context = CreateContext();
         var validator = new UpdateLocationCommandValidator(context);
 
-        var result = await validator.ValidateAsync(new UpdateLocationCommand { Id = 0, Name = "Kitchen", Type = "Kitchen" });
+        var result = await validator.ValidateAsync(new UpdateLocationCommand { Id = Guid.Empty, Name = "Kitchen", Type = "Kitchen" });
 
-        result.Errors.ShouldContain(e => e.PropertyName == nameof(UpdateLocationCommand.Id) && e.ErrorCode == ValidationErrorCodes.GreaterThan);
+        result.Errors.ShouldContain(e => e.PropertyName == nameof(UpdateLocationCommand.Id) && e.ErrorCode == ValidationErrorCodes.Required);
     }
 
     [Test]
@@ -49,7 +49,7 @@ public class UpdateLocationCommandValidatorTests
         await using var context = CreateContext();
         var validator = new UpdateLocationCommandValidator(context);
 
-        var result = await validator.ValidateAsync(new UpdateLocationCommand { Id = 1, Name = "", Type = "Kitchen" });
+        var result = await validator.ValidateAsync(new UpdateLocationCommand { Id = Guid.NewGuid(), Name = "", Type = "Kitchen" });
 
         result.Errors.ShouldContain(e => e.PropertyName == nameof(UpdateLocationCommand.Name) && e.ErrorCode == ValidationErrorCodes.Required);
     }
@@ -60,7 +60,7 @@ public class UpdateLocationCommandValidatorTests
         await using var context = CreateContext();
         var validator = new UpdateLocationCommandValidator(context);
 
-        var result = await validator.ValidateAsync(new UpdateLocationCommand { Id = 1, Name = "Kitchen", Type = "" });
+        var result = await validator.ValidateAsync(new UpdateLocationCommand { Id = Guid.NewGuid(), Name = "Kitchen", Type = "" });
 
         result.Errors.ShouldContain(e => e.PropertyName == nameof(UpdateLocationCommand.Type) && e.ErrorCode == ValidationErrorCodes.Required);
     }
@@ -117,7 +117,7 @@ public class UpdateLocationCommandValidatorTests
         await context.SaveChangesAsync(CancellationToken.None);
 
         var validator = new UpdateLocationCommandValidator(context);
-        var result = await validator.ValidateAsync(new UpdateLocationCommand { Id = location.Id, Name = "Kitchen", Type = "Kitchen", ParentLocationId = 99999 });
+        var result = await validator.ValidateAsync(new UpdateLocationCommand { Id = location.Id, Name = "Kitchen", Type = "Kitchen", ParentLocationId = Guid.NewGuid() });
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.InvalidReference);
     }

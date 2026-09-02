@@ -10,7 +10,7 @@ public class Item: BaseAuditableEntity, IKeysetEntity
     public bool IsPerishable { get; set; }
     public bool IsActive { get; set; } = true;
 
-    public int CategoryId { get; set; }
+    public Guid CategoryId { get; set; }
     public Category Category { get; set; } = null!;
 
     public ICollection<StockBatch> Batches { get; set; } = new List<StockBatch>();

@@ -7,8 +7,8 @@ namespace skestock.Application.Features.GoodsReceipts.Commands.CreateGoodsReceip
 
 public class CreateGoodsReceiptLine
 {
-    public int ItemId { get; init; }
-    public int LocationId { get; init; }
+    public Guid ItemId { get; init; }
+    public Guid LocationId { get; init; }
     public int Quantity { get; init; }
     public DateOnly? ExpiryDate { get; init; }
     public decimal UnitPrice { get; init; }
@@ -20,7 +20,7 @@ public class CreateGoodsReceiptLine
 [Authorize]
 public class CreateGoodsReceiptCommand : IRequest<Result<GoodsReceiptDto>>, ICacheInvalidation
 {
-    public int ClassId { get; init; }
+    public Guid ClassId { get; init; }
     public string? SupplierReference { get; init; }
     public string Note { get; init; } = string.Empty;
     public List<CreateGoodsReceiptLine> Lines { get; init; } = [];

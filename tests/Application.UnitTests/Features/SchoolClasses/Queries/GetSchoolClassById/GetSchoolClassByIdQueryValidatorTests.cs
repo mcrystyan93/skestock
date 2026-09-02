@@ -10,18 +10,18 @@ public class GetSchoolClassByIdQueryValidatorTests
     private readonly GetSchoolClassByIdQueryValidator _validator = new();
 
     [Test]
-    public async Task ShouldNotHaveErrorWhenIdIsGreaterThanZero()
+    public async Task ShouldNotHaveErrorWhenIdIsNotEmpty()
     {
-        var result = await _validator.ValidateAsync(new GetSchoolClassByIdQuery { Id = 1 });
+        var result = await _validator.ValidateAsync(new GetSchoolClassByIdQuery { Id = Guid.NewGuid() });
 
         result.IsValid.ShouldBeTrue();
     }
 
     [Test]
-    public async Task ShouldHaveErrorWhenIdIsZeroOrNegative()
+    public async Task ShouldHaveErrorWhenIdIsEmpty()
     {
-        var result = await _validator.ValidateAsync(new GetSchoolClassByIdQuery { Id = 0 });
+        var result = await _validator.ValidateAsync(new GetSchoolClassByIdQuery { Id = Guid.Empty });
 
-        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.GreaterThan);
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.Required);
     }
 }

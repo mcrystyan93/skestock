@@ -13,13 +13,13 @@ public class OrderByBuilderTests
     {
         var items = new List<KeysetTestItem>
         {
-            new() { Id = 3, CreatedDate = DateTimeOffset.UtcNow },
-            new() { Id = 1, CreatedDate = DateTimeOffset.UtcNow },
-            new() { Id = 2, CreatedDate = DateTimeOffset.UtcNow }
+            new() { Id = KeysetTestIds.Of(3), CreatedDate = DateTimeOffset.UtcNow },
+            new() { Id = KeysetTestIds.Of(1), CreatedDate = DateTimeOffset.UtcNow },
+            new() { Id = KeysetTestIds.Of(2), CreatedDate = DateTimeOffset.UtcNow }
         }.AsQueryable();
 
         var ordered = OrderByBuilder<KeysetTestItem>.ApplyOrderBy(items, [("Id", "asc")], Config)
-            .Select(x => x.Id)
+            .Select(x => KeysetTestIds.ToInt(x.Id))
             .ToList();
 
         ordered.ShouldBe([1, 2, 3]);
@@ -30,13 +30,13 @@ public class OrderByBuilderTests
     {
         var items = new List<KeysetTestItem>
         {
-            new() { Id = 3, CreatedDate = DateTimeOffset.UtcNow },
-            new() { Id = 1, CreatedDate = DateTimeOffset.UtcNow },
-            new() { Id = 2, CreatedDate = DateTimeOffset.UtcNow }
+            new() { Id = KeysetTestIds.Of(3), CreatedDate = DateTimeOffset.UtcNow },
+            new() { Id = KeysetTestIds.Of(1), CreatedDate = DateTimeOffset.UtcNow },
+            new() { Id = KeysetTestIds.Of(2), CreatedDate = DateTimeOffset.UtcNow }
         }.AsQueryable();
 
         var ordered = OrderByBuilder<KeysetTestItem>.ApplyOrderBy(items, [("Id", "desc")], Config)
-            .Select(x => x.Id)
+            .Select(x => KeysetTestIds.ToInt(x.Id))
             .ToList();
 
         ordered.ShouldBe([3, 2, 1]);
@@ -48,13 +48,13 @@ public class OrderByBuilderTests
         var now = DateTimeOffset.UtcNow;
         var items = new List<KeysetTestItem>
         {
-            new() { Id = 2, CreatedDate = now, Priority = 1 },
-            new() { Id = 1, CreatedDate = now, Priority = 1 },
-            new() { Id = 3, CreatedDate = now, Priority = 0 }
+            new() { Id = KeysetTestIds.Of(2), CreatedDate = now, Priority = 1 },
+            new() { Id = KeysetTestIds.Of(1), CreatedDate = now, Priority = 1 },
+            new() { Id = KeysetTestIds.Of(3), CreatedDate = now, Priority = 0 }
         }.AsQueryable();
 
         var ordered = OrderByBuilder<KeysetTestItem>.ApplyOrderBy(items, [("Priority", "asc"), ("Id", "asc")], Config)
-            .Select(x => x.Id)
+            .Select(x => KeysetTestIds.ToInt(x.Id))
             .ToList();
 
         ordered.ShouldBe([3, 1, 2]);
@@ -66,13 +66,13 @@ public class OrderByBuilderTests
         var now = DateTimeOffset.UtcNow;
         var items = new List<KeysetTestItem>
         {
-            new() { Id = 1, CreatedDate = now, Priority = 5 },
-            new() { Id = 2, CreatedDate = now, Priority = null },
-            new() { Id = 3, CreatedDate = now, Priority = 1 }
+            new() { Id = KeysetTestIds.Of(1), CreatedDate = now, Priority = 5 },
+            new() { Id = KeysetTestIds.Of(2), CreatedDate = now, Priority = null },
+            new() { Id = KeysetTestIds.Of(3), CreatedDate = now, Priority = 1 }
         }.AsQueryable();
 
         var ordered = OrderByBuilder<KeysetTestItem>.ApplyOrderBy(items, [("Priority", "asc"), ("Id", "asc")], Config)
-            .Select(x => x.Id)
+            .Select(x => KeysetTestIds.ToInt(x.Id))
             .ToList();
 
         ordered.ShouldBe([3, 1, 2]); // 1 < 5 < null
@@ -84,13 +84,13 @@ public class OrderByBuilderTests
         var now = DateTimeOffset.UtcNow;
         var items = new List<KeysetTestItem>
         {
-            new() { Id = 1, CreatedDate = now, Priority = 5 },
-            new() { Id = 2, CreatedDate = now, Priority = null },
-            new() { Id = 3, CreatedDate = now, Priority = 1 }
+            new() { Id = KeysetTestIds.Of(1), CreatedDate = now, Priority = 5 },
+            new() { Id = KeysetTestIds.Of(2), CreatedDate = now, Priority = null },
+            new() { Id = KeysetTestIds.Of(3), CreatedDate = now, Priority = 1 }
         }.AsQueryable();
 
         var ordered = OrderByBuilder<KeysetTestItem>.ApplyOrderBy(items, [("Priority", "desc"), ("Id", "asc")], Config)
-            .Select(x => x.Id)
+            .Select(x => KeysetTestIds.ToInt(x.Id))
             .ToList();
 
         // 5 > 1 in descending order, but null must still sort after both, never before.

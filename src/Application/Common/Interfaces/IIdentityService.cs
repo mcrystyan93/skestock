@@ -2,13 +2,13 @@
 
 public interface IIdentityService
 {
-    Task<string?> GetUserNameAsync(int userId);
+    Task<string?> GetUserNameAsync(Guid userId);
 
-    Task<bool> IsInRoleAsync(int userId, string role);
+    Task<bool> IsInRoleAsync(Guid userId, string role);
 
-    Task<bool> AuthorizeAsync(int userId, string policyName);
+    Task<bool> AuthorizeAsync(Guid userId, string policyName);
 
-    Task<(Result Result, int UserId)> CreateUserAsync(string userName, string password);
+    Task<(Result Result, Guid UserId)> CreateUserAsync(string userName, string password);
 
-    Task<Result> DeleteUserAsync(int userId);
+    Task<Result> DeleteUserAsync(Guid userId);
 }

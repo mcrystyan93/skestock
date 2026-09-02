@@ -39,7 +39,7 @@ public class AdjustStockCommandHandlerTests
         // StockTransaction.UserId links directly to the caller's Identity/AspNetUsers id
         // (UserProfile.IdentityId is the FK's principal key), so no UserProfile.Id resolution
         // happens in the handler; the profile only needs to exist.
-        var userProfile = new UserProfile { IdentityId = 42, FirstName = "Staff", LastName = "Member" };
+        var userProfile = new UserProfile { IdentityId = Guid.NewGuid(), FirstName = "Staff", LastName = "Member" };
         context.UserProfiles.Add(userProfile);
 
         await context.SaveChangesAsync(CancellationToken.None);

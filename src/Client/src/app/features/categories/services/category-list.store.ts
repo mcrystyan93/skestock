@@ -5,7 +5,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, tap } from 'rxjs';
 
 type CategoryListState = {
-  deletingCategoryId: number | null;
+  deletingCategoryId: string | null;
 };
 const initialState: CategoryListState = {
   deletingCategoryId: null

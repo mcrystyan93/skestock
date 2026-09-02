@@ -86,7 +86,7 @@ export class Form {
 }
 
 export type SchoolClassFormModel = {
-  id: number | null;
+  id: string | null;
   name: string;
   startDate: Date | null;
   endDate: Date | null;

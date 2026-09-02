@@ -19,7 +19,7 @@ export class ItemsHttp {
     return this._httpClient.post<PaginatedResponse<ItemDto>>('/api/Items/get-all', request);
   }
 
-  public getById(id: number) {
+  public getById(id: string) {
     return this._httpClient.get<ItemDto>(`/api/Items/${id}`);
   }
 
@@ -27,15 +27,15 @@ export class ItemsHttp {
     return this._httpClient.post<ItemDto>('/api/Items', request);
   }
 
-  public edit(id: number, request: EditItemRequest) {
+  public edit(id: string, request: EditItemRequest) {
     return this._httpClient.put<ItemDto>(`/api/Items/${id}`, request);
   }
 
-  public enable(id: number) {
+  public enable(id: string) {
     return this._httpClient.patch<ItemDto>(`/api/Items/${id}/enable`, {});
   }
 
-  public disable(id: number) {
+  public disable(id: string) {
     return this._httpClient.patch<ItemDto>(`/api/Items/${id}/disable`, {});
   }
 }

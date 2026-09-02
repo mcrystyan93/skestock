@@ -40,15 +40,15 @@ public class EditItemCommandValidatorTests
     }
 
     [Test]
-    public async Task ShouldHaveErrorWhenIdIsZero()
+    public async Task ShouldHaveErrorWhenIdIsEmpty()
     {
         var (context, category, _) = await CreateContextAsync();
         await using var _disposable = context;
         var validator = new EditItemCommandValidator(context);
 
-        var result = await validator.ValidateAsync(new EditItemCommand { Id = 0, Name = "Pencil", Unit = "unit", CategoryId = category.Id });
+        var result = await validator.ValidateAsync(new EditItemCommand { Id = Guid.Empty, Name = "Pencil", Unit = "unit", CategoryId = category.Id });
 
-        result.Errors.ShouldContain(e => e.PropertyName == nameof(EditItemCommand.Id) && e.ErrorCode == ValidationErrorCodes.GreaterThan);
+        result.Errors.ShouldContain(e => e.PropertyName == nameof(EditItemCommand.Id) && e.ErrorCode == ValidationErrorCodes.Required);
     }
 
     [Test]
@@ -87,7 +87,7 @@ public class EditItemCommandValidatorTests
         await using var _disposable = context;
         var validator = new EditItemCommandValidator(context);
 
-        var result = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", CategoryId = 99999 });
+        var result = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", CategoryId = Guid.NewGuid() });
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.InvalidReference);
     }

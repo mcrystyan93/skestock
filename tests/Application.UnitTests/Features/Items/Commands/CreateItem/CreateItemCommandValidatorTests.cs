@@ -84,15 +84,15 @@ public class CreateItemCommandValidatorTests
     }
 
     [Test]
-    public async Task ShouldHaveErrorWhenCategoryIdIsZero()
+    public async Task ShouldHaveRequiredErrorWhenCategoryIdIsEmpty()
     {
         var (context, _) = await CreateContextAsync();
         await using var __ = context;
         var validator = new CreateItemCommandValidator(context);
 
-        var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", CategoryId = 0 });
+        var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", CategoryId = Guid.Empty });
 
-        result.Errors.ShouldContain(e => e.PropertyName == nameof(CreateItemCommand.CategoryId) && e.ErrorCode == ValidationErrorCodes.GreaterThan);
+        result.Errors.ShouldContain(e => e.PropertyName == nameof(CreateItemCommand.CategoryId) && e.ErrorCode == ValidationErrorCodes.Required);
     }
 
     [Test]
@@ -102,7 +102,7 @@ public class CreateItemCommandValidatorTests
         await using var __ = context;
         var validator = new CreateItemCommandValidator(context);
 
-        var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", CategoryId = 99999 });
+        var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", CategoryId = Guid.NewGuid() });
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.InvalidReference);
     }

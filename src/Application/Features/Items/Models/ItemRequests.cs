@@ -18,7 +18,7 @@ public static class ItemRequests
         public string Unit { get; init; } = "unit";
         public int MinThreshold { get; init; }
         public bool IsPerishable { get; init; }
-        public int CategoryId { get; init; }
+        public Guid CategoryId { get; init; }
     }
 
     public class EditItemRequest
@@ -29,6 +29,6 @@ public static class ItemRequests
         public string Unit { get; init; } = "unit";
         public int MinThreshold { get; init; }
         public bool IsPerishable { get; init; }
-        public int CategoryId { get; init; }
+        public Guid CategoryId { get; init; }
     }
 }

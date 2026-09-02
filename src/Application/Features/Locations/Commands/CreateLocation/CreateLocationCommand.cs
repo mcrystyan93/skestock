@@ -7,7 +7,7 @@ public class CreateLocationCommand : IRequest<Result<LocationDto>>, ICacheInvali
 {
     public string Name { get; init; } = string.Empty;
     public string Type { get; init; } = string.Empty;
-    public int? ParentLocationId { get; init; }
+    public Guid? ParentLocationId { get; init; }
 
     // Invalidate every cached GetAllLocations page/filter/sort combination - a new location
     // can affect any of them (default sort, search matches, filters, etc.).

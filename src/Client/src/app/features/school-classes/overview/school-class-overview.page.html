@@ -1,4 +1,4 @@
-<ske-school-class-overview-header-container />
+<ske-school-class-overview-header-container [classId]="store.schoolClass()?.id ?? null"/>
 
 <nz-tabs [nzSelectedIndex]="store.selectedTabIndex()"
          [nzTabBarStyle]="{display:'none'}"

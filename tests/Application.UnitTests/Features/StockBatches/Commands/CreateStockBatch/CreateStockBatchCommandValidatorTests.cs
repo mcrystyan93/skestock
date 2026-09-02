@@ -110,7 +110,7 @@ public class CreateStockBatchCommandValidatorTests
 
         var result = await validator.ValidateAsync(new CreateStockBatchCommand
         {
-            ItemId = 9999,
+            ItemId = Guid.NewGuid(),
             LocationId = location.Id,
             ReceivedClassId = schoolClass.Id,
             Quantity = 1,
@@ -130,7 +130,7 @@ public class CreateStockBatchCommandValidatorTests
         var result = await validator.ValidateAsync(new CreateStockBatchCommand
         {
             ItemId = item.Id,
-            LocationId =9999,
+            LocationId = Guid.NewGuid(),
             ReceivedClassId = schoolClass.Id,
             Quantity = 1,
             ReceivedDate = new DateOnly(2026, 9, 5)
@@ -150,7 +150,7 @@ public class CreateStockBatchCommandValidatorTests
         {
             ItemId = item.Id,
             LocationId = location.Id,
-            ReceivedClassId = 9999,
+            ReceivedClassId = Guid.NewGuid(),
             Quantity = 1,
             ReceivedDate = new DateOnly(2026, 9, 5)
         });

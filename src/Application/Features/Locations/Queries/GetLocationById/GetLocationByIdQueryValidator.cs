@@ -7,7 +7,7 @@ public class GetLocationByIdQueryValidator : AbstractValidator<GetLocationByIdQu
     public GetLocationByIdQueryValidator()
     {
         RuleFor(x => x.Id)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan);
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required);
     }
 }

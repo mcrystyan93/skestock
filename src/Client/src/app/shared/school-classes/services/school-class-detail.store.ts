@@ -4,7 +4,7 @@ import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
 import { SchoolClassesHttp } from '@ske/shared/school-classes';
-import { isNil, isNumber, isString, toNumber } from 'lodash-es';
+import { isNil } from 'lodash-es';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, of, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
@@ -40,14 +40,14 @@ export const SchoolClassDetailState = signalStore(
       return id;
     };
 
-    const loadSchoolClass = rxMethod<number | string>(
+    const loadSchoolClass = rxMethod<string>(
       pipe(
         tap(() => {
           store.setSchoolClassLoading();
           store.clearSchoolClassErrors();
         }),
         switchMap((id) => {
-          if (isString(id) && id === NEW_SCHOOL_CLASS_ROUTE_ID) {
+          if (id === NEW_SCHOOL_CLASS_ROUTE_ID) {
             patchState(store, {
               schoolClass: {}
             });
@@ -55,15 +55,13 @@ export const SchoolClassDetailState = signalStore(
             return of(null);
           }
 
-          const idAsNumber = toNumber(id);
-
-          if (!isNumber(idAsNumber) || Number.isNaN(idAsNumber)) {
+          if (isNil(id) || id === '') {
             store.handleSchoolClassError({ title: 'School class ID missing', status: 400 });
             store.setSchoolClassLoaded();
             return of(null);
           }
 
-          return store.schoolClassHttp.getById(idAsNumber).pipe(
+          return store.schoolClassHttp.getById(id).pipe(
             mapResponse({
               next: (schoolClass) => {
                 patchState(store, { schoolClass });

@@ -47,7 +47,7 @@ public class Items : IEndpointGroup
     [EndpointSummary("Get an item by id")]
     [EndpointDescription("Retrieves a single item by its id.")]
     public static async Task<Results<Ok<ItemDto>, ProblemHttpResult>> GetItemById(
-        ISender sender, int id, CancellationToken cancellationToken)
+        ISender sender, Guid id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetItemByIdQuery { Id = id }, cancellationToken);
 
@@ -84,7 +84,7 @@ public class Items : IEndpointGroup
     [EndpointSummary("Edit an existing item")]
     [EndpointDescription("Updates an existing item's details in the database.")]
     public static async Task<Results<Ok<ItemDto>, ProblemHttpResult>> EditItem(
-        ISender sender, int id, ItemRequests.EditItemRequest request, CancellationToken cancellationToken)
+        ISender sender, Guid id, ItemRequests.EditItemRequest request, CancellationToken cancellationToken)
     {
         var command = new EditItemCommand
         {
@@ -109,7 +109,7 @@ public class Items : IEndpointGroup
     [EndpointSummary("Enable an item")]
     [EndpointDescription("Marks an existing item as active.")]
     public static async Task<Results<Ok<ItemDto>, ProblemHttpResult>> EnableItem(
-        ISender sender, int id, CancellationToken cancellationToken)
+        ISender sender, Guid id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new EnableItemCommand { Id = id }, cancellationToken);
 
@@ -122,7 +122,7 @@ public class Items : IEndpointGroup
     [EndpointSummary("Disable an item")]
     [EndpointDescription("Marks an existing item as inactive.")]
     public static async Task<Results<Ok<ItemDto>, ProblemHttpResult>> DisableItem(
-        ISender sender, int id, CancellationToken cancellationToken)
+        ISender sender, Guid id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new DisableItemCommand { Id = id }, cancellationToken);
 

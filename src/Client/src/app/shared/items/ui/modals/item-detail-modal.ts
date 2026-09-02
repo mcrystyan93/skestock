@@ -97,7 +97,7 @@ export class ItemDetailModal {
       unit: formData.unit,
       minThreshold: formData.minThreshold,
       isPerishable: formData.isPerishable,
-      categoryId: formData.category?.id as number
+      categoryId: formData.category?.id as string
     };
   }
 }

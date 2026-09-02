@@ -14,8 +14,8 @@ public class CreateGoodsReceiptCommandValidator : AbstractValidator<CreateGoodsR
     public CreateGoodsReceiptCommandValidator(IApplicationDbContext dbContext)
     {
         RuleFor(x => x.ClassId)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan)
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required)
             .DependentRules(() =>
             {
                 RuleFor(x => x.ClassId)
@@ -45,12 +45,12 @@ public class CreateGoodsReceiptCommandValidator : AbstractValidator<CreateGoodsR
         RuleForEach(x => x.Lines).ChildRules(line =>
         {
             line.RuleFor(l => l.ItemId)
-                .GreaterThan(0)
-                .WithErrorCode(ValidationErrorCodes.GreaterThan);
+                .NotEmpty()
+                .WithErrorCode(ValidationErrorCodes.Required);
 
             line.RuleFor(l => l.LocationId)
-                .GreaterThan(0)
-                .WithErrorCode(ValidationErrorCodes.GreaterThan);
+                .NotEmpty()
+                .WithErrorCode(ValidationErrorCodes.Required);
 
             line.RuleFor(l => l.Quantity)
                 .GreaterThan(0)
@@ -93,7 +93,7 @@ public class CreateGoodsReceiptCommandValidator : AbstractValidator<CreateGoodsR
                 .ToListAsync(cancellationToken))
             .ToHashSet();
 
-        var seenLineKeys = new HashSet<(int ItemId, int LocationId, DateOnly? ExpiryDate)>();
+        var seenLineKeys = new HashSet<(Guid ItemId, Guid LocationId, DateOnly? ExpiryDate)>();
 
         for (var i = 0; i < lines.Count; i++)
         {
@@ -141,7 +141,7 @@ public class CreateGoodsReceiptCommandValidator : AbstractValidator<CreateGoodsR
         }
     }
 
-    private static async Task<bool> SchoolClassExistsAsync(IApplicationDbContext dbContext, int classId, CancellationToken cancellationToken)
+    private static async Task<bool> SchoolClassExistsAsync(IApplicationDbContext dbContext, Guid classId, CancellationToken cancellationToken)
     {
         return await dbContext.SchoolClasses
             .AsNoTracking()

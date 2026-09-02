@@ -76,7 +76,7 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
   public readonly disabled = input<boolean>(false);
   public readonly allowClear = input<boolean>(false);
   public readonly placeholder = input<string>('Selectați un articol');
-  public readonly categoryId = input<number | null>(null);
+  public readonly categoryId = input<string | null>(null);
 
   public readonly store = inject(ItemDropdownStore);
   private readonly _search$ = new Subject<string>();

@@ -15,7 +15,7 @@ export enum ClassStatus {
 
 /** Mirrors src/Application/Features/SchoolClasses/Models/SchoolClassDto.cs. */
 export type SchoolClassDto = {
-  id: number;
+  id: string;
   name: string;
   startDate: string;
   endDate: string;
@@ -28,7 +28,7 @@ export type SchoolClassDto = {
 
 /** Mirrors src/Application/Features/SchoolClasses/Models/SchoolClassDto.cs. */
 export type SchoolClassSummary = {
-  id: number;
+  id: string;
   noOfGoodsReceipt: number;
   totalAmount: number;
   lowStockItemsCount: number;

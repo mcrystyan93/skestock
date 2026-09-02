@@ -2,11 +2,11 @@ import { TableColumnDefinition } from './pagination';
 
 /** Mirrors src/Application/Features/Stock/Models/StockDto.cs (StockItemDto). */
 export type StockItemDto = {
-  itemId: number;
+  itemId: string;
   itemName: string;
-  categoryId: number;
+  categoryId: string;
   categoryName: string;
-  locationId: number;
+  locationId: string;
   locationName: string;
   unit: string;
   isPerishable: boolean;
@@ -15,7 +15,7 @@ export type StockItemDto = {
 };
 
 export type StockItemCategoryGroup = {
-  categoryId: number;
+  categoryId: string;
   categoryName: string;
 };
 
@@ -24,9 +24,9 @@ export type StockItemCategoryGroup = {
  * (src/Web/Endpoints/Stock.cs, GetClassLocationStockQuery).
  */
 export type GetClassLocationStockRequest = {
-  classId: number;
+  classId: string;
   /** Optional - when omitted, the report aggregates stock across every location for the class. */
-  locationId?: number | null;
+  locationId?: string | null;
   /** Optional - when provided, only items whose name contains this term (case-insensitive) are included. */
   searchTerm?: string | null;
 };
@@ -56,9 +56,9 @@ export const ADJUSTMENT_REASON_OPTIONS: Array<{ label: string; value: Adjustment
 
 /** Mirrors src/Application/Features/Stock/Models/StockRequests.cs (AdjustStockRequest). */
 export type AdjustStockRequest = {
-  classId: number;
-  itemId: number;
-  locationId: number;
+  classId: string;
+  itemId: string;
+  locationId: string;
   actualQuantity: number;
   reason: AdjustmentReason;
 };

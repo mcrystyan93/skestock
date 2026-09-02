@@ -4,5 +4,5 @@ namespace skestock.Application.Features.SchoolClasses.Queries.GetSchoolClassById
 
 public class GetSchoolClassByIdQuery : IRequest<Result<SchoolClassDto>>
 {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
 }

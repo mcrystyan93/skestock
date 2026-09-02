@@ -1,0 +1,24 @@
+<div *nzModalTitle></div>
+
+<ske-add-goods-receipt-upload (onFileListChange)="onFileListChange($event)" />
+
+<div *nzModalFooter>
+  <nz-space>
+    <button nz-button
+            *nzSpaceItem
+            nzType="default"
+            type="button"
+            [nzLoading]="store.uploadLoading()"
+            (click)="close()">
+      Inchide
+    </button>
+    <button nz-button
+            *nzSpaceItem
+            nzType="primary"
+            type="button"
+            [nzLoading]="store.uploadLoading()"
+            (click)="loadFile()">
+      Incarca fisierul
+    </button>
+  </nz-space>
+</div>

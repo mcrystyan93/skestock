@@ -7,7 +7,7 @@ public class DisableItemCommandValidator : AbstractValidator<DisableItemCommand>
     public DisableItemCommandValidator()
     {
         RuleFor(x => x.Id)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan);
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required);
     }
 }

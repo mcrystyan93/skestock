@@ -7,7 +7,7 @@ public class GetGoodsReceiptByIdQueryValidator : AbstractValidator<GetGoodsRecei
     public GetGoodsReceiptByIdQueryValidator()
     {
         RuleFor(x => x.Id)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan);
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required);
     }
 }

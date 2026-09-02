@@ -7,7 +7,7 @@ public class GetSchoolClassSummaryQueryValidator : AbstractValidator<GetSchoolCl
     public GetSchoolClassSummaryQueryValidator()
     {
         RuleFor(x => x.Id)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan);
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required);
     }
 }

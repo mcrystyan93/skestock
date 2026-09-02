@@ -4,5 +4,5 @@ namespace skestock.Application.Features.GoodsReceipts.Queries.GetGoodsReceiptByI
 
 public class GetGoodsReceiptByIdQuery : IRequest<Result<GoodsReceiptDto>>
 {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
 }

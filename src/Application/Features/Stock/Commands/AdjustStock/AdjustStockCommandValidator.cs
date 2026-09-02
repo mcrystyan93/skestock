@@ -9,16 +9,16 @@ public class AdjustStockCommandValidator : AbstractValidator<AdjustStockCommand>
     public AdjustStockCommandValidator(IApplicationDbContext dbContext)
     {
         RuleFor(x => x.ClassId)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan);
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required);
 
         RuleFor(x => x.ItemId)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan);
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required);
 
         RuleFor(x => x.LocationId)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan);
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required);
 
         RuleFor(x => x.ActualQuantity)
             .GreaterThanOrEqualTo(0)
@@ -34,7 +34,7 @@ public class AdjustStockCommandValidator : AbstractValidator<AdjustStockCommand>
         RuleFor(x => x)
             .CustomAsync(async (command, context, cancellationToken) =>
                 await ValidateAsync(dbContext, command, context, cancellationToken))
-            .When(x => x.ClassId > 0 && x.ItemId > 0 && x.LocationId > 0);
+            .When(x => x.ClassId != Guid.Empty && x.ItemId != Guid.Empty && x.LocationId != Guid.Empty);
     }
 
     private static async Task ValidateAsync(

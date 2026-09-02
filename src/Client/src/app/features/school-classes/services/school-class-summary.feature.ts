@@ -22,7 +22,7 @@ export function withSchoolClassSummaryFeature() {
     withMethods((store) => {
       const schoolClassHttp = inject(SchoolClassesHttp);
 
-      const loadSummary = rxMethod<number>(
+      const loadSummary = rxMethod<string>(
         pipe(
           tap(() => {
             store.setSummaryLoading();

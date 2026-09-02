@@ -17,7 +17,7 @@ type StockCollectionState = {
 const initialState: StockCollectionState = {
   stockItems: [],
   filter: {
-    classId: 0,
+    classId: '',
     locationId: null,
     searchTerm: null
   },
@@ -51,7 +51,7 @@ export function withStockCollection() {
                 mapResponse({
                   next: (result) => {
                     const groupedStockItems = new Map<StockItemCategoryGroup, StockItemDto[]>();
-                    const groupsByCategoryId = new Map<number, StockItemCategoryGroup>();
+                    const groupsByCategoryId = new Map<string, StockItemCategoryGroup>();
 
                     for (const item of result) {
                       let group = groupsByCategoryId.get(item.categoryId);

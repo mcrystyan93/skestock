@@ -10,26 +10,26 @@ public class GetCategoryByIdQueryValidatorTests
     private readonly GetCategoryByIdQueryValidator _validator = new();
 
     [Test]
-    public async Task ShouldNotHaveErrorWhenIdIsGreaterThanZero()
+    public async Task ShouldNotHaveErrorWhenIdIsNotEmpty()
     {
-        var result = await _validator.ValidateAsync(new GetCategoryByIdQuery { Id = 1 });
+        var result = await _validator.ValidateAsync(new GetCategoryByIdQuery { Id = Guid.NewGuid() });
 
         result.IsValid.ShouldBeTrue();
     }
 
     [Test]
-    public async Task ShouldHaveErrorWhenIdIsZero()
+    public async Task ShouldHaveErrorWhenIdIsEmpty()
     {
-        var result = await _validator.ValidateAsync(new GetCategoryByIdQuery { Id = 0 });
+        var result = await _validator.ValidateAsync(new GetCategoryByIdQuery { Id = Guid.Empty });
 
-        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.GreaterThan);
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.Required);
     }
 
     [Test]
-    public async Task ShouldHaveErrorWhenIdIsNegative()
+    public async Task ShouldHaveErrorWhenIdIsEmptyVariant()
     {
-        var result = await _validator.ValidateAsync(new GetCategoryByIdQuery { Id = -1 });
+        var result = await _validator.ValidateAsync(new GetCategoryByIdQuery { Id = Guid.Empty });
 
-        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.GreaterThan);
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.Required);
     }
 }

@@ -4,7 +4,7 @@ import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
 import { CategoriesHttp } from '@ske/shared/categories';
-import { isNil, isNumber, isString, toNumber } from 'lodash-es';
+import { isNil } from 'lodash-es';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, of, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
@@ -40,14 +40,14 @@ export const CategoryDetailState = signalStore(
       return id;
     };
 
-    const loadCategory = rxMethod<number | string>(
+    const loadCategory = rxMethod<string>(
       pipe(
         tap(() => {
           store.setCategoryLoading();
           store.clearCategoryErrors();
         }),
         switchMap((id) => {
-          if (isString(id) && id === NEW_CATEGORY_ROUTE_ID) {
+          if (id === NEW_CATEGORY_ROUTE_ID) {
             patchState(store, {
               category: {}
             });
@@ -55,15 +55,13 @@ export const CategoryDetailState = signalStore(
             return of(null);
           }
 
-          const idAsNumber = toNumber(id);
-
-          if (!isNumber(idAsNumber) || Number.isNaN(idAsNumber)) {
+          if (isNil(id) || id === '') {
             store.handleCategoryError({ title: 'Category ID missing', status: 400 });
             store.setCategoryLoaded();
             return of(null);
           }
 
-          return store.categoryHttp.getById(idAsNumber).pipe(
+          return store.categoryHttp.getById(id).pipe(
             mapResponse({
               next: (category) => {
                 patchState(store, { category });

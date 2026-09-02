@@ -35,7 +35,7 @@ public class GetAllStockBatchesHandlerTests
         };
         context.SchoolClasses.Add(schoolClass);
 
-        var receipt = new GoodsReceipt { ClassId = 0, Class = schoolClass, Note = "Receipt" };
+        var receipt = new GoodsReceipt { ClassId = schoolClass.Id, Class = schoolClass, Note = "Receipt" };
         context.GoodsReceipts.Add(receipt);
 
         await context.SaveChangesAsync(CancellationToken.None);
@@ -217,7 +217,7 @@ public class GetAllStockBatchesHandlerTests
     public async Task Handle_WithGoodsReceiptIdFilter_ReturnsOnlyBatchesFromThatReceipt()
     {
         var (context, item, location, schoolClass, receipt) = await SeedPrerequisitesAsync();
-        var otherReceipt = new GoodsReceipt { ClassId = 0, Class = schoolClass, Note = "Other" };
+        var otherReceipt = new GoodsReceipt { ClassId = schoolClass.Id, Class = schoolClass, Note = "Other" };
         context.GoodsReceipts.Add(otherReceipt);
 
         context.StockBatches.Add(MakeBatch(item, location, schoolClass, receipt, 1, 1m, DateTimeOffset.UtcNow));
@@ -270,7 +270,7 @@ public class GetAllStockBatchesHandlerTests
 
         var query = new GetAllStockBatchesQuery
         {
-            Filters = [new ColumnFilter("goodsReceiptId", FilterOperator.Equals, receipt.Id + 999)]
+            Filters = [new ColumnFilter("goodsReceiptId", FilterOperator.Equals, Guid.NewGuid())]
         };
         var result = await handler.Handle(query, CancellationToken.None);
 

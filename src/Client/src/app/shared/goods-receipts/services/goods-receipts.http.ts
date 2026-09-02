@@ -1,9 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import {
+  CreateGoodsReceiptImportRequest,
   CreateGoodsReceiptRequest,
   GetAllGoodsReceiptsRequest,
   GoodsReceiptDto,
+  GoodsReceiptImportDto,
   GoodsReceiptListItemDto,
   PaginatedResponse
 } from '@ske/models';
@@ -19,11 +21,15 @@ export class GoodsReceiptsHttp {
     return this._httpClient.post<PaginatedResponse<GoodsReceiptListItemDto>>('/api/GoodsReceipts/get-all', request);
   }
 
-  public getById(id: number) {
+  public getById(id: string) {
     return this._httpClient.get<GoodsReceiptDto>(`/api/GoodsReceipts/${id}`);
   }
 
   public create(request: CreateGoodsReceiptRequest) {
     return this._httpClient.post<GoodsReceiptDto>('/api/GoodsReceipts', request);
+  }
+
+  public createImport(request: CreateGoodsReceiptImportRequest) {
+    return this._httpClient.post<GoodsReceiptImportDto>('/api/GoodsReceipts/imports', request);
   }
 }

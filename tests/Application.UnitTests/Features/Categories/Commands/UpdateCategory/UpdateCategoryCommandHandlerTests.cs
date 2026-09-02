@@ -4,6 +4,7 @@ using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Categories.Commands.UpdateCategory;
 using skestock.Domain.Entities;
+using skestock.Domain.Queues;
 using NUnit.Framework;
 using Shouldly;
 
@@ -29,10 +30,20 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
     public DbSet<StockTransaction> StockTransactions => Set<StockTransaction>();
     public DbSet<GoodsReceipt> GoodsReceipts => Set<GoodsReceipt>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+    public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+
+    public DbSet<GoodsReceiptImport> GoodsReceiptImports => Set<GoodsReceiptImport>();
+    public DbSet<GoodsReceiptImportLine> GoodsReceiptImportLines => Set<GoodsReceiptImportLine>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Ignore<GoodsReceiptImport>();
+        builder.Ignore<GoodsReceiptImportLine>();
+
+        builder.Ignore<FileMetadata>();
 
         builder.Entity<UserProfile>(b =>
         {
@@ -113,7 +124,7 @@ public class UpdateCategoryCommandHandlerTests
         var handler = new UpdateCategoryCommandHandler(context);
 
         var result = await handler.Handle(
-            new UpdateCategoryCommand { Id = 12345, Name = "Anything" },
+            new UpdateCategoryCommand { Id = Guid.NewGuid(), Name = "Anything" },
             CancellationToken.None);
 
         result.IsFailed.ShouldBeTrue();

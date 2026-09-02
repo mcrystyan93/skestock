@@ -10,18 +10,18 @@ public class GetItemByIdQueryValidatorTests
     private readonly GetItemByIdQueryValidator _validator = new();
 
     [Test]
-    public async Task ShouldNotHaveErrorWhenIdIsGreaterThanZero()
+    public async Task ShouldNotHaveErrorWhenIdIsNotEmpty()
     {
-        var result = await _validator.ValidateAsync(new GetItemByIdQuery { Id = 1 });
+        var result = await _validator.ValidateAsync(new GetItemByIdQuery { Id = Guid.NewGuid() });
 
         result.IsValid.ShouldBeTrue();
     }
 
     [Test]
-    public async Task ShouldHaveErrorWhenIdIsZeroOrNegative()
+    public async Task ShouldHaveErrorWhenIdIsEmpty()
     {
-        var result = await _validator.ValidateAsync(new GetItemByIdQuery { Id = 0 });
+        var result = await _validator.ValidateAsync(new GetItemByIdQuery { Id = Guid.Empty });
 
-        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.GreaterThan);
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.Required);
     }
 }

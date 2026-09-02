@@ -29,7 +29,7 @@ export const SchoolClassOverviewStore = signalStore(
     schoolClassHttp: inject(SchoolClassesHttp)
   })),
   withMethods((store) => {
-    const load = rxMethod<number>(
+    const load = rxMethod<string>(
       pipe(
         tap(() => {
           store.clearSchoolClassErrors();

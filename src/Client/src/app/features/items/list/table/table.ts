@@ -24,7 +24,7 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
 })
 export class Table extends BaseTable<ItemDto, GetAllItemsRequest> {
   public readonly loading = input.required<boolean>();
-  public readonly togglingItemId = input<number | null>(null);
+  public readonly togglingItemId = input<string | null>(null);
 
   public readonly onEdit = output<ItemDto>();
   public readonly onToggleActive = output<ItemDto>();

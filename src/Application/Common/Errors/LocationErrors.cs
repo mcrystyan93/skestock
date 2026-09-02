@@ -7,7 +7,7 @@ public static class LocationErrors
     {
         public const string ErrorCode = "locations.not_found";
 
-        public LocationNotFound(int locationId) : base($"Location with id '{locationId}' was not found.")
+        public LocationNotFound(Guid locationId) : base($"Location with id '{locationId}' was not found.")
         {
             Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status404NotFound);
             Metadata.Add(ErrorMetadataKeys.Title, "Location not found");

@@ -52,7 +52,7 @@ export class Form {
 }
 
 export type CategoryFormModel = {
-  id: number | null;
+  id: string | null;
   name: string;
 };
 export type CategoryFormSubmit = {

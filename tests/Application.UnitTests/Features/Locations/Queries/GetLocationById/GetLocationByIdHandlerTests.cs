@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Locations.Queries.GetLocationById;
 using skestock.Domain.Entities;
+using skestock.Domain.Queues;
 using NUnit.Framework;
 using Shouldly;
 
@@ -28,10 +29,20 @@ public class LocationTestDbContext(DbContextOptions<LocationTestDbContext> optio
     public DbSet<StockTransaction> StockTransactions => Set<StockTransaction>();
     public DbSet<GoodsReceipt> GoodsReceipts => Set<GoodsReceipt>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+    public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+
+    public DbSet<GoodsReceiptImport> GoodsReceiptImports => Set<GoodsReceiptImport>();
+    public DbSet<GoodsReceiptImportLine> GoodsReceiptImportLines => Set<GoodsReceiptImportLine>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Ignore<GoodsReceiptImport>();
+        builder.Ignore<GoodsReceiptImportLine>();
+
+        builder.Ignore<FileMetadata>();
 
         builder.Entity<UserProfile>(b =>
         {
@@ -112,7 +123,7 @@ public class GetLocationByIdHandlerTests
         await using var context = CreateContext();
         var handler = new GetLocationByIdHandler(context);
 
-        var result = await handler.Handle(new GetLocationByIdQuery { Id = 12345 }, CancellationToken.None);
+        var result = await handler.Handle(new GetLocationByIdQuery { Id = Guid.NewGuid() }, CancellationToken.None);
 
         result.IsFailed.ShouldBeTrue();
     }

@@ -3,10 +3,10 @@ import { PAGINATION_PAGE_SIZE } from './category';
 
 /** Mirrors src/Application/Features/Locations/Models/LocationDto.cs. */
 export type LocationDto = {
-  id: number;
+  id: string;
   name: string;
   type: string;
-  parentLocationId?: number | null;
+  parentLocationId?: string | null;
   parentLocationName?: string | null;
   createdByName?: string | null;
   lastModifiedByName?: string | null;
@@ -23,14 +23,14 @@ export type GetAllLocationsRequest = BasePaginationFilter & {
 export type CreateLocationRequest = {
   name: string;
   type: string;
-  parentLocationId?: number | null;
+  parentLocationId?: string | null;
 };
 
 /** Mirrors src/Application/Features/Locations/Models/LocationRequests.cs. */
 export type UpdateLocationRequest = {
   name: string;
   type: string;
-  parentLocationId?: number | null;
+  parentLocationId?: string | null;
 };
 
 export type LocationDropdownValue = LocationDto | Partial<LocationDto> | null;

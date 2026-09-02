@@ -43,7 +43,7 @@ public class Categories : IEndpointGroup
     [EndpointSummary("Get a category by id")]
     [EndpointDescription("Retrieves a single category by its id.")]
     public static async Task<Results<Ok<CategoryDto>, ProblemHttpResult>> GetCategoryById(
-        ISender sender, int id, CancellationToken cancellationToken)
+        ISender sender, Guid id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetCategoryByIdQuery { Id = id }, cancellationToken);
 
@@ -71,7 +71,7 @@ public class Categories : IEndpointGroup
     [EndpointSummary("Update an existing category")]
     [EndpointDescription("Updates an existing category in the database.")]
     public static async Task<Results<Ok<CategoryDto>, ProblemHttpResult>> UpdateCategory(
-        ISender sender, int id, CategoryRequests.UpdateCategoryRequest request, CancellationToken cancellationToken)
+        ISender sender, Guid id, CategoryRequests.UpdateCategoryRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateCategoryCommand { Id = id, Name = request.Name };
 

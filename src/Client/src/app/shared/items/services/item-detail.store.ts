@@ -4,7 +4,7 @@ import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
 import { ItemsHttp } from '@ske/shared/items';
-import { isNil, isNumber, isString, toNumber } from 'lodash-es';
+import { isNil } from 'lodash-es';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, of, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
@@ -40,14 +40,14 @@ export const ItemDetailState = signalStore(
       return id;
     };
 
-    const loadItem = rxMethod<number | string>(
+    const loadItem = rxMethod<string>(
       pipe(
         tap(() => {
           store.setItemLoading();
           store.clearItemErrors();
         }),
         switchMap((id) => {
-          if (isString(id) && id === NEW_ITEM_ROUTE_ID) {
+          if (id === NEW_ITEM_ROUTE_ID) {
             patchState(store, {
               item: {}
             });
@@ -55,15 +55,13 @@ export const ItemDetailState = signalStore(
             return of(null);
           }
 
-          const idAsNumber = toNumber(id);
-
-          if (!isNumber(idAsNumber) || Number.isNaN(idAsNumber)) {
+          if (isNil(id) || id === '') {
             store.handleItemError({ title: 'Item ID missing', status: 400 });
             store.setItemLoaded();
             return of(null);
           }
 
-          return store.itemHttp.getById(idAsNumber).pipe(
+          return store.itemHttp.getById(id).pipe(
             mapResponse({
               next: (item) => {
                 patchState(store, { item });

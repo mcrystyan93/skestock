@@ -19,7 +19,7 @@ public class GetAllSchoolClassesQueryValidatorTests
         var effectiveSort = DynamicSortBuilder<SchoolClass>.BuildEffectiveSort(sort, SortConfiguration);
         var entity = new SchoolClass
         {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Name = "Test Class",
             StartDate = new DateOnly(2026, 1, 1),
             EndDate = new DateOnly(2026, 6, 1),

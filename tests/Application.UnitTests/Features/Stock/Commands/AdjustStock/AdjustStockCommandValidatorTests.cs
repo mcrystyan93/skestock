@@ -81,7 +81,7 @@ public class AdjustStockCommandValidatorTests
 
         var result = await validator.ValidateAsync(new AdjustStockCommand
         {
-            ClassId = 9999,
+            ClassId = Guid.NewGuid(),
             ItemId = item.Id,
             LocationId = location.Id,
             ActualQuantity = 10,
@@ -101,7 +101,7 @@ public class AdjustStockCommandValidatorTests
         var result = await validator.ValidateAsync(new AdjustStockCommand
         {
             ClassId = schoolClass.Id,
-            ItemId = 9999,
+            ItemId = Guid.NewGuid(),
             LocationId = location.Id,
             ActualQuantity = 10,
             Reason = AdjustmentReason.Miscount
@@ -121,7 +121,7 @@ public class AdjustStockCommandValidatorTests
         {
             ClassId = schoolClass.Id,
             ItemId = item.Id,
-            LocationId = 9999,
+            LocationId = Guid.NewGuid(),
             ActualQuantity = 10,
             Reason = AdjustmentReason.Miscount
         });

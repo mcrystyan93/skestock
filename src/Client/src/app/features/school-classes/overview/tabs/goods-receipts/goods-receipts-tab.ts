@@ -22,7 +22,7 @@ import { ColumnFilter } from '@ske/models';
   `
 })
 export class GoodsReceiptsTab {
-  public readonly classId = input.required<number | null>();
+  public readonly classId = input.required<string | null>();
   public readonly store = inject(SchoolClassOverviewStore);
 
   private readonly _classIdEffectRef = effect(() => {
@@ -36,7 +36,7 @@ export class GoodsReceiptsTab {
     });
   });
 
-  private getClassIdFilter(classId: number): ColumnFilter {
+  private getClassIdFilter(classId: string): ColumnFilter {
     return {
       value: classId,
       operator: 'equals',

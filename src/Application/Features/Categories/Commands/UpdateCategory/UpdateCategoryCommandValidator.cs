@@ -12,8 +12,8 @@ public class UpdateCategoryCommandValidator : AbstractValidator<UpdateCategoryCo
     public UpdateCategoryCommandValidator(IApplicationDbContext dbContext)
     {
         RuleFor(x => x.Id)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan);
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required);
 
         RuleFor(x => x.Name)
             .NotEmpty()
@@ -30,7 +30,7 @@ public class UpdateCategoryCommandValidator : AbstractValidator<UpdateCategoryCo
             });
     }
 
-    private static async Task<bool> IsNameUniqueAsync(IApplicationDbContext dbContext, int id, string name, CancellationToken cancellationToken)
+    private static async Task<bool> IsNameUniqueAsync(IApplicationDbContext dbContext, Guid id, string name, CancellationToken cancellationToken)
     {
         var normalized = name.Trim().ToLower();
         return !await dbContext.Categories

@@ -89,6 +89,6 @@ export class AddStockBatchModal {
 }
 
 type StockBatchDetailModalData = {
-  schoolClassId: number;
+  schoolClassId: string;
   category: Partial<CategoryDto> | null;
 }

@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Shared\Shared.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="..\Web\Web.csproj" />
+    <ProjectReference Include="..\Worker\Worker.csproj" />
   </ItemGroup>
 
 </Project>

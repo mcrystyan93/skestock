@@ -46,7 +46,7 @@ public class CreateLocationCommandValidator : AbstractValidator<CreateLocationCo
             .AnyAsync(l => l.Name.ToLower() == normalized, cancellationToken);
     }
 
-    private static async Task<bool> ParentLocationExistsAsync(IApplicationDbContext dbContext, int? parentLocationId, CancellationToken cancellationToken)
+    private static async Task<bool> ParentLocationExistsAsync(IApplicationDbContext dbContext, Guid? parentLocationId, CancellationToken cancellationToken)
     {
         return await dbContext.Locations
             .AsNoTracking()

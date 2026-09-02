@@ -90,7 +90,7 @@ export class Form {
 }
 
 export type ItemFormModel = {
-  id: number | null;
+  id: string | null;
   sku: string;
   name: string;
   description: string;

@@ -4,9 +4,10 @@ namespace skestock.Domain.Common;
 
 public abstract class BaseEntity
 {
-    // This can easily be modified to be BaseEntity<T> and public T Id to support different key types.
-    // Using non-generic integer types for simplicity
-    public int Id { get; set; }
+    // GUID v7 (time-ordered) primary key. Values are assigned on insert by the
+    // ID-generation SaveChanges interceptor (Guid.CreateVersion7) so keyset pagination
+    // ordering on Id stays monotonic.
+    public Guid Id { get; set; }
 
     private readonly List<BaseEvent> _domainEvents = new();
 

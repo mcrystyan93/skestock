@@ -19,7 +19,7 @@ public class GetAllStockBatchesQueryValidatorTests
         var effectiveSort = DynamicSortBuilder<StockBatch>.BuildEffectiveSort(sort, SortConfiguration);
         var entity = new StockBatch
         {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Item = null!,
             Location = null!,
             ReceivedClass = null!,

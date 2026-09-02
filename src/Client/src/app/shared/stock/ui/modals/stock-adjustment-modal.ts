@@ -100,6 +100,6 @@ export class StockAdjustmentModal {
 }
 
 export type StockAdjustmentModalData = {
-  classId: number;
+  classId: string;
   item: StockItemDto;
 }

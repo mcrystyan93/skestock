@@ -2,7 +2,7 @@ namespace skestock.Application.Features.Items.Models;
 
 public record ItemDto
 {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
     public string? Sku { get; init; }
     public string Name { get; init; } = string.Empty;
     public string? Description { get; init; }
@@ -10,7 +10,7 @@ public record ItemDto
     public int MinThreshold { get; init; }
     public bool IsPerishable { get; init; }
     public bool IsActive { get; init; }
-    public int CategoryId { get; init; }
+    public Guid CategoryId { get; init; }
     public string? CategoryName { get; init; }
     public string? CreatedByName { get; init; }
     public string? LastModifiedByName { get; init; }
