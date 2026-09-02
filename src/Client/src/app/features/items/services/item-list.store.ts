@@ -8,7 +8,7 @@ import { inject } from '@angular/core';
 import { ItemsHttp } from '@ske/shared/items';
 
 type ItemListState = {
-  togglingItemId: number | null;
+  togglingItemId: string | null;
 };
 const initialState: ItemListState = {
   togglingItemId: null

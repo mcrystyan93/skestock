@@ -19,7 +19,7 @@ export class LocationsHttp {
     return this._httpClient.post<PaginatedResponse<LocationDto>>('/api/Locations/get-all', request);
   }
 
-  public getById(id: number) {
+  public getById(id: string) {
     return this._httpClient.get<LocationDto>(`/api/Locations/${id}`);
   }
 
@@ -27,7 +27,7 @@ export class LocationsHttp {
     return this._httpClient.post<LocationDto>('/api/Locations', request);
   }
 
-  public update(id: number, request: UpdateLocationRequest) {
+  public update(id: string, request: UpdateLocationRequest) {
     return this._httpClient.put<LocationDto>(`/api/Locations/${id}`, request);
   }
 }

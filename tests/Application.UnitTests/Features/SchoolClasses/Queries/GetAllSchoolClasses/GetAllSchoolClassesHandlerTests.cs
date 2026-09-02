@@ -6,6 +6,7 @@ using skestock.Application.Common.Models;
 using skestock.Application.Features.SchoolClasses.Models;
 using skestock.Application.Features.SchoolClasses.Queries.GetAllSchoolClasses;
 using skestock.Domain.Entities;
+using skestock.Domain.Queues;
 using skestock.Domain.Enums;
 using NUnit.Framework;
 using Shouldly;
@@ -29,10 +30,20 @@ public class SchoolClassTestDbContext(DbContextOptions<SchoolClassTestDbContext>
     public DbSet<StockTransaction> StockTransactions => Set<StockTransaction>();
     public DbSet<GoodsReceipt> GoodsReceipts => Set<GoodsReceipt>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+    public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+
+    public DbSet<GoodsReceiptImport> GoodsReceiptImports => Set<GoodsReceiptImport>();
+    public DbSet<GoodsReceiptImportLine> GoodsReceiptImportLines => Set<GoodsReceiptImportLine>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Ignore<GoodsReceiptImport>();
+        builder.Ignore<GoodsReceiptImportLine>();
+
+        builder.Ignore<FileMetadata>();
 
         builder.Entity<UserProfile>(b =>
         {

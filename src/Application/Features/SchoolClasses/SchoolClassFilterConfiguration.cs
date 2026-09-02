@@ -9,7 +9,7 @@ public class SchoolClassFilterConfiguration : IFilterConfiguration<SchoolClass>
 {
     public IReadOnlyDictionary<string, FilterField<SchoolClass>> Fields { get; } = new Dictionary<string, FilterField<SchoolClass>>(StringComparer.OrdinalIgnoreCase)
     {
-        ["id"] = new((Expression<Func<SchoolClass, int>>)(d => d.Id), typeof(int)),
+        ["id"] = new((Expression<Func<SchoolClass, Guid>>)(d => d.Id), typeof(Guid)),
         ["name"] = new((Expression<Func<SchoolClass, string>>)(d => d.Name), typeof(string)),
         ["status"] = new((Expression<Func<SchoolClass, ClassStatus>>)(d => d.Status), typeof(ClassStatus)),
         ["startDate"] = new((Expression<Func<SchoolClass, DateOnly>>)(d => d.StartDate), typeof(DateOnly)),

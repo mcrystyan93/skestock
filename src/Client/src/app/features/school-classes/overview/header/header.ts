@@ -1,6 +1,6 @@
-import { Component, input, model } from '@angular/core';
+import { Component, input, model, output } from '@angular/core';
 import {
-  NzPageHeaderComponent, NzPageHeaderContentDirective, NzPageHeaderFooterDirective,
+  NzPageHeaderComponent, NzPageHeaderContentDirective, NzPageHeaderExtraDirective, NzPageHeaderFooterDirective,
   NzPageHeaderSubtitleDirective,
   NzPageHeaderTitleDirective
 } from 'ng-zorro-antd/page-header';
@@ -10,6 +10,7 @@ import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 import { NzStatisticComponent } from 'ng-zorro-antd/statistic';
 import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+import { NzButtonComponent } from 'ng-zorro-antd/button';
 
 @Component({
   imports: [
@@ -25,7 +26,9 @@ import { NzTypographyComponent } from 'ng-zorro-antd/typography';
     NzTabsComponent,
     NzTabComponent,
     CurrencyPipe,
-    NzTypographyComponent
+    NzTypographyComponent,
+    NzPageHeaderExtraDirective,
+    NzButtonComponent
   ],
   selector: 'ske-school-class-overview-header',
   styles: ``,
@@ -36,4 +39,5 @@ export class Header {
   public readonly summary = input.required<Partial<SchoolClassSummary>>();
 
   public selectedTabIndex = model<number>(0);
+  public onAddGoodsReceipt = output<void>();
 }

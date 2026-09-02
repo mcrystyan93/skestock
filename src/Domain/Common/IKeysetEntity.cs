@@ -6,7 +6,7 @@ namespace skestock.Domain.Common;
 /// </summary>
 public interface IKeysetEntity
 {
-    int Id { get; }
+    Guid Id { get; }
     DateTimeOffset CreatedDate { get; }
 }
 

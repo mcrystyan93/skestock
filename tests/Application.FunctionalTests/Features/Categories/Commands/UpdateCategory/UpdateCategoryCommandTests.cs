@@ -38,7 +38,7 @@ public class UpdateCategoryCommandTests : TestBase
     [Test]
     public async Task Handle_WithNonExistentId_ReturnsFailedResult()
     {
-        var result = await TestApp.SendAsync(new UpdateCategoryCommand { Id = int.MaxValue, Name = $"{_prefix}-X" });
+        var result = await TestApp.SendAsync(new UpdateCategoryCommand { Id = Guid.NewGuid(), Name = $"{_prefix}-X" });
 
         result.IsFailed.ShouldBeTrue();
     }

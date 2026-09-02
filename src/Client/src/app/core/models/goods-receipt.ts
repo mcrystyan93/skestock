@@ -4,10 +4,10 @@ import { GetAllSchoolClassesRequest } from './school-class';
 
 /** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptDto.cs. */
 export type GoodsReceiptLineDto = {
-  stockBatchId: number;
-  itemId: number;
+  stockBatchId: string;
+  itemId: string;
   itemName: string;
-  locationId: number;
+  locationId: string;
   locationName: string;
   quantity: number;
   expiryDate?: string | null;
@@ -15,8 +15,8 @@ export type GoodsReceiptLineDto = {
 
 /** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptDto.cs. */
 export type GoodsReceiptDto = {
-  id: number;
-  classId: number;
+  id: string;
+  classId: string;
   className: string;
   receivedAt: string;
   supplierReference?: string | null;
@@ -34,8 +34,8 @@ export type GoodsReceiptDto = {
  * src/Application/Features/GoodsReceipts/Models/GoodsReceiptDto.cs.
  */
 export type GoodsReceiptListItemDto = {
-  id: number;
-  classId: number;
+  id: string;
+  classId: string;
   className: string;
   receivedAt: string;
   supplierReference?: string | null;
@@ -54,19 +54,38 @@ export type GetAllGoodsReceiptsRequest = BasePaginationFilter & {
 
 /** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptRequests.cs. */
 export type CreateGoodsReceiptLineRequest = {
-  itemId: number;
-  locationId: number;
+  itemId: string;
+  locationId: string;
   quantity: number;
   expiryDate?: string | null;
 };
 
 /** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptRequests.cs. */
 export type CreateGoodsReceiptRequest = {
-  classId: number;
+  classId: string;
   supplierReference?: string | null;
   note: string;
   lines: CreateGoodsReceiptLineRequest[];
 };
+/** Mirrors src/Domain/Enums/GoodsReceiptImportStatus.cs. */
+export type GoodsReceiptImportStatus = 'Processing' | 'PendingReview' | 'Confirmed' | 'Failed';
+
+/** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptImportDto.cs. */
+export type GoodsReceiptImportDto = {
+  id: string;
+  status: GoodsReceiptImportStatus;
+  classId: string;
+  fileMetadataId: string;
+  blobPath: string;
+  uploadedAt: string;
+};
+
+/** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptRequests.cs. */
+export type CreateGoodsReceiptImportRequest = {
+  classId: string;
+  fileMetadataId: string;
+};
+
 export type GoodsReceiptTableColumn =
   | 'className'
   | 'receivedAt'

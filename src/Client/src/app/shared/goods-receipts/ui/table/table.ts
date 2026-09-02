@@ -29,13 +29,13 @@ export class Table extends BaseTable<GoodsReceiptListItemDto, GetAllGoodsReceipt
 
   // public readonly onView = output<GoodsReceiptListItemDto>();
   public readonly columns = GOODS_RECEIPT_TABLE_COLUMNS;
-  public readonly expandedRows = signal<Set<number>>(new Set<number>());
+  public readonly expandedRows = signal<Set<string>>(new Set<string>());
 
   constructor() {
     super();
   }
 
-  public toggleRow(id: number) {
+  public toggleRow(id: string) {
     this.expandedRows.update((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(id))

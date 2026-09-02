@@ -6,7 +6,7 @@ namespace skestock.Application.Features.SchoolClasses.Commands.UpdateSchoolClass
 
 public class UpdateSchoolClassCommand : IRequest<Result<SchoolClassDto>>, ICacheInvalidation
 {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
     public string Name { get; init; } = string.Empty;
     public DateOnly StartDate { get; init; }
     public DateOnly EndDate { get; init; }

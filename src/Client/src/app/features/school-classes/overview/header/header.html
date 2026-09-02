@@ -35,6 +35,15 @@
     </nz-row>
   </nz-page-header-content>
 
+  <nz-page-header-extra>
+    <button nz-button
+            nzType="primary"
+            type="button"
+            (click)="onAddGoodsReceipt.emit()">
+      Adauga comanda
+    </button>
+  </nz-page-header-extra>
+
   <nz-page-header-footer>
     <nz-tabs [(nzSelectedIndex)]="selectedTabIndex">
       <nz-tab nzTitle="Comenzi"></nz-tab>

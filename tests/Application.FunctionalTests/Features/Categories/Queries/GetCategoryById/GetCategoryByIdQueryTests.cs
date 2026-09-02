@@ -30,7 +30,7 @@ public class GetCategoryByIdQueryTests : TestBase
     [Test]
     public async Task Handle_WithNonExistentId_ReturnsFailedResult()
     {
-        var result = await TestApp.SendAsync(new GetCategoryByIdQuery { Id = int.MaxValue });
+        var result = await TestApp.SendAsync(new GetCategoryByIdQuery { Id = Guid.NewGuid() });
 
         result.IsFailed.ShouldBeTrue();
     }
@@ -38,7 +38,7 @@ public class GetCategoryByIdQueryTests : TestBase
     [Test]
     public async Task Handle_WithInvalidId_ThrowsValidationException()
     {
-        var act = async () => await TestApp.SendAsync(new GetCategoryByIdQuery { Id = 0 });
+        var act = async () => await TestApp.SendAsync(new GetCategoryByIdQuery { Id = Guid.Empty });
 
         var exception = await act.ShouldThrowAsync<ValidationException>();
         exception.Errors.ShouldContainKey(nameof(GetCategoryByIdQuery.Id));

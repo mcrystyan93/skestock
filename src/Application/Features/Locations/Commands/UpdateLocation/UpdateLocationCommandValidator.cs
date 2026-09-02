@@ -17,8 +17,8 @@ public class UpdateLocationCommandValidator : AbstractValidator<UpdateLocationCo
     public UpdateLocationCommandValidator(IApplicationDbContext dbContext)
     {
         RuleFor(x => x.Id)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan);
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required);
 
         RuleFor(x => x.Name)
             .NotEmpty()
@@ -62,7 +62,7 @@ public class UpdateLocationCommandValidator : AbstractValidator<UpdateLocationCo
             });
     }
 
-    private static async Task<bool> IsNameUniqueAsync(IApplicationDbContext dbContext, int id, string name, CancellationToken cancellationToken)
+    private static async Task<bool> IsNameUniqueAsync(IApplicationDbContext dbContext, Guid id, string name, CancellationToken cancellationToken)
     {
         var normalized = name.Trim().ToLower();
         return !await dbContext.Locations
@@ -70,7 +70,7 @@ public class UpdateLocationCommandValidator : AbstractValidator<UpdateLocationCo
             .AnyAsync(l => l.Id != id && l.Name.ToLower() == normalized, cancellationToken);
     }
 
-    private static async Task<bool> ParentLocationExistsAsync(IApplicationDbContext dbContext, int? parentLocationId, CancellationToken cancellationToken)
+    private static async Task<bool> ParentLocationExistsAsync(IApplicationDbContext dbContext, Guid? parentLocationId, CancellationToken cancellationToken)
     {
         return await dbContext.Locations
             .AsNoTracking()
@@ -82,7 +82,7 @@ public class UpdateLocationCommandValidator : AbstractValidator<UpdateLocationCo
     /// <paramref name="id"/> does not appear in it - assigning such a parent would create a cycle
     /// in the self-referencing Location hierarchy.
     /// </summary>
-    private static async Task<bool> HasCircularReferenceAsync(IApplicationDbContext dbContext, int id, int? parentLocationId, CancellationToken cancellationToken)
+    private static async Task<bool> HasCircularReferenceAsync(IApplicationDbContext dbContext, Guid id, Guid? parentLocationId, CancellationToken cancellationToken)
     {
         var currentId = parentLocationId;
         var depth = 0;
@@ -98,7 +98,7 @@ public class UpdateLocationCommandValidator : AbstractValidator<UpdateLocationCo
             currentId = await dbContext.Locations
                 .AsNoTracking()
                 .Where(l => l.Id == currentId.Value)
-                .Select(l => (int?)l.ParentLocationId)
+                .Select(l => (Guid?)l.ParentLocationId)
                 .SingleOrDefaultAsync(cancellationToken);
         }
 

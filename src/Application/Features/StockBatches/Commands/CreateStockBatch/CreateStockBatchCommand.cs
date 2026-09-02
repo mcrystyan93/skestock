@@ -11,9 +11,9 @@ namespace skestock.Application.Features.StockBatches.Commands.CreateStockBatch;
 [Authorize]
 public class CreateStockBatchCommand : IRequest<Result<StockBatchListItemDto>>, ICacheInvalidation
 {
-    public int ItemId { get; init; }
-    public int LocationId { get; init; }
-    public int ReceivedClassId { get; init; }
+    public Guid ItemId { get; init; }
+    public Guid LocationId { get; init; }
+    public Guid ReceivedClassId { get; init; }
     public int Quantity { get; init; }
     public DateOnly? ExpiryDate { get; init; }
     public DateOnly ReceivedDate { get; init; }

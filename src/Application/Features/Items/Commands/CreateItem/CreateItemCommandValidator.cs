@@ -47,8 +47,8 @@ public class CreateItemCommandValidator : AbstractValidator<CreateItemCommand>
             });
 
         RuleFor(x => x.CategoryId)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan)
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required)
             .DependentRules(() =>
             {
                 RuleFor(x => x.CategoryId)
@@ -66,7 +66,7 @@ public class CreateItemCommandValidator : AbstractValidator<CreateItemCommand>
             .AnyAsync(i => i.Sku != null && i.Sku.ToLower() == normalized, cancellationToken);
     }
 
-    private static async Task<bool> CategoryExistsAsync(IApplicationDbContext dbContext, int categoryId, CancellationToken cancellationToken)
+    private static async Task<bool> CategoryExistsAsync(IApplicationDbContext dbContext, Guid categoryId, CancellationToken cancellationToken)
     {
         return await dbContext.Categories
             .AsNoTracking()

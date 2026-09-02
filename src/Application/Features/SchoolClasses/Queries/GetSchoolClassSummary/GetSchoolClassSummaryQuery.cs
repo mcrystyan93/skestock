@@ -4,5 +4,5 @@ namespace skestock.Application.Features.SchoolClasses.Queries.GetSchoolClassSumm
 
 public class GetSchoolClassSummaryQuery : IRequest<Result<SchoolClassSummary>>
 {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
 }

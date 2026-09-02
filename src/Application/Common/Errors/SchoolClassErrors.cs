@@ -7,7 +7,7 @@ public static class SchoolClassErrors
     {
         public const string ErrorCode = "school_classes.not_found";
 
-        public SchoolClassNotFound(int schoolClassId) : base($"School class with id '{schoolClassId}' was not found.")
+        public SchoolClassNotFound(Guid schoolClassId) : base($"School class with id '{schoolClassId}' was not found.")
         {
             Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status404NotFound);
             Metadata.Add(ErrorMetadataKeys.Title, "School class not found");

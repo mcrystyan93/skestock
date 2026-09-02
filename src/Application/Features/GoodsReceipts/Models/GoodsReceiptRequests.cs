@@ -12,8 +12,8 @@ public static class GoodsReceiptRequests
 
     public class CreateGoodsReceiptLineRequest
     {
-        public int ItemId { get; init; }
-        public int LocationId { get; init; }
+        public Guid ItemId { get; init; }
+        public Guid LocationId { get; init; }
         public int Quantity { get; init; }
         public DateOnly? ExpiryDate { get; init; }
         public decimal UnitPrice { get; init; }
@@ -21,9 +21,15 @@ public static class GoodsReceiptRequests
 
     public class CreateGoodsReceiptRequest
     {
-        public int ClassId { get; init; }
+        public Guid ClassId { get; init; }
         public string? SupplierReference { get; init; }
         public string Note { get; init; } = string.Empty;
         public List<CreateGoodsReceiptLineRequest> Lines { get; init; } = [];
+    }
+
+    public class CreateGoodsReceiptImportRequest
+    {
+        public Guid ClassId { get; init; }
+        public Guid FileMetadataId { get; init; }
     }
 }

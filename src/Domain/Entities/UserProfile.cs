@@ -3,7 +3,7 @@ namespace skestock.Domain.Entities;
 public class UserProfile: BaseAuditableEntity, IKeysetEntity
 {
     // Links to AspNetUsers.Id in the Infrastructure layer
-    public required int IdentityId { get; set; }
+    public required Guid IdentityId { get; set; }
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string FullName { get; private set; } = string.Empty;

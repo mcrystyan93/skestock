@@ -6,9 +6,9 @@ public static class StockRequests
 {
     public class AdjustStockRequest
     {
-        public int ClassId { get; init; }
-        public int ItemId { get; init; }
-        public int LocationId { get; init; }
+        public Guid ClassId { get; init; }
+        public Guid ItemId { get; init; }
+        public Guid LocationId { get; init; }
         public int ActualQuantity { get; init; }
         public AdjustmentReason Reason { get; init; }
     }

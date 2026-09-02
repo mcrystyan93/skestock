@@ -6,7 +6,7 @@ import { inject } from '@angular/core';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import {
-  buildGoodsReceiptListFilter,
+  buildGoodsReceiptListFilter, CreateGoodsReceiptImportRequest, FileMetadataDto,
   GetAllGoodsReceiptsRequest,
   GoodsReceiptListItemDto,
   PaginatedResponseData
@@ -111,7 +111,21 @@ export function withGoodReceiptsFeature() {
         )
       );
 
-      return { loadGoodsReceipts, loadMoreGoodsReceipts };
+      const importGoodReceipt = rxMethod<CreateGoodsReceiptImportRequest>(
+        pipe(
+          switchMap(request =>
+            goodsReceiptsHttp.createImport(request)
+          ),
+          mapResponse({
+            next: () => {
+            },
+            error: (error) => {
+            }
+          })
+        )
+      );
+
+      return { loadGoodsReceipts, loadMoreGoodsReceipts, importGoodReceipt };
     })
   );
 }

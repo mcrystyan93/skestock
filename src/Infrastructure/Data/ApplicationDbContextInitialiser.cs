@@ -28,9 +28,9 @@ public class ApplicationDbContextInitialiser
     private readonly ILogger<ApplicationDbContextInitialiser> _logger;
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly RoleManager<IdentityRole<int>> _roleManager;
+    private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
-    public ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger, ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole<int>> roleManager)
+    public ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger, ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole<Guid>> roleManager)
     {
         _logger = logger;
         _context = context;
@@ -69,7 +69,7 @@ public class ApplicationDbContextInitialiser
     public async Task TrySeedAsync()
     {
         // Default roles
-        var administratorRole = new IdentityRole<int>(Roles.Administrator);
+        var administratorRole = new IdentityRole<Guid>(Roles.Administrator) { Id = Guid.CreateVersion7() };
 
         if (_roleManager.Roles.All(r => r.Name != administratorRole.Name))
         {
@@ -149,7 +149,7 @@ public class ApplicationDbContextInitialiser
         "Consumabile Menaj"
     ];
 
-    private async Task SeedCategoriesAsync(int administratorIdentityId)
+    private async Task SeedCategoriesAsync(Guid administratorIdentityId)
     {
         var existingNames = await _context.Categories
             .Select(c => c.Name)
@@ -182,7 +182,7 @@ public class ApplicationDbContextInitialiser
                 .SetProperty(c => c.LastModifiedById, administratorIdentityId));
     }
 
-    private async Task SeedLocationsAsync(int administratorIdentityId)
+    private async Task SeedLocationsAsync(Guid administratorIdentityId)
     {
         var existingNames = await _context.Locations
             .Select(l => l.Name)
@@ -219,7 +219,7 @@ public class ApplicationDbContextInitialiser
         ("SKE 29", new DateOnly(2026, 7, 13), new DateOnly(2026, 9, 4), ClassStatus.Active)
     ];
 
-    private async Task SeedSchoolClassesAsync(int administratorIdentityId)
+    private async Task SeedSchoolClassesAsync(Guid administratorIdentityId)
     {
         var existingNames = await _context.SchoolClasses
             .Select(c => c.Name)
@@ -293,7 +293,7 @@ public class ApplicationDbContextInitialiser
         ("226170", "FINO 30 COLI HAR COPT 42X38CM", "FINO 30 COLI HAR COPT 42X38CM", "BU", false, "Consumabile Menaj", 15.99m)
     ];
 
-    private async Task SeedItemsAsync(int administratorIdentityId)
+    private async Task SeedItemsAsync(Guid administratorIdentityId)
     {
         var existingSkus = await _context.Items
             .Select(i => i.Sku)
@@ -357,7 +357,7 @@ public class ApplicationDbContextInitialiser
     private const int MaxBatchQuantity = 30;
     private const int DefaultPerishableShelfLifeDays = 14;
 
-    private async Task SeedGoodsReceiptAsync(int administratorIdentityId)
+    private async Task SeedGoodsReceiptAsync(Guid administratorIdentityId)
     {
         var alreadySeededCount = await _context.Set<GoodsReceipt>()
             .CountAsync(r => r.Note.StartsWith(DefaultGoodsReceiptNotePrefix));

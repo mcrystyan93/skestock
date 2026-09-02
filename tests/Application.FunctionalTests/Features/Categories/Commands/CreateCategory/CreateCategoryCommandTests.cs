@@ -24,7 +24,7 @@ public class CreateCategoryCommandTests : TestBase
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Name.ShouldBe(name);
-        result.Value.Id.ShouldBeGreaterThan(0);
+        result.Value.Id.ShouldNotBe(Guid.Empty);
 
         var persisted = await TestApp.FindAsync<Category>(result.Value.Id);
         persisted.ShouldNotBeNull();

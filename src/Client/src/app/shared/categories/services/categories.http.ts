@@ -19,7 +19,7 @@ export class CategoriesHttp {
     return this._httpClient.post<PaginatedResponse<CategoryDto>>('/api/Categories/get-all', request);
   }
 
-  public getById(id: number) {
+  public getById(id: string) {
     return this._httpClient.get<CategoryDto>(`/api/Categories/${id}`);
   }
 
@@ -27,7 +27,7 @@ export class CategoriesHttp {
     return this._httpClient.post<CategoryDto>('/api/Categories', request);
   }
 
-  public update(id: number, request: UpdateCategoryRequest) {
+  public update(id: string, request: UpdateCategoryRequest) {
     return this._httpClient.put<CategoryDto>(`/api/Categories/${id}`, request);
   }
 }

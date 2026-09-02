@@ -15,6 +15,12 @@ public static class Services
     public const string WebApi = "webapi";
 
     /// <summary>
+    /// The name of the Worker service.
+    /// This service is responsible for running background/queued processing jobs.
+    /// </summary>
+    public const string Worker = "worker";
+
+    /// <summary>
     /// The name of the Database Server service.
     /// This service is responsible for hosting the database server (e.g., PostgreSQL, SQL Server, or SQLite).
     /// </summary>
@@ -38,4 +44,8 @@ public static class Services
     /// </summary>
     public const string Storage = "storage";
     public const string StorageVolumes = "storage-data";
+    public const string Blobs = "blobs";
+    public const string BlobService = "blobservice";
+    public const string Queues = "queues";
+    public const string GoodsReceiptImportQueue = "goods-receipt-import";
 }

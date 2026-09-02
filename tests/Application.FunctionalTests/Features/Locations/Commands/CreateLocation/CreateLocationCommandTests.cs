@@ -25,7 +25,7 @@ public class CreateLocationCommandTests : TestBase
         result.IsSuccess.ShouldBeTrue();
         result.Value.Name.ShouldBe(name);
         result.Value.Type.ShouldBe("Kitchen");
-        result.Value.Id.ShouldBeGreaterThan(0);
+        result.Value.Id.ShouldNotBe(Guid.Empty);
 
         var persisted = await TestApp.FindAsync<Location>(result.Value.Id);
         persisted.ShouldNotBeNull();
@@ -87,7 +87,7 @@ public class CreateLocationCommandTests : TestBase
         {
             Name = $"{_prefix}-Room",
             Type = "Room",
-            ParentLocationId = int.MaxValue
+            ParentLocationId = Guid.NewGuid()
         });
 
         var exception = await act.ShouldThrowAsync<ValidationException>();

@@ -22,7 +22,7 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 })
 export class Table extends BaseTable<CategoryDto, GetAllCategoriesRequest> {
   public readonly loading = input.required<boolean>();
-  public readonly deletingCategoryId = input<number | null>(null);
+  public readonly deletingCategoryId = input<string | null>(null);
 
   public readonly onEdit = output<CategoryDto>();
   public readonly onDelete = output<CategoryDto>();

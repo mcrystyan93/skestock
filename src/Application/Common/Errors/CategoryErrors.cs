@@ -7,7 +7,7 @@ public static class CategoryErrors
     {
         public const string ErrorCode = "categories.not_found";
 
-        public CategoryNotFound(int categoryId) : base($"Category with id '{categoryId}' was not found.")
+        public CategoryNotFound(Guid categoryId) : base($"Category with id '{categoryId}' was not found.")
         {
             Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status404NotFound);
             Metadata.Add(ErrorMetadataKeys.Title, "Category not found");

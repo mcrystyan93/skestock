@@ -52,7 +52,7 @@ public class UpdateSchoolClassCommandTests : TestBase
     {
         var result = await TestApp.SendAsync(new UpdateSchoolClassCommand
         {
-            Id = int.MaxValue,
+            Id = Guid.NewGuid(),
             Name = $"{_prefix}-X",
             StartDate = new DateOnly(2026, 1, 1),
             EndDate = new DateOnly(2026, 6, 1)

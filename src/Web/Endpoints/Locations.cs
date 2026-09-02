@@ -43,7 +43,7 @@ public class Locations : IEndpointGroup
     [EndpointSummary("Get a location by id")]
     [EndpointDescription("Retrieves a single location by its id.")]
     public static async Task<Results<Ok<LocationDto>, ProblemHttpResult>> GetLocationById(
-        ISender sender, int id, CancellationToken cancellationToken)
+        ISender sender, Guid id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetLocationByIdQuery { Id = id }, cancellationToken);
 
@@ -76,7 +76,7 @@ public class Locations : IEndpointGroup
     [EndpointSummary("Update an existing location")]
     [EndpointDescription("Updates an existing location in the database.")]
     public static async Task<Results<Ok<LocationDto>, ProblemHttpResult>> UpdateLocation(
-        ISender sender, int id, LocationRequests.UpdateLocationRequest request, CancellationToken cancellationToken)
+        ISender sender, Guid id, LocationRequests.UpdateLocationRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateLocationCommand
         {

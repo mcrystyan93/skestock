@@ -11,9 +11,22 @@ namespace skestock.Application.UnitTests.Common.Keyset;
 /// </summary>
 public sealed class KeysetTestItem : IKeysetEntity
 {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
     public DateTimeOffset CreatedDate { get; init; }
     public int? Priority { get; init; }
+}
+
+/// <summary>
+/// Deterministic <see cref="Guid"/> helpers for the keyset tests. Since domain keys are now
+/// GUID v7, the tests build ids whose <see cref="Guid.CompareTo"/> ordering matches a simple
+/// integer sequence (only the last node varies), so ordering/tie-breaker assertions can still be
+/// expressed and read as plain integers via <see cref="ToInt"/>.
+/// </summary>
+public static class KeysetTestIds
+{
+    public static Guid Of(int i) => new($"00000000-0000-0000-0000-{i:X12}");
+
+    public static int ToInt(Guid id) => (int)Convert.ToInt64(id.ToString("N")[^12..], 16);
 }
 
 /// <summary>

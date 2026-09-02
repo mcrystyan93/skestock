@@ -23,7 +23,7 @@ public class Stock : IEndpointGroup
                           "location. The optional 'searchTerm' query parameter filters the report " +
                           "to items whose name contains the given term (case-insensitive).")]
     public static async Task<Results<Ok<List<StockItemDto>>, ProblemHttpResult>> GetClassLocationStock(
-        ISender sender, int classId, int? locationId, string? searchTerm, CancellationToken cancellationToken)
+        ISender sender, Guid classId, Guid? locationId, string? searchTerm, CancellationToken cancellationToken)
     {
         var query = new GetClassLocationStockQuery { ClassId = classId, LocationId = locationId, SearchTerm = searchTerm };
 

@@ -4,5 +4,5 @@ namespace skestock.Application.Features.Categories.Queries.GetCategoryById;
 
 public class GetCategoryByIdQuery : IRequest<Result<CategoryDto>>
 {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
 }

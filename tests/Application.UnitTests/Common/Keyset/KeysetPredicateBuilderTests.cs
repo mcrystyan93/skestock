@@ -18,7 +18,7 @@ public class KeysetPredicateBuilderTests
         // the predicate is now actually built (and filters correctly) instead of silently no-op'ing.
         var baseTime = DateTimeOffset.UtcNow;
         var items = Enumerable.Range(1, 25)
-            .Select(i => new KeysetTestItem { Id = i, CreatedDate = baseTime.AddSeconds(-i) })
+            .Select(i => new KeysetTestItem { Id = KeysetTestIds.Of(i), CreatedDate = baseTime.AddSeconds(-i) })
             .ToList();
 
         var effectiveSort = DynamicSortBuilder<KeysetTestItem>.BuildEffectiveSort([], Config);
@@ -36,7 +36,7 @@ public class KeysetPredicateBuilderTests
         var baseTime = DateTimeOffset.UtcNow;
         // Even ids get a Priority value, odd ids are null.
         var items = Enumerable.Range(1, 25)
-            .Select(i => new KeysetTestItem { Id = i, CreatedDate = baseTime.AddSeconds(-i), Priority = i % 2 == 0 ? i : null })
+            .Select(i => new KeysetTestItem { Id = KeysetTestIds.Of(i), CreatedDate = baseTime.AddSeconds(-i), Priority = i % 2 == 0 ? i : null })
             .ToList();
 
         var effectiveSort = DynamicSortBuilder<KeysetTestItem>.BuildEffectiveSort(
@@ -60,7 +60,7 @@ public class KeysetPredicateBuilderTests
     {
         var baseTime = DateTimeOffset.UtcNow;
         var items = Enumerable.Range(1, 25)
-            .Select(i => new KeysetTestItem { Id = i, CreatedDate = baseTime.AddSeconds(-i), Priority = i % 2 == 0 ? i : null })
+            .Select(i => new KeysetTestItem { Id = KeysetTestIds.Of(i), CreatedDate = baseTime.AddSeconds(-i), Priority = i % 2 == 0 ? i : null })
             .ToList();
 
         var effectiveSort = DynamicSortBuilder<KeysetTestItem>.BuildEffectiveSort(
@@ -81,7 +81,7 @@ public class KeysetPredicateBuilderTests
     [Test]
     public void ApplyKeysetPredicate_WithNoCursorValues_ReturnsQueryUnchanged()
     {
-        var items = new List<KeysetTestItem> { new() { Id = 1, CreatedDate = DateTimeOffset.UtcNow } }.AsQueryable();
+        var items = new List<KeysetTestItem> { new() { Id = KeysetTestIds.Of(1), CreatedDate = DateTimeOffset.UtcNow } }.AsQueryable();
         var effectiveSort = DynamicSortBuilder<KeysetTestItem>.BuildEffectiveSort([], Config);
 
         var result = KeysetPredicateBuilder<KeysetTestItem>.ApplyKeysetPredicate(
@@ -95,8 +95,8 @@ public class KeysetPredicateBuilderTests
     {
         var items = new List<KeysetTestItem>
         {
-            new() { Id = 1, CreatedDate = DateTimeOffset.UtcNow },
-            new() { Id = 2, CreatedDate = DateTimeOffset.UtcNow }
+            new() { Id = KeysetTestIds.Of(1), CreatedDate = DateTimeOffset.UtcNow },
+            new() { Id = KeysetTestIds.Of(2), CreatedDate = DateTimeOffset.UtcNow }
         }.AsQueryable();
 
         var effectiveSort = DynamicSortBuilder<KeysetTestItem>.BuildEffectiveSort([], Config);
@@ -130,7 +130,7 @@ public class KeysetPredicateBuilderTests
             if (pageItems.Count == 0)
                 break;
 
-            seenIds.AddRange(pageItems.Select(x => x.Id));
+            seenIds.AddRange(pageItems.Select(x => KeysetTestIds.ToInt(x.Id)));
             cursor = CursorCodec<KeysetTestItem>.Encode(pageItems[^1], effectiveSort, Config);
         }
 

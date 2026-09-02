@@ -89,7 +89,7 @@ public class CreateGoodsReceiptCommandValidatorTests
 
         var result = await validator.ValidateAsync(new CreateGoodsReceiptCommand
         {
-            ClassId = 9999,
+            ClassId = Guid.NewGuid(),
             Note = "Delivery",
             Lines = [new CreateGoodsReceiptLine { ItemId = item.Id, LocationId = location.Id, Quantity = 1 }]
         });
@@ -108,7 +108,7 @@ public class CreateGoodsReceiptCommandValidatorTests
         {
             ClassId = schoolClass.Id,
             Note = "Delivery",
-            Lines = [new CreateGoodsReceiptLine { ItemId = 9999, LocationId = location.Id, Quantity = 1 }]
+            Lines = [new CreateGoodsReceiptLine { ItemId = Guid.NewGuid(), LocationId = location.Id, Quantity = 1 }]
         });
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.InvalidReference && e.PropertyName == "Lines[0].ItemId");
@@ -125,7 +125,7 @@ public class CreateGoodsReceiptCommandValidatorTests
         {
             ClassId = schoolClass.Id,
             Note = "Delivery",
-            Lines = [new CreateGoodsReceiptLine { ItemId = item.Id, LocationId =9999, Quantity = 1 }]
+            Lines = [new CreateGoodsReceiptLine { ItemId = item.Id, LocationId = Guid.NewGuid(), Quantity = 1 }]
         });
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.InvalidReference && e.PropertyName == "Lines[0].LocationId");

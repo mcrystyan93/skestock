@@ -26,7 +26,7 @@ export class TableContainer {
   //
   // public readonly onFilterChange = output<GetAllStockBatchesRequest>();
   // public readonly onLoadMore = output<void>();
-  public readonly goodsReceiptId = input.required<number>();
+  public readonly goodsReceiptId = input.required<string>();
 
   public readonly store = inject(StockBatchListStore);
 
@@ -41,7 +41,7 @@ export class TableContainer {
     });
   });
 
-  private getClassIdFilter(goodsReceiptId: number): ColumnFilter {
+  private getClassIdFilter(goodsReceiptId: string): ColumnFilter {
     return {
       value: goodsReceiptId,
       operator: 'equals',

@@ -1,13 +1,18 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Queues.Interfaces;
+using skestock.Application.Storage.Interfaces;
 using skestock.Infrastructure.Data;
 using skestock.Infrastructure.Data.Interceptors;
 using skestock.Infrastructure.Identity;
+using skestock.Infrastructure.Queues;
+using skestock.Infrastructure.Storage;
 
 namespace skestock.Infrastructure;
 
@@ -30,7 +35,8 @@ public static class DependencyInjection
 
         builder.EnrichSqlServerDbContext<ApplicationDbContext>();
 
-        builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+        builder.Services.AddScoped<IApplicationDbContext>(provider =>
+            provider.GetRequiredService<ApplicationDbContext>());
 
         builder.Services.AddScoped<ApplicationDbContextInitialiser>();
 
@@ -45,14 +51,20 @@ public static class DependencyInjection
 
         builder.Services
             .AddIdentityCore<ApplicationUser>()
-            .AddRoles<IdentityRole<int>>()
+            .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddApiEndpoints();
 
         builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddTransient<IIdentityService, IdentityService>();
-        
+
         builder.AddRedisDistributedCache(Services.Cache);
         builder.Services.AddHybridCache();
+
+        builder.AddAzureBlobServiceClient(Services.BlobService);
+        builder.AddAzureQueueServiceClient(Services.Queues);
+        
+        builder.Services.AddScoped<IBlobStorageService, AzureBlobStorageService>();
+        builder.Services.AddScoped<IQueueSender, AzureQueueSender>();
     }
 }

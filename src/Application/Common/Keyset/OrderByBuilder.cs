@@ -38,7 +38,7 @@ public static class OrderByBuilder<TEntity> where TEntity : class
                 : (ordered == null ? query.OrderBy(expr) : ordered.ThenBy(expr));
         }
 
-        return ordered ?? query.OrderByDescending(e => EF.Property<int>(e, "Id"));
+        return ordered ?? query.OrderByDescending(e => EF.Property<Guid>(e, "Id"));
     }
 }
 

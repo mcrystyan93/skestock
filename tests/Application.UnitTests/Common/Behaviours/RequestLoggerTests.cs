@@ -26,13 +26,13 @@ public class RequestLoggerTests
     [Test]
     public async Task ShouldCallGetUserNameAsyncOnceIfAuthenticated()
     {
-        _user.Setup(x => x.Id).Returns(1);
+        _user.Setup(x => x.Id).Returns(Guid.NewGuid());
 
         var requestLogger = new LoggingBehaviour<TestCommand, Unit>(_logger.Object, _user.Object, _identityService.Object);
 
         await requestLogger.Handle(new TestCommand(), static (_, _) => new ValueTask<Unit>(Unit.Value), new CancellationToken());
 
-        _identityService.Verify(i => i.GetUserNameAsync(It.IsAny<int>()), Times.Once);
+        _identityService.Verify(i => i.GetUserNameAsync(It.IsAny<Guid>()), Times.Once);
     }
 
     [Test]
@@ -42,6 +42,6 @@ public class RequestLoggerTests
 
         await requestLogger.Handle(new TestCommand(), static (_, _) => new ValueTask<Unit>(Unit.Value), new CancellationToken());
 
-        _identityService.Verify(i => i.GetUserNameAsync(It.IsAny<int>()), Times.Never);
+        _identityService.Verify(i => i.GetUserNameAsync(It.IsAny<Guid>()), Times.Never);
     }
 }

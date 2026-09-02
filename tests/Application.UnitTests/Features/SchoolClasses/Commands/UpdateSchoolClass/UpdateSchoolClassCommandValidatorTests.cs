@@ -43,7 +43,7 @@ public class UpdateSchoolClassCommandValidatorTests
     }
 
     [Test]
-    public async Task ShouldHaveErrorWhenIdIsZero()
+    public async Task ShouldHaveErrorWhenIdIsEmpty()
     {
         var (context, _) = await CreateContextWithClassAsync();
         await using var _disposable = context;
@@ -51,13 +51,13 @@ public class UpdateSchoolClassCommandValidatorTests
 
         var result = await validator.ValidateAsync(new UpdateSchoolClassCommand
         {
-            Id = 0,
+            Id = Guid.Empty,
             Name = "Fall 2026",
             StartDate = new DateOnly(2026, 9, 1),
             EndDate = new DateOnly(2026, 12, 1)
         });
 
-        result.Errors.ShouldContain(e => e.PropertyName == nameof(UpdateSchoolClassCommand.Id) && e.ErrorCode == ValidationErrorCodes.GreaterThan);
+        result.Errors.ShouldContain(e => e.PropertyName == nameof(UpdateSchoolClassCommand.Id) && e.ErrorCode == ValidationErrorCodes.Required);
     }
 
     [Test]

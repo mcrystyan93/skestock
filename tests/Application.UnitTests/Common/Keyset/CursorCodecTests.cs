@@ -11,7 +11,7 @@ public class CursorCodecTests
     [Test]
     public void EncodeThenDecode_RoundTripsKeyValues()
     {
-        var entity = new KeysetTestItem { Id = 7, CreatedDate = DateTimeOffset.UtcNow, Priority = 42 };
+        var entity = new KeysetTestItem { Id = KeysetTestIds.Of(7), CreatedDate = DateTimeOffset.UtcNow, Priority = 42 };
         var sort = new List<(string Key, string Direction)> { ("Priority", "asc"), ("Id", "asc") };
 
         var token = CursorCodec<KeysetTestItem>.Encode(entity, sort, Config);
@@ -19,7 +19,7 @@ public class CursorCodecTests
 
         decoded.ShouldNotBeNull();
         decoded!.KeyValues["Priority"]!.ToString().ShouldBe("42");
-        decoded.KeyValues["Id"]!.ToString().ShouldBe("7");
+        decoded.KeyValues["Id"]!.ToString().ShouldBe(KeysetTestIds.Of(7).ToString());
     }
 
     [Test]
@@ -28,7 +28,7 @@ public class CursorCodecTests
         // Regression test: null values used to be skipped entirely during Encode, which made
         // KeysetPredicateBuilder's cursorValues.TryGetValue lookup fail and abort the predicate
         // for that key (and any deeper tie-breaker keys) instead of treating it as "IS NULL".
-        var entity = new KeysetTestItem { Id = 7, CreatedDate = DateTimeOffset.UtcNow, Priority = null };
+        var entity = new KeysetTestItem { Id = KeysetTestIds.Of(7), CreatedDate = DateTimeOffset.UtcNow, Priority = null };
         var sort = new List<(string Key, string Direction)> { ("Priority", "asc"), ("Id", "asc") };
 
         var token = CursorCodec<KeysetTestItem>.Encode(entity, sort, Config);
@@ -37,7 +37,7 @@ public class CursorCodecTests
         decoded.ShouldNotBeNull();
         decoded!.KeyValues.ShouldContainKey("Priority");
         decoded.KeyValues["Priority"].ShouldBeNull();
-        decoded.KeyValues["Id"]!.ToString().ShouldBe("7");
+        decoded.KeyValues["Id"]!.ToString().ShouldBe(KeysetTestIds.Of(7).ToString());
     }
 
     [Test]
@@ -57,7 +57,7 @@ public class CursorCodecTests
     [Test]
     public void MatchesSort_ReturnsTrueForIdenticalSortSpec()
     {
-        var entity = new KeysetTestItem { Id = 1, CreatedDate = DateTimeOffset.UtcNow };
+        var entity = new KeysetTestItem { Id = KeysetTestIds.Of(1), CreatedDate = DateTimeOffset.UtcNow };
         var sort = new List<(string Key, string Direction)> { ("CreatedDate", "desc"), ("Id", "desc") };
 
         var decoded = CursorCodec<KeysetTestItem>.Decode(CursorCodec<KeysetTestItem>.Encode(entity, sort, Config))!;
@@ -68,7 +68,7 @@ public class CursorCodecTests
     [Test]
     public void MatchesSort_ReturnsFalseWhenDirectionDiffers()
     {
-        var entity = new KeysetTestItem { Id = 1, CreatedDate = DateTimeOffset.UtcNow };
+        var entity = new KeysetTestItem { Id = KeysetTestIds.Of(1), CreatedDate = DateTimeOffset.UtcNow };
         var originalSort = new List<(string Key, string Direction)> { ("CreatedDate", "desc"), ("Id", "desc") };
         var requestedSort = new List<(string Key, string Direction)> { ("CreatedDate", "asc"), ("Id", "desc") };
 
@@ -80,7 +80,7 @@ public class CursorCodecTests
     [Test]
     public void MatchesSort_ReturnsFalseWhenKeyOrderDiffers()
     {
-        var entity = new KeysetTestItem { Id = 1, CreatedDate = DateTimeOffset.UtcNow, Priority = 3 };
+        var entity = new KeysetTestItem { Id = KeysetTestIds.Of(1), CreatedDate = DateTimeOffset.UtcNow, Priority = 3 };
         var originalSort = new List<(string Key, string Direction)> { ("Priority", "asc"), ("Id", "asc") };
         var requestedSort = new List<(string Key, string Direction)> { ("Id", "asc"), ("Priority", "asc") };
 
@@ -92,7 +92,7 @@ public class CursorCodecTests
     [Test]
     public void MatchesSort_ReturnsFalseWhenKeyCountDiffers()
     {
-        var entity = new KeysetTestItem { Id = 1, CreatedDate = DateTimeOffset.UtcNow };
+        var entity = new KeysetTestItem { Id = KeysetTestIds.Of(1), CreatedDate = DateTimeOffset.UtcNow };
         var originalSort = new List<(string Key, string Direction)> { ("CreatedDate", "desc"), ("Id", "desc") };
         var requestedSort = new List<(string Key, string Direction)> { ("Id", "desc") };
 

@@ -9,16 +9,16 @@ public class CreateStockBatchCommandValidator : AbstractValidator<CreateStockBat
     public CreateStockBatchCommandValidator(IApplicationDbContext dbContext)
     {
         RuleFor(x => x.ItemId)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan);
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required);
 
         RuleFor(x => x.LocationId)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan);
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required);
 
         RuleFor(x => x.ReceivedClassId)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan);
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required);
 
         RuleFor(x => x.Quantity)
             .GreaterThan(0)
@@ -36,7 +36,7 @@ public class CreateStockBatchCommandValidator : AbstractValidator<CreateStockBat
         RuleFor(x => x)
             .CustomAsync(async (command, context, cancellationToken) =>
                 await ValidateAsync(dbContext, command, context, cancellationToken))
-            .When(x => x.ItemId > 0 && x.LocationId > 0 && x.ReceivedClassId > 0);
+            .When(x => x.ItemId != Guid.Empty && x.LocationId != Guid.Empty && x.ReceivedClassId != Guid.Empty);
     }
 
     private static async Task ValidateAsync(

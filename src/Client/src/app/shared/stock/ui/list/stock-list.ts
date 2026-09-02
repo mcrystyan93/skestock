@@ -18,8 +18,8 @@ import {isNil} from 'lodash-es';
   }
 })
 export class StockList {
-  public readonly classId = input.required<number | null>();
-  public readonly locationId = input<number | null>(null);
+  public readonly classId = input.required<string | null>();
+  public readonly locationId = input<string | null>(null);
 
   public readonly store = inject(StockStore);
 

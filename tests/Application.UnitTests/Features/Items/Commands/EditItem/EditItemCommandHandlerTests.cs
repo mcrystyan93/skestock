@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Items.Commands.EditItem;
 using skestock.Domain.Entities;
+using skestock.Domain.Queues;
 using NUnit.Framework;
 using Shouldly;
 
@@ -25,10 +26,20 @@ public class ItemTestDbContext(DbContextOptions<ItemTestDbContext> options)
     public DbSet<StockTransaction> StockTransactions => Set<StockTransaction>();
     public DbSet<GoodsReceipt> GoodsReceipts => Set<GoodsReceipt>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+    public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+
+    public DbSet<GoodsReceiptImport> GoodsReceiptImports => Set<GoodsReceiptImport>();
+    public DbSet<GoodsReceiptImportLine> GoodsReceiptImportLines => Set<GoodsReceiptImportLine>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Ignore<GoodsReceiptImport>();
+        builder.Ignore<GoodsReceiptImportLine>();
+
+        builder.Ignore<FileMetadata>();
 
         builder.Entity<UserProfile>(b =>
         {
@@ -165,7 +176,7 @@ public class EditItemCommandHandlerTests
 
         var result = await handler.Handle(new EditItemCommand
         {
-            Id = 12345,
+            Id = Guid.NewGuid(),
             Name = "Anything",
             Unit = "unit",
             CategoryId = category.Id

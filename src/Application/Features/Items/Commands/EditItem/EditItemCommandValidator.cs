@@ -15,8 +15,8 @@ public class EditItemCommandValidator : AbstractValidator<EditItemCommand>
     public EditItemCommandValidator(IApplicationDbContext dbContext)
     {
         RuleFor(x => x.Id)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan);
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required);
 
         RuleFor(x => x.Name)
             .NotEmpty()
@@ -52,8 +52,8 @@ public class EditItemCommandValidator : AbstractValidator<EditItemCommand>
             });
 
         RuleFor(x => x.CategoryId)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan)
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required)
             .DependentRules(() =>
             {
                 RuleFor(x => x.CategoryId)
@@ -63,7 +63,7 @@ public class EditItemCommandValidator : AbstractValidator<EditItemCommand>
             });
     }
 
-    private static async Task<bool> IsSkuUniqueAsync(IApplicationDbContext dbContext, int id, string sku, CancellationToken cancellationToken)
+    private static async Task<bool> IsSkuUniqueAsync(IApplicationDbContext dbContext, Guid id, string sku, CancellationToken cancellationToken)
     {
         var normalized = sku.Trim().ToLower();
         return !await dbContext.Items
@@ -71,7 +71,7 @@ public class EditItemCommandValidator : AbstractValidator<EditItemCommand>
             .AnyAsync(i => i.Id != id && i.Sku != null && i.Sku.ToLower() == normalized, cancellationToken);
     }
 
-    private static async Task<bool> CategoryExistsAsync(IApplicationDbContext dbContext, int categoryId, CancellationToken cancellationToken)
+    private static async Task<bool> CategoryExistsAsync(IApplicationDbContext dbContext, Guid categoryId, CancellationToken cancellationToken)
     {
         return await dbContext.Categories
             .AsNoTracking()

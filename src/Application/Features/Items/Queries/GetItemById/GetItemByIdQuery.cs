@@ -4,5 +4,5 @@ namespace skestock.Application.Features.Items.Queries.GetItemById;
 
 public class GetItemByIdQuery : IRequest<Result<ItemDto>>
 {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
 }

@@ -4,6 +4,7 @@ using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.SchoolClasses.Commands.CreateSchoolClass;
 using skestock.Application.Features.SchoolClasses.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Queues;
 using skestock.Domain.Enums;
 using NUnit.Framework;
 using Shouldly;
@@ -30,10 +31,20 @@ public class SchoolClassTestDbContext(DbContextOptions<SchoolClassTestDbContext>
     public DbSet<StockTransaction> StockTransactions => Set<StockTransaction>();
     public DbSet<GoodsReceipt> GoodsReceipts => Set<GoodsReceipt>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+    public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+
+    public DbSet<GoodsReceiptImport> GoodsReceiptImports => Set<GoodsReceiptImport>();
+    public DbSet<GoodsReceiptImportLine> GoodsReceiptImportLines => Set<GoodsReceiptImportLine>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Ignore<GoodsReceiptImport>();
+        builder.Ignore<GoodsReceiptImportLine>();
+
+        builder.Ignore<FileMetadata>();
 
         builder.Entity<UserProfile>(b =>
         {
@@ -90,7 +101,7 @@ public class CreateSchoolClassCommandHandlerTests
         result.Value.StartDate.ShouldBe(new DateOnly(2026, 9, 1));
         result.Value.EndDate.ShouldBe(new DateOnly(2026, 12, 15));
         result.Value.Status.ShouldBe(ClassStatus.Upcoming);
-        result.Value.Id.ShouldBeGreaterThan(0);
+        result.Value.Id.ShouldNotBe(Guid.Empty);
 
         var persisted = await context.SchoolClasses.SingleAsync(c => c.Id == result.Value.Id, CancellationToken.None);
         persisted.Name.ShouldBe("Fall 2026 - Cycle 1");

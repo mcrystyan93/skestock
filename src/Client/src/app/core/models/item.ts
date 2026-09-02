@@ -3,7 +3,7 @@ import { PAGINATION_PAGE_SIZE } from './category';
 
 /** Mirrors src/Application/Features/Items/Models/ItemDto.cs. */
 export type ItemDto = {
-  id: number;
+  id: string;
   sku?: string | null;
   name: string;
   description?: string | null;
@@ -11,7 +11,7 @@ export type ItemDto = {
   minThreshold: number;
   isPerishable: boolean;
   isActive: boolean;
-  categoryId: number;
+  categoryId: string;
   categoryName?: string | null;
   createdByName?: string | null;
   lastModifiedByName?: string | null;
@@ -32,7 +32,7 @@ export type CreateItemRequest = {
   unit: string;
   minThreshold: number;
   isPerishable: boolean;
-  categoryId: number;
+  categoryId: string;
 };
 
 /** Mirrors src/Application/Features/Items/Models/ItemRequests.cs. */
@@ -43,7 +43,7 @@ export type EditItemRequest = {
   unit: string;
   minThreshold: number;
   isPerishable: boolean;
-  categoryId: number;
+  categoryId: string;
 };
 
 export type ItemTableColumn =

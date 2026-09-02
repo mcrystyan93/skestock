@@ -33,14 +33,14 @@ public class UpdateCategoryCommandValidatorTests
     }
 
     [Test]
-    public async Task ShouldHaveErrorWhenIdIsZeroOrNegative()
+    public async Task ShouldHaveErrorWhenIdIsEmpty()
     {
         await using var context = CreateContext();
         var validator = new UpdateCategoryCommandValidator(context);
 
-        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = 0, Name = "Stationery" });
+        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = Guid.Empty, Name = "Stationery" });
 
-        result.Errors.ShouldContain(e => e.PropertyName == nameof(UpdateCategoryCommand.Id) && e.ErrorCode == ValidationErrorCodes.GreaterThan);
+        result.Errors.ShouldContain(e => e.PropertyName == nameof(UpdateCategoryCommand.Id) && e.ErrorCode == ValidationErrorCodes.Required);
     }
 
     [Test]
@@ -49,7 +49,7 @@ public class UpdateCategoryCommandValidatorTests
         await using var context = CreateContext();
         var validator = new UpdateCategoryCommandValidator(context);
 
-        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = 1, Name = "" });
+        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = Guid.NewGuid(), Name = "" });
 
         result.Errors.ShouldContain(e => e.PropertyName == nameof(UpdateCategoryCommand.Name) && e.ErrorCode == ValidationErrorCodes.Required);
     }
@@ -60,7 +60,7 @@ public class UpdateCategoryCommandValidatorTests
         await using var context = CreateContext();
         var validator = new UpdateCategoryCommandValidator(context);
 
-        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = 1, Name = "   " });
+        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = Guid.NewGuid(), Name = "   " });
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.Required);
     }
@@ -71,7 +71,7 @@ public class UpdateCategoryCommandValidatorTests
         await using var context = CreateContext();
         var validator = new UpdateCategoryCommandValidator(context);
 
-        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = 1, Name = new string('a', 101) });
+        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = Guid.NewGuid(), Name = new string('a', 101) });
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.MaxLength);
     }
@@ -82,7 +82,7 @@ public class UpdateCategoryCommandValidatorTests
         await using var context = CreateContext();
         var validator = new UpdateCategoryCommandValidator(context);
 
-        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = 1, Name = new string('a', 100) });
+        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = Guid.NewGuid(), Name = new string('a', 100) });
 
         result.Errors.ShouldNotContain(e => e.ErrorCode == ValidationErrorCodes.MaxLength);
     }

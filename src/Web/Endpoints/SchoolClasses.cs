@@ -45,7 +45,7 @@ public class SchoolClasses : IEndpointGroup
     [EndpointSummary("Get a school class by id")]
     [EndpointDescription("Retrieves a single school class by its id.")]
     public static async Task<Results<Ok<SchoolClassDto>, ProblemHttpResult>> GetSchoolClassById(
-        ISender sender, int id, CancellationToken cancellationToken)
+        ISender sender, Guid id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetSchoolClassByIdQuery { Id = id }, cancellationToken);
 
@@ -58,7 +58,7 @@ public class SchoolClasses : IEndpointGroup
     [EndpointSummary("Get a school class summary")]
     [EndpointDescription("Retrieves the goods-receipt summary (count and total amount) for a school class.")]
     public static async Task<Results<Ok<SchoolClassSummary>, ProblemHttpResult>> GetSchoolClassSummary(
-        ISender sender, int id, CancellationToken cancellationToken)
+        ISender sender, Guid id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetSchoolClassSummaryQuery { Id = id }, cancellationToken);
 
@@ -92,7 +92,7 @@ public class SchoolClasses : IEndpointGroup
     [EndpointSummary("Update an existing school class")]
     [EndpointDescription("Updates an existing school class in the database.")]
     public static async Task<Results<Ok<SchoolClassDto>, ProblemHttpResult>> UpdateSchoolClass(
-        ISender sender, int id, SchoolClassRequests.UpdateSchoolClassRequest request, CancellationToken cancellationToken)
+        ISender sender, Guid id, SchoolClassRequests.UpdateSchoolClassRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateSchoolClassCommand
         {

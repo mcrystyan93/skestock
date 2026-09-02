@@ -4,6 +4,7 @@ using Azure.Identity;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
 using skestock.Application.Common.Interfaces;
+using skestock.Web.BackgroundJobs;
 using skestock.Web.Services;
 
 namespace skestock.Web;
@@ -33,12 +34,12 @@ public static class DependencyInjection
 
         builder.Services.AddHttpContextAccessor();
 
-        builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();    
-        
+        builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
+
         // Fallback ProblemDetails generation for exceptions not handled by ProblemDetailsExceptionHandler,
         // so any unhandled exception still returns an RFC 9110-compliant ProblemDetails response.
         builder.Services.AddProblemDetails();
-        
+
         builder.Services.ConfigureHttpJsonOptions(options =>
         {
             options.SerializerOptions.Converters.Add(
@@ -59,6 +60,8 @@ public static class DependencyInjection
         });
 
         builder.Services.AddCors();
+
+        builder.Services.AddHostedService<OutboxPublisherService>();
     }
 
     public static void AddKeyVaultIfConfigured(this IHostApplicationBuilder builder)

@@ -5,13 +5,13 @@ namespace skestock.Application.Features.Stock.Queries.GetClassLocationStock;
 
 public class GetClassLocationStockQuery : IRequest<Result<List<StockItemDto>>>, ICacheableQuery<List<StockItemDto>>
 {
-    public int ClassId { get; init; }
+    public Guid ClassId { get; init; }
 
     /// <summary>
     /// Optional - when omitted, the report aggregates stock across every location for the class,
     /// with one row per (item, location) combination instead of one row per item.
     /// </summary>
-    public int? LocationId { get; init; }
+    public Guid? LocationId { get; init; }
 
     /// <summary>
     /// Optional - when provided, only items whose name contains this term (case-insensitive) are

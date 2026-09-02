@@ -1,6 +1,12 @@
-import { Component, inject, model } from '@angular/core';
+import { Component, DestroyRef, inject, input, model } from '@angular/core';
 import { SchoolClassOverviewStore } from '../../services/school-class-overview.store';
 import { Header } from './header';
+import { NzModalService } from 'ng-zorro-antd/modal';
+import { AddGoodsReceiptModal } from '@ske/shared/goods-receipts';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter, map, tap } from 'rxjs';
+import { isNil } from 'lodash-es';
+import { CreateGoodsReceiptImportRequest, FileMetadataDto } from '@ske/models';
 
 @Component({
   imports: [
@@ -9,8 +15,47 @@ import { Header } from './header';
   selector: 'ske-school-class-overview-header-container',
   styles: ``,
   templateUrl: './header-container.html',
+  providers: [NzModalService]
 })
 export class HeaderContainer {
   public readonly selectedTabIndex = model<number>(0);
+  public readonly classId = input.required<string | null>();
   public readonly store = inject(SchoolClassOverviewStore);
+
+  private readonly _nzModalService = inject(NzModalService);
+  private readonly _destroyRef = inject(DestroyRef);
+
+  public addGoodsReceipt() {
+    const modalRef = this._nzModalService.create({
+      nzContent: AddGoodsReceiptModal,
+      nzCentered: true,
+      nzClosable: false
+    });
+
+    modalRef.afterClose
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        map((result) => {
+          if (isNil(result?.fileMetadata))
+            return;
+
+          return this.mapImportRequest(result.fileMetadata as FileMetadataDto);
+        }),
+        filter((request): request is CreateGoodsReceiptImportRequest => !isNil(request)),
+        tap((request) => this.store.importGoodReceipt(request))
+      )
+      .subscribe();
+  }
+
+  public mapImportRequest(fileMetadata: FileMetadataDto): CreateGoodsReceiptImportRequest | null {
+    const classId = this.classId();
+
+    if (isNil(classId))
+      return null;
+
+    return {
+      fileMetadataId: fileMetadata.id,
+      classId
+    };
+  }
 }

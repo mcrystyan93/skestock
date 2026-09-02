@@ -77,7 +77,7 @@ public class CreateStockBatchCommandTests : TestBase
         result.Value.UnitPrice.ShouldBe(4.25m);
         result.Value.LineTotal.ShouldBe(85m);
         result.Value.GoodsReceiptId.ShouldBeNull();
-        result.Value.Id.ShouldBeGreaterThan(0);
+        result.Value.Id.ShouldNotBe(Guid.Empty);
 
         var persistedBatch = await TestApp.FindAsync<StockBatch>(result.Value.Id);
         persistedBatch.ShouldNotBeNull();
@@ -119,7 +119,7 @@ public class CreateStockBatchCommandTests : TestBase
         var act = async () => await TestApp.SendAsync(new CreateStockBatchCommand
         {
             ItemId = item.Id,
-            LocationId = int.MaxValue,
+            LocationId = Guid.NewGuid(),
             ReceivedClassId = schoolClass.Id,
             Quantity = 5,
             ReceivedDate = new DateOnly(2024, 2, 1)

@@ -11,9 +11,9 @@ namespace skestock.Application.Features.Stock.Commands.AdjustStock;
 [Authorize]
 public class AdjustStockCommand : IRequest<Result<StockItemDto>>, ICacheInvalidation
 {
-    public int ClassId { get; init; }
-    public int ItemId { get; init; }
-    public int LocationId { get; init; }
+    public Guid ClassId { get; init; }
+    public Guid ItemId { get; init; }
+    public Guid LocationId { get; init; }
 
     // The quantity staff physically counted. The handler diffs this against the current total
     // (sum of StockBatch.Quantity for this Item+Location+Class) to compute the adjustment delta.

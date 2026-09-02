@@ -1,3 +1,5 @@
+using Aspire.Hosting.Azure;
+using Azure.Storage.Blobs.Models;
 using skestock.AppHost;
 using skestock.Shared;
 
@@ -45,10 +47,25 @@ var storage = builder
             .WithDataVolume(Services.StorageVolumes)
             .WithBlobPort(10000)
             .WithQueuePort(10001)
-            .WithTablePort(10002);
+            .WithTablePort(10002)
+            .WithComputeEnvironment(compose);
     });
-var blobs = storage.AddBlobContainer("blobs");
 var filesContainer = storage.AddBlobContainer("app-files", blobContainerName: "app-files");
+var blobService = storage.AddBlobs(Services.BlobService);
+
+storage.SetBlobCorsRules(new[]
+{
+    new BlobCorsRule
+    {
+        AllowedOrigins = "http://webfrontend-skestock.dev.localhost:7001,http://127.0.0.1:7001",
+        AllowedMethods = "GET,POST,PUT,DELETE,OPTIONS",
+        AllowedHeaders = "*",
+        ExposedHeaders = "*",
+        MaxAgeInSeconds = 3600
+    }
+});
+
+var queue = storage.AddQueues(Services.Queues);
 
 var web = builder.AddProject<Projects.Web>(Services.WebApi)
     .PublishAsDockerComposeService((resource, service) =>
@@ -60,8 +77,10 @@ var web = builder.AddProject<Projects.Web>(Services.WebApi)
     .WaitFor(databaseServer)
     .WithReference(cache)
     .WaitFor(cache)
-    .WithReference(blobs)
+    .WithReference(blobService)
     .WaitFor(filesContainer)
+    .WithReference(queue)
+    .WaitFor(queue)
     .WithExternalHttpEndpoints()
     .WithAspNetCoreEnvironment()
     .WithUrlForEndpoint("http", url =>
@@ -69,6 +88,19 @@ var web = builder.AddProject<Projects.Web>(Services.WebApi)
         url.DisplayText = "Scalar API Reference";
         url.Url = "/scalar";
     });
+
+var worker = builder.AddProject<Projects.Worker>(Services.Worker)
+    .PublishAsDockerComposeService((resource, service) =>
+    {
+        service.Name = Services.Worker;
+    })
+    .WithComputeEnvironment(compose)
+    .WithReference(databaseServer)
+    .WaitFor(databaseServer)
+    .WithReference(cache)
+    .WaitFor(cache)
+    .WithReference(queue)
+    .WaitFor(queue);
 
 var webfrontend = builder.AddViteApp(Services.WebFrontend, "../Client", "dev")
     .PublishAsDockerComposeService((resource, service) =>

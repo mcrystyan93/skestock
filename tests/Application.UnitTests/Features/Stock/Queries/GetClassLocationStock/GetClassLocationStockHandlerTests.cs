@@ -222,7 +222,7 @@ public class GetClassLocationStockHandlerTests
 
         var handler = new GetClassLocationStockHandler(context);
         var result = await handler.Handle(
-            new GetClassLocationStockQuery { ClassId = 999, LocationId = location.Id },
+            new GetClassLocationStockQuery { ClassId = Guid.NewGuid(), LocationId = location.Id },
             CancellationToken.None);
 
         result.IsFailed.ShouldBeTrue();
@@ -237,7 +237,7 @@ public class GetClassLocationStockHandlerTests
 
         var handler = new GetClassLocationStockHandler(context);
         var result = await handler.Handle(
-            new GetClassLocationStockQuery { ClassId = schoolClass.Id, LocationId = 999 },
+            new GetClassLocationStockQuery { ClassId = schoolClass.Id, LocationId = Guid.NewGuid() },
             CancellationToken.None);
 
         result.IsFailed.ShouldBeTrue();
@@ -276,7 +276,7 @@ public class GetClassLocationStockHandlerTests
 
         var handler = new GetClassLocationStockHandler(context);
         var result = await handler.Handle(
-            new GetClassLocationStockQuery { ClassId = 999, LocationId = null },
+            new GetClassLocationStockQuery { ClassId = Guid.NewGuid(), LocationId = null },
             CancellationToken.None);
 
         result.IsFailed.ShouldBeTrue();

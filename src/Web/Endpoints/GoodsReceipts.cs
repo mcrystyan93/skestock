@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using skestock.Application.Common.Models;
 using skestock.Application.Features.GoodsReceipts.Commands.CreateGoodsReceipt;
+using skestock.Application.Features.GoodsReceipts.Commands.CreateGoodsReceiptImport;
 using skestock.Application.Features.GoodsReceipts.Models;
 using skestock.Application.Features.GoodsReceipts.Queries.GetAllGoodsReceipts;
 using skestock.Application.Features.GoodsReceipts.Queries.GetGoodsReceiptById;
@@ -14,6 +15,7 @@ public class GoodsReceipts : IEndpointGroup
         groupBuilder.MapPost(GetAllGoodsReceipts, "get-all");
         groupBuilder.MapGet(GetGoodsReceiptById, "{id}");
         groupBuilder.MapPost(CreateGoodsReceipt, "");
+        groupBuilder.MapPost(CreateGoodsReceiptImport, "imports");
     }
 
     [EndpointSummary("Get all goods receipts")]
@@ -41,7 +43,7 @@ public class GoodsReceipts : IEndpointGroup
     [EndpointSummary("Get a goods receipt by id")]
     [EndpointDescription("Retrieves a single goods receipt, including its lines, by its id.")]
     public static async Task<Results<Ok<GoodsReceiptDto>, ProblemHttpResult>> GetGoodsReceiptById(
-        ISender sender, int id, CancellationToken cancellationToken)
+        ISender sender, Guid id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetGoodsReceiptByIdQuery { Id = id }, cancellationToken);
 
@@ -77,5 +79,24 @@ public class GoodsReceipts : IEndpointGroup
             return result.ToProblemHttpResult();
 
         return TypedResults.Created($"/api/GoodsReceipts/{result.Value.Id}", result.Value);
+    }
+
+    [EndpointSummary("Create a new goods receipt import")]
+    [EndpointDescription("Starts a goods receipt import for an uploaded file: creates a GoodsReceiptImport in the Processing state, capturing the blob path from the referenced file metadata.")]
+    public static async Task<Results<Created<GoodsReceiptImportDto>, ProblemHttpResult>> CreateGoodsReceiptImport(
+        ISender sender, GoodsReceiptRequests.CreateGoodsReceiptImportRequest request, CancellationToken cancellationToken)
+    {
+        var command = new CreateGoodsReceiptImportCommand
+        {
+            ClassId = request.ClassId,
+            FileMetadataId = request.FileMetadataId
+        };
+
+        var result = await sender.Send(command, cancellationToken);
+
+        if (result.IsFailed)
+            return result.ToProblemHttpResult();
+
+        return TypedResults.Created($"/api/GoodsReceipts/imports/{result.Value.Id}", result.Value);
     }
 }

@@ -34,7 +34,7 @@ public class CreateSchoolClassCommandTests : TestBase
         result.Value.StartDate.ShouldBe(new DateOnly(2026, 9, 1));
         result.Value.EndDate.ShouldBe(new DateOnly(2026, 12, 15));
         result.Value.Status.ShouldBe(ClassStatus.Upcoming);
-        result.Value.Id.ShouldBeGreaterThan(0);
+        result.Value.Id.ShouldNotBe(Guid.Empty);
 
         var persisted = await TestApp.FindAsync<SchoolClass>(result.Value.Id);
         persisted.ShouldNotBeNull();

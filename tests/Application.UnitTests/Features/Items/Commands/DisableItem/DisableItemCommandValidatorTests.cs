@@ -10,18 +10,18 @@ public class DisableItemCommandValidatorTests
     private readonly DisableItemCommandValidator _validator = new();
 
     [Test]
-    public async Task ShouldNotHaveErrorWhenIdIsGreaterThanZero()
+    public async Task ShouldNotHaveErrorWhenIdIsNotEmpty()
     {
-        var result = await _validator.ValidateAsync(new DisableItemCommand { Id = 1 });
+        var result = await _validator.ValidateAsync(new DisableItemCommand { Id = Guid.NewGuid() });
 
         result.IsValid.ShouldBeTrue();
     }
 
     [Test]
-    public async Task ShouldHaveErrorWhenIdIsZeroOrNegative()
+    public async Task ShouldHaveErrorWhenIdIsEmpty()
     {
-        var result = await _validator.ValidateAsync(new DisableItemCommand { Id = 0 });
+        var result = await _validator.ValidateAsync(new DisableItemCommand { Id = Guid.Empty });
 
-        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.GreaterThan);
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.Required);
     }
 }

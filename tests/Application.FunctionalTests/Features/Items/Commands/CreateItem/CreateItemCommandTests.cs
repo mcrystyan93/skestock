@@ -44,7 +44,7 @@ public class CreateItemCommandTests : TestBase
         result.Value.CategoryId.ShouldBe(category.Id);
         result.Value.CategoryName.ShouldBe(category.Name);
         result.Value.IsActive.ShouldBeTrue();
-        result.Value.Id.ShouldBeGreaterThan(0);
+        result.Value.Id.ShouldNotBe(Guid.Empty);
 
         var persisted = await TestApp.FindAsync<Item>(result.Value.Id);
         persisted.ShouldNotBeNull();
@@ -94,7 +94,7 @@ public class CreateItemCommandTests : TestBase
         {
             Name = $"{_prefix}-X",
             Unit = "unit",
-            CategoryId = int.MaxValue
+            CategoryId = Guid.NewGuid()
         });
 
         var exception = await act.ShouldThrowAsync<ValidationException>();

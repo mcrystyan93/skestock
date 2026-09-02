@@ -10,26 +10,26 @@ public class GetLocationByIdQueryValidatorTests
     private readonly GetLocationByIdQueryValidator _validator = new();
 
     [Test]
-    public async Task ShouldNotHaveErrorWhenIdIsGreaterThanZero()
+    public async Task ShouldNotHaveErrorWhenIdIsNotEmpty()
     {
-        var result = await _validator.ValidateAsync(new GetLocationByIdQuery { Id = 1 });
+        var result = await _validator.ValidateAsync(new GetLocationByIdQuery { Id = Guid.NewGuid() });
 
         result.IsValid.ShouldBeTrue();
     }
 
     [Test]
-    public async Task ShouldHaveErrorWhenIdIsZero()
+    public async Task ShouldHaveErrorWhenIdIsEmpty()
     {
-        var result = await _validator.ValidateAsync(new GetLocationByIdQuery { Id = 0 });
+        var result = await _validator.ValidateAsync(new GetLocationByIdQuery { Id = Guid.Empty });
 
-        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.GreaterThan);
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.Required);
     }
 
     [Test]
-    public async Task ShouldHaveErrorWhenIdIsNegative()
+    public async Task ShouldHaveErrorWhenIdIsEmptyVariant()
     {
-        var result = await _validator.ValidateAsync(new GetLocationByIdQuery { Id = -1 });
+        var result = await _validator.ValidateAsync(new GetLocationByIdQuery { Id = Guid.Empty });
 
-        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.GreaterThan);
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.Required);
     }
 }

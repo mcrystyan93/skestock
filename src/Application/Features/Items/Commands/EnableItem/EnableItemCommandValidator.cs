@@ -7,7 +7,7 @@ public class EnableItemCommandValidator : AbstractValidator<EnableItemCommand>
     public EnableItemCommandValidator()
     {
         RuleFor(x => x.Id)
-            .GreaterThan(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThan);
+            .NotEmpty()
+            .WithErrorCode(ValidationErrorCodes.Required);
     }
 }

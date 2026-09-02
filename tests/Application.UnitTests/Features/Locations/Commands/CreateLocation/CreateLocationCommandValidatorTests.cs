@@ -132,7 +132,7 @@ public class CreateLocationCommandValidatorTests
         await using var context = CreateContext();
         var validator = new CreateLocationCommandValidator(context);
 
-        var result = await validator.ValidateAsync(new CreateLocationCommand { Name = "Room 101", Type = "Room", ParentLocationId = 12345 });
+        var result = await validator.ValidateAsync(new CreateLocationCommand { Name = "Room 101", Type = "Room", ParentLocationId = Guid.NewGuid() });
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.InvalidReference);
     }

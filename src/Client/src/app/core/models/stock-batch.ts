@@ -6,12 +6,12 @@ import { PAGINATION_PAGE_SIZE } from './category';
  * src/Application/Features/StockBatches/Models/StockBatchDto.cs (StockBatchListItemDto).
  */
 export type StockBatchListItemDto = {
-  id: number;
-  itemId: number;
+  id: string;
+  itemId: string;
   itemName: string;
-  locationId: number;
+  locationId: string;
   locationName: string;
-  goodsReceiptId?: number | null;
+  goodsReceiptId?: string | null;
   quantity: number;
   unitPrice: number;
   lineTotal: number;
@@ -27,9 +27,9 @@ export type GetAllStockBatchesRequest = BasePaginationFilter & {
 
 /** Mirrors src/Application/Features/StockBatches/Models/StockBatchRequests.cs. */
 export type CreateStockBatchRequest = {
-  itemId: number;
-  locationId: number;
-  receivedClassId: number;
+  itemId: string;
+  locationId: string;
+  receivedClassId: string;
   quantity: number;
   expiryDate?: string | null;
   receivedDate: string;

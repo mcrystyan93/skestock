@@ -19,7 +19,7 @@ public class GetAllItemsQueryValidatorTests
         var effectiveSort = DynamicSortBuilder<Item>.BuildEffectiveSort(sort, SortConfiguration);
         var entity = new Item
         {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Name = "Test Item",
             Unit = "unit",
             CreatedDate = DateTimeOffset.UtcNow,

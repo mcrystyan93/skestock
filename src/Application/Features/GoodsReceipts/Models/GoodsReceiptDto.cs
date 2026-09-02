@@ -2,10 +2,10 @@ namespace skestock.Application.Features.GoodsReceipts.Models;
 
 public record GoodsReceiptLineDto
 {
-    public int StockBatchId { get; init; }
-    public int ItemId { get; init; }
+    public Guid StockBatchId { get; init; }
+    public Guid ItemId { get; init; }
     public string ItemName { get; init; } = string.Empty;
-    public int LocationId { get; init; }
+    public Guid LocationId { get; init; }
     public string LocationName { get; init; } = string.Empty;
     public int Quantity { get; init; }
     public DateOnly? ExpiryDate { get; init; }
@@ -15,8 +15,8 @@ public record GoodsReceiptLineDto
 
 public record GoodsReceiptDto
 {
-    public int Id { get; init; }
-    public int ClassId { get; init; }
+    public Guid Id { get; init; }
+    public Guid ClassId { get; init; }
     public string ClassName { get; init; } = string.Empty;
     public DateTime ReceivedAt { get; init; }
     public string? SupplierReference { get; init; }
@@ -36,8 +36,8 @@ public record GoodsReceiptDto
 /// </summary>
 public record GoodsReceiptListItemDto
 {
-    public int Id { get; init; }
-    public int ClassId { get; init; }
+    public Guid Id { get; init; }
+    public Guid ClassId { get; init; }
     public string ClassName { get; init; } = string.Empty;
     public DateTime ReceivedAt { get; init; }
     public string? SupplierReference { get; init; }

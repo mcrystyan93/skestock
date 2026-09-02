@@ -19,7 +19,7 @@ public class GetAllCategoriesQueryValidatorTests
         var effectiveSort = DynamicSortBuilder<Category>.BuildEffectiveSort(sort, SortConfiguration);
         var entity = new Category
         {
-            Id = 1,
+            Id = Guid.NewGuid(),
             Name = "Test Category",
             CreatedDate = DateTimeOffset.UtcNow,
             LastModifiedDate = DateTimeOffset.UtcNow
