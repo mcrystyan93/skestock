@@ -28,6 +28,7 @@ public class GoodsReceiptImportTestDbContext(DbContextOptions<GoodsReceiptImport
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

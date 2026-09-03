@@ -16,3 +16,19 @@ public static class GoodsReceiptErrors
         }
     }
 }
+
+public static class GoodsReceiptImportErrors
+{
+    public sealed class GoodsReceiptImportNotFound : Error
+    {
+        public const string ErrorCode = "goods_receipt_imports.not_found";
+
+        public GoodsReceiptImportNotFound(Guid goodsReceiptImportId) : base($"Goods receipt import with id '{goodsReceiptImportId}' was not found.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status404NotFound);
+            Metadata.Add(ErrorMetadataKeys.Title, "Goods receipt import not found");
+            Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
+            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object> { ["goodsReceiptImportId"] = goodsReceiptImportId });
+        }
+    }
+}
