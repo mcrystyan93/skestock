@@ -24,6 +24,8 @@ public class GoodsReceiptImport : BaseAuditableEntity
     // Set only once the user confirms and a real GoodsReceipt is created from this import
     public Guid? ResultingGoodsReceiptId { get; set; }
     public GoodsReceipt? ResultingGoodsReceipt { get; set; }
+    
+    public string? ExtractedDataJson { get; private set; }
 
     public ICollection<GoodsReceiptImportLine> Lines { get; set; } = new List<GoodsReceiptImportLine>();
 
@@ -45,5 +47,21 @@ public class GoodsReceiptImport : BaseAuditableEntity
         import.AddDomainEvent(new GoodsReceiptImportCreatedEvent(import));
         
         return import;
+    }
+
+    public void ApplyExtractionResult(string extractedDataJson)
+    {
+        ExtractedDataJson = extractedDataJson;
+        Status = GoodsReceiptImportStatus.PendingReview;
+        
+        AddDomainEvent(new GoodsReceiptImportCompletedEvent(Id));
+    }
+
+    public void MarkAsFailed(string errorMessage)
+    {
+        Status = GoodsReceiptImportStatus.Failed;
+        ErrorMessage = errorMessage;
+        
+        AddDomainEvent(new GoodsReceiptImportFailedEvent(Id));
     }
 }

@@ -19,9 +19,9 @@ public class AzureBlobStorageService(BlobServiceClient blobServiceClient) : IBlo
             StartsOn = DateTimeOffset.UtcNow,
             ExpiresOn = DateTimeOffset.UtcNow.Add(dto.ValidFor)
         };
-        
+
         sas.SetPermissions(BlobSasPermissions.Write | BlobSasPermissions.Create);
-        
+
         return Task.FromResult(blob.GenerateSasUri(sas));
     }
 
@@ -36,9 +36,9 @@ public class AzureBlobStorageService(BlobServiceClient blobServiceClient) : IBlo
             StartsOn = DateTimeOffset.UtcNow,
             ExpiresOn = DateTimeOffset.UtcNow.Add(dto.ValidFor)
         };
-        
+
         sas.SetPermissions(BlobSasPermissions.Read);
-        
+
         return Task.FromResult(blob.GenerateSasUri(sas));
     }
 
@@ -47,7 +47,7 @@ public class AzureBlobStorageService(BlobServiceClient blobServiceClient) : IBlo
         var blob = blobServiceClient.GetBlobContainerClient(dto.ContainerName).GetBlobClient(dto.BlobPath);
         if (!await blob.ExistsAsync(cancellationToken))
             return null;
-        
+
         var props = await blob.GetPropertiesAsync(cancellationToken: cancellationToken);
 
         return new BlobInfo(props.Value.ContentLength, props.Value.ETag.ToString(), props.Value.ContentType);
@@ -56,7 +56,15 @@ public class AzureBlobStorageService(BlobServiceClient blobServiceClient) : IBlo
     public async Task DeleteAsync(DeleteDto dto, CancellationToken cancellationToken)
     {
         var blob = blobServiceClient.GetBlobContainerClient(dto.ContainerName).GetBlobClient(dto.BlobPath);
-        
+
         await blob.DeleteIfExistsAsync(cancellationToken: cancellationToken);
+    }
+
+    public async Task<Stream> DownloadAsync(DownloadDto dto, CancellationToken cancellationToken)
+    {
+        var blob = blobServiceClient.GetBlobContainerClient(dto.ContainerName).GetBlobClient(dto.BlobPath);
+
+        var response = await blob.DownloadStreamingAsync(cancellationToken: cancellationToken);
+        return response.Value.Content;
     }
 }

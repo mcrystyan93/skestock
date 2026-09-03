@@ -31,6 +31,7 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
 
     public DbSet<GoodsReceiptImport> GoodsReceiptImports => Set<GoodsReceiptImport>();
     public DbSet<GoodsReceiptImportLine> GoodsReceiptImportLines => Set<GoodsReceiptImportLine>();

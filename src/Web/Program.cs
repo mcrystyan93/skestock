@@ -13,6 +13,7 @@ builder.AddServiceDefaults();
 builder.AddKeyVaultIfConfigured();
 builder.AddApplicationServices();
 builder.AddInfrastructureServices();
+builder.AddWebAuthenticationServices();
 builder.AddWebServices();
 
 var app = builder.Build();

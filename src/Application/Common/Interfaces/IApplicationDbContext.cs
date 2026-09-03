@@ -20,6 +20,7 @@ public interface IApplicationDbContext
     DbSet<GoodsReceiptImportLine> GoodsReceiptImportLines { get; }
     DbSet<UserProfile> UserProfiles { get; }
     DbSet<OutboxMessage> OutboxMessages { get; }
+    DbSet<ProcessedMessage> ProcessedMessages { get; }
     
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
