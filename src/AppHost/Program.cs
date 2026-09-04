@@ -29,6 +29,11 @@ var databaseServer = builder
 var redisPassword = builder.AddParameter("redis-password", secret: true);
 var cache = builder
     .AddRedis(Services.Cache)
+    .WithRedisCommander(commander =>
+    {
+        commander.WithComputeEnvironment(compose)
+            .WithEndpoint(targetPort: 8081, port: 8081, name: "http");
+    })
     .PublishAsDockerComposeService((resource, service) =>
     {
         service.Name = Services.Cache;

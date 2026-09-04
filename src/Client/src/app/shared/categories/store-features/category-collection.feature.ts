@@ -10,9 +10,11 @@ import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
 import { CategoriesHttp } from '@ske/shared/categories';
+import { categoryRealtimeEvents } from './category.events';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
+import { eventGroup, on, withReducer } from '@ngrx/signals/events';
 
 
 type CategoryCollectionState = {
@@ -119,6 +121,14 @@ export function withCategoryCollection() {
       );
 
       return { load, loadMore };
-    })
+    }),
+    withReducer(
+      on(categoryRealtimeEvents.categoryUpdated, (event, state) => {
+        console.log('categoryUpdated event received:', event);
+        return {
+          ...state
+        };
+      })
+    )
   );
 }

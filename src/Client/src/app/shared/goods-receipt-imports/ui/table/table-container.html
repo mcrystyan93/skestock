@@ -1,0 +1,7 @@
+<ske-goods-receipt-imports-table [items]="store.goodsReceiptImports()"
+                                 [filter]="store.filter()"
+                                 [loading]="store.goodsReceiptImportsLoading()"
+                                 [hasNextPage]="store.hasNextPage()"
+                                 [isLoadingMore]="store.isLoadingMore()"
+                                 (onFilterChange)="store.load($event)"
+                                 (onLoadMore)="store.loadMore()" />

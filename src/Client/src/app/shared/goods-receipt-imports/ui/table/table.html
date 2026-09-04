@@ -1,0 +1,69 @@
+@let dimensions = tableDimensions();
+@let sortByKeyFn = sortByKey();
+
+<nz-table #table
+          nzTableLayout="auto"
+          [nzData]="itemsVirtualData()"
+          [nzVirtualItemSize]="virtualItemSize()"
+          [nzVirtualMinBufferPx]="virtualMinBufferPx()"
+          [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
+          [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          [nzLoading]="loading()"
+          nzSize="small"
+          [nzScroll]="{x:dimensions.width, y:dimensions.height}">
+  <thead>
+  <tr>
+    <th nzWidth="150px">
+      {{ columns.className.label }}
+    </th>
+    <th nzWidth="120px">
+      {{ columns.status.label }}
+    </th>
+    <th nzWidth="150px">
+      {{ columns.uploadedByName.label }}
+    </th>
+    <th nzWidth="150px">
+      {{ columns.uploadedAt.label }}
+    </th>
+    <th nzWidth="150px">
+      {{ columns.processedAt.label }}
+    </th>
+    <th nzWidth="200px">
+      {{ columns.errorMessage.label }}
+    </th>
+    <th nzWidth="150px">
+      {{ columns.createdDate.label }}
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <ng-template nz-virtual-scroll
+               let-goodsReceiptImport>
+    <tr>
+      <td>
+        {{ goodsReceiptImport.className }}
+      </td>
+      <td>
+        <nz-tag [nzColor]="statusColor(goodsReceiptImport.status)">{{ statusLabel(goodsReceiptImport.status) }}</nz-tag>
+      </td>
+      <td>
+        {{ goodsReceiptImport.uploadedByName }}
+      </td>
+      <td>
+        {{ goodsReceiptImport.uploadedAt | date:'medium' }}
+      </td>
+      <td>
+        {{ goodsReceiptImport.processedAt | date:'medium' }}
+      </td>
+      <td>
+        {{ goodsReceiptImport.errorMessage }}
+      </td>
+      <td>
+        {{ goodsReceiptImport.createdDate | date:'medium' }}
+      </td>
+    </tr>
+  </ng-template>
+  </tbody>
+</nz-table>

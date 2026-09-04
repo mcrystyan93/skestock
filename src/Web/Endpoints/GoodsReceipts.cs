@@ -4,6 +4,7 @@ using skestock.Application.Features.GoodsReceipts.Commands.CreateGoodsReceipt;
 using skestock.Application.Features.GoodsReceipts.Commands.CreateGoodsReceiptImport;
 using skestock.Application.Features.GoodsReceipts.Models;
 using skestock.Application.Features.GoodsReceipts.Queries.GetAllGoodsReceipts;
+using skestock.Application.Features.GoodsReceipts.Queries.GetAllGoodsReceiptImports;
 using skestock.Application.Features.GoodsReceipts.Queries.GetGoodsReceiptById;
 
 namespace skestock.Web.Endpoints;
@@ -16,6 +17,7 @@ public class GoodsReceipts : IEndpointGroup
         groupBuilder.MapGet(GetGoodsReceiptById, "{id}");
         groupBuilder.MapPost(CreateGoodsReceipt, "");
         groupBuilder.MapPost(CreateGoodsReceiptImport, "imports");
+        groupBuilder.MapPost(GetAllGoodsReceiptImports, "imports/get-all");
     }
 
     [EndpointSummary("Get all goods receipts")]
@@ -98,5 +100,27 @@ public class GoodsReceipts : IEndpointGroup
             return result.ToProblemHttpResult();
 
         return TypedResults.Created($"/api/GoodsReceipts/imports/{result.Value.Id}", result.Value);
+    }
+
+    [EndpointSummary("Get all goods receipt imports")]
+    [EndpointDescription("Retrieves a paginated, filterable list of goods receipt imports. Filter by classId, status, etc. via the Filters column-filter list.")]
+    public static async Task<Results<Ok<PaginatedResponse<GoodsReceiptImportListItemDto>>, ProblemHttpResult>> GetAllGoodsReceiptImports(
+        ISender sender, GoodsReceiptRequests.GetAllGoodsReceiptImportsRequest request, CancellationToken cancellationToken)
+    {
+        var query = new GetAllGoodsReceiptImportsQuery
+        {
+            Filters = request.Filters,
+            Sort = request.Sort,
+            Cursor = request.Cursor,
+            SearchTerm = request.SearchTerm,
+            PageSize = request.PageSize
+        };
+
+        var result = await sender.Send(query, cancellationToken);
+
+        if (result.IsFailed)
+            return result.ToProblemHttpResult();
+
+        return TypedResults.Ok(result.Value);
     }
 }

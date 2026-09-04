@@ -9,4 +9,7 @@
   <nz-tab>
     <ske-stock-list [classId]="store.schoolClass()?.id ?? null"></ske-stock-list>
   </nz-tab>
+  <nz-tab>
+    <ske-school-class-overview-goods-receipt-imports-tab [classId]="store.schoolClass()?.id ?? null" />
+  </nz-tab>
 </nz-tabs>

@@ -44,7 +44,7 @@ export type GoodsReceiptListItemDto = {
   totalQuantity: number;
   createdByName?: string | null;
   createdDate: string;
-  totalAmount:number;
+  totalAmount: number;
 };
 
 /** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptRequests.cs. */
@@ -68,7 +68,7 @@ export type CreateGoodsReceiptRequest = {
   lines: CreateGoodsReceiptLineRequest[];
 };
 /** Mirrors src/Domain/Enums/GoodsReceiptImportStatus.cs. */
-export type GoodsReceiptImportStatus = 'Processing' | 'PendingReview' | 'Confirmed' | 'Failed';
+export type GoodsReceiptImportStatus = 'processing' | 'pendingReview' | 'confirmed' | 'failed';
 
 /** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptImportDto.cs. */
 export type GoodsReceiptImportDto = {
@@ -85,6 +85,89 @@ export type CreateGoodsReceiptImportRequest = {
   classId: string;
   fileMetadataId: string;
 };
+
+/**
+ * Row shape for the paginated goods-receipt-import list. Mirrors
+ * src/Application/Features/GoodsReceipts/Models/GoodsReceiptImportListItemDto.cs.
+ */
+export type GoodsReceiptImportListItemDto = {
+  id: string;
+  status: GoodsReceiptImportStatus;
+  classId: string;
+  className: string;
+  fileMetadataId: string;
+  blobPath: string;
+  errorMessage?: string | null;
+  uploadedByName?: string | null;
+  uploadedAt: string;
+  processedAt?: string | null;
+  createdDate: string;
+};
+
+/** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptRequests.cs. */
+export type GetAllGoodsReceiptImportsRequest = BasePaginationFilter & {
+  filters: ColumnFilter[];
+};
+
+export type GoodsReceiptImportTableColumn =
+  | 'className'
+  | 'status'
+  | 'uploadedByName'
+  | 'uploadedAt'
+  | 'processedAt'
+  | 'errorMessage'
+  | 'createdDate';
+
+export const GOODS_RECEIPT_IMPORT_TABLE_COLUMNS: TableColumnDefinition<GoodsReceiptImportTableColumn> = {
+  className: {
+    label: 'Clasa',
+    value: 'className',
+    fieldType: 'string'
+  },
+  status: {
+    label: 'Status',
+    value: 'status',
+    fieldType: 'select'
+  },
+  uploadedByName: {
+    label: 'Incarcat de',
+    value: 'uploadedByName',
+    fieldType: 'string'
+  },
+  uploadedAt: {
+    label: 'Data incarcarii',
+    value: 'uploadedAt',
+    fieldType: 'date'
+  },
+  processedAt: {
+    label: 'Data procesarii',
+    value: 'processedAt',
+    fieldType: 'date'
+  },
+  errorMessage: {
+    label: 'Eroare',
+    value: 'errorMessage',
+    fieldType: 'string'
+  },
+  createdDate: {
+    label: 'Data creare',
+    value: 'createdDate',
+    fieldType: 'date'
+  }
+};
+
+export function buildGoodsReceiptImportListFilter(
+  currentFilter: GetAllGoodsReceiptImportsRequest,
+  partialFilter: Partial<GetAllGoodsReceiptImportsRequest>
+): GetAllGoodsReceiptImportsRequest {
+  return {
+    ...currentFilter,
+    ...partialFilter,
+    cursor: null,
+    pageSize: partialFilter.pageSize ?? currentFilter.pageSize ?? PAGINATION_PAGE_SIZE,
+    sort: prioritizeSort(currentFilter.sort ?? [], partialFilter.sort ?? [])
+  };
+}
 
 export type GoodsReceiptTableColumn =
   | 'className'
@@ -137,6 +220,20 @@ export const GOODS_RECEIPT_TABLE_COLUMNS: TableColumnDefinition<GoodsReceiptTabl
     value: 'createdDate',
     fieldType: 'date'
   }
+};
+
+export const GOODS_RECEIPT_IMPORT_STATUS_LABELS: Record<GoodsReceiptImportStatus, string> = {
+  processing: 'In procesare',
+  pendingReview: 'In asteptare revizuire',
+  confirmed: 'Confirmat',
+  failed: 'Eroare'
+};
+
+export const GOODS_RECEIPT_IMPORT_STATUS_COLORS: Record<GoodsReceiptImportStatus, string> = {
+  processing: 'blue',
+  pendingReview: 'orange',
+  confirmed: 'green',
+  failed: 'red'
 };
 
 export function buildGoodsReceiptListFilter(

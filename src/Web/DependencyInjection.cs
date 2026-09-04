@@ -1,11 +1,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Azure.Identity;
-using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc;
 using skestock.Application.Common.Interfaces;
 using skestock.Web.BackgroundJobs;
 using skestock.Web.Services;
+using StackExchange.Redis;
 
 namespace skestock.Web;
 
@@ -62,6 +62,7 @@ public static class DependencyInjection
         builder.Services.AddCors();
 
         builder.Services.AddHostedService<OutboxPublisherService>();
+
     }
 
     public static void AddKeyVaultIfConfigured(this IHostApplicationBuilder builder)

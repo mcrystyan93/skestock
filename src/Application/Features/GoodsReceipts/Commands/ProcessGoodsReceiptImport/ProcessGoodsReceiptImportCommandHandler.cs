@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using skestock.Application.Common.Errors;
+using skestock.Application.Common.Exceptions;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Documents.Interfaces;
 using skestock.Application.Features.GoodsReceipts.Models;
@@ -45,13 +46,20 @@ public class ProcessGoodsReceiptImportCommandHandler(
             
             import.ApplyExtractionResult(extraction.ToJson());
         }
-        catch (Exception ex)
+        catch (UnprocessableDocumentException ex)
         {
-            logger.LogError(ex, "Error processing goods receipt import: {GoodsReceiptImportId}",
+            // permanent failure - retrying with the same input would fail identically, so mark
+            // the import as Failed here instead of letting the caller retry it.
+            logger.LogError(ex, "Unprocessable goods receipt import: {GoodsReceiptImportId}",
                 request.GoodsReceiptImportId);
 
             import.MarkAsFailed(ex.Message);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            return Result.Ok();
         }
+        // Transient failures (e.g. TransientExtractionException) and any other unexpected
+        // exception are intentionally left uncaught here so they propagate to the caller
+        // (the queue processor), which decides whether to retry.
 
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Ok();

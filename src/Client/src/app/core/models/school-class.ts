@@ -32,6 +32,9 @@ export type SchoolClassSummary = {
   noOfGoodsReceipt: number;
   totalAmount: number;
   lowStockItemsCount: number;
+  processingImportsCount: number;
+  pendingReviewImportsCount: number;
+  failedImportsCount: number;
 };
 
 /** Mirrors src/Application/Features/SchoolClasses/Models/SchoolClassRequests.cs. */

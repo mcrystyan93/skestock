@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, inject, OnDestroy, OnInit } from '@angular/core';
 import { CategoryListState } from '../services/category-list.store';
 import { FilterContainer } from './filter/filter-container';
 import { Table } from './table/table';
@@ -7,6 +7,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { Header } from './header/header';
 import { CategoryDetailModal } from '@ske/shared/categories';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { SignalRGroupManagerStore } from '@ske/signalr';
 
 @Component({
   imports: [
@@ -21,11 +22,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     class: 'flex flex-col grow gap-4'
   }
 })
-export class CategoriesPage {
+export class CategoriesPage implements OnInit, OnDestroy{
   public readonly store = inject(CategoryListState);
 
   private readonly _modalService = inject(NzModalService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _signalRGroupManager = inject(SignalRGroupManagerStore);
 
   public onFilterChange(filter: GetAllCategoriesRequest) {
     this.store.load(filter);
@@ -41,6 +43,14 @@ export class CategoriesPage {
 
   public onAdd() {
     this.openCategoryModal();
+  }
+
+  public ngOnInit() {
+    this._signalRGroupManager.join('categories-list');
+  }
+
+  public ngOnDestroy() {
+    this._signalRGroupManager.leave('categories-list');
   }
 
   private openCategoryModal(category: CategoryDto | null = null) {
