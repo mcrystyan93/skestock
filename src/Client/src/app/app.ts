@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { AuthStore } from '@ske/auth';
 import { LoaderDirective } from '@ske/shared/loader';
 import { RouterOutlet } from '@angular/router';
+import { SignalRGroupManagerStore } from '@ske/signalr';
 
 @Component({
   imports: [
@@ -9,7 +10,8 @@ import { RouterOutlet } from '@angular/router';
     RouterOutlet
   ],
   selector: 'ske-root',
-  templateUrl: './app.html'
+  templateUrl: './app.html',
+  providers: [SignalRGroupManagerStore]
 })
 export class App {
   public readonly authStore = inject(AuthStore);

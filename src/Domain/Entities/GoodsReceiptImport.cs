@@ -3,7 +3,7 @@ using skestock.Domain.Events.GoodsReceipt;
 
 namespace skestock.Domain.Entities;
 
-public class GoodsReceiptImport : BaseAuditableEntity
+public class GoodsReceiptImport : BaseAuditableEntity, IKeysetEntity
 {
     public string BlobPath { get; set; } = null!;
     public GoodsReceiptImportStatus Status { get; set; } = GoodsReceiptImportStatus.Processing;
@@ -53,8 +53,9 @@ public class GoodsReceiptImport : BaseAuditableEntity
     {
         ExtractedDataJson = extractedDataJson;
         Status = GoodsReceiptImportStatus.PendingReview;
+        ProcessedAt = DateTime.UtcNow;
         
-        AddDomainEvent(new GoodsReceiptImportCompletedEvent(Id));
+        AddDomainEvent(new GoodsReceiptImportCompletedEvent(Id, UploadedByUserId));
     }
 
     public void MarkAsFailed(string errorMessage)

@@ -1,6 +1,7 @@
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.SchoolClasses.Models;
+using skestock.Domain.Enums;
 
 namespace skestock.Application.Features.SchoolClasses.Queries.GetSchoolClassSummary;
 
@@ -34,10 +35,23 @@ public class GetSchoolClassSummaryHandler(IApplicationDbContext dbContext)
             .Join(dbContext.Items, s => s.ItemId, i => i.Id, (s, i) => new { s.Quantity, i.MinThreshold })
             .CountAsync(x => x.Quantity < x.MinThreshold, cancellationToken);
 
+        var importCountsByStatus = await dbContext.GoodsReceiptImports
+            .AsNoTracking()
+            .Where(i => i.ClassId == request.Id)
+            .GroupBy(i => i.Status)
+            .Select(g => new { Status = g.Key, Count = g.Count() })
+            .ToListAsync(cancellationToken);
+
+        int CountFor(GoodsReceiptImportStatus status) =>
+            importCountsByStatus.SingleOrDefault(c => c.Status == status)?.Count ?? 0;
+
         return Result.Ok(new SchoolClassSummary(
             summary.Id,
             summary.NoOfGoodsReceipt,
             summary.TotalAmount,
-            lowStockItemsCount));
+            lowStockItemsCount,
+            CountFor(GoodsReceiptImportStatus.Processing),
+            CountFor(GoodsReceiptImportStatus.PendingReview),
+            CountFor(GoodsReceiptImportStatus.Failed)));
     }
 }

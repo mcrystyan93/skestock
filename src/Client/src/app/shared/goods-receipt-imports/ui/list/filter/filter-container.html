@@ -1,0 +1,5 @@
+<nz-card>
+  <ske-goods-receipt-imports-filter-form [loading]="store.goodsReceiptImportsLoading()"
+                                         [filter]="store.filter()"
+                                         (onFilterChange)="onFilterChange($event)" />
+</nz-card>

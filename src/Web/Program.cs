@@ -2,6 +2,7 @@ using skestock.Infrastructure.Data;
 using Scalar.AspNetCore;
 using skestock.Application;
 using skestock.Infrastructure;
+using skestock.Infrastructure.Realtime;
 using skestock.ServiceDefaults;
 using skestock.Web;
 
@@ -62,6 +63,7 @@ app.MapScalarApiReference();
 app.UseExceptionHandler(options => { });
 
 app.Map("/", () => Results.Redirect("/scalar"));
+app.MapHub<AppHub>("/hubs/app").RequireAuthorization();
 
 app.MapDefaultEndpoints();
 app.MapEndpoints(typeof(Program).Assembly);

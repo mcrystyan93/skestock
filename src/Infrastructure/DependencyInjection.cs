@@ -23,6 +23,8 @@ using skestock.Infrastructure.Queues;
 using skestock.Infrastructure.Storage;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
+using skestock.Infrastructure.Realtime;
+using StackExchange.Redis;
 
 namespace skestock.Infrastructure;
 
@@ -78,6 +80,18 @@ public static class DependencyInjection
                 GoodsReceiptExtractionSchemaFactory>();
 
         builder.AddDocumentExtractionServices();
+
+        var redisConnectionString = builder.Configuration.GetConnectionString(skestock.Shared.Services.Cache);
+        builder.Services.AddSignalR(options =>
+            {
+                options.KeepAliveInterval = TimeSpan.FromSeconds(15); // server pings the client
+                options.ClientTimeoutInterval = TimeSpan.FromSeconds(30); // if no ping/activity in this window, connection is dead
+            })
+            .AddStackExchangeRedis(redisConnectionString!, options =>
+            {
+                options.Configuration.ChannelPrefix = RedisChannel.Literal("skestock:signalr:");
+            });
+        builder.Services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
     }
 
     private static void AddDocumentExtractionServices(this IHostApplicationBuilder builder)
@@ -119,31 +133,34 @@ public static class DependencyInjection
 
 #pragma warning disable EXTEXP0001
         builder.Services.AddHttpClient<IDocumentExtractionService, NutrientDocumentExtractionService>(client =>
-        {
-            client.BaseAddress = new Uri(builder.Configuration.GetValue<string>($"{Services.NutrientApiSettings}:{Services.NutrientBaseUrl}") ??
-                                         throw new InvalidOperationException());
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
-                builder.Configuration.GetValue<string>($"{Services.NutrientApiSettings}:{Services.NutrientApiKey}") ??
-                throw new InvalidOperationException());
-        })
-        .RemoveAllResilienceHandlers()
+            {
+                client.BaseAddress = new Uri(
+                    builder.Configuration.GetValue<string>(
+                        $"{Services.NutrientApiSettings}:{Services.NutrientBaseUrl}") ??
+                    throw new InvalidOperationException());
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
+                    builder.Configuration.GetValue<string>(
+                        $"{Services.NutrientApiSettings}:{Services.NutrientApiKey}") ??
+                    throw new InvalidOperationException());
+            })
+            .RemoveAllResilienceHandlers()
 #pragma warning restore EXTEXP0001
             .AddStandardResilienceHandler(options =>
-        {
-            // per-attempt timeout — must exceed how long a single extraction call can take
-            options.AttemptTimeout.Timeout = TimeSpan.FromMinutes(2);
+            {
+                // per-attempt timeout — must exceed how long a single extraction call can take
+                options.AttemptTimeout.Timeout = TimeSpan.FromMinutes(2);
 
-            // overall timeout across all retries — must be >= AttemptTimeout, higher if you allow retries
-            options.TotalRequestTimeout.Timeout = TimeSpan.FromMinutes(5);
+                // overall timeout across all retries — must be >= AttemptTimeout, higher if you allow retries
+                options.TotalRequestTimeout.Timeout = TimeSpan.FromMinutes(5);
 
-            // be conservative on retries for a slow, potentially expensive call
-            options.Retry.MaxRetryAttempts = 2;
-            options.Retry.BackoffType = DelayBackoffType.Exponential;
-            options.Retry.Delay = TimeSpan.FromSeconds(2);
+                // be conservative on retries for a slow, potentially expensive call
+                options.Retry.MaxRetryAttempts = 2;
+                options.Retry.BackoffType = DelayBackoffType.Exponential;
+                options.Retry.Delay = TimeSpan.FromSeconds(2);
 
-            // circuit breaker sampling duration must be >= 2x AttemptTimeout — the library enforces this
-            options.CircuitBreaker.SamplingDuration = TimeSpan.FromMinutes(4);
-        });
+                // circuit breaker sampling duration must be >= 2x AttemptTimeout — the library enforces this
+                options.CircuitBreaker.SamplingDuration = TimeSpan.FromMinutes(4);
+            });
     }
 
     private static void AddOpenAiExtraction(IHostApplicationBuilder builder)

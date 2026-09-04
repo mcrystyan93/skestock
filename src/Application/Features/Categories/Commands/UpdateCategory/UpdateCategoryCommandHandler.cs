@@ -1,6 +1,7 @@
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Categories.Models;
+using skestock.Domain.Events.Categories;
 
 namespace skestock.Application.Features.Categories.Commands.UpdateCategory;
 
@@ -16,6 +17,8 @@ public class UpdateCategoryCommandHandler(IApplicationDbContext dbContext)
             return Result.Fail(new CategoryErrors.CategoryNotFound(request.Id));
 
         category.Name = request.Name.Trim();
+        
+        category.AddDomainEvent(new CategoryUpdatedEvent(category));
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

@@ -32,4 +32,9 @@ public static class GoodsReceiptRequests
         public Guid ClassId { get; init; }
         public Guid FileMetadataId { get; init; }
     }
+
+    public class GetAllGoodsReceiptImportsRequest : BasePaginationFilter
+    {
+        public List<ColumnFilter> Filters { get; init; } = [];
+    }
 }

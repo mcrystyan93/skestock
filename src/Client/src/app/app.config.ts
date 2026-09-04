@@ -13,6 +13,9 @@ import { provideNzDateFnsAdapter } from 'ng-zorro-antd/core/time';
 import { provideHttpClient, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
 import { appInitializer } from './app.init';
 import { authInterceptor } from '@ske/auth';
+import { provideSignalR } from '@ske/signalr';
+import { categoryRealtimeEvents } from '@ske/shared/categories';
+import { goodsReceiptImportRealtimeEvents } from '@ske/shared/goods-receipt-imports';
 
 registerLocaleData(ro);
 
@@ -31,6 +34,15 @@ export const appConfig: ApplicationConfig = {
     provideNzI18n(ro_RO),
     provideNzDateFnsAdapter(),
     { provide: DEFAULT_CURRENCY_CODE, useValue: 'RON' },
-    { provide: LOCALE_ID, useValue: 'ro' }
+    { provide: LOCALE_ID, useValue: 'ro' },
+    provideSignalR({
+      url: '/hubs/app',
+      eventMap: {
+        'CategoryCreated': categoryRealtimeEvents.categoryCreated,
+        'CategoryUpdated': categoryRealtimeEvents.categoryUpdated,
+        'GoodsReceiptImportCompletedMarkListChanged': goodsReceiptImportRealtimeEvents.markListAsChanged,
+        'GoodsReceiptImportCompletedNotifyUser': goodsReceiptImportRealtimeEvents.notifyUser
+      }
+    })
   ]
 };

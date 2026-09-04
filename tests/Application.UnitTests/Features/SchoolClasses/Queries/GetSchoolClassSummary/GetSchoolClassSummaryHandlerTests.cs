@@ -39,10 +39,20 @@ public class SchoolClassSummaryTestDbContext(DbContextOptions<SchoolClassSummary
     {
         base.OnModelCreating(builder);
 
-        builder.Ignore<GoodsReceiptImport>();
         builder.Ignore<GoodsReceiptImportLine>();
 
         builder.Ignore<FileMetadata>();
+
+        builder.Entity<GoodsReceiptImport>(b =>
+        {
+            b.HasOne(i => i.Class).WithMany().HasForeignKey(i => i.ClassId);
+            b.Ignore(i => i.FileMetadata);
+            b.Ignore(i => i.UploadedByUser);
+            b.Ignore(i => i.ResultingGoodsReceipt);
+            b.Ignore(i => i.Lines);
+            b.Ignore(i => i.CreatedBy);
+            b.Ignore(i => i.LastModifiedBy);
+        });
 
         builder.Entity<UserProfile>(b =>
         {
@@ -152,6 +162,18 @@ public class GetSchoolClassSummaryHandlerTests
         UnitPrice = 1m
     };
 
+    private static GoodsReceiptImport CreateImport(SchoolClass schoolClass, GoodsReceiptImportStatus status) => new()
+    {
+        ClassId = schoolClass.Id,
+        Class = null!,
+        FileMetadataId = Guid.NewGuid(),
+        FileMetadata = null!,
+        UploadedByUserId = Guid.NewGuid(),
+        UploadedByUser = null!,
+        BlobPath = "app-files/import.pdf",
+        Status = status
+    };
+
     [Test]
     public async Task Handle_WithNonExistentId_ReturnsFailedResult()
     {
@@ -178,6 +200,9 @@ public class GetSchoolClassSummaryHandlerTests
         result.Value.NoOfGoodsReceipt.ShouldBe(0);
         result.Value.TotalAmount.ShouldBe(0m);
         result.Value.LowStockItemsCount.ShouldBe(0);
+        result.Value.ProcessingImportsCount.ShouldBe(0);
+        result.Value.PendingReviewImportsCount.ShouldBe(0);
+        result.Value.FailedImportsCount.ShouldBe(0);
     }
 
     [Test]
@@ -199,6 +224,34 @@ public class GetSchoolClassSummaryHandlerTests
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.LowStockItemsCount.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Handle_CountsImportsPerStatusScopedToTheClass()
+    {
+        await using var context = CreateContext();
+        var schoolClass = CreateSchoolClass();
+        var otherClass = CreateSchoolClass();
+        context.AddRange(schoolClass, otherClass);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        context.GoodsReceiptImports.AddRange(
+            CreateImport(schoolClass, GoodsReceiptImportStatus.Processing),
+            CreateImport(schoolClass, GoodsReceiptImportStatus.Processing),
+            CreateImport(schoolClass, GoodsReceiptImportStatus.PendingReview),
+            CreateImport(schoolClass, GoodsReceiptImportStatus.Failed),
+            CreateImport(schoolClass, GoodsReceiptImportStatus.Confirmed),
+            // Belongs to a different class - must not be counted.
+            CreateImport(otherClass, GoodsReceiptImportStatus.Processing));
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new GetSchoolClassSummaryHandler(context);
+        var result = await handler.Handle(new GetSchoolClassSummaryQuery { Id = schoolClass.Id }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ProcessingImportsCount.ShouldBe(2);
+        result.Value.PendingReviewImportsCount.ShouldBe(1);
+        result.Value.FailedImportsCount.ShouldBe(1);
     }
 
     [Test]

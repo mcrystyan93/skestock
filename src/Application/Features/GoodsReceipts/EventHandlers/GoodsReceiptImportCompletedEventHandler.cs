@@ -5,33 +5,18 @@ using skestock.Domain.Events.GoodsReceipt;
 
 namespace skestock.Application.Features.GoodsReceipts.EventHandlers;
 
-public class GoodsReceiptImportCompletedEventHandler(
-    IApplicationDbContext dbContext,
-    ILogger<GoodsReceiptImportCompletedEventHandler> logger) : INotificationHandler<GoodsReceiptImportCompletedEvent>
+public class GoodsReceiptImportCompletedEventHandler(IRealtimeNotifier notifier)
+    : INotificationHandler<GoodsReceiptImportCompletedEvent>
 {
     public async ValueTask Handle(GoodsReceiptImportCompletedEvent notification, CancellationToken cancellationToken)
     {
-        var import = await dbContext.GoodsReceiptImports
-            .FirstOrDefaultAsync(x => x.Id == notification.ImportId, cancellationToken);
+        var payload = new { GoodsReceiptImportId = notification.ImportId };
 
-        if (import is null)
-        {
-            logger.LogError("Goods receipt import not found: {GoodsReceiptImportId}", notification.ImportId);
-            return;
-        }
-
-        // make sure it's not processed already
-        if (import.Status is GoodsReceiptImportStatus.Confirmed or GoodsReceiptImportStatus.Failed
-            or GoodsReceiptImportStatus.PendingReview)
-        {
-            logger.LogInformation("Goods receipt import already processed: {GoodsReceiptImportId}, Status: {Status}",
-                notification.ImportId, import.Status);
-            return;
-        }
-        
-        // waiting for user to review the import
-        import.Status = GoodsReceiptImportStatus.PendingReview;
-        
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await Task.WhenAll([
+            notifier.NotifyGroupAsync("goods-receipts-import-list", "GoodsReceiptImportCompletedMarkListChanged", payload,
+                cancellationToken),
+            notifier.NotifyUserAsync(notification.UploadedByUserId.ToString(), "GoodsReceiptImportCompletedNotifyUser", payload,
+                cancellationToken)
+        ]);
     }
 }

@@ -32,6 +32,26 @@
           </ng-template>
         </nz-statistic>
       </nz-col>
+      <nz-col nzFlex>
+        <nz-statistic nzTitle="Comenzi in procesare"
+                      [nzValue]="summary().processingImportsCount ?? 0" />
+      </nz-col>
+      <nz-col nzFlex>
+        <nz-statistic nzTitle="Comenzi in asteptare"
+                      [nzValue]="summary().pendingReviewImportsCount ?? 0" />
+      </nz-col>
+      <nz-col nzFlex>
+        <nz-statistic nzTitle="Comenzi esuate"
+                      [nzValueTemplate]="failedImportsCountTemplate">
+          <ng-template #failedImportsCountTemplate>
+            <div nz-typography
+                 nzType="danger"
+                 class="mb-0">
+              {{ summary().failedImportsCount ?? 0 }}
+            </div>
+          </ng-template>
+        </nz-statistic>
+      </nz-col>
     </nz-row>
   </nz-page-header-content>
 
@@ -48,6 +68,7 @@
     <nz-tabs [(nzSelectedIndex)]="selectedTabIndex">
       <nz-tab nzTitle="Comenzi"></nz-tab>
       <nz-tab nzTitle="Stoc"></nz-tab>
+      <nz-tab nzTitle="Comenzi importate"></nz-tab>
     </nz-tabs>
   </nz-page-header-footer>
 </nz-page-header>

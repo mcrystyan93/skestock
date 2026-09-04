@@ -2,10 +2,12 @@ using System.Text;
 using System.Text.Json;
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
+using FluentResults;
 using Mediator;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Queues;
 using skestock.Domain.Queues;
 using skestock.Shared;
 using Worker.Services;
@@ -102,7 +104,20 @@ public class GoodsReceiptImportQueueProcessingService(
                           ?? throw new InvalidOperationException("Empty payload");
 
             // dispatch into Application layer — same handlers Web would call
-            await mediator.Send(request, cancellationToken);
+            var response = await mediator.Send(request, cancellationToken);
+
+            if (response is IResultBase { IsSuccess: false } failedResult)
+            {
+                // a Result.Fail(...) is a permanent, well-known application failure (e.g. the
+                // import no longer exists) - retrying the same message can't change that.
+                logger.LogError(
+                    "Goods receipt import message {Id} failed: {Errors}",
+                    envelope.MessageId, string.Join("; ", failedResult.Errors.Select(e => e.Message)));
+
+                await MoveToPoisonQueueAsync(message, envelope, cancellationToken);
+                await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
+                return;
+            }
 
             dbContext.ProcessedMessages.Add(new ProcessedMessage
             {
@@ -123,12 +138,15 @@ public class GoodsReceiptImportQueueProcessingService(
             logger.LogError(ex, "Failed processing message {Id}, dequeue count {Count}",
                 envelope.MessageId, message.DequeueCount);
 
-            if (message.DequeueCount >= MaxDequeueCount)
+            if (MessageFailureClassifier.IsPermanent(ex) || message.DequeueCount >= MaxDequeueCount)
             {
+                // permanent failures can never succeed on retry, and exhausted-retry failures
+                // have had their fair chance - dead-letter both immediately.
                 await MoveToPoisonQueueAsync(message, envelope, cancellationToken);
                 await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
             }
-            // else: don't delete — visibility timeout expires, Storage Queue redelivers automatically
+            // else: transient failure with retries remaining — don't delete, visibility timeout
+            // expires and Storage Queue redelivers automatically.
         }
     }
 
