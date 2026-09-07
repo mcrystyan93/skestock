@@ -44,6 +44,8 @@ public class ValidationErrorCodes
     public const string ExpiryDateRequired = "validation.expiry_date_required";
     /// <summary>A non-perishable item's receipt line supplied an expiry date, which isn't allowed.</summary>
     public const string ExpiryDateNotAllowed = "validation.expiry_date_not_allowed";
+    /// <summary>The split lines derived from one extracted import line don't sum back to its original quantity.</summary>
+    public const string SplitQuantityMismatch = "validation.split_quantity_mismatch";
 
     // ── Stock adjustment codes ─────────────────────────────────────────────
     /// <summary>The counted quantity submitted for a stock adjustment equals the current total, so nothing would change.</summary>

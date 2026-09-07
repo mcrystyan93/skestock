@@ -52,6 +52,7 @@ public class GetAllLocationsHandler(IApplicationDbContext dbContext)
                     Id = l.Id,
                     Name = l.Name,
                     Type = l.Type,
+                    IsDefault = l.IsDefault,
                     ParentLocationId = l.ParentLocationId,
                     ParentLocationName = l.ParentLocation != null ? l.ParentLocation.Name : null,
                     CreatedByName = l.CreatedBy != null ? l.CreatedBy.FullName : null,

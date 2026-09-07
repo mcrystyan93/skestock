@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import {Component, input, output} from '@angular/core';
 import { BaseTable } from '@ske/shared/tables';
 import {
   GetAllGoodsReceiptImportsRequest, GOODS_RECEIPT_IMPORT_STATUS_COLORS,
@@ -8,12 +8,16 @@ import {
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { DatePipe } from '@angular/common';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
+import {NzButtonComponent} from 'ng-zorro-antd/button';
+import {NzIconDirective} from 'ng-zorro-antd/icon';
 
 @Component({
   imports: [
     NzTableModule,
     DatePipe,
-    NzTagComponent
+    NzTagComponent,
+    NzButtonComponent,
+    NzIconDirective
   ],
   selector: 'ske-goods-receipt-imports-table',
   styles: ``,
@@ -24,6 +28,9 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
 })
 export class Table extends BaseTable<GoodsReceiptImportListItemDto, GetAllGoodsReceiptImportsRequest> {
   public readonly loading = input.required<boolean>();
+
+  public readonly downloadFile = output<GoodsReceiptImportListItemDto>();
+  public readonly review = output<GoodsReceiptImportListItemDto>();
 
   public readonly columns = GOODS_RECEIPT_IMPORT_TABLE_COLUMNS;
 

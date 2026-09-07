@@ -10,7 +10,7 @@ import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
 import { LocationsHttp } from '@ske/shared/locations';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
+import { EMPTY, exhaustMap, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
 
 
@@ -19,6 +19,8 @@ type LocationCollectionState = {
   paginationData: PaginatedResponseData | null;
   filter: GetAllLocationsRequest;
   isLoadingMore: boolean;
+  defaultLocation: LocationDto | null;
+  defaultLocationLoaded: boolean;
 };
 
 const initialState: LocationCollectionState = {
@@ -31,7 +33,9 @@ const initialState: LocationCollectionState = {
     pageSize: PAGINATION_PAGE_SIZE,
     searchTerm: null
   },
-  isLoadingMore: false
+  isLoadingMore: false,
+  defaultLocation: null,
+  defaultLocationLoaded: false
 };
 
 export function withLocationCollection() {
@@ -117,7 +121,28 @@ export function withLocationCollection() {
         )
       );
 
-      return { load, loadMore };
+      const loadDefault = rxMethod<void>(
+        pipe(
+          tap(() => store.clearLocationsErrors()),
+          filter(()=> !store.defaultLocationLoaded()),
+          exhaustMap(() =>
+            store.locationHttp.getDefault()
+              .pipe(
+                mapResponse({
+                  next: (defaultLocation) => {
+                    patchState(store, { defaultLocation, defaultLocationLoaded: true });
+                  },
+                  error: (error) => {
+                    store.handleLocationsError(error);
+                    patchState(store, { defaultLocationLoaded: true });
+                  }
+                })
+              )
+          )
+        )
+      );
+
+      return { load, loadMore, loadDefault };
     })
   );
 }

@@ -1,0 +1,128 @@
+<ng-template #errorTemplate
+             let-control>
+  @let formControl = control.control;
+  @if (formControl.errors?.required; as requiredError) {
+    {{ requiredError.message }}
+  }
+  @if (formControl.errors?.min; as minError) {
+    {{ minError.message }}
+  }
+  @if (formControl.errors?.totalSum; as totalSumError) {
+    {{ totalSumError.message }}
+  }
+</ng-template>
+
+<nz-table #table
+          [nzTemplateMode]="true"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          [nzLoading]="loading()"
+          nzSize="small"
+          [nzScroll]="{x: '1300px'}">
+  <thead>
+  <tr>
+    <th nzWidth="280px">Text extras</th>
+    <th nzWidth="110px">Status</th>
+    <th nzWidth="320px">Produs</th>
+    <th nzWidth="150px">Locatie</th>
+    <th nzWidth="250px">Cantitate</th>
+    <th nzWidth="170px">Data expirare</th>
+    <th nzWidth="130px">Pret unitar</th>
+    <th nzWidth="90px">Actiuni</th>
+  </tr>
+  </thead>
+  <tbody>
+    @for (lineField of linesForm.lines; track $index) {
+      @let line = lineField().value();
+      <tr>
+        <td>
+          {{ line.rawItemText ?? line.extractedName }}
+        </td>
+        <td>
+          @if (line.item?.id) {
+            <nz-tag nzColor="green">Gasit</nz-tag>
+          } @else {
+            <nz-tag nzColor="orange">Lipsa produs</nz-tag>
+          }
+        </td>
+        <td>
+          <nz-form-item>
+            <nz-form-control [nzErrorTip]="errorTemplate">
+              <ske-item-dropdown [formField]="lineField.item"
+                                 [allowClear]="true"
+                                 [allowEdit]="false"
+                                 [allowCreate]="!line.item?.id"
+                                 [placeholder]="itemPlaceholder"
+                                 [createPrefill]="createPrefill(line)" />
+            </nz-form-control>
+          </nz-form-item>
+        </td>
+        <td>
+          <nz-form-item>
+            <nz-form-control [nzErrorTip]="errorTemplate">
+              <ske-location-dropdown [formField]="lineField.location"
+                                     [prePopulateWithDefault]="true" />
+            </nz-form-control>
+          </nz-form-item>
+        </td>
+        <td>
+          <nz-form-item>
+            <nz-form-control [nzErrorTip]="errorTemplate"
+                             [nzValidateStatus]="isQuantityOver().get(line.sourceLineIndex) ? 'warning' : ''"
+                             nzWarningTip="Test"
+                             nzHasFeedback>
+              <!--              <nz-input-wrapper>-->
+              <nz-input-number [formField]="lineField.quantity"
+                               class="w-full!">
+                <span nzInputAddonBefore>
+                <nz-icon nzType="icons:circle-info"
+                         nz-tooltip
+                         nzTooltipTrigger="hover"
+                         [nzTooltipTitle]="'Cantitatea originala: ' + (line?.originalQuantity ?? 0)"></nz-icon>
+                  </span>
+              </nz-input-number>
+
+              <!--              </nz-input-wrapper>-->
+            </nz-form-control>
+          </nz-form-item>
+        </td>
+        <td>
+          <nz-form-item>
+            <nz-form-control [nzErrorTip]="errorTemplate">
+              <nz-date-picker [formField]="lineField.expiryDate"
+                              class="w-full!" />
+            </nz-form-control>
+          </nz-form-item>
+        </td>
+        <td>
+          <nz-form-item>
+            <nz-form-control [nzErrorTip]="errorTemplate">
+              <nz-input-number [formField]="lineField.unitPrice"
+                               [nzMin]="0"
+                               class="w-full!" />
+            </nz-form-control>
+          </nz-form-item>
+        </td>
+        <td>
+          <button nz-button
+                  nzType="link"
+                  type="button"
+                  title="Imparte randul"
+                  (click)="onSplit(line.rowId)">
+            <nz-icon nzType="icons:split" />
+          </button>
+          @if (canRemove(line)) {
+            <button nz-button
+                    nzType="link"
+                    nzDanger
+                    type="button"
+                    title="Sterge randul"
+                    (click)="onRemove(line.rowId)">
+              <nz-icon nzType="icons:trash" />
+            </button>
+          }
+        </td>
+      </tr>
+    }
+  </tbody>
+</nz-table>

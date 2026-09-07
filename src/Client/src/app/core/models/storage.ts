@@ -34,3 +34,9 @@ export type FileMetadataDto = {
   eTag?: string | null;
   completedDate?: string | null;
 };
+
+/** Mirrors src/Application/Storage/Models/FileDownloadResult.cs. */
+export type FileDownloadResult = {
+  file: FileMetadataDto;
+  downloadUrl: string;
+};

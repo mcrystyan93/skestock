@@ -1,5 +1,6 @@
 namespace skestock.Application.Common.Errors;
 using Microsoft.AspNetCore.Http;
+using skestock.Domain.Enums;
 
 public static class GoodsReceiptErrors
 {
@@ -29,6 +30,24 @@ public static class GoodsReceiptImportErrors
             Metadata.Add(ErrorMetadataKeys.Title, "Goods receipt import not found");
             Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
             Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object> { ["goodsReceiptImportId"] = goodsReceiptImportId });
+        }
+    }
+
+    public sealed class GoodsReceiptImportNotInReview : Error
+    {
+        public const string ErrorCode = "goods_receipt_imports.not_in_review";
+
+        public GoodsReceiptImportNotInReview(Guid goodsReceiptImportId, GoodsReceiptImportStatus status)
+            : base($"Goods receipt import with id '{goodsReceiptImportId}' is '{status}' and cannot be confirmed. Only imports pending review can be confirmed.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
+            Metadata.Add(ErrorMetadataKeys.Title, "Goods receipt import not pending review");
+            Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
+            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object>
+            {
+                ["goodsReceiptImportId"] = goodsReceiptImportId,
+                ["status"] = status.ToString()
+            });
         }
     }
 }

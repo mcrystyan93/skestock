@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using skestock.Application.Common.Models;
+using skestock.Application.Features.GoodsReceipts.Commands.ConfirmGoodsReceiptImport;
 using skestock.Application.Features.GoodsReceipts.Commands.CreateGoodsReceipt;
 using skestock.Application.Features.GoodsReceipts.Commands.CreateGoodsReceiptImport;
 using skestock.Application.Features.GoodsReceipts.Models;
 using skestock.Application.Features.GoodsReceipts.Queries.GetAllGoodsReceipts;
 using skestock.Application.Features.GoodsReceipts.Queries.GetAllGoodsReceiptImports;
 using skestock.Application.Features.GoodsReceipts.Queries.GetGoodsReceiptById;
+using skestock.Application.Features.GoodsReceipts.Queries.GetGoodsReceiptImportById;
 
 namespace skestock.Web.Endpoints;
 
@@ -18,6 +20,8 @@ public class GoodsReceipts : IEndpointGroup
         groupBuilder.MapPost(CreateGoodsReceipt, "");
         groupBuilder.MapPost(CreateGoodsReceiptImport, "imports");
         groupBuilder.MapPost(GetAllGoodsReceiptImports, "imports/get-all");
+        groupBuilder.MapGet(GetGoodsReceiptImportById, "imports/{id}");
+        groupBuilder.MapPost(ConfirmGoodsReceiptImport, "imports/{id}/confirm");
     }
 
     [EndpointSummary("Get all goods receipts")]
@@ -122,5 +126,52 @@ public class GoodsReceipts : IEndpointGroup
             return result.ToProblemHttpResult();
 
         return TypedResults.Ok(result.Value);
+    }
+
+    [EndpointSummary("Get a goods receipt import for review")]
+    [EndpointDescription("Retrieves a goods receipt import's AI-extracted lines, each matched (by SKU) against the item catalog, for the review screen.")]
+    public static async Task<Results<Ok<GoodsReceiptImportReviewDto>, ProblemHttpResult>> GetGoodsReceiptImportById(
+        ISender sender, Guid id, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetGoodsReceiptImportByIdQuery { Id = id }, cancellationToken);
+
+        if (result.IsFailed)
+            return result.ToProblemHttpResult();
+
+        return TypedResults.Ok(result.Value);
+    }
+
+    [EndpointSummary("Confirm a goods receipt import")]
+    [EndpointDescription("Confirms a reviewed goods receipt import: creates any new items/categories, records a goods receipt (one batch + transaction per line), and marks the import as confirmed - all in a single transaction.")]
+    public static async Task<Results<Created<GoodsReceiptDto>, ProblemHttpResult>> ConfirmGoodsReceiptImport(
+        ISender sender, Guid id, GoodsReceiptRequests.ConfirmGoodsReceiptImportRequest request, CancellationToken cancellationToken)
+    {
+        var command = new ConfirmGoodsReceiptImportCommand
+        {
+            ImportId = id,
+            SupplierReference = request.SupplierReference,
+            Note = request.Note,
+            Lines = request.Lines.Select(l => new ConfirmGoodsReceiptImportLine
+            {
+                ItemId = l.ItemId,
+                Name = l.Name,
+                Sku = l.Sku,
+                Unit = l.Unit,
+                CategoryName = l.CategoryName,
+                IsPerishable = l.IsPerishable,
+                LocationId = l.LocationId,
+                Quantity = l.Quantity,
+                ExpiryDate = l.ExpiryDate,
+                UnitPrice = l.UnitPrice,
+                SourceLineIndex = l.SourceLineIndex
+            }).ToList()
+        };
+
+        var result = await sender.Send(command, cancellationToken);
+
+        if (result.IsFailed)
+            return result.ToProblemHttpResult();
+
+        return TypedResults.Created($"/api/GoodsReceipts/{result.Value.Id}", result.Value);
     }
 }

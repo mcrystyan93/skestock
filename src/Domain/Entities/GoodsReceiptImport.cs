@@ -65,4 +65,13 @@ public class GoodsReceiptImport : BaseAuditableEntity, IKeysetEntity
         
         AddDomainEvent(new GoodsReceiptImportFailedEvent(Id));
     }
+
+    // Called once the user has reviewed the extracted lines and a real GoodsReceipt has been
+    // created from this import. Links the import to that receipt and closes it out.
+    public void MarkAsConfirmed(Guid goodsReceiptId)
+    {
+        Status = GoodsReceiptImportStatus.Confirmed;
+        ResultingGoodsReceiptId = goodsReceiptId;
+        ProcessedAt ??= DateTime.UtcNow;
+    }
 }

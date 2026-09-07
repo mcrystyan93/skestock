@@ -13,6 +13,7 @@ import { eventGroup, injectDispatch } from '@ngrx/signals/events';
 type ItemDetailState = { item: Partial<ItemDto> };
 const initialState: ItemDetailState = { item: {} };
 export const NEW_ITEM_ROUTE_ID = 'new';
+export type LoadItemRequest = { id: string; prefill?: Partial<ItemDto> | null };
 export const itemApiEvents = eventGroup({
   source: 'Item API',
   events: {
@@ -40,16 +41,16 @@ export const ItemDetailState = signalStore(
       return id;
     };
 
-    const loadItem = rxMethod<string>(
+    const loadItem = rxMethod<LoadItemRequest>(
       pipe(
         tap(() => {
           store.setItemLoading();
           store.clearItemErrors();
         }),
-        switchMap((id) => {
+        switchMap(({ id, prefill }) => {
           if (id === NEW_ITEM_ROUTE_ID) {
             patchState(store, {
-              item: {}
+              item: prefill ?? {}
             });
             store.setItemLoaded();
             return of(null);

@@ -154,4 +154,24 @@ public class AzureBlobStorageServiceTests
                 It.IsAny<DeleteSnapshotsOption>(), It.IsAny<BlobRequestConditions>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
+
+    [Test]
+    public async Task DownloadAsync_ResolvesBlob_AndReturnsContentStream()
+    {
+        var harness = CreateHarness();
+        var expectedContent = new MemoryStream("blob-bytes"u8.ToArray());
+        var streamingResult = BlobsModelFactory.BlobDownloadStreamingResult(content: expectedContent);
+        harness.Blob.Setup(b => b.DownloadStreamingAsync(
+                It.IsAny<BlobDownloadOptions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Response.FromValue(streamingResult, Mock.Of<Response>()));
+
+        var stream = await harness.Service.DownloadAsync(new DownloadDto(BlobPath, Container), CancellationToken.None);
+
+        stream.ShouldBeSameAs(expectedContent);
+        harness.ServiceClient.Verify(s => s.GetBlobContainerClient(Container), Times.Once);
+        harness.Container.Verify(c => c.GetBlobClient(BlobPath), Times.Once);
+        harness.Blob.Verify(
+            b => b.DownloadStreamingAsync(It.IsAny<BlobDownloadOptions>(), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
 }
