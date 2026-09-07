@@ -34,6 +34,7 @@ public class EnableItemCommandHandler(IApplicationDbContext dbContext)
             Unit = item.Unit,
             MinThreshold = item.MinThreshold,
             IsPerishable = item.IsPerishable,
+            ShelfLifeDays = item.ShelfLifeDays,
             IsActive = item.IsActive,
             CategoryId = item.CategoryId,
             CategoryName = categoryName,

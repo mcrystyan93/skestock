@@ -30,7 +30,9 @@ public class ApplicationDbContextInitialiser
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
-    public ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger, ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole<Guid>> roleManager)
+    public ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger,
+        ApplicationDbContext context, UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole<Guid>> roleManager)
     {
         _logger = logger;
         _context = context;
@@ -77,14 +79,15 @@ public class ApplicationDbContextInitialiser
         }
 
         // Default users
-        var administrator = new ApplicationUser { UserName = "administrator@localhost", Email = "administrator@localhost" };
+        var administrator =
+            new ApplicationUser { UserName = "administrator@localhost", Email = "administrator@localhost" };
 
         if (_userManager.Users.All(u => u.UserName != administrator.UserName))
         {
             await _userManager.CreateAsync(administrator, "Administrator1!");
             if (!string.IsNullOrWhiteSpace(administratorRole.Name))
             {
-                await _userManager.AddToRolesAsync(administrator, new [] { administratorRole.Name });
+                await _userManager.AddToRolesAsync(administrator, new[] { administratorRole.Name });
             }
         }
 
@@ -100,9 +103,7 @@ public class ApplicationDbContextInitialiser
         {
             administratorProfile = new UserProfile
             {
-                IdentityId = administrator!.Id,
-                FirstName = "Administrator",
-                LastName = "Administrator"
+                IdentityId = administrator!.Id, FirstName = "Administrator", LastName = "Administrator"
             };
             _context.Set<UserProfile>().Add(administratorProfile);
             await _context.SaveChangesAsync(CancellationToken.None);
@@ -126,26 +127,26 @@ public class ApplicationDbContextInitialiser
 
     private static readonly string[] DefaultCategoryNames =
     [
-        "Lactate și Ouă", 
-        "Brânzeturi", 
-        "Carne Proaspătă", 
-        "Pește și Fructe de Mare", 
-        "Mezeluri și Specialități", 
-        "Legume Proaspete", 
-        "Fructe Proaspete", 
-        "Produse Congelate", 
-        "Conserve", 
-        "Semipreparate și Tartinabile", 
-        "Alimente de Bază", 
-        "Paste și Orez", 
-        "Ulei și Oțet", 
-        "Condimente și Ingrediente", 
-        "Nuci și Fructe Uscate", 
-        "Cereale și Mic Dejun", 
-        "Dulciuri și Biscuiți", 
-        "Ingrediente Patiserie", 
-        "Băuturi Vegetale și Solubile", 
-        "Detergenți și Dezinfectanți", 
+        "Lactate și Ouă",
+        "Brânzeturi",
+        "Carne Proaspătă",
+        "Pește și Fructe de Mare",
+        "Mezeluri și Specialități",
+        "Legume Proaspete",
+        "Fructe Proaspete",
+        "Produse Congelate",
+        "Conserve",
+        "Semipreparate și Tartinabile",
+        "Alimente de Bază",
+        "Paste și Orez",
+        "Ulei și Oțet",
+        "Condimente și Ingrediente",
+        "Nuci și Fructe Uscate",
+        "Cereale și Mic Dejun",
+        "Dulciuri și Biscuiți",
+        "Ingrediente Patiserie",
+        "Băuturi Vegetale și Solubile",
+        "Detergenți și Dezinfectanți",
         "Consumabile Menaj"
     ];
 
@@ -214,10 +215,11 @@ public class ApplicationDbContextInitialiser
                 .SetProperty(l => l.LastModifiedById, administratorIdentityId));
     }
 
-    private static readonly (string Name, DateOnly StartDate, DateOnly EndDate, ClassStatus Status)[] DefaultSchoolClasses =
-    [
-        ("SKE 29", new DateOnly(2026, 7, 13), new DateOnly(2026, 9, 4), ClassStatus.Active)
-    ];
+    private static readonly (string Name, DateOnly StartDate, DateOnly EndDate, ClassStatus Status)[]
+        DefaultSchoolClasses =
+        [
+            ("SKE 29", new DateOnly(2026, 7, 13), new DateOnly(2026, 9, 4), ClassStatus.Active)
+        ];
 
     private async Task SeedSchoolClassesAsync(Guid administratorIdentityId)
     {
@@ -237,10 +239,7 @@ public class ApplicationDbContextInitialiser
         var newSchoolClasses = classesToSeed
             .Select(c => new SchoolClass
             {
-                Name = c.Name,
-                StartDate = c.StartDate,
-                EndDate = c.EndDate,
-                Status = c.Status
+                Name = c.Name, StartDate = c.StartDate, EndDate = c.EndDate, Status = c.Status
             })
             .ToList();
 
@@ -257,41 +256,60 @@ public class ApplicationDbContextInitialiser
                 .SetProperty(c => c.LastModifiedById, administratorIdentityId));
     }
 
-    private static readonly (string Sku, string Name, string Description, string Unit, bool IsPerishable, string Category, decimal UnitPrice)[] DefaultItems =
-    [
-        ("301195", "200G PRESIDENT UNT 82%", "200G PRESIDENT UNT 82%", "BU", true, "Lactate și Ouă", 8.49m),
-        ("110285", "1L DORNA LAPTE UHT 3.5%", "1L DORNA LAPTE UHT 3.5%", "BU", true, "Lactate și Ouă", 6.99m),
-        ("375946", "320G DANONE SANA", "320G DANONE SANA", "BU", true, "Lactate și Ouă", 5.49m),
-        ("396048", "330G IAURT BAUT IN TIHNA 1.5%", "330G IAURT BAUT IN TIHNA 1.5%", "BU", true, "Lactate și Ouă", 4.99m),
-        ("292392", "4X10G PAKMAYA DROJDIE USCATA", "4X10G PAKMAYA DROJDIE USCATA", "IM", false, "Ingrediente Patiserie", 3.29m),
-        ("294576", "1X30 OUA L TONELI", "1X30 OUA L TONELI", "CA", true, "Lactate și Ouă", 24.99m),
-        ("212144", "180G HOCHLAND MARGELE BRANZA", "180G HOCHLAND MARGELE BRANZA", "BU", true, "Brânzeturi", 9.99m),
-        ("110049", "150G HOCHLAND CASCAV FELII CL", "150G HOCHLAND CASCAV FELII CL", "BU", true, "Brânzeturi", 10.49m),
-        ("307600", "350G HOCHLAND TELEMEA NATUR", "350G HOCHLAND TELEMEA NATUR", "BU", true, "Brânzeturi", 12.99m),
-        ("02929310000006", "LAMAI", "LAMAI", "KG", true, "Fructe Proaspete", 7.99m),
-        ("103483", "MORCOVI 1KG", "MORCOVI 1KG", "BU", true, "Legume Proaspete", 3.49m),
-        ("02917900000000", "ROSII CHERRY", "ROSII CHERRY", "KG", true, "Legume Proaspete", 14.99m),
-        ("02922510000005", "CARTOFI DULCI", "CARTOFI DULCI", "KG", true, "Legume Proaspete", 6.49m),
-        ("02807430000000", "DOVLECEI", "DOVLECEI", "KG", true, "Legume Proaspete", 5.99m),
-        ("404381", "MC SALATA CROCANTA 500G", "MC SALATA CROCANTA 500G", "CE", true, "Legume Proaspete", 8.99m),
-        ("407310", "MC SALATA MOZAIC 200G", "MC SALATA MOZAIC 200G", "CE", true, "Legume Proaspete", 6.99m),
-        ("411680", "2KG CEAPA GALBENA", "2KG CEAPA GALBENA", "SC", true, "Legume Proaspete", 5.49m),
-        ("096968", "400G CIRIO PULPA DE ROSII BAX", "400G CIRIO PULPA DE ROSII BAX", "IM", false, "Conserve", 4.79m),
-        ("339290", "340G BONDUELLE PORUMB GOLD", "340G BONDUELLE PORUMB GOLD", "CV", false, "Conserve", 5.29m),
-        ("353143", "425ML GIANA FASOLE ROSIE", "425ML GIANA FASOLE ROSIE", "BU", false, "Conserve", 3.99m),
-        ("116094", "300G AROVIT ZACUSCA CU VINETE", "300G AROVIT ZACUSCA CU VINETE", "BO", false, "Semipreparate și Tartinabile", 7.49m),
-        ("400142", "0.5L FINE LIFE ULEI MASLIN EXV", "0.5L FINE LIFE ULEI MASLIN EXV", "BU", false, "Ulei și Oțet", 19.99m),
-        ("031645", "1KG BARILLA PENNE RIGATE NR. 73", "1KG BARILLA PENNE RIGATE NR. 73", "BU", false, "Paste și Orez", 8.99m),
-        ("447356", "500G BARILLA FUSILLI NR.98", "500G BARILLA FUSILLI NR.98", "BU", false, "Paste și Orez", 5.99m),
-        ("093092", "340G MAXIM'S CREMA DE ARAHIDE", "340G MAXIM'S CREMA DE ARAHIDE", "BO", false, "Semipreparate și Tartinabile", 11.99m),
-        ("242535", "370G FL DULCEATA VISINE", "370G FL DULCEATA VISINE", "BO", false, "Semipreparate și Tartinabile", 9.49m),
-        ("273444", "200G NUTELLA CREMA ALUNE&CACAO", "200G NUTELLA CREMA ALUNE&CACAO", "CA", false, "Semipreparate și Tartinabile", 13.99m),
-        ("408197", "500G PIRIFAN FULGI OVAZ", "500G PIRIFAN FULGI OVAZ", "BU", false, "Cereale și Mic Dejun", 6.79m),
-        ("229937", "BG DR OETKER ZAHAR VANILINAT", "BG DR OETKER ZAHAR VANILINAT", "PI", false, "Ingrediente Patiserie", 1.99m),
-        ("281529", "1KG METRO CHEF CAJU CRUD", "1KG METRO CHEF CAJU CRUD", "IM", false, "Nuci și Fructe Uscate", 44.99m),
-        ("281535", "1KG METRO CHEF MIGDALE CRUDE", "1KG METRO CHEF MIGDALE CRUDE", "PG", false, "Nuci și Fructe Uscate", 39.99m),
-        ("226170", "FINO 30 COLI HAR COPT 42X38CM", "FINO 30 COLI HAR COPT 42X38CM", "BU", false, "Consumabile Menaj", 15.99m)
-    ];
+    private static readonly (string Sku, string Name, string Description, string Unit, bool IsPerishable, string
+        Category, decimal UnitPrice, int ShelfLifeDays)[] DefaultItems =
+        [
+            ("301195", "200G PRESIDENT UNT 82%", "200G PRESIDENT UNT 82%", "BU", true, "Lactate și Ouă", 8.49m, 60),
+            ("110285", "1L DORNA LAPTE UHT 3.5%", "1L DORNA LAPTE UHT 3.5%", "BU", true, "Lactate și Ouă", 6.99m, 90),
+            ("375946", "320G DANONE SANA", "320G DANONE SANA", "BU", true, "Lactate și Ouă", 5.49m, 21),
+            ("396048", "330G IAURT BAUT IN TIHNA 1.5%", "330G IAURT BAUT IN TIHNA 1.5%", "BU", true, "Lactate și Ouă",
+                4.99m, 21),
+            ("292392", "4X10G PAKMAYA DROJDIE USCATA", "4X10G PAKMAYA DROJDIE USCATA", "IM", false,
+                "Ingrediente Patiserie", 3.29m, 365),
+            ("294576", "1X30 OUA L TONELI", "1X30 OUA L TONELI", "CA", true, "Lactate și Ouă", 24.99m, 28),
+            ("212144", "180G HOCHLAND MARGELE BRANZA", "180G HOCHLAND MARGELE BRANZA", "BU", true, "Brânzeturi", 9.99m,
+                30),
+            ("110049", "150G HOCHLAND CASCAV FELII CL", "150G HOCHLAND CASCAV FELII CL", "BU", true, "Brânzeturi",
+                10.49m, 45),
+            ("307600", "350G HOCHLAND TELEMEA NATUR", "350G HOCHLAND TELEMEA NATUR", "BU", true, "Brânzeturi", 12.99m,
+                60),
+            ("02929310000006", "LAMAI", "LAMAI", "KG", true, "Fructe Proaspete", 7.99m, 21),
+            ("103483", "MORCOVI 1KG", "MORCOVI 1KG", "BU", true, "Legume Proaspete", 3.49m, 30),
+            ("02917900000000", "ROSII CHERRY", "ROSII CHERRY", "KG", true, "Legume Proaspete", 14.99m, 10),
+            ("02922510000005", "CARTOFI DULCI", "CARTOFI DULCI", "KG", true, "Legume Proaspete", 6.49m, 30),
+            ("02807430000000", "DOVLECEI", "DOVLECEI", "KG", true, "Legume Proaspete", 5.99m, 10),
+            ("404381", "MC SALATA CROCANTA 500G", "MC SALATA CROCANTA 500G", "CE", true, "Legume Proaspete", 8.99m, 5),
+            ("407310", "MC SALATA MOZAIC 200G", "MC SALATA MOZAIC 200G", "CE", true, "Legume Proaspete", 6.99m, 5),
+            ("411680", "2KG CEAPA GALBENA", "2KG CEAPA GALBENA", "SC", true, "Legume Proaspete", 5.49m, 60),
+            ("096968", "400G CIRIO PULPA DE ROSII BAX", "400G CIRIO PULPA DE ROSII BAX", "IM", false, "Conserve", 4.79m,
+                730),
+            ("339290", "340G BONDUELLE PORUMB GOLD", "340G BONDUELLE PORUMB GOLD", "CV", false, "Conserve", 5.29m, 730),
+            ("353143", "425ML GIANA FASOLE ROSIE", "425ML GIANA FASOLE ROSIE", "BU", false, "Conserve", 3.99m, 730),
+            ("116094", "300G AROVIT ZACUSCA CU VINETE", "300G AROVIT ZACUSCA CU VINETE", "BO", false,
+                "Semipreparate și Tartinabile", 7.49m, 365),
+            ("400142", "0.5L FINE LIFE ULEI MASLIN EXV", "0.5L FINE LIFE ULEI MASLIN EXV", "BU", false, "Ulei și Oțet",
+                19.99m, 540),
+            ("031645", "1KG BARILLA PENNE RIGATE NR. 73", "1KG BARILLA PENNE RIGATE NR. 73", "BU", false,
+                "Paste și Orez", 8.99m, 730),
+            ("447356", "500G BARILLA FUSILLI NR.98", "500G BARILLA FUSILLI NR.98", "BU", false, "Paste și Orez", 5.99m,
+                730),
+            ("093092", "340G MAXIM'S CREMA DE ARAHIDE", "340G MAXIM'S CREMA DE ARAHIDE", "BO", false,
+                "Semipreparate și Tartinabile", 11.99m, 365),
+            ("242535", "370G FL DULCEATA VISINE", "370G FL DULCEATA VISINE", "BO", false,
+                "Semipreparate și Tartinabile", 9.49m, 540),
+            ("273444", "200G NUTELLA CREMA ALUNE&CACAO", "200G NUTELLA CREMA ALUNE&CACAO", "CA", false,
+                "Semipreparate și Tartinabile", 13.99m, 365),
+            ("408197", "500G PIRIFAN FULGI OVAZ", "500G PIRIFAN FULGI OVAZ", "BU", false, "Cereale și Mic Dejun", 6.79m,
+                365),
+            ("229937", "BG DR OETKER ZAHAR VANILINAT", "BG DR OETKER ZAHAR VANILINAT", "PI", false,
+                "Ingrediente Patiserie", 1.99m, 730),
+            ("281529", "1KG METRO CHEF CAJU CRUD", "1KG METRO CHEF CAJU CRUD", "IM", false, "Nuci și Fructe Uscate",
+                44.99m, 180),
+            ("281535", "1KG METRO CHEF MIGDALE CRUDE", "1KG METRO CHEF MIGDALE CRUDE", "PG", false,
+                "Nuci și Fructe Uscate", 39.99m, 365),
+            ("226170", "FINO 30 COLI HAR COPT 42X38CM", "FINO 30 COLI HAR COPT 42X38CM", "BU", false,
+                "Consumabile Menaj", 15.99m, 1095)
+        ];
 
     private async Task SeedItemsAsync(Guid administratorIdentityId)
     {
@@ -327,6 +345,8 @@ public class ApplicationDbContextInitialiser
                 Description = i.Description,
                 Unit = i.Unit,
                 IsPerishable = i.IsPerishable,
+                ShelfLifeDays = i.ShelfLifeDays,
+                MinThreshold = Random.Shared.Next(1, 51),
                 CategoryId = categoryId
             });
         }
@@ -375,7 +395,8 @@ public class ApplicationDbContextInitialiser
 
         if (schoolClass is null || location is null)
         {
-            _logger.LogWarning("Skipping goods receipt seeding - required SchoolClass 'SKE 29' or Location 'Rafturi' not found.");
+            _logger.LogWarning(
+                "Skipping goods receipt seeding - required SchoolClass 'SKE 29' or Location 'Rafturi' not found.");
             return;
         }
 
@@ -420,7 +441,9 @@ public class ApplicationDbContextInitialiser
                     Quantity = Random.Shared.Next(MinBatchQuantity, MaxBatchQuantity + 1),
                     ExpiryDate = item.IsPerishable ? receivedDate.AddDays(DefaultPerishableShelfLifeDays) : null,
                     ReceivedDate = receivedDate,
-                    UnitPrice = item.Sku is not null && unitPricesBySku.TryGetValue(item.Sku, out var unitPrice) ? unitPrice : 0m,
+                    UnitPrice = item.Sku is not null && unitPricesBySku.TryGetValue(item.Sku, out var unitPrice)
+                        ? unitPrice
+                        : 0m,
                     GoodsReceiptId = goodsReceipt.Id
                 })
                 .ToList();

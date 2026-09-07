@@ -132,6 +132,30 @@
     </nz-form-control>
   </nz-form-item>
 
+  <!--   shelfLifeDays   -->
+  @if (!itemForm.shelfLifeDays().hidden()) {
+    <nz-form-item *skeletonInputLoader="loading()">
+      <nz-form-label>
+        Termen de valabilitate (zile)
+      </nz-form-label>
+      <nz-form-control [nzErrorTip]="shelfLifeDaysErrorTemplate">
+        <nz-input-number [formField]="itemForm.shelfLifeDays"
+                         class="w-full!"
+                         [nzMin]="1" />
+
+        <ng-template #shelfLifeDaysErrorTemplate>
+          @if (itemForm.shelfLifeDays().errors(); as errors) {
+            @for (error of errors; track $index) {
+              <div class="ant-form-item-explain-error">
+                {{ error.message }}
+              </div>
+            }
+          }
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+  }
+
   <!--   description   -->
   <nz-form-item *skeletonInputLoader="loading()">
     <nz-form-label>

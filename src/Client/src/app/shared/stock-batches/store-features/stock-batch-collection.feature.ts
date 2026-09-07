@@ -9,7 +9,8 @@ import { patchState, signalStoreFeature, withComputed, withMethods, withProps, w
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
-import { StockBatchesHttp } from '@ske/shared/stock-batches';
+// noinspection ES6PreferShortImport
+import { StockBatchesHttp } from '../services/stock-batches.http';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';

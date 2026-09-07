@@ -58,6 +58,7 @@ public class GetGoodsReceiptImportByIdHandler(IApplicationDbContext dbContext)
                     Name = item.Name,
                     Unit = item.Unit,
                     IsPerishable = item.IsPerishable,
+                    ShelfLifeDays = item.ShelfLifeDays,
                     CategoryId = item.CategoryId,
                     CategoryName = item.Category.Name
                 })

@@ -103,4 +103,32 @@ public class EditItemCommandValidatorTests
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.GreaterThanOrEqualTo);
     }
+
+    [Test]
+    public async Task ShouldNotHaveErrorWhenShelfLifeDaysIsNullOrPositive()
+    {
+        var (context, category, item) = await CreateContextAsync();
+        await using var _ = context;
+        var validator = new EditItemCommandValidator(context);
+
+        var nullResult = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", ShelfLifeDays = null, CategoryId = category.Id });
+        var positiveResult = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", ShelfLifeDays = 14, CategoryId = category.Id });
+
+        nullResult.Errors.ShouldNotContain(e => e.PropertyName == nameof(EditItemCommand.ShelfLifeDays));
+        positiveResult.Errors.ShouldNotContain(e => e.PropertyName == nameof(EditItemCommand.ShelfLifeDays));
+    }
+
+    [Test]
+    public async Task ShouldHaveErrorWhenShelfLifeDaysIsNotPositive()
+    {
+        var (context, category, item) = await CreateContextAsync();
+        await using var _ = context;
+        var validator = new EditItemCommandValidator(context);
+
+        var zeroResult = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", ShelfLifeDays = 0, CategoryId = category.Id });
+        var negativeResult = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", ShelfLifeDays = -3, CategoryId = category.Id });
+
+        zeroResult.Errors.ShouldContain(e => e.PropertyName == nameof(EditItemCommand.ShelfLifeDays) && e.ErrorCode == ValidationErrorCodes.GreaterThan);
+        negativeResult.Errors.ShouldContain(e => e.PropertyName == nameof(EditItemCommand.ShelfLifeDays) && e.ErrorCode == ValidationErrorCodes.GreaterThan);
+    }
 }

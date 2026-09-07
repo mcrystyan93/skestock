@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { mapResponse } from '@ngrx/operators';
 import { EMPTY, pipe, switchMap, tap } from 'rxjs';
@@ -106,9 +106,14 @@ function buildEditableLine(line: GoodsReceiptImportReviewLineDto, sourceLineInde
       : null,
     location: null,
     quantity: line.quantity,
-    expiryDate: null,
+    expiryDate: matchedItem?.shelfLifeDays && matchedItem?.isPerishable ? getDateForShelfLife(matchedItem.shelfLifeDays) : null,
     unitPrice: line.unitPrice ?? 0
   };
+}
+
+export function getDateForShelfLife(shelfLifeDays: number): Date {
+  const now = new Date();
+  return new Date(now.getTime() + shelfLifeDays * 24 * 60 * 60 * 1000);
 }
 
 /**
@@ -198,21 +203,19 @@ export const ReviewStore = signalStore(
       patchState(store, { lines: storeLines.filter((l) => l.rowId !== rowId) });
     };
 
-    const confirm = rxMethod<ReviewEditableLine[]>(
+    const confirm = rxMethod<ConfirmGoodsReceiptImportRequest>(
       pipe(
         tap(() => {
           store.clearReviewErrors();
           store.setReviewConfirmLoading();
         }),
-        switchMap((lines) => {
+        switchMap((request) => {
           const importId = store.importId();
 
           if (!importId) {
             store.setReviewConfirmLoaded();
             return EMPTY;
           }
-
-          const request = buildConfirmRequest(store.supplierReference(), store.note(), lines);
 
           return http.confirm(importId, request).pipe(
             mapResponse({
@@ -234,7 +237,7 @@ export const ReviewStore = signalStore(
   })
 );
 
-function buildConfirmRequest(
+export function buildConfirmRequest(
   supplierReference: string | null,
   note: string,
   lines: ReviewEditableLine[]

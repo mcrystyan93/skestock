@@ -34,6 +34,14 @@ public class CreateItemCommandValidator : AbstractValidator<CreateItemCommand>
             .GreaterThanOrEqualTo(0)
             .WithErrorCode(ValidationErrorCodes.GreaterThanOrEqualTo);
 
+        // Optional shelf life; only meaningful for perishable items. When supplied it must be a
+        // positive number of days (auto-calc: ReceivedDate + ShelfLifeDays).
+        RuleFor(x => x.ShelfLifeDays!.Value)
+            .GreaterThan(0)
+            .WithErrorCode(ValidationErrorCodes.GreaterThan)
+            .OverridePropertyName(nameof(CreateItemCommand.ShelfLifeDays))
+            .When(x => x.ShelfLifeDays.HasValue);
+
         RuleFor(x => x.Sku)
             .MaximumLength(SkuMaxLength)
             .WithErrorCode(ValidationErrorCodes.MaxLength)

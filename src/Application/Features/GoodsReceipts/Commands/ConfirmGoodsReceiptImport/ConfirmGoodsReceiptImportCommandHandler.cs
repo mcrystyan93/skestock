@@ -38,12 +38,26 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
 
         var newItemsByKey = await ResolveNewItemsAsync(request.Lines, cancellationToken);
 
+        // Load perishable flag + shelf life for existing referenced items, so an existing-item line
+        // that omits an expiry date can have it derived (ReceivedDate + ShelfLifeDays). New-item
+        // lines have no persisted shelf life yet, so their expiry stays as supplied.
+        var existingItemIds = request.Lines
+            .Where(l => l.ItemId is not null)
+            .Select(l => l.ItemId!.Value)
+            .Distinct()
+            .ToList();
+        var itemInfoById = await dbContext.Items
+            .AsNoTracking()
+            .Where(i => existingItemIds.Contains(i.Id))
+            .Select(i => new { i.Id, i.IsPerishable, i.ShelfLifeDays })
+            .ToDictionaryAsync(i => i.Id, i => (i.IsPerishable, i.ShelfLifeDays), cancellationToken);
+
         var receipt = new GoodsReceipt
         {
             ClassId = import.ClassId,
             Class = null!,
             SupplierReference = string.IsNullOrWhiteSpace(request.SupplierReference) ? null : request.SupplierReference.Trim(),
-            Note = request.Note.Trim()
+            Note = request.Note.Trim(),
         };
 
         var receivedDate = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -52,6 +66,16 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
         {
             var newItem = line.ItemId is null ? newItemsByKey[BuildNewItemKey(line)] : null;
 
+            var expiryDate = line.ExpiryDate;
+            if (expiryDate is null
+                && line.ItemId is { } lineItemId
+                && itemInfoById.TryGetValue(lineItemId, out var info)
+                && info.IsPerishable
+                && info.ShelfLifeDays is > 0)
+            {
+                expiryDate = receivedDate.AddDays(info.ShelfLifeDays.Value);
+            }
+
             var batch = new StockBatch
             {
                 ItemId = line.ItemId ?? Guid.Empty,
@@ -59,7 +83,7 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
                 LocationId = line.LocationId,
                 ReceivedClassId = import.ClassId,
                 Quantity = line.Quantity,
-                ExpiryDate = line.ExpiryDate,
+                ExpiryDate = expiryDate,
                 ReceivedDate = receivedDate,
                 UnitPrice = line.UnitPrice,
                 GoodsReceipt = receipt

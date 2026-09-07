@@ -9,7 +9,8 @@ import { patchState, signalStoreFeature, withComputed, withMethods, withProps, w
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
-import { CategoriesHttp } from '@ske/shared/categories';
+// noinspection ES6PreferShortImport
+import { CategoriesHttp } from '../services/categories.http';
 import { categoryRealtimeEvents } from './category.events';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';

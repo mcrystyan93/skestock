@@ -12,6 +12,7 @@ public class EditItemCommand : IRequest<Result<ItemDto>>, ICacheInvalidation
     public string Unit { get; init; } = "unit";
     public int MinThreshold { get; init; }
     public bool IsPerishable { get; init; }
+    public int? ShelfLifeDays { get; init; }
     public Guid CategoryId { get; init; }
 
     // Invalidate every cached GetAllItems page/filter/sort combination - an edited item can

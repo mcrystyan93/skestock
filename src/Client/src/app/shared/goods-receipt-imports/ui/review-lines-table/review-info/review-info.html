@@ -1,0 +1,43 @@
+<form nz-form
+      nzLayout="horizontal">
+  <nz-row [nzGutter]="[16, 16]">
+    <nz-col [nzSpan]="12">
+      <nz-form-item>
+        <nz-form-label nzRequired>
+          Referinta furnizorului
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="errorTemplate">
+          <input type="text"
+                 nz-input
+                 [formField]="reviewForm.supplierReference">
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col [nzSpan]="12">
+      <nz-form-item>
+        <nz-form-label nzRequired>
+          Nota
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="errorTemplate">
+          <input type="text"
+                 nz-input
+                 [formField]="reviewForm.note">
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+  </nz-row>
+</form>
+
+<ng-template #errorTemplate
+             let-control>
+  @let formControl = control.control;
+  @if (formControl.errors?.required; as requiredError) {
+    {{ requiredError.message }}
+  }
+  @if (formControl.errors?.min; as minError) {
+    {{ minError.message }}
+  }
+  @if (formControl.errors?.totalSum; as totalSumError) {
+    {{ totalSumError.message }}
+  }
+</ng-template>

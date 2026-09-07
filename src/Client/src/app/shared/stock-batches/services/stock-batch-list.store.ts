@@ -1,5 +1,6 @@
 import { signalStore, withMethods, withState } from '@ngrx/signals';
-import { withStockBatchCollection } from '@ske/shared/stock-batches';
+// noinspection ES6PreferShortImport
+import { withStockBatchCollection } from '../store-features/stock-batch-collection.feature';
 
 type StockBatchState = {};
 const initialState: StockBatchState = {};

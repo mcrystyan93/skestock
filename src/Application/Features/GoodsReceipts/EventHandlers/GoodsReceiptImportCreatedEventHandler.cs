@@ -6,10 +6,10 @@ using skestock.Shared;
 
 namespace skestock.Application.Features.GoodsReceipts.EventHandlers;
 
-public class GoodsReceiptImportCreatedEventHandler(IApplicationDbContext dbContext)
+public class GoodsReceiptImportCreatedEventHandler(IApplicationDbContext dbContext, IRealtimeNotifier notifier)
     : INotificationHandler<GoodsReceiptImportCreatedEvent>
 {
-    public ValueTask Handle(GoodsReceiptImportCreatedEvent notification, CancellationToken cancellationToken)
+    public async ValueTask Handle(GoodsReceiptImportCreatedEvent notification, CancellationToken cancellationToken)
     {
         dbContext.OutboxMessages.Add(new OutboxMessage()
         {
@@ -20,6 +20,9 @@ public class GoodsReceiptImportCreatedEventHandler(IApplicationDbContext dbConte
             UserId = notification.Import.UploadedByUserId
         });
 
-        return ValueTask.CompletedTask;
+        var payload = new { GoodsReceiptImportId = notification.Import.Id };
+        await notifier.NotifyGroupAsync("goods-receipts-import-list", "GoodsReceiptImportCreated",
+            payload,
+            cancellationToken);
     }
 }

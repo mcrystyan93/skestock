@@ -1,10 +1,11 @@
 import { patchState, signalStoreFeature, withComputed, withMethods, withState } from '@ngrx/signals';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
-import { GoodsReceiptsHttp } from '@ske/shared/goods-receipts';
+// noinspection ES6PreferShortImport
+import { GoodsReceiptsHttp } from '../services/goods-receipts.http';
 import { inject } from '@angular/core';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
+import { concatMap, EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import {
   buildGoodsReceiptListFilter, CreateGoodsReceiptImportRequest, FileMetadataDto,
   GetAllGoodsReceiptsRequest,
@@ -113,7 +114,7 @@ export function withGoodReceiptsFeature() {
 
       const importGoodReceipt = rxMethod<CreateGoodsReceiptImportRequest>(
         pipe(
-          switchMap(request =>
+          concatMap(request =>
             goodsReceiptsHttp.createImport(request)
           ),
           mapResponse({

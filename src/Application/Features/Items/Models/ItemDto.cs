@@ -9,6 +9,7 @@ public record ItemDto
     public string Unit { get; init; } = string.Empty;
     public int MinThreshold { get; init; }
     public bool IsPerishable { get; init; }
+    public int? ShelfLifeDays { get; init; }
     public bool IsActive { get; init; }
     public Guid CategoryId { get; init; }
     public string? CategoryName { get; init; }

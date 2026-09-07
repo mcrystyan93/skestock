@@ -70,6 +70,7 @@ public class Items : IEndpointGroup
             Unit = request.Unit,
             MinThreshold = request.MinThreshold,
             IsPerishable = request.IsPerishable,
+            ShelfLifeDays = request.ShelfLifeDays,
             CategoryId = request.CategoryId
         };
 
@@ -95,6 +96,7 @@ public class Items : IEndpointGroup
             Unit = request.Unit,
             MinThreshold = request.MinThreshold,
             IsPerishable = request.IsPerishable,
+            ShelfLifeDays = request.ShelfLifeDays,
             CategoryId = request.CategoryId
         };
 

@@ -4,7 +4,7 @@ import { Header } from './header';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { AddGoodsReceiptModal } from '@ske/shared/goods-receipts';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter, map, tap } from 'rxjs';
+import { from, map, tap } from 'rxjs';
 import { isNil } from 'lodash-es';
 import { CreateGoodsReceiptImportRequest, FileMetadataDto } from '@ske/models';
 
@@ -35,16 +35,19 @@ export class HeaderContainer {
     modalRef.afterClose
       .pipe(
         takeUntilDestroyed(this._destroyRef),
-        map((result) => {
-          if (isNil(result?.fileMetadata))
-            return;
-
-          return this.mapImportRequest(result.fileMetadata as FileMetadataDto);
-        }),
-        filter((request): request is CreateGoodsReceiptImportRequest => !isNil(request)),
-        tap((request) => this.store.importGoodReceipt(request))
+        map((result) => this.mapImportRequests(result?.files as FileMetadataDto[] | undefined)),
+        tap((requests) => this.store.importGoodReceipt(from(requests)))
       )
       .subscribe();
+  }
+
+  public mapImportRequests(files: FileMetadataDto[] | undefined): CreateGoodsReceiptImportRequest[] {
+    if (isNil(files) || files.length === 0)
+      return [];
+
+    return files
+      .map((file) => this.mapImportRequest(file))
+      .filter((request): request is CreateGoodsReceiptImportRequest => !isNil(request));
   }
 
   public mapImportRequest(fileMetadata: FileMetadataDto): CreateGoodsReceiptImportRequest | null {

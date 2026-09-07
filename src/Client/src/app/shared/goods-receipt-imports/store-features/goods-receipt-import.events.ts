@@ -4,7 +4,7 @@ import { type } from '@ngrx/signals';
 export const goodsReceiptImportRealtimeEvents = eventGroup({
   source: 'GoodsReceiptImportRealtime SignalR',
   events: {
-    markListAsChanged: type<{ importId: string }>(),
-    notifyUser: type<{ importId: string }>()
+    goodsReceiptImportCreated: type<{ goodsReceiptImportId: string }>(),
+    goodsReceiptImportProcessed: type<{ goodsReceiptImportId: string }>(),
   }
 });

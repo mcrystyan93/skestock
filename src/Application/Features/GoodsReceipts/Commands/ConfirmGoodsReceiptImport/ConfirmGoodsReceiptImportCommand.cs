@@ -44,6 +44,7 @@ public class ConfirmGoodsReceiptImportCommand : IRequest<Result<GoodsReceiptDto>
     public Guid ImportId { get; init; }
     public string? SupplierReference { get; init; }
     public string Note { get; init; } = string.Empty;
+    public DateOnly ReceivedDate { get; set; }
     public List<ConfirmGoodsReceiptImportLine> Lines { get; init; } = [];
 
     // ClassId is resolved from the import (locked in at upload time), not supplied by the caller,

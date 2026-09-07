@@ -23,6 +23,37 @@ public class EditItemCommandTests : TestBase
     }
 
     [Test]
+    public async Task Handle_WithShelfLifeDays_UpdatesAndPersistsValue()
+    {
+        var category = await SeedCategoryAsync();
+        var created = await TestApp.SendAsync(new CreateItemCommand
+        {
+            Name = $"{_prefix}-Cheese",
+            Unit = "kg",
+            IsPerishable = true,
+            ShelfLifeDays = 10,
+            CategoryId = category.Id
+        });
+
+        var result = await TestApp.SendAsync(new EditItemCommand
+        {
+            Id = created.Value.Id,
+            Name = $"{_prefix}-Cheese",
+            Unit = "kg",
+            IsPerishable = true,
+            ShelfLifeDays = 45,
+            CategoryId = category.Id
+        });
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShelfLifeDays.ShouldBe(45);
+
+        var persisted = await TestApp.FindAsync<Item>(created.Value.Id);
+        persisted.ShouldNotBeNull();
+        persisted.ShelfLifeDays.ShouldBe(45);
+    }
+
+    [Test]
     public async Task Handle_WithValidChanges_UpdatesItemAndReturnsDto()
     {
         var category = await SeedCategoryAsync();

@@ -21,6 +21,7 @@ public class EditItemCommandHandler(IApplicationDbContext dbContext)
         item.Unit = request.Unit.Trim();
         item.MinThreshold = request.MinThreshold;
         item.IsPerishable = request.IsPerishable;
+        item.ShelfLifeDays = request.ShelfLifeDays;
         item.CategoryId = request.CategoryId;
 
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -43,6 +44,7 @@ public class EditItemCommandHandler(IApplicationDbContext dbContext)
             Unit = item.Unit,
             MinThreshold = item.MinThreshold,
             IsPerishable = item.IsPerishable,
+            ShelfLifeDays = item.ShelfLifeDays,
             IsActive = item.IsActive,
             CategoryId = item.CategoryId,
             CategoryName = categoryName,

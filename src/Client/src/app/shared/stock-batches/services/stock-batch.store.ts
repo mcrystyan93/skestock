@@ -4,7 +4,8 @@ import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { CreateStockBatchRequest } from '@ske/models';
 import { pipe, switchMap, tap } from 'rxjs';
-import { StockBatchesHttp } from '@ske/shared/stock-batches';
+// noinspection ES6PreferShortImport
+import { StockBatchesHttp } from '../services/stock-batches.http';
 import { inject } from '@angular/core';
 import { mapResponse } from '@ngrx/operators';
 import { eventGroup, injectDispatch } from '@ngrx/signals/events';

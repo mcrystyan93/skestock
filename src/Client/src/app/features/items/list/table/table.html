@@ -33,6 +33,9 @@
     <th nzWidth="100px">
       {{ columns.isPerishable.label }}
     </th>
+    <th nzWidth="130px">
+      {{ columns.shelfLifeDays.label }}
+    </th>
     <th nzWidth="100px">
       {{ columns.isActive.label }}
     </th>
@@ -77,6 +80,9 @@
         } @else {
           <nz-tag>Nu</nz-tag>
         }
+      </td>
+      <td>
+        {{ item.shelfLifeDays ?? '-' }}
       </td>
       <td>
         @if (item.isActive) {

@@ -1,5 +1,6 @@
 import { signalStore, withMethods, withState } from '@ngrx/signals';
-import { withGoodsReceiptImportCollection } from '@ske/shared/goods-receipt-imports';
+// noinspection ES6PreferShortImport
+import { withGoodsReceiptImportCollection } from '../store-features/goods-receipt-import-collection.feature';
 
 type GoodsReceiptImportState = {};
 const initialState: GoodsReceiptImportState = {};

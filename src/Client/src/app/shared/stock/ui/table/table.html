@@ -49,7 +49,7 @@
           </button>
         </td>
       </tr>
-      @for (item of groupItems().get(category); track item.itemId) {
+      @for (item of groupItems().get(category); track $index) {
         <tr>
           <td [nzIndentSize]="20">
             {{ item.itemName }}

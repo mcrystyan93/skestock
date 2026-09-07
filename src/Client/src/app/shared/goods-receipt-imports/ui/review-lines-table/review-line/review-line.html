@@ -1,0 +1,106 @@
+<td>
+  {{ line().rawItemText ?? line().extractedName }}
+</td>
+<td>
+  @if (line().item?.id) {
+    <nz-tag nzColor="green">Gasit</nz-tag>
+  } @else {
+    <nz-tag nzColor="orange">Lipsa produs</nz-tag>
+  }
+</td>
+<td>
+  <nz-form-item>
+    <nz-form-control [nzErrorTip]="errorTemplate">
+      <ske-item-dropdown [formField]="lineForm().item"
+                         [allowClear]="true"
+                         [allowEdit]="false"
+                         [allowCreate]="!line().item?.id"
+                         [placeholder]="itemPlaceholder"
+                         [createPrefill]="createPrefill(line())" />
+    </nz-form-control>
+  </nz-form-item>
+</td>
+<td>
+  <nz-form-item>
+    <nz-form-control [nzErrorTip]="errorTemplate">
+      <ske-location-dropdown [formField]="lineForm().location"
+                             [prePopulateWithDefault]="true" />
+    </nz-form-control>
+  </nz-form-item>
+</td>
+<td>
+  <nz-form-item>
+    <nz-form-control [nzErrorTip]="errorTemplate"
+                     [nzValidateStatus]="quantityValidateStatus()"
+                     nzWarningTip="Cantitatea introduse este mai mare decat cantitatea originala"
+                     nzHasFeedback>
+      <!--              <nz-input-wrapper>-->
+      <nz-input-number [formField]="lineForm().quantity"
+                       class="w-full!">
+                  <span nzInputAddonBefore>
+                  <nz-icon nzType="icons:circle-info"
+                           nz-tooltip
+                           nzTooltipTrigger="hover"
+                           [nzTooltipTitle]="'Cantitatea originala: ' + (line()?.originalQuantity ?? 0)"></nz-icon>
+                    </span>
+      </nz-input-number>
+
+      <!--              </nz-input-wrapper>-->
+    </nz-form-control>
+  </nz-form-item>
+</td>
+<td>
+  @if (line().item?.isPerishable) {
+    <nz-form-item>
+      <nz-form-control [nzErrorTip]="errorTemplate">
+        <nz-date-picker [formField]="lineForm().expiryDate"
+                        class="w-full!" />
+      </nz-form-control>
+    </nz-form-item>
+  }
+</td>
+<td>
+  <nz-form-item>
+    <nz-form-control [nzErrorTip]="errorTemplate">
+      <nz-input-number [formField]="lineForm().unitPrice"
+                       [nzMin]="0"
+                       class="w-full!">
+        <span nzInputAddonAfter>RON</span>
+      </nz-input-number>
+    </nz-form-control>
+  </nz-form-item>
+</td>
+<td>
+  <button nz-button
+          nzType="link"
+          type="button"
+          title="Imparte randul"
+          (click)="splitLine.emit(line())">
+    <nz-icon nzType="icons:split" />
+  </button>
+  @if (canRemove()) {
+    <button nz-button
+            nzType="link"
+            nzDanger
+            type="button"
+            title="Sterge randul"
+            (click)="removeLine.emit(line())">
+      <nz-icon nzType="icons:trash" />
+    </button>
+  }
+</td>
+
+
+<ng-template #errorTemplate
+             let-control>
+  @let formControl = control.control;
+  @if (formControl.errors?.required; as requiredError) {
+    {{ requiredError.message }}
+  }
+  @if (formControl.errors?.min; as minError) {
+    {{ minError.message }}
+  }
+  @if (formControl.errors?.totalSum; as totalSumError) {
+    {{ totalSumError.message }}
+  }
+</ng-template>

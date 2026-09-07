@@ -8,6 +8,10 @@ public class Item: BaseAuditableEntity, IKeysetEntity
     public string Unit { get; set; } = "unit"; // e.g. "unit", "kg", "box"
     public int MinThreshold { get; set; }
     public bool IsPerishable { get; set; }
+
+    // Optional shelf life in days. When set on a perishable item, a goods-receipt line that omits
+    // an expiry date derives it as ReceivedDate + ShelfLifeDays (see the goods-receipt handlers).
+    public int? ShelfLifeDays { get; set; }
     public bool IsActive { get; set; } = true;
 
     public Guid CategoryId { get; set; }

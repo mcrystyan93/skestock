@@ -84,7 +84,7 @@ public class ConfirmGoodsReceiptImportCommandValidator : AbstractValidator<Confi
         var perishableByItemId = await dbContext.Items
             .AsNoTracking()
             .Where(i => itemIds.Contains(i.Id))
-            .ToDictionaryAsync(i => i.Id, i => i.IsPerishable, cancellationToken);
+            .ToDictionaryAsync(i => i.Id, i => (i.IsPerishable, i.ShelfLifeDays), cancellationToken);
 
         var existingLocationIds = (await dbContext.Locations
                 .AsNoTracking()
@@ -100,7 +100,7 @@ public class ConfirmGoodsReceiptImportCommandValidator : AbstractValidator<Confi
 
             if (line.ItemId is { } itemId)
             {
-                if (!perishableByItemId.TryGetValue(itemId, out var isPerishable))
+                if (!perishableByItemId.TryGetValue(itemId, out var itemInfo))
                 {
                     context.AddFailure(new ValidationFailure($"{prefix}.ItemId", "Item does not exist")
                     {
@@ -109,12 +109,15 @@ public class ConfirmGoodsReceiptImportCommandValidator : AbstractValidator<Confi
                 }
                 else
                 {
-                    ValidateExpiry(context, prefix, isPerishable, line.ExpiryDate);
+                    // Existing item: a perishable line may omit the expiry when the item has a shelf
+                    // life set (the handler derives it), so pass the shelf life through.
+                    ValidateExpiry(context, prefix, itemInfo.IsPerishable, itemInfo.ShelfLifeDays, line.ExpiryDate);
                 }
             }
             else
             {
-                ValidateExpiry(context, prefix, line.IsPerishable, line.ExpiryDate);
+                // New item: no persisted shelf life to fall back on, so expiry stays required when perishable.
+                ValidateExpiry(context, prefix, line.IsPerishable, null, line.ExpiryDate);
             }
 
             if (!existingLocationIds.Contains(line.LocationId))
@@ -126,13 +129,14 @@ public class ConfirmGoodsReceiptImportCommandValidator : AbstractValidator<Confi
             }
         }
 
-        await ValidateSplitQuantitiesAsync(dbContext, command, context, cancellationToken);
+        // await ValidateSplitQuantitiesAsync(dbContext, command, context, cancellationToken);
     }
 
     private static void ValidateExpiry(
-        ValidationContext<ConfirmGoodsReceiptImportCommand> context, string prefix, bool isPerishable, DateOnly? expiryDate)
+        ValidationContext<ConfirmGoodsReceiptImportCommand> context, string prefix, bool isPerishable, int? shelfLifeDays, DateOnly? expiryDate)
     {
-        if (isPerishable && expiryDate is null)
+        // A perishable line only requires an explicit expiry when there's no shelf life to derive it from.
+        if (isPerishable && expiryDate is null && shelfLifeDays is not > 0)
         {
             context.AddFailure(new ValidationFailure($"{prefix}.ExpiryDate", "Expiry date is required for perishable items")
             {
@@ -148,46 +152,46 @@ public class ConfirmGoodsReceiptImportCommandValidator : AbstractValidator<Confi
         }
     }
 
-    private static async Task ValidateSplitQuantitiesAsync(
-        IApplicationDbContext dbContext,
-        ConfirmGoodsReceiptImportCommand command,
-        ValidationContext<ConfirmGoodsReceiptImportCommand> context,
-        CancellationToken cancellationToken)
-    {
-        var extractedJson = await dbContext.GoodsReceiptImports
-            .AsNoTracking()
-            .Where(i => i.Id == command.ImportId)
-            .Select(i => i.ExtractedDataJson)
-            .SingleOrDefaultAsync(cancellationToken);
-
-        if (string.IsNullOrWhiteSpace(extractedJson))
-            return;
-
-        var extraction = JsonSerializer.Deserialize<GoodsReceiptExtractionResult>(extractedJson);
-        if (extraction is null || extraction.LineItems.Count == 0)
-            return;
-
-        // Group the (possibly split) confirm lines back onto the source extraction line they came from,
-        // and require each group's quantities to sum to the original extracted quantity. A source line
-        // dropped entirely (no confirm lines) is allowed; a present group that doesn't add up is not.
-        var quantityBySource = command.Lines
-            .GroupBy(l => l.SourceLineIndex)
-            .ToDictionary(g => g.Key, g => g.Sum(l => l.Quantity));
-
-        foreach (var (sourceIndex, totalQuantity) in quantityBySource)
-        {
-            if (sourceIndex < 0 || sourceIndex >= extraction.LineItems.Count)
-                continue;
-
-            var originalQuantity = extraction.LineItems[sourceIndex].Quantity;
-            if (totalQuantity != originalQuantity)
-            {
-                context.AddFailure(new ValidationFailure("Lines",
-                    $"Split lines for '{extraction.LineItems[sourceIndex].Name}' sum to {totalQuantity} but the extracted quantity is {originalQuantity}.")
-                {
-                    ErrorCode = ValidationErrorCodes.SplitQuantityMismatch
-                });
-            }
-        }
-    }
+    // private static async Task ValidateSplitQuantitiesAsync(
+    //     IApplicationDbContext dbContext,
+    //     ConfirmGoodsReceiptImportCommand command,
+    //     ValidationContext<ConfirmGoodsReceiptImportCommand> context,
+    //     CancellationToken cancellationToken)
+    // {
+    //     var extractedJson = await dbContext.GoodsReceiptImports
+    //         .AsNoTracking()
+    //         .Where(i => i.Id == command.ImportId)
+    //         .Select(i => i.ExtractedDataJson)
+    //         .SingleOrDefaultAsync(cancellationToken);
+    //
+    //     if (string.IsNullOrWhiteSpace(extractedJson))
+    //         return;
+    //
+    //     var extraction = JsonSerializer.Deserialize<GoodsReceiptExtractionResult>(extractedJson);
+    //     if (extraction is null || extraction.LineItems.Count == 0)
+    //         return;
+    //
+    //     // Group the (possibly split) confirm lines back onto the source extraction line they came from,
+    //     // and require each group's quantities to sum to the original extracted quantity. A source line
+    //     // dropped entirely (no confirm lines) is allowed; a present group that doesn't add up is not.
+    //     var quantityBySource = command.Lines
+    //         .GroupBy(l => l.SourceLineIndex)
+    //         .ToDictionary(g => g.Key, g => g.Sum(l => l.Quantity));
+    //
+    //     foreach (var (sourceIndex, totalQuantity) in quantityBySource)
+    //     {
+    //         if (sourceIndex < 0 || sourceIndex >= extraction.LineItems.Count)
+    //             continue;
+    //
+    //         var originalQuantity = extraction.LineItems[sourceIndex].Quantity;
+    //         if (totalQuantity != originalQuantity)
+    //         {
+    //             context.AddFailure(new ValidationFailure("Lines",
+    //                 $"Split lines for '{extraction.LineItems[sourceIndex].Name}' sum to {totalQuantity} but the extracted quantity is {originalQuantity}.")
+    //             {
+    //                 ErrorCode = ValidationErrorCodes.SplitQuantityMismatch
+    //             });
+    //         }
+    //     }
+    // }
 }

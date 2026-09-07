@@ -149,4 +149,89 @@ public class CreateGoodsReceiptCommandHandlerTests
         result.Value.Note.ShouldBe("Delivered by supplier van");
         result.Value.ClassName.ShouldBe("Fall 2026");
     }
+
+    [Test]
+    public async Task Handle_PerishableItemWithShelfLifeAndNoExpiry_DerivesExpiryFromReceivedDate()
+    {
+        var (context, _, _, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+
+        var categoryId = await context.Categories.Select(c => c.Id).FirstAsync(CancellationToken.None);
+        var shelfLifeItem = new Item { Name = "Yogurt", Unit = "cup", IsPerishable = true, ShelfLifeDays = 7, CategoryId = categoryId };
+        context.Items.Add(shelfLifeItem);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new CreateGoodsReceiptCommandHandler(context, new FakeUser(userProfile.IdentityId));
+
+        var command = new CreateGoodsReceiptCommand
+        {
+            ClassId = schoolClass.Id,
+            Note = "Fresh delivery",
+            Lines = [new CreateGoodsReceiptLine { ItemId = shelfLifeItem.Id, LocationId = location.Id, Quantity = 4 }]
+        };
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+
+        var batch = await context.StockBatches.SingleAsync(b => b.ItemId == shelfLifeItem.Id, CancellationToken.None);
+        batch.ExpiryDate.ShouldBe(batch.ReceivedDate.AddDays(7));
+    }
+
+    [Test]
+    public async Task Handle_PerishableItemWithShelfLifeButExplicitExpiry_PreservesSuppliedExpiry()
+    {
+        var (context, _, _, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+
+        var categoryId = await context.Categories.Select(c => c.Id).FirstAsync(CancellationToken.None);
+        var shelfLifeItem = new Item { Name = "Cheese", Unit = "kg", IsPerishable = true, ShelfLifeDays = 30, CategoryId = categoryId };
+        context.Items.Add(shelfLifeItem);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var explicitExpiry = new DateOnly(2027, 1, 15);
+        var handler = new CreateGoodsReceiptCommandHandler(context, new FakeUser(userProfile.IdentityId));
+
+        var command = new CreateGoodsReceiptCommand
+        {
+            ClassId = schoolClass.Id,
+            Note = "Aged delivery",
+            Lines = [new CreateGoodsReceiptLine { ItemId = shelfLifeItem.Id, LocationId = location.Id, Quantity = 2, ExpiryDate = explicitExpiry }]
+        };
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+
+        var batch = await context.StockBatches.SingleAsync(b => b.ItemId == shelfLifeItem.Id, CancellationToken.None);
+        batch.ExpiryDate.ShouldBe(explicitExpiry);
+    }
+
+    [Test]
+    public async Task Handle_NonPerishableItemWithShelfLife_DoesNotDeriveExpiry()
+    {
+        var (context, _, _, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+
+        var categoryId = await context.Categories.Select(c => c.Id).FirstAsync(CancellationToken.None);
+        var nonPerishable = new Item { Name = "Flour", Unit = "kg", IsPerishable = false, ShelfLifeDays = 90, CategoryId = categoryId };
+        context.Items.Add(nonPerishable);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new CreateGoodsReceiptCommandHandler(context, new FakeUser(userProfile.IdentityId));
+
+        var command = new CreateGoodsReceiptCommand
+        {
+            ClassId = schoolClass.Id,
+            Note = "Dry goods",
+            Lines = [new CreateGoodsReceiptLine { ItemId = nonPerishable.Id, LocationId = location.Id, Quantity = 20 }]
+        };
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+
+        var batch = await context.StockBatches.SingleAsync(b => b.ItemId == nonPerishable.Id, CancellationToken.None);
+        batch.ExpiryDate.ShouldBeNull();
+    }
 }

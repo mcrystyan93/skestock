@@ -17,6 +17,7 @@ public class CreateItemCommandHandler(IApplicationDbContext dbContext)
             Unit = request.Unit.Trim(),
             MinThreshold = request.MinThreshold,
             IsPerishable = request.IsPerishable,
+            ShelfLifeDays = request.ShelfLifeDays,
             CategoryId = request.CategoryId,
             IsActive = true
         };
@@ -42,6 +43,7 @@ public class CreateItemCommandHandler(IApplicationDbContext dbContext)
             Unit = item.Unit,
             MinThreshold = item.MinThreshold,
             IsPerishable = item.IsPerishable,
+            ShelfLifeDays = item.ShelfLifeDays,
             IsActive = item.IsActive,
             CategoryId = item.CategoryId,
             CategoryName = categoryName,

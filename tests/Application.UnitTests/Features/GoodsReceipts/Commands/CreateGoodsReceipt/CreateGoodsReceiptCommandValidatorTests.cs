@@ -149,6 +149,29 @@ public class CreateGoodsReceiptCommandValidatorTests
     }
 
     [Test]
+    public async Task ShouldNotHaveExpiryDateRequiredErrorWhenPerishableItemHasShelfLifeAndNoExpiry()
+    {
+        var (context, _, _, location, schoolClass) = await CreateContextAsync();
+        await using var _ = context;
+
+        var categoryId = await context.Categories.Select(c => c.Id).FirstAsync(CancellationToken.None);
+        var shelfLifeItem = new Item { Name = "Bread", Unit = "loaf", IsPerishable = true, ShelfLifeDays = 3, CategoryId = categoryId };
+        context.Items.Add(shelfLifeItem);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var validator = new CreateGoodsReceiptCommandValidator(context);
+
+        var result = await validator.ValidateAsync(new CreateGoodsReceiptCommand
+        {
+            ClassId = schoolClass.Id,
+            Note = "Delivery",
+            Lines = [new CreateGoodsReceiptLine { ItemId = shelfLifeItem.Id, LocationId = location.Id, Quantity = 1 }]
+        });
+
+        result.Errors.ShouldNotContain(e => e.ErrorCode == ValidationErrorCodes.ExpiryDateRequired);
+    }
+
+    [Test]
     public async Task ShouldHaveExpiryDateNotAllowedErrorWhenNonPerishableItemLineHasExpiry()
     {
         var (context, item, _, location, schoolClass) = await CreateContextAsync();

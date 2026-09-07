@@ -176,4 +176,49 @@ public class CreateItemCommandHandlerTests
         first.Value.Id.ShouldNotBe(second.Value.Id);
         (await context.Items.CountAsync(CancellationToken.None)).ShouldBe(2);
     }
+
+    [Test]
+    public async Task Handle_WithShelfLifeDays_PersistsAndReturnsValue()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        var handler = new CreateItemCommandHandler(context);
+
+        var result = await handler.Handle(new CreateItemCommand
+        {
+            Name = "Milk",
+            Unit = "l",
+            IsPerishable = true,
+            ShelfLifeDays = 7,
+            CategoryId = category.Id
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.IsPerishable.ShouldBeTrue();
+        result.Value.ShelfLifeDays.ShouldBe(7);
+
+        var persisted = await context.Items.SingleAsync(CancellationToken.None);
+        persisted.ShelfLifeDays.ShouldBe(7);
+    }
+
+    [Test]
+    public async Task Handle_WithoutShelfLifeDays_PersistsNull()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        var handler = new CreateItemCommandHandler(context);
+
+        var result = await handler.Handle(new CreateItemCommand
+        {
+            Name = "Pen",
+            Unit = "unit",
+            CategoryId = category.Id
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShelfLifeDays.ShouldBeNull();
+
+        var persisted = await context.Items.SingleAsync(CancellationToken.None);
+        persisted.ShelfLifeDays.ShouldBeNull();
+    }
 }

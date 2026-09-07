@@ -8,6 +8,9 @@
             [nzDescription]="store.reviewProblemDetail()?.detail ?? 'Verificati datele introduse.'" />
 }
 
+<ske-goods-receipt-import-review-info [reviewInfo]="store.review()"
+                                      [loading]="store.reviewLoading()" />
+<nz-divider></nz-divider>
 <ske-goods-receipt-import-review-lines-table [lines]="store.lines()"
                                              [loading]="store.reviewLoading()"
                                              (splitLine)="store.splitLine($event)"
