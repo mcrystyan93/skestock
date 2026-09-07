@@ -10,6 +10,7 @@ export type ItemDto = {
   unit: string;
   minThreshold: number;
   isPerishable: boolean;
+  shelfLifeDays?: number | null;
   isActive: boolean;
   categoryId: string;
   categoryName?: string | null;
@@ -32,6 +33,7 @@ export type CreateItemRequest = {
   unit: string;
   minThreshold: number;
   isPerishable: boolean;
+  shelfLifeDays?: number | null;
   categoryId: string;
 };
 
@@ -43,6 +45,7 @@ export type EditItemRequest = {
   unit: string;
   minThreshold: number;
   isPerishable: boolean;
+  shelfLifeDays?: number | null;
   categoryId: string;
 };
 
@@ -52,6 +55,7 @@ export type ItemTableColumn =
   | 'unit'
   | 'minThreshold'
   | 'isPerishable'
+  | 'shelfLifeDays'
   | 'categoryName'
   | 'isActive'
   | 'createdDate'
@@ -84,6 +88,11 @@ export const ITEM_TABLE_COLUMNS: TableColumnDefinition<ItemTableColumn> = {
     label: 'Perisabil',
     value: 'isPerishable',
     fieldType: 'boolean'
+  },
+  shelfLifeDays: {
+    label: 'Valabilitate (zile)',
+    value: 'shelfLifeDays',
+    fieldType: 'number'
   },
   categoryName: {
     label: 'Categorie',

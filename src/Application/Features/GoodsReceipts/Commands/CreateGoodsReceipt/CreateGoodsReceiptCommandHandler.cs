@@ -26,15 +26,33 @@ public class CreateGoodsReceiptCommandHandler(IApplicationDbContext dbContext, I
 
         var receivedDate = DateOnly.FromDateTime(DateTime.UtcNow);
 
+        // Load the perishable flag + shelf life for the referenced items so a line that omits an
+        // expiry date can have it derived (ReceivedDate + ShelfLifeDays) for perishable items.
+        var itemIds = request.Lines.Select(l => l.ItemId).Distinct().ToList();
+        var itemInfoById = await dbContext.Items
+            .AsNoTracking()
+            .Where(i => itemIds.Contains(i.Id))
+            .Select(i => new { i.Id, i.IsPerishable, i.ShelfLifeDays })
+            .ToDictionaryAsync(i => i.Id, i => (i.IsPerishable, i.ShelfLifeDays), cancellationToken);
+
         foreach (var line in request.Lines)
         {
+            var expiryDate = line.ExpiryDate;
+            if (expiryDate is null
+                && itemInfoById.TryGetValue(line.ItemId, out var info)
+                && info.IsPerishable
+                && info.ShelfLifeDays is > 0)
+            {
+                expiryDate = receivedDate.AddDays(info.ShelfLifeDays.Value);
+            }
+
             var batch = new StockBatch
             {
                 ItemId = line.ItemId,
                 LocationId = line.LocationId,
                 ReceivedClassId = request.ClassId,
                 Quantity = line.Quantity,
-                ExpiryDate = line.ExpiryDate,
+                ExpiryDate = expiryDate,
                 ReceivedDate = receivedDate,
                 UnitPrice = line.UnitPrice,
                 GoodsReceipt = receipt

@@ -59,7 +59,7 @@ public class GoodsReceiptExtractionSchemaFactory(IApplicationDbContext dbContext
                                 new JsonObject()
                                 {
                                     ["type"] = "number",
-                                    ["description"] = "Value from 'Valoare totala cu TVA' column"
+                                    ["description"] = "Value from 'Valoare totala cu TVA' column divided by 'Cant.' column'"
                                 },
                             ["category"] = new JsonObject() { ["type"] = "string", ["description"] = $"Value from 'Category' column. Possible values are: {categories}" },
                             ["isPerishable"] =

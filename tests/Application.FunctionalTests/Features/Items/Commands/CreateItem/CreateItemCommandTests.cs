@@ -133,4 +133,44 @@ public class CreateItemCommandTests : TestBase
         after.Value.Data.Count().ShouldBe(1);
         after.Value.Data.Single().Name.ShouldBe(name);
     }
+
+    [Test]
+    public async Task Handle_WithShelfLifeDays_PersistsValue()
+    {
+        var category = await SeedCategoryAsync();
+        var name = $"{_prefix}-Milk";
+
+        var result = await TestApp.SendAsync(new CreateItemCommand
+        {
+            Name = name,
+            Unit = "L",
+            IsPerishable = true,
+            ShelfLifeDays = 7,
+            CategoryId = category.Id
+        });
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShelfLifeDays.ShouldBe(7);
+
+        var persisted = await TestApp.FindAsync<Item>(result.Value.Id);
+        persisted.ShouldNotBeNull();
+        persisted.ShelfLifeDays.ShouldBe(7);
+    }
+
+    [Test]
+    public async Task Handle_WithNonPositiveShelfLifeDays_ThrowsValidationException()
+    {
+        var category = await SeedCategoryAsync();
+
+        var act = async () => await TestApp.SendAsync(new CreateItemCommand
+        {
+            Name = $"{_prefix}-X",
+            Unit = "unit",
+            ShelfLifeDays = 0,
+            CategoryId = category.Id
+        });
+
+        var exception = await act.ShouldThrowAsync<ValidationException>();
+        exception.Errors.ShouldContainKey(nameof(CreateItemCommand.ShelfLifeDays));
+    }
 }

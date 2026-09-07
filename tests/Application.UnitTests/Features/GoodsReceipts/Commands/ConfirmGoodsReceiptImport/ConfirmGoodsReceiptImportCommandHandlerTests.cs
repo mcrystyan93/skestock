@@ -237,6 +237,31 @@ public class ConfirmGoodsReceiptImportCommandHandlerTests
     }
 
     [Test]
+    public async Task Handle_ExistingPerishableItemWithShelfLifeAndNoExpiry_DerivesExpiry()
+    {
+        var (context, _, category, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+
+        var perishable = new Item { Sku = "SKU-P", Name = "Milk", Unit = "L", IsPerishable = true, ShelfLifeDays = 10, Category = category, CategoryId = category.Id };
+        context.Items.Add(perishable);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var import = await AddPendingImportAsync(context, schoolClass.Id);
+        var handler = new ConfirmGoodsReceiptImportCommandHandler(context, new FakeUser(userProfile.IdentityId));
+
+        var result = await handler.Handle(new ConfirmGoodsReceiptImportCommand
+        {
+            ImportId = import.Id,
+            Lines = [new ConfirmGoodsReceiptImportLine { ItemId = perishable.Id, LocationId = location.Id, Quantity = 3, UnitPrice = 2m }]
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+
+        var batch = await context.StockBatches.SingleAsync(b => b.ItemId == perishable.Id, CancellationToken.None);
+        batch.ExpiryDate.ShouldBe(batch.ReceivedDate.AddDays(10));
+    }
+
+    [Test]
     public async Task Handle_WhenImportDoesNotExist_ReturnsFailure()
     {
         var (context, item, _, location, _, userProfile) = await CreateContextAsync();

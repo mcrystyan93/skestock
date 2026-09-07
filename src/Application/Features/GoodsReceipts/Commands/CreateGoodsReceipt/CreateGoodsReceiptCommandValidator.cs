@@ -84,7 +84,7 @@ public class CreateGoodsReceiptCommandValidator : AbstractValidator<CreateGoodsR
         var perishableByItemId = await dbContext.Items
             .AsNoTracking()
             .Where(i => itemIds.Contains(i.Id))
-            .ToDictionaryAsync(i => i.Id, i => i.IsPerishable, cancellationToken);
+            .ToDictionaryAsync(i => i.Id, i => (i.IsPerishable, i.ShelfLifeDays), cancellationToken);
 
         var existingLocationIds = (await dbContext.Locations
                 .AsNoTracking()
@@ -100,21 +100,24 @@ public class CreateGoodsReceiptCommandValidator : AbstractValidator<CreateGoodsR
             var line = lines[i];
             var propertyPrefix = $"Lines[{i}]";
 
-            if (!perishableByItemId.TryGetValue(line.ItemId, out var isPerishable))
+            if (!perishableByItemId.TryGetValue(line.ItemId, out var itemInfo))
             {
                 context.AddFailure(new ValidationFailure($"{propertyPrefix}.ItemId", "Item does not exist")
                 {
                     ErrorCode = ValidationErrorCodes.InvalidReference
                 });
             }
-            else if (isPerishable && line.ExpiryDate is null)
+            // A perishable line may omit the expiry date when the item has a shelf life set - the
+            // handler derives it (ReceivedDate + ShelfLifeDays). Only require it when there's no
+            // shelf life to fall back on.
+            else if (itemInfo.IsPerishable && line.ExpiryDate is null && itemInfo.ShelfLifeDays is not > 0)
             {
                 context.AddFailure(new ValidationFailure($"{propertyPrefix}.ExpiryDate", "Expiry date is required for perishable items")
                 {
                     ErrorCode = ValidationErrorCodes.ExpiryDateRequired
                 });
             }
-            else if (!isPerishable && line.ExpiryDate is not null)
+            else if (!itemInfo.IsPerishable && line.ExpiryDate is not null)
             {
                 context.AddFailure(new ValidationFailure($"{propertyPrefix}.ExpiryDate", "Expiry date is not allowed for non-perishable items")
                 {

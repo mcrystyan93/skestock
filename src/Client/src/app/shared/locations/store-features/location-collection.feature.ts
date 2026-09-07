@@ -8,7 +8,8 @@ import { patchState, signalStoreFeature, withComputed, withMethods, withProps, w
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
-import { LocationsHttp } from '@ske/shared/locations';
+// noinspection ES6PreferShortImport
+import { LocationsHttp } from '../services/locations.http';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, exhaustMap, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';

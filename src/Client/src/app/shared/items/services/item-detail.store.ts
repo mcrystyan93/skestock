@@ -3,7 +3,8 @@ import { patchState, signalStore, type, withMethods, withProps, withState } from
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
-import { ItemsHttp } from '@ske/shared/items';
+// noinspection ES6PreferShortImport
+import { ItemsHttp } from '../services/items.http';
 import { isNil } from 'lodash-es';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, of, pipe, switchMap, tap } from 'rxjs';

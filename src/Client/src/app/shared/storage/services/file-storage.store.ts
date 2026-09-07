@@ -1,21 +1,38 @@
-import { patchState, signalStore, type, withMethods, withProps, withState } from '@ngrx/signals';
+import { patchState, signalStore, type, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
-import { inject } from '@angular/core';
-import { StorageHttp } from '@ske/shared/storage';
+import { computed, inject } from '@angular/core';
+// noinspection ES6PreferShortImport
+import { StorageHttp } from '../services/storage.http';
 import { FileMetadataDto } from '@ske/models';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { concatMap, map, pipe, tap } from 'rxjs';
+import { catchError, concatMap, from, map, of, pipe, switchMap, tap, toArray } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
 import { NzUploadFile } from 'ng-zorro-antd/upload';
 import { eventGroup, injectDispatch } from '@ngrx/signals/events';
 
-type FileStorageState = { fileMetadata: FileMetadataDto | null };
-const initialState: FileStorageState = { fileMetadata: null };
+const PERCENT_MAX = 100;
+
+type FailedUpload = { name: string };
+
+type FileStorageState = {
+  uploadedFiles: FileMetadataDto[];
+  failedFiles: FailedUpload[];
+  totalCount: number;
+  completedCount: number;
+  currentFileName: string | null;
+};
+const initialState: FileStorageState = {
+  uploadedFiles: [],
+  failedFiles: [],
+  totalCount: 0,
+  completedCount: 0,
+  currentFileName: null
+};
 export const fileStorageApiEvents = eventGroup({
   source: 'FileUpload API',
   events: {
-    uploadSuccess: type<FileMetadataDto>()
+    uploadSuccess: type<FileMetadataDto[]>()
   }
 });
 
@@ -40,46 +57,85 @@ export const FileStorageState = signalStore(
     storageHttp: inject(StorageHttp),
     dispatcher: injectDispatch(fileStorageApiEvents)
   })),
+  withComputed((store) => ({
+    uploadPercent: computed(() => {
+      const total = store.totalCount();
+
+      if (total === 0)
+        return 0;
+
+      return Math.round((store.completedCount() / total) * PERCENT_MAX);
+    }),
+    hasUploadFailures: computed(() => store.failedFiles().length > 0)
+  })),
   withMethods((store) => {
-    const uploadFile = rxMethod<NzUploadFile>(
+    const uploadFiles = rxMethod<Array<NzUploadFile>>(
       pipe(
-        tap(() => {
+        tap((files) => {
           store.setUploadLoading();
           store.clearUploadErrors();
-          patchState(store, { fileMetadata: null });
+          patchState(store, {
+            uploadedFiles: [],
+            failedFiles: [],
+            totalCount: files.length,
+            completedCount: 0,
+            currentFileName: null
+          });
         }),
-        concatMap((file) =>
-          store.storageHttp.requestUpload({ fileName: file.name, contentType: file.type! })
-            .pipe(
-              map(uploadResult => ({ file, uploadResult }))
-            )
-        ),
-        concatMap(({ uploadResult, file }) =>
-          store.storageHttp.uploadViaSasUri(file, uploadResult)
-            .pipe(
-              map(() => uploadResult)
-            )
-        ),
-        concatMap((uploadResult) =>
-          store.storageHttp.confirmUpload({ fileId: uploadResult.fileId })),
-        mapResponse({
-          next: (fileMetadata) => {
-            patchState(store, { fileMetadata });
+        switchMap((files) =>
+          from(files).pipe(
+            concatMap((file) => {
+              patchState(store, { currentFileName: file.name });
 
-            store.dispatcher.uploadSuccess(fileMetadata);
+              return store.storageHttp.requestUpload({ fileName: file.name, contentType: file.type! })
+                .pipe(
+                  concatMap((uploadResult) =>
+                    store.storageHttp.uploadViaSasUri(file, uploadResult)
+                      .pipe(map(() => uploadResult))
+                  ),
+                  concatMap((uploadResult) =>
+                    store.storageHttp.confirmUpload({ fileId: uploadResult.fileId })
+                  ),
+                  tap((fileMetadata) => {
+                    patchState(store, {
+                      uploadedFiles: [...store.uploadedFiles(), fileMetadata],
+                      completedCount: store.completedCount() + 1
+                    });
+                  }),
+                  catchError(() => {
+                    patchState(store, {
+                      failedFiles: [...store.failedFiles(), { name: file.name }],
+                      completedCount: store.completedCount() + 1
+                    });
 
-            store.setUploadLoaded();
-          },
-          error: (error) => {
-            store.handleUploadError(error);
-            store.setUploadLoaded();
-          }
+                    return of(null);
+                  })
+                );
+            }),
+            toArray()
+          )
+        ),
+        tap(() => {
+          patchState(store, { currentFileName: null });
+
+          const uploaded = store.uploadedFiles();
+
+          if (uploaded.length > 0)
+            store.dispatcher.uploadSuccess(uploaded);
+
+          store.setUploadLoaded();
         })
       )
     );
 
     const resetUpload = () => {
-      patchState(store, { fileMetadata: null });
+      patchState(store, {
+        uploadedFiles: [],
+        failedFiles: [],
+        totalCount: 0,
+        completedCount: 0,
+        currentFileName: null
+      });
       store.clearUploadErrors();
     };
 
@@ -111,6 +167,6 @@ export const FileStorageState = signalStore(
       )
     );
 
-    return { uploadFile, resetUpload, downloadFile };
+    return { uploadFiles, resetUpload, downloadFile };
   })
 );

@@ -148,4 +148,52 @@ public class CreateItemCommandValidatorTests
 
         result.Errors.ShouldNotContain(e => e.ErrorCode == ValidationErrorCodes.DuplicateSku);
     }
+
+    [Test]
+    public async Task ShouldNotHaveErrorWhenShelfLifeDaysIsNull()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        var validator = new CreateItemCommandValidator(context);
+
+        var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", ShelfLifeDays = null, CategoryId = category.Id });
+
+        result.Errors.ShouldNotContain(e => e.PropertyName == nameof(CreateItemCommand.ShelfLifeDays));
+    }
+
+    [Test]
+    public async Task ShouldNotHaveErrorWhenShelfLifeDaysIsPositive()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        var validator = new CreateItemCommandValidator(context);
+
+        var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", ShelfLifeDays = 30, CategoryId = category.Id });
+
+        result.Errors.ShouldNotContain(e => e.PropertyName == nameof(CreateItemCommand.ShelfLifeDays));
+    }
+
+    [Test]
+    public async Task ShouldHaveErrorWhenShelfLifeDaysIsZero()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        var validator = new CreateItemCommandValidator(context);
+
+        var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", ShelfLifeDays = 0, CategoryId = category.Id });
+
+        result.Errors.ShouldContain(e => e.PropertyName == nameof(CreateItemCommand.ShelfLifeDays) && e.ErrorCode == ValidationErrorCodes.GreaterThan);
+    }
+
+    [Test]
+    public async Task ShouldHaveErrorWhenShelfLifeDaysIsNegative()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        var validator = new CreateItemCommandValidator(context);
+
+        var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", ShelfLifeDays = -5, CategoryId = category.Id });
+
+        result.Errors.ShouldContain(e => e.PropertyName == nameof(CreateItemCommand.ShelfLifeDays) && e.ErrorCode == ValidationErrorCodes.GreaterThan);
+    }
 }

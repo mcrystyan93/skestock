@@ -40,8 +40,8 @@ export const appConfig: ApplicationConfig = {
       eventMap: {
         'CategoryCreated': categoryRealtimeEvents.categoryCreated,
         'CategoryUpdated': categoryRealtimeEvents.categoryUpdated,
-        'GoodsReceiptImportCompletedMarkListChanged': goodsReceiptImportRealtimeEvents.markListAsChanged,
-        'GoodsReceiptImportCompletedNotifyUser': goodsReceiptImportRealtimeEvents.notifyUser
+        'GoodsReceiptImportCreated': goodsReceiptImportRealtimeEvents.goodsReceiptImportCreated,
+        'GoodsReceiptImportProcessed': goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed,
       }
     })
   ]

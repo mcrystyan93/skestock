@@ -9,7 +9,8 @@ import { patchState, signalStoreFeature, withComputed, withMethods, withProps, w
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
-import { GoodsReceiptImportsHttp } from '@ske/shared/goods-receipt-imports';
+// noinspection ES6PreferShortImport
+import { GoodsReceiptImportsHttp } from '../services/goods-receipt-imports.http';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
@@ -123,19 +124,17 @@ export function withGoodsReceiptImportCollection() {
 
       return { load, loadMore };
     }),
-    withReducer(
-      on(goodsReceiptImportRealtimeEvents.markListAsChanged, (state) => ({
-        ...state,
-        listHasChanged: true
-      }))
-    ),
     withEventHandlers((store, events = inject(Events), nzMessageService = inject(NzMessageService)) => ({
-      notifyUser: events.on(goodsReceiptImportRealtimeEvents.notifyUser)
+      notifyUser: events.on(goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed)
         .pipe(
           tap(() => nzMessageService.success(
-            'Importul de bunuri a fost actualizat. Vă rugăm să reîncărcați lista pentru a vedea modificările.',
+            'Importul de bunuri a fost procesat cu succes. Lista a fost reîncărcată.',
             { nzDuration: 5000 })
           )
+        ),
+      importCreated: events.on(goodsReceiptImportRealtimeEvents.goodsReceiptImportCreated, goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed)
+        .pipe(
+          tap(() => store.load(store.filter()))
         )
     }))
   );

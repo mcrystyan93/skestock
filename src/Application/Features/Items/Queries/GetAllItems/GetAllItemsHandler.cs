@@ -56,6 +56,7 @@ public class GetAllItemsHandler(IApplicationDbContext dbContext)
                     Unit = i.Unit,
                     MinThreshold = i.MinThreshold,
                     IsPerishable = i.IsPerishable,
+                    ShelfLifeDays = i.ShelfLifeDays,
                     IsActive = i.IsActive,
                     CategoryId = i.CategoryId,
                     CategoryName = i.Category != null ? i.Category.Name : null,

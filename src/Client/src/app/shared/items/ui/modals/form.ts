@@ -1,6 +1,6 @@
 import { Component, input, linkedSignal } from '@angular/core';
 import { CategoryDropdownValue, ItemDto } from '@ske/models';
-import { form, FormField, maxLength, min, required, submit } from '@angular/forms/signals';
+import { form, FormField, applyWhen, hidden, maxLength, min, required, submit } from '@angular/forms/signals';
 import { NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
 import { SkeletonInputLoaderDirective } from '@ske/shared/loader';
 import { NzInputDirective, NzInputWrapperComponent, NzTextareaCountComponent } from 'ng-zorro-antd/input';
@@ -45,6 +45,7 @@ export class Form {
       unit: item.unit ?? '',
       minThreshold: item.minThreshold ?? 0,
       isPerishable: item.isPerishable ?? false,
+      shelfLifeDays: item.shelfLifeDays ?? null,
       category: !item.categoryId ? null : { id: item.categoryId, name: item.categoryName ?? '' }
     })
   });
@@ -74,6 +75,20 @@ export class Form {
     min(schemaPath.minThreshold, 0, {
       message: 'Pragul minim nu poate fi negativ.'
     });
+    // Shelf life is only relevant for perishable items: hide it otherwise, and only require a
+    // positive value when it is both visible (perishable) and filled in.
+    hidden(schemaPath.shelfLifeDays, {
+      when: ({ valueOf }) => !valueOf(schemaPath.isPerishable)
+    });
+    applyWhen(
+      schemaPath.shelfLifeDays,
+      ({ valueOf }) => valueOf(schemaPath.isPerishable) && valueOf(schemaPath.shelfLifeDays) != null,
+      (shelfLifePath) => {
+        min(shelfLifePath, 1, {
+          message: 'Termenul de valabilitate trebuie să fie de cel puțin o zi.'
+        });
+      }
+    );
     required(schemaPath.category, {
       message: 'Categoria este obligatorie.'
     });
@@ -97,6 +112,7 @@ export type ItemFormModel = {
   unit: string;
   minThreshold: number;
   isPerishable: boolean;
+  shelfLifeDays: number | null;
   category: CategoryDropdownValue;
 };
 export type ItemFormSubmit = {

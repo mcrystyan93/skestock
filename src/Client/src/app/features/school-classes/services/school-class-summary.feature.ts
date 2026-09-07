@@ -5,8 +5,10 @@ import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
 import { SchoolClassesHttp } from '@ske/shared/school-classes';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { pipe, switchMap, tap } from 'rxjs';
+import { filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
+import { Events, withEventHandlers } from '@ngrx/signals/events';
+import { goodsReceiptImportRealtimeEvents } from '@ske/shared/goods-receipt-imports';
 
 type SchoolClassSummaryState = {
   summary: Partial<SchoolClassSummary>;
@@ -46,7 +48,15 @@ export function withSchoolClassSummaryFeature() {
         )
       );
 
-      return {loadSummary};
-    })
-  );
+      return { loadSummary };
+    }),
+    withEventHandlers((store, events = inject(Events)) => ({
+        goodsReceiptImportChanges: events.on(goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed, goodsReceiptImportRealtimeEvents.goodsReceiptImportCreated)
+          .pipe(
+            map(() => store.summary().id),
+            filter((id): id is string => !!id),
+            tap((id) => store.loadSummary(id))
+          )
+      }))
+    );
 }

@@ -4,8 +4,10 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { NzAlertComponent } from 'ng-zorro-antd/alert';
 import { isNil } from 'lodash-es';
-import { ReviewStore } from '../../services/review.store';
+import { buildConfirmRequest, ReviewStore } from '../../services/review.store';
 import { ReviewLinesTable } from '../review-lines-table/review-lines-table';
+import { ReviewInfo } from '../review-lines-table/review-info/review-info';
+import { NzDividerComponent } from 'ng-zorro-antd/divider';
 
 export type ReviewModalData = {
   importId: string;
@@ -19,7 +21,9 @@ export type ReviewModalData = {
     NzSpaceComponent,
     NzSpaceItemDirective,
     NzAlertComponent,
-    ReviewLinesTable
+    ReviewLinesTable,
+    ReviewInfo,
+    NzDividerComponent
   ],
   selector: 'ske-goods-receipt-import-review-modal',
   styles: ``,
@@ -33,6 +37,7 @@ export class ReviewModal {
   public readonly store = inject(ReviewStore);
 
   private readonly _linesTable = viewChild(ReviewLinesTable);
+  private readonly _reviewInfo = viewChild(ReviewInfo);
 
   private readonly _confirmedEffectRef = effect(() => {
     const receipt = this.store.confirmedReceipt();
@@ -53,15 +58,17 @@ export class ReviewModal {
 
   public async save() {
     const linesTable = this._linesTable();
+    const reviewInfo = this._reviewInfo();
 
-    if (isNil(linesTable))
+    if (isNil(linesTable) || isNil(reviewInfo))
       return;
 
     const { isValid, lines } = await linesTable.submit();
+    const { isValid: isReviewInfoValid, model: reviewInfoModel } = await reviewInfo.submit();
 
-    if (!isValid)
+    if (!isValid || !isReviewInfoValid || isNil(reviewInfoModel))
       return;
 
-    this.store.confirm(lines);
+    this.store.confirm(buildConfirmRequest(reviewInfoModel.supplierReference, reviewInfoModel.note, lines));
   }
 }

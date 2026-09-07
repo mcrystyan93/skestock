@@ -1,43 +1,20 @@
 import { Component, computed, input, linkedSignal, output } from '@angular/core';
-import { applyEach, disabled, form, FormField, required, schema, submit, validate } from '@angular/forms/signals';
+import { applyEach, disabled, form, required, schema, submit, validate } from '@angular/forms/signals';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzTagComponent } from 'ng-zorro-antd/tag';
-import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
-import { NzDatePickerComponent } from 'ng-zorro-antd/date-picker';
-import { ItemDropdown } from '@ske/shared/items';
-import { LocationDropdown } from '@ske/shared/locations';
-import { ItemDto } from '@ske/models';
 import { LineMutationEvent, ReviewEditableLine } from '../../services/review.store';
-import { NzFormControlComponent, NzFormItemComponent } from 'ng-zorro-antd/form';
-import { NzInputAddonBeforeDirective, NzInputPrefixDirective } from 'ng-zorro-antd/input';
-import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
+import { ReviewLine } from './review-line/review-line';
 
-const ITEM_DROPDOWN_PLACEHOLDER = 'Creaza sau alege un produs';
 
 @Component({
   imports: [
     NzTableModule,
-    NzTagComponent,
-    NzIconDirective,
-    NzButtonComponent,
-    NzInputNumberComponent,
-    NzDatePickerComponent,
-    FormField,
-    ItemDropdown,
-    LocationDropdown,
-    NzFormItemComponent,
-    NzFormControlComponent,
-    NzTooltipDirective,
-    NzInputAddonBeforeDirective
+    ReviewLine
   ],
   selector: 'ske-goods-receipt-import-review-lines-table',
   styles: ``,
   templateUrl: './review-lines-table.html'
 })
 export class ReviewLinesTable {
-  public readonly itemPlaceholder = ITEM_DROPDOWN_PLACEHOLDER;
 
   public readonly lines = input.required<ReviewEditableLine[]>();
   public readonly loading = input<boolean>();
@@ -96,19 +73,6 @@ export class ReviewLinesTable {
 
   public readonly linesForm = form(this._linesModel, this._linesSchema);
 
-  public readonly isQuantityOver = computed(() => {
-    const totals = this.groupTotals();
-
-    // a new map where the key is the sourceLineIndex and the value is a boolean indicating if the total quantity exceeds the original quantity
-    const overMap = new Map<number, boolean>();
-
-    for (const [sourceLineIndex, { quantity, originalQuantity }] of totals.entries()) {
-      overMap.set(sourceLineIndex, quantity > originalQuantity);
-    }
-
-    return overMap;
-  });
-
   public groupTotals = computed(() => {
     const totals = new Map<number, { quantity: number, originalQuantity: number }>();
     const lines = this._linesModel().lines;
@@ -124,25 +88,17 @@ export class ReviewLinesTable {
     return totals;
   });
 
-  public canRemove(line: ReviewEditableLine): boolean {
-    return this._linesModel().lines.filter((l) => l.sourceLineIndex === line.sourceLineIndex).length > 1;
-  }
+  public canRemoveMap = computed(() => {
+    const removeMap = new Map<number, boolean>();
+    const lines = this._linesModel().lines;
 
-  public createPrefill(line: ReviewEditableLine): Partial<ItemDto> {
-    return {
-      name: line.extractedName ?? '',
-      sku: line.extractedSku ?? '',
-      unit: line.extractedUnit ?? ''
-    };
-  }
+    for (const line of lines) {
+      const count = lines.filter((l) => l.sourceLineIndex === line.sourceLineIndex).length;
+      removeMap.set(line.sourceLineIndex, count > 1);
+    }
 
-  public onSplit(rowId: string) {
-    this.splitLine.emit({ rowId });
-  }
-
-  public onRemove(rowId: string) {
-    this.removeLine.emit({ rowId });
-  }
+    return removeMap;
+  });
 
   public async submit(): Promise<ReviewLinesSubmit> {
     let isValid = false;

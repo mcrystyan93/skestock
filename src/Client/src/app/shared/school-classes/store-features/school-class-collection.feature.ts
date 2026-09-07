@@ -9,7 +9,8 @@ import { patchState, signalStoreFeature, withComputed, withMethods, withProps, w
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
-import { SchoolClassesHttp } from '@ske/shared/school-classes';
+// noinspection ES6PreferShortImport
+import { SchoolClassesHttp } from '../services/school-classes.http';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';

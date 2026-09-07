@@ -41,6 +41,7 @@ public record GoodsReceiptImportReviewMatchDto
     public string Name { get; init; } = string.Empty;
     public string Unit { get; init; } = string.Empty;
     public bool IsPerishable { get; init; }
+    public int? ShelfLifeDays { get; set; }
     public Guid CategoryId { get; init; }
     public string CategoryName { get; init; } = string.Empty;
 }

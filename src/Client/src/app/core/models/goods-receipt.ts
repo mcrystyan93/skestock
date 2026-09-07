@@ -243,6 +243,7 @@ export type GoodsReceiptImportReviewMatchDto = {
   name: string;
   unit: string;
   isPerishable: boolean;
+  shelfLifeDays?: number | null;
   categoryId: string;
   categoryName: string;
 };

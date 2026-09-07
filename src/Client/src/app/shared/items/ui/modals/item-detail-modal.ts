@@ -97,6 +97,7 @@ export class ItemDetailModal {
       unit: formData.unit,
       minThreshold: formData.minThreshold,
       isPerishable: formData.isPerishable,
+      shelfLifeDays: formData.isPerishable ? (formData.shelfLifeDays ?? null) : null,
       categoryId: formData.category?.id as string
     };
   }

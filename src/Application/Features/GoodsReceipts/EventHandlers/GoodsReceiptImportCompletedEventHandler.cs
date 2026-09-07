@@ -12,11 +12,7 @@ public class GoodsReceiptImportCompletedEventHandler(IRealtimeNotifier notifier)
     {
         var payload = new { GoodsReceiptImportId = notification.ImportId };
 
-        await Task.WhenAll([
-            notifier.NotifyGroupAsync("goods-receipts-import-list", "GoodsReceiptImportCompletedMarkListChanged", payload,
-                cancellationToken),
-            notifier.NotifyUserAsync(notification.UploadedByUserId.ToString(), "GoodsReceiptImportCompletedNotifyUser", payload,
-                cancellationToken)
-        ]);
+        await notifier.NotifyGroupAsync("goods-receipts-import-list", "GoodsReceiptImportProcessed", payload,
+            cancellationToken);
     }
 }
