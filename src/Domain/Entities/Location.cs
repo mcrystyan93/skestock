@@ -6,6 +6,8 @@ public class Location: BaseAuditableEntity, IKeysetEntity
     public string Name { get; set; } = null!;
     public string Type { get; set; } = null!; // "Kitchen", "StorageRoom", ...
 
+    public bool IsDefault { get; set; }
+
     public Guid? ParentLocationId { get; set; }
     public Location? ParentLocation { get; set; }
     public ICollection<Location> ChildLocations { get; set; } = new List<Location>();

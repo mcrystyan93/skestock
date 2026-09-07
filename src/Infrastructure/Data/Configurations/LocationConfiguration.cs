@@ -11,6 +11,8 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
         builder.Property(l => l.Name).HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH).IsRequired();
         builder.Property(l => l.Type).HasMaxLength(50).IsRequired();
 
+        builder.Property(l => l.IsDefault).HasDefaultValue(false);
+
         // Self-referencing hierarchy - SQL Server does not allow cascade delete here (would create a cycle).
         builder.HasOne(l => l.ParentLocation)
             .WithMany(l => l.ChildLocations)

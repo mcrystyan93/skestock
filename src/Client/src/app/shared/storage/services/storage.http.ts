@@ -1,6 +1,6 @@
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {inject, Service} from '@angular/core';
-import {ConfirmUploadRequest, FileMetadataDto, RequestUploadRequest, UploadRequestResult} from '@ske/models';
+import {ConfirmUploadRequest, FileDownloadResult, FileMetadataDto, RequestUploadRequest, UploadRequestResult} from '@ske/models';
 import {NzUploadFile} from 'ng-zorro-antd/upload';
 
 /**
@@ -27,5 +27,13 @@ export class StorageHttp {
 
   public confirmUpload(request: ConfirmUploadRequest) {
     return this._httpClient.post<FileMetadataDto>('/api/Storage/confirm-upload', request);
+  }
+
+  public getFileDownload(fileId: string) {
+    return this._httpClient.get<FileDownloadResult>(`/api/Storage/${fileId}/download`);
+  }
+
+  public downloadBlob(sasUrl: string) {
+    return this._httpClient.get(sasUrl, {responseType: 'blob'});
   }
 }

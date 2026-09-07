@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import {
   CreateLocationRequest,
+  DefaultLocationDto,
   GetAllLocationsRequest,
   LocationDto,
   PaginatedResponse,
@@ -21,6 +22,10 @@ export class LocationsHttp {
 
   public getById(id: string) {
     return this._httpClient.get<LocationDto>(`/api/Locations/${id}`);
+  }
+
+  public getDefault() {
+    return this._httpClient.get<DefaultLocationDto>('/api/Locations/default');
   }
 
   public create(request: CreateLocationRequest) {

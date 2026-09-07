@@ -51,9 +51,9 @@ export class ItemDetailModal {
     if (this.initialLoad)
       return;
 
-    const { item } = this.modalData();
+    const { item, prefill } = this.modalData();
 
-    this.store.loadItem(item?.id ?? NEW_ITEM_ROUTE_ID);
+    this.store.loadItem({ id: item?.id ?? NEW_ITEM_ROUTE_ID, prefill: item ? null : prefill });
     this.initialLoad = true;
   });
 
@@ -63,13 +63,13 @@ export class ItemDetailModal {
       tap(() => this._nzMessageService.success('Articolul a fost salvat cu succes!')),
       switchMap(() => this._close$),
       filter((shouldClose) => shouldClose),
-      tap(() => this.close())
+      tap(() => this.close(this.store.item()))
     )
     .subscribe();
 
 
-  public close() {
-    this._nzModalRef.close();
+  public close(savedItem: Partial<ItemDto> | null = null) {
+    this._nzModalRef.close(savedItem);
   }
 
   public async save(shouldClose: boolean = true) {
@@ -104,4 +104,5 @@ export class ItemDetailModal {
 
 type ItemDetailModalData = {
   item: ItemDto | null;
+  prefill?: Partial<ItemDto> | null;
 }

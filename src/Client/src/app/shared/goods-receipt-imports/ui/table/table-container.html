@@ -4,4 +4,6 @@
                                  [hasNextPage]="store.hasNextPage()"
                                  [isLoadingMore]="store.isLoadingMore()"
                                  (onFilterChange)="store.load($event)"
-                                 (onLoadMore)="store.loadMore()" />
+                                 (onLoadMore)="store.loadMore()"
+                                 (downloadFile)="downloadFile($event)"
+                                 (review)="review($event)"/>

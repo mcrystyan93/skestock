@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, linkedSignal, model, untracked } from '@angular/core';
+import { Component, effect, inject, input, linkedSignal, model, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { form, FormField, type FormValueControl } from '@angular/forms/signals';
 import { type LocationDropdownValue, GetAllLocationsRequest, PAGINATION_PAGE_SIZE } from '@ske/models';
@@ -44,17 +44,18 @@ import { NzSpinComponent } from 'ng-zorro-antd/spin';
         <nz-spin></nz-spin>
       }
     </ng-template>
-  `,
-  providers: [LocationDropdownStore]
+  `
 })
 export class LocationDropdown implements FormValueControl<LocationDropdownValue> {
   public readonly value = model<LocationDropdownValue>(null);
   public readonly disabled = input<boolean>(false);
   public readonly allowClear = input<boolean>(false);
   public readonly placeholder = input<string>('Selectați o locație');
+  public readonly prePopulateWithDefault = input<boolean>(false);
 
   public readonly store = inject(LocationDropdownStore);
   private readonly _search$ = new Subject<string>();
+  private readonly _defaultRequested = signal(false);
 
   private readonly _formModel = linkedSignal({
     source: () => this.value(),
@@ -67,6 +68,31 @@ export class LocationDropdown implements FormValueControl<LocationDropdownValue>
     const location = this.locationForm.location().value();
 
     untracked(() => this.value.set(location));
+  });
+
+  // When enabled, request the default location once (SignalStore owns the async fetch + state).
+  private readonly _requestDefaultEffectRef = effect(() => {
+    if (!this.prePopulateWithDefault() || untracked(this._defaultRequested)) {
+      return;
+    }
+
+    this._defaultRequested.set(true);
+    this.store.loadDefault();
+  });
+
+  // Apply the resolved default only while the user hasn't already picked/cleared a value.
+  private readonly _applyDefaultEffectRef = effect(() => {
+    const defaultLocation = this.store.defaultLocation();
+
+    if (!this.prePopulateWithDefault() || !defaultLocation) {
+      return;
+    }
+
+    untracked(() => {
+      if (!this.value()) {
+        this.value.set(defaultLocation);
+      }
+    });
   });
 
   private readonly _searchSub = this._search$

@@ -36,6 +36,9 @@
     <th nzWidth="150px">
       {{ columns.createdDate.label }}
     </th>
+    <th>
+      Actiuni
+    </th>
   </tr>
   </thead>
   <tbody>
@@ -62,6 +65,24 @@
       </td>
       <td>
         {{ goodsReceiptImport.createdDate | date:'medium' }}
+      </td>
+      <td>
+        <button type="button"
+                nz-button
+                nzType="link"
+                (click)="downloadFile.emit(goodsReceiptImport)">
+          <nz-icon nzType="icons:download"></nz-icon>
+          Descarca
+        </button>
+        @if (goodsReceiptImport.status === 'pendingReview') {
+          <button type="button"
+                  nz-button
+                  nzType="link"
+                  (click)="review.emit(goodsReceiptImport)">
+            <nz-icon nzType="icons:eye"></nz-icon>
+            Revizuieste
+          </button>
+        }
       </td>
     </tr>
   </ng-template>

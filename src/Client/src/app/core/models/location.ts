@@ -6,6 +6,7 @@ export type LocationDto = {
   id: string;
   name: string;
   type: string;
+  isDefault: boolean;
   parentLocationId?: string | null;
   parentLocationName?: string | null;
   createdByName?: string | null;
@@ -13,6 +14,9 @@ export type LocationDto = {
   createdDate: string;
   lastModifiedDate: string;
 };
+
+/** Payload of GET /api/Locations/default — null when no default is configured. */
+export type DefaultLocationDto = LocationDto | null;
 
 /** Mirrors src/Application/Features/Locations/Models/LocationRequests.cs. */
 export type GetAllLocationsRequest = BasePaginationFilter & {

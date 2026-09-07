@@ -4,6 +4,7 @@ using skestock.Application.Features.Locations.Commands.CreateLocation;
 using skestock.Application.Features.Locations.Commands.UpdateLocation;
 using skestock.Application.Features.Locations.Models;
 using skestock.Application.Features.Locations.Queries.GetAllLocations;
+using skestock.Application.Features.Locations.Queries.GetDefaultLocation;
 using skestock.Application.Features.Locations.Queries.GetLocationById;
 
 namespace skestock.Web.Endpoints;
@@ -13,6 +14,7 @@ public class Locations : IEndpointGroup
     public static void Map(RouteGroupBuilder groupBuilder)
     {
         groupBuilder.MapPost(GetAllLocations, "get-all");
+        groupBuilder.MapGet(GetDefaultLocation, "default");
         groupBuilder.MapGet(GetLocationById, "{id}");
         groupBuilder.MapPost(CreateLocation, "");
         groupBuilder.MapPut(UpdateLocation, "{id}");
@@ -38,6 +40,19 @@ public class Locations : IEndpointGroup
             return result.ToProblemHttpResult();
 
         return TypedResults.Ok(result.Value);
+    }
+
+    [EndpointSummary("Get the default location")]
+    [EndpointDescription("Retrieves the location flagged as default, or null when none is configured.")]
+    public static async Task<Results<Ok<LocationDto?>, ProblemHttpResult>> GetDefaultLocation(
+        ISender sender, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetDefaultLocationQuery(), cancellationToken);
+
+        if (result.IsFailed)
+            return result.ToProblemHttpResult();
+
+        return TypedResults.Ok<LocationDto?>(result.Value);
     }
 
     [EndpointSummary("Get a location by id")]

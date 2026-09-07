@@ -5,6 +5,7 @@ public record LocationDto
     public Guid Id { get; init; }
     public string Name { get; init; } = string.Empty;
     public string Type { get; init; } = string.Empty;
+    public bool IsDefault { get; init; }
     public Guid? ParentLocationId { get; init; }
     public string? ParentLocationName { get; init; }
     public string? CreatedByName { get; init; }

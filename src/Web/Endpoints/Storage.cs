@@ -3,6 +3,7 @@ using skestock.Application.Storage.Commands.ConfirmUpload;
 using skestock.Application.Storage.Commands.RequestUpload;
 using skestock.Application.Storage.DTOs;
 using skestock.Application.Storage.Models;
+using skestock.Application.Storage.Queries.GetFileDownload;
 
 namespace skestock.Web.Endpoints;
 
@@ -12,6 +13,7 @@ public class Storage : IEndpointGroup
     {
         groupBuilder.MapPost(RequestUpload, "request-upload").RequireAuthorization();
         groupBuilder.MapPost(ConfirmUpload, "confirm-upload").RequireAuthorization();
+        groupBuilder.MapGet(GetFileDownload, "{fileId:guid}/download").RequireAuthorization();
     }
 
     [EndpointSummary("Request a file upload")]
@@ -44,5 +46,18 @@ public class Storage : IEndpointGroup
             return result.ToProblemHttpResult();
 
         return TypedResults.Ok(FileMetadataDto.FromEntity(result.Value));
+    }
+
+    [EndpointSummary("Get a file download link")]
+    [EndpointDescription("Returns the file metadata plus a short-lived read SAS URL the client downloads the blob from.")]
+    public static async Task<Results<Ok<FileDownloadResult>, ProblemHttpResult>> GetFileDownload(
+        ISender sender, Guid fileId, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetFileDownloadQuery { FileId = fileId }, cancellationToken);
+
+        if (result.IsFailed)
+            return result.ToProblemHttpResult();
+
+        return TypedResults.Ok(result.Value);
     }
 }

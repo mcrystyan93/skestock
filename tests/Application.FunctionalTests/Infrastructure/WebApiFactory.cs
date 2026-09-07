@@ -1,4 +1,5 @@
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Storage.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -13,7 +14,13 @@ public class WebApiFactory(string connectionString, string cacheConnectionString
     {
         builder
             .UseSetting("ConnectionStrings:skestockDb", connectionString)
-            .UseSetting($"ConnectionStrings:{skestock.Shared.Services.Cache}", cacheConnectionString);
+            .UseSetting($"ConnectionStrings:{skestock.Shared.Services.Cache}", cacheConnectionString)
+            .UseSetting(
+                $"{skestock.Shared.Services.NutrientApiSettings}:{skestock.Shared.Services.NutrientBaseUrl}",
+                "https://nutrient.test")
+            .UseSetting(
+                $"{skestock.Shared.Services.NutrientApiSettings}:{skestock.Shared.Services.NutrientApiKey}",
+                "test-api-key");
 
         builder.ConfigureTestServices(services =>
         {
@@ -26,6 +33,10 @@ public class WebApiFactory(string connectionString, string cacheConnectionString
                     mock.SetupGet(x => x.Id).Returns(TestApp.GetUserId());
                     return mock.Object;
                 });
+
+            services
+                .RemoveAll<IBlobStorageService>()
+                .AddSingleton<IBlobStorageService, FakeBlobStorageService>();
         });
     }
 }

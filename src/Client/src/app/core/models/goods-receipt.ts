@@ -236,6 +236,63 @@ export const GOODS_RECEIPT_IMPORT_STATUS_COLORS: Record<GoodsReceiptImportStatus
   failed: 'red'
 };
 
+/** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptImportReviewDto.cs. */
+export type GoodsReceiptImportReviewMatchDto = {
+  id: string;
+  sku?: string | null;
+  name: string;
+  unit: string;
+  isPerishable: boolean;
+  categoryId: string;
+  categoryName: string;
+};
+
+/** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptImportReviewDto.cs. */
+export type GoodsReceiptImportReviewLineDto = {
+  rawItemText?: string | null;
+  productCode?: string | null;
+  name?: string | null;
+  unit?: string | null;
+  category?: string | null;
+  quantity: number;
+  unitPrice?: number | null;
+  isPerishable: boolean;
+  matchedItem?: GoodsReceiptImportReviewMatchDto | null;
+};
+
+/** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptImportReviewDto.cs. */
+export type GoodsReceiptImportReviewDto = {
+  id: string;
+  status: GoodsReceiptImportStatus;
+  classId: string;
+  className: string;
+  supplierReference?: string | null;
+  receivedAt?: string | null;
+  lines: GoodsReceiptImportReviewLineDto[];
+};
+
+/** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptRequests.cs. */
+export type ConfirmGoodsReceiptImportLineRequest = {
+  itemId?: string | null;
+  name?: string | null;
+  sku?: string | null;
+  unit?: string | null;
+  categoryName?: string | null;
+  isPerishable: boolean;
+  locationId: string;
+  quantity: number;
+  expiryDate?: string | null;
+  unitPrice: number;
+  sourceLineIndex: number;
+};
+
+/** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptRequests.cs. */
+export type ConfirmGoodsReceiptImportRequest = {
+  supplierReference?: string | null;
+  note: string;
+  lines: ConfirmGoodsReceiptImportLineRequest[];
+};
+
 export function buildGoodsReceiptListFilter(
   currentFilter: GetAllGoodsReceiptsRequest,
   partialFilter: Partial<GetAllGoodsReceiptsRequest>

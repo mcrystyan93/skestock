@@ -29,10 +29,12 @@ import { NzModalService } from 'ng-zorro-antd/modal';
       <nz-select [formField]="itemForm.item"
                  nzShowSearch
                  nzShowArrow
+                 [nzPlaceHolder]="placeholder()"
                  [nzLoading]="store.itemsLoading()"
                  [nzAllowClear]="allowClear()"
                  nzServerSearch
                  class="w-full"
+                 [nzDropdownMatchSelectWidth]="false"
                  [compareWith]="(a, b) => a && b ? a.id === b.id : a === b"
                  (nzOnSearch)="onSearch($event)"
                  [nzDropdownRender]="loadingMoreTemplate"
@@ -47,20 +49,23 @@ import { NzModalService } from 'ng-zorro-antd/modal';
                      [nzLabel]="item.name ?? ''"></nz-option>
         }
       </nz-select>
-      @if (value()?.id) {
+      @if (allowEdit()) {
         <button nz-button
                 nzType="primary"
                 type="button"
-                (click)="onEdit(value())">
+                (click)="onEdit(value())"
+                [disabled]="!value()?.id">
           <nz-icon nzType="icons:pencil"></nz-icon>
         </button>
       }
-      <button nz-button
-              nzType="primary"
-              type="button"
-              (click)="onAdd()">
-        <nz-icon nzType="icons:plus"></nz-icon>
-      </button>
+      @if (allowCreate()) {
+        <button nz-button
+                nzType="primary"
+                type="button"
+                (click)="onAdd()">
+          <nz-icon nzType="icons:plus"></nz-icon>
+        </button>
+      }
     </nz-space-compact>
 
     <ng-template #loadingMoreTemplate>
@@ -75,8 +80,11 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
   public readonly value = model<ItemDropdownValue>(null);
   public readonly disabled = input<boolean>(false);
   public readonly allowClear = input<boolean>(false);
+  public readonly allowEdit = input<boolean>(true);
+  public readonly allowCreate = input<boolean>(true);
   public readonly placeholder = input<string>('Selectați un articol');
   public readonly categoryId = input<string | null>(null);
+  public readonly createPrefill = input<Partial<ItemDto> | null>(null);
 
   public readonly store = inject(ItemDropdownStore);
   private readonly _search$ = new Subject<string>();
@@ -142,7 +150,8 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
     const modalRef = this._modalService.create({
       nzContent: ItemDetailModal,
       nzData: {
-        item
+        item,
+        prefill: item ? null : this.buildCreatePrefill()
       },
       nzCentered: true,
       nzMaskClosable: false
@@ -150,7 +159,10 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
 
     modalRef.afterClose.pipe(
       takeUntilDestroyed(this._destroyRef)
-    ).subscribe(() => {
+    ).subscribe((savedItem: ItemDropdownValue) => {
+      if (savedItem?.id)
+        this.value.set(savedItem);
+
       this.store.load(this.store.filter());
     });
   }
@@ -166,6 +178,15 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
         value: 'ascend',
         key: 'name'
       }]
+    };
+  }
+
+  private buildCreatePrefill(): Partial<ItemDto> {
+    const categoryId = this.categoryId();
+
+    return {
+      ...(isNil(categoryId) ? {} : { categoryId }),
+      ...this.createPrefill()
     };
   }
 

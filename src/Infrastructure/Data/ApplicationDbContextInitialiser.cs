@@ -115,13 +115,13 @@ public class ApplicationDbContextInitialiser
         await SeedGoodsReceiptAsync(administrator!.Id);
     }
 
-    private static readonly (string Name, string Type)[] DefaultLocations =
+    private static readonly (string Name, string Type, bool IsDefault)[] DefaultLocations =
     [
-        ("Frigider", "Bucatarie"),
-        ("Dulap servire", "Sala de mese"),
-        ("Rafturi", "Bucatarie"),
-        ("Camara", "Bucatarie"),
-        ("Depozit", "Depozit")
+        ("Frigider", "Bucatarie", false),
+        ("Dulap servire", "Sala de mese", false),
+        ("Rafturi", "Bucatarie", false),
+        ("Camara", "Bucatarie", true),
+        ("Depozit", "Depozit", false)
     ];
 
     private static readonly string[] DefaultCategoryNames =
@@ -198,7 +198,7 @@ public class ApplicationDbContextInitialiser
         }
 
         var newLocations = locationsToSeed
-            .Select(l => new Location { Name = l.Name, Type = l.Type })
+            .Select(l => new Location { Name = l.Name, Type = l.Type, IsDefault = l.IsDefault })
             .ToList();
 
         _context.Locations.AddRange(newLocations);

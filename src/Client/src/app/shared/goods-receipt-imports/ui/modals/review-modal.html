@@ -1,0 +1,34 @@
+<div *nzModalTitle>Revizuire import receptie</div>
+
+@if (store.reviewProblemDetail() || store.reviewValidationErrors()) {
+  <nz-alert nzType="error"
+            nzShowIcon
+            class="mb-3"
+            nzMessage="Nu am putut incarca sau salva importul."
+            [nzDescription]="store.reviewProblemDetail()?.detail ?? 'Verificati datele introduse.'" />
+}
+
+<ske-goods-receipt-import-review-lines-table [lines]="store.lines()"
+                                             [loading]="store.reviewLoading()"
+                                             (splitLine)="store.splitLine($event)"
+                                             (removeLine)="store.removeLine($event)" />
+
+<div *nzModalFooter>
+  <nz-space>
+    <button nz-button
+            *nzSpaceItem
+            nzType="default"
+            type="button"
+            (click)="close()">
+      Inchide
+    </button>
+    <button nz-button
+            *nzSpaceItem
+            nzType="primary"
+            type="button"
+            [nzLoading]="store.reviewConfirmLoading()"
+            (click)="save()">
+      Confirma si creeaza receptia
+    </button>
+  </nz-space>
+</div>
