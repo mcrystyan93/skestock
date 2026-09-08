@@ -490,3 +490,6 @@ $RECYCLE.BIN/
 *.db
 *.db-shm
 *.db-wal
+
+# Graphify's local extraction cache and transient query state
+graphify-out/cache/
