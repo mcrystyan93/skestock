@@ -1,0 +1,45 @@
+<div *nzModalTitle>Importă categorii</div>
+
+<p class="mb-4 text-sm text-gray-600">
+  Încarcă un document cu categoriile care vor fi analizate automat.
+</p>
+
+<ske-file-upload [multiple]="false" (onFileListChange)="onFileListChange($event)" />
+
+@if (fileStorage.uploadLoading()) {
+  <nz-progress [nzPercent]="fileStorage.uploadPercent()" nzStatus="active" />
+
+  @if (fileStorage.currentFileName(); as currentFileName) {
+    <p class="mt-2 text-sm text-gray-500">Se încarcă {{ currentFileName }}</p>
+  }
+}
+
+@if (fileStorage.hasUploadFailures()) {
+  <p class="mt-2 text-sm text-red-500">Fișierul nu a putut fi încărcat.</p>
+}
+
+@if (store.categoryImportProblemDetail(); as problemDetail) {
+  <ske-error-alert [problemDetail]="problemDetail" />
+}
+
+<div *nzModalFooter>
+  <nz-space>
+    <button nz-button
+            *nzSpaceItem
+            nzType="default"
+            type="button"
+            [disabled]="fileStorage.uploadLoading() || store.categoryImportLoading()"
+            (click)="close()">
+      Închide
+    </button>
+    <button nz-button
+            *nzSpaceItem
+            nzType="primary"
+            type="button"
+            [disabled]="!hasFiles()"
+            [nzLoading]="fileStorage.uploadLoading() || store.categoryImportLoading()"
+            (click)="loadFile()">
+      Încarcă și procesează
+    </button>
+  </nz-space>
+</div>

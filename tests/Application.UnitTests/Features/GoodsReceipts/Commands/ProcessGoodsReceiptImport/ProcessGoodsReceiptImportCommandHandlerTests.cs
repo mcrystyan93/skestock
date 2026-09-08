@@ -65,7 +65,7 @@ public class ProcessGoodsReceiptImportCommandHandlerTests
     {
         await using var context = CreateContext();
         var blob = new Mock<IBlobStorageService>();
-        var extraction = new Mock<IDocumentExtractionService>();
+        var extraction = new Mock<IStockDocumentExtractionService>();
 
         var handler = new ProcessGoodsReceiptImportCommandHandler(
             context, blob.Object, extraction.Object, NullLogger<ProcessGoodsReceiptImportCommandHandler>.Instance);
@@ -87,7 +87,7 @@ public class ProcessGoodsReceiptImportCommandHandlerTests
             .ReturnsAsync(new MemoryStream());
 
         var extractionResult = new GoodsReceiptExtractionResult { SupplierReference = "PO-123" };
-        var extraction = new Mock<IDocumentExtractionService>();
+        var extraction = new Mock<IStockDocumentExtractionService>();
         extraction.Setup(e => e.ExtractAsync<GoodsReceiptExtractionResult>(
                 It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(extractionResult);
@@ -115,7 +115,7 @@ public class ProcessGoodsReceiptImportCommandHandlerTests
         blob.Setup(b => b.DownloadAsync(It.IsAny<DownloadDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MemoryStream());
 
-        var extraction = new Mock<IDocumentExtractionService>();
+        var extraction = new Mock<IStockDocumentExtractionService>();
         extraction.Setup(e => e.ExtractAsync<GoodsReceiptExtractionResult>(
                 It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnprocessableDocumentException("file is corrupt"));
@@ -145,7 +145,7 @@ public class ProcessGoodsReceiptImportCommandHandlerTests
         blob.Setup(b => b.DownloadAsync(It.IsAny<DownloadDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MemoryStream());
 
-        var extraction = new Mock<IDocumentExtractionService>();
+        var extraction = new Mock<IStockDocumentExtractionService>();
         extraction.Setup(e => e.ExtractAsync<GoodsReceiptExtractionResult>(
                 It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new TransientExtractionException("network blip"));
@@ -174,7 +174,7 @@ public class ProcessGoodsReceiptImportCommandHandlerTests
         await context.SaveChangesAsync(CancellationToken.None);
 
         var blob = new Mock<IBlobStorageService>();
-        var extraction = new Mock<IDocumentExtractionService>();
+        var extraction = new Mock<IStockDocumentExtractionService>();
 
         var handler = new ProcessGoodsReceiptImportCommandHandler(
             context, blob.Object, extraction.Object, NullLogger<ProcessGoodsReceiptImportCommandHandler>.Instance);

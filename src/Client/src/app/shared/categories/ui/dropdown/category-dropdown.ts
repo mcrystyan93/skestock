@@ -1,17 +1,17 @@
-import { Component, DestroyRef, effect, inject, input, linkedSignal, model, untracked } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { form, FormField, type FormValueControl } from '@angular/forms/signals';
-import { type CategoryDropdownValue, CategoryDto, GetAllCategoriesRequest, PAGINATION_PAGE_SIZE } from '@ske/models';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
-import { CategoryDropdownStore } from '../../services/category-dropdown.store';
-import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
-import { NzSpinComponent } from 'ng-zorro-antd/spin';
-import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
-import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { isNil } from 'lodash-es';
-import { CategoryDetailModal } from '../modals/category-detail-modal';
-import { NzModalService } from 'ng-zorro-antd/modal';
+import {Component, DestroyRef, effect, inject, input, linkedSignal, model, untracked} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {form, FormField, type FormValueControl} from '@angular/forms/signals';
+import {type CategoryDropdownValue, CategoryDto, GetAllCategoriesRequest, PAGINATION_PAGE_SIZE} from '@ske/models';
+import {debounceTime, distinctUntilChanged, Subject} from 'rxjs';
+import {CategoryDropdownStore} from '../../services/category-dropdown.store';
+import {NzOptionComponent, NzSelectComponent} from 'ng-zorro-antd/select';
+import {NzSpinComponent} from 'ng-zorro-antd/spin';
+import {NzSpaceCompactComponent} from 'ng-zorro-antd/space';
+import {NzButtonComponent} from 'ng-zorro-antd/button';
+import {NzIconDirective} from 'ng-zorro-antd/icon';
+import {isNil} from 'lodash-es';
+import {CategoryDetailModal} from '../modals/category-detail-modal';
+import {NzModalService} from 'ng-zorro-antd/modal';
 
 @Component({
   selector: 'ske-category-dropdown',
@@ -27,6 +27,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
   template: `
     <nz-space-compact class="w-full">
       <nz-select [formField]="categoryForm.category"
+                 [nzPlaceHolder]="placeholder()"
                  nzShowSearch
                  nzShowArrow
                  [nzLoading]="store.categoriesLoading()"
@@ -48,7 +49,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
                      [nzLabel]="category.name ?? ''"></nz-option>
         }
       </nz-select>
-      @if (value()?.id) {
+      @if (allowEdit() && value()?.id) {
         <button nz-button
                 nzType="primary"
                 type="button"
@@ -56,12 +57,14 @@ import { NzModalService } from 'ng-zorro-antd/modal';
           <nz-icon nzType="icons:pencil"></nz-icon>
         </button>
       }
-      <button nz-button
-              nzType="primary"
-              type="button"
-              (click)="onAdd()">
-        <nz-icon nzType="icons:plus"></nz-icon>
-      </button>
+      @if (allowCreate()) {
+        <button nz-button
+                nzType="primary"
+                type="button"
+                (click)="onAdd()">
+          <nz-icon nzType="icons:plus"></nz-icon>
+        </button>
+      }
     </nz-space-compact>
 
     <ng-template #loadingMoreTemplate>
@@ -76,6 +79,8 @@ export class CategoryDropdown implements FormValueControl<CategoryDropdownValue>
   public readonly value = model<CategoryDropdownValue>(null);
   public readonly disabled = input<boolean>(false);
   public readonly allowClear = input<boolean>(false);
+  public readonly allowEdit = input<boolean>(true);
+  public readonly allowCreate = input<boolean>(true);
   public readonly placeholder = input<string>('Selectați o categorie');
 
   public readonly store = inject(CategoryDropdownStore);
@@ -85,7 +90,7 @@ export class CategoryDropdown implements FormValueControl<CategoryDropdownValue>
 
   private readonly _formModel = linkedSignal({
     source: () => this.value(),
-    computation: (value) => (<CategoryDropdownFormModel>{ category: value })
+    computation: (value) => (<CategoryDropdownFormModel>{category: value})
   });
 
   public readonly categoryForm = form(this._formModel);
@@ -103,7 +108,7 @@ export class CategoryDropdown implements FormValueControl<CategoryDropdownValue>
       takeUntilDestroyed()
     )
     .subscribe((searchTerm) => {
-      this.store.load(this.buildFilter({ searchTerm }));
+      this.store.load(this.buildFilter({searchTerm}));
     });
 
   public loadMore() {

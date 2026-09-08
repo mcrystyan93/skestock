@@ -3,9 +3,8 @@ import { NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zo
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { NzProgressComponent, NzProgressStatusType } from 'ng-zorro-antd/progress';
-import { Upload } from './upload';
 import { NzUploadFile } from 'ng-zorro-antd/upload';
-import { fileStorageApiEvents, FileStorageState } from '@ske/shared/storage';
+import { fileStorageApiEvents, FileStorageState, FileUpload } from '@ske/shared/storage';
 import { Events } from '@ngrx/signals/events';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { tap } from 'rxjs';
@@ -18,7 +17,7 @@ import { tap } from 'rxjs';
     NzSpaceComponent,
     NzSpaceItemDirective,
     NzProgressComponent,
-    Upload
+    FileUpload
   ],
   selector: 'ske-add-goods-receipt-modal',
   styles: ``,

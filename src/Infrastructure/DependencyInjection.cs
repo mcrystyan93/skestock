@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Common.Models.Options;
 using skestock.Application.Documents.Interfaces;
+using skestock.Application.Documents.Models;
 using skestock.Application.Documents.Schemas;
 using skestock.Application.Features.GoodsReceipts.Models;
 using skestock.Application.Queues.Interfaces;
@@ -87,8 +88,11 @@ public static class DependencyInjection
         builder.Services
             .AddScoped<IExtractionSchemaFactory<GoodsReceiptExtractionResult>,
                 GoodsReceiptExtractionSchemaFactory>();
+        builder.Services
+            .AddScoped<IExtractionSchemaFactory<CategoryExtractionResult>,
+                CategoryExtractionSchemaFactory>();
 
-        builder.AddDocumentExtractionServices();
+        AddOpenAiExtraction(builder);
 
         var redisConnectionString = builder.Configuration.GetConnectionString(skestock.Shared.Services.Cache);
         builder.Services.AddSignalR(options =>
@@ -104,75 +108,6 @@ public static class DependencyInjection
         builder.Services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
     }
 
-    private static void AddDocumentExtractionServices(this IHostApplicationBuilder builder)
-    {
-        var provider = builder.Configuration.GetValue<ExtractionProvider>(
-            $"{Services.DocumentExtractionSettings}:{Services.DocumentExtractionProvider}");
-
-        switch (provider)
-        {
-            case ExtractionProvider.Gemini:
-                AddGeminiExtraction(builder);
-                break;
-            case ExtractionProvider.OpenAI:
-                AddOpenAiExtraction(builder);
-                break;
-            case ExtractionProvider.Nutrient:
-            default:
-                AddNutrientExtraction(builder);
-                break;
-        }
-    }
-
-    private static void AddGeminiExtraction(IHostApplicationBuilder builder)
-    {
-        builder.Services.AddOptions<GeminiApiSettings>()
-            .BindConfiguration(Services.GeminiApiSettings)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
-        builder.Services.AddScoped<IDocumentExtractionService, GeminiDocumentExtractionService>();
-    }
-
-    private static void AddNutrientExtraction(IHostApplicationBuilder builder)
-    {
-        builder.Services.AddOptions<NutrientApiSettings>()
-            .BindConfiguration(Services.NutrientApiSettings)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
-#pragma warning disable EXTEXP0001
-        builder.Services.AddHttpClient<IDocumentExtractionService, NutrientDocumentExtractionService>(client =>
-            {
-                client.BaseAddress = new Uri(
-                    builder.Configuration.GetValue<string>(
-                        $"{Services.NutrientApiSettings}:{Services.NutrientBaseUrl}") ??
-                    throw new InvalidOperationException());
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
-                    builder.Configuration.GetValue<string>(
-                        $"{Services.NutrientApiSettings}:{Services.NutrientApiKey}") ??
-                    throw new InvalidOperationException());
-            })
-            .RemoveAllResilienceHandlers()
-#pragma warning restore EXTEXP0001
-            .AddStandardResilienceHandler(options =>
-            {
-                // per-attempt timeout — must exceed how long a single extraction call can take
-                options.AttemptTimeout.Timeout = TimeSpan.FromMinutes(2);
-
-                // overall timeout across all retries — must be >= AttemptTimeout, higher if you allow retries
-                options.TotalRequestTimeout.Timeout = TimeSpan.FromMinutes(5);
-
-                // be conservative on retries for a slow, potentially expensive call
-                options.Retry.MaxRetryAttempts = 2;
-                options.Retry.BackoffType = DelayBackoffType.Exponential;
-                options.Retry.Delay = TimeSpan.FromSeconds(2);
-
-                // circuit breaker sampling duration must be >= 2x AttemptTimeout — the library enforces this
-                options.CircuitBreaker.SamplingDuration = TimeSpan.FromMinutes(4);
-            });
-    }
-
     private static void AddOpenAiExtraction(IHostApplicationBuilder builder)
     {
         builder.Services.AddOptions<OpenAiApiSettings>()
@@ -181,7 +116,7 @@ public static class DependencyInjection
             .ValidateOnStart();
 
 #pragma warning disable EXTEXP0001
-        builder.Services.AddHttpClient<IDocumentExtractionService, OpenAiDocumentExtractionService>(client =>
+        builder.Services.AddHttpClient<OpenAiDocumentExtractionClient>(client =>
             {
                 client.BaseAddress = new Uri("https://api.openai.com/");
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
@@ -189,7 +124,6 @@ public static class DependencyInjection
                     throw new InvalidOperationException());
             })
             .RemoveAllResilienceHandlers()
-#pragma warning restore EXTEXP0001
             .AddStandardResilienceHandler(options =>
             {
                 // per-attempt timeout — must exceed how long a single extraction call can take
@@ -206,6 +140,10 @@ public static class DependencyInjection
                 // circuit breaker sampling duration must be >= 2x AttemptTimeout — the library enforces this
                 options.CircuitBreaker.SamplingDuration = TimeSpan.FromMinutes(4);
             });
+#pragma warning restore EXTEXP0001
+
+        builder.Services.AddTransient<IStockDocumentExtractionService, OpenAiStockDocumentExtractionService>();
+        builder.Services.AddTransient<ICategoryDocumentExtractionService, OpenAiCategoryDocumentExtractionService>();
     }
 
     /// <summary>

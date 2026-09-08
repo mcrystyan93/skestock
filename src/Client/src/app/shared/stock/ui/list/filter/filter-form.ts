@@ -1,5 +1,10 @@
 import { Component, input, linkedSignal, output } from '@angular/core';
-import { GetClassLocationStockRequest } from '@ske/models';
+import {
+  CategoryDropdownValue,
+  ColumnFilter,
+  GetClassLocationStockRequest,
+  LocationDropdownValue
+} from '@ske/models';
 import { form, FormField, submit } from '@angular/forms/signals';
 import { isNil } from 'lodash-es';
 import { FormsModule } from '@angular/forms';
@@ -9,6 +14,9 @@ import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { CategoryDropdown } from '@ske/shared/categories';
+import { LocationDropdown } from '@ske/shared/locations';
+import {NzDividerComponent} from 'ng-zorro-antd/divider';
 
 @Component({
   imports: [
@@ -22,7 +30,10 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
     FormField,
     NzSpaceComponent,
     NzSpaceItemDirective,
-    NzButtonComponent
+    NzButtonComponent,
+    CategoryDropdown,
+    LocationDropdown,
+    NzDividerComponent
   ],
   selector: 'ske-stock-filter-form',
   styles: ``,
@@ -37,7 +48,9 @@ export class FilterForm {
   private readonly _formModel = linkedSignal({
     source: () => this.filter(),
     computation: (filter) => (<StockListFilterModel>{
-      searchTerm: filter.searchTerm ?? ''
+      searchTerm: filter.searchTerm ?? '',
+      location: getDropdownFilterValue(filter.filters, 'locationId'),
+      category: getDropdownFilterValue(filter.filters, 'categoryId')
     })
   });
 
@@ -48,7 +61,14 @@ export class FilterForm {
 
     return {
       ...this.filter(),
-      searchTerm: criteria.searchTerm
+      searchTerm: criteria.searchTerm,
+      filters: [
+        ...this.filter().filters.filter(filter => !STOCK_FILTER_FIELDS.has(filter.field)),
+        ...[
+          buildEqualsFilter('locationId', criteria.location),
+          buildEqualsFilter('categoryId', criteria.category)
+        ].filter((filter): filter is ColumnFilter => filter !== null)
+      ]
     };
   }
 
@@ -69,7 +89,9 @@ export class FilterForm {
 
   public clear() {
     this.stockListFilterForm().reset({
-      searchTerm: ''
+      searchTerm: '',
+      location: null,
+      category: null
     });
 
     this.onSubmit();
@@ -78,4 +100,40 @@ export class FilterForm {
 
 type StockListFilterModel = {
   searchTerm: string;
+  location: LocationDropdownValue;
+  category: CategoryDropdownValue;
+}
+
+const STOCK_FILTER_FIELDS = new Set(['locationId', 'categoryId']);
+
+function getDropdownFilterValue(
+  filters: ColumnFilter[],
+  field: string
+): { id: string; name: string } | null {
+  const selectedFilter = filters.find(filter =>
+    filter.field === field && filter.operator === 'equals');
+
+  if (isNil(selectedFilter?.value))
+    return null;
+
+  return {
+    id: String(selectedFilter.value),
+    name: selectedFilter.displayValue ?? ''
+  };
+}
+
+function buildEqualsFilter(
+  field: string,
+  value: { id?: string; name?: string } | null
+): ColumnFilter | null {
+  if (isNil(value?.id) || value.id.length === 0)
+    return null;
+
+  return {
+    field,
+    operator: 'equals',
+    value: value.id,
+    fieldType: 'select',
+    displayValue: value.name
+  };
 }

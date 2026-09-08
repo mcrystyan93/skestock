@@ -2,7 +2,7 @@ namespace skestock.Application.Common.Exceptions;
 
 /// <summary>
 /// The extraction call itself failed for operational reasons (network blip,
-/// rate limit, timeout, 5xx from Gemini). Safe to retry — the same input
+/// rate limit, timeout, or 5xx response). Safe to retry — the same input
 /// might succeed on a later attempt.
 /// </summary>
 public class TransientExtractionException : DocumentExtractionException

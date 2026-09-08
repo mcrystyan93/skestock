@@ -15,6 +15,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
 
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<CategoryImport> CategoryImports => Set<CategoryImport>();
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
     public DbSet<Item> Items => Set<Item>();

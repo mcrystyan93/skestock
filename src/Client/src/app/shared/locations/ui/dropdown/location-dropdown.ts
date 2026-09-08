@@ -1,11 +1,11 @@
-import { Component, effect, inject, input, linkedSignal, model, signal, untracked } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { form, FormField, type FormValueControl } from '@angular/forms/signals';
-import { type LocationDropdownValue, GetAllLocationsRequest, PAGINATION_PAGE_SIZE } from '@ske/models';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
-import { LocationDropdownStore } from '../../services/location-dropdown.store';
-import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
-import { NzSpinComponent } from 'ng-zorro-antd/spin';
+import {Component, effect, inject, input, linkedSignal, model, signal, untracked} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {form, FormField, type FormValueControl} from '@angular/forms/signals';
+import {type LocationDropdownValue, GetAllLocationsRequest, PAGINATION_PAGE_SIZE} from '@ske/models';
+import {debounceTime, distinctUntilChanged, Subject} from 'rxjs';
+import {LocationDropdownStore} from '../../services/location-dropdown.store';
+import {NzOptionComponent, NzSelectComponent} from 'ng-zorro-antd/select';
+import {NzSpinComponent} from 'ng-zorro-antd/spin';
 
 @Component({
   selector: 'ske-location-dropdown',
@@ -26,7 +26,8 @@ import { NzSpinComponent } from 'ng-zorro-antd/spin';
                [compareWith]="(a, b) => a && b ? a.id === b.id : a === b"
                (nzOnSearch)="onSearch($event)"
                [nzDropdownRender]="loadingMoreTemplate"
-               (nzScrollToBottom)="loadMore()">
+               (nzScrollToBottom)="loadMore()"
+               [nzPlaceHolder]="placeholder()">
       @if (value(); as location) {
         <nz-option [nzValue]="location"
                    nzHide
@@ -59,7 +60,7 @@ export class LocationDropdown implements FormValueControl<LocationDropdownValue>
 
   private readonly _formModel = linkedSignal({
     source: () => this.value(),
-    computation: (value) => (<LocationDropdownFormModel>{ location: value })
+    computation: (value) => (<LocationDropdownFormModel>{location: value})
   });
 
   public readonly locationForm = form(this._formModel);
@@ -102,7 +103,7 @@ export class LocationDropdown implements FormValueControl<LocationDropdownValue>
       takeUntilDestroyed()
     )
     .subscribe((searchTerm) => {
-      this.store.load(this.buildFilter({ searchTerm }));
+      this.store.load(this.buildFilter({searchTerm}));
     });
 
   public loadMore() {

@@ -17,6 +17,7 @@ builder.Services.AddScoped<AmbientUser>();
 builder.Services.AddScoped<IUser>(sp => sp.GetRequiredService<AmbientUser>());
 
 builder.Services.AddHostedService<GoodsReceiptImportQueueProcessingService>();
+builder.Services.AddHostedService<CategoryImportQueueProcessingService>();
 
 var host = builder.Build();
 host.Run();

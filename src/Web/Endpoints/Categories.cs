@@ -82,4 +82,5 @@ public class Categories : IEndpointGroup
 
         return TypedResults.Ok(result.Value);
     }
+
 }

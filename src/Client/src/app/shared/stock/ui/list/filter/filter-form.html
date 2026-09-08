@@ -20,6 +20,24 @@
         </nz-form-control>
       </nz-form-item>
     </nz-col>
+    <nz-col nzFlex="250px">
+      <nz-form-item>
+        <nz-form-control nzSpan="24">
+          <ske-location-dropdown [formField]="stockListFilterForm.location"
+                                 [allowClear]="true" />
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col nzFlex="250px">
+      <nz-form-item>
+        <nz-form-control nzSpan="24">
+          <ske-category-dropdown [formField]="stockListFilterForm.category"
+                                 [allowClear]="true"
+                                 [allowCreate]="false"
+                                 [allowEdit]="false" />
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
     <nz-col nzFlex="none">
       <nz-space class="ml-3">
         <button type="submit"
@@ -40,6 +58,11 @@
           Reseteaza
         </button>
       </nz-space>
+      <nz-divider nzType="vertical"></nz-divider>
+      <button nz-button nzType="primary" type="button">
+        <nz-icon nzType="icons:plus"></nz-icon>
+        Adauga produs
+      </button>
     </nz-col>
   </nz-row>
 </form>

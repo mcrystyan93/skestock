@@ -1,6 +1,6 @@
 <div *nzModalTitle></div>
 
-<ske-add-goods-receipt-upload (onFileListChange)="onFileListChange($event)" />
+<ske-file-upload [multiple]="true" (onFileListChange)="onFileListChange($event)" />
 
 @if (store.uploadLoading() || store.hasUploadFailures()) {
   <nz-progress [nzPercent]="store.uploadPercent()"

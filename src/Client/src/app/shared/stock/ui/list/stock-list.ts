@@ -21,19 +21,17 @@ import { ErrorAlert } from '@ske/shared/errors';
 })
 export class StockList {
   public readonly classId = input.required<string | null>();
-  public readonly locationId = input<string | null>(null);
 
   public readonly store = inject(StockStore);
 
   private readonly _loadEffectRef = effect(() => {
     const classId = this.classId();
-    const locationId = this.locationId();
 
     if (isNil(classId))
       return;
 
     untracked(() => {
-      this.store.load({ classId, locationId });
+      this.store.load({ classId, filters: [] });
     });
   });
 

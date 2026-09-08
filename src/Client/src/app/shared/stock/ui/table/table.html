@@ -1,94 +1,116 @@
-<nz-table #table
-          nzTableLayout="auto"
-          [nzTemplateMode]="true"
-          [nzFrontPagination]="false"
-          [nzShowPagination]="false"
-          [nzLoading]="loading()"
-          nzSize="small"
-          class="absolute inset-0 block overflow-auto">
-  <thead>
-  <tr>
-    <th nzColumnKey="itemName"
-        [nzSortFn]="sortByItemName">
-      {{ columns.itemName.label }}
-    </th>
-    <th nzColumnKey="locationName"
-        [nzSortFn]="sortByLocationName">
-      {{ columns.locationName.label }}
-    </th>
-    <th nzColumnKey="unit">
-      {{ columns.unit.label }}
-    </th>
-    <th nzColumnKey="isPerishable">
-      {{ columns.isPerishable.label }}
-    </th>
-    <th nzColumnKey="quantity"
-        [nzSortFn]="sortByQuantity">
-      {{ columns.quantity.label }}
-    </th>
-    <th nzColumnKey="isLowStock">
-      {{ columns.isLowStock.label }}
-    </th>
-    <th nzWidth="100px">
-      Actiuni
-    </th>
-  </tr>
-  </thead>
-  <tbody>
-    @for (category of groupItems().keys(); track category.categoryId) {
-      <tr>
-        <td colSpan="6"><strong>{{ category.categoryName }}</strong></td>
-        <td>
-          <button nz-button
-                  nzType="link"
-                  type="button"
-                  [attr.aria-label]="'Adauga stoc'"
-                  (click)="add(category)">
-            <nz-icon nzType="icons:plus"></nz-icon>
-            Adauga
-          </button>
-        </td>
-      </tr>
-      @for (item of groupItems().get(category); track $index) {
+<div class="absolute inset-0 flex flex-col gap-4 overflow-auto">
+  @for (category of groupItems().keys(); track category.categoryId) {
+    @let items = groupItems().get(category) ?? [];
+
+    <ng-template #cardTitle>
+      <div class="flex items-center gap-4">
+        <nz-icon [nzType]="category.categoryIcon?.fileName ? ('icons:' + category.categoryIcon?.fileName) : 'icons:box'" class="text-3xl text-blue-500!"></nz-icon>
+        <!--        <nz-avatar [nzIcon]="" />-->
+        <div class="flex flex-col">
+          <h3 nz-typography
+              class="mb-0!">{{ category.categoryName }}</h3>
+          <span nz-typography
+                nzType="secondary"
+                class="mb-0!">{{ items.length }} articole in stoc</span>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #cardExtra>
+      <button nz-button
+              nzType="link"
+              type="button"
+              [attr.aria-label]="'Adauga stoc pentru ' + category.categoryName"
+              (click)="add(category)">
+        <nz-icon nzType="icons:plus"></nz-icon>
+        Adauga
+      </button>
+    </ng-template>
+
+    <nz-card nzSize="small"
+             [nzTitle]="cardTitle"
+             [nzExtra]="cardExtra">
+      <nz-table #table
+                nzTableLayout="auto"
+                [nzTemplateMode]="true"
+                [nzFrontPagination]="false"
+                [nzShowPagination]="false"
+                [nzLoading]="loading()"
+                nzSize="small"
+                class="block overflow-auto">
+        <thead>
         <tr>
-          <td [nzIndentSize]="20">
-            {{ item.itemName }}
-          </td>
-          <td>
-            {{ item.locationName }}
-          </td>
-          <td>
-            {{ item.unit }}
-          </td>
-          <td>
-            @if (item.isPerishable) {
-              <nz-tag nzColor="orange">Da</nz-tag>
-            } @else {
-              <nz-tag>Nu</nz-tag>
-            }
-          </td>
-          <td>
-            {{ item.quantity }}
-          </td>
-          <td>
-            @if (item.isLowStock) {
-              <nz-tag nzColor="red">Stoc redus</nz-tag>
-            } @else {
-              <nz-tag nzColor="green">OK</nz-tag>
-            }
-          </td>
-          <td>
-            <button nz-button
-                    nzType="link"
-                    type="button"
-                    [attr.aria-label]="'Ajusteaza stoc'"
-                    (click)="onAdjust.emit(item)">
-              <nz-icon nzType="icons:pencil"></nz-icon>
-              Ajusteaza
-            </button>
-          </td>
+          <th nzColumnKey="itemName">
+            <strong>{{ columns.itemName.label }}</strong>
+          </th>
+          <th nzColumnKey="locationName">
+            <strong>{{ columns.locationName.label }}</strong>
+          </th>
+          <th nzColumnKey="unit">
+            <strong>{{ columns.unit.label }}</strong>
+          </th>
+          <th nzColumnKey="isPerishable">
+            <strong>{{ columns.isPerishable.label }}</strong>
+          </th>
+          <th nzColumnKey="quantity">
+            <strong>{{ columns.quantity.label }}</strong>
+          </th>
+          <th nzColumnKey="isLowStock">
+            <strong>{{ columns.isLowStock.label }}</strong>
+          </th>
+          <th nzWidth="100px">
+            <strong>Actiuni</strong>
+          </th>
         </tr>
-      }
-    }
-  </tbody>
-</nz-table>
+        </thead>
+        <tbody>
+          @for (item of items; track item.itemId + ':' + item.locationId) {
+            <tr>
+              <td>
+                <div class="flex flex-col">
+                  <strong>{{ item.itemName }}</strong>
+                  <span nz-typography
+                        nzType="secondary"
+                        class="mb-0!">{{ item.sku ?? '-' }}</span>
+                </div>
+              </td>
+              <td>
+                {{ item.locationName }}
+              </td>
+              <td>
+                {{ item.unit }}
+              </td>
+              <td>
+                @if (item.isPerishable) {
+                  <nz-tag nzColor="orange">Perisabil</nz-tag>
+                } @else {
+                  <nz-tag>Nu</nz-tag>
+                }
+              </td>
+              <td>
+                {{ item.quantity }}
+              </td>
+              <td>
+                @if (item.isLowStock) {
+                  <nz-tag nzColor="red">Stoc redus</nz-tag>
+                } @else {
+                  <nz-tag nzColor="green">OK</nz-tag>
+                }
+              </td>
+              <td>
+                <button nz-button
+                        nzType="link"
+                        type="button"
+                        [attr.aria-label]="'Ajusteaza stoc pentru ' + item.itemName"
+                        (click)="onAdjust.emit(item)">
+                  <nz-icon nzType="icons:pencil"></nz-icon>
+                  Ajusteaza
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-card>
+  }
+</div>

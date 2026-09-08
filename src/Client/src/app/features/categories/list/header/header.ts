@@ -16,4 +16,5 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 })
 export class Header {
   public readonly onAdd = output<void>();
+  public readonly onImport = output<void>();
 }
