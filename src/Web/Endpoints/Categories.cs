@@ -58,7 +58,7 @@ public class Categories : IEndpointGroup
     public static async Task<Results<Created<CategoryDto>, ProblemHttpResult>> CreateCategory(
         ISender sender, CategoryRequests.CreateCategoryRequest request, CancellationToken cancellationToken)
     {
-        var command = new CreateCategoryCommand { Name = request.Name };
+        var command = new CreateCategoryCommand { Name = request.Name, Icon = request.Icon };
 
         var result = await sender.Send(command, cancellationToken);
 
@@ -73,7 +73,7 @@ public class Categories : IEndpointGroup
     public static async Task<Results<Ok<CategoryDto>, ProblemHttpResult>> UpdateCategory(
         ISender sender, Guid id, CategoryRequests.UpdateCategoryRequest request, CancellationToken cancellationToken)
     {
-        var command = new UpdateCategoryCommand { Id = id, Name = request.Name };
+        var command = new UpdateCategoryCommand { Id = id, Name = request.Name, Icon = request.Icon };
 
         var result = await sender.Send(command, cancellationToken);
 

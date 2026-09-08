@@ -1,6 +1,7 @@
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Features.Categories.Models;
 using skestock.Application.Features.Categories.Queries.GetCategoryById;
 using skestock.Domain.Entities;
 using skestock.Domain.Queues;
@@ -56,6 +57,7 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
         {
             b.HasOne(c => c.CreatedBy).WithMany().HasForeignKey(c => c.CreatedById);
             b.HasOne(c => c.LastModifiedBy).WithMany().HasForeignKey(c => c.LastModifiedById);
+            b.OwnsOne(c => c.Icon);
             b.Ignore(c => c.Items);
         });
 
@@ -84,7 +86,11 @@ public class GetCategoryByIdHandlerTests
     public async Task Handle_WithExistingId_ReturnsMatchingCategoryDto()
     {
         await using var context = CreateContext();
-        var category = new Category { Name = "Stationery" };
+        var category = new Category
+        {
+            Name = "Stationery",
+            Icon = new CategoryIcon("Square Q", "square-q", "/assets/icons/square-q.svg")
+        };
         context.Categories.Add(category);
         await context.SaveChangesAsync(CancellationToken.None);
 
@@ -94,6 +100,10 @@ public class GetCategoryByIdHandlerTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.Id.ShouldBe(category.Id);
         result.Value.Name.ShouldBe("Stationery");
+        result.Value.Icon.ShouldNotBeNull();
+        result.Value.Icon.Name.ShouldBe("Square Q");
+        result.Value.Icon.FileName.ShouldBe("square-q");
+        result.Value.Icon.Path.ShouldBe("/assets/icons/square-q.svg");
     }
 
     [Test]

@@ -51,6 +51,14 @@ public class GetAllCategoriesHandler(IApplicationDbContext dbContext)
                 {
                     Id = c.Id,
                     Name = c.Name,
+                    Icon = c.Icon == null
+                        ? null
+                        : new CategoryIconDto
+                        {
+                            Name = c.Icon.Name,
+                            FileName = c.Icon.FileName,
+                            Path = c.Icon.Path
+                        },
                     CreatedByName = c.CreatedBy!=null ? c.CreatedBy.FullName : null,
                     LastModifiedByName = c.LastModifiedBy!=null ? c.LastModifiedBy.FullName : null,
                     CreatedDate = c.CreatedDate,

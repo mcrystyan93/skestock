@@ -1,6 +1,7 @@
 using skestock.Application.Common.Exceptions;
 using skestock.Application.Features.Categories.Commands.CreateCategory;
 using skestock.Application.Features.Categories.Commands.UpdateCategory;
+using skestock.Application.Features.Categories.Models;
 using skestock.Application.Features.Categories.Queries.GetAllCategories;
 using skestock.Domain.Entities;
 
@@ -24,15 +25,51 @@ public class UpdateCategoryCommandTests : TestBase
         var result = await TestApp.SendAsync(new UpdateCategoryCommand
         {
             Id = created.Value.Id,
-            Name = $"{_prefix}-New"
+            Name = $"{_prefix}-New",
+            Icon = new CategoryIconDto
+            {
+                Name = "Square Q",
+                FileName = "square-q",
+                Path = "/assets/icons/square-q.svg"
+            }
         });
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Name.ShouldBe($"{_prefix}-New");
+        result.Value.Icon.ShouldNotBeNull();
+        result.Value.Icon.Name.ShouldBe("Square Q");
 
         var persisted = await TestApp.FindAsync<Category>(created.Value.Id);
         persisted.ShouldNotBeNull();
         persisted.Name.ShouldBe($"{_prefix}-New");
+        persisted.Icon.ShouldNotBeNull();
+        persisted.Icon.Path.ShouldBe("/assets/icons/square-q.svg");
+    }
+
+    [Test]
+    public async Task Handle_WithNullIcon_ClearsExistingIcon()
+    {
+        var created = await TestApp.SendAsync(new CreateCategoryCommand
+        {
+            Name = $"{_prefix}-WithIcon",
+            Icon = new CategoryIconDto
+            {
+                Name = "Square Q",
+                FileName = "square-q",
+                Path = "/assets/icons/square-q.svg"
+            }
+        });
+
+        var result = await TestApp.SendAsync(new UpdateCategoryCommand
+        {
+            Id = created.Value.Id,
+            Name = created.Value.Name,
+            Icon = null
+        });
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Icon.ShouldBeNull();
+        (await TestApp.FindAsync<Category>(created.Value.Id))!.Icon.ShouldBeNull();
     }
 
     [Test]

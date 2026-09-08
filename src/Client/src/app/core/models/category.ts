@@ -1,4 +1,5 @@
-import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
+import {BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition} from './pagination';
+import type {IconPickerValue} from '@ske/shared/icons';
 
 /** Mirrors src/Application/Features/Categories/Models/CategoryDto.cs. */
 export type CategoryDto = {
@@ -8,6 +9,7 @@ export type CategoryDto = {
   lastModifiedByName?: string | null;
   createdDate: string;
   lastModifiedDate: string;
+  icon?: IconPickerValue | null;
 };
 
 /** Mirrors src/Application/Features/Categories/Models/CategoryRequests.cs. */
@@ -18,11 +20,13 @@ export type GetAllCategoriesRequest = BasePaginationFilter & {
 /** Mirrors src/Application/Features/Categories/Models/CategoryRequests.cs. */
 export type CreateCategoryRequest = {
   name: string;
+  icon?: IconPickerValue | null;
 };
 
 /** Mirrors src/Application/Features/Categories/Models/CategoryRequests.cs. */
 export type UpdateCategoryRequest = {
   name: string;
+  icon?: IconPickerValue | null;
 };
 export const PAGINATION_PAGE_SIZE = 50;
 

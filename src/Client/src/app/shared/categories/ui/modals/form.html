@@ -25,4 +25,13 @@
       </ng-template>
     </nz-form-control>
   </nz-form-item>
+
+  <nz-form-item *skeletonInputLoader="loading()">
+    <nz-form-label>
+      Pictogramă
+    </nz-form-label>
+    <nz-form-control>
+      <ske-icon-picker [formField]="categoryForm.icon" />
+    </nz-form-control>
+  </nz-form-item>
 </form>

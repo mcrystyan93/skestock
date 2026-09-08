@@ -66,6 +66,26 @@ public class GetAllCategoriesQueryTests : TestBase
     }
 
     [Test]
+    public async Task Handle_ReturnsCategoryIcon()
+    {
+        var category = new Category
+        {
+            Name = $"{_prefix}-Stationery",
+            Icon = new CategoryIcon("Square Q", "square-q", "/assets/icons/square-q.svg")
+        };
+        await TestApp.AddAsync(category);
+
+        var result = await TestApp.SendAsync(Query(_prefix));
+
+        result.IsSuccess.ShouldBeTrue();
+        var icon = result.Value.Data.Single().Icon;
+        icon.ShouldNotBeNull();
+        icon!.Name.ShouldBe("Square Q");
+        icon.FileName.ShouldBe("square-q");
+        icon.Path.ShouldBe("/assets/icons/square-q.svg");
+    }
+
+    [Test]
     public async Task Handle_WithNoMatches_ReturnsEmptyPage()
     {
         var result = await TestApp.SendAsync(Query($"{_prefix}-does-not-exist"));

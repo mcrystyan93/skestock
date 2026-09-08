@@ -35,10 +35,14 @@
   </tr>
   </thead>
   <tbody>
-  <ng-template nz-virtual-scroll let-category>
+  <ng-template nz-virtual-scroll
+               let-category>
     <tr>
       <td>
-        {{ category.name }}
+        <div class="flex gap-2 items-center">
+          <nz-avatar [nzIcon]="category.icon?.fileName ? ('icons:'+category.icon.fileName) : 'icons:box'" />
+          {{ category.name }}
+        </div>
       </td>
       <td>
         {{ category.createdDate | date }}

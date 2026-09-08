@@ -1,9 +1,10 @@
-import { Component, input, linkedSignal } from '@angular/core';
-import { CategoryDto } from '@ske/models';
-import { form, FormField, maxLength, required, submit } from '@angular/forms/signals';
-import { NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
-import { SkeletonInputLoaderDirective } from '@ske/shared/loader';
-import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
+import {Component, input, linkedSignal} from '@angular/core';
+import {CategoryDto} from '@ske/models';
+import {form, FormField, maxLength, required, submit} from '@angular/forms/signals';
+import {NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent} from 'ng-zorro-antd/form';
+import {SkeletonInputLoaderDirective} from '@ske/shared/loader';
+import {NzInputDirective, NzInputWrapperComponent} from 'ng-zorro-antd/input';
+import {IconPicker, type IconPickerValue} from '@ske/shared/icons';
 
 @Component({
   imports: [
@@ -14,7 +15,8 @@ import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
     NzFormControlComponent,
     NzInputWrapperComponent,
     FormField,
-    NzInputDirective
+    NzInputDirective,
+    IconPicker
   ],
   selector: 'ske-form',
   styles: ``,
@@ -28,7 +30,8 @@ export class Form {
     source: () => this.category(),
     computation: (category) => (<CategoryFormModel>{
       id: category.id ?? null,
-      name: category.name ?? ''
+      name: category.name ?? '',
+      icon: category.icon ?? null
     })
   });
 
@@ -41,19 +44,20 @@ export class Form {
     });
   });
 
-  public async submit():Promise<CategoryFormSubmit> {
+  public async submit(): Promise<CategoryFormSubmit> {
     let formData: CategoryFormModel | null = null;
     const isValid = await submit(this.categoryForm, async (data) => {
       formData = this.categoryForm().value();
     });
 
-    return { isValid, formData };
+    return {isValid, formData};
   }
 }
 
 export type CategoryFormModel = {
   id: string | null;
   name: string;
+  icon: IconPickerValue | null;
 };
 export type CategoryFormSubmit = {
   isValid: boolean;

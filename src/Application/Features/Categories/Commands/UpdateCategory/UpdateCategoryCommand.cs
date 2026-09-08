@@ -7,6 +7,7 @@ public class UpdateCategoryCommand : IRequest<Result<CategoryDto>>, ICacheInvali
 {
     public Guid Id { get; init; }
     public string Name { get; init; } = string.Empty;
+    public CategoryIconDto? Icon { get; init; }
 
     // Invalidate every cached GetAllCategories page/filter/sort combination - an updated category
     // can affect any of them (default sort, search matches, filters, etc.).
