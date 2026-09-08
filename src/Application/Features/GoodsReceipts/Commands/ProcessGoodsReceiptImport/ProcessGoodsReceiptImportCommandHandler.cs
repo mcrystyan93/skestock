@@ -12,7 +12,7 @@ namespace skestock.Application.Features.GoodsReceipts.Commands.ProcessGoodsRecei
 public class ProcessGoodsReceiptImportCommandHandler(
     IApplicationDbContext dbContext,
     IBlobStorageService blobStorageService,
-    IDocumentExtractionService documentExtractionService,
+    IStockDocumentExtractionService stockDocumentExtractionService,
     ILogger<ProcessGoodsReceiptImportCommandHandler> logger) : IRequestHandler<ProcessGoodsReceiptImportCommand, Result>
 {
     public async ValueTask<Result> Handle(ProcessGoodsReceiptImportCommand request, CancellationToken cancellationToken)
@@ -41,7 +41,7 @@ public class ProcessGoodsReceiptImportCommandHandler(
                 await blobStorageService.DownloadAsync(new(import.BlobPath, import.FileMetadata.BlobContainer),
                     cancellationToken);
 
-            var extraction = await documentExtractionService.ExtractAsync<GoodsReceiptExtractionResult>(fileStream,
+            var extraction = await stockDocumentExtractionService.ExtractAsync<GoodsReceiptExtractionResult>(fileStream,
                 import.FileMetadata.ContentType,  cancellationToken);
             
             import.ApplyExtractionResult(extraction.ToJson());

@@ -48,19 +48,9 @@ public static class Services
     public const string BlobService = "blobservice";
     public const string Queues = "queues";
     public const string GoodsReceiptImportQueue = "goods-receipt-import";
-    
-    public const string NutrientApiSettings = "NutrientApiSettings";
-    public const string NutrientApiKey = "ApiKey";
-    public const string NutrientBaseUrl = "BaseUrl";
-
-    public const string GeminiApiSettings = "GeminiApiSettings";
-    public const string GeminiApiKey = "ApiKey";
-    public const string GeminiModel = "Model";
+    public const string CategoryImportQueue = "category-import";
     
     public const string OpenApiSettings = "OpenApiSettings";
     public const string OpenApiKey = "ApiKey";
     public const string OpenApiModel = "Model";
-
-    public const string DocumentExtractionSettings = "DocumentExtraction";
-    public const string DocumentExtractionProvider = "Provider";
 }

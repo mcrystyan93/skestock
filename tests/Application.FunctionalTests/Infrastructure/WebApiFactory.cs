@@ -14,13 +14,7 @@ public class WebApiFactory(string connectionString, string cacheConnectionString
     {
         builder
             .UseSetting("ConnectionStrings:skestockDb", connectionString)
-            .UseSetting($"ConnectionStrings:{skestock.Shared.Services.Cache}", cacheConnectionString)
-            .UseSetting(
-                $"{skestock.Shared.Services.NutrientApiSettings}:{skestock.Shared.Services.NutrientBaseUrl}",
-                "https://nutrient.test")
-            .UseSetting(
-                $"{skestock.Shared.Services.NutrientApiSettings}:{skestock.Shared.Services.NutrientApiKey}",
-                "test-api-key");
+            .UseSetting($"ConnectionStrings:{skestock.Shared.Services.Cache}", cacheConnectionString);
 
         builder.ConfigureTestServices(services =>
         {

@@ -4,6 +4,7 @@ export * from './errors';
 export * from './error-codes';
 export * from './pagination';
 export * from './category';
+export * from './category-import';
 export * from './item';
 export * from './location';
 export * from './school-class';

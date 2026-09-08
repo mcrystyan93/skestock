@@ -20,7 +20,7 @@ const initialState: StockCollectionState = {
   stockItems: [],
   filter: {
     classId: '',
-    locationId: null,
+    filters: [],
     searchTerm: null
   },
   groupedStockItems: new Map()
@@ -58,7 +58,11 @@ export function withStockCollection() {
                     for (const item of result) {
                       let group = groupsByCategoryId.get(item.categoryId);
                       if (!group) {
-                        group = { categoryId: item.categoryId, categoryName: item.categoryName };
+                        group = {
+                          categoryId: item.categoryId,
+                          categoryName: item.categoryName,
+                          categoryIcon: item.categoryIcon ?? null
+                        };
                         groupsByCategoryId.set(item.categoryId, group);
                         groupedStockItems.set(group, []);
                       }

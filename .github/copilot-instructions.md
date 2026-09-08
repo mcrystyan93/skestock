@@ -15,7 +15,7 @@ implicit usings, and `TreatWarningsAsErrors=true` to the solution. The solution 
 `skestock.slnx`, not a classic `.sln`.
 
 The current stack includes SQL Server, Redis, Azure Storage/Azurite blobs and queues, ASP.NET Core
-Identity, SignalR, OpenTelemetry, optional document extraction providers (Nutrient, Gemini, OpenAI),
+Identity, SignalR, OpenTelemetry, OpenAI document extraction,
 and an Angular 22 SPA. The backend uses Mediator source generation, not MediatR.
 
 ## Architecture & Layer Responsibilities

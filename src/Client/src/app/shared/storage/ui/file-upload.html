@@ -1,0 +1,10 @@
+<nz-upload nzType="drag"
+           [nzBeforeUpload]="beforeUpload"
+           [nzFileList]="fileList()"
+           [nzMultiple]="multiple()">
+  <p class="ant-upload-drag-icon">
+    <nz-icon nzType="inbox" />
+  </p>
+  <p class="ant-upload-text">Click sau trage un fisier aici</p>
+  <p class="ant-upload-hint">Selectează fișierele care trebuie procesate</p>
+</nz-upload>

@@ -1,4 +1,5 @@
 using skestock.Application.Features.Stock.Queries.GetClassLocationStock;
+using skestock.Application.Common.Filtering;
 using skestock.Domain.Entities;
 
 namespace skestock.Application.FunctionalTests.Features.Stock.Queries.GetClassLocationStock;
@@ -62,6 +63,11 @@ public class GetClassLocationStockQueryTests : TestBase
 
     private async Task SeedBatchAsync(Item item, GoodsReceipt receipt, int quantity)
     {
+        await SeedBatchAsync(item, receipt, _location.Id, quantity);
+    }
+
+    private async Task SeedBatchAsync(Item item, GoodsReceipt receipt, Guid locationId, int quantity)
+    {
         // Only FK scalars are set here (Item/Location/ReceivedClass/GoodsReceipt navigations are
         // left at their null! default) - item/receipt/location/schoolClass were persisted via
         // previous TestApp.AddAsync calls using different DbContext scopes, so they're detached
@@ -70,7 +76,7 @@ public class GetClassLocationStockQueryTests : TestBase
         var batch = new StockBatch
         {
             ItemId = item.Id,
-            LocationId = _location.Id,
+            LocationId = locationId,
             ReceivedClassId = _schoolClass.Id,
             GoodsReceiptId = receipt.Id,
             Quantity = quantity,
@@ -80,6 +86,9 @@ public class GetClassLocationStockQueryTests : TestBase
 
         await TestApp.AddAsync(batch);
     }
+
+    private static ColumnFilter EqualsFilter(string field, Guid value) =>
+        new(field, FilterOperator.Equals, value);
 
     [Test]
     public async Task Handle_SearchTermMatchingItemName_ReturnsOnlyMatchingItems()
@@ -93,7 +102,7 @@ public class GetClassLocationStockQueryTests : TestBase
         var result = await TestApp.SendAsync(new GetClassLocationStockQuery
         {
             ClassId = _schoolClass.Id,
-            LocationId = _location.Id,
+            Filters = [EqualsFilter("locationId", _location.Id)],
             SearchTerm = $"{_prefix}-Flour"
         });
 
@@ -112,7 +121,7 @@ public class GetClassLocationStockQueryTests : TestBase
         var result = await TestApp.SendAsync(new GetClassLocationStockQuery
         {
             ClassId = _schoolClass.Id,
-            LocationId = _location.Id,
+            Filters = [EqualsFilter("locationId", _location.Id)],
             SearchTerm = "flour"
         });
 
@@ -131,7 +140,7 @@ public class GetClassLocationStockQueryTests : TestBase
         var result = await TestApp.SendAsync(new GetClassLocationStockQuery
         {
             ClassId = _schoolClass.Id,
-            LocationId = _location.Id,
+            Filters = [EqualsFilter("locationId", _location.Id)],
             SearchTerm = $"{_prefix}-does-not-exist"
         });
 
@@ -140,7 +149,7 @@ public class GetClassLocationStockQueryTests : TestBase
     }
 
     [Test]
-    public async Task Handle_NoSearchTerm_ReturnsEveryItemForTheClassAndLocation()
+    public async Task Handle_NoFilters_ReturnsEveryItemForTheClass()
     {
         var flour = await SeedItemAsync("Flour");
         var pasta = await SeedItemAsync("Pasta");
@@ -150,12 +159,51 @@ public class GetClassLocationStockQueryTests : TestBase
 
         var result = await TestApp.SendAsync(new GetClassLocationStockQuery
         {
-            ClassId = _schoolClass.Id,
-            LocationId = _location.Id
+            ClassId = _schoolClass.Id
         });
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Count.ShouldBe(2);
         result.Value.Select(x => x.ItemName).ShouldBe([flour.Name, pasta.Name], ignoreOrder: true);
+    }
+
+    [Test]
+    public async Task Handle_LocationAndCategoryFilters_ReturnOnlyMatchingStock()
+    {
+        var flour = await SeedItemAsync("Flour");
+        var otherCategory = new Category { Name = $"{_prefix}-OtherCategory" };
+        await TestApp.AddAsync(otherCategory);
+        var pasta = new Item
+        {
+            Name = $"{_prefix}-Pasta",
+            Unit = "unit",
+            MinThreshold = 5,
+            CategoryId = otherCategory.Id
+        };
+        await TestApp.AddAsync(pasta);
+
+        var otherLocation = new Location { Name = $"{_prefix}-OtherLocation", Type = "Storage" };
+        await TestApp.AddAsync(otherLocation);
+
+        var receipt = await SeedGoodsReceiptAsync();
+        await SeedBatchAsync(flour, receipt, _location.Id, 10);
+        await SeedBatchAsync(flour, receipt, otherLocation.Id, 7);
+        await SeedBatchAsync(pasta, receipt, _location.Id, 6);
+
+        var result = await TestApp.SendAsync(new GetClassLocationStockQuery
+        {
+            ClassId = _schoolClass.Id,
+            Filters =
+            [
+                EqualsFilter("locationId", _location.Id),
+                EqualsFilter("categoryId", _category.Id)
+            ]
+        });
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Count.ShouldBe(1);
+        result.Value.Single().ItemId.ShouldBe(flour.Id);
+        result.Value.Single().LocationId.ShouldBe(_location.Id);
+        result.Value.Single().Quantity.ShouldBe(10);
     }
 }

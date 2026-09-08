@@ -20,6 +20,7 @@ public class SchoolClassSummaryTestDbContext(DbContextOptions<SchoolClassSummary
     : DbContext(options), IApplicationDbContext
 {
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<CategoryImport> CategoryImports => Set<CategoryImport>();
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<Location> Locations => Set<Location>();
@@ -38,6 +39,8 @@ public class SchoolClassSummaryTestDbContext(DbContextOptions<SchoolClassSummary
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Ignore<CategoryImport>();
 
         builder.Ignore<GoodsReceiptImportLine>();
 
@@ -66,6 +69,7 @@ public class SchoolClassSummaryTestDbContext(DbContextOptions<SchoolClassSummary
         {
             b.HasOne(c => c.CreatedBy).WithMany().HasForeignKey(c => c.CreatedById);
             b.HasOne(c => c.LastModifiedBy).WithMany().HasForeignKey(c => c.LastModifiedById);
+            b.OwnsOne(c => c.Icon);
         });
 
         builder.Entity<Item>(b =>

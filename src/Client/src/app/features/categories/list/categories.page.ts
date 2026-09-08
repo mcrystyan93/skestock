@@ -5,7 +5,7 @@ import { Table } from './table/table';
 import { CategoryDto, GetAllCategoriesRequest } from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { Header } from './header/header';
-import { CategoryDetailModal } from '@ske/shared/categories';
+import { CategoryDetailModal, CategoryImportModal } from '@ske/shared/categories';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SignalRGroupManagerStore } from '@ske/signalr';
 import { ErrorAlert } from '@ske/shared/errors';
@@ -45,6 +45,14 @@ export class CategoriesPage implements OnInit, OnDestroy{
 
   public onAdd() {
     this.openCategoryModal();
+  }
+
+  public onImport() {
+    this._modalService.create({
+      nzContent: CategoryImportModal,
+      nzCentered: true,
+      nzMaskClosable: false
+    });
   }
 
   public ngOnInit() {

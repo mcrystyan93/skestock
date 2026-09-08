@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { AdjustStockRequest, GetClassLocationStockRequest, StockItemDto } from '@ske/models';
 
@@ -10,17 +10,9 @@ export class StockHttp {
   private readonly _httpClient = inject(HttpClient);
 
   public getClassLocationStock(request: GetClassLocationStockRequest) {
-    const { classId, locationId, searchTerm } = request;
+    const { classId, ...body } = request;
 
-    let params = new HttpParams();
-    if (locationId != null) {
-      params = params.set('locationId', locationId);
-    }
-    if (searchTerm != null && searchTerm !== '') {
-      params = params.set('searchTerm', searchTerm);
-    }
-
-    return this._httpClient.get<StockItemDto[]>(`/api/Stock/class/${classId}`, { params });
+    return this._httpClient.post<StockItemDto[]>(`/api/Stock/class/${classId}`, body);
   }
 
   public adjustStock(request: AdjustStockRequest) {

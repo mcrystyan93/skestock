@@ -1,11 +1,14 @@
-import { TableColumnDefinition } from './pagination';
+import { ColumnFilter, TableColumnDefinition } from './pagination';
+import type { IconPickerValue } from '@ske/shared/icons';
 
 /** Mirrors src/Application/Features/Stock/Models/StockDto.cs (StockItemDto). */
 export type StockItemDto = {
   itemId: string;
   itemName: string;
+  sku?: string | null;
   categoryId: string;
   categoryName: string;
+  categoryIcon?: IconPickerValue | null;
   locationId: string;
   locationName: string;
   unit: string;
@@ -17,16 +20,16 @@ export type StockItemDto = {
 export type StockItemCategoryGroup = {
   categoryId: string;
   categoryName: string;
+  categoryIcon?: IconPickerValue | null;
 };
 
 /**
- * Mirrors the route/query parameters of `GET /api/Stock/class/{classId}`
- * (src/Web/Endpoints/Stock.cs, GetClassLocationStockQuery).
+ * Mirrors the route/body contract of `POST /api/Stock/class/{classId}`
+ * (src/Web/Endpoints/Stock.cs, GetClassLocationStockRequest).
  */
 export type GetClassLocationStockRequest = {
   classId: string;
-  /** Optional - when omitted, the report aggregates stock across every location for the class. */
-  locationId?: string | null;
+  filters: ColumnFilter[];
   /** Optional - when provided, only items whose name contains this term (case-insensitive) are included. */
   searchTerm?: string | null;
 };

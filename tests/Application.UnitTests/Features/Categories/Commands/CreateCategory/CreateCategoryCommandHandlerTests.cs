@@ -22,6 +22,7 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
     : DbContext(options), IApplicationDbContext
 {
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<CategoryImport> CategoryImports => Set<CategoryImport>();
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<Location> Locations => Set<Location>();
@@ -40,6 +41,8 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Ignore<CategoryImport>();
 
         builder.Ignore<GoodsReceiptImport>();
         builder.Ignore<GoodsReceiptImportLine>();

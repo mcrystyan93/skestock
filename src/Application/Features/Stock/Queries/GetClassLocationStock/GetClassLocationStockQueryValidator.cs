@@ -10,9 +10,5 @@ public class GetClassLocationStockQueryValidator : AbstractValidator<GetClassLoc
             .NotEmpty()
             .WithErrorCode(ValidationErrorCodes.Required);
 
-        RuleFor(x => x.LocationId!.Value)
-            .NotEmpty()
-            .WithErrorCode(ValidationErrorCodes.Required)
-            .When(x => x.LocationId is not null);
     }
 }

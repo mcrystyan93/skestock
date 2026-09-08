@@ -1,12 +1,23 @@
 using skestock.Application.Common.Errors;
+using skestock.Application.Common.Filtering;
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Features.Categories.Models;
+using skestock.Application.Features.Items;
 using skestock.Application.Features.Stock.Models;
+using skestock.Application.Features.StockBatches;
+using skestock.Domain.Entities;
 
 namespace skestock.Application.Features.Stock.Queries.GetClassLocationStock;
 
 public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
     : IRequestHandler<GetClassLocationStockQuery, Result<List<StockItemDto>>>
 {
+    private static readonly IFilterConfiguration<StockBatch> StockBatchFilterConfiguration =
+        new StockBatchFilterConfiguration();
+
+    private static readonly IFilterConfiguration<Item> ItemFilterConfiguration =
+        new ItemFilterConfiguration();
+
     public async ValueTask<Result<List<StockItemDto>>> Handle(GetClassLocationStockQuery request,
         CancellationToken cancellationToken)
     {
@@ -16,27 +27,20 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
         if (!classExists)
             return Result.Fail(new SchoolClassErrors.SchoolClassNotFound(request.ClassId));
 
-        if (request.LocationId is { } requestedLocationId)
-        {
-            var locationExists = await dbContext.Locations
-                .AsNoTracking()
-                .AnyAsync(l => l.Id == requestedLocationId, cancellationToken);
-            if (!locationExists)
-                return Result.Fail(new LocationErrors.LocationNotFound(requestedLocationId));
-        }
-
         // Current stock for an item at a location = sum of the remaining Quantity across every
         // StockBatch received by this class at that location. Items/locations with no batches
         // simply don't appear, matching the "sum of stockBatches" definition literally.
-        // When LocationId is omitted, group by (Item, Location) instead of just Item, so the
+        // When no location filter is supplied, group by (Item, Location) instead of just Item, so the
         // report still returns one row per item per location rather than collapsing quantities
         // from different locations into a single, ambiguous total.
         var batchesQuery = dbContext.StockBatches
             .AsNoTracking()
             .Where(b => b.ReceivedClassId == request.ClassId);
 
-        if (request.LocationId is { } locationId)
-            batchesQuery = batchesQuery.Where(b => b.LocationId == locationId);
+        var locationFilters = request.Filters.Where(filter =>
+            string.Equals(filter.Field, "locationId", StringComparison.OrdinalIgnoreCase));
+        batchesQuery = FilterQueryBuilder<StockBatch>.Apply(
+            batchesQuery, locationFilters, StockBatchFilterConfiguration);
 
         var stockByItemLocation = await batchesQuery
             .GroupBy(b => new { b.ItemId, b.LocationId })
@@ -53,6 +57,10 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
             .AsNoTracking()
             .Where(i => itemIds.Contains(i.Id));
 
+        var categoryFilters = request.Filters.Where(filter =>
+            string.Equals(filter.Field, "categoryId", StringComparison.OrdinalIgnoreCase));
+        itemsQuery = FilterQueryBuilder<Item>.Apply(itemsQuery, categoryFilters, ItemFilterConfiguration);
+
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
             var term = request.SearchTerm.Trim();
@@ -60,7 +68,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
         }
 
         var items = await itemsQuery
-            .Select(i => new { i.Id, i.Name, i.Unit, i.IsPerishable, i.MinThreshold, i.CategoryId })
+            .Select(i => new { i.Id, i.Name, i.Sku, i.Unit, i.IsPerishable, i.MinThreshold, i.CategoryId })
             .ToDictionaryAsync(i => i.Id, cancellationToken);
 
         // Items excluded by the search term filter above must also be excluded from the stock
@@ -81,7 +89,19 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
         var categories = await dbContext.Categories
             .AsNoTracking()
             .Where(c => categoryIds.Contains(c.Id))
-            .Select(c => new { c.Id, c.Name })
+            .Select(c => new
+            {
+                c.Id,
+                c.Name,
+                Icon = c.Icon == null
+                    ? null
+                    : new CategoryIconDto
+                    {
+                        Name = c.Icon.Name,
+                        FileName = c.Icon.FileName,
+                        Path = c.Icon.Path
+                    }
+            })
             .ToDictionaryAsync(c => c.Id, cancellationToken);
 
         var data = stockByItemLocation
@@ -94,8 +114,10 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
                 {
                     ItemId = x.ItemId,
                     ItemName = item.Name,
+                    Sku = item.Sku,
                     CategoryId = category.Id,
                     CategoryName = category.Name,
+                    CategoryIcon = category.Icon,
                     LocationId = location.Id,
                     LocationName = location.Name,
                     Unit = item.Unit,

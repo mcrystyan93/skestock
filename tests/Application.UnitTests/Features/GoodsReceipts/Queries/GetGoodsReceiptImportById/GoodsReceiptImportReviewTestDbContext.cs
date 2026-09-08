@@ -15,6 +15,7 @@ public class GoodsReceiptImportReviewTestDbContext(DbContextOptions<GoodsReceipt
     : DbContext(options), IApplicationDbContext
 {
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<CategoryImport> CategoryImports => Set<CategoryImport>();
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<Location> Locations => Set<Location>();
@@ -33,6 +34,8 @@ public class GoodsReceiptImportReviewTestDbContext(DbContextOptions<GoodsReceipt
     {
         base.OnModelCreating(builder);
 
+        builder.Ignore<CategoryImport>();
+
         builder.Entity<UserProfile>(b =>
         {
             b.Ignore(u => u.CreatedBy);
@@ -45,6 +48,7 @@ public class GoodsReceiptImportReviewTestDbContext(DbContextOptions<GoodsReceipt
         {
             b.HasOne(c => c.CreatedBy).WithMany().HasForeignKey(c => c.CreatedById);
             b.HasOne(c => c.LastModifiedBy).WithMany().HasForeignKey(c => c.LastModifiedById);
+            b.OwnsOne(c => c.Icon);
         });
 
         builder.Entity<Item>(b =>
