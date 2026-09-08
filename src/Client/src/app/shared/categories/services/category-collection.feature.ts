@@ -11,7 +11,7 @@ import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
 // noinspection ES6PreferShortImport
 import { CategoriesHttp } from './categories.http';
-import { categoryRealtimeEvents } from './category.events';
+import { realtimeEvents } from '@ske/signalr';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
@@ -124,7 +124,7 @@ export function withCategoryCollection() {
       return { load, loadMore };
     }),
     withReducer(
-      on(categoryRealtimeEvents.categoryUpdated, (event, state) => {
+      on(realtimeEvents.categoryUpdated, (event, state) => {
         console.log('categoryUpdated event received:', event);
         return {
           ...state

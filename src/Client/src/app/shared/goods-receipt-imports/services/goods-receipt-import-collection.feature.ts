@@ -15,7 +15,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
 import { Events, on, withEventHandlers, withReducer } from '@ngrx/signals/events';
-import { goodsReceiptImportRealtimeEvents } from './goods-receipt-import.events';
+import { realtimeEvents } from '@ske/signalr';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
 type GoodsReceiptImportCollectionState = {
@@ -125,14 +125,14 @@ export function withGoodsReceiptImportCollection() {
       return { load, loadMore };
     }),
     withEventHandlers((store, events = inject(Events), nzMessageService = inject(NzMessageService)) => ({
-      notifyUser: events.on(goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed)
+      notifyUser: events.on(realtimeEvents.goodsReceiptImportProcessed)
         .pipe(
           tap(() => nzMessageService.success(
             'Importul de bunuri a fost procesat cu succes. Lista a fost reîncărcată.',
             { nzDuration: 5000 })
           )
         ),
-      importCreated: events.on(goodsReceiptImportRealtimeEvents.goodsReceiptImportCreated, goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed)
+      importCreated: events.on(realtimeEvents.goodsReceiptImportCreated, realtimeEvents.goodsReceiptImportProcessed)
         .pipe(
           tap(() => console.log('signalR event from goods-receipt-import-collection')),
           tap(() => store.load(store.filter()))

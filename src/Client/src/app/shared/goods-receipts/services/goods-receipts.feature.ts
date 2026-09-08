@@ -15,7 +15,7 @@ import {
 } from '@ske/models';
 import { mapResponse } from '@ngrx/operators';
 import { Events, withEventHandlers } from '@ngrx/signals/events';
-import { goodsReceiptImportRealtimeEvents } from '@ske/shared/goods-receipt-imports';
+import { realtimeEvents } from '@ske/signalr';
 
 type GoodsReceiptsState = {
   goodsReceipts: GoodsReceiptListItemDto[];
@@ -132,7 +132,7 @@ export function withGoodReceiptsFeature() {
       return { loadGoodsReceipts, loadMoreGoodsReceipts, importGoodReceipt };
     }),
     withEventHandlers((store, events = inject(Events)) => ({
-      goodsReceiptImportChanges: events.on(goodsReceiptImportRealtimeEvents.goodsReceiptImportConfirmed)
+      goodsReceiptImportChanges: events.on(realtimeEvents.goodsReceiptImportConfirmed)
         .pipe(
           map(() => store.filter()),
           filter((filter): filter is GetAllGoodsReceiptsRequest => !!filter),

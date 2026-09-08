@@ -25,7 +25,7 @@ public class GetFileDownloadQueryHandlerTests
 
     private static FileMetadata NewFile(Guid fileId, FileStatus status) => new()
     {
-        FileId = fileId,
+        Id = fileId,
         OriginalName = "receipt.pdf",
         BlobContainer = "app-files",
         BlobPath = $"{fileId}/receipt.pdf",
@@ -41,7 +41,7 @@ public class GetFileDownloadQueryHandlerTests
 
         var handler = new GetFileDownloadQueryHandler(context, blob.Object);
         var result = await handler.Handle(
-            new GetFileDownloadQuery { FileId = Guid.NewGuid() }, CancellationToken.None);
+            new GetFileDownloadQuery { Id = Guid.NewGuid() }, CancellationToken.None);
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is StorageErrors.FileNotFound);
@@ -62,7 +62,7 @@ public class GetFileDownloadQueryHandlerTests
 
         var handler = new GetFileDownloadQueryHandler(context, blob.Object);
         var result = await handler.Handle(
-            new GetFileDownloadQuery { FileId = fileId }, CancellationToken.None);
+            new GetFileDownloadQuery { Id = fileId }, CancellationToken.None);
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is StorageErrors.BlobNotFound);
@@ -89,11 +89,11 @@ public class GetFileDownloadQueryHandlerTests
 
         var handler = new GetFileDownloadQueryHandler(context, blob.Object);
         var result = await handler.Handle(
-            new GetFileDownloadQuery { FileId = fileId }, CancellationToken.None);
+            new GetFileDownloadQuery { Id = fileId }, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.DownloadUrl.ShouldBe(expectedUri);
-        result.Value.File.FileId.ShouldBe(fileId);
+        result.Value.File.Id.ShouldBe(fileId);
         result.Value.File.OriginalName.ShouldBe(file.OriginalName);
         result.Value.File.Status.ShouldBe(FileStatus.Completed);
 

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Caching.Hybrid;
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Common.Realtime;
 using skestock.Domain.Events.Categories;
 
 namespace skestock.Application.Features.Categories.EventHandlers;
@@ -16,6 +17,10 @@ public class CategoryUpdatedEventHandler(IRealtimeNotifier notifier, HybridCache
 
         var payload = new { CategoryId = notification.Category.Id };
 
-        await notifier.NotifyGroupAsync("categories-list", "CategoryUpdated", payload, cancellationToken);
+        await notifier.NotifyGroupAsync(
+            RealtimeGroups.CategoriesList,
+            RealtimeEvents.CategoryUpdated,
+            payload,
+            cancellationToken);
     }
 }

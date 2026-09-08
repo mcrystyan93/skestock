@@ -9,7 +9,7 @@ public class GetFileDownloadQueryTests : TestBase
 {
     private static FileMetadata NewFile(Guid fileId, FileStatus status) => new()
     {
-        FileId = fileId,
+        Id = fileId,
         OriginalName = "receipt.pdf",
         BlobContainer = "app-files",
         BlobPath = $"{fileId}/receipt.pdf",
@@ -24,10 +24,10 @@ public class GetFileDownloadQueryTests : TestBase
         var file = NewFile(fileId, FileStatus.Completed);
         await TestApp.AddAsync(file);
 
-        var result = await TestApp.SendAsync(new GetFileDownloadQuery { FileId = fileId });
+        var result = await TestApp.SendAsync(new GetFileDownloadQuery { Id = fileId });
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.File.FileId.ShouldBe(fileId);
+        result.Value.File.Id.ShouldBe(fileId);
         result.Value.File.OriginalName.ShouldBe(file.OriginalName);
         result.Value.File.Status.ShouldBe(FileStatus.Completed);
         result.Value.DownloadUrl.ToString().ShouldBe(
@@ -37,7 +37,7 @@ public class GetFileDownloadQueryTests : TestBase
     [Test]
     public async Task ReturnsFileNotFound_WhenFileMissing()
     {
-        var result = await TestApp.SendAsync(new GetFileDownloadQuery { FileId = Guid.NewGuid() });
+        var result = await TestApp.SendAsync(new GetFileDownloadQuery { Id = Guid.NewGuid() });
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is StorageErrors.FileNotFound);
@@ -49,7 +49,7 @@ public class GetFileDownloadQueryTests : TestBase
         var fileId = Guid.NewGuid();
         await TestApp.AddAsync(NewFile(fileId, FileStatus.Pending));
 
-        var result = await TestApp.SendAsync(new GetFileDownloadQuery { FileId = fileId });
+        var result = await TestApp.SendAsync(new GetFileDownloadQuery { Id = fileId });
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is StorageErrors.BlobNotFound);

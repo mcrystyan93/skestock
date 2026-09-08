@@ -145,8 +145,8 @@ export const FileStorageState = signalStore(
           store.setDownloadLoading();
           store.clearDownloadErrors();
         }),
-        concatMap((fileId) =>
-          store.storageHttp.getFileDownload(fileId)
+        concatMap((id) =>
+          store.storageHttp.getFileDownload(id)
             .pipe(
               concatMap((downloadResult) =>
                 store.storageHttp.downloadBlob(downloadResult.downloadUrl)

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Common.Realtime;
 
 namespace skestock.Infrastructure.Realtime;
 
@@ -8,7 +9,7 @@ public class SignalRRealtimeNotifier(IHubContext<AppHub> hubContext) : IRealtime
     public Task NotifyUserAsync<T>(string userId, string method, T payload, CancellationToken ct = default)
     {
         var envelope = new RealtimeEnvelope<T>(Guid.NewGuid(), payload);
-        return hubContext.Clients.Group($"user:{userId}").SendAsync(method, envelope, ct);
+        return hubContext.Clients.Group(RealtimeGroups.User(userId)).SendAsync(method, envelope, ct);
     }
 
     public Task NotifyGroupAsync<T>(string group, string method, T payload, CancellationToken ct = default)

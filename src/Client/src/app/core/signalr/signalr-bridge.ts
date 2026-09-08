@@ -1,6 +1,6 @@
 import { inject, OnDestroy, Service } from '@angular/core';
 import { Router } from '@angular/router';
-import { SIGNALR_CONFIG } from './provide-signalr';
+import { SIGNALR_CONFIG } from './signalr-config';
 import { Dispatcher, Events } from '@ngrx/signals/events';
 import { HttpError, HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import { merge, Subscription, switchMap, tap } from 'rxjs';

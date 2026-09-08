@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Caching.Hybrid;
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Common.Realtime;
 using skestock.Domain.Events.GoodsReceipt;
 
 namespace skestock.Application.Features.GoodsReceipts.EventHandlers;
@@ -19,7 +20,9 @@ public class GoodsReceiptImportCreatedEventHandler(
         await cache.RemoveByTagAsync(_tags, cancellationToken);
 
         var payload = new { GoodsReceiptImportId = notification.Import.Id };
-        await notifier.NotifyGroupAsync("goods-receipts-import-list", "GoodsReceiptImportCreated",
+        await notifier.NotifyGroupAsync(
+            RealtimeGroups.GoodsReceiptImportsList,
+            RealtimeEvents.GoodsReceiptImportCreated,
             payload,
             cancellationToken);
     }

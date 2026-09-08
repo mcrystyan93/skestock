@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Logging;
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Common.Realtime;
 using skestock.Domain.Enums;
 using skestock.Domain.Events.GoodsReceipt;
 
@@ -20,7 +21,10 @@ public class GoodsReceiptImportCompletedEventHandler(IRealtimeNotifier notifier,
         
         var payload = new { GoodsReceiptImportId = notification.ImportId };
 
-        await notifier.NotifyGroupAsync("goods-receipts-import-list", "GoodsReceiptImportProcessed", payload,
+        await notifier.NotifyGroupAsync(
+            RealtimeGroups.GoodsReceiptImportsList,
+            RealtimeEvents.GoodsReceiptImportProcessed,
+            payload,
             cancellationToken);
     }
 }

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
+using skestock.Application.Common.Realtime;
 
 namespace skestock.Infrastructure.Realtime;
 
@@ -10,7 +11,7 @@ public class AppHub: Hub
     {
         var userId = Context.UserIdentifier; // wire up your auth to populate this
         if (userId is not null)
-            await Groups.AddToGroupAsync(Context.ConnectionId, $"user:{userId}");
+            await Groups.AddToGroupAsync(Context.ConnectionId, RealtimeGroups.User(userId));
         await base.OnConnectedAsync();
     }
     
