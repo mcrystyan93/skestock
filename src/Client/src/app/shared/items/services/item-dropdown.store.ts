@@ -1,5 +1,5 @@
 import { signalStore, withState } from '@ngrx/signals';
-import { withItemCollection } from '../store-features/item-collection.feature';
+import { withItemCollection } from './item-collection.feature';
 
 type ItemDropdownState = {};
 const initialState: ItemDropdownState = {};

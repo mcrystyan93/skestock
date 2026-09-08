@@ -4,7 +4,7 @@ import { SIGNALR_CONFIG } from './provide-signalr';
 import { Dispatcher, Events } from '@ngrx/signals/events';
 import { HttpError, HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import { merge, Subscription, switchMap, tap } from 'rxjs';
-import { signalrEvents } from './store/signalr.events';
+import { signalrEvents } from './services/signalr.events';
 
 @Service()
 export class SignalRBridge implements OnDestroy {

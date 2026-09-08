@@ -1,30 +1,31 @@
 import {
-  buildSchoolClassListFilter,
-  GetAllSchoolClassesRequest,
+  LocationDto,
+  GetAllLocationsRequest,
   PAGINATION_PAGE_SIZE,
-  PaginatedResponseData,
-  SchoolClassDto
+  PaginatedResponseData, buildLocationListFilter
 } from '@ske/models';
 import { patchState, signalStoreFeature, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
 // noinspection ES6PreferShortImport
-import { SchoolClassesHttp } from '../services/school-classes.http';
+import { LocationsHttp } from './locations.http';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
+import { EMPTY, exhaustMap, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
 
 
-type SchoolClassCollectionState = {
-  schoolClasses: SchoolClassDto[];
+type LocationCollectionState = {
+  locations: LocationDto[];
   paginationData: PaginatedResponseData | null;
-  filter: GetAllSchoolClassesRequest;
+  filter: GetAllLocationsRequest;
   isLoadingMore: boolean;
+  defaultLocation: LocationDto | null;
+  defaultLocationLoaded: boolean;
 };
 
-const initialState: SchoolClassCollectionState = {
-  schoolClasses: [],
+const initialState: LocationCollectionState = {
+  locations: [],
   paginationData: null,
   filter: {
     sort: [],
@@ -33,46 +34,48 @@ const initialState: SchoolClassCollectionState = {
     pageSize: PAGINATION_PAGE_SIZE,
     searchTerm: null
   },
-  isLoadingMore: false
+  isLoadingMore: false,
+  defaultLocation: null,
+  defaultLocationLoaded: false
 };
 
-export function withSchoolClassCollection() {
+export function withLocationCollection() {
   return signalStoreFeature(
     withState(initialState),
-    withLoadingFeature('schoolClasses'),
-    withProblemDetailsFeature('schoolClasses'),
+    withLoadingFeature('locations'),
+    withProblemDetailsFeature('locations'),
     withComputed((store) => ({
       hasNextPage: () => store.paginationData()?.hasNextPage ?? false,
       nextCursor: () => store.paginationData()?.nextCursor ?? null
     })),
     withProps(() => ({
-      schoolClassHttp: inject(SchoolClassesHttp)
+      locationHttp: inject(LocationsHttp)
     })),
     withMethods((store) => {
-      const load = rxMethod<GetAllSchoolClassesRequest>(
+      const load = rxMethod<GetAllLocationsRequest>(
         pipe(
-          map(data => buildSchoolClassListFilter(store.filter(), data)),
+          map(data => buildLocationListFilter(store.filter(), data)),
           tap((filter) => {
-            store.clearSchoolClassesErrors();
-            store.schoolClassesLoading();
+            store.clearLocationsErrors();
+            store.locationsLoading();
 
             patchState(store, { filter, isLoadingMore: false });
           }),
           switchMap(filter =>
-            store.schoolClassHttp.getAll(filter)
+            store.locationHttp.getAll(filter)
               .pipe(
                 mapResponse({
                   next: (result) => {
                     patchState(store, {
-                      schoolClasses: result.data,
+                      locations: result.data,
                       paginationData: result,
                       filter: { ...filter, cursor: null, sort: result.sort }
                     });
-                    store.setSchoolClassesLoaded();
+                    store.setLocationsLoaded();
                   },
                   error: (error) => {
-                    store.handleSchoolClassesError(error);
-                    store.setSchoolClassesLoaded();
+                    store.handleLocationsError(error);
+                    store.setLocationsLoaded();
                   }
                 })
               )
@@ -84,7 +87,7 @@ export function withSchoolClassCollection() {
         pipe(
           filter(() => store.hasNextPage() && !store.isLoadingMore()),
           tap(() => {
-            store.clearSchoolClassesErrors();
+            store.clearLocationsErrors();
             patchState(store, { isLoadingMore: true });
           }),
           switchMap(() => {
@@ -96,20 +99,20 @@ export function withSchoolClassCollection() {
               return EMPTY;
             }
 
-            return store.schoolClassHttp.getAll({ ...filter, cursor: nextCursor })
+            return store.locationHttp.getAll({ ...filter, cursor: nextCursor })
               .pipe(
                 mapResponse({
                   next: (result) => {
                     patchState(store, {
-                      schoolClasses: [...store.schoolClasses(), ...result.data],
+                      locations: [...store.locations(), ...result.data],
                       paginationData: result,
                       filter: { ...filter, cursor: null, sort: result.sort },
                       isLoadingMore: false
                     });
-                    store.setSchoolClassesLoaded();
+                    store.setLocationsLoaded();
                   },
                   error: (error) => {
-                    store.handleSchoolClassesError(error);
+                    store.handleLocationsError(error);
                     patchState(store, { isLoadingMore: false });
                   }
                 })
@@ -119,7 +122,28 @@ export function withSchoolClassCollection() {
         )
       );
 
-      return { load, loadMore };
+      const loadDefault = rxMethod<void>(
+        pipe(
+          tap(() => store.clearLocationsErrors()),
+          filter(()=> !store.defaultLocationLoaded()),
+          exhaustMap(() =>
+            store.locationHttp.getDefault()
+              .pipe(
+                mapResponse({
+                  next: (defaultLocation) => {
+                    patchState(store, { defaultLocation, defaultLocationLoaded: true });
+                  },
+                  error: (error) => {
+                    store.handleLocationsError(error);
+                    patchState(store, { defaultLocationLoaded: true });
+                  }
+                })
+              )
+          )
+        )
+      );
+
+      return { load, loadMore, loadDefault };
     })
   );
 }

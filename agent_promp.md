@@ -38,3 +38,36 @@ Output requirements:
 - Do not duplicate AGENTS.md content verbatim — instead point to it where appropriate and 
   add details AGENTS.md doesn't cover (e.g. deeper file-by-file structure, testing nuances, 
   frontend specifics).
+
+
+
+
+
+
+
+
+
+
+
+  --------------------------------------------
+  Review the current state of the skestock repository and update /AGENTS.md to reflect the actual codebase. Do this:
+1.
+Walk src/ and tests/ to confirm the current project list, layer references, and folder structure (compare against what's documented — flag any projects/folders that were added, removed, or renamed).
+2.
+For each Application/Features/<Slice> folder, verify which use-cases exist (Create/Update/Edit/Disable/Enable/GetAll/GetById) and whether it has pagination/filter/sort/cache boilerplate, and update the "Scaffolding" / feature-slice sections accordingly.
+3.
+Check Application/DependencyInjection.cs for the current Mediator pipeline Behaviours order and update the documented pipeline if it changed.
+4.
+Check Directory.Packages.props for any new/bumped package versions relevant to conventions (Mediator, FluentValidation, EF Core, Aspire, etc.) and update version call-outs only if AGENTS.md pins specific versions.
+5.
+Confirm the async outbox → queue → Worker flow, Storage (SAS blob) flow, and Auth setup still match what's described — note any behavioral drift (e.g., Worker no longer a stub, antiforgery enabled, new roles added).
+6.
+Check src/AppHost/Program.cs for new/changed Aspire resources and update the resource graph section if it drifted.
+7.
+Check tests/ projects for new coverage (e.g., if Domain.UnitTests or GoodsReceipts functional tests now exist) and update the testing strategy section.
+8.
+Keep AGENTS.md as the concise canonical quick-reference — do NOT duplicate the deep file-by-file detail that belongs in the Copilot instructions file; only update what's actually documented in AGENTS.md itself.
+9.
+Preserve existing formatting/style and don't invent new sections unless something genuinely new and cross-cutting was added (e.g., a new layer, a new cross-cutting behaviour, a new auth mechanism).
+10.
+Output a summary of what changed and why, and only edit lines that are stale or incorrect — don't rewrite the whole file.

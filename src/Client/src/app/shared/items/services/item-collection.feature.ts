@@ -1,32 +1,29 @@
 import {
-  CategoryDto,
-  GetAllCategoriesRequest,
-  PaginatedResponse,
+  ItemDto,
+  GetAllItemsRequest,
   PAGINATION_PAGE_SIZE,
-  PaginatedResponseData, buildCategoryListFilter
+  PaginatedResponseData, buildItemListFilter
 } from '@ske/models';
 import { patchState, signalStoreFeature, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
 // noinspection ES6PreferShortImport
-import { CategoriesHttp } from '../services/categories.http';
-import { categoryRealtimeEvents } from './category.events';
+import { ItemsHttp } from './items.http';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
-import { eventGroup, on, withReducer } from '@ngrx/signals/events';
 
 
-type CategoryCollectionState = {
-  categories: CategoryDto[];
+type ItemCollectionState = {
+  items: ItemDto[];
   paginationData: PaginatedResponseData | null;
-  filter: GetAllCategoriesRequest;
+  filter: GetAllItemsRequest;
   isLoadingMore: boolean;
 };
 
-const initialState: CategoryCollectionState = {
-  categories: [],
+const initialState: ItemCollectionState = {
+  items: [],
   paginationData: null,
   filter: {
     sort: [],
@@ -38,43 +35,43 @@ const initialState: CategoryCollectionState = {
   isLoadingMore: false
 };
 
-export function withCategoryCollection() {
+export function withItemCollection() {
   return signalStoreFeature(
     withState(initialState),
-    withLoadingFeature('categories'),
-    withProblemDetailsFeature('categories'),
+    withLoadingFeature('items'),
+    withProblemDetailsFeature('items'),
     withComputed((store) => ({
       hasNextPage: () => store.paginationData()?.hasNextPage ?? false,
       nextCursor: () => store.paginationData()?.nextCursor ?? null
     })),
     withProps(() => ({
-      categoryHttp: inject(CategoriesHttp)
+      itemHttp: inject(ItemsHttp)
     })),
     withMethods((store) => {
-      const load = rxMethod<GetAllCategoriesRequest>(
+      const load = rxMethod<GetAllItemsRequest>(
         pipe(
-          map(data => buildCategoryListFilter(store.filter(), data)),
+          map(data => buildItemListFilter(store.filter(), data)),
           tap((filter) => {
-            store.clearCategoriesErrors();
-            store.categoriesLoading();
+            store.clearItemsErrors();
+            store.itemsLoading();
 
             patchState(store, { filter, isLoadingMore: false });
           }),
           switchMap(filter =>
-            store.categoryHttp.getAll(filter)
+            store.itemHttp.getAll(filter)
               .pipe(
                 mapResponse({
                   next: (result) => {
                     patchState(store, {
-                      categories: result.data,
+                      items: result.data,
                       paginationData: result,
                       filter: { ...filter, cursor: null, sort: result.sort }
                     });
-                    store.setCategoriesLoaded();
+                    store.setItemsLoaded();
                   },
                   error: (error) => {
-                    store.handleCategoriesError(error);
-                    store.setCategoriesLoaded();
+                    store.handleItemsError(error);
+                    store.setItemsLoaded();
                   }
                 })
               )
@@ -86,7 +83,7 @@ export function withCategoryCollection() {
         pipe(
           filter(() => store.hasNextPage() && !store.isLoadingMore()),
           tap(() => {
-            store.clearCategoriesErrors();
+            store.clearItemsErrors();
             patchState(store, { isLoadingMore: true });
           }),
           switchMap(() => {
@@ -98,20 +95,20 @@ export function withCategoryCollection() {
               return EMPTY;
             }
 
-            return store.categoryHttp.getAll({ ...filter, cursor: nextCursor })
+            return store.itemHttp.getAll({ ...filter, cursor: nextCursor })
               .pipe(
                 mapResponse({
                   next: (result) => {
                     patchState(store, {
-                      categories: [...store.categories(), ...result.data],
+                      items: [...store.items(), ...result.data],
                       paginationData: result,
                       filter: { ...filter, cursor: null, sort: result.sort },
                       isLoadingMore: false
                     });
-                    store.setCategoriesLoaded();
+                    store.setItemsLoaded();
                   },
                   error: (error) => {
-                    store.handleCategoriesError(error);
+                    store.handleItemsError(error);
                     patchState(store, { isLoadingMore: false });
                   }
                 })
@@ -122,14 +119,6 @@ export function withCategoryCollection() {
       );
 
       return { load, loadMore };
-    }),
-    withReducer(
-      on(categoryRealtimeEvents.categoryUpdated, (event, state) => {
-        console.log('categoryUpdated event received:', event);
-        return {
-          ...state
-        };
-      })
-    )
+    })
   );
 }

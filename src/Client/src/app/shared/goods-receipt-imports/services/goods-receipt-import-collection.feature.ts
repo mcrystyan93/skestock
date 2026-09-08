@@ -1,29 +1,33 @@
 import {
-  buildStockBatchListFilter,
-  GetAllStockBatchesRequest,
+  buildGoodsReceiptImportListFilter,
+  GetAllGoodsReceiptImportsRequest,
+  GoodsReceiptImportListItemDto,
   PAGINATION_PAGE_SIZE,
-  PaginatedResponseData,
-  StockBatchListItemDto
+  PaginatedResponseData
 } from '@ske/models';
 import { patchState, signalStoreFeature, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
 // noinspection ES6PreferShortImport
-import { StockBatchesHttp } from '../services/stock-batches.http';
+import { GoodsReceiptImportsHttp } from './goods-receipt-imports.http';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
+import { Events, on, withEventHandlers, withReducer } from '@ngrx/signals/events';
+import { goodsReceiptImportRealtimeEvents } from './goods-receipt-import.events';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
-type StockBatchCollectionState = {
-  stockBatches: StockBatchListItemDto[];
+type GoodsReceiptImportCollectionState = {
+  goodsReceiptImports: GoodsReceiptImportListItemDto[];
   paginationData: PaginatedResponseData | null;
-  filter: GetAllStockBatchesRequest;
+  filter: GetAllGoodsReceiptImportsRequest;
   isLoadingMore: boolean;
+  listHasChanged: boolean;
 };
 
-const initialState: StockBatchCollectionState = {
-  stockBatches: [],
+const initialState: GoodsReceiptImportCollectionState = {
+  goodsReceiptImports: [],
   paginationData: null,
   filter: {
     sort: [],
@@ -32,46 +36,47 @@ const initialState: StockBatchCollectionState = {
     pageSize: PAGINATION_PAGE_SIZE,
     searchTerm: null
   },
-  isLoadingMore: false
+  isLoadingMore: false,
+  listHasChanged: false
 };
 
-export function withStockBatchCollection() {
+export function withGoodsReceiptImportCollection() {
   return signalStoreFeature(
     withState(initialState),
-    withLoadingFeature('stockBatches'),
-    withProblemDetailsFeature('stockBatches'),
+    withLoadingFeature('goodsReceiptImports'),
+    withProblemDetailsFeature('goodsReceiptImports'),
     withComputed((store) => ({
       hasNextPage: () => store.paginationData()?.hasNextPage ?? false,
       nextCursor: () => store.paginationData()?.nextCursor ?? null
     })),
     withProps(() => ({
-      stockBatchesHttp: inject(StockBatchesHttp)
+      goodsReceiptImportsHttp: inject(GoodsReceiptImportsHttp)
     })),
     withMethods((store) => {
-      const load = rxMethod<GetAllStockBatchesRequest>(
+      const load = rxMethod<GetAllGoodsReceiptImportsRequest>(
         pipe(
-          map((data) => buildStockBatchListFilter(store.filter(), data)),
+          map((data) => buildGoodsReceiptImportListFilter(store.filter(), data)),
           tap((filter) => {
-            store.clearStockBatchesErrors();
-            store.setStockBatchesLoading();
+            store.clearGoodsReceiptImportsErrors();
+            store.setGoodsReceiptImportsLoading();
 
             patchState(store, { filter, isLoadingMore: false });
           }),
           switchMap((filter) =>
-            store.stockBatchesHttp.getAll(filter)
+            store.goodsReceiptImportsHttp.getAll(filter)
               .pipe(
                 mapResponse({
                   next: (result) => {
                     patchState(store, {
-                      stockBatches: result.data,
+                      goodsReceiptImports: result.data,
                       paginationData: result,
                       filter: { ...filter, cursor: null, sort: result.sort }
                     });
-                    store.setStockBatchesLoaded();
+                    store.setGoodsReceiptImportsLoaded();
                   },
                   error: (error) => {
-                    store.handleStockBatchesError(error);
-                    store.setStockBatchesLoaded();
+                    store.handleGoodsReceiptImportsError(error);
+                    store.setGoodsReceiptImportsLoaded();
                   }
                 })
               )
@@ -83,7 +88,7 @@ export function withStockBatchCollection() {
         pipe(
           filter(() => store.hasNextPage() && !store.isLoadingMore()),
           tap(() => {
-            store.clearStockBatchesErrors();
+            store.clearGoodsReceiptImportsErrors();
             patchState(store, { isLoadingMore: true });
           }),
           switchMap(() => {
@@ -95,20 +100,20 @@ export function withStockBatchCollection() {
               return EMPTY;
             }
 
-            return store.stockBatchesHttp.getAll({ ...filter, cursor: nextCursor })
+            return store.goodsReceiptImportsHttp.getAll({ ...filter, cursor: nextCursor })
               .pipe(
                 mapResponse({
                   next: (result) => {
                     patchState(store, {
-                      stockBatches: [...store.stockBatches(), ...result.data],
+                      goodsReceiptImports: [...store.goodsReceiptImports(), ...result.data],
                       paginationData: result,
                       filter: { ...filter, cursor: null, sort: result.sort },
                       isLoadingMore: false
                     });
-                    store.setStockBatchesLoaded();
+                    store.setGoodsReceiptImportsLoaded();
                   },
                   error: (error) => {
-                    store.handleStockBatchesError(error);
+                    store.handleGoodsReceiptImportsError(error);
                     patchState(store, { isLoadingMore: false });
                   }
                 })
@@ -118,6 +123,20 @@ export function withStockBatchCollection() {
       );
 
       return { load, loadMore };
-    })
+    }),
+    withEventHandlers((store, events = inject(Events), nzMessageService = inject(NzMessageService)) => ({
+      notifyUser: events.on(goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed)
+        .pipe(
+          tap(() => nzMessageService.success(
+            'Importul de bunuri a fost procesat cu succes. Lista a fost reîncărcată.',
+            { nzDuration: 5000 })
+          )
+        ),
+      importCreated: events.on(goodsReceiptImportRealtimeEvents.goodsReceiptImportCreated, goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed)
+        .pipe(
+          tap(() => console.log('signalR event from goods-receipt-import-collection')),
+          tap(() => store.load(store.filter()))
+        )
+    }))
   );
 }

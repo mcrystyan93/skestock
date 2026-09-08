@@ -1,5 +1,5 @@
 import { signalStore, withState } from '@ngrx/signals';
-import { withLocationCollection } from '../store-features/location-collection.feature';
+import { withLocationCollection } from './location-collection.feature';
 
 type LocationDropdownState = {};
 const initialState: LocationDropdownState = {};
