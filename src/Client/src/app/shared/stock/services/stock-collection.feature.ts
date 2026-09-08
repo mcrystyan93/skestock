@@ -3,7 +3,7 @@ import { patchState, signalStoreFeature, withMethods, withProps, withState } fro
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
-import { StockHttp } from '../services/stock.http';
+import { StockHttp } from './stock.http';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';

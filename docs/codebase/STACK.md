@@ -18,9 +18,9 @@ Only high-impact production dependencies listed (see `Directory.Packages.props` 
 
 | Dependency | Version | Role in system | Evidence |
 |------------|---------|-----------------|----------|
-| ASP.NET Core / `Microsoft.AspNetCore.OpenApi` | 10.0.11 | Minimal API host (`src/Web`), OpenAPI generation | `Directory.Packages.props`, `src/Web/Program.cs` |
+| ASP.NET Core / `Microsoft.AspNetCore.OpenApi` | .NET 10 / 10.0.11 | Minimal API host (`src/Web`), OpenAPI generation | `Directory.Build.props`, `Directory.Packages.props`, `src/Web/Program.cs` |
 | `Microsoft.EntityFrameworkCore` (+ `.Design`, SqlServer via Aspire) | 10.0.11 | ORM, migrations, `ApplicationDbContext` | `src/Infrastructure/Data/ApplicationDbContext.cs` |
-| `Microsoft.AspNetCore.Identity.EntityFrameworkCore` | 10.0.11 | User/role identity store (`IdentityDbContext<ApplicationUser, IdentityRole<int>, int>`) | `src/Infrastructure/Data/ApplicationDbContext.cs` |
+| `Microsoft.AspNetCore.Identity.EntityFrameworkCore` | 10.0.11 | User/role identity store (`IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>`) | `src/Infrastructure/Data/ApplicationDbContext.cs` |
 | `Mediator.Abstractions` / `Mediator.SourceGenerator` | 3.0.2 | CQRS mediator (source-generator based, **not MediatR**) — commands/queries/pipeline behaviours | `src/Application/DependencyInjection.cs` |
 | `FluentValidation.DependencyInjectionExtensions` | 12.1.1 | Request validators, wired into the Mediator pipeline via `ValidationBehaviour` | `src/Application/Common/Behaviours/ValidationBehaviour.cs` |
 | `FluentResults` | 4.0.0 | `Result`/`Result<T>` return type for expected business failures | `src/Application/Common/Errors/CategoryErrors.cs` |

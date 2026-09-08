@@ -1,5 +1,5 @@
 import { signalStore, withState } from '@ngrx/signals';
-import { withStockCollection } from '../store-features/stock-collection.feature';
+import { withStockCollection } from './stock-collection.feature';
 
 type StockState = {};
 const initialState: StockState = {};

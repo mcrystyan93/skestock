@@ -63,7 +63,7 @@
 ### 5) Evidence
 
 - `skestock.slnx` (authoritative project list and grouping)
-- `.github/skills/acquire-codebase-knowledge/scripts/scan.py` output (`docs/codebase/.codebase-scan.txt`) — directory tree, code metrics
+- `.github/skills/acquire-codebase-knowledge/scripts/scan.py` and direct repository listings — directory tree and code metrics
 - `src/AppHost/Program.cs`, `src/Web/Program.cs`, `tests/TestAppHost/Program.cs` (entry points)
 - Direct `find`/`ls` listings of `src/Application/Features/*`, `tests/Application.UnitTests/Features/*`, `tests/Application.FunctionalTests/Features/*`
 

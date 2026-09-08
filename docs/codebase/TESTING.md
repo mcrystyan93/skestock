@@ -4,7 +4,7 @@
 
 ### 1) Test Stack and Commands
 
-- Primary test framework: **NUnit 4.6.1** (`NUnit3TestAdapter` 6.3.0, `NUnit.Analyzers` 4.14.0) — **not** xUnit, across all four test projects.
+- Primary test framework: **NUnit 4.6.1** (`NUnit3TestAdapter` 6.3.0, `NUnit.Analyzers` 4.14.0) — **not** xUnit, across the four test suites; `TestAppHost` is a supporting Aspire host project.
 - Assertion/mocking tools: **Shouldly 4.3.0** (assertions), **Moq 4.20.72** (mocking), **Respawn 7.0.0** (DB reset for functional tests), `coverlet.collector` 10.0.1 (coverage collection, no enforced threshold found).
 - Commands:
 
@@ -31,7 +31,7 @@ dotnet test --settings functional-tests.runsettings   # alternative: force DOCKE
 | Integration | Yes | `tests/Infrastructure.IntegrationTests` — exercises `ApplicationDbContext`/EF Core directly against a real database | Requires Docker/Podman (same as functional tests, since Infrastructure needs a live SQL Server) |
 | Functional (HTTP end-to-end) | Yes | `tests/Application.FunctionalTests` — full HTTP pipeline via `WebApiFactory`, driven by a live Aspire-hosted SQL Server + Redis (`TestAppHost`) | This is the repo's closest equivalent to E2E testing — no separate browser/UI E2E layer exists (no frontend yet) |
 | Domain unit tests | **No** | `tests/Domain.UnitTests` project exists but contains **zero test files** (only the `.csproj`) | Confirmed via direct listing — don't assume any Domain-layer logic has test coverage |
-| E2E (browser/UI) | Not applicable | — | No frontend project exists yet (see `.github/instructions/angular-guidelines.instructions.md` for the planned Angular frontend, not yet scaffolded) |
+| E2E (browser/UI) | No dedicated suite declared | `src/Client` Angular application | Frontend unit/component tests use Vitest via `npm test`; no browser E2E runner is declared |
 
 ### 4) Mocking and Isolation Strategy
 

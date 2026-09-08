@@ -1,33 +1,32 @@
 import {
-  buildGoodsReceiptImportListFilter,
-  GetAllGoodsReceiptImportsRequest,
-  GoodsReceiptImportListItemDto,
+  CategoryDto,
+  GetAllCategoriesRequest,
+  PaginatedResponse,
   PAGINATION_PAGE_SIZE,
-  PaginatedResponseData
+  PaginatedResponseData, buildCategoryListFilter
 } from '@ske/models';
 import { patchState, signalStoreFeature, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
 // noinspection ES6PreferShortImport
-import { GoodsReceiptImportsHttp } from '../services/goods-receipt-imports.http';
+import { CategoriesHttp } from './categories.http';
+import { categoryRealtimeEvents } from './category.events';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
-import { Events, on, withEventHandlers, withReducer } from '@ngrx/signals/events';
-import { goodsReceiptImportRealtimeEvents } from './goods-receipt-import.events';
-import { NzMessageService } from 'ng-zorro-antd/message';
+import { eventGroup, on, withReducer } from '@ngrx/signals/events';
 
-type GoodsReceiptImportCollectionState = {
-  goodsReceiptImports: GoodsReceiptImportListItemDto[];
+
+type CategoryCollectionState = {
+  categories: CategoryDto[];
   paginationData: PaginatedResponseData | null;
-  filter: GetAllGoodsReceiptImportsRequest;
+  filter: GetAllCategoriesRequest;
   isLoadingMore: boolean;
-  listHasChanged: boolean;
 };
 
-const initialState: GoodsReceiptImportCollectionState = {
-  goodsReceiptImports: [],
+const initialState: CategoryCollectionState = {
+  categories: [],
   paginationData: null,
   filter: {
     sort: [],
@@ -36,47 +35,46 @@ const initialState: GoodsReceiptImportCollectionState = {
     pageSize: PAGINATION_PAGE_SIZE,
     searchTerm: null
   },
-  isLoadingMore: false,
-  listHasChanged: false
+  isLoadingMore: false
 };
 
-export function withGoodsReceiptImportCollection() {
+export function withCategoryCollection() {
   return signalStoreFeature(
     withState(initialState),
-    withLoadingFeature('goodsReceiptImports'),
-    withProblemDetailsFeature('goodsReceiptImports'),
+    withLoadingFeature('categories'),
+    withProblemDetailsFeature('categories'),
     withComputed((store) => ({
       hasNextPage: () => store.paginationData()?.hasNextPage ?? false,
       nextCursor: () => store.paginationData()?.nextCursor ?? null
     })),
     withProps(() => ({
-      goodsReceiptImportsHttp: inject(GoodsReceiptImportsHttp)
+      categoryHttp: inject(CategoriesHttp)
     })),
     withMethods((store) => {
-      const load = rxMethod<GetAllGoodsReceiptImportsRequest>(
+      const load = rxMethod<GetAllCategoriesRequest>(
         pipe(
-          map((data) => buildGoodsReceiptImportListFilter(store.filter(), data)),
+          map(data => buildCategoryListFilter(store.filter(), data)),
           tap((filter) => {
-            store.clearGoodsReceiptImportsErrors();
-            store.setGoodsReceiptImportsLoading();
+            store.clearCategoriesErrors();
+            store.categoriesLoading();
 
             patchState(store, { filter, isLoadingMore: false });
           }),
-          switchMap((filter) =>
-            store.goodsReceiptImportsHttp.getAll(filter)
+          switchMap(filter =>
+            store.categoryHttp.getAll(filter)
               .pipe(
                 mapResponse({
                   next: (result) => {
                     patchState(store, {
-                      goodsReceiptImports: result.data,
+                      categories: result.data,
                       paginationData: result,
                       filter: { ...filter, cursor: null, sort: result.sort }
                     });
-                    store.setGoodsReceiptImportsLoaded();
+                    store.setCategoriesLoaded();
                   },
                   error: (error) => {
-                    store.handleGoodsReceiptImportsError(error);
-                    store.setGoodsReceiptImportsLoaded();
+                    store.handleCategoriesError(error);
+                    store.setCategoriesLoaded();
                   }
                 })
               )
@@ -88,7 +86,7 @@ export function withGoodsReceiptImportCollection() {
         pipe(
           filter(() => store.hasNextPage() && !store.isLoadingMore()),
           tap(() => {
-            store.clearGoodsReceiptImportsErrors();
+            store.clearCategoriesErrors();
             patchState(store, { isLoadingMore: true });
           }),
           switchMap(() => {
@@ -100,43 +98,38 @@ export function withGoodsReceiptImportCollection() {
               return EMPTY;
             }
 
-            return store.goodsReceiptImportsHttp.getAll({ ...filter, cursor: nextCursor })
+            return store.categoryHttp.getAll({ ...filter, cursor: nextCursor })
               .pipe(
                 mapResponse({
                   next: (result) => {
                     patchState(store, {
-                      goodsReceiptImports: [...store.goodsReceiptImports(), ...result.data],
+                      categories: [...store.categories(), ...result.data],
                       paginationData: result,
                       filter: { ...filter, cursor: null, sort: result.sort },
                       isLoadingMore: false
                     });
-                    store.setGoodsReceiptImportsLoaded();
+                    store.setCategoriesLoaded();
                   },
                   error: (error) => {
-                    store.handleGoodsReceiptImportsError(error);
+                    store.handleCategoriesError(error);
                     patchState(store, { isLoadingMore: false });
                   }
                 })
               );
+
           })
         )
       );
 
       return { load, loadMore };
     }),
-    withEventHandlers((store, events = inject(Events), nzMessageService = inject(NzMessageService)) => ({
-      notifyUser: events.on(goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed)
-        .pipe(
-          tap(() => nzMessageService.success(
-            'Importul de bunuri a fost procesat cu succes. Lista a fost reîncărcată.',
-            { nzDuration: 5000 })
-          )
-        ),
-      importCreated: events.on(goodsReceiptImportRealtimeEvents.goodsReceiptImportCreated, goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed)
-        .pipe(
-          tap(() => console.log('signalR event from goods-receipt-import-collection')),
-          tap(() => store.load(store.filter()))
-        )
-    }))
+    withReducer(
+      on(categoryRealtimeEvents.categoryUpdated, (event, state) => {
+        console.log('categoryUpdated event received:', event);
+        return {
+          ...state
+        };
+      })
+    )
   );
 }

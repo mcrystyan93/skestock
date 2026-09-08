@@ -1,18 +1,14 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { BaseTable } from '@ske/shared/tables';
 import { GetAllGoodsReceiptsRequest, GOODS_RECEIPT_TABLE_COLUMNS, GoodsReceiptListItemDto } from '@ske/models';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
-import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { TableContainer as StockBatchesTableContainer } from '@ske/shared/stock-batches';
 
 @Component({
   imports: [
     NzTableModule,
     DatePipe,
-    NzButtonComponent,
-    NzIconDirective,
     StockBatchesTableContainer,
     CurrencyPipe,
     DecimalPipe

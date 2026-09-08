@@ -1,31 +1,29 @@
 import {
-  LocationDto,
-  GetAllLocationsRequest,
+  buildStockBatchListFilter,
+  GetAllStockBatchesRequest,
   PAGINATION_PAGE_SIZE,
-  PaginatedResponseData, buildLocationListFilter
+  PaginatedResponseData,
+  StockBatchListItemDto
 } from '@ske/models';
 import { patchState, signalStoreFeature, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
 // noinspection ES6PreferShortImport
-import { LocationsHttp } from '../services/locations.http';
+import { StockBatchesHttp } from './stock-batches.http';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { EMPTY, exhaustMap, filter, map, pipe, switchMap, tap } from 'rxjs';
+import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
 
-
-type LocationCollectionState = {
-  locations: LocationDto[];
+type StockBatchCollectionState = {
+  stockBatches: StockBatchListItemDto[];
   paginationData: PaginatedResponseData | null;
-  filter: GetAllLocationsRequest;
+  filter: GetAllStockBatchesRequest;
   isLoadingMore: boolean;
-  defaultLocation: LocationDto | null;
-  defaultLocationLoaded: boolean;
 };
 
-const initialState: LocationCollectionState = {
-  locations: [],
+const initialState: StockBatchCollectionState = {
+  stockBatches: [],
   paginationData: null,
   filter: {
     sort: [],
@@ -34,48 +32,46 @@ const initialState: LocationCollectionState = {
     pageSize: PAGINATION_PAGE_SIZE,
     searchTerm: null
   },
-  isLoadingMore: false,
-  defaultLocation: null,
-  defaultLocationLoaded: false
+  isLoadingMore: false
 };
 
-export function withLocationCollection() {
+export function withStockBatchCollection() {
   return signalStoreFeature(
     withState(initialState),
-    withLoadingFeature('locations'),
-    withProblemDetailsFeature('locations'),
+    withLoadingFeature('stockBatches'),
+    withProblemDetailsFeature('stockBatches'),
     withComputed((store) => ({
       hasNextPage: () => store.paginationData()?.hasNextPage ?? false,
       nextCursor: () => store.paginationData()?.nextCursor ?? null
     })),
     withProps(() => ({
-      locationHttp: inject(LocationsHttp)
+      stockBatchesHttp: inject(StockBatchesHttp)
     })),
     withMethods((store) => {
-      const load = rxMethod<GetAllLocationsRequest>(
+      const load = rxMethod<GetAllStockBatchesRequest>(
         pipe(
-          map(data => buildLocationListFilter(store.filter(), data)),
+          map((data) => buildStockBatchListFilter(store.filter(), data)),
           tap((filter) => {
-            store.clearLocationsErrors();
-            store.locationsLoading();
+            store.clearStockBatchesErrors();
+            store.setStockBatchesLoading();
 
             patchState(store, { filter, isLoadingMore: false });
           }),
-          switchMap(filter =>
-            store.locationHttp.getAll(filter)
+          switchMap((filter) =>
+            store.stockBatchesHttp.getAll(filter)
               .pipe(
                 mapResponse({
                   next: (result) => {
                     patchState(store, {
-                      locations: result.data,
+                      stockBatches: result.data,
                       paginationData: result,
                       filter: { ...filter, cursor: null, sort: result.sort }
                     });
-                    store.setLocationsLoaded();
+                    store.setStockBatchesLoaded();
                   },
                   error: (error) => {
-                    store.handleLocationsError(error);
-                    store.setLocationsLoaded();
+                    store.handleStockBatchesError(error);
+                    store.setStockBatchesLoaded();
                   }
                 })
               )
@@ -87,7 +83,7 @@ export function withLocationCollection() {
         pipe(
           filter(() => store.hasNextPage() && !store.isLoadingMore()),
           tap(() => {
-            store.clearLocationsErrors();
+            store.clearStockBatchesErrors();
             patchState(store, { isLoadingMore: true });
           }),
           switchMap(() => {
@@ -99,51 +95,29 @@ export function withLocationCollection() {
               return EMPTY;
             }
 
-            return store.locationHttp.getAll({ ...filter, cursor: nextCursor })
+            return store.stockBatchesHttp.getAll({ ...filter, cursor: nextCursor })
               .pipe(
                 mapResponse({
                   next: (result) => {
                     patchState(store, {
-                      locations: [...store.locations(), ...result.data],
+                      stockBatches: [...store.stockBatches(), ...result.data],
                       paginationData: result,
                       filter: { ...filter, cursor: null, sort: result.sort },
                       isLoadingMore: false
                     });
-                    store.setLocationsLoaded();
+                    store.setStockBatchesLoaded();
                   },
                   error: (error) => {
-                    store.handleLocationsError(error);
+                    store.handleStockBatchesError(error);
                     patchState(store, { isLoadingMore: false });
                   }
                 })
               );
-
           })
         )
       );
 
-      const loadDefault = rxMethod<void>(
-        pipe(
-          tap(() => store.clearLocationsErrors()),
-          filter(()=> !store.defaultLocationLoaded()),
-          exhaustMap(() =>
-            store.locationHttp.getDefault()
-              .pipe(
-                mapResponse({
-                  next: (defaultLocation) => {
-                    patchState(store, { defaultLocation, defaultLocationLoaded: true });
-                  },
-                  error: (error) => {
-                    store.handleLocationsError(error);
-                    patchState(store, { defaultLocationLoaded: true });
-                  }
-                })
-              )
-          )
-        )
-      );
-
-      return { load, loadMore, loadDefault };
+      return { load, loadMore };
     })
   );
 }

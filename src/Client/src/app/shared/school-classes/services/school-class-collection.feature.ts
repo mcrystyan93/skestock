@@ -1,29 +1,30 @@
 import {
-  ItemDto,
-  GetAllItemsRequest,
+  buildSchoolClassListFilter,
+  GetAllSchoolClassesRequest,
   PAGINATION_PAGE_SIZE,
-  PaginatedResponseData, buildItemListFilter
+  PaginatedResponseData,
+  SchoolClassDto
 } from '@ske/models';
 import { patchState, signalStoreFeature, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
 // noinspection ES6PreferShortImport
-import { ItemsHttp } from '../services/items.http';
+import { SchoolClassesHttp } from './school-classes.http';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
 
 
-type ItemCollectionState = {
-  items: ItemDto[];
+type SchoolClassCollectionState = {
+  schoolClasses: SchoolClassDto[];
   paginationData: PaginatedResponseData | null;
-  filter: GetAllItemsRequest;
+  filter: GetAllSchoolClassesRequest;
   isLoadingMore: boolean;
 };
 
-const initialState: ItemCollectionState = {
-  items: [],
+const initialState: SchoolClassCollectionState = {
+  schoolClasses: [],
   paginationData: null,
   filter: {
     sort: [],
@@ -35,43 +36,43 @@ const initialState: ItemCollectionState = {
   isLoadingMore: false
 };
 
-export function withItemCollection() {
+export function withSchoolClassCollection() {
   return signalStoreFeature(
     withState(initialState),
-    withLoadingFeature('items'),
-    withProblemDetailsFeature('items'),
+    withLoadingFeature('schoolClasses'),
+    withProblemDetailsFeature('schoolClasses'),
     withComputed((store) => ({
       hasNextPage: () => store.paginationData()?.hasNextPage ?? false,
       nextCursor: () => store.paginationData()?.nextCursor ?? null
     })),
     withProps(() => ({
-      itemHttp: inject(ItemsHttp)
+      schoolClassHttp: inject(SchoolClassesHttp)
     })),
     withMethods((store) => {
-      const load = rxMethod<GetAllItemsRequest>(
+      const load = rxMethod<GetAllSchoolClassesRequest>(
         pipe(
-          map(data => buildItemListFilter(store.filter(), data)),
+          map(data => buildSchoolClassListFilter(store.filter(), data)),
           tap((filter) => {
-            store.clearItemsErrors();
-            store.itemsLoading();
+            store.clearSchoolClassesErrors();
+            store.schoolClassesLoading();
 
             patchState(store, { filter, isLoadingMore: false });
           }),
           switchMap(filter =>
-            store.itemHttp.getAll(filter)
+            store.schoolClassHttp.getAll(filter)
               .pipe(
                 mapResponse({
                   next: (result) => {
                     patchState(store, {
-                      items: result.data,
+                      schoolClasses: result.data,
                       paginationData: result,
                       filter: { ...filter, cursor: null, sort: result.sort }
                     });
-                    store.setItemsLoaded();
+                    store.setSchoolClassesLoaded();
                   },
                   error: (error) => {
-                    store.handleItemsError(error);
-                    store.setItemsLoaded();
+                    store.handleSchoolClassesError(error);
+                    store.setSchoolClassesLoaded();
                   }
                 })
               )
@@ -83,7 +84,7 @@ export function withItemCollection() {
         pipe(
           filter(() => store.hasNextPage() && !store.isLoadingMore()),
           tap(() => {
-            store.clearItemsErrors();
+            store.clearSchoolClassesErrors();
             patchState(store, { isLoadingMore: true });
           }),
           switchMap(() => {
@@ -95,20 +96,20 @@ export function withItemCollection() {
               return EMPTY;
             }
 
-            return store.itemHttp.getAll({ ...filter, cursor: nextCursor })
+            return store.schoolClassHttp.getAll({ ...filter, cursor: nextCursor })
               .pipe(
                 mapResponse({
                   next: (result) => {
                     patchState(store, {
-                      items: [...store.items(), ...result.data],
+                      schoolClasses: [...store.schoolClasses(), ...result.data],
                       paginationData: result,
                       filter: { ...filter, cursor: null, sort: result.sort },
                       isLoadingMore: false
                     });
-                    store.setItemsLoaded();
+                    store.setSchoolClassesLoaded();
                   },
                   error: (error) => {
-                    store.handleItemsError(error);
+                    store.handleSchoolClassesError(error);
                     patchState(store, { isLoadingMore: false });
                   }
                 })
