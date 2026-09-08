@@ -5,7 +5,7 @@ using skestock.Application.Features.GoodsReceipts.Models;
 
 namespace skestock.Application.Features.GoodsReceipts.Queries.GetAllGoodsReceiptImports;
 
-public class GetAllGoodsReceiptImportsQuery : BasePaginationFilter, IRequest<Result<PaginatedResponse<GoodsReceiptImportListItemDto>>>, ICacheableQuery<PaginatedResponse<GoodsReceiptImportListItemDto>>
+public class GetAllGoodsReceiptImportsQuery : BasePaginationFilter, IRequest<Result<PaginatedResponse<GoodsReceiptImportListItemDto>>>, ICacheableQuery
 {
     public List<ColumnFilter> Filters { get; init; } = [];
     public IReadOnlyCollection<string> Tags => [CacheConstants.GoodsReceiptImportListTag];

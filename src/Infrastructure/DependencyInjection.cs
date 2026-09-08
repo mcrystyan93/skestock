@@ -25,6 +25,8 @@ using Microsoft.Extensions.Http.Resilience;
 using Polly;
 using skestock.Infrastructure.Realtime;
 using StackExchange.Redis;
+using ZiggyCreatures.Caching.Fusion;
+using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
 
 namespace skestock.Infrastructure;
 
@@ -67,7 +69,14 @@ public static class DependencyInjection
         builder.Services.AddTransient<IIdentityService, IdentityService>();
 
         builder.AddRedisDistributedCache(Services.Cache);
-        builder.Services.AddHybridCache();
+        builder.Services.AddFusionCache()
+            .WithBackplane(
+                new RedisBackplane(new RedisBackplaneOptions()
+                {
+                    Configuration = builder.Configuration.GetConnectionString(Services.Cache)
+                })
+            )
+            .AsHybridCache();
 
         builder.AddAzureBlobServiceClient(Services.BlobService);
         builder.AddAzureQueueServiceClient(Services.Queues);
@@ -85,7 +94,8 @@ public static class DependencyInjection
         builder.Services.AddSignalR(options =>
             {
                 options.KeepAliveInterval = TimeSpan.FromSeconds(15); // server pings the client
-                options.ClientTimeoutInterval = TimeSpan.FromSeconds(30); // if no ping/activity in this window, connection is dead
+                options.ClientTimeoutInterval =
+                    TimeSpan.FromSeconds(30); // if no ping/activity in this window, connection is dead
             })
             .AddStackExchangeRedis(redisConnectionString!, options =>
             {

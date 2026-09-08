@@ -60,7 +60,7 @@ Query-side caching and command-side invalidation are cross-cutting `Behaviours` 
 into the same Mediator pipeline (after `PerformanceBehaviour`): `CachingBehavior<,>` then
 `CacheInvalidationBehavior<,>`. Both use `HybridCache`'s native **tag-based invalidation**
 (not a hand-rolled version counter):
-- A query implements `ICacheableQuery<TResponse>` (`Tags`, `BypassCache`, `SlidingExpiration`,
+- A query implements `ICacheableQuery` (`Tags`, `BypassCache`, `SlidingExpiration`,
   `BuildCacheKey()`) — `CachingBehavior` calls `HybridCache.GetOrCreateAsync(key, factory,
   options, tags: message.Tags, ...)`, wrapping the `Result<TResponse>` via `ResultCache`/
   `ResultCacheTransformer`.
@@ -80,4 +80,3 @@ Identity uses ASP.NET Core Identity's built-in API endpoints (`MapIdentityApi<Ap
 ## Tests
 
 Four test projects mirror the layers: `Domain.UnitTests`, `Application.UnitTests`, `Application.FunctionalTests` (full Aspire-hosted stack via `TestAppHost`), `Infrastructure.IntegrationTests`. Functional tests reset the DB per test/fixture via `DatabaseResetter` — don't assume a clean DB is provided automatically outside that helper.
-

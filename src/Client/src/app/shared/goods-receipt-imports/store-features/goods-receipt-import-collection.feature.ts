@@ -134,6 +134,7 @@ export function withGoodsReceiptImportCollection() {
         ),
       importCreated: events.on(goodsReceiptImportRealtimeEvents.goodsReceiptImportCreated, goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed)
         .pipe(
+          tap(() => console.log('signalR event from goods-receipt-import-collection')),
           tap(() => store.load(store.filter()))
         )
     }))

@@ -3,6 +3,8 @@ namespace skestock.Application.Features.Stock;
 public static class CacheConstants
 {
     public const string Stock = "stock";
+    
+    public static string BuildCoarseTag() => $"{Stock}:class:all:location:all";
 
     /// <summary>
     /// Fine-grained cache tag for the current-stock report of one class+location pair.

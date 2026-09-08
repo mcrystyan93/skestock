@@ -3,7 +3,7 @@ using skestock.Application.Features.Stock.Models;
 
 namespace skestock.Application.Features.Stock.Queries.GetClassLocationStock;
 
-public class GetClassLocationStockQuery : IRequest<Result<List<StockItemDto>>>, ICacheableQuery<List<StockItemDto>>
+public class GetClassLocationStockQuery : IRequest<Result<List<StockItemDto>>>, ICacheableQuery
 {
     public Guid ClassId { get; init; }
 
@@ -20,8 +20,15 @@ public class GetClassLocationStockQuery : IRequest<Result<List<StockItemDto>>>, 
     public string? SearchTerm { get; init; }
 
     public IReadOnlyCollection<string> Tags =>
-        [LocationId is { } locationId ? CacheConstants.BuildTag(ClassId, locationId) : CacheConstants.BuildClassTag(ClassId)];
+    [
+        LocationId is { } locationId
+            ? CacheConstants.BuildTag(ClassId, locationId)
+            : CacheConstants.BuildClassTag(ClassId),
+        CacheConstants.BuildCoarseTag()
+    ];
+
     public bool BypassCache => false;
+
     public TimeSpan? SlidingExpiration =>
         SlidingExpirationHelper.GetRandomizedSlidingExpiration(TimeSpan.FromMinutes(5), 30);
 

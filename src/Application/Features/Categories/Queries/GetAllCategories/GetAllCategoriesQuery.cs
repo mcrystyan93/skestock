@@ -6,7 +6,7 @@ using skestock.Domain.Entities;
 
 namespace skestock.Application.Features.Categories.Queries.GetAllCategories;
 
-public class GetAllCategoriesQuery: BasePaginationFilter, IRequest<Result<PaginatedResponse<CategoryDto>>>, ICacheableQuery<PaginatedResponse<CategoryDto>>
+public class GetAllCategoriesQuery: BasePaginationFilter, IRequest<Result<PaginatedResponse<CategoryDto>>>, ICacheableQuery
 {
     public List<ColumnFilter> Filters { get; init; } = [];
     public IReadOnlyCollection<string> Tags => [CacheConstants.CategoryListTag];

@@ -73,5 +73,7 @@ public class GoodsReceiptImport : BaseAuditableEntity, IKeysetEntity
         Status = GoodsReceiptImportStatus.Confirmed;
         ResultingGoodsReceiptId = goodsReceiptId;
         ProcessedAt ??= DateTime.UtcNow;
+        
+        AddDomainEvent(new GoodsReceiptImportConfirmedEvent(Id));
     }
 }

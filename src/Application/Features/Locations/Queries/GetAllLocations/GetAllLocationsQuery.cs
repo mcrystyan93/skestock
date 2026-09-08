@@ -5,7 +5,7 @@ using skestock.Application.Features.Locations.Models;
 
 namespace skestock.Application.Features.Locations.Queries.GetAllLocations;
 
-public class GetAllLocationsQuery: BasePaginationFilter, IRequest<Result<PaginatedResponse<LocationDto>>>, ICacheableQuery<PaginatedResponse<LocationDto>>
+public class GetAllLocationsQuery: BasePaginationFilter, IRequest<Result<PaginatedResponse<LocationDto>>>, ICacheableQuery
 {
     public List<ColumnFilter> Filters { get; init; } = [];
     public IReadOnlyCollection<string> Tags => [CacheConstants.LocationListTag];

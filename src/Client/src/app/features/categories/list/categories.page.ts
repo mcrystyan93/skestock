@@ -8,12 +8,14 @@ import { Header } from './header/header';
 import { CategoryDetailModal } from '@ske/shared/categories';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SignalRGroupManagerStore } from '@ske/signalr';
+import { ErrorAlert } from '@ske/shared/errors';
 
 @Component({
   imports: [
     FilterContainer,
     Table,
-    Header
+    Header,
+    ErrorAlert
   ],
   selector: 'ske-categories-page',
   templateUrl: './categories.page.html',

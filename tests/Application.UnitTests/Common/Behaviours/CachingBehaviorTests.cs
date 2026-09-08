@@ -9,7 +9,7 @@ using Shouldly;
 
 namespace skestock.Application.UnitTests.Common.Behaviours;
 
-public record CacheableTestQuery(string CacheKeySuffix, bool Bypass = false) : IRequest<Result<string>>, ICacheableQuery<string>
+public record CacheableTestQuery(string CacheKeySuffix, bool Bypass = false) : IRequest<Result<string>>, ICacheableQuery
 {
     public IReadOnlyCollection<string> Tags => ["test-tag"];
     public bool BypassCache => Bypass;
@@ -40,7 +40,7 @@ public class CachingBehaviorTests
     [Test]
     public async Task Handle_WithBypassCache_AlwaysCallsNextAndNeverReturnsCachedValue()
     {
-        var behavior = new CachingBehavior<CacheableTestQuery, string>(_cache);
+        var behavior = new CachingBehavior<CacheableTestQuery, Result<string>>(_cache);
         var request = new CacheableTestQuery("key1", Bypass: true);
 
         var first = await behavior.Handle(request, Next, CancellationToken.None);
@@ -54,7 +54,7 @@ public class CachingBehaviorTests
     [Test]
     public async Task Handle_OnCacheMissThenHit_OnlyCallsNextOnce()
     {
-        var behavior = new CachingBehavior<CacheableTestQuery, string>(_cache);
+        var behavior = new CachingBehavior<CacheableTestQuery, Result<string>>(_cache);
         var request = new CacheableTestQuery("key2");
 
         var first = await behavior.Handle(request, Next, CancellationToken.None);
@@ -68,7 +68,7 @@ public class CachingBehaviorTests
     [Test]
     public async Task Handle_WithDifferentCacheKeys_CallsNextForEachDistinctKey()
     {
-        var behavior = new CachingBehavior<CacheableTestQuery, string>(_cache);
+        var behavior = new CachingBehavior<CacheableTestQuery, Result<string>>(_cache);
 
         await behavior.Handle(new CacheableTestQuery("keyA"), Next, CancellationToken.None);
         await behavior.Handle(new CacheableTestQuery("keyB"), Next, CancellationToken.None);
@@ -85,7 +85,7 @@ public class CachingBehaviorTests
             return new ValueTask<Result<string>>(Result.Fail<string>("boom"));
         }
 
-        var behavior = new CachingBehavior<CacheableTestQuery, string>(_cache);
+        var behavior = new CachingBehavior<CacheableTestQuery, Result<string>>(_cache);
         var request = new CacheableTestQuery("failkey");
 
         var first = await behavior.Handle(request, FailingNext, CancellationToken.None);
@@ -100,7 +100,7 @@ public class CachingBehaviorTests
     [Test]
     public async Task Handle_AfterTagInvalidation_CallsNextAgain()
     {
-        var behavior = new CachingBehavior<CacheableTestQuery, string>(_cache);
+        var behavior = new CachingBehavior<CacheableTestQuery, Result<string>>(_cache);
         var request = new CacheableTestQuery("key3");
 
         await behavior.Handle(request, Next, CancellationToken.None);

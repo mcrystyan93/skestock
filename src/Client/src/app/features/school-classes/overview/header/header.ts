@@ -11,6 +11,8 @@ import { NzStatisticComponent } from 'ng-zorro-antd/statistic';
 import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
+import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 
 @Component({
   imports: [
@@ -28,7 +30,10 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
     CurrencyPipe,
     NzTypographyComponent,
     NzPageHeaderExtraDirective,
-    NzButtonComponent
+    NzButtonComponent,
+    NzIconDirective,
+    NzSpaceComponent,
+    NzSpaceItemDirective
   ],
   selector: 'ske-school-class-overview-header',
   styles: ``,
@@ -40,4 +45,5 @@ export class Header {
 
   public selectedTabIndex = model<number>(0);
   public onAddGoodsReceipt = output<void>();
+  public onClose = output<void>();
 }

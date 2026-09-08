@@ -199,7 +199,7 @@ Registered in `src/Application/DependencyInjection.cs`'s `AddMediator(options =>
 3. `AuthorizationBehaviour<TRequest, TResponse>` — enforces `[Authorize]` on requests (`Common/Security`).
 4. `ValidationBehaviour<TRequest, TResponse>` — runs FluentValidation validators.
 5. `PerformanceBehaviour<TRequest, TResponse>` — logs slow requests.
-6. `CachingBehavior<TRequest, TResponse>` — intercepts `ICacheableQuery<T>` requests (HybridCache read-through).
+6. `CachingBehavior<TRequest, TResponse>` — intercepts `ICacheableQuery` requests (HybridCache read-through).
 7. `CacheInvalidationBehavior<TRequest, TResponse>` — invalidates tags for successful `ICacheInvalidation` commands.
 
 New cross-cutting behaviours must be inserted at the correct position in this chain, not
@@ -306,7 +306,7 @@ Conventions to follow (see `Categories.cs` / `Users.cs`):
 Query-side caching and command-side invalidation are cross-cutting `Behaviours`, wired into the
 Mediator pipeline last (after `PerformanceBehaviour`): `CachingBehavior<,>` then
 `CacheInvalidationBehavior<,>`. Both use `HybridCache`'s native **tag-based invalidation**:
-- A query implements `ICacheableQuery<TResponse>` (`Tags`, `BypassCache`, `SlidingExpiration`,
+- A query implements `ICacheableQuery` (`Tags`, `BypassCache`, `SlidingExpiration`,
   `BuildCacheKey()`) — see `GetAllCategoriesQuery` for a realistic `BuildCacheKey()` that
   incorporates search/filters/pageSize/cursor/sort via `CacheKeyNormalization` helpers (avoid ad
   hoc string interpolation, which risks inconsistent keys for logically-equal queries).

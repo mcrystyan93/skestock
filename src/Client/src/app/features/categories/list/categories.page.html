@@ -2,15 +2,19 @@
 
 <ske-category-filter-container class="mx-4" />
 
+<ske-error-alert [problemDetail]="store.categoriesProblemDetail()"
+                 [validationErrors]="store.categoriesValidationErrors()"
+                 class="mx-4" />
+
 <div class="grow relative mx-4 mb-4">
   <ske-category-table [items]="store.categories()"
-             [filter]="store.filter()"
-             [loading]="store.categoriesLoading()"
-             [hasNextPage]="store.hasNextPage()"
-             [isLoadingMore]="store.isLoadingMore()"
-             (onFilterChange)="onFilterChange($event)"
-             (onLoadMore)="onLoadMore()"
-             (onEdit)="onEdit($event)"
-             (onDelete)="onDelete($event)"
-             [deletingCategoryId]="store.deletingCategoryId()" />
+                      [filter]="store.filter()"
+                      [loading]="store.categoriesLoading()"
+                      [hasNextPage]="store.hasNextPage()"
+                      [isLoadingMore]="store.isLoadingMore()"
+                      (onFilterChange)="onFilterChange($event)"
+                      (onLoadMore)="onLoadMore()"
+                      (onEdit)="onEdit($event)"
+                      (onDelete)="onDelete($event)"
+                      [deletingCategoryId]="store.deletingCategoryId()" />
 </div>

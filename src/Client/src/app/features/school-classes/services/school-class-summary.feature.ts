@@ -51,12 +51,17 @@ export function withSchoolClassSummaryFeature() {
       return { loadSummary };
     }),
     withEventHandlers((store, events = inject(Events)) => ({
-        goodsReceiptImportChanges: events.on(goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed, goodsReceiptImportRealtimeEvents.goodsReceiptImportCreated)
-          .pipe(
-            map(() => store.summary().id),
-            filter((id): id is string => !!id),
-            tap((id) => store.loadSummary(id))
-          )
-      }))
-    );
+      goodsReceiptImportChanges: events.on(
+        goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed,
+        goodsReceiptImportRealtimeEvents.goodsReceiptImportCreated,
+        goodsReceiptImportRealtimeEvents.goodsReceiptImportConfirmed
+      )
+        .pipe(
+          map(() => store.summary().id),
+          filter((id): id is string => !!id),
+          tap(()=> console.log('signalR event triggered from school-class-summary')),
+          tap((id) => store.loadSummary(id))
+        )
+    }))
+  );
 }

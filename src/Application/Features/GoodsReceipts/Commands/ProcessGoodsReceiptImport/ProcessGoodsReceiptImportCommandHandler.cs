@@ -62,6 +62,7 @@ public class ProcessGoodsReceiptImportCommandHandler(
         // (the queue processor), which decides whether to retry.
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        
         return Result.Ok();
     }
 }

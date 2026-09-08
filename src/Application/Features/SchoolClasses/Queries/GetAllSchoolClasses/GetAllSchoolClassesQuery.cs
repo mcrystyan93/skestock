@@ -5,7 +5,7 @@ using skestock.Application.Features.SchoolClasses.Models;
 
 namespace skestock.Application.Features.SchoolClasses.Queries.GetAllSchoolClasses;
 
-public class GetAllSchoolClassesQuery: BasePaginationFilter, IRequest<Result<PaginatedResponse<SchoolClassDto>>>, ICacheableQuery<PaginatedResponse<SchoolClassDto>>
+public class GetAllSchoolClassesQuery: BasePaginationFilter, IRequest<Result<PaginatedResponse<SchoolClassDto>>>, ICacheableQuery
 {
     public List<ColumnFilter> Filters { get; init; } = [];
     public IReadOnlyCollection<string> Tags => [CacheConstants.SchoolClassListTag];

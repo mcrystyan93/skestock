@@ -93,10 +93,14 @@ public class ProblemDetailsExceptionHandler : IExceptionHandler
                 Title = "Forbidden",
                 Type = "https://tools.ietf.org/html/rfc9110#section-15.5.4"
             }),
-            _ => (-1, null)
+            _ => (StatusCodes.Status500InternalServerError, new ProblemDetails
+            {
+                Status = StatusCodes.Status500InternalServerError,
+                Title = "Internal server error",
+                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                Detail = exception.Message
+            })
         };
-
-        if (problemDetails is null) return false;
 
         problemDetails.Extensions[ApiErrorExtensions.Error] = new ApiErrorContract(
             Code: exception switch

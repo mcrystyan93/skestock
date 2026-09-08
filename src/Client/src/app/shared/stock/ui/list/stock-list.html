@@ -1,5 +1,10 @@
 <ske-stock-filter-container class="block mb-4" />
 
+
+<ske-error-alert [problemDetail]="store.stockItemsProblemDetail()"
+                 [validationErrors]="store.stockItemsValidationErrors()"
+                 class="mx-4" />
+
 <div class="grow relative">
   <ske-stock-table-container />
 </div>

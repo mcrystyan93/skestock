@@ -2,15 +2,19 @@
 
 <ske-item-filter-container class="mx-4" />
 
+<ske-error-alert [problemDetail]="store.itemsProblemDetail()"
+                 [validationErrors]="store.itemsValidationErrors()"
+                 class="mx-4" />
+
 <div class="grow relative mx-4 mb-4">
   <ske-item-table [items]="store.items()"
-             [filter]="store.filter()"
-             [loading]="store.itemsLoading()"
-             [hasNextPage]="store.hasNextPage()"
-             [isLoadingMore]="store.isLoadingMore()"
-             (onFilterChange)="onFilterChange($event)"
-             (onLoadMore)="onLoadMore()"
-             (onEdit)="onEdit($event)"
-             (onToggleActive)="onToggleActive($event)"
-             [togglingItemId]="store.togglingItemId()" />
+                  [filter]="store.filter()"
+                  [loading]="store.itemsLoading()"
+                  [hasNextPage]="store.hasNextPage()"
+                  [isLoadingMore]="store.isLoadingMore()"
+                  (onFilterChange)="onFilterChange($event)"
+                  (onLoadMore)="onLoadMore()"
+                  (onEdit)="onEdit($event)"
+                  (onToggleActive)="onToggleActive($event)"
+                  [togglingItemId]="store.togglingItemId()" />
 </div>

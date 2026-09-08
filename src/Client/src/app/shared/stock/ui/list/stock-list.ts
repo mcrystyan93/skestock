@@ -3,11 +3,13 @@ import {StockStore} from '../../services/stock.store';
 import {TableContainer} from '../table/table-container';
 import {FilterContainer} from './filter/filter-container';
 import {isNil} from 'lodash-es';
+import { ErrorAlert } from '@ske/shared/errors';
 
 @Component({
   imports: [
     TableContainer,
-    FilterContainer
+    FilterContainer,
+    ErrorAlert
   ],
   selector: 'ske-stock-list',
   styles: ``,

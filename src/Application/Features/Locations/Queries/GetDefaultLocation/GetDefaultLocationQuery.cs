@@ -4,7 +4,7 @@ using skestock.Application.Features.Locations.Models;
 namespace skestock.Application.Features.Locations.Queries.GetDefaultLocation;
 
 public class GetDefaultLocationQuery
-    : IRequest<Result<LocationDto?>>, ICacheableQuery<LocationDto?>
+    : IRequest<Result<LocationDto?>>, ICacheableQuery
 {
     // Shares the list tag so existing Create/Update cache invalidation also busts the default entry;
     // the dedicated default tag is future-proofing for a potential "set default" command.

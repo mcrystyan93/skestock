@@ -2,4 +2,5 @@
                                   [summary]="store.summary()"
                                   [selectedTabIndex]="store.selectedTabIndex()"
                                   (selectedTabIndexChange)="store.selectTab($event)"
-                                  (onAddGoodsReceipt)="addGoodsReceipt()" />
+                                  (onAddGoodsReceipt)="addGoodsReceipt()"
+                                  (onClose)="close()" />

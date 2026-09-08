@@ -42,6 +42,7 @@ export const appConfig: ApplicationConfig = {
         'CategoryUpdated': categoryRealtimeEvents.categoryUpdated,
         'GoodsReceiptImportCreated': goodsReceiptImportRealtimeEvents.goodsReceiptImportCreated,
         'GoodsReceiptImportProcessed': goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed,
+        'GoodsReceiptImportConfirmed': goodsReceiptImportRealtimeEvents.goodsReceiptImportConfirmed
       }
     })
   ]
