@@ -1,5 +1,10 @@
 <ske-goods-receipt-imports-filter-container class="block mb-4" />
 
+
+<ske-error-alert [problemDetail]="store.goodsReceiptImportsProblemDetail()"
+                 [validationErrors]="store.goodsReceiptImportsValidationErrors()"
+                 class="mx-4" />
+
 <div class="grow relative">
   <ske-goods-receipt-imports-table-container />
 </div>

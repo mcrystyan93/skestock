@@ -1,0 +1,5 @@
+@if (problemDetail()) {
+  <ske-problem-detail-alert [problemDetail]="problemDetail()" />
+} @else if (validationErrors()) {
+  <ske-validation-problem-detail-alert [validationErrors]="validationErrors()" />
+}

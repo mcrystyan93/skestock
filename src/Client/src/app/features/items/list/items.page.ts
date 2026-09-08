@@ -7,12 +7,14 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { Header } from './header/header';
 import { ItemDetailModal } from '@ske/shared/items';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ErrorAlert } from '@ske/shared/errors';
 
 @Component({
   imports: [
     FilterContainer,
     Table,
-    Header
+    Header,
+    ErrorAlert
   ],
   selector: 'ske-items-page',
   templateUrl: './items.page.html',

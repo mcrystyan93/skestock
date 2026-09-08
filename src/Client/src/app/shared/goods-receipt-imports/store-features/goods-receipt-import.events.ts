@@ -6,5 +6,6 @@ export const goodsReceiptImportRealtimeEvents = eventGroup({
   events: {
     goodsReceiptImportCreated: type<{ goodsReceiptImportId: string }>(),
     goodsReceiptImportProcessed: type<{ goodsReceiptImportId: string }>(),
+    goodsReceiptImportConfirmed: type<{ goodsReceiptImportId: string }>()
   }
 });

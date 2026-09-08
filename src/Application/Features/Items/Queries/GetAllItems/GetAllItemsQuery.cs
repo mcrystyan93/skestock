@@ -5,7 +5,7 @@ using skestock.Application.Features.Items.Models;
 
 namespace skestock.Application.Features.Items.Queries.GetAllItems;
 
-public class GetAllItemsQuery: BasePaginationFilter, IRequest<Result<PaginatedResponse<ItemDto>>>, ICacheableQuery<PaginatedResponse<ItemDto>>
+public class GetAllItemsQuery: BasePaginationFilter, IRequest<Result<PaginatedResponse<ItemDto>>>, ICacheableQuery
 {
     public List<ColumnFilter> Filters { get; init; } = [];
     public IReadOnlyCollection<string> Tags => [CacheConstants.ItemListTag];

@@ -1,6 +1,7 @@
 export * from './theme';
 export * from './auth';
 export * from './errors';
+export * from './error-codes';
 export * from './pagination';
 export * from './category';
 export * from './item';

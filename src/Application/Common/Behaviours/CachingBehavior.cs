@@ -4,10 +4,10 @@ using skestock.Application.Common.Caching;
 namespace skestock.Application.Common.Behaviours;
 
         
-public class CachingBehavior<TRequest, TResponse>(HybridCache cache): IPipelineBehavior<TRequest, Result<TResponse>>
-    where TRequest : notnull, IMessage, ICacheableQuery<TResponse>
+public class CachingBehavior<TRequest, TResponse>(HybridCache cache): IPipelineBehavior<TRequest, TResponse>
+    where TRequest : notnull, IMessage, ICacheableQuery
 {
-    public async ValueTask<Result<TResponse>> Handle(TRequest message, MessageHandlerDelegate<TRequest, Result<TResponse>> next, CancellationToken cancellationToken)
+    public async ValueTask<TResponse> Handle(TRequest message, MessageHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
         if (message.BypassCache)
         {
@@ -22,12 +22,12 @@ public class CachingBehavior<TRequest, TResponse>(HybridCache cache): IPipelineB
             async token =>
             {
                 var result = await next(message, token);
-                return result.ToResultCache();
+                return ResultCacheTransformer.Serialize(result!);
             },
             new HybridCacheEntryOptions { Expiration = slidingExpiration },
             tags: message.Tags,
             cancellationToken: cancellationToken);
 
-        return cachedResult.ToResult();
+        return ResultCacheTransformer.Deserialize<TResponse>(cachedResult);
     }
 }

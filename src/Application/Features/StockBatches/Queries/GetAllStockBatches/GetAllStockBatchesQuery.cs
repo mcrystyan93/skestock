@@ -5,7 +5,7 @@ using skestock.Application.Features.StockBatches.Models;
 
 namespace skestock.Application.Features.StockBatches.Queries.GetAllStockBatches;
 
-public class GetAllStockBatchesQuery : BasePaginationFilter, IRequest<Result<PaginatedResponse<StockBatchListItemDto>>>, ICacheableQuery<PaginatedResponse<StockBatchListItemDto>>
+public class GetAllStockBatchesQuery : BasePaginationFilter, IRequest<Result<PaginatedResponse<StockBatchListItemDto>>>, ICacheableQuery
 {
     public List<ColumnFilter> Filters { get; init; } = [];
     public IReadOnlyCollection<string> Tags => [CacheConstants.StockBatchListTag];

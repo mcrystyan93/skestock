@@ -1,0 +1,18 @@
+<nz-alert nzType="error"
+          nzShowIcon
+          [nzMessage]="titleToDisplay()"
+          [nzDescription]="descriptionTemplate"></nz-alert>
+
+<ng-template #descriptionTemplate>
+  <strong nz-typography>{{ messageToDisplay() }}</strong>
+
+  @if (detailToDisplay(); as detail) {
+    @if (detail !== messageToDisplay()) {
+      <div>Mesaj: {{ detail }}</div>
+    }
+  }
+
+  @if (correlationId(); as correlationId) {
+    <div>Correlation ID: {{ correlationId }}</div>
+  }
+</ng-template>

@@ -10,6 +10,9 @@
   }
 </div>
 
+<ske-error-alert [problemDetail]="store.categoryProblemDetail()"
+                 [validationErrors]="store.categoryValidationErrors()" />
+
 <ske-form [loading]="store.categoryLoading()"
           [category]="store.category()" />
 

@@ -5,8 +5,10 @@ import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
 import { StockHttp } from '../services/stock.http';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { pipe, switchMap, tap } from 'rxjs';
+import { map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
+import { Events, withEventHandlers } from '@ngrx/signals/events';
+import { goodsReceiptImportRealtimeEvents } from '@ske/shared/goods-receipt-imports';
 
 type StockCollectionState = {
   stockItems: StockItemDto[];
@@ -77,6 +79,13 @@ export function withStockCollection() {
       );
 
       return { load };
-    })
+    }),
+    withEventHandlers((store, events = inject(Events)) => ({
+      goodsReceiptImported: events.on(goodsReceiptImportRealtimeEvents.goodsReceiptImportConfirmed)
+        .pipe(
+          map(() => store.filter()),
+          tap((filter) => store.load(filter))
+        )
+    }))
   );
 }

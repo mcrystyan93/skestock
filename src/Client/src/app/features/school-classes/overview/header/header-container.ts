@@ -7,6 +7,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { from, map, tap } from 'rxjs';
 import { isNil } from 'lodash-es';
 import { CreateGoodsReceiptImportRequest, FileMetadataDto } from '@ske/models';
+import { Router } from '@angular/router';
 
 @Component({
   imports: [
@@ -22,6 +23,7 @@ export class HeaderContainer {
   public readonly classId = input.required<string | null>();
   public readonly store = inject(SchoolClassOverviewStore);
 
+  private readonly _router = inject(Router);
   private readonly _nzModalService = inject(NzModalService);
   private readonly _destroyRef = inject(DestroyRef);
 
@@ -60,5 +62,9 @@ export class HeaderContainer {
       fileMetadataId: fileMetadata.id,
       classId
     };
+  }
+
+  public close() {
+    this._router.navigate(['school-classes']);
   }
 }

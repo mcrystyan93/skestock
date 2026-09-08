@@ -1,7 +1,11 @@
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Features.GoodsReceipts.Commands.ProcessGoodsReceiptImport;
 using skestock.Application.Features.GoodsReceipts.Models;
 using skestock.Domain.Entities;
 using skestock.Domain.Enums;
+using skestock.Domain.Queues;
+using skestock.Shared;
+using System.Text.Json;
 
 namespace skestock.Application.Features.GoodsReceipts.Commands.CreateGoodsReceiptImport;
 
@@ -28,6 +32,16 @@ public class CreateGoodsReceiptImportCommandHandler(IApplicationDbContext dbCont
         var import = GoodsReceiptImport.Create(request.ClassId, request.FileMetadataId, identityId, blobPath);
 
         dbContext.GoodsReceiptImports.Add(import);
+
+        // The outbox row must be atomic with the import row, so it is enqueued here inside the same
+        // unit of work
+        dbContext.OutboxMessages.Add(new OutboxMessage
+        {
+            Type = typeof(ProcessGoodsReceiptImportCommand).AssemblyQualifiedName!,
+            Payload = JsonSerializer.Serialize(new ProcessGoodsReceiptImportCommand(import.Id)),
+            QueueName = Services.GoodsReceiptImportQueue,
+            UserId = identityId
+        });
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

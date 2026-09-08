@@ -7,6 +7,7 @@ import { GoodsReceiptsTab } from './tabs/goods-receipts/goods-receipts-tab';
 import { GoodsReceiptImportsTab } from './tabs/goods-receipt-imports/goods-receipt-imports-tab';
 import { StockList } from '@ske/shared/stock';
 import { SignalRGroupManagerStore } from '@ske/signalr';
+import { ErrorAlert } from '@ske/shared/errors';
 
 @Component({
   imports: [
@@ -15,7 +16,8 @@ import { SignalRGroupManagerStore } from '@ske/signalr';
     NzTabComponent,
     GoodsReceiptsTab,
     GoodsReceiptImportsTab,
-    StockList
+    StockList,
+    ErrorAlert
   ],
   selector: 'ske-school-class-overview-page',
   styles: ``,

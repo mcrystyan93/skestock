@@ -3,14 +3,17 @@ import { Table } from '@ske/shared/goods-receipts';
 import { SchoolClassOverviewStore } from '../../../services/school-class-overview.store';
 import { isNil } from 'lodash-es';
 import { ColumnFilter } from '@ske/models';
+import { ErrorAlert } from '@ske/shared/errors';
 
 @Component({
   imports: [
-    Table
+    Table,
+    ErrorAlert
   ],
   selector: 'ske-school-class-overview-goods-receipts-tab',
   styles: ``,
   template: `
+
     <ske-goods-receipts-table [items]="store.goodsReceipts()"
                               [filter]="store.filter()"
                               [loading]="store.goodsReceiptsLoading()"

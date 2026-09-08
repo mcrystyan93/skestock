@@ -4,11 +4,15 @@ import { FilterContainer } from './filter/filter-container';
 import { TableContainer } from '../table/table-container';
 import { ColumnFilter } from '@ske/models';
 import { isNil } from 'lodash-es';
+import { ErrorAlert } from '@ske/shared/errors';
+import { NzTabComponent } from 'ng-zorro-antd/tabs';
 
 @Component({
   imports: [
     FilterContainer,
-    TableContainer
+    TableContainer,
+    ErrorAlert,
+    NzTabComponent
   ],
   selector: 'ske-goods-receipt-imports-list',
   styles: ``,

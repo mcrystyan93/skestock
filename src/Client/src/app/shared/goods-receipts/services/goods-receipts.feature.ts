@@ -7,12 +7,15 @@ import { inject } from '@angular/core';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { concatMap, EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import {
-  buildGoodsReceiptListFilter, CreateGoodsReceiptImportRequest, FileMetadataDto,
+  buildGoodsReceiptListFilter,
+  CreateGoodsReceiptImportRequest,
   GetAllGoodsReceiptsRequest,
   GoodsReceiptListItemDto,
   PaginatedResponseData
 } from '@ske/models';
 import { mapResponse } from '@ngrx/operators';
+import { Events, withEventHandlers } from '@ngrx/signals/events';
+import { goodsReceiptImportRealtimeEvents } from '@ske/shared/goods-receipt-imports';
 
 type GoodsReceiptsState = {
   goodsReceipts: GoodsReceiptListItemDto[];
@@ -127,6 +130,14 @@ export function withGoodReceiptsFeature() {
       );
 
       return { loadGoodsReceipts, loadMoreGoodsReceipts, importGoodReceipt };
-    })
+    }),
+    withEventHandlers((store, events = inject(Events)) => ({
+      goodsReceiptImportChanges: events.on(goodsReceiptImportRealtimeEvents.goodsReceiptImportConfirmed)
+        .pipe(
+          map(() => store.filter()),
+          filter((filter): filter is GetAllGoodsReceiptsRequest => !!filter),
+          tap((filter) => store.loadGoodsReceipts(filter))
+        )
+    }))
   );
 }

@@ -1,15 +1,17 @@
 <ske-school-class-header (onAdd)="onAdd()" />
 
 <ske-school-class-filter-container class="mx-4" />
-
+<ske-error-alert [problemDetail]="store.schoolClassesProblemDetail()"
+                 [validationErrors]="store.schoolClassesValidationErrors()"
+                 class="mx-4" />
 <div class="grow relative mx-4 mb-4">
   <ske-school-class-table [items]="store.schoolClasses()"
-             [filter]="store.filter()"
-             [loading]="store.schoolClassesLoading()"
-             [hasNextPage]="store.hasNextPage()"
-             [isLoadingMore]="store.isLoadingMore()"
-             (onFilterChange)="onFilterChange($event)"
-             (onLoadMore)="onLoadMore()"
-             (onEdit)="onEdit($event)"
-             (onView)="onView($event)" />
+                          [filter]="store.filter()"
+                          [loading]="store.schoolClassesLoading()"
+                          [hasNextPage]="store.hasNextPage()"
+                          [isLoadingMore]="store.isLoadingMore()"
+                          (onFilterChange)="onFilterChange($event)"
+                          (onLoadMore)="onLoadMore()"
+                          (onEdit)="onEdit($event)"
+                          (onView)="onView($event)" />
 </div>

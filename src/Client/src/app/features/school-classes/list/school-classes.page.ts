@@ -8,12 +8,14 @@ import { Header } from './header/header';
 import { SchoolClassDetailModal } from '@ske/shared/school-classes';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
+import { ErrorAlert } from '@ske/shared/errors';
 
 @Component({
   imports: [
     FilterContainer,
     Table,
-    Header
+    Header,
+    ErrorAlert
   ],
   selector: 'ske-school-classes-page',
   templateUrl: './school-classes.page.html',

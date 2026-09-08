@@ -5,7 +5,7 @@ namespace skestock.Application.Common.Caching;
 /// CachingBehavior is constrained to this interface, so only requests implementing it
 /// will be intercepted — no runtime guard needed.
 /// </summary>
-public interface ICacheableQuery<TResponse>
+public interface ICacheableQuery
 {
     /// <summary>
     /// Tags this cache entry is stamped with. Used by <see cref="ICacheInvalidation.Tags"/>

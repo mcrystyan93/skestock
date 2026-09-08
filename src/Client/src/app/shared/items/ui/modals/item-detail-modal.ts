@@ -13,6 +13,7 @@ import { BehaviorSubject, filter, switchMap, tap } from 'rxjs';
 import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
+import { ErrorAlert } from '@ske/shared/errors';
 
 @Component({
   imports: [
@@ -27,7 +28,8 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
     NzMenuDirective,
     NzMenuItemComponent,
     NzIconDirective,
-    NzDropdownDirective
+    NzDropdownDirective,
+    ErrorAlert
   ],
   selector: 'ske-item-detail-modal',
   styles: ``,

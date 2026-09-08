@@ -1,9 +1,18 @@
-<ske-school-class-overview-header-container [classId]="store.schoolClass()?.id ?? null"/>
+<ske-school-class-overview-header-container [classId]="store.schoolClass()?.id ?? null" />
+
+<ske-error-alert [problemDetail]="store.schoolClassProblemDetail()"
+                 [validationErrors]="store.schoolClassValidationErrors()"
+                 class="mx-4" />
 
 <nz-tabs [nzSelectedIndex]="store.selectedTabIndex()"
          [nzTabBarStyle]="{display:'none'}"
          class="inner-scroll grow m-4!">
   <nz-tab>
+
+    <ske-error-alert [problemDetail]="store.goodsReceiptsProblemDetail()"
+                     [validationErrors]="store.goodsReceiptsValidationErrors()"
+                     class="mx-4" />
+
     <ske-school-class-overview-goods-receipts-tab [classId]="store.schoolClass()?.id ?? null" />
   </nz-tab>
   <nz-tab>

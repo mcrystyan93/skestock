@@ -1,0 +1,23 @@
+<nz-alert nzType="error"
+          nzShowIcon
+          [nzMessage]="titleToDisplay()"
+          [nzDescription]="descriptionTemplate"></nz-alert>
+
+<ng-template #descriptionTemplate>
+  @if (resolvedErrors().length > 0) {
+    @for (error of resolvedErrors(); track $index) {
+      <div>
+        @if (error.field) {
+          <strong>{{ error.field }}:</strong>
+        }
+        {{ error.message }}
+      </div>
+    }
+  }
+
+  @if (correlationId(); as correlationId) {
+    <div>Correlation ID: {{ correlationId }}</div>
+  }
+
+
+</ng-template>
