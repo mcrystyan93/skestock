@@ -17,7 +17,11 @@ public class GetCategoryByIdQueryTests : TestBase
     [Test]
     public async Task Handle_WithExistingId_ReturnsMatchingCategoryDto()
     {
-        var category = new Category { Name = $"{_prefix}-Stationery" };
+        var category = new Category
+        {
+            Name = $"{_prefix}-Stationery",
+            Icon = new CategoryIcon("Square Q", "square-q", "/assets/icons/square-q.svg")
+        };
         await TestApp.AddAsync(category);
 
         var result = await TestApp.SendAsync(new GetCategoryByIdQuery { Id = category.Id });
@@ -25,6 +29,10 @@ public class GetCategoryByIdQueryTests : TestBase
         result.IsSuccess.ShouldBeTrue();
         result.Value.Id.ShouldBe(category.Id);
         result.Value.Name.ShouldBe(category.Name);
+        result.Value.Icon.ShouldNotBeNull();
+        result.Value.Icon.Name.ShouldBe("Square Q");
+        result.Value.Icon.FileName.ShouldBe("square-q");
+        result.Value.Icon.Path.ShouldBe("/assets/icons/square-q.svg");
     }
 
     [Test]

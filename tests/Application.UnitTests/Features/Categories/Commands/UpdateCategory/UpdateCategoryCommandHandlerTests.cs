@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Categories.Commands.UpdateCategory;
+using skestock.Application.Features.Categories.Models;
 using skestock.Domain.Entities;
 using skestock.Domain.Queues;
 using NUnit.Framework;
@@ -56,6 +57,7 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
         {
             b.HasOne(c => c.CreatedBy).WithMany().HasForeignKey(c => c.CreatedById);
             b.HasOne(c => c.LastModifiedBy).WithMany().HasForeignKey(c => c.LastModifiedById);
+            b.OwnsOne(c => c.Icon);
             b.Ignore(c => c.Items);
         });
 
@@ -84,21 +86,59 @@ public class UpdateCategoryCommandHandlerTests
     public async Task Handle_WithExistingCategory_UpdatesNameAndReturnsDto()
     {
         await using var context = CreateContext();
-        var category = new Category { Name = "Old Name" };
+        var category = new Category
+        {
+            Name = "Old Name",
+            Icon = new CategoryIcon("Old Icon", "old-icon", "/assets/icons/old-icon.svg")
+        };
         context.Categories.Add(category);
         await context.SaveChangesAsync(CancellationToken.None);
 
         var handler = new UpdateCategoryCommandHandler(context);
+        var icon = new CategoryIconDto
+        {
+            Name = "Square Q",
+            FileName = "square-q",
+            Path = "/assets/icons/square-q.svg"
+        };
         var result = await handler.Handle(
-            new UpdateCategoryCommand { Id = category.Id, Name = "New Name" },
+            new UpdateCategoryCommand { Id = category.Id, Name = "New Name", Icon = icon },
             CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Id.ShouldBe(category.Id);
         result.Value.Name.ShouldBe("New Name");
+        result.Value.Icon.ShouldBe(icon);
 
         var persisted = await context.Categories.SingleAsync(c => c.Id == category.Id, CancellationToken.None);
         persisted.Name.ShouldBe("New Name");
+        persisted.Icon.ShouldNotBeNull();
+        persisted.Icon.Name.ShouldBe(icon.Name);
+        persisted.Icon.FileName.ShouldBe(icon.FileName);
+        persisted.Icon.Path.ShouldBe(icon.Path);
+    }
+
+    [Test]
+    public async Task Handle_WithNullIcon_ClearsExistingIcon()
+    {
+        await using var context = CreateContext();
+        var category = new Category
+        {
+            Name = "Office Supplies",
+            Icon = new CategoryIcon("Square Q", "square-q", "/assets/icons/square-q.svg")
+        };
+        context.Categories.Add(category);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new UpdateCategoryCommandHandler(context);
+        var result = await handler.Handle(
+            new UpdateCategoryCommand { Id = category.Id, Name = category.Name, Icon = null },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Icon.ShouldBeNull();
+        (await context.Categories.SingleAsync(c => c.Id == category.Id, CancellationToken.None))
+            .Icon.ShouldBeNull();
     }
 
     [Test]

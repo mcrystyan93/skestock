@@ -71,7 +71,7 @@ export class CategoryDetailModal {
 
 
   public close() {
-    this._nzModalRef.close();
+    this._nzModalRef.destroy();
   }
 
   public async save(shouldClose: boolean = true) {
@@ -93,7 +93,8 @@ export class CategoryDetailModal {
 
   private mapSaveRequest(formData: CategoryFormModel): CreateCategoryRequest | UpdateCategoryRequest {
     return {
-      name: formData.name
+      name: formData.name,
+      icon: formData.icon
     };
   }
 }

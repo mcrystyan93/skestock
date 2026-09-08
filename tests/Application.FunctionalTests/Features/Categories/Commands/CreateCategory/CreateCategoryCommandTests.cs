@@ -1,5 +1,6 @@
 using skestock.Application.Common.Exceptions;
 using skestock.Application.Features.Categories.Commands.CreateCategory;
+using skestock.Application.Features.Categories.Models;
 using skestock.Application.Features.Categories.Queries.GetAllCategories;
 using skestock.Domain.Entities;
 
@@ -19,16 +20,27 @@ public class CreateCategoryCommandTests : TestBase
     public async Task Handle_WithValidName_PersistsCategoryAndReturnsDto()
     {
         var name = $"{_prefix}-Stationery";
+        var icon = new CategoryIconDto
+        {
+            Name = "Square Q",
+            FileName = "square-q",
+            Path = "/assets/icons/square-q.svg"
+        };
 
-        var result = await TestApp.SendAsync(new CreateCategoryCommand { Name = name });
+        var result = await TestApp.SendAsync(new CreateCategoryCommand { Name = name, Icon = icon });
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Name.ShouldBe(name);
+        result.Value.Icon.ShouldBe(icon);
         result.Value.Id.ShouldNotBe(Guid.Empty);
 
         var persisted = await TestApp.FindAsync<Category>(result.Value.Id);
         persisted.ShouldNotBeNull();
         persisted.Name.ShouldBe(name);
+        persisted.Icon.ShouldNotBeNull();
+        persisted.Icon.Name.ShouldBe(icon.Name);
+        persisted.Icon.FileName.ShouldBe(icon.FileName);
+        persisted.Icon.Path.ShouldBe(icon.Path);
     }
 
     [Test]

@@ -58,6 +58,7 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
         {
             b.HasOne(c => c.CreatedBy).WithMany().HasForeignKey(c => c.CreatedById);
             b.HasOne(c => c.LastModifiedBy).WithMany().HasForeignKey(c => c.LastModifiedById);
+            b.OwnsOne(c => c.Icon);
             b.Ignore(c => c.Items);
         });
 
@@ -119,6 +120,27 @@ public class GetAllCategoriesHandlerTests
 
         // Default sort is CreatedDate desc, Id desc -> most-recently-created category first.
         page.Data.Select(c => c.Name).ShouldBe(["Category04", "Category03", "Category02", "Category01", "Category00"]);
+    }
+
+    [Test]
+    public async Task Handle_ReturnsCategoryIcon()
+    {
+        await using var context = await SeedAsync(1, _ => new Category
+        {
+            Name = "Stationery",
+            CreatedDate = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero),
+            LastModifiedDate = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero),
+            Icon = new CategoryIcon("Square Q", "square-q", "/assets/icons/square-q.svg")
+        });
+
+        var result = await CreateHandler(context).Handle(new GetAllCategoriesQuery(), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        var icon = result.Value.Data.Single().Icon;
+        icon.ShouldNotBeNull();
+        icon!.Name.ShouldBe("Square Q");
+        icon.FileName.ShouldBe("square-q");
+        icon.Path.ShouldBe("/assets/icons/square-q.svg");
     }
 
     [Test]

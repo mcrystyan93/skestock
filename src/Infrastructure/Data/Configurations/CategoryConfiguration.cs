@@ -11,6 +11,14 @@ public class CategoryConfiguration: IEntityTypeConfiguration<Category>
     {
         builder.Property(c => c.Name).HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
+        builder.OwnsOne(c => c.Icon, icon =>
+        {
+            icon.ToJson("Icon");
+            icon.Property(i => i.Name).HasMaxLength(200).IsRequired();
+            icon.Property(i => i.FileName).HasMaxLength(200).IsRequired();
+            icon.Property(i => i.Path).HasMaxLength(500).IsRequired();
+        });
+
         // Composite indexes matching the (column, Id) tie-breaker pairs used by keyset pagination
         // in GetAllCategoriesQuery/CategorySortConfiguration, so the ORDER BY + WHERE > cursor
         // pattern can seek instead of scan for each supported sort.

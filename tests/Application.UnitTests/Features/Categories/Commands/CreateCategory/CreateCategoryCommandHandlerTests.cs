@@ -2,6 +2,7 @@ using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Categories.Commands.CreateCategory;
+using skestock.Application.Features.Categories.Models;
 using skestock.Domain.Entities;
 using skestock.Domain.Queues;
 using NUnit.Framework;
@@ -55,6 +56,7 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
         {
             b.HasOne(c => c.CreatedBy).WithMany().HasForeignKey(c => c.CreatedById);
             b.HasOne(c => c.LastModifiedBy).WithMany().HasForeignKey(c => c.LastModifiedById);
+            b.OwnsOne(c => c.Icon);
             b.Ignore(c => c.Items);
         });
 
@@ -84,15 +86,28 @@ public class CreateCategoryCommandHandlerTests
     {
         await using var context = CreateContext();
         var handler = new CreateCategoryCommandHandler(context);
+        var icon = new CategoryIconDto
+        {
+            Name = "Square Q",
+            FileName = "square-q",
+            Path = "/assets/icons/square-q.svg"
+        };
 
-        var result = await handler.Handle(new CreateCategoryCommand { Name = "Stationery" }, CancellationToken.None);
+        var result = await handler.Handle(
+            new CreateCategoryCommand { Name = "Stationery", Icon = icon },
+            CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Name.ShouldBe("Stationery");
+        result.Value.Icon.ShouldBe(icon);
         result.Value.Id.ShouldNotBe(Guid.Empty);
 
         var persisted = await context.Categories.SingleAsync(CancellationToken.None);
         persisted.Name.ShouldBe("Stationery");
+        persisted.Icon.ShouldNotBeNull();
+        persisted.Icon.Name.ShouldBe(icon.Name);
+        persisted.Icon.FileName.ShouldBe(icon.FileName);
+        persisted.Icon.Path.ShouldBe(icon.Path);
         persisted.Id.ShouldBe(result.Value.Id);
     }
 
