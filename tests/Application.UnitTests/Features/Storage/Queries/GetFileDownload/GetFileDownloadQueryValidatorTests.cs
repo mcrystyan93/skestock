@@ -10,20 +10,20 @@ public class GetFileDownloadQueryValidatorTests
     private readonly GetFileDownloadQueryValidator _validator = new();
 
     [Test]
-    public void Validate_WithEmptyFileId_Fails()
+    public void Validate_WithEmptyId_Fails()
     {
-        var result = _validator.Validate(new GetFileDownloadQuery { FileId = Guid.Empty });
+        var result = _validator.Validate(new GetFileDownloadQuery { Id = Guid.Empty });
 
         result.IsValid.ShouldBeFalse();
         result.Errors.ShouldContain(e =>
-            e.PropertyName == nameof(GetFileDownloadQuery.FileId)
+            e.PropertyName == nameof(GetFileDownloadQuery.Id)
             && e.ErrorCode == ValidationErrorCodes.Required);
     }
 
     [Test]
-    public void Validate_WithNonEmptyFileId_Passes()
+    public void Validate_WithNonEmptyId_Passes()
     {
-        var result = _validator.Validate(new GetFileDownloadQuery { FileId = Guid.NewGuid() });
+        var result = _validator.Validate(new GetFileDownloadQuery { Id = Guid.NewGuid() });
 
         result.IsValid.ShouldBeTrue();
     }

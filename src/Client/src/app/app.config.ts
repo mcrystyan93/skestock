@@ -13,9 +13,7 @@ import { provideNzDateFnsAdapter } from 'ng-zorro-antd/core/time';
 import { provideHttpClient, withInterceptors, withXsrfConfiguration } from '@angular/common/http';
 import { appInitializer } from './app.init';
 import { authInterceptor } from '@ske/auth';
-import { provideSignalR } from '@ske/signalr';
-import { categoryRealtimeEvents } from '@ske/shared/categories';
-import { goodsReceiptImportRealtimeEvents } from '@ske/shared/goods-receipt-imports';
+import { provideSignalR, realtimeEventNames, realtimeEvents } from '@ske/signalr';
 
 registerLocaleData(ro);
 
@@ -38,11 +36,11 @@ export const appConfig: ApplicationConfig = {
     provideSignalR({
       url: '/hubs/app',
       eventMap: {
-        'CategoryCreated': categoryRealtimeEvents.categoryCreated,
-        'CategoryUpdated': categoryRealtimeEvents.categoryUpdated,
-        'GoodsReceiptImportCreated': goodsReceiptImportRealtimeEvents.goodsReceiptImportCreated,
-        'GoodsReceiptImportProcessed': goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed,
-        'GoodsReceiptImportConfirmed': goodsReceiptImportRealtimeEvents.goodsReceiptImportConfirmed
+        [realtimeEventNames.categoryCreated]: realtimeEvents.categoryCreated,
+        [realtimeEventNames.categoryUpdated]: realtimeEvents.categoryUpdated,
+        [realtimeEventNames.goodsReceiptImportCreated]: realtimeEvents.goodsReceiptImportCreated,
+        [realtimeEventNames.goodsReceiptImportProcessed]: realtimeEvents.goodsReceiptImportProcessed,
+        [realtimeEventNames.goodsReceiptImportConfirmed]: realtimeEvents.goodsReceiptImportConfirmed
       }
     })
   ]

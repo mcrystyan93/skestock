@@ -29,8 +29,8 @@ export class StorageHttp {
     return this._httpClient.post<FileMetadataDto>('/api/Storage/confirm-upload', request);
   }
 
-  public getFileDownload(fileId: string) {
-    return this._httpClient.get<FileDownloadResult>(`/api/Storage/${fileId}/download`);
+  public getFileDownload(id: string) {
+    return this._httpClient.get<FileDownloadResult>(`/api/Storage/${id}/download`);
   }
 
   public downloadBlob(sasUrl: string) {

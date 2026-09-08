@@ -8,7 +8,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { filter, map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
 import { Events, withEventHandlers } from '@ngrx/signals/events';
-import { goodsReceiptImportRealtimeEvents } from '@ske/shared/goods-receipt-imports';
+import { realtimeEvents } from '@ske/signalr';
 
 type SchoolClassSummaryState = {
   summary: Partial<SchoolClassSummary>;
@@ -52,9 +52,9 @@ export function withSchoolClassSummaryFeature() {
     }),
     withEventHandlers((store, events = inject(Events)) => ({
       goodsReceiptImportChanges: events.on(
-        goodsReceiptImportRealtimeEvents.goodsReceiptImportProcessed,
-        goodsReceiptImportRealtimeEvents.goodsReceiptImportCreated,
-        goodsReceiptImportRealtimeEvents.goodsReceiptImportConfirmed
+        realtimeEvents.goodsReceiptImportProcessed,
+        realtimeEvents.goodsReceiptImportCreated,
+        realtimeEvents.goodsReceiptImportConfirmed
       )
         .pipe(
           map(() => store.summary().id),

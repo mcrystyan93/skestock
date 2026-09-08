@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Caching.Hybrid;
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Common.Realtime;
 using skestock.Domain.Events.GoodsReceipt;
 using StockCacheConstants = skestock.Application.Features.Stock.CacheConstants;
 
@@ -20,7 +21,10 @@ public class GoodsReceiptImportConfirmedEventHandler(IRealtimeNotifier notifier,
         
         var payload = new { GoodsReceiptImportId = notification.ImportId };
 
-        await notifier.NotifyGroupAsync("goods-receipts-import-list", "GoodsReceiptImportConfirmed", payload,
+        await notifier.NotifyGroupAsync(
+            RealtimeGroups.GoodsReceiptImportsList,
+            RealtimeEvents.GoodsReceiptImportConfirmed,
+            payload,
             cancellationToken);
     }
 }

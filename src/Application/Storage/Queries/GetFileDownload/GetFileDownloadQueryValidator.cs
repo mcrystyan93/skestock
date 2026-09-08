@@ -6,7 +6,7 @@ public class GetFileDownloadQueryValidator : AbstractValidator<GetFileDownloadQu
 {
     public GetFileDownloadQueryValidator()
     {
-        RuleFor(x => x.FileId)
+        RuleFor(x => x.Id)
             .NotEmpty()
             .WithErrorCode(ValidationErrorCodes.Required);
     }

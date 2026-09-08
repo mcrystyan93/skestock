@@ -1,21 +1,11 @@
 import {
   EnvironmentProviders,
   inject,
-  InjectionToken,
   makeEnvironmentProviders,
   provideAppInitializer
 } from '@angular/core';
 import { SignalRBridge } from './signalr-bridge';
-import { EventInstance } from '@ngrx/signals/events';
-
-export interface SignalRBridgeConfig {
-  url: string;
-  accessTokenFactory?: () => string | Promise<string>;
-  // hub method name -> event creator
-  eventMap: Record<string, (payload: any) => EventInstance<string, unknown>>;
-}
-
-export const SIGNALR_CONFIG = new InjectionToken<SignalRBridgeConfig>('SIGNALR_CONFIG');
+import { SIGNALR_CONFIG, type SignalRBridgeConfig } from './signalr-config';
 
 export function provideSignalR(config: SignalRBridgeConfig): EnvironmentProviders {
   return makeEnvironmentProviders([

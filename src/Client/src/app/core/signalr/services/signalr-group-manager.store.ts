@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { Dispatcher, Events, withEventHandlers } from '@ngrx/signals/events';
 import { signalrEvents } from './signalr.events';
 import { tap } from 'rxjs';
+import type { RealtimeGroup } from '../realtime-groups';
 
 type GroupManagerState = {
   refCounts: Record<string, number>;
@@ -18,7 +19,7 @@ export const SignalRGroupManagerStore = signalStore(
     events: inject(Events)
   })),
   withMethods((store) => ({
-    join(group: string): void {
+    join(group: RealtimeGroup): void {
       const count = store.refCounts()[group] ?? 0;
       patchState(store, (s) => ({ refCounts: { ...s.refCounts, [group]: count + 1 } }));
       if (count === 0) {
@@ -26,7 +27,7 @@ export const SignalRGroupManagerStore = signalStore(
       }
     },
 
-    leave(group: string): void {
+    leave(group: RealtimeGroup): void {
       const count = store.refCounts()[group] ?? 0;
       if (count <= 1) {
         patchState(store, (s) => {

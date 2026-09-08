@@ -7,7 +7,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { Header } from './header/header';
 import { CategoryDetailModal } from '@ske/shared/categories';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { SignalRGroupManagerStore } from '@ske/signalr';
+import { realtimeGroups, SignalRGroupManagerStore } from '@ske/signalr';
 import { ErrorAlert } from '@ske/shared/errors';
 
 @Component({
@@ -48,11 +48,11 @@ export class CategoriesPage implements OnInit, OnDestroy{
   }
 
   public ngOnInit() {
-    this._signalRGroupManager.join('categories-list');
+    this._signalRGroupManager.join(realtimeGroups.categoriesList);
   }
 
   public ngOnDestroy() {
-    this._signalRGroupManager.leave('categories-list');
+    this._signalRGroupManager.leave(realtimeGroups.categoriesList);
   }
 
   private openCategoryModal(category: CategoryDto | null = null) {

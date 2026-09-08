@@ -53,7 +53,7 @@ public class Storage : IEndpointGroup
     public static async Task<Results<Ok<FileDownloadResult>, ProblemHttpResult>> GetFileDownload(
         ISender sender, Guid fileId, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetFileDownloadQuery { FileId = fileId }, cancellationToken);
+        var result = await sender.Send(new GetFileDownloadQuery { Id = fileId }, cancellationToken);
 
         if (result.IsFailed)
             return result.ToProblemHttpResult();

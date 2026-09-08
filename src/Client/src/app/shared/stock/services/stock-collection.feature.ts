@@ -8,7 +8,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { map, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
 import { Events, withEventHandlers } from '@ngrx/signals/events';
-import { goodsReceiptImportRealtimeEvents } from '@ske/shared/goods-receipt-imports';
+import { realtimeEvents } from '@ske/signalr';
 
 type StockCollectionState = {
   stockItems: StockItemDto[];
@@ -81,7 +81,7 @@ export function withStockCollection() {
       return { load };
     }),
     withEventHandlers((store, events = inject(Events)) => ({
-      goodsReceiptImported: events.on(goodsReceiptImportRealtimeEvents.goodsReceiptImportConfirmed)
+      goodsReceiptImported: events.on(realtimeEvents.goodsReceiptImportConfirmed)
         .pipe(
           map(() => store.filter()),
           tap((filter) => store.load(filter))

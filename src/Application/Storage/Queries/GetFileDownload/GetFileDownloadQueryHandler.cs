@@ -14,13 +14,13 @@ public class GetFileDownloadQueryHandler(IApplicationDbContext dbContext, IBlobS
         CancellationToken cancellationToken)
     {
         var file = await dbContext.FileMetadata
-            .SingleOrDefaultAsync(f => f.Id == request.FileId, cancellationToken);
+            .SingleOrDefaultAsync(f => f.Id == request.Id, cancellationToken);
 
         if (file is null)
-            return Result.Fail(new StorageErrors.FileNotFound(request.FileId));
+            return Result.Fail(new StorageErrors.FileNotFound(request.Id));
 
         if (file.Status != FileStatus.Completed)
-            return Result.Fail(new StorageErrors.BlobNotFound(request.FileId));
+            return Result.Fail(new StorageErrors.BlobNotFound(request.Id));
 
         var sasUri = await blobStorageService.GenerateDownloadSasUriAsync(
             new GenerateDownloadSasUriDto(file.BlobContainer, file.BlobPath, TimeSpan.FromMinutes(10)),
