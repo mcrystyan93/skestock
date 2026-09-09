@@ -1,24 +1,29 @@
 <div *nzModalTitle></div>
 
-<ske-file-upload [multiple]="true" (onFileListChange)="onFileListChange($event)" />
+<ske-file-upload [multiple]="true"
+                 (onFileListChange)="onFileListChange($event)"/>
 
-@if (store.uploadLoading() || store.hasUploadFailures()) {
-  <nz-progress [nzPercent]="store.uploadPercent()"
+@if (fileStorage.uploadLoading() || fileStorage.hasUploadFailures()) {
+  <nz-progress [nzPercent]="fileStorage.uploadPercent()"
                [nzStatus]="progressStatus()"
-               [nzFormat]="progressFormat" />
+               [nzFormat]="progressFormat"/>
 
-  @if (store.currentFileName(); as currentFileName) {
+  @if (fileStorage.currentFileName(); as currentFileName) {
     <p class="mt-2 text-sm text-gray-500">Se încarcă {{ currentFileName }}</p>
   }
 
-  @if (store.hasUploadFailures()) {
+  @if (fileStorage.hasUploadFailures()) {
     <p class="mt-2 text-sm text-red-500">Fisiere ce nu au putut fi incarcate:</p>
     <ul class="text-sm text-red-500">
-      @for (failedFile of store.failedFiles(); track failedFile.name) {
+      @for (failedFile of fileStorage.failedFiles(); track failedFile.name) {
         <li>{{ failedFile.name }}</li>
       }
     </ul>
   }
+}
+
+@if (store.goodsReceiptImportProblemDetail(); as problemDetail) {
+  <ske-error-alert [problemDetail]="problemDetail"/>
 }
 
 <div *nzModalFooter>
@@ -27,7 +32,8 @@
             *nzSpaceItem
             nzType="default"
             type="button"
-            [nzLoading]="store.uploadLoading()"
+            [disabled]="fileStorage.uploadLoading() || store.goodsReceiptImportLoading()"
+            [nzLoading]="fileStorage.uploadLoading() || store.goodsReceiptImportLoading()"
             (click)="close()">
       Inchide
     </button>
@@ -35,8 +41,8 @@
             *nzSpaceItem
             nzType="primary"
             type="button"
-            [disabled]="!hasFiles()"
-            [nzLoading]="store.uploadLoading()"
+            [disabled]="!hasFiles() || store.goodsReceiptImportLoading()"
+            [nzLoading]="fileStorage.uploadLoading() || store.goodsReceiptImportLoading()"
             (click)="loadFiles()">
       Incarca fisierele
     </button>

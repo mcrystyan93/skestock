@@ -2,10 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import {
   CategoryImportDto,
+  CategoryImportListItemDto,
   CategoryImportReviewDto,
   ConfirmCategoryImportRequest,
   ConfirmCategoryImportResponse,
-  CreateCategoryImportRequest
+  CreateCategoryImportRequest,
+  GetAllCategoryImportsRequest,
+  PaginatedResponse
 } from '@ske/models';
 
 @Service()
@@ -14,6 +17,10 @@ export class CategoryImportsHttp {
 
   public create(request: CreateCategoryImportRequest) {
     return this._httpClient.post<CategoryImportDto>('/api/CategoryImports', request);
+  }
+
+  public getAll(request: GetAllCategoryImportsRequest | Partial<GetAllCategoryImportsRequest>) {
+    return this._httpClient.post<PaginatedResponse<CategoryImportListItemDto>>('/api/CategoryImports/get-all', request);
   }
 
   public getById(id: string) {

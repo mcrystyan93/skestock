@@ -25,11 +25,13 @@ public class UpdateCategoryCommandHandler(IApplicationDbContext dbContext)
         category.AddDomainEvent(new CategoryUpdatedEvent(category));
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        var itemCount = await dbContext.Items.CountAsync(i => i.CategoryId == category.Id, cancellationToken);
 
         return Result.Ok(new CategoryDto
         {
             Id = category.Id,
             Name = category.Name,
+            ItemCount = itemCount,
             Icon = category.Icon is null
                 ? null
                 : new CategoryIconDto

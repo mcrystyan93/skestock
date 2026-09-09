@@ -4,6 +4,7 @@ public record CategoryDto
 {
     public Guid Id { get; init; }
     public string Name { get; init; } = string.Empty;
+    public int ItemCount { get; init; }
     public CategoryIconDto? Icon { get; init; }
     public string? CreatedByName { get; init; }
     public string? LastModifiedByName { get; init; }

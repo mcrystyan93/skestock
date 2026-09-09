@@ -16,6 +16,7 @@ public class GetCategoryByIdHandler(IApplicationDbContext dbContext)
             {
                 Id = c.Id,
                 Name = c.Name,
+                ItemCount = c.Items.Count,
                 Icon = c.Icon == null
                     ? null
                     : new CategoryIconDto

@@ -1,17 +1,29 @@
 <nz-page-header nzTitle="Categorii">
   <nz-page-header-extra>
-    <button nz-button
-            nzType="primary"
-            type="button"
-            (click)="onAdd.emit()">
-      <nz-icon nzType="icons:plus"></nz-icon>
-      Adaugă
-    </button>
-    <button nz-button
-            nzType="default"
-            type="button"
-            (click)="onImport.emit()">
-      Importă
-    </button>
+    <nz-space>
+      <button nz-button
+              *nzSpaceItem
+              nzType="primary"
+              type="button"
+              (click)="onAdd.emit()">
+        <nz-icon nzType="icons:plus"></nz-icon>
+        Adaugă
+      </button>
+      <button nz-button
+              *nzSpaceItem
+              nzType="default"
+              type="button"
+              (click)="onImport.emit()">
+        <nz-icon nzType="icons:file-import"></nz-icon>
+        Importă
+      </button>
+    </nz-space>
   </nz-page-header-extra>
+
+  <nz-page-header-footer>
+    <nz-tabs [(nzSelectedIndex)]="selectedTabIndex">
+      <nz-tab nzTitle="Categorii"></nz-tab>
+      <nz-tab nzTitle="Importuri categorii"></nz-tab>
+    </nz-tabs>
+  </nz-page-header-footer>
 </nz-page-header>

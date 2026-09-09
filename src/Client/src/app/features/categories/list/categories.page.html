@@ -1,20 +1,25 @@
-<ske-category-header (onAdd)="onAdd()" (onImport)="onImport()" />
+<ske-category-header [(selectedTabIndex)]="selectedTabIndex"
+                     (onAdd)="onAdd()"
+                     (onImport)="onImport()" />
 
-<ske-category-filter-container class="mx-4" />
-
-<ske-error-alert [problemDetail]="store.categoriesProblemDetail()"
-                 [validationErrors]="store.categoriesValidationErrors()"
-                 class="mx-4" />
-
-<div class="grow relative mx-4 mb-4">
-  <ske-category-table [items]="store.categories()"
-                      [filter]="store.filter()"
-                      [loading]="store.categoriesLoading()"
-                      [hasNextPage]="store.hasNextPage()"
-                      [isLoadingMore]="store.isLoadingMore()"
-                      (onFilterChange)="onFilterChange($event)"
-                      (onLoadMore)="onLoadMore()"
-                      (onEdit)="onEdit($event)"
-                      (onDelete)="onDelete($event)"
-                      [deletingCategoryId]="store.deletingCategoryId()" />
-</div>
+<nz-tabs [nzSelectedIndex]="selectedTabIndex()"
+         [nzTabBarStyle]="{ display: 'none' }"
+         class="inner-scroll grow m-4!">
+  <nz-tab>
+    <ske-category-list-tab [categories]="store.categories()"
+                           [filter]="store.filter()"
+                           [problemDetail]="store.categoriesProblemDetail()"
+                           [validationErrors]="store.categoriesValidationErrors()"
+                           [loading]="store.categoriesLoading()"
+                           [hasNextPage]="store.hasNextPage()"
+                           [isLoadingMore]="store.isLoadingMore()"
+                           [deletingCategoryId]="store.deletingCategoryId()"
+                           (onFilterChange)="onFilterChange($event)"
+                           (onLoadMore)="onLoadMore()"
+                           (onEdit)="onEdit($event)"
+                           (onDelete)="onDelete($event)" />
+  </nz-tab>
+  <nz-tab>
+    <ske-category-import-list-tab />
+  </nz-tab>
+</nz-tabs>

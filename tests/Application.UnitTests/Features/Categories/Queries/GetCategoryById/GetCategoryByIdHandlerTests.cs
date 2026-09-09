@@ -61,11 +61,19 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
             b.HasOne(c => c.CreatedBy).WithMany().HasForeignKey(c => c.CreatedById);
             b.HasOne(c => c.LastModifiedBy).WithMany().HasForeignKey(c => c.LastModifiedById);
             b.OwnsOne(c => c.Icon);
-            b.Ignore(c => c.Items);
+        });
+
+        builder.Entity<Item>(b =>
+        {
+            b.HasOne(i => i.Category).WithMany(c => c.Items).HasForeignKey(i => i.CategoryId);
+            b.Ignore(i => i.Batches);
+            b.Ignore(i => i.Transactions);
+            b.Ignore(i => i.ClassBalances);
+            b.Ignore(i => i.CreatedBy);
+            b.Ignore(i => i.LastModifiedBy);
         });
 
         builder.Ignore<ClassBalance>();
-        builder.Ignore<Item>();
         builder.Ignore<Location>();
         builder.Ignore<SchoolClass>();
         builder.Ignore<StockBatch>();
@@ -96,6 +104,10 @@ public class GetCategoryByIdHandlerTests
         };
         context.Categories.Add(category);
         await context.SaveChangesAsync(CancellationToken.None);
+        context.Items.AddRange(
+            new Item { Name = "Notebook", CategoryId = category.Id },
+            new Item { Name = "Pen", CategoryId = category.Id });
+        await context.SaveChangesAsync(CancellationToken.None);
 
         var handler = new GetCategoryByIdHandler(context);
         var result = await handler.Handle(new GetCategoryByIdQuery { Id = category.Id }, CancellationToken.None);
@@ -103,6 +115,7 @@ public class GetCategoryByIdHandlerTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.Id.ShouldBe(category.Id);
         result.Value.Name.ShouldBe("Stationery");
+        result.Value.ItemCount.ShouldBe(2);
         result.Value.Icon.ShouldNotBeNull();
         result.Value.Icon.Name.ShouldBe("Square Q");
         result.Value.Icon.FileName.ShouldBe("square-q");

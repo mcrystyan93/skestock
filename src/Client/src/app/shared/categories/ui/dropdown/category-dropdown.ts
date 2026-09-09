@@ -10,7 +10,7 @@ import {NzSpaceCompactComponent} from 'ng-zorro-antd/space';
 import {NzButtonComponent} from 'ng-zorro-antd/button';
 import {NzIconDirective} from 'ng-zorro-antd/icon';
 import {isNil} from 'lodash-es';
-import {CategoryDetailModal} from '../modals/category-detail-modal';
+import {CategoryDetailModal} from '../modals/detail/category-detail-modal';
 import {NzModalService} from 'ng-zorro-antd/modal';
 
 @Component({

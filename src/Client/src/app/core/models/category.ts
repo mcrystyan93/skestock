@@ -5,6 +5,7 @@ import type {IconPickerValue} from '@ske/shared/icons';
 export type CategoryDto = {
   id: string;
   name: string;
+  itemCount: number;
   createdByName?: string | null;
   lastModifiedByName?: string | null;
   createdDate: string;
@@ -45,6 +46,7 @@ export function buildCategoryListFilter(
 
 export type CategoryTableColumn =
   | 'name'
+  | 'itemCount'
   | 'createdDate'
   | 'lastModifiedDate'
   | 'createdByName'
@@ -55,6 +57,11 @@ export const CATEGORY_TABLE_COLUMNS: TableColumnDefinition<CategoryTableColumn> 
     label: 'Nume',
     value: 'name',
     fieldType: 'string'
+  },
+  itemCount: {
+    label: 'Nr. articole',
+    value: 'itemCount',
+    fieldType: 'number'
   },
   createdDate: {
     label: 'Data creare',
