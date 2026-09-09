@@ -61,11 +61,19 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
             b.HasOne(c => c.CreatedBy).WithMany().HasForeignKey(c => c.CreatedById);
             b.HasOne(c => c.LastModifiedBy).WithMany().HasForeignKey(c => c.LastModifiedById);
             b.OwnsOne(c => c.Icon);
-            b.Ignore(c => c.Items);
+        });
+
+        builder.Entity<Item>(b =>
+        {
+            b.HasOne(i => i.Category).WithMany(c => c.Items).HasForeignKey(i => i.CategoryId);
+            b.Ignore(i => i.Batches);
+            b.Ignore(i => i.Transactions);
+            b.Ignore(i => i.ClassBalances);
+            b.Ignore(i => i.CreatedBy);
+            b.Ignore(i => i.LastModifiedBy);
         });
 
         builder.Ignore<ClassBalance>();
-        builder.Ignore<Item>();
         builder.Ignore<Location>();
         builder.Ignore<SchoolClass>();
         builder.Ignore<StockBatch>();

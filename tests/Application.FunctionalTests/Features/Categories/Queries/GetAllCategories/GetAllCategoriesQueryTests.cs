@@ -86,6 +86,31 @@ public class GetAllCategoriesQueryTests : TestBase
     }
 
     [Test]
+    public async Task Handle_ReturnsNumberOfItemsAssignedToEachCategory()
+    {
+        var categories = await SeedCategoriesAsync("WithItems", "WithoutItems");
+        var categoryWithItems = categories.Single(c => c.Name.EndsWith("WithItems"));
+
+        await TestApp.AddAsync(new Item
+        {
+            Name = $"{_prefix}-Notebook",
+            CategoryId = categoryWithItems.Id
+        });
+        await TestApp.AddAsync(new Item
+        {
+            Name = $"{_prefix}-Pen",
+            CategoryId = categoryWithItems.Id,
+            IsActive = false
+        });
+
+        var result = await TestApp.SendAsync(Query(_prefix));
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Data.Single(c => c.Name.EndsWith("WithItems")).ItemCount.ShouldBe(2);
+        result.Value.Data.Single(c => c.Name.EndsWith("WithoutItems")).ItemCount.ShouldBe(0);
+    }
+
+    [Test]
     public async Task Handle_WithNoMatches_ReturnsEmptyPage()
     {
         var result = await TestApp.SendAsync(Query($"{_prefix}-does-not-exist"));

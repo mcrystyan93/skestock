@@ -1,0 +1,64 @@
+@let dimensions = tableDimensions();
+
+<nz-table #table
+          nzTableLayout="auto"
+          [nzData]="itemsVirtualData()"
+          [nzVirtualItemSize]="virtualItemSize()"
+          [nzVirtualMinBufferPx]="virtualMinBufferPx()"
+          [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
+          [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          [nzLoading]="loading()"
+          nzSize="small"
+          [nzScroll]="{x: dimensions.width, y: dimensions.height}">
+  <thead>
+  <tr>
+    <th nzWidth="240px">{{ columns.blobPath.label }}</th>
+    <th nzWidth="170px">{{ columns.status.label }}</th>
+    <th nzWidth="170px">{{ columns.uploadedByName.label }}</th>
+    <th nzWidth="170px">{{ columns.uploadedAt.label }}</th>
+    <th nzWidth="170px">{{ columns.processedAt.label }}</th>
+    <th nzWidth="240px">{{ columns.errorMessage.label }}</th>
+    <th nzWidth="170px">{{ columns.createdDate.label }}</th>
+    <th>Actiuni</th>
+  </tr>
+  </thead>
+  <tbody>
+  <ng-template nz-virtual-scroll
+               let-categoryImport>
+    <tr>
+      <td>{{ categoryImport.blobPath }}</td>
+      <td>
+        <nz-tag [nzColor]="statusColor(categoryImport.status)">
+          {{ statusLabel(categoryImport.status) }}
+        </nz-tag>
+      </td>
+      <td>{{ categoryImport.uploadedByName || '-' }}</td>
+      <td>{{ categoryImport.uploadedAt | date:'medium' }}</td>
+      <td>{{ categoryImport.processedAt | date:'medium' }}</td>
+      <td>{{ categoryImport.errorMessage || '-' }}</td>
+      <td>{{ categoryImport.createdDate | date:'medium' }}</td>
+      <td>
+        <button type="button"
+                nz-button
+                nzType="link"
+                (click)="downloadFile.emit(categoryImport)"
+                aria-label="Descarca importul">
+          <nz-icon nzType="icons:download"></nz-icon>
+          Descarca
+        </button>
+        <button type="button"
+                nz-button
+                nzType="link"
+                disabled
+                aria-label="Revizuieste importul"
+                title="Revizuirea importului va fi disponibila ulterior">
+          <nz-icon nzType="icons:eye"></nz-icon>
+          Revizuieste
+        </button>
+      </td>
+    </tr>
+  </ng-template>
+  </tbody>
+</nz-table>

@@ -29,7 +29,12 @@ const initialState: CategoryCollectionState = {
   categories: [],
   paginationData: null,
   filter: {
-    sort: [],
+    sort: [
+      {
+        key: 'name',
+        value: 'ascend'
+      }
+    ],
     filters: [],
     cursor: null,
     pageSize: PAGINATION_PAGE_SIZE,

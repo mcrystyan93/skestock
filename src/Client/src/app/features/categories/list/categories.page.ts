@@ -1,31 +1,33 @@
-import { Component, DestroyRef, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CategoryListState } from '../services/category-list.store';
-import { FilterContainer } from './filter/filter-container';
-import { Table } from './table/table';
 import { CategoryDto, GetAllCategoriesRequest } from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { Header } from './header/header';
-import { CategoryDetailModal, CategoryImportModal } from '@ske/shared/categories';
+import { CategoryDetailModal, CategoryImportModal, CategoryImportState } from '@ske/shared/categories';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { SignalRGroupManagerStore } from '@ske/signalr';
-import { ErrorAlert } from '@ske/shared/errors';
+import { realtimeGroups, SignalRGroupManagerStore } from '@ske/signalr';
+import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
+import { CategoryListTab } from './tabs/category-list-tab';
+import { CategoryImportListTab } from './tabs/category-import-list-tab';
 
 @Component({
   imports: [
-    FilterContainer,
-    Table,
     Header,
-    ErrorAlert
+    NzTabsComponent,
+    NzTabComponent,
+    CategoryListTab,
+    CategoryImportListTab
   ],
   selector: 'ske-categories-page',
   templateUrl: './categories.page.html',
-  providers: [CategoryListState, NzModalService],
+  providers: [CategoryListState, CategoryImportState, NzModalService],
   host: {
     class: 'flex flex-col grow gap-4'
   }
 })
-export class CategoriesPage implements OnInit, OnDestroy{
+export class CategoriesPage implements OnInit, OnDestroy {
   public readonly store = inject(CategoryListState);
+  public readonly selectedTabIndex = signal(0);
 
   private readonly _modalService = inject(NzModalService);
   private readonly _destroyRef = inject(DestroyRef);
@@ -56,11 +58,13 @@ export class CategoriesPage implements OnInit, OnDestroy{
   }
 
   public ngOnInit() {
-    this._signalRGroupManager.join('categories-list');
+    this._signalRGroupManager.join(realtimeGroups.categoriesList);
+    this._signalRGroupManager.join(realtimeGroups.categoryImportsList);
   }
 
   public ngOnDestroy() {
-    this._signalRGroupManager.leave('categories-list');
+    this._signalRGroupManager.leave(realtimeGroups.categoriesList);
+    this._signalRGroupManager.leave(realtimeGroups.categoryImportsList);
   }
 
   private openCategoryModal(category: CategoryDto | null = null) {

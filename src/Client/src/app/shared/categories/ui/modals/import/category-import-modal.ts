@@ -1,9 +1,9 @@
-import { Component, DestroyRef, effect, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Events } from '@ngrx/signals/events';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zorro-antd/modal';
-import { NzProgressComponent } from 'ng-zorro-antd/progress';
+import { NzProgressComponent, NzProgressStatusType } from 'ng-zorro-antd/progress';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { NzUploadFile } from 'ng-zorro-antd/upload';
 import { tap } from 'rxjs';
@@ -13,7 +13,8 @@ import {
   FileStorageState,
   FileUpload
 } from '@ske/shared/storage';
-import { CategoryImportState } from '../../services/category-import.store';
+import { CreateCategoryImportRequest } from '@ske/models';
+import { CategoryImportState } from '../../../services/category-import.store';
 
 @Component({
   imports: [
@@ -44,34 +45,50 @@ export class CategoryImportModal {
 
   public readonly hasFiles = () => this._fileList().length > 0;
 
+  public readonly progressStatus = computed<NzProgressStatusType>(() => {
+    if (this.fileStorage.hasUploadFailures())
+      return 'exception';
+
+    if (this.fileStorage.totalCount() > 0 && this.fileStorage.completedCount() === this.fileStorage.totalCount())
+      return 'success';
+
+    return 'active';
+  });
+
+  public readonly progressFormat = (): string =>
+    `${this.fileStorage.completedCount()} din ${this.fileStorage.totalCount()}`;
+
   private readonly _uploadSuccessRef = this._events.on(fileStorageApiEvents.uploadSuccess)
     .pipe(
       takeUntilDestroyed(this._destroyRef),
       tap(({ payload }) => {
-        const [file] = payload;
+        const requests: CreateCategoryImportRequest[] = payload
+          .map((file) => ({ fileMetadataId: file.id }));
 
-        if (file)
-          this.store.createImport({ fileMetadataId: file.id });
+        if (requests.length > 0)
+          this.store.createImports(requests);
       })
     )
     .subscribe();
 
   private readonly _closeAfterCreate = effect(() => {
-    const categoryImport = this.store.categoryImport();
+    const categoryImports = this.store.categoryImports();
 
-    if (categoryImport)
-      this._modalRef.close(categoryImport);
+    if (categoryImports.length > 0)
+      this._modalRef.close(categoryImports);
   });
 
   public close() {
     this._modalRef.close();
   }
 
-  public loadFile() {
-    const [file] = this._fileList();
+  public loadFiles() {
+    const files = this._fileList();
 
-    if (file)
-      this.fileStorage.uploadFiles([file]);
+    if (files.length === 0)
+      return;
+
+    this.fileStorage.uploadFiles(files);
   }
 
   public onFileListChange(fileList: NzUploadFile[]) {

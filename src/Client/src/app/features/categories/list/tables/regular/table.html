@@ -18,6 +18,9 @@
       {{ columns.name.label }}
     </th>
     <th>
+      {{ columns.itemCount.label }}
+    </th>
+    <th>
       {{ columns.createdDate.label }}
     </th>
     <th>
@@ -43,6 +46,9 @@
           <nz-avatar [nzIcon]="category.icon?.fileName ? ('icons:'+category.icon.fileName) : 'icons:box'" />
           {{ category.name }}
         </div>
+      </td>
+      <td>
+        {{ category.itemCount }}
       </td>
       <td>
         {{ category.createdDate | date }}

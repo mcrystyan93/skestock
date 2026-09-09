@@ -62,11 +62,19 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
             b.HasOne(c => c.CreatedBy).WithMany().HasForeignKey(c => c.CreatedById);
             b.HasOne(c => c.LastModifiedBy).WithMany().HasForeignKey(c => c.LastModifiedById);
             b.OwnsOne(c => c.Icon);
-            b.Ignore(c => c.Items);
+        });
+
+        builder.Entity<Item>(b =>
+        {
+            b.HasOne(i => i.Category).WithMany(c => c.Items).HasForeignKey(i => i.CategoryId);
+            b.Ignore(i => i.Batches);
+            b.Ignore(i => i.Transactions);
+            b.Ignore(i => i.ClassBalances);
+            b.Ignore(i => i.CreatedBy);
+            b.Ignore(i => i.LastModifiedBy);
         });
 
         builder.Ignore<ClassBalance>();
-        builder.Ignore<Item>();
         builder.Ignore<Location>();
         builder.Ignore<SchoolClass>();
         builder.Ignore<StockBatch>();
@@ -144,6 +152,29 @@ public class GetAllCategoriesHandlerTests
         icon!.Name.ShouldBe("Square Q");
         icon.FileName.ShouldBe("square-q");
         icon.Path.ShouldBe("/assets/icons/square-q.svg");
+    }
+
+    [Test]
+    public async Task Handle_ReturnsNumberOfItemsAssignedToEachCategory()
+    {
+        await using var context = await SeedAsync(2, i => new Category
+        {
+            Name = i == 0 ? "WithItems" : "WithoutItems",
+            CreatedDate = new DateTimeOffset(2024, 1, 1 + i, 0, 0, 0, TimeSpan.Zero),
+            LastModifiedDate = new DateTimeOffset(2024, 1, 1 + i, 0, 0, 0, TimeSpan.Zero)
+        });
+
+        var categoryWithItems = context.Categories.Single(c => c.Name == "WithItems");
+        context.Items.AddRange(
+            new Item { Name = "Notebook", CategoryId = categoryWithItems.Id },
+            new Item { Name = "Pen", CategoryId = categoryWithItems.Id, IsActive = false });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await CreateHandler(context).Handle(new GetAllCategoriesQuery(), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Data.Single(c => c.Name == "WithItems").ItemCount.ShouldBe(2);
+        result.Value.Data.Single(c => c.Name == "WithoutItems").ItemCount.ShouldBe(0);
     }
 
     [Test]

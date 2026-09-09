@@ -1,0 +1,8 @@
+<ske-category-import-filter-container />
+
+<ske-error-alert [problemDetail]="store.categoryImportListProblemDetail()"
+                 [validationErrors]="store.categoryImportListValidationErrors()" />
+
+<div class="grow relative">
+  <ske-category-import-table-container />
+</div>

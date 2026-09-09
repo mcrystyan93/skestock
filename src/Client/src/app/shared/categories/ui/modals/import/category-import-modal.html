@@ -1,21 +1,29 @@
 <div *nzModalTitle>Importă categorii</div>
 
 <p class="mb-4 text-sm text-gray-600">
-  Încarcă un document cu categoriile care vor fi analizate automat.
+  Încarcă un document sau mai multe cu categoriile care vor fi analizate automat.
 </p>
 
-<ske-file-upload [multiple]="false" (onFileListChange)="onFileListChange($event)" />
+<ske-file-upload [multiple]="true"
+                 (onFileListChange)="onFileListChange($event)" />
 
-@if (fileStorage.uploadLoading()) {
-  <nz-progress [nzPercent]="fileStorage.uploadPercent()" nzStatus="active" />
+@if (fileStorage.uploadLoading() || fileStorage.hasUploadFailures()) {
+  <nz-progress [nzPercent]="fileStorage.uploadPercent()"
+               [nzStatus]="progressStatus()"
+               [nzFormat]="progressFormat" />
 
   @if (fileStorage.currentFileName(); as currentFileName) {
     <p class="mt-2 text-sm text-gray-500">Se încarcă {{ currentFileName }}</p>
   }
-}
 
-@if (fileStorage.hasUploadFailures()) {
-  <p class="mt-2 text-sm text-red-500">Fișierul nu a putut fi încărcat.</p>
+  @if (fileStorage.hasUploadFailures()) {
+    <p class="mt-2 text-sm text-red-500">Fisiere ce nu au putut fi incarcate:</p>
+    <ul class="text-sm text-red-500">
+      @for (failedFile of fileStorage.failedFiles(); track failedFile.name) {
+        <li>{{ failedFile.name }}</li>
+      }
+    </ul>
+  }
 }
 
 @if (store.categoryImportProblemDetail(); as problemDetail) {
@@ -38,7 +46,7 @@
             type="button"
             [disabled]="!hasFiles()"
             [nzLoading]="fileStorage.uploadLoading() || store.categoryImportLoading()"
-            (click)="loadFile()">
+            (click)="loadFiles()">
       Încarcă și procesează
     </button>
   </nz-space>

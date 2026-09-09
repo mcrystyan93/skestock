@@ -27,6 +27,7 @@ public class CreateCategoryCommandHandler(IApplicationDbContext dbContext)
         {
             Id = category.Id,
             Name = category.Name,
+            ItemCount = 0,
             Icon = category.Icon is null
                 ? null
                 : new CategoryIconDto

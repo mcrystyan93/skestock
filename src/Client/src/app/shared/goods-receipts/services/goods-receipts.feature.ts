@@ -1,21 +1,20 @@
-import { patchState, signalStoreFeature, withComputed, withMethods, withState } from '@ngrx/signals';
-import { withLoadingFeature } from '@ske/shared/loader';
-import { withProblemDetailsFeature } from '@ske/shared/errors';
+import {patchState, signalStoreFeature, withComputed, withMethods, withState} from '@ngrx/signals';
+import {withLoadingFeature} from '@ske/shared/loader';
+import {withProblemDetailsFeature} from '@ske/shared/errors';
 // noinspection ES6PreferShortImport
-import { GoodsReceiptsHttp } from '../services/goods-receipts.http';
-import { inject } from '@angular/core';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { concatMap, EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
+import {GoodsReceiptsHttp} from '../services/goods-receipts.http';
+import {inject} from '@angular/core';
+import {rxMethod} from '@ngrx/signals/rxjs-interop';
+import {EMPTY, filter, map, pipe, switchMap, tap} from 'rxjs';
 import {
   buildGoodsReceiptListFilter,
-  CreateGoodsReceiptImportRequest,
   GetAllGoodsReceiptsRequest,
   GoodsReceiptListItemDto,
   PaginatedResponseData
 } from '@ske/models';
-import { mapResponse } from '@ngrx/operators';
-import { Events, withEventHandlers } from '@ngrx/signals/events';
-import { realtimeEvents } from '@ske/signalr';
+import {mapResponse} from '@ngrx/operators';
+import {Events, withEventHandlers} from '@ngrx/signals/events';
+import {realtimeEvents} from '@ske/signalr';
 
 type GoodsReceiptsState = {
   goodsReceipts: GoodsReceiptListItemDto[];
@@ -51,7 +50,7 @@ export function withGoodReceiptsFeature() {
             store.clearGoodsReceiptsErrors();
             store.goodsReceiptsLoading();
 
-            patchState(store, { filter, isLoadingMoreGoodsReceipts: false });
+            patchState(store, {filter, isLoadingMoreGoodsReceipts: false});
           }),
           map((filter) => buildGoodsReceiptListFilter(store.filter(), filter)),
           switchMap((filter) => {
@@ -63,7 +62,7 @@ export function withGoodReceiptsFeature() {
                     patchState(store, {
                       goodsReceipts: result.data,
                       paginationData: result,
-                      filter: { ...filter, cursor: null, sort: result.sort }
+                      filter: {...filter, cursor: null, sort: result.sort}
                     });
                   },
                   error: error => {
@@ -81,32 +80,32 @@ export function withGoodReceiptsFeature() {
           filter(() => store.hasGoodsReceiptsNextPage() && !store.isLoadingMoreGoodsReceipts()),
           tap(() => {
             store.clearGoodsReceiptsErrors();
-            patchState(store, { isLoadingMoreGoodsReceipts: true });
+            patchState(store, {isLoadingMoreGoodsReceipts: true});
           }),
           switchMap(() => {
             const filter = store.filter();
             const nextCursor = store.nextGoodReceiptsCursor();
 
             if (!nextCursor) {
-              patchState(store, { isLoadingMoreGoodsReceipts: false });
+              patchState(store, {isLoadingMoreGoodsReceipts: false});
               return EMPTY;
             }
 
-            return goodsReceiptsHttp.getAll({ ...filter, cursor: nextCursor })
+            return goodsReceiptsHttp.getAll({...filter, cursor: nextCursor})
               .pipe(
                 mapResponse({
                   next: (result) => {
                     patchState(store, {
                       goodsReceipts: [...store.goodsReceipts(), ...result.data],
                       paginationData: result,
-                      filter: { ...filter, cursor: null, sort: result.sort },
+                      filter: {...filter, cursor: null, sort: result.sort},
                       isLoadingMoreGoodsReceipts: false
                     });
                     store.setGoodsReceiptsLoaded();
                   },
                   error: (error) => {
                     store.handleGoodsReceiptsError(error);
-                    patchState(store, { isLoadingMoreGoodsReceipts: false });
+                    patchState(store, {isLoadingMoreGoodsReceipts: false});
                   }
                 })
               );
@@ -115,21 +114,7 @@ export function withGoodReceiptsFeature() {
         )
       );
 
-      const importGoodReceipt = rxMethod<CreateGoodsReceiptImportRequest>(
-        pipe(
-          concatMap(request =>
-            goodsReceiptsHttp.createImport(request)
-          ),
-          mapResponse({
-            next: () => {
-            },
-            error: (error) => {
-            }
-          })
-        )
-      );
-
-      return { loadGoodsReceipts, loadMoreGoodsReceipts, importGoodReceipt };
+      return {loadGoodsReceipts, loadMoreGoodsReceipts};
     }),
     withEventHandlers((store, events = inject(Events)) => ({
       goodsReceiptImportChanges: events.on(realtimeEvents.goodsReceiptImportConfirmed)
