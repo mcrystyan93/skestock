@@ -35,7 +35,7 @@ public static class Services
     public const string DatabaseVolumes = "skestock-db-data";
     
     public const string Cache = "skestock-cache";
-    
+    public const string CacheCommander = "redis-commander";
     public const string CacheVolumes = "skestock-cache-data";    
     
     /// <summary>

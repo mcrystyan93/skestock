@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using skestock.Application.Common.Interfaces;
 using skestock.Web.BackgroundJobs;
 using skestock.Web.Services;
+using skestock.Infrastructure.Storage;
 using StackExchange.Redis;
 
 namespace skestock.Web;
@@ -62,6 +63,7 @@ public static class DependencyInjection
         builder.Services.AddCors();
 
         builder.Services.AddHostedService<OutboxPublisherService>();
+        builder.Services.AddHostedService<AzureBlobCorsInitializer>();
 
     }
 

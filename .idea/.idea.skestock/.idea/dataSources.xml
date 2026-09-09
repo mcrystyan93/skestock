@@ -11,23 +11,23 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="skestock-cache" uuid="1a1231aa-f9ce-4add-87b9-550ef23d772f">
-      <driver-ref>redis</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>jdbc.RedisDriver</jdbc-driver>
-      <jdbc-url>jdbc:redis://parolaREDIS1!@localhost:6379?ssl=true&amp;verifyServerCertificate=false</jdbc-url>
-      <jdbc-additional-properties>
-        <property name="aspireResourceId" value="skestock-cache-etnwhzzb" />
-      </jdbc-additional-properties>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
-    <data-source source="LOCAL" name="dbserver" uuid="692f69bb-5856-4673-ae06-6b5700f93be3">
+    <data-source source="LOCAL" name="dbserver" uuid="d7ef98b9-3fd9-4173-be1d-0187603e323b">
       <driver-ref>sqlserver.jb</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.jetbrains.jdbc.sqlserver.SqlServerDriver</jdbc-driver>
       <jdbc-url>Server=127.0.0.1,1433;User ID=sa;Password=parolaSQL1!;TrustServerCertificate=true</jdbc-url>
       <jdbc-additional-properties>
-        <property name="aspireResourceId" value="dbserver-vhazbmaq" />
+        <property name="aspireResourceId" value="dbserver-eajgtwkx" />
+      </jdbc-additional-properties>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="skestock-cache" uuid="bb4533d2-b9bc-49f5-a452-ff55266e3357">
+      <driver-ref>redis</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>jdbc.RedisDriver</jdbc-driver>
+      <jdbc-url>jdbc:redis://parolaREDIS1!@localhost:6379?ssl=true&amp;verifyServerCertificate=false</jdbc-url>
+      <jdbc-additional-properties>
+        <property name="aspireResourceId" value="skestock-cache-mwyzeepv" />
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>

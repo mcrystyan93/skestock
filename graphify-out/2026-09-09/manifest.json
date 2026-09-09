@@ -48,15 +48,15 @@
     "semantic_hash": "5a46f350118ef7e662e6177d314cb402"
   },
   "src/AppHost/Extensions.cs": {
-    "mtime": 1788325384.037,
-    "seen": 1788844386.8770323,
-    "ast_hash": "84b0ba5bff21902beffe9bd618ebf57f",
-    "semantic_hash": "84b0ba5bff21902beffe9bd618ebf57f"
+    "mtime": 1788953664.3981144,
+    "seen": 1788954127.0534294,
+    "ast_hash": "acbd2f98366e584f4ae630275c378fce",
+    "semantic_hash": ""
   },
   "src/AppHost/Program.cs": {
-    "mtime": 1788890435.8234448,
-    "seen": 1788890474.777335,
-    "ast_hash": "f37fc4dd607c5d56046345cbbd249ffc",
+    "mtime": 1788953679.7971268,
+    "seen": 1788954127.0534308,
+    "ast_hash": "8a909870832aa6b91cae773d8bf836f2",
     "semantic_hash": ""
   },
   "src/AppHost/Properties/launchSettings.json": {
@@ -2802,10 +2802,10 @@
     "semantic_hash": "a178e2445eef0fbd7b0d89ad3341197b"
   },
   "src/Web/DependencyInjection.cs": {
-    "mtime": 1788464433.379,
-    "seen": 1788844386.8772259,
-    "ast_hash": "83343b9ecd5662617b94ec30a0f986c2",
-    "semantic_hash": "83343b9ecd5662617b94ec30a0f986c2"
+    "mtime": 1788953193.8217382,
+    "seen": 1788953212.9831727,
+    "ast_hash": "8fe02c6aa8806989af7ef69c9fb2aa6e",
+    "semantic_hash": ""
   },
   "src/Web/Endpoints/Antiforgery.cs": {
     "mtime": 1788022775.126,
@@ -3786,9 +3786,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/core/signalr/realtime-groups.ts": {
-    "mtime": 1788933710.4772842,
-    "seen": 1788933754.9897804,
-    "ast_hash": "7fc55475d32b0a67d7bc1fe505eda9b3",
+    "mtime": 1788934458.459095,
+    "seen": 1788934477.7536569,
+    "ast_hash": "05e34f9f382a1f15eeb4e470a6e39d1e",
     "semantic_hash": ""
   },
   "src/Client/src/app/core/signalr/services/realtime.events.ts": {
@@ -3828,8 +3828,8 @@
     "semantic_hash": "5b973a02eace6b2c3e55adf6fb0701e2"
   },
   "src/Client/src/app/shared/icons/icon-catalog.generated.ts": {
-    "mtime": 1788933816.5204053,
-    "seen": 1788933834.2747061,
+    "mtime": 1788934462.485099,
+    "seen": 1788934477.753739,
     "ast_hash": "9f18a0461fd8e197b5b5f0e2f49f1049",
     "semantic_hash": "9f18a0461fd8e197b5b5f0e2f49f1049"
   },
@@ -25074,9 +25074,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/categories/list/tables/import/table.ts": {
-    "mtime": 1788933203.920763,
-    "seen": 1788933221.4302185,
-    "ast_hash": "1e09f8ee4eb4130608c09fd12527c1f2",
+    "mtime": 1788933915.0365176,
+    "seen": 1788933933.22655,
+    "ast_hash": "ad329a9ca601c554a1f2788639445e12",
     "semantic_hash": ""
   },
   "src/Client/src/app/features/categories/list/tables/regular/table.ts": {
@@ -25086,9 +25086,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/categories/list/tabs/category-import-list-tab.ts": {
-    "mtime": 1788933203.911763,
-    "seen": 1788933221.4302201,
-    "ast_hash": "6775227076e90dd0fc5624214e540138",
+    "mtime": 1788933915.0605178,
+    "seen": 1788933933.2265515,
+    "ast_hash": "5546e1d308bcb835548005df301d2932",
     "semantic_hash": ""
   },
   "src/Client/src/app/features/categories/list/filter/category-import-filter-container.html": {
@@ -25104,9 +25104,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/categories/list/tables/import/table.html": {
-    "mtime": 1788933250.0403695,
-    "seen": 1788933754.9901514,
-    "ast_hash": "7548b557c3820e788cf47c545fd89f20",
+    "mtime": 1788933915.0425177,
+    "seen": 1788933933.2269964,
+    "ast_hash": "54531ea1aa604eb678a7aa6064b37c5e",
     "semantic_hash": ""
   },
   "src/Client/src/app/features/categories/list/tables/regular/table.html": {
@@ -25116,9 +25116,27 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/categories/list/tabs/category-import-list-tab.html": {
-    "mtime": 1788933203.915763,
-    "seen": 1788933221.4306076,
-    "ast_hash": "91778290859a8f6b7bb6bacabf59e33e",
+    "mtime": 1788933915.0665178,
+    "seen": 1788933933.226998,
+    "ast_hash": "2358440cab6bff7e4b363aa5d3259804",
+    "semantic_hash": ""
+  },
+  "src/Client/src/app/features/categories/list/tables/import/table-container.ts": {
+    "mtime": 1788933915.0485177,
+    "seen": 1788933933.2265482,
+    "ast_hash": "05b5925f784c93db63f0c395d1a7f9ea",
+    "semantic_hash": ""
+  },
+  "src/Client/src/app/features/categories/list/tables/import/table-container.html": {
+    "mtime": 1788933915.0545177,
+    "seen": 1788933933.2269952,
+    "ast_hash": "e20c4772f65749f16f265b344f537b92",
+    "semantic_hash": ""
+  },
+  "src/Infrastructure/Storage/AzureBlobCorsInitializer.cs": {
+    "mtime": 1788953218.0017576,
+    "seen": 1788954127.0537815,
+    "ast_hash": "5f7310757e8cd912d89a7698e1571c76",
     "semantic_hash": ""
   }
 }

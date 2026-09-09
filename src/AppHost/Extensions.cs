@@ -17,7 +17,10 @@ internal static class AspireExtensions
         builder.WithEnvironment(context =>
         {
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-            context.EnvironmentVariables["ASPNETCORE_ENVIRONMENT"] = environment ?? "Development";
+            context.EnvironmentVariables["ASPNETCORE_ENVIRONMENT"] =
+                builder.ApplicationBuilder.ExecutionContext.IsPublishMode
+                    ? "Production"
+                    : environment ?? "Development";
         });
 
         return builder;
@@ -92,80 +95,6 @@ internal static class AspireExtensions
                 )),
             ];
         });
-
-        if (storage.ApplicationBuilder.ExecutionContext.IsRunMode)
-        {
-            var appBuilder = storage.ApplicationBuilder;
-            var logger = appBuilder
-                .Services.BuildServiceProvider()
-                .GetRequiredService<ILogger<DistributedApplication>>();
-
-            // `First`, not `Single` because `AddBlobContainer` and `AddBlobs` both create one
-            // Assume it doesn't matter which one we use, because they are both the same blob service
-            var blobResource = appBuilder
-                .Resources.OfType<AzureBlobStorageResource>()
-                .First(resource => resource.Parent == storage.Resource);
-
-            storage.OnResourceReady(
-                async (_, _, cancellationToken) =>
-                {
-                    var connectionString = await blobResource
-                        .ConnectionStringExpression.GetValueAsync(cancellationToken)
-                        .ConfigureAwait(false);
-
-                    if (string.IsNullOrWhiteSpace(connectionString))
-                    {
-                        throw new InvalidOperationException("Blob connection string is null or empty.");
-                    }
-
-                    var client = new BlobServiceClient(connectionString);
-
-                    const int maxAttempts = 10;
-                    for (var attempt = 1; attempt <= maxAttempts; attempt++)
-                    {
-                        try
-                        {
-                            var propertiesResult = await client
-                                .GetPropertiesAsync(cancellationToken: cancellationToken)
-                                .ConfigureAwait(false);
-
-                            var properties = propertiesResult.Value;
-
-                            properties.Cors = [.. rules];
-
-                            await client
-                                .SetPropertiesAsync(properties, cancellationToken: cancellationToken)
-                                .ConfigureAwait(false);
-
-                            logger.LogInformation(
-                                "Applied blob CORS rule(s) to storage resource '{StorageResourceName}'.",
-                                storage.Resource.Name
-                            );
-                            return;
-                        }
-                        catch (Exception ex)
-                            when (attempt < maxAttempts
-                                && (ex is RequestFailedException or HttpRequestException or IOException)
-                            )
-                        {
-                            logger.LogDebug(
-                                ex,
-                                "Failed to apply blob CORS rule(s) on attempt {Attempt}/{MaxAttempts} for '{StorageResourceName}'. Retrying.",
-                                attempt,
-                                maxAttempts,
-                                storage.Resource.Name
-                            );
-
-                            await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken).ConfigureAwait(false);
-                        }
-                    }
-
-                    throw new InvalidOperationException(
-                        $"Failed to apply blob CORS rule(s) to storage resource '{storage.Resource.Name}' after {maxAttempts} attempts."
-                    );
-                }
-            );
-        }
 
         return storage;
     }
