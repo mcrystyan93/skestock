@@ -49,6 +49,7 @@ public static class Services
     public const string Queues = "queues";
     public const string GoodsReceiptImportQueue = "goods-receipt-import";
     public const string CategoryImportQueue = "category-import";
+    public const string ItemImportQueue = "item-import";
     
     public const string OpenApiSettings = "OpenApiSettings";
     public const string OpenApiKey = "ApiKey";

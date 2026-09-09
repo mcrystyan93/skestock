@@ -13,7 +13,10 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
         builder.Property(i => i.Description).HasMaxLength(DataSchemaConstants.DEFAULT_DESCRIPTION_LENGTH);
         builder.Property(i => i.Unit).HasMaxLength(20).IsRequired();
 
-        builder.HasIndex(i => i.Sku).IsUnique();
+        // SKU is optional; SQL Server's unfiltered unique index would allow only one SKU-less item.
+        builder.HasIndex(i => i.Sku)
+            .IsUnique()
+            .HasFilter("[Sku] IS NOT NULL");
 
         builder.HasOne(i => i.Category)
             .WithMany(c => c.Items)

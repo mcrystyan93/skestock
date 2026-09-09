@@ -1,6 +1,7 @@
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Items.Models;
+using skestock.Domain.Events.Items;
 
 namespace skestock.Application.Features.Items.Commands.DisableItem;
 
@@ -17,6 +18,7 @@ public class DisableItemCommandHandler(IApplicationDbContext dbContext)
 
         // Idempotent: disabling an already-inactive item is a no-op success rather than an error.
         item.IsActive = false;
+        item.AddDomainEvent(new ItemDisabledEvent(item));
         await dbContext.SaveChangesAsync(cancellationToken);
 
         var categoryName = await dbContext.Categories

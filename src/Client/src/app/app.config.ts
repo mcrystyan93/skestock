@@ -41,6 +41,13 @@ export const appConfig: ApplicationConfig = {
         [realtimeEventNames.categoryImportCreated]: realtimeEvents.categoryImportCreated,
         [realtimeEventNames.categoryImportProcessed]: realtimeEvents.categoryImportProcessed,
         [realtimeEventNames.categoryImportConfirmed]: realtimeEvents.categoryImportConfirmed,
+        [realtimeEventNames.itemCreated]: realtimeEvents.itemCreated,
+        [realtimeEventNames.itemUpdated]: realtimeEvents.itemUpdated,
+        [realtimeEventNames.itemDisabled]: realtimeEvents.itemDisabled,
+        [realtimeEventNames.itemEnabled]: realtimeEvents.itemEnabled,
+        [realtimeEventNames.itemImportCreated]: realtimeEvents.itemImportCreated,
+        [realtimeEventNames.itemImportProcessed]: realtimeEvents.itemImportProcessed,
+        [realtimeEventNames.itemImportConfirmed]: realtimeEvents.itemImportConfirmed,
         [realtimeEventNames.goodsReceiptImportCreated]: realtimeEvents.goodsReceiptImportCreated,
         [realtimeEventNames.goodsReceiptImportProcessed]: realtimeEvents.goodsReceiptImportProcessed,
         [realtimeEventNames.goodsReceiptImportConfirmed]: realtimeEvents.goodsReceiptImportConfirmed

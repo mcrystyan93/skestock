@@ -1,6 +1,7 @@
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Items.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Events.Items;
 
 namespace skestock.Application.Features.Items.Commands.CreateItem;
 
@@ -23,6 +24,7 @@ public class CreateItemCommandHandler(IApplicationDbContext dbContext)
         };
 
         dbContext.Items.Add(item);
+        item.AddDomainEvent(new ItemCreatedEvent(item));
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // Category/CreatedBy/LastModifiedBy navigations aren't loaded on a freshly-inserted

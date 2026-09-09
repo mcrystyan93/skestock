@@ -1,0 +1,9 @@
+<ske-item-import-table [items]="store.itemImportListItems()"
+                       [filter]="store.itemImportListFilter()"
+                       [loading]="store.itemImportListLoading()"
+                       [hasNextPage]="store.itemImportListHasNextPage()"
+                       [isLoadingMore]="store.itemImportListLoadingMore()"
+                       (onFilterChange)="store.load($event)"
+                       (onLoadMore)="store.loadMore()"
+                       (downloadFile)="download($event)"
+                       (review)="review.emit($event)" />

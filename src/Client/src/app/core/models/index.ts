@@ -6,6 +6,7 @@ export * from './pagination';
 export * from './category';
 export * from './category-import';
 export * from './item';
+export * from './item-import';
 export * from './location';
 export * from './school-class';
 export * from './goods-receipt';

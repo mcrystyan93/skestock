@@ -1,0 +1,8 @@
+<ske-item-import-filter-container />
+
+<ske-error-alert [problemDetail]="store.itemImportListProblemDetail()"
+                 [validationErrors]="store.itemImportListValidationErrors()" />
+
+<div class="grow relative">
+  <ske-item-import-table-container (review)="review.emit($event)" />
+</div>
