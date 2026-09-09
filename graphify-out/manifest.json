@@ -48,15 +48,15 @@
     "semantic_hash": "5a46f350118ef7e662e6177d314cb402"
   },
   "src/AppHost/Extensions.cs": {
-    "mtime": 1788325384.037,
-    "seen": 1788844386.8770323,
-    "ast_hash": "84b0ba5bff21902beffe9bd618ebf57f",
-    "semantic_hash": "84b0ba5bff21902beffe9bd618ebf57f"
+    "mtime": 1788953664.3981144,
+    "seen": 1788954127.0534294,
+    "ast_hash": "acbd2f98366e584f4ae630275c378fce",
+    "semantic_hash": ""
   },
   "src/AppHost/Program.cs": {
-    "mtime": 1788890435.8234448,
-    "seen": 1788890474.777335,
-    "ast_hash": "f37fc4dd607c5d56046345cbbd249ffc",
+    "mtime": 1788957695.7365274,
+    "seen": 1788957708.9039407,
+    "ast_hash": "6c903916a8043f7fcaffb833e65af979",
     "semantic_hash": ""
   },
   "src/AppHost/Properties/launchSettings.json": {
@@ -2784,9 +2784,9 @@
     "semantic_hash": "171b4b5f19cb37874f91ead8fa13f398"
   },
   "src/Shared/Services.cs": {
-    "mtime": 1788890435.8284447,
-    "seen": 1788890474.7776816,
-    "ast_hash": "c6d781569f2763ad7a107f5ed092c4f4",
+    "mtime": 1788954466.3207626,
+    "seen": 1788954628.6363008,
+    "ast_hash": "4f15f8ac9a29c6827a281151b00af0b8",
     "semantic_hash": ""
   },
   "src/Shared/Shared.csproj": {
@@ -2802,10 +2802,10 @@
     "semantic_hash": "a178e2445eef0fbd7b0d89ad3341197b"
   },
   "src/Web/DependencyInjection.cs": {
-    "mtime": 1788464433.379,
-    "seen": 1788844386.8772259,
-    "ast_hash": "83343b9ecd5662617b94ec30a0f986c2",
-    "semantic_hash": "83343b9ecd5662617b94ec30a0f986c2"
+    "mtime": 1788953193.8217382,
+    "seen": 1788953212.9831727,
+    "ast_hash": "8fe02c6aa8806989af7ef69c9fb2aa6e",
+    "semantic_hash": ""
   },
   "src/Web/Endpoints/Antiforgery.cs": {
     "mtime": 1788022775.126,
@@ -25131,6 +25131,18 @@
     "mtime": 1788933915.0545177,
     "seen": 1788933933.2269952,
     "ast_hash": "e20c4772f65749f16f265b344f537b92",
+    "semantic_hash": ""
+  },
+  "src/Infrastructure/Storage/AzureBlobCorsInitializer.cs": {
+    "mtime": 1788954414.4327207,
+    "seen": 1788954430.348141,
+    "ast_hash": "cd1db30dd60e89e01288bc7dc94c0568",
+    "semantic_hash": ""
+  },
+  "aspire-output/docker-compose.yaml": {
+    "mtime": 1788955543.7226453,
+    "seen": 1788957708.9046562,
+    "ast_hash": "01e11e880be4f85c5491b4cebb1b9594",
     "semantic_hash": ""
   }
 }

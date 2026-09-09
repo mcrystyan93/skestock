@@ -1,0 +1,163 @@
+services:
+  env-dashboard:
+    image: "mcr.microsoft.com/dotnet/nightly/aspire-dashboard:13.5"
+    environment:
+      ASPIRE_DASHBOARD_FORWARDEDHEADERS_ENABLED: "true"
+    ports:
+      - "8080:18888"
+    expose:
+      - "18889"
+      - "18890"
+    networks:
+      - "aspire"
+    restart: "always"
+  dbserver:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${SQL_PASSWORD}"
+    ports:
+      - "1433:1433"
+    volumes:
+      - type: "volume"
+        target: "/var/opt/mssql"
+        source: "skestock-db-data"
+        read_only: false
+    networks:
+      - "aspire"
+  skestock-cache:
+    image: "docker.io/library/redis:8.6"
+    command:
+      - "-c"
+      - "redis-server --requirepass $$REDIS_PASSWORD --save 60 1"
+    entrypoint:
+      - "/bin/sh"
+    environment:
+      REDIS_PASSWORD: "${REDIS_PASSWORD}"
+    ports:
+      - "6379:6379"
+    volumes:
+      - type: "volume"
+        target: "/data"
+        source: "skestock-cache-data"
+        read_only: false
+    networks:
+      - "aspire"
+  webapi:
+    image: "${WEBAPI_IMAGE}"
+    environment:
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      HTTP_PORTS: "8080"
+      OpenApiSettings__ApiKey: "${OPENAPISETTINGSAPIKEY}"
+      OpenApiSettings__Model: "${OPENAPISETTINGSMODEL}"
+      ConnectionStrings__skestockDb: "Server=dbserver,1433;User ID=sa;Password=${SQL_PASSWORD};TrustServerCertificate=true;Initial Catalog=skestockDb"
+      SKESTOCKDB_HOST: "dbserver"
+      SKESTOCKDB_PORT: "1433"
+      SKESTOCKDB_USERNAME: "sa"
+      SKESTOCKDB_PASSWORD: "${SQL_PASSWORD}"
+      SKESTOCKDB_URI: "mssql://sa:${SQL_PASSWORD}@dbserver:1433/skestockDb"
+      SKESTOCKDB_JDBCCONNECTIONSTRING: "jdbc:sqlserver://dbserver:1433;databaseName=skestockDb;trustServerCertificate=true"
+      SKESTOCKDB_DATABASENAME: "skestockDb"
+      ConnectionStrings__skestock-cache: "skestock-cache:6379,password=${REDIS_PASSWORD}"
+      SKESTOCK_CACHE_HOST: "skestock-cache"
+      SKESTOCK_CACHE_PORT: "6379"
+      SKESTOCK_CACHE_PASSWORD: "${REDIS_PASSWORD}"
+      SKESTOCK_CACHE_URI: "redis://:${REDIS_PASSWORD}@skestock-cache:6379"
+      ASPNETCORE_ENVIRONMENT: "Production"
+      ConnectionStrings__blobservice: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1Oc8g4w8r3F2mZ8T9h5e0r3p5m7m8r9s0u1v2w3x4y5z6A7B8C9D0E1F2G3H4I5J6K7L8M9N0;BlobEndpoint=http://MINI_PC_IP:10000/devstoreaccount1"
+      ConnectionStrings__queues: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1Oc8g4w8r3F2mZ8T9h5e0r3p5m7m8r9s0u1v2w3x4y5z6A7B8C9D0E1F2G3H4I5J6K7L8M9N0;QueueEndpoint=http://MINI_PC_IP:10001/devstoreaccount1"
+      Cors__AllowedOrigins__0: "http://MINI_PC_IP:7001"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://env-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "webapi"
+    ports:
+      - "7001:8080"
+    expose:
+      - "${WEBAPI_PORT}"
+    depends_on:
+      dbserver:
+        condition: "service_started"
+      skestock-cache:
+        condition: "service_started"
+      storage:
+        condition: "service_started"
+    networks:
+      - "aspire"
+  worker:
+    image: "${WORKER_IMAGE}"
+    environment:
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      OpenApiSettings__ApiKey: "${OPENAPISETTINGSAPIKEY}"
+      OpenApiSettings__Model: "${OPENAPISETTINGSMODEL}"
+      ConnectionStrings__skestockDb: "Server=dbserver,1433;User ID=sa;Password=${SQL_PASSWORD};TrustServerCertificate=true;Initial Catalog=skestockDb"
+      SKESTOCKDB_HOST: "dbserver"
+      SKESTOCKDB_PORT: "1433"
+      SKESTOCKDB_USERNAME: "sa"
+      SKESTOCKDB_PASSWORD: "${SQL_PASSWORD}"
+      SKESTOCKDB_URI: "mssql://sa:${SQL_PASSWORD}@dbserver:1433/skestockDb"
+      SKESTOCKDB_JDBCCONNECTIONSTRING: "jdbc:sqlserver://dbserver:1433;databaseName=skestockDb;trustServerCertificate=true"
+      SKESTOCKDB_DATABASENAME: "skestockDb"
+      ConnectionStrings__skestock-cache: "skestock-cache:6379,password=${REDIS_PASSWORD}"
+      SKESTOCK_CACHE_HOST: "skestock-cache"
+      SKESTOCK_CACHE_PORT: "6379"
+      SKESTOCK_CACHE_PASSWORD: "${REDIS_PASSWORD}"
+      SKESTOCK_CACHE_URI: "redis://:${REDIS_PASSWORD}@skestock-cache:6379"
+      ConnectionStrings__blobservice: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1Oc8g4w8r3F2mZ8T9h5e0r3p5m7m8r9s0u1v2w3x4y5z6A7B8C9D0E1F2G3H4I5J6K7L8M9N0;BlobEndpoint=http://MINI_PC_IP:10000/devstoreaccount1"
+      ConnectionStrings__queues: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1Oc8g4w8r3F2mZ8T9h5e0r3p5m7m8r9s0u1v2w3x4y5z6A7B8C9D0E1F2G3H4I5J6K7L8M9N0;QueueEndpoint=http://MINI_PC_IP:10001/devstoreaccount1"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://env-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "worker"
+    depends_on:
+      dbserver:
+        condition: "service_started"
+      skestock-cache:
+        condition: "service_started"
+      storage:
+        condition: "service_started"
+    networks:
+      - "aspire"
+  storage:
+    image: "mcr.microsoft.com/azure-storage/azurite:3.35.0"
+    command:
+      - "--location"
+      - "/data"
+      - "--blobHost"
+      - "0.0.0.0"
+      - "--queueHost"
+      - "0.0.0.0"
+      - "--tableHost"
+      - "0.0.0.0"
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - type: "volume"
+        target: "/data"
+        source: "storage-data"
+        read_only: false
+    networks:
+      - "aspire"
+  redis-commander:
+    image: "rediscommander/redis-commander:latest"
+    environment:
+      REDIS_HOSTS: "local:skestock-cache:6379"
+      REDIS_PASSWORD: "${REDIS_PASSWORD}"
+    ports:
+      - "8081:8081"
+    depends_on:
+      skestock-cache:
+        condition: "service_started"
+    networks:
+      - "aspire"
+networks:
+  aspire:
+    driver: "bridge"
+volumes:
+  skestock-db-data:
+    driver: "local"
+  skestock-cache-data:
+    driver: "local"
+  storage-data:
+    driver: "local"
