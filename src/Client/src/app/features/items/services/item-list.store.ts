@@ -1,4 +1,5 @@
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { Events, withEventHandlers } from '@ngrx/signals/events';
 import { withItemCollection } from '@ske/shared/items';
 import { ItemDto } from '@ske/models';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
@@ -6,6 +7,7 @@ import { pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
 import { inject } from '@angular/core';
 import { ItemsHttp } from '@ske/shared/items';
+import { realtimeEvents } from '@ske/signalr';
 
 type ItemListState = {
   togglingItemId: string | null;
@@ -52,5 +54,14 @@ export const ItemListState = signalStore(
     );
 
     return { reload, toggleActive };
-  })
+  }),
+  withEventHandlers((store, events = inject(Events)) => ({
+    itemChanges: events.on(
+      realtimeEvents.itemCreated,
+      realtimeEvents.itemUpdated,
+      realtimeEvents.itemDisabled,
+      realtimeEvents.itemEnabled,
+      realtimeEvents.itemImportConfirmed
+    ).pipe(tap(() => store.reload()))
+  }))
 );

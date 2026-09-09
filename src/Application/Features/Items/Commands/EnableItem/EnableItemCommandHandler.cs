@@ -1,6 +1,7 @@
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Items.Models;
+using skestock.Domain.Events.Items;
 
 namespace skestock.Application.Features.Items.Commands.EnableItem;
 
@@ -17,6 +18,7 @@ public class EnableItemCommandHandler(IApplicationDbContext dbContext)
 
         // Idempotent: enabling an already-active item is a no-op success rather than an error.
         item.IsActive = true;
+        item.AddDomainEvent(new ItemEnabledEvent(item));
         await dbContext.SaveChangesAsync(cancellationToken);
 
         var categoryName = await dbContext.Categories

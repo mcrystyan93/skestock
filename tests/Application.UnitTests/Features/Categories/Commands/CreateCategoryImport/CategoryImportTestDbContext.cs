@@ -18,6 +18,7 @@ public class CategoryImportTestDbContext(DbContextOptions<CategoryImportTestDbCo
     public DbSet<CategoryImport> CategoryImports => Set<CategoryImport>();
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
     public DbSet<Item> Items => Set<Item>();
+    public DbSet<ItemImport> ItemImports => Set<ItemImport>();
     public DbSet<Location> Locations => Set<Location>();
     public DbSet<SchoolClass> SchoolClasses => Set<SchoolClass>();
     public DbSet<StockBatch> StockBatches => Set<StockBatch>();
@@ -33,6 +34,8 @@ public class CategoryImportTestDbContext(DbContextOptions<CategoryImportTestDbCo
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Ignore<ItemImport>();
 
         builder.Entity<UserProfile>(b =>
         {

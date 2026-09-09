@@ -1,0 +1,5 @@
+<nz-card [nzBordered]="false" class="p-0!">
+  <ske-item-import-filter-form [loading]="store.itemImportListLoading()"
+                               [filter]="store.itemImportListFilter()"
+                               (onFilterChange)="onFilterChange($event)" />
+</nz-card>

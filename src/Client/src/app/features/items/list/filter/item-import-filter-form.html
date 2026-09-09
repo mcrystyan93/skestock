@@ -1,0 +1,25 @@
+<form (ngSubmit)="onSubmit()" nz-form nzNoColon nzLayout="horizontal">
+  <nz-row [nzGutter]="[16, 0]" class="grow">
+    <nz-col nzFlex="auto">
+      <nz-form-item>
+        <nz-form-control nzSpan="24">
+          <nz-input-wrapper>
+            <nz-icon nzInputPrefix nzType="icons:magnifying-glass"></nz-icon>
+            <input type="text" nz-input id="itemImportSearchTerm" placeholder="Cautați..."
+                   nzVariant="borderless" [formField]="filterForm.searchTerm" />
+          </nz-input-wrapper>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col nzFlex="none">
+      <nz-space class="ml-3">
+        <button type="submit" *nzSpaceItem nz-button nzType="primary" [nzLoading]="loading()">
+          <nz-icon nzType="icons:magnifying-glass"></nz-icon> Cauta
+        </button>
+        <button *nzSpaceItem nz-button type="button" nzType="default" [nzLoading]="loading()" (click)="clear()">
+          <nz-icon nzType="icons:xmark"></nz-icon> Reseteaza
+        </button>
+      </nz-space>
+    </nz-col>
+  </nz-row>
+</form>

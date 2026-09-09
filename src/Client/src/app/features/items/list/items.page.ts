@@ -1,33 +1,39 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ItemListState } from '../services/item-list.store';
-import { FilterContainer } from './filter/filter-container';
-import { Table } from './table/table';
 import { GetAllItemsRequest, ItemDto } from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { Header } from './header/header';
-import { ItemDetailModal } from '@ske/shared/items';
+import { ItemDetailModal, ItemImportModal, ItemImportReviewModal, ItemImportState } from '@ske/shared/items';
+import { ItemImportListItemDto } from '@ske/models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ErrorAlert } from '@ske/shared/errors';
+import { realtimeGroups, SignalRGroupManagerStore } from '@ske/signalr';
+import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
+import { ItemImportListTab } from './tabs/item-import-list-tab';
+import { ItemListTab } from './tabs/item-list-tab';
 
 @Component({
   imports: [
-    FilterContainer,
-    Table,
     Header,
-    ErrorAlert
+    NzTabsComponent,
+    NzTabComponent,
+    ItemListTab,
+    ItemImportListTab
   ],
   selector: 'ske-items-page',
   templateUrl: './items.page.html',
-  providers: [ItemListState, NzModalService],
+  providers: [ItemListState, ItemImportState, NzModalService],
   host: {
     class: 'flex flex-col grow gap-4'
   }
 })
-export class ItemsPage {
+export class ItemsPage implements OnInit, OnDestroy {
   public readonly store = inject(ItemListState);
+  public readonly importStore = inject(ItemImportState);
+  public readonly selectedTabIndex = signal(0);
 
   private readonly _modalService = inject(NzModalService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _signalRGroupManager = inject(SignalRGroupManagerStore);
 
   public onFilterChange(filter: GetAllItemsRequest) {
     this.store.load(filter);
@@ -43,6 +49,41 @@ export class ItemsPage {
 
   public onAdd() {
     this.openItemModal();
+  }
+
+  public onImport() {
+    const modalRef = this._modalService.create({
+      nzContent: ItemImportModal,
+      nzCentered: true,
+      nzMaskClosable: false
+    });
+
+    modalRef.afterClose.pipe(takeUntilDestroyed(this._destroyRef)).subscribe(() => this.importStore.reload());
+  }
+
+  public onReview(itemImport: ItemImportListItemDto) {
+    const modalRef = this._modalService.create({
+      nzContent: ItemImportReviewModal,
+      nzData: { importId: itemImport.id },
+      nzWidth: '95vw',
+      nzCentered: true,
+      nzMaskClosable: false
+    });
+
+    modalRef.afterClose.pipe(takeUntilDestroyed(this._destroyRef)).subscribe(() => {
+      this.store.reload();
+      this.importStore.reload();
+    });
+  }
+
+  public ngOnInit() {
+    this._signalRGroupManager.join(realtimeGroups.itemsList);
+    this._signalRGroupManager.join(realtimeGroups.itemImportsList);
+  }
+
+  public ngOnDestroy() {
+    this._signalRGroupManager.leave(realtimeGroups.itemsList);
+    this._signalRGroupManager.leave(realtimeGroups.itemImportsList);
   }
 
   private openItemModal(item: ItemDto | null = null) {

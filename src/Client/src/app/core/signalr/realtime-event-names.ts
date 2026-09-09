@@ -4,6 +4,13 @@ export const realtimeEventNames = {
   categoryImportCreated: 'CategoryImportCreated',
   categoryImportProcessed: 'CategoryImportProcessed',
   categoryImportConfirmed: 'CategoryImportConfirmed',
+  itemCreated: 'ItemCreated',
+  itemUpdated: 'ItemUpdated',
+  itemDisabled: 'ItemDisabled',
+  itemEnabled: 'ItemEnabled',
+  itemImportCreated: 'ItemImportCreated',
+  itemImportProcessed: 'ItemImportProcessed',
+  itemImportConfirmed: 'ItemImportConfirmed',
   goodsReceiptImportCreated: 'GoodsReceiptImportCreated',
   goodsReceiptImportProcessed: 'GoodsReceiptImportProcessed',
   goodsReceiptImportConfirmed: 'GoodsReceiptImportConfirmed'

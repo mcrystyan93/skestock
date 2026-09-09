@@ -1,6 +1,7 @@
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Items.Models;
+using skestock.Domain.Events.Items;
 
 namespace skestock.Application.Features.Items.Commands.EditItem;
 
@@ -23,6 +24,7 @@ public class EditItemCommandHandler(IApplicationDbContext dbContext)
         item.IsPerishable = request.IsPerishable;
         item.ShelfLifeDays = request.ShelfLifeDays;
         item.CategoryId = request.CategoryId;
+        item.AddDomainEvent(new ItemUpdatedEvent(item));
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

@@ -19,6 +19,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
     public DbSet<Item> Items => Set<Item>();
+    public DbSet<ItemImport> ItemImports => Set<ItemImport>();
     public DbSet<Location> Locations => Set<Location>();
     public DbSet<SchoolClass> SchoolClasses => Set<SchoolClass>();
     public DbSet<StockBatch> StockBatches => Set<StockBatch>();

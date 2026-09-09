@@ -1,20 +1,25 @@
-<ske-item-header (onAdd)="onAdd()" />
+<ske-item-header [(selectedTabIndex)]="selectedTabIndex"
+                 (onAdd)="onAdd()"
+                 (onImport)="onImport()" />
 
-<ske-item-filter-container class="mx-4" />
-
-<ske-error-alert [problemDetail]="store.itemsProblemDetail()"
-                 [validationErrors]="store.itemsValidationErrors()"
-                 class="mx-4" />
-
-<div class="grow relative mx-4 mb-4">
-  <ske-item-table [items]="store.items()"
-                  [filter]="store.filter()"
-                  [loading]="store.itemsLoading()"
-                  [hasNextPage]="store.hasNextPage()"
-                  [isLoadingMore]="store.isLoadingMore()"
-                  (onFilterChange)="onFilterChange($event)"
-                  (onLoadMore)="onLoadMore()"
-                  (onEdit)="onEdit($event)"
-                  (onToggleActive)="onToggleActive($event)"
-                  [togglingItemId]="store.togglingItemId()" />
-</div>
+<nz-tabs [nzSelectedIndex]="selectedTabIndex()"
+         [nzTabBarStyle]="{ display: 'none' }"
+         class="inner-scroll grow m-4!">
+  <nz-tab>
+    <ske-item-list-tab [items]="store.items()"
+                       [filter]="store.filter()"
+                       [problemDetail]="store.itemsProblemDetail()"
+                       [validationErrors]="store.itemsValidationErrors()"
+                       [loading]="store.itemsLoading()"
+                       [hasNextPage]="store.hasNextPage()"
+                       [isLoadingMore]="store.isLoadingMore()"
+                       [togglingItemId]="store.togglingItemId()"
+                       (onFilterChange)="onFilterChange($event)"
+                       (onLoadMore)="onLoadMore()"
+                       (onEdit)="onEdit($event)"
+                       (onToggleActive)="onToggleActive($event)" />
+  </nz-tab>
+  <nz-tab>
+    <ske-item-import-list-tab (review)="onReview($event)" />
+  </nz-tab>
+</nz-tabs>

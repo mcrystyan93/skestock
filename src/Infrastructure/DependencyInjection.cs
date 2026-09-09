@@ -91,6 +91,9 @@ public static class DependencyInjection
         builder.Services
             .AddScoped<IExtractionSchemaFactory<CategoryExtractionResult>,
                 CategoryExtractionSchemaFactory>();
+        builder.Services
+            .AddScoped<IExtractionSchemaFactory<ItemExtractionResult>,
+                ItemExtractionSchemaFactory>();
 
         AddOpenAiExtraction(builder);
 
@@ -144,6 +147,7 @@ public static class DependencyInjection
 
         builder.Services.AddTransient<IStockDocumentExtractionService, OpenAiStockDocumentExtractionService>();
         builder.Services.AddTransient<ICategoryDocumentExtractionService, OpenAiCategoryDocumentExtractionService>();
+        builder.Services.AddTransient<IItemDocumentExtractionService, OpenAiItemDocumentExtractionService>();
     }
 
     /// <summary>
