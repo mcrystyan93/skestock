@@ -53,9 +53,9 @@ export class CategoryDetailModal {
     if (this.initialLoad)
       return;
 
-    const { category } = this.modalData();
+    const { category, prefill } = this.modalData();
 
-    this.store.loadCategory(category?.id ?? NEW_CATEGORY_ROUTE_ID);
+    this.store.loadCategory({ id: category?.id ?? NEW_CATEGORY_ROUTE_ID, prefill: category ? null : prefill });
     this.initialLoad = true;
   });
 
@@ -65,13 +65,13 @@ export class CategoryDetailModal {
       tap(() => this._nzMessageService.success('Categoria salvata cu succes!')),
       switchMap(() => this._close$),
       filter((shouldClose) => shouldClose),
-      tap(() => this.close())
+      tap(() => this.close(this.store.category()))
     )
     .subscribe();
 
 
-  public close() {
-    this._nzModalRef.destroy();
+  public close(savedCategory: Partial<CategoryDto> | null = null) {
+    this._nzModalRef.close(savedCategory);
   }
 
   public async save(shouldClose: boolean = true) {
@@ -101,4 +101,5 @@ export class CategoryDetailModal {
 
 type CategoryDetailModalData = {
   category: CategoryDto | null;
+  prefill?: Partial<CategoryDto> | null;
 }

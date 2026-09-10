@@ -68,25 +68,9 @@ public class GetItemImportByIdHandler(IApplicationDbContext dbContext)
             });
         }
 
-        var existingSkus = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var skus = suggestedItems.Where(i => i.Sku is not null).Select(i => i.Sku!).ToList();
-        if (skus.Count > 0)
-        {
-            var upperSkus = skus.Select(s => s.ToUpperInvariant()).ToList();
-
-            // Compare on ToUpper() on both sides (translatable to SQL) so the "already exists" flag is
-            // case-insensitive regardless of the suggested SKU's casing.
-            var matchedSkus = await dbContext.Items
-                .AsNoTracking()
-                .Where(i => i.Sku != null && upperSkus.Contains(i.Sku.Trim().ToUpper()))
-                .Select(i => i.Sku!)
-                .ToListAsync(cancellationToken);
-
-            foreach (var sku in matchedSkus)
-                existingSkus.Add(sku);
-        }
-
-        var existingCategoryNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var matchedCategoriesByName = new Dictionary<string, ItemImportReviewCategoryDto>(
+            StringComparer.OrdinalIgnoreCase);
         var categoryNames = suggestedItems.Select(i => i.CategoryName).Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
         if (categoryNames.Count > 0)
@@ -95,27 +79,85 @@ public class GetItemImportByIdHandler(IApplicationDbContext dbContext)
 
             // Compare on ToUpper() on both sides (translatable to SQL) so the "already exists" flag is
             // case-insensitive regardless of the suggested category name's casing.
-            var matchedNames = await dbContext.Categories
+            var matchedCategories = await dbContext.Categories
                 .AsNoTracking()
                 .Where(c => upperNames.Contains(c.Name.Trim().ToUpper()))
-                .Select(c => c.Name)
+                .Select(c => new ItemImportReviewCategoryDto
+                {
+                    Id = c.Id,
+                    Name = c.Name
+                })
                 .ToListAsync(cancellationToken);
 
-            foreach (var name in matchedNames)
-                existingCategoryNames.Add(name);
+            foreach (var category in matchedCategories)
+                matchedCategoriesByName.TryAdd(category.Name.Trim(), category);
         }
 
+        var existingItems = new List<ItemImportReviewItemDto>();
+        var itemNames = suggestedItems.Select(i => i.Name).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        if (itemNames.Count > 0)
+        {
+            var upperItemNames = itemNames.Select(n => n.ToUpperInvariant()).ToList();
+            var upperSkus = skus.Select(s => s.ToUpperInvariant()).ToList();
+            existingItems = await dbContext.Items
+                .AsNoTracking()
+                .Where(i => upperItemNames.Contains(i.Name.Trim().ToUpper()) ||
+                            (i.Sku != null && upperSkus.Contains(i.Sku.Trim().ToUpper())))
+                .Select(i => new ItemImportReviewItemDto
+                {
+                    Id = i.Id,
+                    Sku = i.Sku,
+                    Name = i.Name,
+                    Description = i.Description,
+                    Unit = i.Unit,
+                    IsPerishable = i.IsPerishable,
+                    CategoryId = i.CategoryId,
+                    CategoryName = i.Category.Name
+                })
+                .ToListAsync(cancellationToken);
+        }
+
+        var matchedItemsBySku = existingItems
+            .Where(i => !string.IsNullOrWhiteSpace(i.Sku))
+            .GroupBy(i => i.Sku!.Trim(), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
         var suggestions = suggestedItems
-            .Select(item => new ItemImportReviewLineDto
+            .Select(item =>
             {
-                Sku = item.Sku,
-                Name = item.Name,
-                CategoryName = item.CategoryName,
-                Unit = item.Unit ?? "unit",
-                Description = item.Description,
-                IsPerishable = item.IsPerishable,
-                ItemAlreadyExists = item.Sku is not null && existingSkus.Contains(item.Sku),
-                CategoryAlreadyExists = existingCategoryNames.Contains(item.CategoryName)
+                matchedCategoriesByName.TryGetValue(item.CategoryName, out var matchedCategory);
+
+                ItemImportReviewItemDto? matchedItem = null;
+                if (item.Sku is not null)
+                    matchedItemsBySku.TryGetValue(item.Sku, out matchedItem);
+
+                if (matchedItem is null && matchedCategory is not null)
+                {
+                    var fallbackMatches = existingItems
+                        .Where(existing => existing.CategoryId == matchedCategory.Id &&
+                                            string.Equals(
+                                                Normalize(existing.Name),
+                                                Normalize(item.Name),
+                                                StringComparison.Ordinal))
+                        .ToList();
+
+                    if (fallbackMatches.Count == 1)
+                        matchedItem = fallbackMatches[0];
+                }
+
+                return new ItemImportReviewLineDto
+                {
+                    Sku = item.Sku,
+                    Name = item.Name,
+                    CategoryName = item.CategoryName,
+                    Unit = item.Unit ?? "unit",
+                    Description = item.Description,
+                    IsPerishable = item.IsPerishable,
+                    ItemAlreadyExists = matchedItem is not null,
+                    CategoryAlreadyExists = matchedCategory is not null,
+                    MatchedCategory = matchedCategory,
+                    MatchedItem = matchedItem
+                };
             })
             .ToList();
 
@@ -131,4 +173,6 @@ public class GetItemImportByIdHandler(IApplicationDbContext dbContext)
 
         return Result.Ok(dto);
     }
+
+    private static string Normalize(string value) => value.Trim().ToUpperInvariant();
 }

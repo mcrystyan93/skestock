@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using Shouldly;
+using skestock.Application.Common.Errors;
 using skestock.Application.Features.Items.Commands.ConfirmItemImport;
 using skestock.Domain.Entities;
 using skestock.Domain.Enums;
@@ -27,226 +28,201 @@ public class ConfirmItemImportCommandHandlerTests
         return import;
     }
 
-    [Test]
-    public async Task Handle_WithNewItems_CreatesReviewedItemsAndCategoriesAndMarksConfirmed()
+    private static async Task<(Category Category, Item Item)> AddItemAsync(
+        ConfirmItemImportTestDbContext context,
+        string categoryName = "Dairy",
+        string itemName = "Milk")
     {
-        await using var context = CreateContext();
-        var import = await AddPendingImportAsync(context);
-        var handler = new ConfirmItemImportCommandHandler(context);
-
-        var command = new ConfirmItemImportCommand
-        {
-            ImportId = import.Id,
-            Items =
-            [
-                new ConfirmItemImportItem { Sku = "SKU-1", Name = "Milk", CategoryName = "Dairy", Unit = "L" },
-                new ConfirmItemImportItem { Sku = "SKU-2", Name = "Bread", CategoryName = "Bakery", Unit = "unit" }
-            ]
-        };
-
-        var result = await handler.Handle(command, CancellationToken.None);
-
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.Status.ShouldBe(ItemImportStatus.Confirmed);
-        result.Value.Items.Count.ShouldBe(2);
-        result.Value.Items.ShouldAllBe(i => i.Created);
-        result.Value.Items.ShouldAllBe(i => i.CategoryCreated);
-
-        (await context.Items.CountAsync(CancellationToken.None)).ShouldBe(2);
-        (await context.Categories.CountAsync(CancellationToken.None)).ShouldBe(2);
-
-        var reloaded = await context.ItemImports.SingleAsync(i => i.Id == import.Id, CancellationToken.None);
-        reloaded.Status.ShouldBe(ItemImportStatus.Confirmed);
-    }
-
-    [Test]
-    public async Task Handle_ReusesExistingItemBySkuCaseInsensitively()
-    {
-        await using var context = CreateContext();
-        var category = new Category { Name = "Dairy" };
-        context.Categories.Add(category);
-        var existingItem = new Item
+        var category = new Category { Name = categoryName };
+        var item = new Item
         {
             Sku = "SKU-1",
-            Name = "Milk 1L",
+            Name = itemName,
             Unit = "L",
             Category = category,
             CategoryId = category.Id
         };
-        context.Items.Add(existingItem);
+        context.Categories.Add(category);
+        context.Items.Add(item);
         await context.SaveChangesAsync(CancellationToken.None);
-
-        var import = await AddPendingImportAsync(context);
-        var handler = new ConfirmItemImportCommandHandler(context);
-
-        var command = new ConfirmItemImportCommand
-        {
-            ImportId = import.Id,
-            Items = [new ConfirmItemImportItem { Sku = "sku-1", Name = "Milk", CategoryName = "Dairy", Unit = "L" }]
-        };
-
-        var result = await handler.Handle(command, CancellationToken.None);
-
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.Items.Count.ShouldBe(1);
-        result.Value.Items[0].Created.ShouldBeFalse();
-        result.Value.Items[0].Id.ShouldBe(existingItem.Id);
-
-        // No duplicate item was created for the matched SKU.
-        (await context.Items.CountAsync(CancellationToken.None)).ShouldBe(1);
+        return (category, item);
     }
 
     [Test]
-    public async Task Handle_AutoCreatesMissingCategoryButReusesExistingCategoryCaseInsensitively()
+    public async Task Handle_WithSelectedItem_ConfirmsWithoutCreatingOrMutatingCatalogRows()
     {
         await using var context = CreateContext();
-        var existingCategory = new Category { Name = "Dairy" };
-        context.Categories.Add(existingCategory);
-        await context.SaveChangesAsync(CancellationToken.None);
-
         var import = await AddPendingImportAsync(context);
+        var (_, item) = await AddItemAsync(context);
         var handler = new ConfirmItemImportCommandHandler(context);
 
-        var command = new ConfirmItemImportCommand
+        var result = await handler.Handle(new ConfirmItemImportCommand
         {
             ImportId = import.Id,
             Items =
             [
-                new ConfirmItemImportItem { Sku = "SKU-1", Name = "Milk", CategoryName = "dairy", Unit = "L" },
-                new ConfirmItemImportItem { Sku = "SKU-2", Name = "Bread", CategoryName = "Bakery", Unit = "unit" }
-            ]
-        };
-
-        var result = await handler.Handle(command, CancellationToken.None);
-
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.Items.Single(i => i.Sku == "SKU-1").CategoryCreated.ShouldBeFalse();
-        result.Value.Items.Single(i => i.Sku == "SKU-1").CategoryId.ShouldBe(existingCategory.Id);
-        result.Value.Items.Single(i => i.Sku == "SKU-2").CategoryCreated.ShouldBeTrue();
-
-        // one existing category reused, one new category created
-        (await context.Categories.CountAsync(CancellationToken.None)).ShouldBe(2);
-    }
-
-    [Test]
-    public async Task Handle_DeduplicatesItemsWithSameSkuWithinRequest()
-    {
-        await using var context = CreateContext();
-        var import = await AddPendingImportAsync(context);
-        var handler = new ConfirmItemImportCommandHandler(context);
-
-        var command = new ConfirmItemImportCommand
-        {
-            ImportId = import.Id,
-            Items =
-            [
-                new ConfirmItemImportItem { Sku = "  SKU-1  ", Name = "Milk", CategoryName = "Dairy", Unit = "L" },
                 new ConfirmItemImportItem
                 {
-                    Sku = "sku-1", Name = "Milk (duplicate)", CategoryName = "Dairy", Unit = "L"
+                    ItemId = item.Id,
+                    Sku = "different",
+                    Name = "Edited suggestion"
                 }
             ]
-        };
-
-        var result = await handler.Handle(command, CancellationToken.None);
+        }, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Items.Count.ShouldBe(1);
+        result.Value.Items.Single().Id.ShouldBe(item.Id);
+        result.Value.Items.Single().Name.ShouldBe(item.Name);
+        result.Value.Items.Single().CategoryName.ShouldBe("Dairy");
+        result.Value.Items.Single().Created.ShouldBeFalse();
+        result.Value.Items.Single().CategoryCreated.ShouldBeFalse();
+        import.ConfirmationResultJson.ShouldNotBeNull();
+        import.ConfirmationResultJson.ShouldNotContain("CategoryId");
         (await context.Items.CountAsync(CancellationToken.None)).ShouldBe(1);
+        (await context.Categories.CountAsync(CancellationToken.None)).ShouldBe(1);
     }
 
     [Test]
-    public async Task Handle_RepeatedConfirmation_IsIdempotentAndReturnsStoredResult()
+    public async Task Handle_WhenItemDoesNotExist_ReturnsMissingItemIds()
     {
         await using var context = CreateContext();
         var import = await AddPendingImportAsync(context);
-        var handler = new ConfirmItemImportCommandHandler(context);
+        var missingId = Guid.NewGuid();
 
+        var result = await new ConfirmItemImportCommandHandler(context).Handle(new ConfirmItemImportCommand
+        {
+            ImportId = import.Id,
+            Items = [new ConfirmItemImportItem { ItemId = missingId, Name = "Milk" }]
+        }, CancellationToken.None);
+
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(error => error is ItemImportErrors.ItemsNotFound);
+    }
+
+    [Test]
+    public async Task Handle_WhenItemIsSelectedTwice_RejectsDuplicateSelection()
+    {
+        await using var context = CreateContext();
+        var import = await AddPendingImportAsync(context);
+        var (_, item) = await AddItemAsync(context);
+
+        var result = await new ConfirmItemImportCommandHandler(context).Handle(new ConfirmItemImportCommand
+        {
+            ImportId = import.Id,
+            Items =
+            [
+                new ConfirmItemImportItem { ItemId = item.Id, Name = "Milk" },
+                new ConfirmItemImportItem { ItemId = item.Id, Name = "Milk duplicate" }
+            ]
+        }, CancellationToken.None);
+
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(error => error is ItemImportErrors.DuplicateItems);
+    }
+
+    [Test]
+    public async Task Handle_WithSelectedItem_DerivesCategoryFromCatalog()
+    {
+        await using var context = CreateContext();
+        var import = await AddPendingImportAsync(context);
+        var (_, item) = await AddItemAsync(context);
+
+        var result = await new ConfirmItemImportCommandHandler(context).Handle(new ConfirmItemImportCommand
+        {
+            ImportId = import.Id,
+            Items = [new ConfirmItemImportItem { ItemId = item.Id, Name = "Milk" }]
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Single().CategoryName.ShouldBe("Dairy");
+    }
+
+    [Test]
+    public async Task Handle_RepeatedConfirmation_ReturnsStoredResult()
+    {
+        await using var context = CreateContext();
+        var import = await AddPendingImportAsync(context);
+        var (_, item) = await AddItemAsync(context);
+        var handler = new ConfirmItemImportCommandHandler(context);
         var command = new ConfirmItemImportCommand
         {
             ImportId = import.Id,
-            Items = [new ConfirmItemImportItem { Sku = "SKU-1", Name = "Milk", CategoryName = "Dairy", Unit = "L" }]
+            Items = [new ConfirmItemImportItem { ItemId = item.Id, Name = item.Name }]
         };
 
         var first = await handler.Handle(command, CancellationToken.None);
+        var second = await handler.Handle(command, CancellationToken.None);
 
-        // Second confirmation with a different list must not create anything else - the import is
-        // already Confirmed and returns the result recorded at confirm time.
-        var second =
-            await handler.Handle(
-                new ConfirmItemImportCommand
-                {
-                    ImportId = import.Id,
-                    Items =
-                    [
-                        new ConfirmItemImportItem
-                        {
-                            Sku = "SKU-2", Name = "Bread", CategoryName = "Bakery", Unit = "unit"
-                        }
-                    ]
-                }, CancellationToken.None);
-
+        first.IsSuccess.ShouldBeTrue();
         second.IsSuccess.ShouldBeTrue();
         second.Value.Items.Select(i => i.Id).ShouldBe(first.Value.Items.Select(i => i.Id));
-        (await context.Items.CountAsync(CancellationToken.None)).ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Handle_RepeatedConfirmation_ReadsLegacyStoredCategoryId()
+    {
+        await using var context = CreateContext();
+        var import = await AddPendingImportAsync(context);
+        var (_, item) = await AddItemAsync(context);
+
+        import.MarkAsConfirmed(System.Text.Json.JsonSerializer.Serialize(new
+        {
+            ImportId = import.Id,
+            Status = ItemImportStatus.Confirmed,
+            Items = new[]
+            {
+                new
+                {
+                    Id = item.Id,
+                    Sku = item.Sku,
+                    Name = item.Name,
+                    CategoryId = item.CategoryId,
+                    CategoryName = "Dairy",
+                    Created = false,
+                    CategoryCreated = false
+                }
+            }
+        }));
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new ConfirmItemImportCommandHandler(context).Handle(new ConfirmItemImportCommand
+        {
+            ImportId = import.Id
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Single().CategoryName.ShouldBe("Dairy");
     }
 
     [Test]
     public async Task Handle_WhenImportDoesNotExist_ReturnsNotFoundFailure()
     {
         await using var context = CreateContext();
-        var handler = new ConfirmItemImportCommandHandler(context);
 
-        var result =
-            await handler.Handle(
-                new ConfirmItemImportCommand
-                {
-                    ImportId = Guid.NewGuid(),
-                    Items = [new ConfirmItemImportItem { Name = "Milk", CategoryName = "Dairy" }]
-                }, CancellationToken.None);
+        var result = await new ConfirmItemImportCommandHandler(context).Handle(new ConfirmItemImportCommand
+        {
+            ImportId = Guid.NewGuid(),
+            Items = []
+        }, CancellationToken.None);
 
         result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(error => error is ItemImportErrors.ItemImportNotFound);
     }
 
     [Test]
-    public async Task Handle_WhenImportNotPendingReview_ReturnsFailure()
-    {
-        await using var context = CreateContext();
-        var import = ItemImport.Create(Guid.NewGuid(), Guid.NewGuid(), "blob/items.pdf");
-        import.Status = ItemImportStatus.Processing;
-        context.ItemImports.Add(import);
-        await context.SaveChangesAsync(CancellationToken.None);
-
-        var handler = new ConfirmItemImportCommandHandler(context);
-
-        var result =
-            await handler.Handle(
-                new ConfirmItemImportCommand
-                {
-                    ImportId = import.Id,
-                    Items = [new ConfirmItemImportItem { Name = "Milk", CategoryName = "Dairy" }]
-                }, CancellationToken.None);
-
-        result.IsFailed.ShouldBeTrue();
-        (await context.Items.CountAsync(CancellationToken.None)).ShouldBe(0);
-    }
-
-    [Test]
-    public async Task Handle_WhenReviewedRowHasNoCategory_RejectsConfirmation()
+    public async Task Handle_WhenReviewedRowHasNoCategory_AllowsConfirmation()
     {
         await using var context = CreateContext();
         var import = await AddPendingImportAsync(context);
-        var handler = new ConfirmItemImportCommandHandler(context);
+        var (_, item) = await AddItemAsync(context);
 
-        var result =
-            await handler.Handle(
-                new ConfirmItemImportCommand
-                {
-                    ImportId = import.Id, Items = [new ConfirmItemImportItem { Name = "Milk", CategoryName = " " }]
-                }, CancellationToken.None);
+        var result = await new ConfirmItemImportCommandHandler(context).Handle(new ConfirmItemImportCommand
+        {
+            ImportId = import.Id,
+            Items = [new ConfirmItemImportItem { ItemId = item.Id, Name = "Milk" }]
+        }, CancellationToken.None);
 
-        result.IsFailed.ShouldBeTrue();
-        (await context.Items.CountAsync(CancellationToken.None)).ShouldBe(0);
-        (await context.Categories.CountAsync(CancellationToken.None)).ShouldBe(0);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Single().CategoryName.ShouldBe("Dairy");
     }
 }

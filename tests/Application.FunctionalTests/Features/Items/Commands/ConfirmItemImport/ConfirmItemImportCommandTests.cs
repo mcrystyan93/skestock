@@ -38,33 +38,38 @@ public class ConfirmItemImportCommandTests : TestBase
     }
 
     [Test]
-    public async Task Handle_WithReviewedItems_CreatesItemsAndCategoriesAndMarksConfirmed()
+    public async Task Handle_WithReviewedItems_UsesSelectedItemAndMarksConfirmed()
     {
         var import = await SeedPendingReviewImportAsync();
         var categoryName = $"{_prefix}-Dairy";
         var sku = $"{_prefix}-SKU-1";
+        var category = new Category { Name = categoryName };
+        await TestApp.AddAsync(category);
+        var item = new Item { Sku = sku, Name = "Milk", Unit = "L", CategoryId = category.Id };
+        await TestApp.AddAsync(item);
 
         var result = await TestApp.SendAsync(new ConfirmItemImportCommand
         {
             ImportId = import.Id,
             Items =
             [
-                new ConfirmItemImportItem { Sku = sku, Name = "Milk", CategoryName = categoryName, Unit = "L" }
+                new ConfirmItemImportItem { ItemId = item.Id, Sku = sku, Name = "Milk", Unit = "L" }
             ]
         });
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Status.ShouldBe(ItemImportStatus.Confirmed);
         result.Value.Items.Count.ShouldBe(1);
-        result.Value.Items[0].Created.ShouldBeTrue();
-        result.Value.Items[0].CategoryCreated.ShouldBeTrue();
+        result.Value.Items[0].CategoryName.ShouldBe(categoryName);
+        result.Value.Items[0].Created.ShouldBeFalse();
+        result.Value.Items[0].CategoryCreated.ShouldBeFalse();
 
-        var category = await TestApp.SingleOrDefaultAsync<Category>(c => c.Name == categoryName);
-        category.ShouldNotBeNull();
+        var persistedCategory = await TestApp.SingleOrDefaultAsync<Category>(c => c.Name == categoryName);
+        persistedCategory.ShouldNotBeNull();
 
-        var item = await TestApp.SingleOrDefaultAsync<Item>(i => i.Sku == sku);
-        item.ShouldNotBeNull();
-        item.CategoryId.ShouldBe(category.Id);
+        var persistedItem = await TestApp.SingleOrDefaultAsync<Item>(i => i.Id == item.Id);
+        persistedItem.ShouldNotBeNull();
+        persistedItem.CategoryId.ShouldBe(persistedCategory.Id);
 
         var persisted = await TestApp.FindAsync<ItemImport>(import.Id);
         persisted.ShouldNotBeNull();
@@ -72,7 +77,7 @@ public class ConfirmItemImportCommandTests : TestBase
     }
 
     [Test]
-    public async Task Handle_WhenSkuAlreadyExists_ReusesExistingItemInsteadOfCreatingDuplicate()
+    public async Task Handle_WhenSelectedItemExists_UsesTheSelectedItem()
     {
         var import = await SeedPendingReviewImportAsync();
         var categoryName = $"{_prefix}-Dairy";
@@ -86,7 +91,7 @@ public class ConfirmItemImportCommandTests : TestBase
         var result = await TestApp.SendAsync(new ConfirmItemImportCommand
         {
             ImportId = import.Id,
-            Items = [new ConfirmItemImportItem { Sku = sku, Name = "Milk", CategoryName = categoryName, Unit = "L" }]
+            Items = [new ConfirmItemImportItem { ItemId = existingItem.Id, Sku = sku, Name = "Milk", Unit = "L" }]
         });
 
         result.IsSuccess.ShouldBeTrue();

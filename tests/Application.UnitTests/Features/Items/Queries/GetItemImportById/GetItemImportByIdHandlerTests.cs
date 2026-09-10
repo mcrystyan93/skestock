@@ -53,10 +53,17 @@ public class GetItemImportByIdHandlerTests
         var milk = result.Value.Suggestions.Single(s => s.Sku == "sku-1");
         milk.ItemAlreadyExists.ShouldBeTrue();
         milk.CategoryAlreadyExists.ShouldBeTrue();
+        milk.MatchedCategory.ShouldNotBeNull();
+        milk.MatchedCategory!.Id.ShouldBe(category.Id);
+        milk.MatchedCategory.Name.ShouldBe("Dairy");
+        milk.MatchedItem.ShouldNotBeNull();
+        milk.MatchedItem!.Id.ShouldBe(context.Items.Single().Id);
+        milk.MatchedItem.CategoryId.ShouldBe(category.Id);
 
         var bread = result.Value.Suggestions.Single(s => s.Sku == "SKU-2");
         bread.ItemAlreadyExists.ShouldBeFalse();
         bread.CategoryAlreadyExists.ShouldBeFalse();
+        bread.MatchedCategory.ShouldBeNull();
     }
 
     [Test]
@@ -112,5 +119,60 @@ public class GetItemImportByIdHandlerTests
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Suggestions.Count.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Handle_MatchesItemByUniqueNameAndCategoryWhenSkuDoesNotMatch()
+    {
+        await using var context = CreateContext();
+        var category = new Category { Name = "Dairy" };
+        var item = new Item
+        {
+            Name = "Milk",
+            Unit = "L",
+            Category = category,
+            CategoryId = category.Id
+        };
+        context.Categories.Add(category);
+        context.Items.Add(item);
+
+        var import = ItemImport.Create(Guid.NewGuid(), Guid.NewGuid(), "blob/items.pdf");
+        import.ApplyExtractionResult(JsonSerializer.Serialize(new ItemExtractionResult
+        {
+            Items = [new ExtractedItem { Sku = "new-sku", Name = " milk ", CategoryName = " dairy " }]
+        }));
+        context.ItemImports.Add(import);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new GetItemImportByIdHandler(context)
+            .Handle(new GetItemImportByIdQuery { Id = import.Id }, CancellationToken.None);
+
+        var suggestion = result.Value.Suggestions.Single();
+        suggestion.MatchedItem.ShouldNotBeNull();
+        suggestion.MatchedItem!.Id.ShouldBe(item.Id);
+    }
+
+    [Test]
+    public async Task Handle_LeavesAmbiguousNameAndCategoryMatchUnresolved()
+    {
+        await using var context = CreateContext();
+        var category = new Category { Name = "Dairy" };
+        context.Categories.Add(category);
+        context.Items.AddRange(
+            new Item { Name = "Milk", Category = category, CategoryId = category.Id },
+            new Item { Name = "Milk", Category = category, CategoryId = category.Id });
+
+        var import = ItemImport.Create(Guid.NewGuid(), Guid.NewGuid(), "blob/items.pdf");
+        import.ApplyExtractionResult(JsonSerializer.Serialize(new ItemExtractionResult
+        {
+            Items = [new ExtractedItem { Name = "Milk", CategoryName = "Dairy" }]
+        }));
+        context.ItemImports.Add(import);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new GetItemImportByIdHandler(context)
+            .Handle(new GetItemImportByIdQuery { Id = import.Id }, CancellationToken.None);
+
+        result.Value.Suggestions.Single().MatchedItem.ShouldBeNull();
     }
 }

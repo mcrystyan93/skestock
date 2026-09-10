@@ -17,7 +17,7 @@ public class ConfirmItemImportCommandValidatorTests
             ImportId = Guid.NewGuid(),
             Items =
             [
-                new ConfirmItemImportItem { Sku = "SKU-1", Name = "Milk", CategoryName = "Dairy", Unit = "L" }
+            new ConfirmItemImportItem { ItemId = Guid.NewGuid(), Sku = "SKU-1", Name = "Milk", Unit = "L" }
             ]
         });
 
@@ -30,7 +30,7 @@ public class ConfirmItemImportCommandValidatorTests
         var result = await _validator.ValidateAsync(new ConfirmItemImportCommand
         {
             ImportId = Guid.Empty,
-            Items = [new ConfirmItemImportItem { Name = "Milk", CategoryName = "Dairy" }]
+            Items = [new ConfirmItemImportItem { Name = "Milk" }]
         });
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.Required && e.PropertyName == "ImportId");
@@ -54,22 +54,22 @@ public class ConfirmItemImportCommandValidatorTests
         var result = await _validator.ValidateAsync(new ConfirmItemImportCommand
         {
             ImportId = Guid.NewGuid(),
-            Items = [new ConfirmItemImportItem { Name = " ", CategoryName = "Dairy" }]
+            Items = [new ConfirmItemImportItem { ItemId = Guid.NewGuid(), Name = " " }]
         });
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.Required && e.PropertyName == "Items[0].Name");
     }
 
     [Test]
-    public async Task ShouldHaveRequiredErrorWhenCategoryNameIsBlank()
+    public async Task ShouldHaveRequiredErrorWhenItemIdIsEmpty()
     {
         var result = await _validator.ValidateAsync(new ConfirmItemImportCommand
         {
             ImportId = Guid.NewGuid(),
-            Items = [new ConfirmItemImportItem { Name = "Milk", CategoryName = " " }]
+            Items = [new ConfirmItemImportItem { Name = "Milk" }]
         });
 
-        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.Required && e.PropertyName == "Items[0].CategoryName");
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.Required && e.PropertyName == "Items[0].ItemId");
     }
 
     [Test]
@@ -78,7 +78,7 @@ public class ConfirmItemImportCommandValidatorTests
         var result = await _validator.ValidateAsync(new ConfirmItemImportCommand
         {
             ImportId = Guid.NewGuid(),
-            Items = [new ConfirmItemImportItem { Sku = new string('S', 51), Name = "Milk", CategoryName = "Dairy" }]
+            Items = [new ConfirmItemImportItem { ItemId = Guid.NewGuid(), Sku = new string('S', 51), Name = "Milk" }]
         });
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.MaxLength && e.PropertyName == "Items[0].Sku");

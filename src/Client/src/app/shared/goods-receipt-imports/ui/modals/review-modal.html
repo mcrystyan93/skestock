@@ -1,12 +1,7 @@
 <div *nzModalTitle>Revizuire import receptie</div>
 
-@if (store.reviewProblemDetail() || store.reviewValidationErrors()) {
-  <nz-alert nzType="error"
-            nzShowIcon
-            class="mb-3"
-            nzMessage="Nu am putut incarca sau salva importul."
-            [nzDescription]="store.reviewProblemDetail()?.detail ?? 'Verificati datele introduse.'" />
-}
+<ske-error-alert [problemDetail]="store.reviewProblemDetail()"
+                 [validationErrors]="store.reviewValidationErrors()" />
 
 <ske-goods-receipt-import-review-info [reviewInfo]="store.review()"
                                       [loading]="store.reviewLoading()" />

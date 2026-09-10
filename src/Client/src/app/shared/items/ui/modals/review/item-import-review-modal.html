@@ -1,0 +1,26 @@
+<div *nzModalTitle>Revizuire import articole</div>
+
+<ske-error-alert [problemDetail]="store.reviewProblemDetail()"
+                 [validationErrors]="store.reviewValidationErrors()" />
+
+<ske-item-import-review-table [lines]="store.lines()"
+                              [loading]="store.reviewLoading()" />
+
+<div *nzModalFooter>
+  <nz-space>
+    <button nz-button
+            *nzSpaceItem
+            nzType="default"
+            type="button"
+            (click)="close()">Inchide
+    </button>
+    <button nz-button
+            *nzSpaceItem
+            nzType="primary"
+            type="button"
+            [nzLoading]="store.reviewConfirmLoading()"
+            [disabled]="store.reviewLoading() || !store.lines().length"
+            (click)="save()">Confirma si creeaza articolele
+    </button>
+  </nz-space>
+</div>

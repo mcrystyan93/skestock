@@ -41,16 +41,16 @@ export const CategoryDetailState = signalStore(
       return id;
     };
 
-    const loadCategory = rxMethod<string>(
+    const loadCategory = rxMethod<LoadCategoryRequest>(
       pipe(
         tap(() => {
           store.setCategoryLoading();
           store.clearCategoryErrors();
         }),
-        switchMap((id) => {
+        switchMap(({ id, prefill }) => {
           if (id === NEW_CATEGORY_ROUTE_ID) {
             patchState(store, {
-              category: {}
+              category: prefill ?? {}
             });
             store.setCategoryLoaded();
             return of(null);
@@ -144,3 +144,8 @@ export const CategoryDetailState = signalStore(
     return { loadCategory, saveCategory };
   })
 );
+
+type LoadCategoryRequest = {
+  id: string;
+  prefill?: Partial<CategoryDto> | null;
+};

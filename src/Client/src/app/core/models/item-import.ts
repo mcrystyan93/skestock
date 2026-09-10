@@ -1,4 +1,6 @@
 import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
+import type { CategoryDropdownValue } from './category';
+import type { ItemDropdownValue } from './item';
 
 export type ItemImportStatus = 'processing' | 'pendingReview' | 'confirmed' | 'failed';
 
@@ -66,7 +68,7 @@ export const ITEM_IMPORT_TABLE_COLUMNS: TableColumnDefinition<ItemImportTableCol
 
 export const ITEM_IMPORT_STATUS_LABELS: Record<ItemImportStatus, string> = {
   processing: 'Se proceseaza',
-  pendingReview: 'In asteptarea revizuirii',
+  pendingReview: 'In asteptare',
   confirmed: 'Confirmat',
   failed: 'Esuat'
 };
@@ -79,14 +81,16 @@ export const ITEM_IMPORT_STATUS_COLORS: Record<ItemImportStatus, string> = {
 };
 
 export type ItemImportReviewLineDto = {
-  sku?: string | null;
+  sku: string;
   name: string;
   categoryName: string;
   unit: string;
-  description?: string | null;
+  description: string;
   isPerishable: boolean;
   itemAlreadyExists: boolean;
   categoryAlreadyExists: boolean;
+  matchedCategory?: CategoryDropdownValue;
+  matchedItem?: ItemDropdownValue;
 };
 
 export type ItemImportReviewDto = {
@@ -98,7 +102,12 @@ export type ItemImportReviewDto = {
   suggestions: ItemImportReviewLineDto[];
 };
 
-export type ConfirmItemImportRequestItem = ItemImportReviewLineDto;
+export type ConfirmItemImportRequestItem = Omit<
+  ItemImportReviewLineDto,
+  'categoryName' | 'matchedCategory' | 'matchedItem' | 'categoryAlreadyExists' | 'itemAlreadyExists'
+> & {
+  itemId: string;
+};
 
 export type ConfirmItemImportRequest = {
   items: ConfirmItemImportRequestItem[];
@@ -113,5 +122,6 @@ export type ItemImportConfirmationResultDto = {
     name: string;
     categoryName: string;
     created: boolean;
+    categoryCreated: boolean;
   }>;
 };

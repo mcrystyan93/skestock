@@ -37,6 +37,21 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
   [ErrorCodes.resource.goodsReceiptImportNotFound]: 'Importul de recepție nu a fost găsit.',
   [ErrorCodes.resource.goodsReceiptImportNotInReview]:
     'Importul de recepție nu este în așteptarea confirmării și nu poate fi confirmat.',
+  [ErrorCodes.resource.itemImportFileNotConfirmed]:
+    'Încărcarea fișierului pentru importul de articole nu a fost confirmată.',
+  [ErrorCodes.resource.itemImportNotFound]: 'Importul de articole nu a fost găsit.',
+  [ErrorCodes.resource.itemImportNotInReview]:
+    'Importul de articole nu este în așteptarea confirmării și nu poate fi confirmat.',
+  [ErrorCodes.resource.itemImportRowsWithoutCategory]:
+    'Importul de articole conține una sau mai multe linii fără categorie.',
+  [ErrorCodes.resource.itemImportCategoriesNotFound]:
+    'Importul de articole conține una sau mai multe categorii care nu mai există.',
+  [ErrorCodes.resource.itemImportItemsNotFound]:
+    'Importul de articole conține selecții pentru articole care nu mai există.',
+  [ErrorCodes.resource.itemImportDuplicateItems]:
+    'Importul de articole selectează același articol de mai multe ori.',
+  [ErrorCodes.resource.itemImportItemCategoryMismatch]:
+    'Importul de articole conține o selecție de articol și categorie care nu corespund.',
   [ErrorCodes.resource.fileNotFound]: 'Fișierul nu a fost găsit.',
   [ErrorCodes.resource.blobNotFound]: 'Încărcarea fișierului nu a fost finalizată.',
 

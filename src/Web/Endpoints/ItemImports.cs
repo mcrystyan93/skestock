@@ -78,7 +78,7 @@ public class ItemImports : IEndpointGroup
 
     [EndpointSummary("Confirm an item import")]
     [EndpointDescription(
-        "Confirms a reviewed item import using the explicit reviewed items, auto-creating any missing categories and reusing items whose SKU already exists.")]
+        "Confirms a reviewed item import using the explicitly selected catalog items.")]
     public static async Task<Results<Ok<ItemImportConfirmationResultDto>, ProblemHttpResult>> ConfirmItemImport(
         ISender sender,
         Guid id,
@@ -90,9 +90,9 @@ public class ItemImports : IEndpointGroup
             ImportId = id,
             Items = request.Items.Select(i => new ConfirmItemImportItem
             {
+                ItemId = i.ItemId,
                 Sku = i.Sku,
                 Name = i.Name,
-                CategoryName = i.CategoryName,
                 Unit = i.Unit,
                 Description = i.Description,
                 IsPerishable = i.IsPerishable

@@ -2,12 +2,12 @@ import { Component, effect, inject, viewChild } from '@angular/core';
 import { NZ_MODAL_DATA, NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zorro-antd/modal';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
-import { NzAlertComponent } from 'ng-zorro-antd/alert';
 import { isNil } from 'lodash-es';
 import { buildConfirmRequest, ReviewStore } from '../../services/review.store';
 import { ReviewLinesTable } from '../review-lines-table/review-lines-table';
 import { ReviewInfo } from '../review-lines-table/review-info/review-info';
 import { NzDividerComponent } from 'ng-zorro-antd/divider';
+import { ErrorAlert } from '@ske/shared/errors';
 
 export type ReviewModalData = {
   importId: string;
@@ -20,10 +20,10 @@ export type ReviewModalData = {
     NzButtonComponent,
     NzSpaceComponent,
     NzSpaceItemDirective,
-    NzAlertComponent,
     ReviewLinesTable,
     ReviewInfo,
-    NzDividerComponent
+    NzDividerComponent,
+    ErrorAlert
   ],
   selector: 'ske-goods-receipt-import-review-modal',
   styles: ``,

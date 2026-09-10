@@ -1,0 +1,25 @@
+<nz-table nzSize="small"
+          [nzTemplateMode]="true"
+          [nzScroll]="{ x: '1250px', y: '450px' }"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false">
+  <thead>
+  <tr>
+    <th nzWidth="100px">Cod</th>
+    <th nzWidth="220px">Nume citit</th>
+    <th nzWidth="150px">Potrivire</th>
+    <th nzWidth="220px">Denumire</th>
+    <th nzWidth="180px">Categorie</th>
+    <th nzWidth="130px">Unitate</th>
+    <th nzWidth="260px">Descriere</th>
+    <th nzWidth="120px">Perisabil</th>
+  </tr>
+  </thead>
+  <tbody>
+    @for (line of linesForm.lines; track $index) {
+      <tr ske-item-import-review-line-row
+          [lineForm]="line">
+      </tr>
+    }
+  </tbody>
+</nz-table>

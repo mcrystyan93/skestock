@@ -4,7 +4,8 @@
   Incarca documentele cu articolele care vor fi analizate automat.
 </p>
 
-<ske-file-upload [multiple]="true" (onFileListChange)="onFileListChange($event)" />
+<ske-file-upload [multiple]="true"
+                 (onFileListChange)="onFileListChange($event)" />
 
 @if (fileStorage.uploadLoading() || fileStorage.hasUploadFailures()) {
   <nz-progress [nzPercent]="fileStorage.uploadPercent()"
@@ -31,12 +32,20 @@
 
 <div *nzModalFooter>
   <nz-space>
-    <button nz-button *nzSpaceItem nzType="default" type="button"
+    <button nz-button
+            *nzSpaceItem
+            nzType="default"
+            type="button"
             [disabled]="fileStorage.uploadLoading() || store.itemImportLoading()"
-            (click)="close()">Inchide</button>
-    <button nz-button *nzSpaceItem nzType="primary" type="button"
+            (click)="close()">Inchide
+    </button>
+    <button nz-button
+            *nzSpaceItem
+            nzType="primary"
+            type="button"
             [disabled]="!hasFiles()"
             [nzLoading]="fileStorage.uploadLoading() || store.itemImportLoading()"
-            (click)="loadFiles()">Incarca si proceseaza</button>
+            (click)="loadFiles()">Incarca si proceseaza
+    </button>
   </nz-space>
 </div>

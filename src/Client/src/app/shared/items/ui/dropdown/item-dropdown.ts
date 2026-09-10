@@ -10,7 +10,7 @@ import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { isNil } from 'lodash-es';
-import { ItemDetailModal } from '../modals/item-detail-modal';
+import { ItemDetailModal } from '../modals/detail/item-detail-modal';
 import { NzModalService } from 'ng-zorro-antd/modal';
 
 @Component({
@@ -41,6 +41,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
                  (nzScrollToBottom)="loadMore()">
         @if (value(); as item) {
           <nz-option [nzValue]="item"
+                     nzHide
                      [nzLabel]="item.name ?? ''"></nz-option>
         }
 
