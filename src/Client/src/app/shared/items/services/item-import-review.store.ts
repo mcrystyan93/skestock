@@ -7,13 +7,18 @@ import {
   ConfirmItemImportRequest,
   ItemImportConfirmationResultDto,
   ItemImportReviewDto,
-  ItemImportReviewLineDto
+  ItemImportReviewLineDto,
+  ItemDropdownValue, CategoryDropdownValue
 } from '@ske/models';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { ItemImportsHttp } from './item-imports.http';
 
-export type ItemImportReviewEditableLine = ItemImportReviewLineDto & { rowId: string };
+export type ItemImportReviewEditableLine = Omit<ItemImportReviewLineDto, 'matchedCategory' | 'matchedItem'> & {
+  rowId: string;
+  item: ItemDropdownValue;
+  category: CategoryDropdownValue;
+};
 
 type ItemImportReviewState = {
   importId: string | null;
@@ -51,7 +56,12 @@ export const ItemImportReviewState = signalStore(
             next: (review) => {
               patchState(store, {
                 review,
-                lines: review.suggestions.map((line) => ({ ...line, rowId: nextRowId() }))
+                lines: review.suggestions.map((line) => ({
+                  ...line,
+                  item: line.matchedItem ?? null,
+                  category: line.matchedCategory ?? null,
+                  rowId: nextRowId()
+                }))
               });
               store.setReviewLoaded();
             },
@@ -79,7 +89,14 @@ export const ItemImportReviewState = signalStore(
           }
 
           const request: ConfirmItemImportRequest = {
-            items: lines.map(({ rowId: _, ...line }) => line)
+            items: lines.map((line) => ({
+              sku: line.sku,
+              itemId: line.item?.id ?? '',
+              name: line.name,
+              unit: line.unit,
+              description: line.description,
+              isPerishable: line.isPerishable
+            }))
           };
 
           return http.confirm(importId, request).pipe(

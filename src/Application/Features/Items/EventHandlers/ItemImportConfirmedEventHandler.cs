@@ -2,7 +2,6 @@ using Microsoft.Extensions.Caching.Hybrid;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Common.Realtime;
 using skestock.Domain.Events.Items;
-using CategoryCacheConstants = skestock.Application.Features.Categories.CacheConstants;
 using StockCacheConstants = skestock.Application.Features.Stock.CacheConstants;
 
 namespace skestock.Application.Features.Items.EventHandlers;
@@ -14,7 +13,6 @@ public class ItemImportConfirmedEventHandler(IRealtimeNotifier notifier, HybridC
     [
         CacheConstants.ItemImportListTag,
         CacheConstants.ItemListTag,
-        CategoryCacheConstants.CategoryListTag,
         StockCacheConstants.BuildCoarseTag()
     ];
 

@@ -17,16 +17,16 @@ public static class ItemImportRequests
 
     public class ConfirmItemImportRequest
     {
-        // The reviewed list of items. A future UI may edit or omit the AI's suggestions, so this is
-        // the source of truth for what gets created/reused - the stored extraction is only a hint.
+        // The reviewed list of items. The selected item IDs are authoritative; the extracted fields
+        // are retained for compatibility and review display.
         public List<ConfirmItemImportRequestItem> Items { get; init; } = [];
     }
 
     public class ConfirmItemImportRequestItem
     {
+        public Guid ItemId { get; init; }
         public string? Sku { get; init; }
         public string Name { get; init; } = string.Empty;
-        public string CategoryName { get; init; } = string.Empty;
         public string Unit { get; init; } = "unit";
         public string? Description { get; init; }
         public bool IsPerishable { get; init; }

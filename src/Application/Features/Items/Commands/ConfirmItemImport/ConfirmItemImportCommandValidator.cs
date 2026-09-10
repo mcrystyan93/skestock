@@ -7,7 +7,6 @@ public class ConfirmItemImportCommandValidator : AbstractValidator<ConfirmItemIm
     // Keep in sync with ItemConfiguration/CategoryConfiguration's HasMaxLength (Infrastructure.Data.
     // Configurations.DataSchemaConstants) - Application can't reference Infrastructure.
     private const int NameMaxLength = 100;
-    private const int CategoryNameMaxLength = 100;
     private const int SkuMaxLength = 50;
     private const int UnitMaxLength = 20;
     private const int DescriptionMaxLength = 500;
@@ -29,18 +28,16 @@ public class ConfirmItemImportCommandValidator : AbstractValidator<ConfirmItemIm
 
         RuleForEach(x => x.Items).ChildRules(item =>
         {
+            item.RuleFor(i => i.ItemId)
+                .NotEmpty()
+                .WithErrorCode(ValidationErrorCodes.Required)
+                .WithMessage("An item is required");
+
             item.RuleFor(i => i.Name)
                 .Must(n => !string.IsNullOrWhiteSpace(n))
                 .WithErrorCode(ValidationErrorCodes.Required)
                 .WithMessage("Item names cannot be blank")
                 .MaximumLength(NameMaxLength)
-                .WithErrorCode(ValidationErrorCodes.MaxLength);
-
-            item.RuleFor(i => i.CategoryName)
-                .Must(n => !string.IsNullOrWhiteSpace(n))
-                .WithErrorCode(ValidationErrorCodes.Required)
-                .WithMessage("Category names cannot be blank")
-                .MaximumLength(CategoryNameMaxLength)
                 .WithErrorCode(ValidationErrorCodes.MaxLength);
 
             item.RuleFor(i => i.Sku)

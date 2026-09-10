@@ -10,12 +10,31 @@ public sealed class ItemExtractionSchemaFactory(IApplicationDbContext dbContext)
     : IExtractionSchemaFactory<ItemExtractionResult>
 {
     public string Prompt =>
-        "Inspect the attached document (typically a product catalog, price list, or inventory sheet) " +
-        "and identify every catalog item listed. For each item capture its SKU/product code when " +
-        "present (empty string if not present), its name, the unit of measure (e.g. 'unit', 'kg', " +
-        "'box'; default to 'unit' if not present), a short description if present (empty string " +
-        "otherwise), whether it is a perishable good, its minimum stock threshold (default 0), " +
-        "shelf-life in days when perishable (empty when unknown), and the category it belongs to.";
+        """
+        Extract and list every catalog item from the attached document (commonly a product catalog, price list, or inventory sheet, usually in Romanian). For each item found, identify and record the following attributes:
+
+        - SKU/product code (use "" if not present)
+        - Name
+        - Unit of measure (e.g. 'buc', 'kg', 'box'; default to 'buc' if not listed)
+        - Short description ("" if not present)
+        - Is perishable good (true/false) — reason about the product to determine perishability
+        - Minimum stock threshold (integer, default 0 if not listed)
+        - Shelf-life in days (if perishable and reason about the product to determine the shelf-life, otherwise "", leave blank for non-perishable)
+        - Category (based on the item listing; provide best-guess if not explicit)
+
+        Before concluding and generating the output, internally reason step-by-step to identify, extract, and determine the value for each attribute, especially perishability and category. Only include the final JSON output at the end.
+
+        Persist with reasoning and extraction until all catalog items are processed.
+
+        **Edge Cases:**
+        - If an attribute is missing or not explicit (e.g., unit of measure or description), use defaults as above.
+        - When in doubt about perishability or category, make a reasoned best guess, erring toward broad, clear categories.
+        - For missing or ambiguous product codes, leave the 'sku' field empty.
+        - For shelf-life, only fill if perishable and stated; else empty string.
+
+        **REMINDER:**
+        Extract all items; for each, systematically reason through attribute selection before making conclusions. Output only the JSON as specified.
+        """;
 
     public async Task<JsonObject> Create(CancellationToken cancellationToken)
     {
@@ -75,7 +94,7 @@ public sealed class ItemExtractionSchemaFactory(IApplicationDbContext dbContext)
                                 {
                                     ["type"] = "string",
                                     ["description"] =
-                                        "The unit of measure, e.g. 'unit', 'kg', 'box'."
+                                        "The unit of measure, e.g. 'unit', 'kg', 'box'. Most likely it's in romanian. For Metro receipts, you find it in the column 'Mod amb'"
                                 },
                             ["description"] =
                                 new JsonObject

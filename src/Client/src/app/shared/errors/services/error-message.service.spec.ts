@@ -44,6 +44,23 @@ describe('ErrorMessageService', () => {
     expect(service.resolveCode(ErrorCodes.validation.invalidJson)).toContain('JSON');
   });
 
+  it('resolves item import error codes to Romanian copy', () => {
+    const codes = [
+      ErrorCodes.resource.itemImportFileNotConfirmed,
+      ErrorCodes.resource.itemImportNotFound,
+      ErrorCodes.resource.itemImportNotInReview,
+      ErrorCodes.resource.itemImportRowsWithoutCategory,
+      ErrorCodes.resource.itemImportCategoriesNotFound,
+      ErrorCodes.resource.itemImportItemsNotFound,
+      ErrorCodes.resource.itemImportDuplicateItems,
+      ErrorCodes.resource.itemImportItemCategoryMismatch,
+    ];
+
+    for (const code of codes) {
+      expect(service.resolveCode(code)).not.toBe(RO_DEFAULT_ERROR_MESSAGE);
+    }
+  });
+
   it('returns the default message for a null/empty code', () => {
     expect(service.resolveCode(null)).toBe(RO_DEFAULT_ERROR_MESSAGE);
     expect(service.resolveCode('')).toBe(RO_DEFAULT_ERROR_MESSAGE);

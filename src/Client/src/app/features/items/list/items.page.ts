@@ -27,7 +27,7 @@ import { ItemListTab } from './tabs/item-list-tab';
   }
 })
 export class ItemsPage implements OnInit, OnDestroy {
-  public readonly store = inject(ItemListState);
+  public readonly listStore = inject(ItemListState);
   public readonly importStore = inject(ItemImportState);
   public readonly selectedTabIndex = signal(0);
 
@@ -36,11 +36,11 @@ export class ItemsPage implements OnInit, OnDestroy {
   private readonly _signalRGroupManager = inject(SignalRGroupManagerStore);
 
   public onFilterChange(filter: GetAllItemsRequest) {
-    this.store.load(filter);
+    this.listStore.load(filter);
   }
 
   public onLoadMore() {
-    this.store.loadMore();
+    this.listStore.loadMore();
   }
 
   public onEdit(item: ItemDto) {
@@ -71,7 +71,7 @@ export class ItemsPage implements OnInit, OnDestroy {
     });
 
     modalRef.afterClose.pipe(takeUntilDestroyed(this._destroyRef)).subscribe(() => {
-      this.store.reload();
+      this.listStore.reload();
       this.importStore.reload();
     });
   }
@@ -99,7 +99,7 @@ export class ItemsPage implements OnInit, OnDestroy {
     modalRef.afterClose.pipe(
       takeUntilDestroyed(this._destroyRef)
     ).subscribe(() => {
-      this.store.reload();
+      this.listStore.reload();
     });
   }
 
@@ -113,11 +113,11 @@ export class ItemsPage implements OnInit, OnDestroy {
         nzOkDanger: true,
         nzCentered: true,
         nzIconType: 'icons:circle-exclamation',
-        nzOnOk: () => this.store.toggleActive(item)
+        nzOnOk: () => this.listStore.toggleActive(item)
       });
       return;
     }
 
-    this.store.toggleActive(item);
+    this.listStore.toggleActive(item);
   }
 }

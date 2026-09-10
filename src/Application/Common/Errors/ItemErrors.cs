@@ -65,17 +65,40 @@ public static class ItemImportErrors
         }
     }
 
-    public sealed class RowsWithoutCategory : Error
+    public sealed class ItemsNotFound : Error
     {
-        public const string ErrorCode = "item_imports.rows_without_category";
+        public const string ErrorCode = "item_imports.items_not_found";
 
-        public RowsWithoutCategory(Guid itemImportId)
-            : base($"Item import '{itemImportId}' contains one or more rows without a category.")
+        public ItemsNotFound(Guid itemImportId, IReadOnlyCollection<Guid> itemIds)
+            : base($"Item import '{itemImportId}' contains item selections that no longer exist.")
         {
             Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status400BadRequest);
-            Metadata.Add(ErrorMetadataKeys.Title, "Category is required");
+            Metadata.Add(ErrorMetadataKeys.Title, "Item not found");
             Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
-            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object> { ["itemImportId"] = itemImportId });
+            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object>
+            {
+                ["itemImportId"] = itemImportId,
+                ["itemIds"] = itemIds
+            });
         }
     }
+
+    public sealed class DuplicateItems : Error
+    {
+        public const string ErrorCode = "item_imports.duplicate_items";
+
+        public DuplicateItems(Guid itemImportId, IReadOnlyCollection<Guid> itemIds)
+            : base($"Item import '{itemImportId}' selects the same item more than once.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status400BadRequest);
+            Metadata.Add(ErrorMetadataKeys.Title, "Duplicate item selection");
+            Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
+            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object>
+            {
+                ["itemImportId"] = itemImportId,
+                ["itemIds"] = itemIds
+            });
+        }
+    }
+
 }

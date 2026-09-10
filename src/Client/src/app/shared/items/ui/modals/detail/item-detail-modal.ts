@@ -1,5 +1,5 @@
 import { Component, DestroyRef, effect, inject, signal, viewChild } from '@angular/core';
-import { itemApiEvents, ItemDetailState, NEW_ITEM_ROUTE_ID } from '../../services/item-detail.store';
+import { itemApiEvents, ItemDetailState, NEW_ITEM_ROUTE_ID } from '../../../services/item-detail.store';
 import { CreateItemRequest, EditItemRequest, ItemDto } from '@ske/models';
 import { NZ_MODAL_DATA, NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zorro-antd/modal';
 import { NzSpaceCompactComponent, NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';

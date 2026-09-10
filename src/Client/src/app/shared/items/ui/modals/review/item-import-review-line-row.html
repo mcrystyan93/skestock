@@ -1,0 +1,70 @@
+@let lineFormSignal = lineForm();
+<td>
+  {{ lineForm().sku().value() ?? '-' }}
+</td>
+<td>
+  {{ lineForm().name().value() ?? '-' }}
+</td>
+<td>
+  @if (lineFormSignal().value().itemAlreadyExists) {
+    <nz-tag nzColor="green">Articol existent</nz-tag>
+  } @else {
+    <nz-tag nzColor="blue">Nou</nz-tag>
+  }
+</td>
+<td>
+  <nz-form-item>
+    <nz-form-control [nzErrorTip]="errorTemplate">
+      <ske-item-dropdown [formField]="lineForm().item"
+                         [allowEdit]="false"
+                         [allowCreate]="true"
+                         [placeholder]="itemPlaceholder"
+                         [createPrefill]="itemPrefill()" />
+    </nz-form-control>
+  </nz-form-item>
+</td>
+<td>
+  @let selectedItem = lineFormSignal().value().item;
+  @let matchedCategory = lineFormSignal().value().category;
+  @if (matchedCategory?.name && !selectedItem?.categoryName) {
+    <span nz-typography
+          nzType="secondary">
+      <span>Sugerat: </span>
+      <span>{{ matchedCategory?.name }}</span>
+    </span>
+  } @else {
+    <span [class.text-gray-500]="!selectedItem?.categoryName">
+    {{ selectedItem?.categoryName ?? categoryPlaceholder }}
+  </span>
+  }
+</td>
+<td>
+  {{ lineForm().unit().value() ?? '-' }}
+</td>
+<td>
+  {{ lineForm().description().value() ?? '-' }}
+</td>
+<td>
+  <nz-tag [nzColor]="lineForm().isPerishable().value() ? 'warning' : 'blue'">
+    @if (lineForm().isPerishable().value()) {
+      Perisabil
+    } @else {
+      Neperisabil
+    }
+  </nz-tag>
+</td>
+
+
+<ng-template #errorTemplate
+             let-control>
+  @let formControl = control.control;
+  @if (formControl.errors?.required; as requiredError) {
+    {{ requiredError.message }}
+  }
+  @if (formControl.errors?.min; as minError) {
+    {{ minError.message }}
+  }
+  @if (formControl.errors?.totalSum; as totalSumError) {
+    {{ totalSumError.message }}
+  }
+</ng-template>
