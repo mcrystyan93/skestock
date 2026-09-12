@@ -70,6 +70,15 @@
               *nzSpaceItem
               nz-button
               nzType="default"
+              (click)="onAnalytics.emit()">
+        <nz-icon nzType="icons:chart-bar"></nz-icon>
+        Analiză
+      </button>
+
+      <button type="button"
+              *nzSpaceItem
+              nz-button
+              nzType="default"
               (click)="onClose.emit()">
         <nz-icon nzType="icons:xmark"></nz-icon>
         Inchide

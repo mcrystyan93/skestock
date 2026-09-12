@@ -1,15 +1,14 @@
-import { NgOptimizedImage } from '@angular/common';
-import { Component, computed, effect, input, linkedSignal, model, signal, untracked } from '@angular/core';
-import { form, FormField, type FormValueControl } from '@angular/forms/signals';
-import { NzFilterOptionType, NzOptionComponent, NzSelectComponent, NzSelectItemInterface } from 'ng-zorro-antd/select';
-import { ICON_CATALOG, type IconPickerValue } from '../icon-catalog';
-import { NzIconDirective } from 'ng-zorro-antd/icon';
+import {NgOptimizedImage} from '@angular/common';
+import {Component, computed, effect, input, linkedSignal, model, signal, untracked} from '@angular/core';
+import {form, FormField, type FormValueControl} from '@angular/forms/signals';
+import {NzFilterOptionType, NzOptionComponent, NzSelectComponent, NzSelectItemInterface} from 'ng-zorro-antd/select';
+import {ICON_CATALOG, type IconPickerValue} from '../icon-catalog';
+import {NzIconDirective} from 'ng-zorro-antd/icon';
 
 @Component({
   selector: 'ske-icon-picker',
   imports: [
     FormField,
-    NgOptimizedImage,
     NzOptionComponent,
     NzSelectComponent,
     NzIconDirective
@@ -65,8 +64,8 @@ export class IconPicker implements FormValueControl<IconPickerValue | null> {
     const searchTerm = this.searchTerm().trim();
 
     if (selectedIcon &&
-        searchTerm.length === 0 &&
-        !visibleIcons.some((icon) => icon.fileName === selectedIcon.fileName)) {
+      searchTerm.length === 0 &&
+      !visibleIcons.some((icon) => icon.fileName === selectedIcon.fileName)) {
       return [...visibleIcons, selectedIcon];
     }
 
@@ -88,7 +87,7 @@ export class IconPicker implements FormValueControl<IconPickerValue | null> {
 
   private readonly _formModel = linkedSignal({
     source: () => this.value(),
-    computation: (value) => (<IconPickerFormModel>{ icon: value })
+    computation: (value) => (<IconPickerFormModel>{icon: value})
   });
 
   public readonly iconForm = form(this._formModel);

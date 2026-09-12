@@ -126,7 +126,9 @@ export const ITEM_TABLE_COLUMNS: TableColumnDefinition<ItemTableColumn> = {
   }
 };
 
-export type ItemDropdownValue = ItemDto | Partial<ItemDto> | null;
+export type ItemDropdownOption = Partial<ItemDto> & Pick<ItemDto, 'id'>;
+
+export type ItemDropdownValue = ItemDto | ItemDropdownOption | null;
 
 export function buildItemListFilter(
   currentFilter: GetAllItemsRequest,
@@ -140,4 +142,3 @@ export function buildItemListFilter(
     sort: prioritizeSort(currentFilter.sort ?? [], partialFilter.sort ?? [])
   };
 }
-

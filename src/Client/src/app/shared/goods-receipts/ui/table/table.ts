@@ -1,4 +1,4 @@
-import { Component, input, signal } from '@angular/core';
+import { Component, effect, input, signal, untracked } from '@angular/core';
 import { BaseTable } from '@ske/shared/tables';
 import { GetAllGoodsReceiptsRequest, GOODS_RECEIPT_TABLE_COLUMNS, GoodsReceiptListItemDto } from '@ske/models';
 import { NzTableModule } from 'ng-zorro-antd/table';
@@ -22,10 +22,20 @@ import { TableContainer as StockBatchesTableContainer } from '@ske/shared/stock-
 })
 export class Table extends BaseTable<GoodsReceiptListItemDto, GetAllGoodsReceiptsRequest> {
   public readonly loading = input.required<boolean>();
+  public readonly expandedReceiptId = input<string | null>(null);
 
   // public readonly onView = output<GoodsReceiptListItemDto>();
   public readonly columns = GOODS_RECEIPT_TABLE_COLUMNS;
   public readonly expandedRows = signal<Set<string>>(new Set<string>());
+
+  private readonly _expandedReceiptEffect = effect(() => {
+    const receiptId = this.expandedReceiptId();
+    if (!receiptId || !this.items().some((item) => item.id === receiptId)) {
+      return;
+    }
+
+    untracked(() => this.expandedRows.set(new Set([receiptId])));
+  });
 
   constructor() {
     super();

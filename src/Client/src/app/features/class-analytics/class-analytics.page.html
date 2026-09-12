@@ -1,0 +1,57 @@
+<ske-class-analysis-page-header title="Analiză clasă"
+                                description="Monitorizează stocul pe categorii și costurile recepțiilor." />
+
+<ske-class-analytics-filters class="mx-4"
+                             [filter]="store.filter()"
+                             (filterChange)="store.setFilter($event)" />
+
+<!--<ske-error-alert [problemDetail]="store.locationsProblemDetail()"-->
+<!--                 [validationErrors]="store.locationsValidationErrors()"-->
+<!--                 class="mt-4" />-->
+
+<!--@if (store.selectedClassId()) {-->
+<!--  <div class="mt-4">-->
+<!--    <ske-class-analytics-kpis [totalQuantity]="store.totalQuantity()"-->
+<!--                              [totalItemCount]="store.totalItemCount()"-->
+<!--                              [totalCategoryCount]="store.totalCategoryCount()"-->
+<!--                              [totalAmount]="store.totalAmount()"-->
+<!--                              [receiptCount]="store.receiptCount()"-->
+<!--                              [averageAmount]="store.averageAmount()" />-->
+<!--  </div>-->
+
+<!--  <div class="mt-4 grid gap-4 xl:grid-cols-2">-->
+<!--    @if (store.stockLoading()) {-->
+<!--      <div class="rounded-lg border border-gray-200 p-4"-->
+<!--           role="status">Se încarcă stocul...-->
+<!--      </div>-->
+<!--    } @else if (store.stockProblemDetail() || store.stockValidationErrors()) {-->
+<!--      <ske-error-alert [problemDetail]="store.stockProblemDetail()"-->
+<!--                       [validationErrors]="store.stockValidationErrors()" />-->
+<!--    } @else if (!store.hasCategories()) {-->
+<!--      <div class="rounded-lg border border-gray-200 p-4"-->
+<!--           role="status">-->
+<!--        Nu există stoc pentru această clasă și locație.-->
+<!--      </div>-->
+<!--    } @else {-->
+<!--      <ske-category-stock-chart [categories]="store.categories()"-->
+<!--                                (categorySelected)="categorySelected($event)" />-->
+<!--    }-->
+
+<!--    @if (store.costsLoading()) {-->
+<!--      <div class="rounded-lg border border-gray-200 p-4"-->
+<!--           role="status">Se încarcă costurile...-->
+<!--      </div>-->
+<!--    } @else if (store.costsProblemDetail() || store.costsValidationErrors()) {-->
+<!--      <ske-error-alert [problemDetail]="store.costsProblemDetail()"-->
+<!--                       [validationErrors]="store.costsValidationErrors()" />-->
+<!--    } @else if (!store.hasReceiptPoints()) {-->
+<!--      <div class="rounded-lg border border-gray-200 p-4"-->
+<!--           role="status">-->
+<!--        Nu există recepții în intervalul selectat.-->
+<!--      </div>-->
+<!--    } @else {-->
+<!--      <ske-receipt-cost-chart [points]="store.receiptPoints()"-->
+<!--                              (receiptSelected)="receiptSelected($event)" />-->
+<!--    }-->
+<!--  </div>-->
+<!--}-->

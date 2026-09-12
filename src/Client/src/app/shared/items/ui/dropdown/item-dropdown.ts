@@ -1,17 +1,24 @@
-import { Component, DestroyRef, effect, inject, input, linkedSignal, model, untracked } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { form, FormField, type FormValueControl } from '@angular/forms/signals';
-import { type ItemDropdownValue, ItemDto, GetAllItemsRequest, PAGINATION_PAGE_SIZE, ColumnFilter } from '@ske/models';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
-import { ItemDropdownStore } from '../../services/item-dropdown.store';
-import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
-import { NzSpinComponent } from 'ng-zorro-antd/spin';
-import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
-import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { isNil } from 'lodash-es';
-import { ItemDetailModal } from '../modals/detail/item-detail-modal';
-import { NzModalService } from 'ng-zorro-antd/modal';
+import {Component, computed, DestroyRef, effect, inject, input, linkedSignal, model, untracked} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {form, FormField, type FormValueControl} from '@angular/forms/signals';
+import {
+  type ItemDropdownOption,
+  type ItemDropdownValue,
+  type ItemDto,
+  GetAllItemsRequest,
+  PAGINATION_PAGE_SIZE,
+  ColumnFilter
+} from '@ske/models';
+import {debounceTime, distinctUntilChanged, Subject} from 'rxjs';
+import {ItemDropdownStore} from '../../services/item-dropdown.store';
+import {NzOptionComponent, NzSelectComponent} from 'ng-zorro-antd/select';
+import {NzSpinComponent} from 'ng-zorro-antd/spin';
+import {NzSpaceCompactComponent} from 'ng-zorro-antd/space';
+import {NzButtonComponent} from 'ng-zorro-antd/button';
+import {NzIconDirective} from 'ng-zorro-antd/icon';
+import {isNil} from 'lodash-es';
+import {ItemDetailModal} from '../modals/detail/item-detail-modal';
+import {NzModalService} from 'ng-zorro-antd/modal';
 
 @Component({
   selector: 'ske-item-dropdown',
@@ -30,8 +37,9 @@ import { NzModalService } from 'ng-zorro-antd/modal';
                  nzShowSearch
                  nzShowArrow
                  [nzPlaceHolder]="placeholder()"
-                 [nzLoading]="store.itemsLoading()"
+                 [nzLoading]="store.loading()"
                  [nzAllowClear]="allowClear()"
+                 [attr.aria-busy]="store.loading()"
                  nzServerSearch
                  class="w-full"
                  [nzDropdownMatchSelectWidth]="false"
@@ -42,14 +50,15 @@ import { NzModalService } from 'ng-zorro-antd/modal';
         @if (value(); as item) {
           <nz-option [nzValue]="item"
                      nzHide
-                     [nzLabel]="item.name ?? ''"></nz-option>
+                     [nzLabel]="selectedItemLabel()"></nz-option>
         }
 
         @for (item of store.items(); track item.id) {
           <nz-option [nzValue]="item"
-                     [nzLabel]="item.name ?? ''"></nz-option>
+                     [nzLabel]="item.name"/>
         }
       </nz-select>
+
       @if (allowEdit()) {
         <button nz-button
                 nzType="primary"
@@ -96,7 +105,7 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
 
   private readonly _formModel = linkedSignal({
     source: () => this.value(),
-    computation: (value) => (<ItemDropdownFormModel>{ item: value })
+    computation: (value) => (<ItemDropdownFormModel>{item: value})
   });
 
   public readonly itemForm = form(this._formModel);
@@ -114,7 +123,7 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
       takeUntilDestroyed()
     )
     .subscribe((searchTerm) => {
-      this.store.load(this.buildFilter({ searchTerm }));
+      this.store.load(this.buildFilter({searchTerm}));
     });
 
   private readonly _categoryChangeEffectRef = effect(() => {
@@ -128,12 +137,42 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
     untracked(() => this.store.load(this.buildFilter({})));
   });
 
+  private readonly _selectedValueEffectRef = effect(() => {
+    const item = this.value();
+
+    untracked(() => this.store.resolveSelectedItem(item));
+  });
+
+  public readonly selectedItemLabel = computed(() => {
+    const item = this.value();
+
+    if (!item?.id)
+      return '';
+
+    const resolvedItem = this.store.selectedItem();
+
+    if (resolvedItem?.id === item.id && resolvedItem.name)
+      return this.itemLabel(resolvedItem);
+
+    if (this.store.selectedItemLoading())
+      return 'Se încarcă articolul…';
+
+    if (this.store.selectedItemUnavailable())
+      return `Articol indisponibil`;
+
+    return item.name ? this.itemLabel(item) : 'Se încarcă articolul…';
+  });
+
   public loadMore() {
     this.store.loadMore();
   }
 
   public onSearch(searchTerm: string) {
     this._search$.next(searchTerm);
+  }
+
+  public itemLabel(item: ItemDropdownOption): string {
+    return item?.name ?? 'Articol indisponibil';
   }
 
   public onAdd() {
@@ -186,7 +225,7 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
     const categoryId = this.categoryId();
 
     return {
-      ...(isNil(categoryId) ? {} : { categoryId }),
+      ...(isNil(categoryId) ? {} : {categoryId}),
       ...this.createPrefill()
     };
   }

@@ -26,6 +26,8 @@ export type SchoolClassDto = {
   lastModifiedDate: string;
 };
 
+export type SchoolClassDropdownValue = SchoolClassDto | Partial<SchoolClassDto> | null;
+
 /** Mirrors src/Application/Features/SchoolClasses/Models/SchoolClassDto.cs. */
 export type SchoolClassSummary = {
   id: string;
@@ -144,3 +146,9 @@ export function buildSchoolClassListFilter(
     sort: prioritizeSort(currentFilter.sort ?? [], partialFilter.sort ?? [])
   };
 }
+
+export enum SchoolClassTab {
+  Receipts = 0,
+  Stock = 1,
+  Imports = 2
+};

@@ -2,6 +2,7 @@ using skestock.Application.Common.Caching;
 using skestock.Application.Common.Security;
 using skestock.Application.Features.GoodsReceipts.Models;
 using StockCacheConstants = skestock.Application.Features.Stock.CacheConstants;
+using StatisticsCacheConstants = skestock.Application.Features.Statistics.CacheConstants;
 
 namespace skestock.Application.Features.GoodsReceipts.Commands.CreateGoodsReceipt;
 
@@ -33,6 +34,7 @@ public class CreateGoodsReceiptCommand : IRequest<Result<GoodsReceiptDto>>, ICac
     public IReadOnlyCollection<string> Tags =>
         [
             CacheConstants.GoodsReceiptListTag,
+            StatisticsCacheConstants.BuildClassGoodsReceiptCostTag(ClassId),
             StockCacheConstants.BuildClassTag(ClassId),
             ..Lines.Select(l => l.LocationId).Distinct().Select(locationId => StockCacheConstants.BuildTag(ClassId, locationId))
         ];
