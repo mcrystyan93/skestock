@@ -33,6 +33,13 @@ export class HeaderContainer {
     });
   }
 
+  public openAnalytics() {
+    const classId = this.classId();
+    if (classId) {
+      void this._router.navigate(['/class-analytics'], { queryParams: { classId } });
+    }
+  }
+
   public close() {
     this._router.navigate(['school-classes']);
   }

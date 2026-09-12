@@ -4,6 +4,7 @@ using skestock.Application.Features.GoodsReceipts.Models;
 using CategoryCacheConstants = skestock.Application.Features.Categories.CacheConstants;
 using ItemCacheConstants = skestock.Application.Features.Items.CacheConstants;
 using StockCacheConstants = skestock.Application.Features.Stock.CacheConstants;
+using StatisticsCacheConstants = skestock.Application.Features.Statistics.CacheConstants;
 
 namespace skestock.Application.Features.GoodsReceipts.Commands.ConfirmGoodsReceiptImport;
 
@@ -57,6 +58,7 @@ public class ConfirmGoodsReceiptImportCommand : IRequest<Result<GoodsReceiptDto>
         [
             CacheConstants.GoodsReceiptListTag,
             CacheConstants.GoodsReceiptImportListTag,
+            StatisticsCacheConstants.BuildClassGoodsReceiptCostTag(ClassId),
             ItemCacheConstants.ItemListTag,
             CategoryCacheConstants.CategoryListTag,
             StockCacheConstants.BuildClassTag(ClassId),

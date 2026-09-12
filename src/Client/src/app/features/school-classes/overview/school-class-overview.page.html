@@ -13,10 +13,11 @@
                      [validationErrors]="store.goodsReceiptsValidationErrors()"
                      class="mx-4" />
 
-    <ske-school-class-overview-goods-receipts-tab [classId]="store.schoolClass()?.id ?? null" />
+    <ske-school-class-overview-goods-receipts-tab [classId]="store.schoolClass()?.id ?? null"
+                                                  [receiptId]="store.receiptIdQueryParam()" />
   </nz-tab>
   <nz-tab>
-    <ske-stock-list [classId]="store.schoolClass()?.id ?? null"></ske-stock-list>
+    <ske-stock-list [classId]="store.schoolClass()?.id ?? null" />
   </nz-tab>
   <nz-tab>
     <ske-school-class-overview-goods-receipt-imports-tab [classId]="store.schoolClass()?.id ?? null" />

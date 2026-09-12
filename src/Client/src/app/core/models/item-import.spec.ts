@@ -21,7 +21,7 @@ describe('item import models', () => {
 
   it('keeps labels and colors aligned for every import status', () => {
     expect(Object.keys(ITEM_IMPORT_STATUS_LABELS)).toEqual(Object.keys(ITEM_IMPORT_STATUS_COLORS));
-    expect(ITEM_IMPORT_STATUS_LABELS.pendingReview).toBe('In asteptarea revizuirii');
+    expect(ITEM_IMPORT_STATUS_LABELS.pendingReview).toBe('In asteptare');
     expect(ITEM_IMPORT_STATUS_COLORS.confirmed).toBe('success');
   });
 });

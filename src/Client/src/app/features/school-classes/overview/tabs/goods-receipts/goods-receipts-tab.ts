@@ -15,6 +15,7 @@ import { ColumnFilter } from '@ske/models';
     <ske-goods-receipts-table [items]="store.goodsReceipts()"
                               [filter]="store.filter()"
                               [loading]="store.goodsReceiptsLoading()"
+                              [expandedReceiptId]="receiptId()"
                               [hasNextPage]="store.hasGoodsReceiptsNextPage()"
                               [isLoadingMore]="store.isLoadingMoreGoodsReceipts()"
                               (onFilterChange)="store.loadGoodsReceipts($event)"
@@ -24,16 +25,23 @@ import { ColumnFilter } from '@ske/models';
 })
 export class GoodsReceiptsTab {
   public readonly classId = input.required<string | null>();
+  public readonly receiptId = input<string | null>(null);
   public readonly store = inject(SchoolClassOverviewStore);
 
   private readonly _classIdEffectRef = effect(() => {
     const classIdValue = this.classId();
+    const receiptIdValue = this.receiptId();
 
     if (isNil(classIdValue))
       return;
 
     untracked(() => {
-      this.store.loadGoodsReceipts({ ...this.store.filter(), ...{ filters: [this.getClassIdFilter(classIdValue)] } });
+      const filters = [
+        this.getClassIdFilter(classIdValue),
+        ...(receiptIdValue ? [this.getReceiptIdFilter(receiptIdValue)] : [])
+      ];
+
+      this.store.loadGoodsReceipts({ ...this.store.filter(), filters });
     });
   });
 
@@ -43,6 +51,15 @@ export class GoodsReceiptsTab {
       operator: 'equals',
       fieldType: 'number',
       field: 'classId'
+    };
+  }
+
+  private getReceiptIdFilter(receiptId: string): ColumnFilter {
+    return {
+      value: receiptId,
+      operator: 'equals',
+      fieldType: 'number',
+      field: 'id'
     };
   }
 }

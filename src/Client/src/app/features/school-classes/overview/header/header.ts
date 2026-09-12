@@ -45,5 +45,6 @@ export class Header {
 
   public selectedTabIndex = model<number>(0);
   public onAddGoodsReceipt = output<void>();
+  public onAnalytics = output<void>();
   public onClose = output<void>();
 }

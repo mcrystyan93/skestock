@@ -9,14 +9,17 @@ import { pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
 import { withSchoolClassSummaryFeature } from './school-class-summary.feature';
 import { withGoodReceiptsFeature } from '@ske/shared/goods-receipts';
+import { withQueryParamsSync } from '@ske/routes';
 
 type SchoolClassOverviewState = {
   schoolClass: Partial<SchoolClassDto>;
   selectedTabIndex: number;
+  receiptIdQueryParam: string | null;
 };
 const initialState: SchoolClassOverviewState = {
   schoolClass: {},
-  selectedTabIndex: 0
+  selectedTabIndex: 0,
+  receiptIdQueryParam: null
 };
 
 export const SchoolClassOverviewStore = signalStore(
@@ -25,6 +28,23 @@ export const SchoolClassOverviewStore = signalStore(
   withProblemDetailsFeature('schoolClass'),
   withSchoolClassSummaryFeature(),
   withGoodReceiptsFeature(),
+  withQueryParamsSync({
+    key: 'tab',
+    getValue: (store) => () => store.selectedTabIndex(),
+    setValue: (store, value) => patchState(store, { selectedTabIndex: value }),
+    parse: (raw) => {
+      const parsed = parseInt(raw ?? '0', 10);
+      return isNaN(parsed) ? 0 : parsed;
+    },
+    serialize: (value) => value.toString()
+  }),
+  withQueryParamsSync({
+    key: 'receiptId',
+    getValue: (store) => () => store.receiptIdQueryParam(),
+    setValue: (store, value) => patchState(store, { receiptIdQueryParam: value }),
+    parse: (raw) => raw ?? null,
+    serialize: (value) => value ?? ''
+  }),
   withProps(() => ({
     schoolClassHttp: inject(SchoolClassesHttp)
   })),
