@@ -1,6 +1,6 @@
 import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CategoryListState } from '../services/category-list.store';
-import { CategoryDto, CategoryImportBatchDto, GetAllCategoriesRequest } from '@ske/models';
+import { CategoryDto, GetAllCategoriesRequest } from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { Header } from './header/header';
 import {
@@ -61,13 +61,6 @@ export class CategoriesPage implements OnInit, OnDestroy {
       nzCentered: true,
       nzMaskClosable: false
     });
-
-    modalRef.afterClose.pipe(takeUntilDestroyed(this._destroyRef)).subscribe((result: CategoryImportBatchDto | unknown) => {
-      this.importStore.reload();
-
-      if (this.isBatchImportResult(result))
-        this.openCategoryImportReview(result.id);
-    });
   }
 
   private openCategoryImportReview(importId: string) {
@@ -83,15 +76,6 @@ export class CategoriesPage implements OnInit, OnDestroy {
       this.store.reload();
       this.importStore.reload();
     });
-  }
-
-  private isBatchImportResult(result: unknown): result is CategoryImportBatchDto {
-    return typeof result === 'object'
-      && result !== null
-      && 'id' in result
-      && 'files' in result
-      && Array.isArray(result.files)
-      && typeof result.id === 'string';
   }
 
   public ngOnInit() {

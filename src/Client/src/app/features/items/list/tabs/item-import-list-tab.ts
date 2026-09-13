@@ -2,7 +2,7 @@ import { Component, inject, output } from '@angular/core';
 import { ErrorAlert } from '@ske/shared/errors';
 import { ItemImportBatchListItemDto } from '@ske/models';
 import { ItemImportState } from '@ske/shared/items';
-import { ItemImportFilterContainer } from '../filter/item-import-filter-container';
+import { ItemImportFilterContainer } from '../filter/import/item-import-filter-container';
 import { ItemImportTableContainer } from '../tables/import/table-container';
 
 @Component({

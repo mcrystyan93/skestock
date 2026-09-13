@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { ErrorAlert } from '@ske/shared/errors';
-import { FilterContainer } from '../filter/filter-container';
-import { Table } from '../table/table';
+import { FilterContainer } from '../filter/regular/filter-container';
+import { Table } from '../tables/regular/table';
 import { GetAllItemsRequest, ItemDto, ProblemDetails, ValidationProblemDetails } from '@ske/models';
 
 @Component({

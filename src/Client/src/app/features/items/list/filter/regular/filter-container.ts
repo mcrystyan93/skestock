@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { GetAllItemsRequest } from '@ske/models';
-import { ItemListState } from '../../services/item-list.store';
+import { ItemListState } from '../../../services/item-list.store';
 import { NzCardComponent } from 'ng-zorro-antd/card';
 import { FilterForm } from './filter-form';
 

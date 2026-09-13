@@ -112,21 +112,21 @@
             <nz-icon nzType="icons:pencil"></nz-icon>
             Editeaza
           </button>
-          <button nz-button
-                  [nzDanger]="item.isActive"
-                  nzType="link"
-                  type="button"
-                  [nzLoading]="togglingItemId() === item.id"
-                  [attr.aria-label]="item.isActive ? 'Dezactiveaza' : 'Activeaza'"
-                  (click)="onToggleActive.emit(item)">
-            @if (item.isActive) {
-              <nz-icon nzType="icons:ban"></nz-icon>
-              Dezactiveaza
-            } @else {
-              <nz-icon nzType="icons:check"></nz-icon>
-              Activeaza
-            }
-          </button>
+<!--          <button nz-button-->
+<!--                  [nzDanger]="item.isActive"-->
+<!--                  nzType="link"-->
+<!--                  type="button"-->
+<!--                  [nzLoading]="togglingItemId() === item.id"-->
+<!--                  [attr.aria-label]="item.isActive ? 'Dezactiveaza' : 'Activeaza'"-->
+<!--                  (click)="onToggleActive.emit(item)">-->
+<!--            @if (item.isActive) {-->
+<!--              <nz-icon nzType="icons:ban"></nz-icon>-->
+<!--              Dezactiveaza-->
+<!--            } @else {-->
+<!--              <nz-icon nzType="icons:check"></nz-icon>-->
+<!--              Activeaza-->
+<!--            }-->
+<!--          </button>-->
         </div>
       </td>
     </tr>

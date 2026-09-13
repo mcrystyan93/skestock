@@ -63,26 +63,25 @@
         {{ category.lastModifiedByName }}
       </td>
       <td>
-        <div class="flex items-center">
-          <button nz-button
-                  nzType="link"
-                  type="button"
-                  [attr.aria-label]="'Editeaza'"
-                  (click)="onEdit.emit(category)">
-            <nz-icon nzType="icons:pencil"></nz-icon>
-            Editeaza
-          </button>
-          <button nz-button
-                  nzDanger
-                  nzType="link"
-                  type="button"
-                  [nzLoading]="deletingCategoryId() === category.id"
-                  [attr.aria-label]="'Sterge'"
-                  (click)="onDelete.emit(category)">
-            <nz-icon nzType="icons:trash-can"></nz-icon>
-            Dezactiveaza
-          </button>
-        </div>
+        <button nz-button
+                nzType="link"
+                type="button"
+                class="px-0!"
+                [attr.aria-label]="'Editeaza'"
+                (click)="onEdit.emit(category)">
+          <nz-icon nzType="icons:pencil"></nz-icon>
+          Editeaza
+        </button>
+        <!--          <button nz-button-->
+        <!--                  nzDanger-->
+        <!--                  nzType="link"-->
+        <!--                  type="button"-->
+        <!--                  [nzLoading]="deletingCategoryId() === category.id"-->
+        <!--                  [attr.aria-label]="'Sterge'"-->
+        <!--                  (click)="onDelete.emit(category)">-->
+        <!--            <nz-icon nzType="icons:trash-can"></nz-icon>-->
+        <!--            Dezactiveaza-->
+        <!--          </button>-->
       </td>
     </tr>
   </ng-template>
