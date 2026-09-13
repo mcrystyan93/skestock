@@ -9,8 +9,10 @@ import { NzUploadFile } from 'ng-zorro-antd/upload';
 import { tap } from 'rxjs';
 import { ErrorAlert } from '@ske/shared/errors';
 import { fileStorageApiEvents, FileStorageState, FileUpload } from '@ske/shared/storage';
-import { CreateItemImportRequest } from '@ske/models';
 import { ItemImportState } from '../../../services/item-import.store';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+
+const NO_FILES_COUNT = 0;
 
 @Component({
   imports: [
@@ -21,7 +23,8 @@ import { ItemImportState } from '../../../services/item-import.store';
     NzSpaceItemDirective,
     NzProgressComponent,
     ErrorAlert,
-    FileUpload
+    FileUpload,
+    NzTypographyComponent
   ],
   selector: 'ske-item-import-modal',
   templateUrl: './item-import-modal.html',
@@ -54,16 +57,20 @@ export class ItemImportModal {
     .pipe(
       takeUntilDestroyed(this._destroyRef),
       tap(({ payload }) => {
-        const requests: CreateItemImportRequest[] = payload.map((file) => ({ fileMetadataId: file.id }));
-        if (requests.length > 0)
-          this.store.createImports(requests);
+        if (this.fileStorage.hasUploadFailures() || payload.length === NO_FILES_COUNT)
+          return;
+
+        this.store.createBatch({
+          fileMetadataIds: payload.map((file) => file.id),
+          clientRequestId: crypto.randomUUID()
+        });
       })
     )
     .subscribe();
 
   private readonly _closeAfterCreate = effect(() => {
-    if (this.store.itemImports().length > 0)
-      this._modalRef.close(this.store.itemImports());
+    if (this.store.itemImportBatch())
+      this._modalRef.close(this.store.itemImportBatch());
   });
 
   public close() {

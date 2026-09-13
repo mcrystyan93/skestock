@@ -4,11 +4,14 @@ import { mapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { EMPTY, pipe, switchMap, tap } from 'rxjs';
 import {
-  ConfirmItemImportRequest,
-  ItemImportConfirmationResultDto,
-  ItemImportReviewDto,
-  ItemImportReviewLineDto,
-  ItemDropdownValue, CategoryDropdownValue
+  CategoryDropdownValue,
+  ConfirmItemImportBatchRequest,
+  ConfirmItemImportBatchResponse,
+  ImportBatchFileDto,
+  ImportBatchHistoryDto,
+  ItemDropdownValue,
+  ItemImportBatchReviewDto,
+  ItemImportReviewLineDto
 } from '@ske/models';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
@@ -16,25 +19,30 @@ import { ItemImportsHttp } from './item-imports.http';
 
 export type ItemImportReviewEditableLine = Omit<ItemImportReviewLineDto, 'matchedCategory' | 'matchedItem'> & {
   rowId: string;
-  item: ItemDropdownValue;
-  category: CategoryDropdownValue;
+  item: ItemDropdownValue | null;
+  category: CategoryDropdownValue | null;
 };
 
 type ItemImportReviewState = {
   importId: string | null;
-  review: ItemImportReviewDto | null;
+  review: ItemImportBatchReviewDto | null;
   lines: ItemImportReviewEditableLine[];
-  confirmation: ItemImportConfirmationResultDto | null;
+  files: ImportBatchFileDto[];
+  history: ImportBatchHistoryDto[];
+  confirmation: ConfirmItemImportBatchResponse | null;
 };
 
 const initialState: ItemImportReviewState = {
   importId: null,
   review: null,
   lines: [],
+  files: [],
+  history: [],
   confirmation: null
 };
 
 const nextRowId = () => crypto.randomUUID();
+const BATCH_REVIEW_POLL_INTERVAL_MS = 2000;
 
 export const ItemImportReviewState = signalStore(
   withState(initialState),
@@ -49,28 +57,39 @@ export const ItemImportReviewState = signalStore(
         tap((importId) => {
           store.clearReviewErrors();
           store.setReviewLoading();
-          patchState(store, { importId, confirmation: null });
+          patchState(store, {
+            importId,
+            review: null,
+            lines: [],
+            files: [],
+            history: [],
+            confirmation: null
+          });
         }),
-        switchMap((importId) => http.getById(importId).pipe(
-          mapResponse({
-            next: (review) => {
-              patchState(store, {
-                review,
-                lines: review.suggestions.map((line) => ({
-                  ...line,
-                  item: line.matchedItem ?? null,
-                  category: line.matchedCategory ?? null,
-                  rowId: nextRowId()
-                }))
-              });
-              store.setReviewLoaded();
-            },
-            error: (error) => {
-              store.handleReviewError(error);
-              store.setReviewLoaded();
-            }
-          })
-        ))
+        switchMap((importId) =>
+          http.getBatchById(importId).pipe(mapResponse({
+              next: (review) => {
+                patchState(store, {
+                  review,
+                  lines: review.suggestions.map((line) => ({
+                    ...line,
+                    item: line.matchedItem ?? null,
+                    category: line.matchedCategory ?? null,
+                    rowId: nextRowId()
+                  })),
+                  files: review.files,
+                  history: review.history
+                });
+                
+                store.setReviewLoaded();
+              },
+              error: (error) => {
+                store.handleReviewError(error);
+                store.setReviewLoaded();
+              }
+            })
+          )
+        )
       )
     );
 
@@ -88,7 +107,7 @@ export const ItemImportReviewState = signalStore(
             return EMPTY;
           }
 
-          const request: ConfirmItemImportRequest = {
+          const request: ConfirmItemImportBatchRequest = {
             items: lines.map((line) => ({
               sku: line.sku,
               itemId: line.item?.id ?? '',
@@ -99,7 +118,7 @@ export const ItemImportReviewState = signalStore(
             }))
           };
 
-          return http.confirm(importId, request).pipe(
+          return http.confirmBatch(importId, request).pipe(
             mapResponse({
               next: (confirmation) => {
                 patchState(store, { confirmation });

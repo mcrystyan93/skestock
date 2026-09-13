@@ -7,17 +7,23 @@ import { ItemImportReviewState } from '../../../services/item-import-review.stor
 import { ItemImportReviewTable } from './item-import-review-table';
 import { ErrorAlert } from '@ske/shared/errors';
 import { isNil } from 'lodash-es';
+import { NzTagComponent } from 'ng-zorro-antd/tag';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
+import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
+import { NzTimelineComponent, NzTimelineItemComponent } from 'ng-zorro-antd/timeline';
+import { DatePipe } from '@angular/common';
 
 @Component({
   imports: [FormsModule, NzButtonComponent, NzModalFooterDirective,
-    NzModalTitleDirective, NzSpaceComponent, NzSpaceItemDirective, ItemImportReviewTable, ErrorAlert],
+    NzModalTitleDirective, NzSpaceComponent, NzSpaceItemDirective, ItemImportReviewTable, ErrorAlert, NzTagComponent, NzTypographyComponent, NzIconDirective, NzTabComponent, NzTabsComponent, NzTimelineComponent, NzTimelineItemComponent, DatePipe],
   selector: 'ske-item-import-review-modal',
   templateUrl: './item-import-review-modal.html',
   providers: [ItemImportReviewState]
 })
 export class ItemImportReviewModal {
   private readonly _modalRef = inject(NzModalRef);
-  private readonly _data = inject<{ importId: string }>(NZ_MODAL_DATA);
+  private readonly _importId = inject<string>(NZ_MODAL_DATA);
   private readonly _linesTable = viewChild(ItemImportReviewTable);
 
   public readonly store = inject(ItemImportReviewState);
@@ -27,7 +33,7 @@ export class ItemImportReviewModal {
   });
 
   constructor() {
-    this.store.load(this._data.importId);
+    this.store.load(this._importId);
   }
 
   public async save() {

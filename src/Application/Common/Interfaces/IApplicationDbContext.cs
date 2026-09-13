@@ -12,7 +12,8 @@ public interface IApplicationDbContext
     DbSet<ClassBalance> ClassBalances { get; }
     DbSet<FileMetadata> FileMetadata { get; }
     DbSet<Item> Items { get; }
-    DbSet<ItemImport> ItemImports { get; }
+    DbSet<ItemImportBatch> ItemImportBatches { get; }
+    DbSet<ItemImportBatchFile> ItemImportBatchFiles { get; }
     DbSet<Location> Locations { get; }
     DbSet<SchoolClass> SchoolClasses { get; }
     DbSet<StockBatch> StockBatches { get; }

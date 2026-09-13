@@ -13,8 +13,10 @@ import {
   FileStorageState,
   FileUpload
 } from '@ske/shared/storage';
-import { CreateCategoryImportRequest } from '@ske/models';
 import { CategoryImportState } from '../../../services/category-import.store';
+
+const NO_FILES_COUNT = 0;
+const SINGLE_FILE_COUNT = 1;
 
 @Component({
   imports: [
@@ -62,11 +64,18 @@ export class CategoryImportModal {
     .pipe(
       takeUntilDestroyed(this._destroyRef),
       tap(({ payload }) => {
-        const requests: CreateCategoryImportRequest[] = payload
-          .map((file) => ({ fileMetadataId: file.id }));
+        if (this.fileStorage.hasUploadFailures() || payload.length === NO_FILES_COUNT)
+          return;
 
-        if (requests.length > 0)
-          this.store.createImports(requests);
+        if (payload.length === SINGLE_FILE_COUNT) {
+          this.store.createImports([{ fileMetadataId: payload[0].id }]);
+          return;
+        }
+
+        this.store.createBatch({
+          fileMetadataIds: payload.map((file) => file.id),
+          clientRequestId: crypto.randomUUID()
+        });
       })
     )
     .subscribe();
@@ -76,6 +85,8 @@ export class CategoryImportModal {
 
     if (categoryImports.length > 0)
       this._modalRef.close(categoryImports);
+    else if (this.store.categoryImportBatch())
+      this._modalRef.close(this.store.categoryImportBatch());
   });
 
   public close() {

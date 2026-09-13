@@ -1,6 +1,7 @@
 <div *nzModalTitle>Importa articole</div>
 
-<p class="mb-4 text-sm text-gray-600">
+<p nz-typography
+   nzType="secondary">
   Incarca documentele cu articolele care vor fi analizate automat.
 </p>
 
@@ -13,14 +14,19 @@
                [nzFormat]="progressFormat" />
 
   @if (fileStorage.currentFileName(); as currentFileName) {
-    <p class="mt-2 text-sm text-gray-500">Se incarca {{ currentFileName }}</p>
+    <p nz-typography
+       nzType="secondary">Se incarca {{ currentFileName }}</p>
   }
 
   @if (fileStorage.hasUploadFailures()) {
-    <p class="mt-2 text-sm text-red-500">Fisiere ce nu au putut fi incarcate:</p>
-    <ul class="text-sm text-red-500">
+    <p nz-typography
+       nzType="danger">Fisiere ce nu au putut fi incarcate:</p>
+    <ul>
       @for (failedFile of fileStorage.failedFiles(); track failedFile.name) {
-        <li>{{ failedFile.name }}</li>
+        <li nz-typography
+            nzType="danger">
+          {{ failedFile.name }}
+        </li>
       }
     </ul>
   }

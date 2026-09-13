@@ -8,9 +8,9 @@ export const realtimeEventNames = {
   itemUpdated: 'ItemUpdated',
   itemDisabled: 'ItemDisabled',
   itemEnabled: 'ItemEnabled',
-  itemImportCreated: 'ItemImportCreated',
-  itemImportProcessed: 'ItemImportProcessed',
-  itemImportConfirmed: 'ItemImportConfirmed',
+  itemImportBatchCreated: 'ItemImportBatchCreated',
+  itemImportBatchProcessed: 'ItemImportBatchProcessed',
+  itemImportBatchConfirmed: 'ItemImportBatchConfirmed',
   goodsReceiptImportCreated: 'GoodsReceiptImportCreated',
   goodsReceiptImportProcessed: 'GoodsReceiptImportProcessed',
   goodsReceiptImportConfirmed: 'GoodsReceiptImportConfirmed'

@@ -61,7 +61,7 @@ export const ItemListState = signalStore(
       realtimeEvents.itemUpdated,
       realtimeEvents.itemDisabled,
       realtimeEvents.itemEnabled,
-      realtimeEvents.itemImportConfirmed
+      realtimeEvents.itemImportBatchConfirmed
     ).pipe(tap(() => store.reload()))
   }))
 );

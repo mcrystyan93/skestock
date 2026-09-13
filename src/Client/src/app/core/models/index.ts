@@ -10,6 +10,7 @@ export * from './item-import';
 export * from './location';
 export * from './school-class';
 export * from './goods-receipt';
+export * from './import-batch';
 export * from './stock-batch';
 export * from './stock';
 export * from './storage';

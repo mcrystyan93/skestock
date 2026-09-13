@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { GetAllItemImportsRequest } from '@ske/models';
+import { GetAllItemImportBatchesRequest } from '@ske/models';
 import { NzCardComponent } from 'ng-zorro-antd/card';
 import { ItemImportState } from '@ske/shared/items';
 import { ItemImportFilterForm } from './item-import-filter-form';
@@ -12,7 +12,7 @@ import { ItemImportFilterForm } from './item-import-filter-form';
 export class ItemImportFilterContainer {
   public readonly store = inject(ItemImportState);
 
-  public onFilterChange(filter: GetAllItemImportsRequest) {
+  public onFilterChange(filter: GetAllItemImportBatchesRequest) {
     this.store.load(filter);
   }
 }

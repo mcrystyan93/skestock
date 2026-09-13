@@ -118,6 +118,13 @@ public static class DependencyInjection
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        // Multi-file import-batch limits (max files/size). Configuration section is optional -
+        // ImportBatchOptions' property defaults apply for any value not overridden.
+        builder.Services.AddOptions<ImportBatchOptions>()
+            .BindConfiguration(Services.ImportBatchSettings)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
 #pragma warning disable EXTEXP0001
         builder.Services.AddHttpClient<OpenAiDocumentExtractionClient>(client =>
             {

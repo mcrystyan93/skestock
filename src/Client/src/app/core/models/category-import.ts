@@ -1,5 +1,10 @@
 import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
 import type { CategoryDto } from './category';
+import type {
+  ImportBatchFileDto,
+  ImportBatchHistoryDto,
+  ImportBatchStatus
+} from './import-batch';
 
 export type CategoryImportStatus = 'processing' | 'pendingReview' | 'confirmed' | 'failed';
 
@@ -7,10 +12,30 @@ export type CreateCategoryImportRequest = {
   fileMetadataId: string;
 };
 
+export type CreateCategoryImportBatchRequest = {
+  fileMetadataIds: string[];
+  clientRequestId?: string;
+};
+
 export type CategoryImportDto = {
   id: string;
   fileMetadataId: string;
   status: CategoryImportStatus;
+  uploadedAt: string;
+  processedAt?: string | null;
+  errorMessage?: string | null;
+};
+
+export type CategoryImportBatchFileDto = ImportBatchFileDto;
+export type CategoryImportBatchStatus = ImportBatchStatus;
+
+export type CategoryImportBatchDto = {
+  id: string;
+  status: CategoryImportBatchStatus;
+  clientRequestId?: string | null;
+  attemptCount: number;
+  files: CategoryImportBatchFileDto[];
+  history: ImportBatchHistoryDto[];
   uploadedAt: string;
   processedAt?: string | null;
   errorMessage?: string | null;
@@ -120,6 +145,19 @@ export type CategoryImportReviewDto = {
   suggestions: CategoryImportSuggestionDto[];
 };
 
+export type CategoryImportBatchReviewDto = {
+  id: string;
+  status: CategoryImportBatchStatus;
+  clientRequestId?: string | null;
+  attemptCount: number;
+  errorMessage?: string | null;
+  uploadedAt: string;
+  processedAt?: string | null;
+  files: CategoryImportBatchFileDto[];
+  history: ImportBatchHistoryDto[];
+  suggestions: CategoryImportSuggestionDto[];
+};
+
 export type ConfirmCategoryImportRequest = {
   names: string[];
 };
@@ -127,6 +165,20 @@ export type ConfirmCategoryImportRequest = {
 export type ConfirmCategoryImportResponse = {
   importId: string;
   status: CategoryImportStatus;
+  categories: Array<{
+    id: string;
+    name: string;
+    created: boolean;
+  }>;
+};
+
+export type ConfirmCategoryImportBatchRequest = {
+  names: string[];
+};
+
+export type ConfirmCategoryImportBatchResponse = {
+  batchId: string;
+  status: CategoryImportBatchStatus;
   categories: Array<{
     id: string;
     name: string;

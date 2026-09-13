@@ -1,10 +1,9 @@
 import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ItemListState } from '../services/item-list.store';
-import { GetAllItemsRequest, ItemDto } from '@ske/models';
+import { GetAllItemsRequest, ItemDto, ItemImportBatchDto, ItemImportBatchListItemDto } from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { Header } from './header/header';
 import { ItemDetailModal, ItemImportModal, ItemImportReviewModal, ItemImportState } from '@ske/shared/items';
-import { ItemImportListItemDto } from '@ske/models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { realtimeGroups, SignalRGroupManagerStore } from '@ske/signalr';
 import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
@@ -52,19 +51,28 @@ export class ItemsPage implements OnInit, OnDestroy {
   }
 
   public onImport() {
-    const modalRef = this._modalService.create({
+    this._modalService.create({
       nzContent: ItemImportModal,
       nzCentered: true,
       nzMaskClosable: false
     });
 
-    modalRef.afterClose.pipe(takeUntilDestroyed(this._destroyRef)).subscribe(() => this.importStore.reload());
+    // modalRef.afterClose.pipe(takeUntilDestroyed(this._destroyRef)).subscribe((result: ItemImportBatchDto | unknown) => {
+    //   this.importStore.reload();
+    //
+    //   if (this.isBatchImportResult(result))
+    //     this.openItemImportReview(result.id);
+    // });
   }
 
-  public onReview(itemImport: ItemImportListItemDto) {
+  public onReview(itemImport: ItemImportBatchListItemDto) {
+    this.openItemImportReview(itemImport.id);
+  }
+
+  private openItemImportReview(importId: string) {
     const modalRef = this._modalService.create({
       nzContent: ItemImportReviewModal,
-      nzData: { importId: itemImport.id },
+      nzData: importId,
       nzWidth: '95vw',
       nzCentered: true,
       nzMaskClosable: false
@@ -78,12 +86,12 @@ export class ItemsPage implements OnInit, OnDestroy {
 
   public ngOnInit() {
     this._signalRGroupManager.join(realtimeGroups.itemsList);
-    this._signalRGroupManager.join(realtimeGroups.itemImportsList);
+    this._signalRGroupManager.join(realtimeGroups.itemImportBatchesList);
   }
 
   public ngOnDestroy() {
     this._signalRGroupManager.leave(realtimeGroups.itemsList);
-    this._signalRGroupManager.leave(realtimeGroups.itemImportsList);
+    this._signalRGroupManager.leave(realtimeGroups.itemImportBatchesList);
   }
 
   private openItemModal(item: ItemDto | null = null) {

@@ -1,28 +1,36 @@
 import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
 import type { CategoryDropdownValue } from './category';
 import type { ItemDropdownValue } from './item';
+import type {
+  ImportBatchFileDto,
+  ImportBatchHistoryDto,
+  ImportBatchStatus
+} from './import-batch';
 
-export type ItemImportStatus = 'processing' | 'pendingReview' | 'confirmed' | 'failed';
-
-export type CreateItemImportRequest = {
-  fileMetadataId: string;
+export type CreateItemImportBatchRequest = {
+  fileMetadataIds: string[];
+  clientRequestId?: string;
 };
 
-export type ItemImportDto = {
+export type ItemImportBatchFileDto = ImportBatchFileDto;
+export type ItemImportBatchStatus = ImportBatchStatus;
+
+export type ItemImportBatchDto = {
   id: string;
-  status: ItemImportStatus;
-  fileMetadataId: string;
-  blobPath: string;
+  status: ItemImportBatchStatus;
+  clientRequestId?: string | null;
+  attemptCount: number;
+  files: ItemImportBatchFileDto[];
+  history: ImportBatchHistoryDto[];
   uploadedAt: string;
   processedAt?: string | null;
   errorMessage?: string | null;
 };
 
-export type ItemImportListItemDto = {
+export type ItemImportBatchListItemDto = {
   id: string;
-  status: ItemImportStatus;
-  fileMetadataId: string;
-  blobPath: string;
+  status: ItemImportBatchStatus;
+  files: ItemImportBatchFileDto[];
   errorMessage?: string | null;
   uploadedByName?: string | null;
   uploadedAt: string;
@@ -30,14 +38,14 @@ export type ItemImportListItemDto = {
   createdDate: string;
 };
 
-export type GetAllItemImportsRequest = BasePaginationFilter & {
+export type GetAllItemImportBatchesRequest = BasePaginationFilter & {
   filters: ColumnFilter[];
 };
 
-export function buildItemImportListFilter(
-  currentFilter: GetAllItemImportsRequest,
-  partialFilter: Partial<GetAllItemImportsRequest>
-): GetAllItemImportsRequest {
+export function buildItemImportBatchListFilter(
+  currentFilter: GetAllItemImportBatchesRequest,
+  partialFilter: Partial<GetAllItemImportBatchesRequest>
+): GetAllItemImportBatchesRequest {
   return {
     ...currentFilter,
     ...partialFilter,
@@ -47,8 +55,8 @@ export function buildItemImportListFilter(
   };
 }
 
-export type ItemImportTableColumn =
-  | 'blobPath'
+export type ItemImportBatchTableColumn =
+  | 'files'
   | 'status'
   | 'uploadedByName'
   | 'uploadedAt'
@@ -56,8 +64,8 @@ export type ItemImportTableColumn =
   | 'errorMessage'
   | 'createdDate';
 
-export const ITEM_IMPORT_TABLE_COLUMNS: TableColumnDefinition<ItemImportTableColumn> = {
-  blobPath: { label: 'Fisier', value: 'blobPath', fieldType: 'string' },
+export const ITEM_IMPORT_BATCH_TABLE_COLUMNS: TableColumnDefinition<ItemImportBatchTableColumn> = {
+  files: { label: 'Fisiere', value: 'files', fieldType: 'string' },
   status: { label: 'Stare', value: 'status', fieldType: 'string' },
   uploadedByName: { label: 'Incarcat de', value: 'uploadedByName', fieldType: 'string' },
   uploadedAt: { label: 'Data incarcare', value: 'uploadedAt', fieldType: 'date' },
@@ -66,14 +74,14 @@ export const ITEM_IMPORT_TABLE_COLUMNS: TableColumnDefinition<ItemImportTableCol
   createdDate: { label: 'Data creare', value: 'createdDate', fieldType: 'date' }
 };
 
-export const ITEM_IMPORT_STATUS_LABELS: Record<ItemImportStatus, string> = {
+export const ITEM_IMPORT_BATCH_STATUS_LABELS: Record<ItemImportBatchStatus, string> = {
   processing: 'Se proceseaza',
   pendingReview: 'In asteptare',
   confirmed: 'Confirmat',
   failed: 'Esuat'
 };
 
-export const ITEM_IMPORT_STATUS_COLORS: Record<ItemImportStatus, string> = {
+export const ITEM_IMPORT_BATCH_STATUS_COLORS: Record<ItemImportBatchStatus, string> = {
   processing: 'processing',
   pendingReview: 'orange',
   confirmed: 'success',
@@ -93,12 +101,16 @@ export type ItemImportReviewLineDto = {
   matchedItem?: ItemDropdownValue;
 };
 
-export type ItemImportReviewDto = {
+export type ItemImportBatchReviewDto = {
   id: string;
-  status: ItemImportStatus;
+  status: ItemImportBatchStatus;
+  clientRequestId?: string | null;
+  attemptCount: number;
   errorMessage?: string | null;
   uploadedAt: string;
   processedAt?: string | null;
+  files: ItemImportBatchFileDto[];
+  history: ImportBatchHistoryDto[];
   suggestions: ItemImportReviewLineDto[];
 };
 
@@ -109,13 +121,13 @@ export type ConfirmItemImportRequestItem = Omit<
   itemId: string;
 };
 
-export type ConfirmItemImportRequest = {
+export type ConfirmItemImportBatchRequest = {
   items: ConfirmItemImportRequestItem[];
 };
 
-export type ItemImportConfirmationResultDto = {
-  importId: string;
-  status: ItemImportStatus;
+export type ConfirmItemImportBatchResponse = {
+  batchId: string;
+  status: ItemImportBatchStatus;
   items: Array<{
     id: string;
     sku?: string | null;

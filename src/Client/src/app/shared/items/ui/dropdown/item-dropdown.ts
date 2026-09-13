@@ -158,9 +158,24 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
       return 'Se încarcă articolul…';
 
     if (this.store.selectedItemUnavailable())
-      return `Articol indisponibil`;
+      return `Articol indisponibil (ID ${item.id})`;
 
     return item.name ? this.itemLabel(item) : 'Se încarcă articolul…';
+  });
+
+  public readonly selectedItemStatus = computed(() => {
+    const item = this.value();
+
+    if (!item?.id)
+      return '';
+
+    if (this.store.selectedItemLoading())
+      return 'Se încarcă articolul selectat.';
+
+    if (this.store.selectedItemUnavailable())
+      return `Articolul cu ID ${item.id} nu este disponibil.`;
+
+    return '';
   });
 
   public loadMore() {

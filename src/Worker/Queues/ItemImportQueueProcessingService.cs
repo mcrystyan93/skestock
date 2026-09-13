@@ -6,6 +6,7 @@ using FluentResults;
 using Mediator;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using skestock.Application.Common.Exceptions;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Queues;
 using skestock.Domain.Queues;
@@ -25,7 +26,7 @@ public class ItemImportQueueProcessingService(
     private readonly TimeSpan _pollInterval = TimeSpan.FromSeconds(5);
     private const int BatchSize = 10;
     private const int MaxRetries = 5;
-    private const int VisibilityTimeoutSeconds = 600;
+    private const int VisibilityTimeoutSeconds = 1200;
     private const int MaxDequeueCount = 5;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -132,6 +133,13 @@ public class ItemImportQueueProcessingService(
         {
             // race: another instance processed this message concurrently — safe to treat as done
             logger.LogInformation("Message {Id} processed concurrently by another instance", envelope.MessageId);
+            await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
+        }
+        catch (ImportBatchProcessingInProgressException)
+        {
+            // Another delivery owns the batch lease. This message is redundant; deleting it leaves
+            // the owning delivery responsible for completing or retrying the batch.
+            logger.LogInformation("Import batch for message {Id} is already being processed", envelope.MessageId);
             await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
         }
         catch (Exception ex)

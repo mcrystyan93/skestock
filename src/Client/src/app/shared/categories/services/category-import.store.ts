@@ -4,8 +4,10 @@ import { mapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import {
   buildCategoryImportListFilter,
+  CategoryImportBatchDto,
   CategoryImportDto,
   CategoryImportListItemDto,
+  CreateCategoryImportBatchRequest,
   CreateCategoryImportRequest,
   GetAllCategoryImportsRequest,
   PAGINATION_PAGE_SIZE,
@@ -20,6 +22,7 @@ import { realtimeEvents } from '@ske/signalr';
 
 type CategoryImportStateModel = {
   categoryImports: CategoryImportDto[];
+  categoryImportBatch: CategoryImportBatchDto | null;
   categoryImportListItems: CategoryImportListItemDto[];
   categoryImportListPaginationData: PaginatedResponseData | null;
   categoryImportListFilter: GetAllCategoryImportsRequest;
@@ -28,6 +31,7 @@ type CategoryImportStateModel = {
 
 const initialState: CategoryImportStateModel = {
   categoryImports: [],
+  categoryImportBatch: null,
   categoryImportListItems: [],
   categoryImportListPaginationData: null,
   categoryImportListFilter: {
@@ -59,7 +63,7 @@ export const CategoryImportState = signalStore(
         tap(() => {
           store.clearCategoryImportErrors();
           store.setCategoryImportLoading();
-          patchState(store, { categoryImports: [] });
+          patchState(store, { categoryImports: [], categoryImportBatch: null });
         }),
         concatMap((requests) => from(requests).pipe(
           concatMap((request) => store.categoryImportsHttp.create(request)),
@@ -68,6 +72,27 @@ export const CategoryImportState = signalStore(
         mapResponse({
           next: (categoryImports) => {
             patchState(store, { categoryImports });
+            store.setCategoryImportLoaded();
+          },
+          error: (error) => {
+            store.handleCategoryImportError(error);
+            store.setCategoryImportLoaded();
+          }
+        })
+      )
+    );
+
+    const createBatch = rxMethod<CreateCategoryImportBatchRequest>(
+      pipe(
+        tap(() => {
+          store.clearCategoryImportErrors();
+          store.setCategoryImportLoading();
+          patchState(store, { categoryImports: [], categoryImportBatch: null });
+        }),
+        concatMap((request) => store.categoryImportsHttp.createBatch(request)),
+        mapResponse({
+          next: (categoryImportBatch) => {
+            patchState(store, { categoryImportBatch });
             store.setCategoryImportLoaded();
           },
           error: (error) => {
@@ -148,7 +173,7 @@ export const CategoryImportState = signalStore(
 
     const reload = () => load(store.categoryImportListFilter());
 
-    return { createImports, load, loadMore, reload };
+    return { createImports, createBatch, load, loadMore, reload };
   }),
   withEventHandlers((store, events = inject(Events)) => ({
     categoryImportChanges: events.on(

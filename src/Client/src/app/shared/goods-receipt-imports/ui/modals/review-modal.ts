@@ -3,15 +3,17 @@ import { NZ_MODAL_DATA, NzModalFooterDirective, NzModalRef, NzModalTitleDirectiv
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { isNil } from 'lodash-es';
-import { buildConfirmRequest, ReviewStore } from '../../services/review.store';
+import {
+  buildConfirmRequest,
+  GoodsReceiptImportReviewTarget,
+  ReviewStore
+} from '../../services/review.store';
 import { ReviewLinesTable } from '../review-lines-table/review-lines-table';
 import { ReviewInfo } from '../review-lines-table/review-info/review-info';
 import { NzDividerComponent } from 'ng-zorro-antd/divider';
 import { ErrorAlert } from '@ske/shared/errors';
 
-export type ReviewModalData = {
-  importId: string;
-};
+export type ReviewModalData = GoodsReceiptImportReviewTarget;
 
 @Component({
   imports: [
@@ -49,7 +51,7 @@ export class ReviewModal {
   });
 
   constructor() {
-    this.store.load(this._modalData.importId);
+    this.store.load(this._modalData);
   }
 
   public close() {

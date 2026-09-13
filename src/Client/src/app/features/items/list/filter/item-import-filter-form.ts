@@ -1,5 +1,5 @@
 import { Component, effect, input, linkedSignal, output } from '@angular/core';
-import { GetAllItemImportsRequest } from '@ske/models';
+import { GetAllItemImportBatchesRequest } from '@ske/models';
 import { form, FormField, submit } from '@angular/forms/signals';
 import { FormsModule } from '@angular/forms';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
@@ -18,8 +18,8 @@ import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 })
 export class ItemImportFilterForm {
   public readonly loading = input.required<boolean>();
-  public readonly filter = input.required<GetAllItemImportsRequest>();
-  public readonly onFilterChange = output<GetAllItemImportsRequest>();
+  public readonly filter = input.required<GetAllItemImportBatchesRequest>();
+  public readonly onFilterChange = output<GetAllItemImportBatchesRequest>();
 
   private _initialFilterEmitted = false;
   private readonly _formModel = linkedSignal({
@@ -37,7 +37,7 @@ export class ItemImportFilterForm {
   });
 
   public async onSubmit() {
-    let validFilter: GetAllItemImportsRequest | null = null;
+    let validFilter: GetAllItemImportBatchesRequest | null = null;
     const valid = await submit(this.filterForm, async () => {
       validFilter = this.buildFilterCriteria();
     });
@@ -50,7 +50,7 @@ export class ItemImportFilterForm {
     void this.onSubmit();
   }
 
-  private buildFilterCriteria(): GetAllItemImportsRequest {
+  private buildFilterCriteria(): GetAllItemImportBatchesRequest {
     return { ...this.filter(), searchTerm: this.filterForm().value().searchTerm };
   }
 }

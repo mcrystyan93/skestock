@@ -1,10 +1,60 @@
-<div *nzModalTitle>Revizuire import articole</div>
+<div *nzModalTitle>
+  <nz-space>
+    <span *nzSpaceItem>
+      Revizuire import articole
+    </span>
+    @if (store.review(); as review) {
+      <nz-tag *nzSpaceItem
+              [nzColor]="review.status === 'pendingReview' ? 'blue' : (review.status === 'confirmed' ? 'green' : 'red')">
+        {{ review.status }}
+      </nz-tag>
+    }
+  </nz-space>
+
+</div>
 
 <ske-error-alert [problemDetail]="store.reviewProblemDetail()"
                  [validationErrors]="store.reviewValidationErrors()" />
+<nz-tabs>
+  <nz-tab nzTitle="Rezumat">
+    @if (store.review(); as review) {
+      @if (store.files().length > 0) {
+        <p nz-typography>Fisiere procesate</p>
+        <div class="flex gap-2 mb-2">
+          @for (file of store.files(); track file.fileMetadataId) {
+            <nz-tag [nzColor]="'geekblue'">
+              <nz-space class="p-1">
+                <nz-icon *nzSpaceItem
+                         nzType="icons:file"></nz-icon>
+                <strong *nzSpaceItem
+                        nz-typography>{{ file.originalName }}</strong>
+              </nz-space>
+            </nz-tag>
+          }
+        </div>
+      }
+      @if (review.errorMessage; as errorMessage) {
+        <p nz-typography
+           nzType="danger">{{ errorMessage }}</p>
+      }
+    }
 
-<ske-item-import-review-table [lines]="store.lines()"
-                              [loading]="store.reviewLoading()" />
+    <ske-item-import-review-table [lines]="store.lines()"
+                                  [loading]="store.reviewLoading()" />
+  </nz-tab>
+  <nz-tab nzTitle="Istoric">
+    @if (store.history().length > 0) {
+      <nz-timeline nzReverse>
+        @for (entry of store.history(); track $index) {
+          <nz-timeline-item>
+            <p >{{ entry.status }} - incercarea {{ entry.attempt }}</p>
+            <p >{{ entry.createdAtUtc | date:'short' }}</p>
+          </nz-timeline-item>
+        }
+      </nz-timeline>
+    }
+  </nz-tab>
+</nz-tabs>
 
 <div *nzModalFooter>
   <nz-space>
@@ -19,7 +69,7 @@
             nzType="primary"
             type="button"
             [nzLoading]="store.reviewConfirmLoading()"
-            [disabled]="store.reviewLoading() || !store.lines().length"
+            [disabled]="store.reviewLoading() || store.review()?.status !== 'pendingReview' || !store.lines().length"
             (click)="save()">Confirma si creeaza articolele
     </button>
   </nz-space>
