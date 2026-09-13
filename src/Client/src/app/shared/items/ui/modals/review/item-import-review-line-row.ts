@@ -1,11 +1,12 @@
 import { Component, computed, input } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
-import { ItemDropdown, ItemImportReviewEditableLine } from '@ske/shared/items';
+import { ItemDropdown } from '../../dropdown/item-dropdown';
 import { NzTableCellDirective } from 'ng-zorro-antd/table';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
 import { NzFormControlComponent, NzFormItemComponent } from 'ng-zorro-antd/form';
 import { ItemDto } from '@ske/models';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+import { ItemImportReviewEditableLine } from '../../../services/item-import-review.store';
 
 const ITEM_DROPDOWN_PLACEHOLDER = 'Alege un produs';
 const CATEGORY_PLACEHOLDER = 'Selectează un articol';
