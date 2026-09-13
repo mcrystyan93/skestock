@@ -1,9 +1,14 @@
 import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CategoryListState } from '../services/category-list.store';
-import { CategoryDto, GetAllCategoriesRequest } from '@ske/models';
+import { CategoryDto, CategoryImportBatchDto, GetAllCategoriesRequest } from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { Header } from './header/header';
-import { CategoryDetailModal, CategoryImportModal, CategoryImportState } from '@ske/shared/categories';
+import {
+  CategoryDetailModal,
+  CategoryImportModal,
+  CategoryImportReviewModal,
+  CategoryImportState
+} from '@ske/shared/categories';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { realtimeGroups, SignalRGroupManagerStore } from '@ske/signalr';
 import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
@@ -27,6 +32,7 @@ import { CategoryImportListTab } from './tabs/category-import-list-tab';
 })
 export class CategoriesPage implements OnInit, OnDestroy {
   public readonly store = inject(CategoryListState);
+  public readonly importStore = inject(CategoryImportState);
   public readonly selectedTabIndex = signal(0);
 
   private readonly _modalService = inject(NzModalService);
@@ -50,11 +56,42 @@ export class CategoriesPage implements OnInit, OnDestroy {
   }
 
   public onImport() {
-    this._modalService.create({
+    const modalRef = this._modalService.create({
       nzContent: CategoryImportModal,
       nzCentered: true,
       nzMaskClosable: false
     });
+
+    modalRef.afterClose.pipe(takeUntilDestroyed(this._destroyRef)).subscribe((result: CategoryImportBatchDto | unknown) => {
+      this.importStore.reload();
+
+      if (this.isBatchImportResult(result))
+        this.openCategoryImportReview(result.id);
+    });
+  }
+
+  private openCategoryImportReview(importId: string) {
+    const modalRef = this._modalService.create({
+      nzContent: CategoryImportReviewModal,
+      nzData: { importId, isBatch: true },
+      nzWidth: '720px',
+      nzCentered: true,
+      nzMaskClosable: false
+    });
+
+    modalRef.afterClose.pipe(takeUntilDestroyed(this._destroyRef)).subscribe(() => {
+      this.store.reload();
+      this.importStore.reload();
+    });
+  }
+
+  private isBatchImportResult(result: unknown): result is CategoryImportBatchDto {
+    return typeof result === 'object'
+      && result !== null
+      && 'id' in result
+      && 'files' in result
+      && Array.isArray(result.files)
+      && typeof result.id === 'string';
   }
 
   public ngOnInit() {

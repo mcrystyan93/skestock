@@ -14,7 +14,7 @@ public static class RealtimeEvents
     public const string ItemUpdated = "ItemUpdated";
     public const string ItemDisabled = "ItemDisabled";
     public const string ItemEnabled = "ItemEnabled";
-    public const string ItemImportCreated = "ItemImportCreated";
-    public const string ItemImportProcessed = "ItemImportProcessed";
-    public const string ItemImportConfirmed = "ItemImportConfirmed";
+    public const string ItemImportBatchCreated = "ItemImportBatchCreated";
+    public const string ItemImportBatchProcessed = "ItemImportBatchProcessed";
+    public const string ItemImportBatchConfirmed = "ItemImportBatchConfirmed";
 }

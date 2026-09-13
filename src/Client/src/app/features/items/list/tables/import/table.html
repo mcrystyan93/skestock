@@ -14,7 +14,7 @@
           [nzScroll]="{x: dimensions.width, y: dimensions.height}">
   <thead>
   <tr>
-    <th>{{ columns.blobPath.label }}</th>
+    <th>{{ columns.files.label }}</th>
     <th nzWidth="170px">{{ columns.status.label }}</th>
     <th nzWidth="200px">{{ columns.uploadedByName.label }}</th>
     <th nzWidth="170px">{{ columns.uploadedAt.label }}</th>
@@ -28,7 +28,7 @@
   <ng-template nz-virtual-scroll
                let-itemImport>
     <tr>
-      <td>{{ itemImport.blobPath }}</td>
+      <td>{{ fileNames(itemImport) }}</td>
       <td>
         <nz-tag [nzColor]="statusColor(itemImport.status)">{{ statusLabel(itemImport.status) }}</nz-tag>
       </td>
@@ -41,18 +41,31 @@
         <button type="button"
                 nz-button
                 nzType="link"
-                (click)="downloadFile.emit(itemImport)">
-          <nz-icon nzType="icons:download"></nz-icon>
-          Descarca
-        </button>
-        <button type="button"
-                nz-button
-                nzType="link"
                 [disabled]="itemImport.status !== 'pendingReview'"
                 (click)="review.emit(itemImport)">
           <nz-icon nzType="icons:eye"></nz-icon>
           Revizuieste
         </button>
+        <button type="button"
+                nz-button
+                nzType="link"
+                nz-dropdown
+                [nzDropdownMenu]="menu"
+                [attr.aria-label]="'Actiuni pentru importul ' + itemImport.id">
+          <nz-icon nzType="icons:files"></nz-icon>
+          Descarca fisierele
+        </button>
+        <nz-dropdown-menu #menu="nzDropdownMenu">
+          <ul nz-menu>
+            @for (file of itemImport.files; track file.fileMetadataId) {
+              <li nz-menu-item
+                  (click)="downloadFile.emit(file)">
+                <nz-icon nzType="icons:download"></nz-icon>
+                Descarca {{ file.originalName }}
+              </li>
+            }
+          </ul>
+        </nz-dropdown-menu>
       </td>
     </tr>
   </ng-template>

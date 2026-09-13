@@ -19,84 +19,89 @@ public static class ItemErrors
     }
 }
 
-public static class ItemImportErrors
+public static class ItemImportBatchErrors
 {
-    public sealed class FileMetadataNotConfirmed : Error
+    public sealed class ItemImportBatchNotFound : Error
     {
-        public const string ErrorCode = "item_imports.file_not_confirmed";
+        public const string ErrorCode = "item_import_batches.not_found";
 
-        public FileMetadataNotConfirmed(Guid fileMetadataId)
-            : base($"File metadata with id '{fileMetadataId}' was not found or is not confirmed.")
-        {
-            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
-            Metadata.Add(ErrorMetadataKeys.Title, "File upload not confirmed");
-            Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
-            Metadata.Add(ErrorMetadataKeys.Params,
-                new Dictionary<string, object> { ["fileMetadataId"] = fileMetadataId });
-        }
-    }
-
-    public sealed class ItemImportNotFound : Error
-    {
-        public const string ErrorCode = "item_imports.not_found";
-
-        public ItemImportNotFound(Guid itemImportId) : base($"Item import with id '{itemImportId}' was not found.")
+        public ItemImportBatchNotFound(Guid batchId)
+            : base($"Item import batch with id '{batchId}' was not found.")
         {
             Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status404NotFound);
-            Metadata.Add(ErrorMetadataKeys.Title, "Item import not found");
+            Metadata.Add(ErrorMetadataKeys.Title, "Item import batch not found");
             Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
-            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object> { ["itemImportId"] = itemImportId });
+            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object> { ["batchId"] = batchId });
         }
     }
 
-    public sealed class ItemImportNotInReview : Error
+    public sealed class ItemImportBatchNotInReview : Error
     {
-        public const string ErrorCode = "item_imports.not_in_review";
+        public const string ErrorCode = "item_import_batches.not_in_review";
 
-        public ItemImportNotInReview(Guid itemImportId, ItemImportStatus status)
-            : base(
-                $"Item import with id '{itemImportId}' is '{status}' and cannot be confirmed. Only imports pending review can be confirmed.")
+        public ItemImportBatchNotInReview(Guid batchId, ItemImportBatchStatus status)
+            : base($"Item import batch with id '{batchId}' is '{status}' and cannot be confirmed. Only batches pending review can be confirmed.")
         {
             Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
-            Metadata.Add(ErrorMetadataKeys.Title, "Item import not pending review");
+            Metadata.Add(ErrorMetadataKeys.Title, "Item import batch not pending review");
             Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
-            Metadata.Add(ErrorMetadataKeys.Params,
-                new Dictionary<string, object> { ["itemImportId"] = itemImportId, ["status"] = status.ToString() });
+            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object>
+            {
+                ["batchId"] = batchId,
+                ["status"] = status.ToString()
+            });
         }
     }
 
-    public sealed class ItemsNotFound : Error
+    public sealed class ItemsNotFoundInBatch : Error
     {
-        public const string ErrorCode = "item_imports.items_not_found";
+        public const string ErrorCode = "item_import_batches.items_not_found";
 
-        public ItemsNotFound(Guid itemImportId, IReadOnlyCollection<Guid> itemIds)
-            : base($"Item import '{itemImportId}' contains item selections that no longer exist.")
+        public ItemsNotFoundInBatch(Guid batchId, IReadOnlyCollection<Guid> itemIds)
+            : base($"Item import batch '{batchId}' contains item selections that no longer exist.")
         {
             Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status400BadRequest);
             Metadata.Add(ErrorMetadataKeys.Title, "Item not found");
             Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
             Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object>
             {
-                ["itemImportId"] = itemImportId,
+                ["batchId"] = batchId,
                 ["itemIds"] = itemIds
             });
         }
     }
 
-    public sealed class DuplicateItems : Error
+    public sealed class DuplicateItemsInBatch : Error
     {
-        public const string ErrorCode = "item_imports.duplicate_items";
+        public const string ErrorCode = "item_import_batches.duplicate_items";
 
-        public DuplicateItems(Guid itemImportId, IReadOnlyCollection<Guid> itemIds)
-            : base($"Item import '{itemImportId}' selects the same item more than once.")
+        public DuplicateItemsInBatch(Guid batchId, IReadOnlyCollection<Guid> itemIds)
+            : base($"Item import batch '{batchId}' selects the same item more than once.")
         {
             Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status400BadRequest);
             Metadata.Add(ErrorMetadataKeys.Title, "Duplicate item selection");
             Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
             Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object>
             {
-                ["itemImportId"] = itemImportId,
+                ["batchId"] = batchId,
                 ["itemIds"] = itemIds
+            });
+        }
+    }
+
+    public sealed class IdempotencyConflict : Error
+    {
+        public const string ErrorCode = "item_import_batches.idempotency_conflict";
+
+        public IdempotencyConflict(Guid clientRequestId)
+            : base($"Client request id '{clientRequestId}' was already used for a different item import batch.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
+            Metadata.Add(ErrorMetadataKeys.Title, "Idempotency key conflict");
+            Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
+            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object>
+            {
+                ["clientRequestId"] = clientRequestId
             });
         }
     }

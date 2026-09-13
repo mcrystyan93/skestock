@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using skestock.Application.Common.Exceptions;
 using skestock.Application.Common.Models.Options;
+using skestock.Application.Documents.Models;
 using skestock.Application.Documents.Schemas;
 
 namespace skestock.Infrastructure.AI;
@@ -19,17 +20,86 @@ public sealed class OpenAiDocumentExtractionClient(
         string mimeType,
         CancellationToken cancellationToken) where TResult : class
     {
-        var schemaFactory = serviceProvider.GetService<IExtractionSchemaFactory<TResult>>()
-                            ?? throw new InvalidOperationException(
-                                $"No {nameof(IExtractionSchemaFactory<TResult>)} registered for {typeof(TResult).Name}");
+        var schemaFactory = GetSchemaFactory<TResult>();
+        var schema = await schemaFactory.Create(cancellationToken);
+        var base64 = await ToBase64Async(stream, cancellationToken);
 
+        var content = new JsonArray
+        {
+            new JsonObject
+            {
+                ["type"] = "input_file",
+                ["filename"] = "document",
+                ["file_data"] = $"data:{mimeType};base64,{base64}"
+            },
+            new JsonObject
+            {
+                ["type"] = "input_text",
+                ["text"] = schemaFactory.Prompt
+            }
+        };
+
+        var requestBody = BuildRequestBody<TResult>(content, schema);
+
+        return await SendAsync<TResult>(requestBody, cancellationToken);
+    }
+
+    /// <summary>
+    /// Extracts from several files in one Responses API call: each file becomes its own named
+    /// <c>input_file</c> content item alongside a single shared <c>input_text</c> prompt, so the
+    /// model sees every file in the same turn and can merge its suggestions into one
+    /// <typeparamref name="TResult"/>. Preserves the same request/response shape as the single-file
+    /// overload above - only the number of <c>input_file</c> content items differs.
+    /// </summary>
+    public async Task<TResult> ExtractAsync<TResult>(
+        IReadOnlyList<DocumentExtractionInput> files,
+        CancellationToken cancellationToken) where TResult : class
+    {
+        Guard.Against.NullOrEmpty(files, message: "At least one file is required for extraction.");
+
+        var schemaFactory = GetSchemaFactory<TResult>();
         var schema = await schemaFactory.Create(cancellationToken);
 
+        var content = new JsonArray();
+        for (var i = 0; i < files.Count; i++)
+        {
+            var file = files[i];
+            var base64 = await ToBase64Async(file.Stream, cancellationToken);
+            var filename = string.IsNullOrWhiteSpace(file.FileName) ? $"document-{i + 1}" : file.FileName;
+
+            content.Add(new JsonObject
+            {
+                ["type"] = "input_file",
+                ["filename"] = filename,
+                ["file_data"] = $"data:{file.MimeType};base64,{base64}"
+            });
+        }
+
+        content.Add(new JsonObject
+        {
+            ["type"] = "input_text",
+            ["text"] = schemaFactory.Prompt
+        });
+
+        var requestBody = BuildRequestBody<TResult>(content, schema);
+
+        return await SendAsync<TResult>(requestBody, cancellationToken);
+    }
+
+    private IExtractionSchemaFactory<TResult> GetSchemaFactory<TResult>() where TResult : class =>
+        serviceProvider.GetService<IExtractionSchemaFactory<TResult>>()
+        ?? throw new InvalidOperationException(
+            $"No {nameof(IExtractionSchemaFactory<TResult>)} registered for {typeof(TResult).Name}");
+
+    private static async Task<string> ToBase64Async(Stream stream, CancellationToken cancellationToken)
+    {
         using var memoryStream = new MemoryStream();
         await stream.CopyToAsync(memoryStream, cancellationToken);
-        var base64 = Convert.ToBase64String(memoryStream.ToArray());
+        return Convert.ToBase64String(memoryStream.ToArray());
+    }
 
-        var requestBody = new JsonObject
+    private JsonObject BuildRequestBody<TResult>(JsonArray content, JsonObject schema) where TResult : class =>
+        new()
         {
             ["model"] = options.Value.Model,
             ["input"] = new JsonArray
@@ -37,20 +107,7 @@ public sealed class OpenAiDocumentExtractionClient(
                 new JsonObject
                 {
                     ["role"] = "user",
-                    ["content"] = new JsonArray
-                    {
-                        new JsonObject
-                        {
-                            ["type"] = "input_file",
-                            ["filename"] = "document",
-                            ["file_data"] = $"data:{mimeType};base64,{base64}"
-                        },
-                        new JsonObject
-                        {
-                            ["type"] = "input_text",
-                            ["text"] = schemaFactory.Prompt
-                        }
-                    }
+                    ["content"] = content
                 }
             },
             ["text"] = new JsonObject
@@ -65,6 +122,9 @@ public sealed class OpenAiDocumentExtractionClient(
             }
         };
 
+    private async Task<TResult> SendAsync<TResult>(JsonObject requestBody, CancellationToken cancellationToken)
+        where TResult : class
+    {
         HttpResponseMessage response;
         try
         {
@@ -112,7 +172,7 @@ public sealed class OpenAiDocumentExtractionClient(
 
             var outputText = payload?["output"]?.AsArray()
                 .SelectMany(item => item?["content"]?.AsArray() ?? [])
-                .FirstOrDefault(content => content?["type"]?.GetValue<string>() == "output_text")
+                .FirstOrDefault(contentItem => contentItem?["type"]?.GetValue<string>() == "output_text")
                 ?["text"]?.GetValue<string>();
 
             if (string.IsNullOrWhiteSpace(outputText))

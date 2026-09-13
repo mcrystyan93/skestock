@@ -54,4 +54,6 @@ public static class Services
     public const string OpenApiSettings = "OpenApiSettings";
     public const string OpenApiKey = "ApiKey";
     public const string OpenApiModel = "Model";
+
+    public const string ImportBatchSettings = "ImportBatch";
 }

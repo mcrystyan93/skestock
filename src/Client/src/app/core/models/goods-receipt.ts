@@ -306,4 +306,3 @@ export function buildGoodsReceiptListFilter(
     sort: prioritizeSort(currentFilter.sort ?? [], partialFilter.sort ?? [])
   };
 }
-

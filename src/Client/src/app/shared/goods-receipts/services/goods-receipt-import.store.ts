@@ -3,12 +3,15 @@ import {rxMethod} from '@ngrx/signals/rxjs-interop';
 import {mapResponse} from '@ngrx/operators';
 import {patchState, signalStore, withMethods, withProps, withState} from '@ngrx/signals';
 import {concatMap, from, pipe, tap, toArray} from 'rxjs';
-import {FileMetadataDto, GoodsReceiptImportDto} from '@ske/models';
+import {
+  FileMetadataDto,
+  GoodsReceiptImportDto
+} from '@ske/models';
 import {withLoadingFeature} from '@ske/shared/loader';
 import {withProblemDetailsFeature} from '@ske/shared/errors';
 import {GoodsReceiptsHttp} from './goods-receipts.http';
 
-export type GoodsReceiptImportBatch = {
+export type GoodsReceiptImportFiles = {
   files: FileMetadataDto[];
   classId: string | null;
 };
@@ -33,7 +36,7 @@ export const GoodsReceiptImportState = signalStore(
     goodsReceiptsHttp: inject(GoodsReceiptsHttp)
   })),
   withMethods((store) => {
-    const createImports = rxMethod<GoodsReceiptImportBatch>(
+    const createImports = rxMethod<GoodsReceiptImportFiles>(
       pipe(
         tap(() => {
           store.clearGoodsReceiptImportErrors();

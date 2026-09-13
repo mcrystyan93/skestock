@@ -14,6 +14,8 @@ import {Events} from '@ngrx/signals/events';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {tap} from 'rxjs';
 
+const NO_FILES_COUNT = 0;
+
 @Component({
   imports: [
     NzModalTitleDirective,
@@ -55,10 +57,14 @@ export class AddGoodsReceiptModal {
   private readonly _uploadSuccessRef = this._events.on(fileStorageApiEvents.uploadSuccess)
     .pipe(
       takeUntilDestroyed(this._destroyRef),
-      tap(({payload}) => this.store.createImports({
-        files: payload,
-        classId: this.modalData().classId
-      }))
+      tap(({payload}) => {
+        const classId = this.modalData().classId;
+
+        if (classId === null || this.fileStorage.hasUploadFailures() || payload.length === NO_FILES_COUNT)
+          return;
+
+        this.store.createImports({files: payload, classId});
+      })
     )
     .subscribe();
 

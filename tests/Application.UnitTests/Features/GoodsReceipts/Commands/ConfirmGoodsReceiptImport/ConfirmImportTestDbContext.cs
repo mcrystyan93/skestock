@@ -18,7 +18,8 @@ public class ConfirmImportTestDbContext(DbContextOptions<ConfirmImportTestDbCont
     public DbSet<CategoryImport> CategoryImports => Set<CategoryImport>();
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
     public DbSet<Item> Items => Set<Item>();
-    public DbSet<ItemImport> ItemImports => Set<ItemImport>();
+    public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();
+    public DbSet<ItemImportBatchFile> ItemImportBatchFiles => Set<ItemImportBatchFile>();
     public DbSet<Location> Locations => Set<Location>();
     public DbSet<SchoolClass> SchoolClasses => Set<SchoolClass>();
     public DbSet<StockBatch> StockBatches => Set<StockBatch>();
@@ -35,7 +36,6 @@ public class ConfirmImportTestDbContext(DbContextOptions<ConfirmImportTestDbCont
     {
         base.OnModelCreating(builder);
 
-        builder.Ignore<ItemImport>();
 
         builder.Ignore<CategoryImport>();
 

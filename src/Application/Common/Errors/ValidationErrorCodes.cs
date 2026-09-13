@@ -51,6 +51,26 @@ public class ValidationErrorCodes
     /// <summary>The counted quantity submitted for a stock adjustment equals the current total, so nothing would change.</summary>
     public const string NoAdjustmentNeeded = "validation.no_adjustment_needed";
 
+    // ── Import batch codes ─────────────────────────────────────────────────
+    /// <summary>The aggregate import must contain at least two files.</summary>
+    public const string TooFewFiles = "validation.too_few_files";
+    /// <summary>The batch contains more files than <c>ImportBatchOptions.MaxFiles</c> allows.</summary>
+    public const string TooManyFiles = "validation.too_many_files";
+    /// <summary>The same FileMetadataId was supplied more than once in the same batch.</summary>
+    public const string DuplicateFile = "validation.duplicate_file";
+    /// <summary>Two selected files have the same completed-content identity within this batch.</summary>
+    public const string DuplicateContent = "validation.duplicate_content";
+    /// <summary>A referenced file is not owned by the caller (its upload was not created by them).</summary>
+    public const string FileNotOwned = "validation.file_not_owned";
+    /// <summary>A referenced file's content type is not in the configured allow-list.</summary>
+    public const string UnsupportedFileType = "validation.unsupported_file_type";
+    /// <summary>A single file exceeds <c>ImportBatchOptions.MaxFileSizeBytes</c>.</summary>
+    public const string FileTooLarge = "validation.file_too_large";
+    /// <summary>The combined size of every file in the batch exceeds <c>ImportBatchOptions.MaxTotalSizeBytes</c>.</summary>
+    public const string BatchTooLarge = "validation.batch_too_large";
+    /// <summary>The estimated base64/provider payload exceeds <c>ImportBatchOptions.MaxEncodedPayloadBytes</c>.</summary>
+    public const string EncodedPayloadTooLarge = "validation.encoded_payload_too_large";
+
     // ── Fallback ───────────────────────────────────────────────────────────
     public const string Unknown = "validation.unknown";
 }

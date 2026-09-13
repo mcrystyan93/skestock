@@ -1,3 +1,4 @@
+import { addEntity, setAllEntities, withEntities } from '@ngrx/signals/entities';
 import { patchState, signalStore, type, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
@@ -11,22 +12,22 @@ import { mapResponse } from '@ngrx/operators';
 import { NzUploadFile } from 'ng-zorro-antd/upload';
 import { eventGroup, injectDispatch } from '@ngrx/signals/events';
 
+const EMPTY_COUNT = 0;
+const COUNT_INCREMENT = 1;
 const PERCENT_MAX = 100;
 
 type FailedUpload = { name: string };
 
 type FileStorageState = {
-  uploadedFiles: FileMetadataDto[];
   failedFiles: FailedUpload[];
   totalCount: number;
   completedCount: number;
   currentFileName: string | null;
 };
 const initialState: FileStorageState = {
-  uploadedFiles: [],
   failedFiles: [],
-  totalCount: 0,
-  completedCount: 0,
+  totalCount: EMPTY_COUNT,
+  completedCount: EMPTY_COUNT,
   currentFileName: null
 };
 export const fileStorageApiEvents = eventGroup({
@@ -48,6 +49,7 @@ function triggerBrowserDownload(blob: Blob, fileName: string): void {
 }
 
 export const FileStorageState = signalStore(
+  withEntities<FileMetadataDto>(),
   withState(initialState),
   withLoadingFeature('upload'),
   withProblemDetailsFeature('upload'),
@@ -58,15 +60,16 @@ export const FileStorageState = signalStore(
     dispatcher: injectDispatch(fileStorageApiEvents)
   })),
   withComputed((store) => ({
+    uploadedFiles: computed(() => store.entities()),
     uploadPercent: computed(() => {
       const total = store.totalCount();
 
-      if (total === 0)
-        return 0;
+      if (total === EMPTY_COUNT)
+        return EMPTY_COUNT;
 
       return Math.round((store.completedCount() / total) * PERCENT_MAX);
     }),
-    hasUploadFailures: computed(() => store.failedFiles().length > 0)
+    hasUploadFailures: computed(() => store.failedFiles().length > EMPTY_COUNT)
   })),
   withMethods((store) => {
     const uploadFiles = rxMethod<Array<NzUploadFile>>(
@@ -74,13 +77,16 @@ export const FileStorageState = signalStore(
         tap((files) => {
           store.setUploadLoading();
           store.clearUploadErrors();
-          patchState(store, {
-            uploadedFiles: [],
-            failedFiles: [],
-            totalCount: files.length,
-            completedCount: 0,
-            currentFileName: null
-          });
+          patchState(
+            store,
+            setAllEntities([] as FileMetadataDto[]),
+            {
+              failedFiles: [],
+              totalCount: files.length,
+              completedCount: EMPTY_COUNT,
+              currentFileName: null
+            }
+          );
         }),
         switchMap((files) =>
           from(files).pipe(
@@ -98,14 +104,13 @@ export const FileStorageState = signalStore(
                   ),
                   tap((fileMetadata) => {
                     patchState(store, {
-                      uploadedFiles: [...store.uploadedFiles(), fileMetadata],
-                      completedCount: store.completedCount() + 1
-                    });
+                      completedCount: store.completedCount() + COUNT_INCREMENT
+                    }, addEntity(fileMetadata));
                   }),
                   catchError(() => {
                     patchState(store, {
                       failedFiles: [...store.failedFiles(), { name: file.name }],
-                      completedCount: store.completedCount() + 1
+                      completedCount: store.completedCount() + COUNT_INCREMENT
                     });
 
                     return of(null);
@@ -120,7 +125,7 @@ export const FileStorageState = signalStore(
 
           const uploaded = store.uploadedFiles();
 
-          if (uploaded.length > 0)
+          if (uploaded.length > EMPTY_COUNT)
             store.dispatcher.uploadSuccess(uploaded);
 
           store.setUploadLoaded();
@@ -130,12 +135,11 @@ export const FileStorageState = signalStore(
 
     const resetUpload = () => {
       patchState(store, {
-        uploadedFiles: [],
         failedFiles: [],
-        totalCount: 0,
-        completedCount: 0,
+        totalCount: EMPTY_COUNT,
+        completedCount: EMPTY_COUNT,
         currentFileName: null
-      });
+      }, setAllEntities([] as FileMetadataDto[]));
       store.clearUploadErrors();
     };
 

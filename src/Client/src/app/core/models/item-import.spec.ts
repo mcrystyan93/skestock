@@ -1,12 +1,12 @@
 import {
-  buildItemImportListFilter,
-  ITEM_IMPORT_STATUS_COLORS,
-  ITEM_IMPORT_STATUS_LABELS
+  buildItemImportBatchListFilter,
+  ITEM_IMPORT_BATCH_STATUS_COLORS,
+  ITEM_IMPORT_BATCH_STATUS_LABELS
 } from './item-import';
 
 describe('item import models', () => {
   it('resets pagination when applying a new list filter', () => {
-    const result = buildItemImportListFilter({
+    const result = buildItemImportBatchListFilter({
       searchTerm: 'old',
       filters: [],
       sort: [{ key: 'createdDate', value: 'descend' }],
@@ -20,8 +20,8 @@ describe('item import models', () => {
   });
 
   it('keeps labels and colors aligned for every import status', () => {
-    expect(Object.keys(ITEM_IMPORT_STATUS_LABELS)).toEqual(Object.keys(ITEM_IMPORT_STATUS_COLORS));
-    expect(ITEM_IMPORT_STATUS_LABELS.pendingReview).toBe('In asteptare');
-    expect(ITEM_IMPORT_STATUS_COLORS.confirmed).toBe('success');
+    expect(Object.keys(ITEM_IMPORT_BATCH_STATUS_LABELS)).toEqual(Object.keys(ITEM_IMPORT_BATCH_STATUS_COLORS));
+    expect(ITEM_IMPORT_BATCH_STATUS_LABELS.pendingReview).toBe('In asteptare');
+    expect(ITEM_IMPORT_BATCH_STATUS_COLORS.confirmed).toBe('success');
   });
 });

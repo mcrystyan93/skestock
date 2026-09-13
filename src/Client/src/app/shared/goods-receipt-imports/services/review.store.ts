@@ -38,6 +38,10 @@ export type ReviewEditableLine = {
   unitPrice: number;
 };
 
+export type GoodsReceiptImportReviewTarget = {
+  importId: string;
+};
+
 /**
  * Payload emitted by the review lines table for a structural mutation (split/remove). It carries
  * the table's current *edited* working copy so the store applies the change on top of unsaved edits
@@ -129,33 +133,36 @@ export const ReviewStore = signalStore(
   withMethods((store) => {
     const http = inject(GoodsReceiptImportsHttp);
 
-    const load = rxMethod<string>(
+    const load = rxMethod<GoodsReceiptImportReviewTarget>(
       pipe(
-        tap((importId) => {
+        tap(({ importId }) => {
           store.clearReviewErrors();
           store.setReviewLoading();
 
-          patchState(store, { importId, confirmedReceipt: null });
+          patchState(store, {
+            importId,
+            review: null,
+            lines: [],
+            confirmedReceipt: null
+          });
         }),
-        switchMap((importId) =>
-          http.getById(importId).pipe(
-            mapResponse({
-              next: (review) => {
-                patchState(store, {
-                  review,
-                  lines: review.lines.map((line, index) => buildEditableLine(line, index)),
-                  supplierReference: review.supplierReference ?? null,
-                  note: ''
-                });
-                store.setReviewLoaded();
-              },
-              error: (error) => {
-                store.handleReviewError(error);
-                store.setReviewLoaded();
-              }
-            })
-          )
-        )
+        switchMap(({ importId }) => http.getById(importId).pipe(
+          mapResponse({
+            next: (review) => {
+              patchState(store, {
+                review,
+                lines: review.lines.map((line, index) => buildEditableLine(line, index)),
+                supplierReference: review.supplierReference ?? null,
+                note: ''
+              });
+              store.setReviewLoaded();
+            },
+            error: (error) => {
+              store.handleReviewError(error);
+              store.setReviewLoaded();
+            }
+          })
+        ))
       )
     );
 

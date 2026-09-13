@@ -44,9 +44,17 @@ public class ApplicationDbContextInitialiser
     {
         try
         {
-            // See https://jasontaylor.dev/ef-core-database-initialisation-strategies
-            // await _context.Database.EnsureDeletedAsync();
-            await _context.Database.EnsureCreatedAsync();
+            if (_context.Database.GetMigrations().Any())
+            {
+                await _context.Database.MigrateAsync();
+            }
+            else
+            {
+                // This repository has no migrations; recreating the schema applies model removals such
+                // as the legacy ItemImports table through the existing supported initialization path.
+                // await _context.Database.EnsureDeletedAsync();
+                await _context.Database.EnsureCreatedAsync();
+            }
         }
         catch (Exception ex)
         {

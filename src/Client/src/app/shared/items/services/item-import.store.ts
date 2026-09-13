@@ -3,13 +3,13 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { mapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { Events, withEventHandlers } from '@ngrx/signals/events';
-import { EMPTY, concatMap, filter, from, map, pipe, switchMap, tap, toArray } from 'rxjs';
+import { EMPTY, concatMap, filter, map, pipe, switchMap, tap } from 'rxjs';
 import {
-  buildItemImportListFilter,
-  CreateItemImportRequest,
-  GetAllItemImportsRequest,
-  ItemImportDto,
-  ItemImportListItemDto,
+  buildItemImportBatchListFilter,
+  CreateItemImportBatchRequest,
+  ItemImportBatchDto,
+  GetAllItemImportBatchesRequest,
+  ItemImportBatchListItemDto,
   PAGINATION_PAGE_SIZE,
   PaginatedResponseData
 } from '@ske/models';
@@ -19,15 +19,15 @@ import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { ItemImportsHttp } from './item-imports.http';
 
 type ItemImportStateModel = {
-  itemImports: ItemImportDto[];
-  itemImportListItems: ItemImportListItemDto[];
+  itemImportBatch: ItemImportBatchDto | null;
+  itemImportListItems: ItemImportBatchListItemDto[];
   itemImportListPaginationData: PaginatedResponseData | null;
-  itemImportListFilter: GetAllItemImportsRequest;
+  itemImportListFilter: GetAllItemImportBatchesRequest;
   itemImportListLoadingMore: boolean;
 };
 
 const initialState: ItemImportStateModel = {
-  itemImports: [],
+  itemImportBatch: null,
   itemImportListItems: [],
   itemImportListPaginationData: null,
   itemImportListFilter: {
@@ -52,20 +52,17 @@ export const ItemImportState = signalStore(
     itemImportListNextCursor: () => store.itemImportListPaginationData()?.nextCursor ?? null
   })),
   withMethods((store) => {
-    const createImports = rxMethod<CreateItemImportRequest[]>(
+    const createBatch = rxMethod<CreateItemImportBatchRequest>(
       pipe(
         tap(() => {
           store.clearItemImportErrors();
           store.setItemImportLoading();
-          patchState(store, { itemImports: [] });
+          patchState(store, { itemImportBatch: null });
         }),
-        concatMap((requests) => from(requests).pipe(
-          concatMap((request) => store.itemImportsHttp.create(request)),
-          toArray()
-        )),
+        concatMap((request) => store.itemImportsHttp.createBatch(request)),
         mapResponse({
-          next: (itemImports) => {
-            patchState(store, { itemImports });
+          next: (itemImportBatch) => {
+            patchState(store, { itemImportBatch });
             store.setItemImportLoaded();
           },
           error: (error) => {
@@ -76,9 +73,9 @@ export const ItemImportState = signalStore(
       )
     );
 
-    const load = rxMethod<GetAllItemImportsRequest>(
+    const load = rxMethod<GetAllItemImportBatchesRequest>(
       pipe(
-        map((data) => buildItemImportListFilter(store.itemImportListFilter(), data)),
+        map((data) => buildItemImportBatchListFilter(store.itemImportListFilter(), data)),
         tap((filter) => {
           store.clearItemImportListErrors();
           store.setItemImportListLoading();
@@ -142,13 +139,13 @@ export const ItemImportState = signalStore(
 
     const reload = () => load(store.itemImportListFilter());
 
-    return { createImports, load, loadMore, reload };
+    return { createBatch, load, loadMore, reload };
   }),
   withEventHandlers((store, events = inject(Events)) => ({
     itemImportChanges: events.on(
-      realtimeEvents.itemImportCreated,
-      realtimeEvents.itemImportProcessed,
-      realtimeEvents.itemImportConfirmed
+      realtimeEvents.itemImportBatchCreated,
+      realtimeEvents.itemImportBatchProcessed,
+      realtimeEvents.itemImportBatchConfirmed
     ).pipe(tap(() => store.reload()))
   }))
 );

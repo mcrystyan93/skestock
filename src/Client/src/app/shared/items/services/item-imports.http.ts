@@ -1,13 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import {
-  ConfirmItemImportRequest,
-  CreateItemImportRequest,
-  GetAllItemImportsRequest,
-  ItemImportConfirmationResultDto,
-  ItemImportDto,
-  ItemImportListItemDto,
-  ItemImportReviewDto,
+  ConfirmItemImportBatchRequest,
+  ConfirmItemImportBatchResponse,
+  CreateItemImportBatchRequest,
+  ItemImportBatchDto,
+  ItemImportBatchReviewDto,
+  GetAllItemImportBatchesRequest,
+  ItemImportBatchListItemDto,
   PaginatedResponse
 } from '@ske/models';
 
@@ -15,19 +15,22 @@ import {
 export class ItemImportsHttp {
   private readonly _httpClient = inject(HttpClient);
 
-  public create(request: CreateItemImportRequest) {
-    return this._httpClient.post<ItemImportDto>('/api/ItemImports', request);
+  public createBatch(request: CreateItemImportBatchRequest) {
+    return this._httpClient.post<ItemImportBatchDto>('/api/ItemImportBatches', request);
   }
 
-  public getAll(request: GetAllItemImportsRequest | Partial<GetAllItemImportsRequest>) {
-    return this._httpClient.post<PaginatedResponse<ItemImportListItemDto>>('/api/ItemImports/get-all', request);
+  public getAll(request: GetAllItemImportBatchesRequest | Partial<GetAllItemImportBatchesRequest>) {
+    return this._httpClient.post<PaginatedResponse<ItemImportBatchListItemDto>>(
+      '/api/ItemImportBatches/get-all',
+      request
+    );
   }
 
-  public getById(id: string) {
-    return this._httpClient.get<ItemImportReviewDto>(`/api/ItemImports/${id}`);
+  public getBatchById(id: string) {
+    return this._httpClient.get<ItemImportBatchReviewDto>(`/api/ItemImportBatches/${id}`);
   }
 
-  public confirm(id: string, request: ConfirmItemImportRequest) {
-    return this._httpClient.post<ItemImportConfirmationResultDto>(`/api/ItemImports/${id}/confirm`, request);
+  public confirmBatch(id: string, request: ConfirmItemImportBatchRequest) {
+    return this._httpClient.post<ConfirmItemImportBatchResponse>(`/api/ItemImportBatches/${id}/confirm`, request);
   }
 }
