@@ -1488,9 +1488,9 @@
     "semantic_hash": "9bf9ba6f4b6fc6e8314c0b11f868879c"
   },
   "src/Client/src/app/core/auth/services/auth.store.ts": {
-    "mtime": 1789320972.041,
-    "seen": 1789322418.3178244,
-    "ast_hash": "86f7d9b20a6f24302ca9a497a126c8cc",
+    "mtime": 1789406157.7237608,
+    "seen": 1789406178.3984208,
+    "ast_hash": "cef1025264355d4283d27ebfcf498b2d",
     "semantic_hash": ""
   },
   "src/Client/src/app/core/layouts/full/full.routes.ts": {
@@ -1620,22 +1620,22 @@
     "semantic_hash": "03dab84e7813ceaa27ccc80a5ef5d25c"
   },
   "src/Client/src/app/core/signalr/index.ts": {
-    "mtime": 1788852485.167,
-    "seen": 1788854927.952931,
-    "ast_hash": "544f8e4ee87b8719e5b1a4c657483c30",
-    "semantic_hash": "544f8e4ee87b8719e5b1a4c657483c30"
+    "mtime": 1789406052.4075925,
+    "seen": 1789406093.2025542,
+    "ast_hash": "13b20c428c054a63905cbd5f5fe4efdb",
+    "semantic_hash": ""
   },
   "src/Client/src/app/core/signalr/provide-signalr.ts": {
-    "mtime": 1788852485.15,
-    "seen": 1788854927.9529314,
-    "ast_hash": "34a21f32df987d195df832945a9561f3",
-    "semantic_hash": "34a21f32df987d195df832945a9561f3"
+    "mtime": 1789406024.1805472,
+    "seen": 1789406093.2025552,
+    "ast_hash": "486258657779d8ee7944fe1c9af92fad",
+    "semantic_hash": ""
   },
   "src/Client/src/app/core/signalr/signalr-bridge.ts": {
-    "mtime": 1788852485.16,
-    "seen": 1788854927.9529347,
-    "ast_hash": "3a09a7f703ef6a7235c80f3553d00294",
-    "semantic_hash": "3a09a7f703ef6a7235c80f3553d00294"
+    "mtime": 1789406108.5966823,
+    "seen": 1789406138.9839365,
+    "ast_hash": "f9311a484251260dd20f0f2c0777dcd3",
+    "semantic_hash": ""
   },
   "src/Client/src/app/core/theme/index.ts": {
     "mtime": 1787755350.964,
@@ -1878,9 +1878,9 @@
     "semantic_hash": "be6488568aa007e206b1039a56468726"
   },
   "src/Client/src/app/shared/categories/ui/dropdown/category-dropdown.ts": {
-    "mtime": 1789022781.93,
-    "seen": 1789035034.5551217,
-    "ast_hash": "78ad077fe5b40f1641bee652f37a751b",
+    "mtime": 1789404000.46,
+    "seen": 1789406093.202607,
+    "ast_hash": "f026afba8c4670ab45d4419a72f14ff7",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/errors/index.ts": {
@@ -2226,9 +2226,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/stock/ui/list/filter/filter-form.ts": {
-    "mtime": 1789321488.116,
-    "seen": 1789322418.3179736,
-    "ast_hash": "60ba572e4fa2d6370e9f0d875569cfb1",
+    "mtime": 1789404473.27,
+    "seen": 1789406093.202663,
+    "ast_hash": "b267b9a38d97fca148bf584860675757",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/stock/ui/list/stock-list.ts": {
@@ -2250,10 +2250,10 @@
     "semantic_hash": "f7670cb376fa71dd8f3859f4e9d0a810"
   },
   "src/Client/src/app/shared/stock/ui/table/table-container.ts": {
-    "mtime": 1788263162.784,
-    "seen": 1788844386.8771906,
-    "ast_hash": "9995788b825773add64f16a96f6ce17c",
-    "semantic_hash": "9995788b825773add64f16a96f6ce17c"
+    "mtime": 1789404111.903,
+    "seen": 1789406093.2026649,
+    "ast_hash": "3a8ea937f942dc139c51b66ac0366386",
+    "semantic_hash": ""
   },
   "src/Client/src/app/shared/stock/ui/table/table.ts": {
     "mtime": 1788869585.764,
@@ -3798,8 +3798,8 @@
     "semantic_hash": "5b973a02eace6b2c3e55adf6fb0701e2"
   },
   "src/Client/src/app/shared/icons/icon-catalog.generated.ts": {
-    "mtime": 1789403611.9896138,
-    "seen": 1789403622.2105694,
+    "mtime": 1789406056.0985982,
+    "seen": 1789406093.2026289,
     "ast_hash": "9f18a0461fd8e197b5b5f0e2f49f1049",
     "semantic_hash": "9f18a0461fd8e197b5b5f0e2f49f1049"
   },
@@ -5220,9 +5220,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/stock/ui/table/table-container.html": {
-    "mtime": 1788259472.437,
-    "seen": 1788861962.6187794,
-    "ast_hash": "370860b1ddce2cfe6f948437350a7904",
+    "mtime": 1789404163.323,
+    "seen": 1789406093.2029674,
+    "ast_hash": "fa1502aa2d7bbe6dd9c03adfe1fcfe4b",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/stock/ui/table/table.html": {

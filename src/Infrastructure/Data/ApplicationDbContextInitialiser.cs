@@ -50,9 +50,8 @@ public class ApplicationDbContextInitialiser
             }
             else
             {
-                // This repository has no migrations; recreating the schema applies model removals such
-                // as the legacy ItemImports table through the existing supported initialization path.
-                 await _context.Database.EnsureDeletedAsync();
+                // This repository has no migrations;
+                // await _context.Database.EnsureDeletedAsync();
                 await _context.Database.EnsureCreatedAsync();
             }
         }
@@ -144,7 +143,7 @@ public class ApplicationDbContextInitialiser
         "Smântână/frișcă",
         "Ouă",
         "Produse lactate fermentate (chefir, sana)",
- 
+
         // Carne și pește
         "Carne de porc",
         "Carne de vită",
@@ -156,7 +155,7 @@ public class ApplicationDbContextInitialiser
         "Fructe de mare",
         "Pește afumat/sărat",
         "Carne tocată",
- 
+
         // Congelate
         "Legume congelate",
         "Fructe congelate",
@@ -167,7 +166,7 @@ public class ApplicationDbContextInitialiser
         "Aluaturi congelate",
         "Cartofi congelați (pommes frites)",
         "Deserturi congelate",
- 
+
         // Fructe și legume proaspete
         "Legume cu frunze (salată, spanac)",
         "Legume rădăcinoase (morcov, sfeclă)",
@@ -179,7 +178,7 @@ public class ApplicationDbContextInitialiser
         "Citrice",
         "Ciuperci",
         "Verdețuri și ierburi aromatice",
- 
+
         // Panificație și cofetărie
         "Pâine albă",
         "Pâine integrală/specială",
@@ -189,7 +188,7 @@ public class ApplicationDbContextInitialiser
         "Prăjituri/torturi",
         "Covrigi/lipii",
         "Batoane de cereale",
- 
+
         // Băuturi
         "Apă plată",
         "Apă minerală",
@@ -201,7 +200,7 @@ public class ApplicationDbContextInitialiser
         "Bere",
         "Vin",
         "Băuturi spirtoase",
- 
+
         // Băcănie/produse de bază
         "Paste făinoase",
         "Orez",
@@ -218,7 +217,7 @@ public class ApplicationDbContextInitialiser
         "Muraturi",
         "Miere și gemuri",
         "Cereale/leguminoase uscate (linte, fasole)",
- 
+
         // Snacksuri și dulciuri
         "Chipsuri",
         "Nuci și semințe",
@@ -226,13 +225,13 @@ public class ApplicationDbContextInitialiser
         "Bomboane",
         "Gumă de mestecat",
         "Popcorn",
- 
+
         // Produse pentru copii
         "Lapte praf/formule",
         "Alimente pentru bebeluși",
         "Scutece",
         "Șervețele umede pentru copii",
- 
+
         // Îngrijire personală
         "Șampon",
         "Balsam de păr",
@@ -244,7 +243,7 @@ public class ApplicationDbContextInitialiser
         "Produse de igienă feminină",
         "Aparate/lame de ras",
         "Produse cosmetice de bază (creme, loțiuni)",
- 
+
         // Curățenie casă
         "Detergent de rufe",
         "Balsam de rufe",
@@ -254,11 +253,10 @@ public class ApplicationDbContextInitialiser
         "Produse de curățat baie/WC",
         "Pungi de gunoi",
         "Șervețele de bucătărie/hârtie igienică",
- 
+
         // Diverse
         "Produse pentru animale de companie",
         "Baterii/consumabile pentru casă"
-
     ];
 
     private async Task SeedCategoriesAsync(Guid administratorIdentityId)
