@@ -14,6 +14,7 @@ import { realtimeGroups, SignalRGroupManagerStore } from '@ske/signalr';
 import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
 import { CategoryListTab } from './tabs/category-list-tab';
 import { CategoryImportListTab } from './tabs/category-import-list-tab';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 
 @Component({
   imports: [
@@ -21,7 +22,8 @@ import { CategoryImportListTab } from './tabs/category-import-list-tab';
     NzTabsComponent,
     NzTabComponent,
     CategoryListTab,
-    CategoryImportListTab
+    CategoryImportListTab,
+    LayoutBreakpoint
   ],
   selector: 'ske-categories-page',
   templateUrl: './categories.page.html',
