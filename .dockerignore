@@ -1,0 +1,13 @@
+.git
+.idea
+.vs
+artifacts
+aspire-output
+graphify-out
+src/Client/.angular
+src/Client/dist
+src/Client/node_modules
+**/bin
+**/obj
+**/*.user
+**/*.suo

@@ -1,0 +1,18 @@
+[Unit]
+Description=skestock Azurite storage emulator
+
+[Container]
+ContainerName=skestock-storage
+Image=mcr.microsoft.com/azure-storage/azurite:3.35.0
+Network=skestock.network
+Volume=skestock-storage-data.volume:/data:Z
+Exec=azurite --location /data --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --skipApiVersionCheck
+PublishPort=0.0.0.0:10000:10000
+PublishPort=0.0.0.0:10001:10001
+PublishPort=0.0.0.0:10002:10002
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

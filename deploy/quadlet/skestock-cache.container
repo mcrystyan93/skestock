@@ -1,0 +1,18 @@
+[Unit]
+Description=skestock Redis cache
+
+[Container]
+ContainerName=skestock-cache
+Image=docker.io/library/redis:8.6
+Network=skestock.network
+Volume=skestock-cache-data.volume:/data:Z
+EnvironmentFile=%h/.config/skestock/production.env
+Entrypoint=/bin/sh
+Exec=-c "exec redis-server --requirepass \"$REDIS_PASSWORD\" --save 60 1"
+PublishPort=127.0.0.1:6379:6379
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

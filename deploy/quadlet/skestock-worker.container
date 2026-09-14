@@ -1,0 +1,17 @@
+[Unit]
+Description=skestock background worker
+Requires=skestock-db.service skestock-cache.service skestock-storage.service
+After=skestock-db.service skestock-cache.service skestock-storage.service
+
+[Container]
+ContainerName=skestock-worker
+Image=localhost/skestock-worker:current
+Network=skestock.network
+EnvironmentFile=%h/.config/skestock/production.env
+
+[Service]
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=default.target

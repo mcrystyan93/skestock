@@ -3798,8 +3798,8 @@
     "semantic_hash": "5b973a02eace6b2c3e55adf6fb0701e2"
   },
   "src/Client/src/app/shared/icons/icon-catalog.generated.ts": {
-    "mtime": 1789364739.9528902,
-    "seen": 1789364879.332982,
+    "mtime": 1789322406.6483314,
+    "seen": 1789322418.3179219,
     "ast_hash": "9f18a0461fd8e197b5b5f0e2f49f1049",
     "semantic_hash": "9f18a0461fd8e197b5b5f0e2f49f1049"
   },
@@ -25893,24 +25893,6 @@
     "mtime": 1789320676.992,
     "seen": 1789322418.3182673,
     "ast_hash": "4190726257ba64438f5d2b32605971ef",
-    "semantic_hash": ""
-  },
-  "deploy/deploy.sh": {
-    "mtime": 1789364659.931738,
-    "seen": 1789364879.3326132,
-    "ast_hash": "6d6f2b681239693f8aff558f4bd87896",
-    "semantic_hash": ""
-  },
-  ".github/workflows/deploy-production.yml": {
-    "mtime": 1789364659.9237378,
-    "seen": 1789364879.333472,
-    "ast_hash": "33763ddb9787e20f402f83df8fc2665d",
-    "semantic_hash": ""
-  },
-  "deploy/README.md": {
-    "mtime": 1789364628.0686798,
-    "seen": 1789364879.3334777,
-    "ast_hash": "e4c607f6bac458ae507614adfe66b159",
     "semantic_hash": ""
   }
 }

@@ -1,0 +1,17 @@
+[Unit]
+Description=skestock SQL Server
+
+[Container]
+ContainerName=skestock-db
+Image=mcr.microsoft.com/mssql/server:2022-latest
+Network=skestock.network
+Volume=skestock-db-data.volume:/var/opt/mssql:Z
+EnvironmentFile=%h/.config/skestock/production.env
+PublishPort=127.0.0.1:1433:1433
+
+[Service]
+Restart=always
+TimeoutStartSec=900
+
+[Install]
+WantedBy=default.target
