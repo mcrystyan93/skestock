@@ -1,0 +1,18 @@
+[Unit]
+Description=skestock Web API and Angular frontend
+Requires=skestock-db.service skestock-cache.service skestock-storage.service
+After=skestock-db.service skestock-cache.service skestock-storage.service
+
+[Container]
+ContainerName=skestock-webapi
+Image=localhost/skestock-web:current
+Network=skestock.network
+EnvironmentFile=%h/.config/skestock/production.env
+PublishPort=7001:8080
+
+[Service]
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=default.target

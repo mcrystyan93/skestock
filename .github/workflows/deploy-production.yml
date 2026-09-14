@@ -1,0 +1,252 @@
+name: Deploy production
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  NODE_VERSION: "22.x"
+  IMAGE_TAG: sha-${{ github.sha }}
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: src/Client/package-lock.json
+
+      - name: Restore solution
+        run: dotnet restore skestock.slnx
+
+      - name: Build solution
+        run: dotnet build skestock.slnx --configuration Release --no-restore
+
+      - name: Run application unit tests
+        run: dotnet test tests/Application.UnitTests/Application.UnitTests.csproj --configuration Release --no-build
+
+      - name: Install client dependencies
+        working-directory: src/Client
+        run: npm ci
+
+      - name: Run client tests
+        working-directory: src/Client
+        run: npm test -- --watch=false
+
+      - name: Build client
+        working-directory: src/Client
+        run: npm run build -- --configuration production
+
+  publish:
+    name: Build and publish images
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.release.outputs.image_tag }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set release tag
+        id: release
+        run: |
+          set -euo pipefail
+          tag="$IMAGE_TAG"
+          if [[ ! "$tag" =~ ^[a-zA-Z0-9][a-zA-Z0-9._-]*$ ]]; then
+            echo "::error::image_tag must contain only letters, numbers, '.', '_' or '-'"
+            exit 1
+          fi
+          printf 'image_tag=%s\n' "$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push Web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/Web/Dockerfile
+          target: final
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/skestock-web:${{ steps.release.outputs.image_tag }}
+            ghcr.io/${{ github.repository_owner }}/skestock-web:production
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha,scope=skestock-web
+          cache-to: type=gha,mode=max,scope=skestock-web
+          provenance: true
+          sbom: true
+
+      - name: Build and push Worker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/Worker/Dockerfile
+          target: final
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/skestock-worker:${{ steps.release.outputs.image_tag }}
+            ghcr.io/${{ github.repository_owner }}/skestock-worker:production
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha,scope=skestock-worker
+          cache-to: type=gha,mode=max,scope=skestock-worker
+          provenance: true
+          sbom: true
+
+  deploy:
+    name: Deploy to Fedora
+    needs: publish
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+    env:
+      DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+      PUBLIC_ORIGINS: ${{ vars.PUBLIC_ORIGINS }}
+      STORAGE_PUBLIC_HOST: ${{ vars.STORAGE_PUBLIC_HOST }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+      DEPLOY_HEALTH_URL: ${{ vars.DEPLOY_HEALTH_URL }}
+      SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      GHCR_DEPLOY_USERNAME: ${{ secrets.GHCR_DEPLOY_USERNAME }}
+      GHCR_DEPLOY_TOKEN: ${{ secrets.GHCR_DEPLOY_TOKEN }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate production Environment configuration
+        run: |
+          set -euo pipefail
+          test -n "$DEPLOY_HOST" || { echo "::error::Missing vars.DEPLOY_HOST"; exit 1; }
+          test -n "$DEPLOY_USER" || { echo "::error::Missing vars.DEPLOY_USER"; exit 1; }
+          test -n "$PUBLIC_ORIGINS" || { echo "::error::Missing vars.PUBLIC_ORIGINS"; exit 1; }
+          test -n "$STORAGE_PUBLIC_HOST" || { echo "::error::Missing vars.STORAGE_PUBLIC_HOST"; exit 1; }
+          test -n "$OPENAI_MODEL" || { echo "::error::Missing vars.OPENAI_MODEL"; exit 1; }
+          test -n "$DEPLOY_HEALTH_URL" || { echo "::error::Missing vars.DEPLOY_HEALTH_URL"; exit 1; }
+          test -n "$SQL_PASSWORD" || { echo "::error::Missing secrets.SQL_PASSWORD"; exit 1; }
+          test -n "$REDIS_PASSWORD" || { echo "::error::Missing secrets.REDIS_PASSWORD"; exit 1; }
+          test -n "$OPENAI_API_KEY" || { echo "::error::Missing secrets.OPENAI_API_KEY"; exit 1; }
+          test -n "$DEPLOY_SSH_PRIVATE_KEY" || { echo "::error::Missing secrets.DEPLOY_SSH_PRIVATE_KEY"; exit 1; }
+          test -n "$DEPLOY_KNOWN_HOSTS" || { echo "::error::Missing secrets.DEPLOY_KNOWN_HOSTS"; exit 1; }
+          test -n "$GHCR_DEPLOY_USERNAME" || { echo "::error::Missing secrets.GHCR_DEPLOY_USERNAME"; exit 1; }
+          test -n "$GHCR_DEPLOY_TOKEN" || { echo "::error::Missing secrets.GHCR_DEPLOY_TOKEN"; exit 1; }
+
+      - name: Render runtime environment
+        env:
+          IMAGE_TAG: ${{ needs.publish.outputs.image_tag }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+          umask 077
+          runtime_env="$RUNNER_TEMP/skestock-production.env"
+          azurite_account_key="Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
+          image_owner="$(printf '%s' "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')"
+          blob_connection_string="DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=${azurite_account_key};BlobEndpoint=http://${STORAGE_PUBLIC_HOST}:10000/devstoreaccount1"
+          queue_connection_string="DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=${azurite_account_key};QueueEndpoint=http://${STORAGE_PUBLIC_HOST}:10001/devstoreaccount1"
+
+          {
+            printf 'SKESTOCK_IMAGE_TAG=%s\n' "$IMAGE_TAG"
+            printf 'SKESTOCK_WEB_IMAGE=ghcr.io/%s/skestock-web:%s\n' "$image_owner" "$IMAGE_TAG"
+            printf 'SKESTOCK_WORKER_IMAGE=ghcr.io/%s/skestock-worker:%s\n' "$image_owner" "$IMAGE_TAG"
+            printf 'ACCEPT_EULA=Y\n'
+            printf 'MSSQL_PID=Developer\n'
+            printf 'MSSQL_SA_PASSWORD=%s\n' "$SQL_PASSWORD"
+            printf 'REDIS_PASSWORD=%s\n' "$REDIS_PASSWORD"
+            printf 'OpenApiSettings__ApiKey=%s\n' "$OPENAI_API_KEY"
+            printf 'OpenApiSettings__Model=%s\n' "$OPENAI_MODEL"
+            printf 'ASPNETCORE_ENVIRONMENT=Production\n'
+            printf 'ASPNETCORE_HTTP_PORTS=8080\n'
+            printf 'ASPNETCORE_FORWARDEDHEADERS_ENABLED=true\n'
+            printf 'ConnectionStrings__skestockDb=%s\n' "Server=dbserver,1433;User ID=sa;Password=${SQL_PASSWORD};TrustServerCertificate=true;Initial Catalog=skestockDb"
+            printf 'ConnectionStrings__skestock-cache=%s\n' "skestock-cache:6379,password=${REDIS_PASSWORD}"
+            printf 'ConnectionStrings__blobservice=%s\n' "$blob_connection_string"
+            printf 'ConnectionStrings__queues=%s\n' "$queue_connection_string"
+          } > "$runtime_env"
+
+          origin_index=0
+          while IFS= read -r origin; do
+            [ -n "$origin" ] || continue
+            printf 'Cors__AllowedOrigins__%s=%s\n' "$origin_index" "$origin" >> "$runtime_env"
+            origin_index=$((origin_index + 1))
+          done < <(printf '%s' "$PUBLIC_ORIGINS" | tr ',' '\n')
+
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          printf '%s\n' "$DEPLOY_SSH_PRIVATE_KEY" > "$RUNNER_TEMP/skestock_deploy_key"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/skestock_known_hosts"
+          chmod 600 "$RUNNER_TEMP/skestock_deploy_key" "$RUNNER_TEMP/skestock_known_hosts"
+
+      - name: Prepare deployment directories
+        run: |
+          set -euo pipefail
+          ssh_args=(-i "$RUNNER_TEMP/skestock_deploy_key" -o IdentitiesOnly=yes -o UserKnownHostsFile="$RUNNER_TEMP/skestock_known_hosts" -o StrictHostKeyChecking=yes)
+          ssh "${ssh_args[@]}" "$DEPLOY_USER@$DEPLOY_HOST" \
+            'install -d -m 700 "$HOME/.config/skestock" "$HOME/.config/skestock/quadlet" "$HOME/.config/containers/systemd"'
+
+      - name: Upload deployment files
+        run: |
+          set -euo pipefail
+          ssh_args=(-i "$RUNNER_TEMP/skestock_deploy_key" -o IdentitiesOnly=yes -o UserKnownHostsFile="$RUNNER_TEMP/skestock_known_hosts" -o StrictHostKeyChecking=yes)
+          scp "${ssh_args[@]}" "$RUNNER_TEMP/skestock-production.env" \
+            "$DEPLOY_USER@$DEPLOY_HOST:.config/skestock/production.env.new"
+          scp "${ssh_args[@]}" deploy/deploy.sh \
+            "$DEPLOY_USER@$DEPLOY_HOST:.config/skestock/deploy.sh.new"
+          scp "${ssh_args[@]}" deploy/quadlet/* \
+            "$DEPLOY_USER@$DEPLOY_HOST:.config/skestock/quadlet/"
+
+      - name: Log in to GHCR on the Fedora host
+        run: |
+          set -euo pipefail
+          ssh_args=(-i "$RUNNER_TEMP/skestock_deploy_key" -o IdentitiesOnly=yes -o UserKnownHostsFile="$RUNNER_TEMP/skestock_known_hosts" -o StrictHostKeyChecking=yes)
+          printf '%s' "$GHCR_DEPLOY_TOKEN" | ssh "${ssh_args[@]}" "$DEPLOY_USER@$DEPLOY_HOST" \
+            "podman login ghcr.io --username '$GHCR_DEPLOY_USERNAME' --password-stdin"
+
+      - name: Activate release
+        run: |
+          set -euo pipefail
+          ssh_args=(-i "$RUNNER_TEMP/skestock_deploy_key" -o IdentitiesOnly=yes -o UserKnownHostsFile="$RUNNER_TEMP/skestock_known_hosts" -o StrictHostKeyChecking=yes)
+          ssh "${ssh_args[@]}" "$DEPLOY_USER@$DEPLOY_HOST" \
+            'chmod 700 "$HOME/.config/skestock/deploy.sh.new" && bash "$HOME/.config/skestock/deploy.sh.new"'
+
+      - name: Verify deployment
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 30 --retry-delay 2 --retry-connrefused "$DEPLOY_HEALTH_URL"
