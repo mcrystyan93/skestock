@@ -1,48 +1,74 @@
 <nz-layout>
-  <ske-header></ske-header>
+  <ske-header (drawerToggle)="drawerOpen.set(!drawerOpen())"></ske-header>
   <nz-layout>
-    <nz-sider nzCollapsible nzBreakpoint="lg" [nzCollapsedWidth]="0" >
-      <ul nz-menu
-          nzMode="inline">
-<!--        <li nz-menu-item-->
-<!--            nzMatchRouter-->
-<!--            [routerLink]="['/home']">-->
-<!--          <nz-icon nzType="icons:house"-->
-<!--                   class="text-2xl!"></nz-icon>-->
-<!--          <span>Acasa</span>-->
-<!--        </li>-->
-        <li nz-menu-item
-            nzMatchRouter
-            [routerLink]="['/categories']">
-          <nz-icon nzType="icons:list"
-                   class="text-2xl!"></nz-icon>
-          <span>Categorii</span>
-        </li>
-        <li nz-menu-item
-            nzMatchRouter
-            [routerLink]="['/items']">
-          <nz-icon nzType="icons:box"
-                   class="text-2xl!"></nz-icon>
-          <span>Produse</span>
-        </li>
-        <li nz-menu-item
-            nzMatchRouter
-            [routerLink]="['/school-classes']">
-          <nz-icon nzType="icons:school"
-                   class="text-2xl!"></nz-icon>
-          <span>Clase</span>
-        </li>
-        <li nz-menu-item
-            nzMatchRouter
-            [routerLink]="['/class-analytics']">
-          <nz-icon nzType="icons:chart-bar"
-                   class="text-2xl!"></nz-icon>
-          <span>Analiză clase</span>
-        </li>
-      </ul>
-    </nz-sider>
+    <ng-container *skeLayoutBreakpoint="'xl';else:drawerTemplate">
+      <nz-sider>
+        <ng-container *ngTemplateOutlet="menuTemplate"></ng-container>
+      </nz-sider>
+    </ng-container>
+    <ng-template #drawerTemplate>
+      <nz-drawer [nzVisible]="drawerOpen()"
+                 [nzClosable]="false"
+                 nzPlacement="left"
+                 [nzMaskClosable]="true"
+                 [nzCloseOnNavigation]="true"
+                 (nzOnClose)="drawerOpen.set(false)"
+                 [nzBodyStyle]="{ padding: 0, 'padding-top': '64px' }"
+                 nzWrapClassName="menuDrawer"
+                 [nzWidth]="200">
+        <ng-container *nzDrawerContent>
+          <ng-container *ngTemplateOutlet="menuTemplate"></ng-container>
+        </ng-container>
+      </nz-drawer>
+    </ng-template>
+
     <nz-content class="flex!">
       <router-outlet></router-outlet>
     </nz-content>
   </nz-layout>
 </nz-layout>
+
+<ng-template #menuTemplate>
+  <ul nz-menu
+      nzMode="inline">
+    <!--        <li nz-menu-item-->
+    <!--            nzMatchRouter-->
+    <!--            [routerLink]="['/home']">-->
+    <!--          <nz-icon nzType="icons:house"-->
+    <!--                   class="text-2xl!"></nz-icon>-->
+    <!--          <span>Acasa</span>-->
+    <!--        </li>-->
+    <li nz-menu-item
+        nzMatchRouter
+        (click)="drawerOpen.set(false)"
+        [routerLink]="['/categories']">
+      <nz-icon nzType="icons:list"
+               class="text-2xl!"></nz-icon>
+      <span>Categorii</span>
+    </li>
+    <li nz-menu-item
+        nzMatchRouter
+        (click)="drawerOpen.set(false)"
+        [routerLink]="['/items']">
+      <nz-icon nzType="icons:box"
+               class="text-2xl!"></nz-icon>
+      <span>Produse</span>
+    </li>
+    <li nz-menu-item
+        nzMatchRouter
+        (click)="drawerOpen.set(false)"
+        [routerLink]="['/school-classes']">
+      <nz-icon nzType="icons:school"
+               class="text-2xl!"></nz-icon>
+      <span>Clase</span>
+    </li>
+    <li nz-menu-item
+        nzMatchRouter
+        (click)="drawerOpen.set(false)"
+        [routerLink]="['/class-analytics']">
+      <nz-icon nzType="icons:chart-bar"
+               class="text-2xl!"></nz-icon>
+      <span>Analiză clase</span>
+    </li>
+  </ul>
+</ng-template>

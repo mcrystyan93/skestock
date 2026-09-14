@@ -1,5 +1,17 @@
-<nz-header class="pr-4!">
-  <div class="flex h-full items-center justify-end gap-3">
-    <ske-theme-switcher />
+<nz-header class="pr-4! pl-3!">
+  <div class="flex h-full items-center">
+    <ng-container *skeLayoutBreakpoint="'xl';else:menuToggleTemplate"></ng-container>
+    <ng-template #menuToggleTemplate>
+      <button nz-button
+              type="button"
+              nzType="text"
+              (click)="drawerToggle.emit()">
+        <nz-icon nzType="icons:bars"></nz-icon>
+      </button>
+    </ng-template>
+    <div class="grow"></div>
+    <div>
+      <ske-theme-switcher />
+    </div>
   </div>
 </nz-header>
