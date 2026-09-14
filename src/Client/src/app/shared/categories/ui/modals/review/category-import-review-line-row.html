@@ -1,0 +1,30 @@
+@let lineFormSignal = lineForm();
+<td>
+  {{ lineFormSignal().value().name }}
+</td>
+<td>
+  @if (lineFormSignal().value().alreadyExists) {
+    <nz-tag nzColor="green">Categorie existenta</nz-tag>
+  } @else {
+    <nz-tag nzColor="blue">Noua</nz-tag>
+  }
+</td>
+<td>
+  <nz-form-item>
+    <nz-form-control [nzErrorTip]="errorTemplate">
+      <ske-category-dropdown [formField]="lineForm().category"
+                              [allowEdit]="false"
+                              [allowCreate]="true"
+                              [placeholder]="categoryPlaceholder"
+                              [createPrefill]="categoryPrefill()" />
+    </nz-form-control>
+  </nz-form-item>
+</td>
+
+<ng-template #errorTemplate
+             let-control>
+  @let formControl = control.control;
+  @if (formControl.errors?.required; as requiredError) {
+    {{ requiredError.message }}
+  }
+</ng-template>

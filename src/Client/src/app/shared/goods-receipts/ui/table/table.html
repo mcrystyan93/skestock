@@ -1,7 +1,7 @@
 @let dimensions = tableDimensions();
 
 <nz-table #table
-          nzTableLayout="auto"
+          nzTableLayout="fixed"
           [nzData]="itemsVirtualData()"
           [nzVirtualItemSize]="virtualItemSize()"
           [nzVirtualMinBufferPx]="virtualMinBufferPx()"
@@ -14,27 +14,27 @@
           [nzScroll]="{x:dimensions.width, y:dimensions.height}">
   <thead>
   <tr>
-    <th>
+    <th nzWidth="50px">
     </th>
-    <th>
+    <th nzWidth="150px">
       {{ columns.receivedAt.label }}
     </th>
-    <th>
+    <th nzWidth="180px">
       {{ columns.supplierReference.label }}
     </th>
-    <th>
+    <th nzWidth="110px">
       {{ columns.lineCount.label }}
     </th>
-    <th>
+    <th nzWidth="130px">
       {{ columns.totalQuantity.label }}
     </th>
-    <th>
+    <th nzWidth="150px">
       {{ columns.totalAmount.label }}
     </th>
-    <th>
+    <th nzWidth="180px">
       {{ columns.createdByName.label }}
     </th>
-    <th>
+    <th nzWidth="150px">
       {{ columns.createdDate.label }}
     </th>
 <!--    <th>-->

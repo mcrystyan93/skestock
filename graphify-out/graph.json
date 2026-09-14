@@ -16849,7 +16849,7 @@
       "file_type": "code",
       "norm_label": "stockbatchformmodel",
       "source_file": "src/Client/src/app/shared/stock-batches/ui/modals/form.ts",
-      "source_location": "L107"
+      "source_location": "L105"
     },
     {
       "id": "src_client_src_app_shared_stock_batches_ui_modals_form_stockbatchformsubmit",
@@ -16862,7 +16862,7 @@
       "file_type": "code",
       "norm_label": "stockbatchformsubmit",
       "source_file": "src/Client/src/app/shared/stock-batches/ui/modals/form.ts",
-      "source_location": "L116"
+      "source_location": "L114"
     },
     {
       "id": "src_client_src_app_shared_stock_services_stock_adjustment_store_stockadjustmentstate",
@@ -46037,7 +46037,7 @@
       "file_type": "code",
       "norm_label": ".constructor()",
       "source_file": "src/Client/src/app/features/categories/list/tables/regular/table.ts",
-      "source_location": "L33"
+      "source_location": "L42"
     },
     {
       "id": "src_client_src_app_shared_categories_services_category_collection_feature_withcategorycollection",
@@ -54483,7 +54483,7 @@
       "file_type": "code",
       "norm_label": ".decrementquantity()",
       "source_file": "src/Client/src/app/shared/stock-batches/ui/modals/form.ts",
-      "source_location": "L90"
+      "source_location": "L88"
     },
     {
       "id": "src_client_src_app_shared_stock_batches_ui_modals_form_form_incrementquantity",
@@ -54495,7 +54495,7 @@
       "file_type": "code",
       "norm_label": ".incrementquantity()",
       "source_file": "src/Client/src/app/shared/stock-batches/ui/modals/form.ts",
-      "source_location": "L86"
+      "source_location": "L84"
     },
     {
       "id": "src_client_src_app_shared_stock_batches_ui_modals_form_form_submit",
@@ -54507,7 +54507,7 @@
       "file_type": "code",
       "norm_label": ".submit()",
       "source_file": "src/Client/src/app/shared/stock-batches/ui/modals/form.ts",
-      "source_location": "L94"
+      "source_location": "L92"
     },
     {
       "id": "src_client_src_app_shared_stock_services_stock_collection_feature_withstockcollection",
@@ -360870,7 +360870,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/Client/src/app/shared/stock-batches/ui/modals/form.ts",
-      "source_location": "L107",
+      "source_location": "L105",
       "weight": 1.0
     },
     {
@@ -360881,7 +360881,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/Client/src/app/shared/stock-batches/ui/modals/form.ts",
-      "source_location": "L116",
+      "source_location": "L114",
       "weight": 1.0
     },
     {
@@ -372279,7 +372279,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/Client/src/app/features/categories/list/tables/regular/table.ts",
-      "source_location": "L33",
+      "source_location": "L42",
       "weight": 1.0
     },
     {
@@ -374193,7 +374193,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/Client/src/app/shared/stock-batches/ui/modals/form.ts",
-      "source_location": "L86",
+      "source_location": "L84",
       "weight": 1.0
     },
     {
@@ -374204,7 +374204,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/Client/src/app/shared/stock-batches/ui/modals/form.ts",
-      "source_location": "L90",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -374215,7 +374215,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/Client/src/app/shared/stock-batches/ui/modals/form.ts",
-      "source_location": "L94",
+      "source_location": "L92",
       "weight": 1.0
     },
     {
@@ -405039,5 +405039,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "44ae18c2f4a22af83c8440f10320ec5a3f1af750"
+  "built_at_commit": "6c474f245332695863d69b22ae240d5651b36c2d"
 }

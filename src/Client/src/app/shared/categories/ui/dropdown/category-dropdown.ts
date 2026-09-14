@@ -36,6 +36,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
                  class="w-full"
                  [compareWith]="(a, b) => a && b ? a.id === b.id : a === b"
                  (nzOnSearch)="onSearch($event)"
+                 [nzDropdownMatchSelectWidth]="false"
                  [nzDropdownRender]="loadingMoreTemplate"
                  (nzScrollToBottom)="loadMore()">
         @if (value(); as category) {

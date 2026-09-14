@@ -3186,9 +3186,9 @@
     "semantic_hash": "800aedc4c09429efe20e3373c4b749d4"
   },
   "tests/Application.FunctionalTests/Infrastructure/WebApiFactory.cs": {
-    "mtime": 1788890435.8504448,
-    "seen": 1788890474.7777255,
-    "ast_hash": "29fdea87be1750519ddcf2df6969e3e1",
+    "mtime": 1789398484.9105165,
+    "seen": 1789398565.3454084,
+    "ast_hash": "aa57d7b75b6ad0a8568f666ecbaa54aa",
     "semantic_hash": ""
   },
   "tests/Application.UnitTests/Application.UnitTests.csproj": {
@@ -3798,8 +3798,8 @@
     "semantic_hash": "5b973a02eace6b2c3e55adf6fb0701e2"
   },
   "src/Client/src/app/shared/icons/icon-catalog.generated.ts": {
-    "mtime": 1789396018.8044908,
-    "seen": 1789396039.3707926,
+    "mtime": 1789402312.107483,
+    "seen": 1789402328.9984133,
     "ast_hash": "9f18a0461fd8e197b5b5f0e2f49f1049",
     "semantic_hash": "9f18a0461fd8e197b5b5f0e2f49f1049"
   },
@@ -4950,9 +4950,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/core/layouts/full/full.html": {
-    "mtime": 1789320972.051,
-    "seen": 1789322418.3182507,
-    "ast_hash": "9053affae74e1074793385a9e0bb8ba4",
+    "mtime": 1789400927.172,
+    "seen": 1789401052.5153847,
+    "ast_hash": "e89e9d066900a1fee189041db7505535",
     "semantic_hash": ""
   },
   "src/Client/src/app/core/layouts/full/header/header.html": {
@@ -5136,9 +5136,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/goods-receipt-imports/ui/table/table.html": {
-    "mtime": 1788846771.581,
-    "seen": 1788861962.6187718,
-    "ast_hash": "564881d8ca81e7367da68ba805a0e3b6",
+    "mtime": 1789402298.2684612,
+    "seen": 1789402328.9988482,
+    "ast_hash": "c061be1b18f32855ab290f14ba121650",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/goods-receipts/ui/add/add-goods-receipt-modal.html": {
@@ -5148,9 +5148,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/goods-receipts/ui/table/table.html": {
-    "mtime": 1788846779.957,
-    "seen": 1788861962.6187732,
-    "ast_hash": "6c7f1d94a6d9f10d6ed14137bb9b5d49",
+    "mtime": 1789402302.2914674,
+    "seen": 1789402328.9988496,
+    "ast_hash": "2279a779bef66ddf43be3ade65be0f88",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/school-classes/ui/modals/form.html": {
@@ -24738,9 +24738,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/categories/list/tables/regular/table.ts": {
-    "mtime": 1788860247.663,
-    "seen": 1788933221.430219,
-    "ast_hash": "54ee86681023eb2668a9ad7500c78e2f",
+    "mtime": 1789400741.609,
+    "seen": 1789401052.5148203,
+    "ast_hash": "1cc3f2f65da8335acf7d1cbfc7798c85",
     "semantic_hash": ""
   },
   "src/Client/src/app/features/categories/list/tabs/category-import-list-tab.ts": {
@@ -24762,15 +24762,15 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/categories/list/tables/import/table.html": {
-    "mtime": 1789386062.4761338,
-    "seen": 1789386300.6527884,
-    "ast_hash": "b611ea40312650f8449b880236219fc6",
+    "mtime": 1789402298.2494612,
+    "seen": 1789402328.998816,
+    "ast_hash": "3e75a5b54851a7feb8d3d0fe387c8562",
     "semantic_hash": ""
   },
   "src/Client/src/app/features/categories/list/tables/regular/table.html": {
-    "mtime": 1789319008.986,
-    "seen": 1789322418.3182585,
-    "ast_hash": "0faa06d14defb3c89005d02b41e1c898",
+    "mtime": 1789400802.809,
+    "seen": 1789401052.515392,
+    "ast_hash": "016df104520a80788fdf2576ed029a59",
     "semantic_hash": ""
   },
   "src/Client/src/app/features/categories/list/tabs/category-import-list-tab.html": {
@@ -24942,9 +24942,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/items/list/tables/import/table.html": {
-    "mtime": 1789318312.959,
-    "seen": 1789322418.318267,
-    "ast_hash": "84c90d126af02de87e31d24c63a44aac",
+    "mtime": 1789402298.261461,
+    "seen": 1789402328.9988272,
+    "ast_hash": "9b86150a549b1b9f2bb6c94a90f317b6",
     "semantic_hash": ""
   },
   "src/Client/src/app/features/items/list/tabs/item-import-list-tab.html": {
@@ -25608,9 +25608,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/items/list/tables/regular/table.html": {
-    "mtime": 1789320676.992,
-    "seen": 1789322418.3182673,
-    "ast_hash": "4190726257ba64438f5d2b32605971ef",
+    "mtime": 1789402298.254461,
+    "seen": 1789402328.998828,
+    "ast_hash": "eabd0815f6b8da375709768c4c79418b",
     "semantic_hash": ""
   },
   "deploy/deploy.sh": {

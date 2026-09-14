@@ -1,7 +1,7 @@
 @let dimensions = tableDimensions();
 
 <nz-table #table
-          nzTableLayout="auto"
+          nzTableLayout="fixed"
           [nzData]="itemsVirtualData()"
           [nzVirtualItemSize]="virtualItemSize()"
           [nzVirtualMinBufferPx]="virtualMinBufferPx()"
@@ -14,25 +14,26 @@
           [nzScroll]="{x:dimensions.width, y:dimensions.height}">
   <thead>
   <tr>
-    <th>
+    <th [nzWidth]="columnLayout.name.width">
       {{ columns.name.label }}
     </th>
-    <th>
+    <th [nzWidth]="columnLayout.itemCount.width">
       {{ columns.itemCount.label }}
     </th>
-    <th>
+    <th [nzWidth]="columnLayout.createdDate.width">
       {{ columns.createdDate.label }}
     </th>
-    <th>
+    <th [nzWidth]="columnLayout.createdByName.width">
       {{ columns.createdByName.label }}
     </th>
-    <th>
+    <th [nzWidth]="columnLayout.lastModifiedDate.width">
       {{ columns.lastModifiedDate.label }}
     </th>
-    <th>
+    <th [nzWidth]="columnLayout.lastModifiedByName.width">
       {{ columns.lastModifiedByName.label }}
     </th>
-    <th>
+    <th [nzWidth]="columnLayout.actions.width"
+        nzRight>
       Actiuni
     </th>
   </tr>
@@ -43,8 +44,12 @@
     <tr>
       <td>
         <div class="flex gap-2 items-center">
-          <nz-avatar [nzIcon]="category.icon?.fileName ? ('icons:'+category.icon.fileName) : 'icons:box'" />
-          {{ category.name }}
+          <nz-avatar class="shrink-0"
+                     [nzIcon]="category.icon?.fileName ? ('icons:'+category.icon.fileName) : 'icons:box'"/>
+          <span class="min-w-0 flex-1 truncate"
+                [attr.title]="category.name">
+            {{ category.name }}
+          </span>
         </div>
       </td>
       <td>
@@ -62,7 +67,7 @@
       <td>
         {{ category.lastModifiedByName }}
       </td>
-      <td>
+      <td nzRight>
         <button nz-button
                 nzType="link"
                 type="button"

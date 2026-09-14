@@ -31,7 +31,7 @@
              [nzTitle]="cardTitle"
              [nzExtra]="cardExtra">
       <nz-table #table
-                nzTableLayout="auto"
+                nzTableLayout="fixed"
                 [nzTemplateMode]="true"
                 [nzFrontPagination]="false"
                 [nzShowPagination]="false"
@@ -40,25 +40,32 @@
                 class="block overflow-auto">
         <thead>
         <tr>
-          <th nzColumnKey="itemName">
+          <th nzColumnKey="itemName"
+              nzWidth="280px">
             <strong>{{ columns.itemName.label }}</strong>
           </th>
-          <th nzColumnKey="locationName">
+          <th nzColumnKey="locationName"
+              nzWidth="180px">
             <strong>{{ columns.locationName.label }}</strong>
           </th>
-          <th nzColumnKey="unit">
+          <th nzColumnKey="unit"
+              nzWidth="110px">
             <strong>{{ columns.unit.label }}</strong>
           </th>
-          <th nzColumnKey="isPerishable">
+          <th nzColumnKey="isPerishable"
+              nzWidth="150px">
             <strong>{{ columns.isPerishable.label }}</strong>
           </th>
-          <th nzColumnKey="quantity">
+          <th nzColumnKey="quantity"
+              nzWidth="120px">
             <strong>{{ columns.quantity.label }}</strong>
           </th>
-          <th nzColumnKey="isLowStock">
+          <th nzColumnKey="isLowStock"
+              nzWidth="150px">
             <strong>{{ columns.isLowStock.label }}</strong>
           </th>
-          <th nzWidth="100px">
+          <th nzRight
+              nzWidth="140px">
             <strong>Actiuni</strong>
           </th>
         </tr>
@@ -66,7 +73,7 @@
         <tbody>
           @for (item of items; track item.itemId + ':' + item.locationId) {
             <tr>
-              <td>
+              <td nzRight>
                 <div class="flex flex-col">
                   <strong>{{ item.itemName }}</strong>
                   <span nz-typography

@@ -1,4 +1,5 @@
 <nz-table #table
+          nzTableLayout="fixed"
           [nzTemplateMode]="true"
           [nzFrontPagination]="false"
           [nzShowPagination]="false"
@@ -14,7 +15,10 @@
     <th nzWidth="250px">Cantitate</th>
     <th nzWidth="170px">Data expirare</th>
     <th nzWidth="130px">Pret unitar</th>
-    <th nzWidth="90px">Actiuni</th>
+    <th nzRight
+        nzWidth="90px">
+      Actiuni
+    </th>
   </tr>
   </thead>
   <tbody>
