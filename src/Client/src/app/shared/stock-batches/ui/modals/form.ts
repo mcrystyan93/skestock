@@ -1,6 +1,6 @@
 import { Component, input, linkedSignal, signal } from '@angular/core';
 import { CategoryDto, ItemDto, LocationDto } from '@ske/models';
-import { form, FormField, required, submit, validate } from '@angular/forms/signals';
+import { disabled, form, FormField, required, submit, validate } from '@angular/forms/signals';
 import { NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
 import { ItemDropdown } from '@ske/shared/items';
 import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
@@ -58,9 +58,6 @@ export class Form {
   });
 
   public readonly stockBatchForm = form(this._formModel, (schemaPath) => {
-    required(schemaPath.category, {
-      message: 'Categoria este obligatorie.'
-    });
     required(schemaPath.item, {
       message: 'Produsul este obligatoriu.'
     });
@@ -70,6 +67,7 @@ export class Form {
     required(schemaPath.location, {
       message: 'Locația este obligatorie.'
     });
+    disabled(schemaPath.expiryDate, { when: ({ valueOf }) => !valueOf(schemaPath.item)?.isPerishable });
     validate(schemaPath.quantity, (ctx) => {
       const isValid = ctx.valueOf(schemaPath.quantity) > 0;
 

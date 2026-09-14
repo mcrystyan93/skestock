@@ -29,6 +29,15 @@ export class Table extends BaseTable<CategoryDto, GetAllCategoriesRequest> {
   public readonly onEdit = output<CategoryDto>();
   public readonly onDelete = output<CategoryDto>();
   public readonly columns = CATEGORY_TABLE_COLUMNS;
+  public readonly columnLayout = {
+    name: { width: '300px' },
+    itemCount: { width: '110px' },
+    createdDate: { width: '150px' },
+    createdByName: { width: '180px' },
+    lastModifiedDate: { width: '160px' },
+    lastModifiedByName: { width: '180px' },
+    actions: { width: '130px' }
+  } as const;
 
   constructor() {
     super();

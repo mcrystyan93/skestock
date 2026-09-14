@@ -27385,25 +27385,25 @@
             "callee": "UseSetting",
             "receiver_type": "IWebHostBuilder",
             "lang": "csharp",
-            "line": "L15"
+            "line": "L19"
           },
           {
             "callee": "ConfigureTestServices",
             "receiver_type": "IWebHostBuilder",
             "lang": "csharp",
-            "line": "L19"
+            "line": "L27"
           },
           {
             "callee": "SetupGet",
             "receiver_type": "Mock",
             "lang": "csharp",
-            "line": "L26"
+            "line": "L34"
           }
         ]
       },
       "norm_label": ".configurewebhost()",
       "source_file": "tests/Application.FunctionalTests/Infrastructure/WebApiFactory.cs",
-      "source_location": "L13"
+      "source_location": "L17"
     },
     {
       "id": "tests_application_unittests_features_categories_commands_updatecategory_updatecategorycommandvalidatortests_skestock_application_unittests_features_categories_commands_updatecategory_updatecategorycommandvalidatortests_createcontext",
@@ -46037,7 +46037,7 @@
       "file_type": "code",
       "norm_label": ".constructor()",
       "source_file": "src/Client/src/app/features/categories/list/tables/regular/table.ts",
-      "source_location": "L33"
+      "source_location": "L42"
     },
     {
       "id": "src_client_src_app_shared_categories_services_category_collection_feature_withcategorycollection",
@@ -168766,7 +168766,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Infrastructure/WebApiFactory.cs",
-      "source_location": "L26",
+      "source_location": "L34",
       "weight": 1.0
     },
     {
@@ -168778,7 +168778,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Infrastructure/WebApiFactory.cs",
-      "source_location": "L27",
+      "source_location": "L35",
       "weight": 1.0
     },
     {
@@ -221964,7 +221964,7 @@
         "ref_token": "FakeBlobStorageService"
       },
       "source_file": "tests/Application.FunctionalTests/Infrastructure/WebApiFactory.cs",
-      "source_location": "L31",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -229119,7 +229119,7 @@
         "ref_token": "IBlobStorageService"
       },
       "source_file": "tests/Application.FunctionalTests/Infrastructure/WebApiFactory.cs",
-      "source_location": "L31",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -229524,7 +229524,7 @@
         "ref_token": "IUser"
       },
       "source_file": "tests/Application.FunctionalTests/Infrastructure/WebApiFactory.cs",
-      "source_location": "L21",
+      "source_location": "L29",
       "weight": 1.0
     },
     {
@@ -300463,7 +300463,7 @@
         "ref_token": "IWebHostBuilder"
       },
       "source_file": "tests/Application.FunctionalTests/Infrastructure/WebApiFactory.cs",
-      "source_location": "L13",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -372279,7 +372279,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/Client/src/app/features/categories/list/tables/regular/table.ts",
-      "source_location": "L33",
+      "source_location": "L42",
       "weight": 1.0
     },
     {
@@ -379561,7 +379561,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/Application.FunctionalTests/Infrastructure/WebApiFactory.cs",
-      "source_location": "L13",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -405039,5 +405039,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "44ae18c2f4a22af83c8440f10320ec5a3f1af750"
+  "built_at_commit": "6c474f245332695863d69b22ae240d5651b36c2d"
 }

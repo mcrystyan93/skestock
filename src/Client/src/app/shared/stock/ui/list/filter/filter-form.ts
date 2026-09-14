@@ -1,17 +1,17 @@
-import { Component, input, linkedSignal, output } from '@angular/core';
-import { CategoryDropdownValue, ColumnFilter, GetClassLocationStockRequest, LocationDropdownValue } from '@ske/models';
-import { form, FormField, submit } from '@angular/forms/signals';
-import { isNil } from 'lodash-es';
-import { FormsModule } from '@angular/forms';
-import { NzFormDirective } from 'ng-zorro-antd/form';
-import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
-import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
-import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
-import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { CategoryDropdown } from '@ske/shared/categories';
-import { LocationDropdown } from '@ske/shared/locations';
-import { NzDividerComponent } from 'ng-zorro-antd/divider';
+import {Component, computed, effect, input, linkedSignal, output, untracked} from '@angular/core';
+import {CategoryDropdownValue, ColumnFilter, GetClassLocationStockRequest, LocationDropdownValue} from '@ske/models';
+import {form, FormField, submit} from '@angular/forms/signals';
+import {isNil} from 'lodash-es';
+import {FormsModule} from '@angular/forms';
+import {NzFormDirective} from 'ng-zorro-antd/form';
+import {NzColDirective, NzRowDirective} from 'ng-zorro-antd/grid';
+import {NzInputDirective, NzInputWrapperComponent} from 'ng-zorro-antd/input';
+import {NzIconDirective} from 'ng-zorro-antd/icon';
+import {NzSpaceComponent, NzSpaceItemDirective} from 'ng-zorro-antd/space';
+import {NzButtonComponent} from 'ng-zorro-antd/button';
+import {CategoryDropdown} from '@ske/shared/categories';
+import {LocationDropdown} from '@ske/shared/locations';
+import {NzDividerComponent} from 'ng-zorro-antd/divider';
 
 @Component({
   imports: [
@@ -51,6 +51,38 @@ export class FilterForm {
   });
 
   public readonly stockListFilterForm = form(this._formModel);
+
+  private readonly _categoryEffectChange = effect(() => {
+    const categoryValue = this._getCategoryValue();
+    const categoryFormValue = this.stockListFilterForm().value().category;
+
+    if (categoryValue === (categoryFormValue?.id ?? null))
+      return;
+
+    untracked(() => this.onSubmit());
+  });
+
+  private readonly _locationEffectChange = effect(() => {
+    const locationValue = this._getLocationValue();
+    const locationFormValue = this.stockListFilterForm().value().location;
+
+    if (locationValue === (locationFormValue?.id ?? null))
+      return;
+
+    untracked(() => this.onSubmit());
+  });
+
+  private readonly _getLocationValue = computed(() => {
+    const currentFilter = this.filter();
+
+    return currentFilter.filters.find(filter => filter.field === 'locationId')?.value ?? null;
+  });
+
+  private readonly _getCategoryValue = computed(() => {
+    const currentFilter = this.filter();
+
+    return currentFilter.filters.find(filter => filter.field === 'categoryId')?.value ?? null;
+  });
 
   private buildFilterCriteria(): GetClassLocationStockRequest {
     const criteria = this.stockListFilterForm().value();
@@ -133,3 +165,4 @@ function buildEqualsFilter(
     displayValue: value.name
   };
 }
+

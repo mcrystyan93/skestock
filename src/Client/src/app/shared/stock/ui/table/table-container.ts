@@ -6,10 +6,12 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { StockAdjustmentModal, StockAdjustmentModalData } from '../modals/stock-adjustment-modal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AddStockBatchModal } from '@ske/shared/stock-batches';
+import { NzEmptyComponent } from 'ng-zorro-antd/empty';
 
 @Component({
   imports: [
-    Table
+    Table,
+    NzEmptyComponent
   ],
   selector: 'ske-stock-table-container',
   styles: ``,

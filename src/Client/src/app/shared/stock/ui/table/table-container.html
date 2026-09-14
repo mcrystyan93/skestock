@@ -1,4 +1,10 @@
-<ske-stock-table [groupItems]="store.groupedStockItems()"
-                 [loading]="store.stockItemsLoading()"
-                 (onAdjust)="onAdjust($event)"
-                 (onAdd)="addStock($event)" />
+@if (store.stockItems().length === 0) {
+  <div class="w-full flex justify-center items-center h-full">
+    <nz-empty></nz-empty>
+  </div>
+} @else {
+  <ske-stock-table [groupItems]="store.groupedStockItems()"
+                   [loading]="store.stockItemsLoading()"
+                   (onAdjust)="onAdjust($event)"
+                   (onAdd)="addStock($event)" />
+}
