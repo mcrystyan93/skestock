@@ -26,15 +26,27 @@ public sealed class GetAllItemImportBatchesHandler(IApplicationDbContext dbConte
             .AsNoTracking()
             .AsQueryable();
 
-        query = FilterQueryBuilder<ItemImportBatch>.Apply(query, request.Filters, FilterConfiguration);
+        query = FilterQueryBuilder<ItemImportBatch>.Apply(
+            query,
+            request.Filters,
+            FilterConfiguration,
+            TextSearchCollation.IsSqlServer(dbContext.Database));
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
             var term = request.SearchTerm.Trim();
-            query = query.Where(batch =>
-                batch.ErrorMessage != null && batch.ErrorMessage.Contains(term) ||
-                batch.Files.Any(file => file.FileMetadata.OriginalName.Contains(term) ||
-                                        file.FileMetadata.BlobPath.Contains(term)));
+            query = TextSearchCollation.IsSqlServer(dbContext.Database)
+                ? query.Where(batch =>
+                    batch.ErrorMessage != null &&
+                    EF.Functions.Collate(batch.ErrorMessage, TextSearchCollation.AccentInsensitive).Contains(term) ||
+                    batch.Files.Any(file =>
+                        EF.Functions.Collate(file.FileMetadata.OriginalName, TextSearchCollation.AccentInsensitive).Contains(term) ||
+                        EF.Functions.Collate(file.FileMetadata.BlobPath, TextSearchCollation.AccentInsensitive).Contains(term)))
+                : query.Where(batch =>
+                    batch.ErrorMessage != null && batch.ErrorMessage.Contains(term) ||
+                    batch.Files.Any(file =>
+                        file.FileMetadata.OriginalName.Contains(term) ||
+                        file.FileMetadata.BlobPath.Contains(term)));
         }
 
         if (cursorState?.KeyValues.Count > 0)

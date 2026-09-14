@@ -18,51 +18,52 @@ public static class CategoryErrors
     }
 }
 
-public static class CategoryImportErrors
+public static class CategoryImportBatchErrors
 {
-    public sealed class FileMetadataNotConfirmed : Error
+    public sealed class IdempotencyConflict : Error
     {
-        public const string ErrorCode = "category_imports.file_not_confirmed";
+        public const string ErrorCode = "category_import_batches.idempotency_conflict";
 
-        public FileMetadataNotConfirmed(Guid fileMetadataId)
-            : base($"File metadata with id '{fileMetadataId}' was not found or is not confirmed.")
+        public IdempotencyConflict(Guid clientRequestId)
+            : base($"Client request id '{clientRequestId}' was already used for a different category import batch.")
         {
             Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
-            Metadata.Add(ErrorMetadataKeys.Title, "File upload not confirmed");
+            Metadata.Add(ErrorMetadataKeys.Title, "Idempotency key conflict");
             Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
             Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object>
             {
-                ["fileMetadataId"] = fileMetadataId
+                ["clientRequestId"] = clientRequestId
             });
         }
     }
 
-    public sealed class CategoryImportNotFound : Error
+    public sealed class CategoryImportBatchNotFound : Error
     {
-        public const string ErrorCode = "category_imports.not_found";
+        public const string ErrorCode = "category_import_batches.not_found";
 
-        public CategoryImportNotFound(Guid categoryImportId) : base($"Category import with id '{categoryImportId}' was not found.")
+        public CategoryImportBatchNotFound(Guid batchId)
+            : base($"Category import batch with id '{batchId}' was not found.")
         {
             Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status404NotFound);
-            Metadata.Add(ErrorMetadataKeys.Title, "Category import not found");
+            Metadata.Add(ErrorMetadataKeys.Title, "Category import batch not found");
             Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
-            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object> { ["categoryImportId"] = categoryImportId });
+            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object> { ["batchId"] = batchId });
         }
     }
 
-    public sealed class CategoryImportNotInReview : Error
+    public sealed class CategoryImportBatchNotInReview : Error
     {
-        public const string ErrorCode = "category_imports.not_in_review";
+        public const string ErrorCode = "category_import_batches.not_in_review";
 
-        public CategoryImportNotInReview(Guid categoryImportId, CategoryImportStatus status)
-            : base($"Category import with id '{categoryImportId}' is '{status}' and cannot be confirmed. Only imports pending review can be confirmed.")
+        public CategoryImportBatchNotInReview(Guid batchId, CategoryImportBatchStatus status)
+            : base($"Category import batch with id '{batchId}' is '{status}' and cannot be confirmed. Only batches pending review can be confirmed.")
         {
             Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
-            Metadata.Add(ErrorMetadataKeys.Title, "Category import not pending review");
+            Metadata.Add(ErrorMetadataKeys.Title, "Category import batch not pending review");
             Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
             Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object>
             {
-                ["categoryImportId"] = categoryImportId,
+                ["batchId"] = batchId,
                 ["status"] = status.ToString()
             });
         }

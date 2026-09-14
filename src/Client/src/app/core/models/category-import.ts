@@ -1,29 +1,14 @@
 import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
-import type { CategoryDto } from './category';
+import type { CategoryDropdownValue } from './category';
 import type {
   ImportBatchFileDto,
   ImportBatchHistoryDto,
   ImportBatchStatus
 } from './import-batch';
 
-export type CategoryImportStatus = 'processing' | 'pendingReview' | 'confirmed' | 'failed';
-
-export type CreateCategoryImportRequest = {
-  fileMetadataId: string;
-};
-
 export type CreateCategoryImportBatchRequest = {
   fileMetadataIds: string[];
   clientRequestId?: string;
-};
-
-export type CategoryImportDto = {
-  id: string;
-  fileMetadataId: string;
-  status: CategoryImportStatus;
-  uploadedAt: string;
-  processedAt?: string | null;
-  errorMessage?: string | null;
 };
 
 export type CategoryImportBatchFileDto = ImportBatchFileDto;
@@ -41,11 +26,10 @@ export type CategoryImportBatchDto = {
   errorMessage?: string | null;
 };
 
-export type CategoryImportListItemDto = {
+export type CategoryImportBatchListItemDto = {
   id: string;
-  status: CategoryImportStatus;
-  fileMetadataId: string;
-  blobPath: string;
+  status: CategoryImportBatchStatus;
+  files: CategoryImportBatchFileDto[];
   errorMessage?: string | null;
   uploadedByName?: string | null;
   uploadedAt: string;
@@ -53,14 +37,14 @@ export type CategoryImportListItemDto = {
   createdDate: string;
 };
 
-export type GetAllCategoryImportsRequest = BasePaginationFilter & {
+export type GetAllCategoryImportBatchesRequest = BasePaginationFilter & {
   filters: ColumnFilter[];
 };
 
-export function buildCategoryImportListFilter(
-  currentFilter: GetAllCategoryImportsRequest,
-  partialFilter: Partial<GetAllCategoryImportsRequest>
-): GetAllCategoryImportsRequest {
+export function buildCategoryImportBatchListFilter(
+  currentFilter: GetAllCategoryImportBatchesRequest,
+  partialFilter: Partial<GetAllCategoryImportBatchesRequest>
+): GetAllCategoryImportBatchesRequest {
   return {
     ...currentFilter,
     ...partialFilter,
@@ -70,8 +54,8 @@ export function buildCategoryImportListFilter(
   };
 }
 
-export type CategoryImportTableColumn =
-  | 'blobPath'
+export type CategoryImportBatchTableColumn =
+  | 'files'
   | 'status'
   | 'uploadedByName'
   | 'uploadedAt'
@@ -79,70 +63,34 @@ export type CategoryImportTableColumn =
   | 'errorMessage'
   | 'createdDate';
 
-export const CATEGORY_IMPORT_TABLE_COLUMNS: TableColumnDefinition<CategoryImportTableColumn> = {
-  blobPath: {
-    label: 'Fisier',
-    value: 'blobPath',
-    fieldType: 'string'
-  },
-  status: {
-    label: 'Stare',
-    value: 'status',
-    fieldType: 'string'
-  },
-  uploadedByName: {
-    label: 'Incarcat de',
-    value: 'uploadedByName',
-    fieldType: 'string'
-  },
-  uploadedAt: {
-    label: 'Data incarcare',
-    value: 'uploadedAt',
-    fieldType: 'date'
-  },
-  processedAt: {
-    label: 'Data procesare',
-    value: 'processedAt',
-    fieldType: 'date'
-  },
-  errorMessage: {
-    label: 'Eroare',
-    value: 'errorMessage',
-    fieldType: 'string'
-  },
-  createdDate: {
-    label: 'Data creare',
-    value: 'createdDate',
-    fieldType: 'date'
-  }
+export const CATEGORY_IMPORT_BATCH_TABLE_COLUMNS: TableColumnDefinition<CategoryImportBatchTableColumn> = {
+  files: { label: 'Fisiere', value: 'files', fieldType: 'string' },
+  status: { label: 'Stare', value: 'status', fieldType: 'string' },
+  uploadedByName: { label: 'Incarcat de', value: 'uploadedByName', fieldType: 'string' },
+  uploadedAt: { label: 'Data incarcare', value: 'uploadedAt', fieldType: 'date' },
+  processedAt: { label: 'Data procesare', value: 'processedAt', fieldType: 'date' },
+  errorMessage: { label: 'Eroare', value: 'errorMessage', fieldType: 'string' },
+  createdDate: { label: 'Data creare', value: 'createdDate', fieldType: 'date' }
 };
 
-export const CATEGORY_IMPORT_STATUS_LABELS: Record<CategoryImportStatus, string> = {
+export const CATEGORY_IMPORT_BATCH_STATUS_LABELS: Record<CategoryImportBatchStatus, string> = {
   processing: 'Se proceseaza',
-  pendingReview: 'In asteptarea revizuirii',
+  pendingReview: 'In asteptare',
   confirmed: 'Confirmat',
   failed: 'Esuat'
 };
 
-export const CATEGORY_IMPORT_STATUS_COLORS: Record<CategoryImportStatus, string> = {
+export const CATEGORY_IMPORT_BATCH_STATUS_COLORS: Record<CategoryImportBatchStatus, string> = {
   processing: 'processing',
   pendingReview: 'orange',
   confirmed: 'success',
   failed: 'error'
 };
 
-export type CategoryImportSuggestionDto = {
+export type CategoryImportReviewLineDto = {
   name: string;
   alreadyExists: boolean;
-};
-
-export type CategoryImportReviewDto = {
-  id: string;
-  status: CategoryImportStatus;
-  errorMessage?: string | null;
-  uploadedAt: string;
-  processedAt?: string | null;
-  suggestions: CategoryImportSuggestionDto[];
+  matchedCategory?: CategoryDropdownValue | null;
 };
 
 export type CategoryImportBatchReviewDto = {
@@ -155,21 +103,7 @@ export type CategoryImportBatchReviewDto = {
   processedAt?: string | null;
   files: CategoryImportBatchFileDto[];
   history: ImportBatchHistoryDto[];
-  suggestions: CategoryImportSuggestionDto[];
-};
-
-export type ConfirmCategoryImportRequest = {
-  names: string[];
-};
-
-export type ConfirmCategoryImportResponse = {
-  importId: string;
-  status: CategoryImportStatus;
-  categories: Array<{
-    id: string;
-    name: string;
-    created: boolean;
-  }>;
+  suggestions: CategoryImportReviewLineDto[];
 };
 
 export type ConfirmCategoryImportBatchRequest = {

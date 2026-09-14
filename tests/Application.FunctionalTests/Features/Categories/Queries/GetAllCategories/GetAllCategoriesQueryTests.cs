@@ -149,6 +149,51 @@ public class GetAllCategoriesQueryTests : TestBase
     }
 
     [Test]
+    public async Task Handle_WithRomanianNameSortAscending_TreatsDiacriticsAsEquivalent()
+    {
+        await SeedCategoriesAsync("b", "a", "ă", "c");
+
+        var result = await TestApp.SendAsync(Query(
+            _prefix,
+            sort: [new PaginationSort { Key = "name", Value = "ascend" }]));
+
+        result.IsSuccess.ShouldBeTrue();
+        var orderedNames = result.Value.Data.Select(c => c.Name).ToList();
+        orderedNames.Take(2).ShouldContain($"{_prefix}-a");
+        orderedNames.Take(2).ShouldContain($"{_prefix}-ă");
+        orderedNames[2].ShouldBe($"{_prefix}-b");
+        orderedNames[3].ShouldBe($"{_prefix}-c");
+    }
+
+    [Test]
+    public async Task Handle_WithRomanianSearchTerm_MatchesAccentedAndUnaccentedForms()
+    {
+        await SeedCategoriesAsync("Săpun", "Sapun");
+
+        var result = await TestApp.SendAsync(Query("SĂ"));
+
+        result.IsSuccess.ShouldBeTrue();
+        var names = result.Value.Data.Select(c => c.Name).ToList();
+        names.Count.ShouldBe(2);
+        names.ShouldContain($"{_prefix}-Săpun");
+        names.ShouldContain($"{_prefix}-Sapun");
+    }
+
+    [Test]
+    public async Task Handle_WithUnaccentedSearchTerm_MatchesRomanianDiacritics()
+    {
+        await SeedCategoriesAsync("Apă minerală", "Apa plată");
+
+        var result = await TestApp.SendAsync(Query("apa"));
+
+        result.IsSuccess.ShouldBeTrue();
+        var names = result.Value.Data.Select(c => c.Name).ToList();
+        names.Count.ShouldBe(2);
+        names.ShouldContain($"{_prefix}-Apă minerală");
+        names.ShouldContain($"{_prefix}-Apa plată");
+    }
+
+    [Test]
     public async Task Handle_PagingThroughCursors_ReturnsAllSeededItemsExactlyOnce()
     {
         var names = Enumerable.Range(0, 7).Select(i => $"Item{i:D2}").ToArray();

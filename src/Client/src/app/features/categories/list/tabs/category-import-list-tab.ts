@@ -1,5 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, output } from '@angular/core';
 import { ErrorAlert } from '@ske/shared/errors';
+import { CategoryImportBatchListItemDto } from '@ske/models';
 import { CategoryImportState } from '@ske/shared/categories';
 import { CategoryImportFilterContainer } from '../filter/category-import-filter-container';
 import { TableContainer } from '../tables/import/table-container';
@@ -18,4 +19,5 @@ import { TableContainer } from '../tables/import/table-container';
 })
 export class CategoryImportListTab {
   public readonly store = inject(CategoryImportState);
+  public readonly review = output<CategoryImportBatchListItemDto>();
 }

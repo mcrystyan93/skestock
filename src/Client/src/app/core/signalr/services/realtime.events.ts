@@ -6,9 +6,9 @@ export const realtimeEvents = eventGroup({
   events: {
     categoryCreated: type<{ categoryId: string }>(),
     categoryUpdated: type<{ categoryId: string }>(),
-    categoryImportCreated: type<{ categoryImportId: string }>(),
-    categoryImportProcessed: type<{ categoryImportId: string }>(),
-    categoryImportConfirmed: type<{ categoryImportId: string }>(),
+    categoryImportBatchCreated: type<{ categoryImportBatchId: string }>(),
+    categoryImportBatchProcessed: type<{ categoryImportBatchId: string }>(),
+    categoryImportBatchConfirmed: type<{ categoryImportBatchId: string }>(),
     itemCreated: type<{ itemId: string }>(),
     itemUpdated: type<{ itemId: string }>(),
     itemDisabled: type<{ itemId: string }>(),

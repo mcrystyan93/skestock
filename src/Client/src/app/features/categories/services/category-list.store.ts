@@ -34,7 +34,7 @@ export const CategoryListState = signalStore(
     return { reload, deleteCategory };
   }),
   withEventHandlers((store, events = inject(Events)) => ({
-    categoryImportConfirmed: events.on(realtimeEvents.categoryImportConfirmed).pipe(
+    categoryImportBatchConfirmed: events.on(realtimeEvents.categoryImportBatchConfirmed).pipe(
       tap(() => store.reload())
     )
   }))

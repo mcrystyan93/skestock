@@ -19,7 +19,8 @@ public class SchoolClassTestDbContext(DbContextOptions<SchoolClassTestDbContext>
     : DbContext(options), IApplicationDbContext
 {
     public DbSet<Category> Categories => Set<Category>();
-    public DbSet<CategoryImport> CategoryImports => Set<CategoryImport>();
+    public DbSet<CategoryImportBatch> CategoryImportBatches => Set<CategoryImportBatch>();
+    public DbSet<CategoryImportBatchFile> CategoryImportBatchFiles => Set<CategoryImportBatchFile>();
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();
@@ -42,7 +43,8 @@ public class SchoolClassTestDbContext(DbContextOptions<SchoolClassTestDbContext>
         base.OnModelCreating(builder);
 
 
-        builder.Ignore<CategoryImport>();
+        builder.Ignore<CategoryImportBatch>();
+        builder.Ignore<CategoryImportBatchFile>();
 
         builder.Ignore<GoodsReceiptImport>();
         builder.Ignore<GoodsReceiptImportLine>();

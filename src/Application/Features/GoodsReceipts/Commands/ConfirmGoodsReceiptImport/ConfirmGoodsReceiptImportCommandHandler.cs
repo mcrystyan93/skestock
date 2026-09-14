@@ -170,13 +170,15 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        var upperNames = names.Select(n => n.ToUpper()).ToList();
+        var upperNames = names.Select(n => n.ToUpperInvariant()).ToList();
 
-        // Compare on ToUpper() on both sides (translatable to SQL) so category matching is
-        // case-insensitive regardless of the extracted category name's casing.
-        var existing = await dbContext.Categories
-            .Where(c => upperNames.Contains(c.Name.ToUpper()))
-            .ToListAsync(cancellationToken);
+        // Apply an accent-insensitive collation so category matching also ignores Romanian diacritics.
+        var existingQuery = dbContext.Categories.AsQueryable();
+        existingQuery = TextSearchCollation.IsSqlServer(dbContext.Database)
+            ? existingQuery.Where(c => upperNames.Contains(
+                EF.Functions.Collate(c.Name.Trim(), TextSearchCollation.AccentInsensitive)))
+            : existingQuery.Where(c => upperNames.Contains(c.Name.Trim().ToUpper()));
+        var existing = await existingQuery.ToListAsync(cancellationToken);
 
         var byName = existing.ToDictionary(c => c.Name.Trim().ToLowerInvariant(), c => c);
 

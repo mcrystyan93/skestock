@@ -13,6 +13,10 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
 import { NzTimelineComponent, NzTimelineItemComponent } from 'ng-zorro-antd/timeline';
 import { DatePipe } from '@angular/common';
+import {
+  ITEM_IMPORT_BATCH_STATUS_COLORS,
+  ITEM_IMPORT_BATCH_STATUS_LABELS
+} from '@ske/models';
 
 @Component({
   imports: [FormsModule, NzButtonComponent, NzModalFooterDirective,
@@ -27,6 +31,16 @@ export class ItemImportReviewModal {
   private readonly _linesTable = viewChild(ItemImportReviewTable);
 
   public readonly store = inject(ItemImportReviewState);
+  public readonly statusLabels = ITEM_IMPORT_BATCH_STATUS_LABELS;
+  public readonly statusColors = ITEM_IMPORT_BATCH_STATUS_COLORS;
+  public readonly historyStatusLabels: Record<string, string> = {
+    created: 'Creat',
+    processing: 'Se proceseaza',
+    completed: 'Procesat',
+    failed: 'Esuat',
+    confirmed: 'Confirmat'
+  };
+
   private readonly _closeEffect = effect(() => {
     if (this.store.confirmation())
       this._modalRef.close(this.store.confirmation());

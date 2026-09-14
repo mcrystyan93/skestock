@@ -1,18 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import {
-  CategoryImportDto,
   CategoryImportBatchDto,
   CategoryImportBatchReviewDto,
-  CategoryImportListItemDto,
+  CategoryImportBatchListItemDto,
   ConfirmCategoryImportBatchRequest,
   ConfirmCategoryImportBatchResponse,
-  CategoryImportReviewDto,
-  ConfirmCategoryImportRequest,
-  ConfirmCategoryImportResponse,
   CreateCategoryImportBatchRequest,
-  CreateCategoryImportRequest,
-  GetAllCategoryImportsRequest,
+  GetAllCategoryImportBatchesRequest,
   PaginatedResponse
 } from '@ske/models';
 
@@ -20,24 +15,15 @@ import {
 export class CategoryImportsHttp {
   private readonly _httpClient = inject(HttpClient);
 
-  public create(request: CreateCategoryImportRequest) {
-    return this._httpClient.post<CategoryImportDto>('/api/CategoryImports', request);
-  }
-
   public createBatch(request: CreateCategoryImportBatchRequest) {
     return this._httpClient.post<CategoryImportBatchDto>('/api/CategoryImportBatches', request);
   }
 
-  public getAll(request: GetAllCategoryImportsRequest | Partial<GetAllCategoryImportsRequest>) {
-    return this._httpClient.post<PaginatedResponse<CategoryImportListItemDto>>('/api/CategoryImports/get-all', request);
-  }
-
-  public getById(id: string) {
-    return this._httpClient.get<CategoryImportReviewDto>(`/api/CategoryImports/${id}`);
-  }
-
-  public confirm(id: string, request: ConfirmCategoryImportRequest) {
-    return this._httpClient.post<ConfirmCategoryImportResponse>(`/api/CategoryImports/${id}/confirm`, request);
+  public getAll(request: GetAllCategoryImportBatchesRequest | Partial<GetAllCategoryImportBatchesRequest>) {
+    return this._httpClient.post<PaginatedResponse<CategoryImportBatchListItemDto>>(
+      '/api/CategoryImportBatches/get-all',
+      request
+    );
   }
 
   public getBatchById(id: string) {

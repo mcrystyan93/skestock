@@ -38,7 +38,7 @@ export class ItemImportModal {
 
   public readonly fileStorage = inject(FileStorageState);
   public readonly store = inject(ItemImportState);
-  public readonly hasFiles = () => this._fileList().length > 0;
+  public readonly hasFiles = computed(() => this._fileList().length > 0);
 
   public readonly progressStatus = computed<NzProgressStatusType>(() => {
     if (this.fileStorage.hasUploadFailures())
@@ -50,8 +50,9 @@ export class ItemImportModal {
     return 'active';
   });
 
-  public readonly progressFormat = (): string =>
-    `${this.fileStorage.completedCount()} din ${this.fileStorage.totalCount()}`;
+  public readonly progressFormat = computed(() => () =>
+    `${this.fileStorage.completedCount()} din ${this.fileStorage.totalCount()}`
+  );
 
   private readonly _uploadSuccessRef = this._events.on(fileStorageApiEvents.uploadSuccess)
     .pipe(

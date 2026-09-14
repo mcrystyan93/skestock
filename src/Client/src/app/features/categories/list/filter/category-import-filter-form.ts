@@ -1,5 +1,5 @@
 import { Component, effect, input, linkedSignal, output } from '@angular/core';
-import { GetAllCategoryImportsRequest } from '@ske/models';
+import { GetAllCategoryImportBatchesRequest } from '@ske/models';
 import { form, FormField, submit } from '@angular/forms/signals';
 import { isNil } from 'lodash-es';
 import { FormsModule } from '@angular/forms';
@@ -29,8 +29,8 @@ import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 })
 export class FilterForm {
   public readonly loading = input.required<boolean>();
-  public readonly filter = input.required<GetAllCategoryImportsRequest>();
-  public readonly onFilterChange = output<GetAllCategoryImportsRequest>();
+  public readonly filter = input.required<GetAllCategoryImportBatchesRequest>();
+  public readonly onFilterChange = output<GetAllCategoryImportBatchesRequest>();
 
   private _initialFilterEmitted = false;
   private readonly _formModel = linkedSignal({
@@ -40,7 +40,7 @@ export class FilterForm {
     })
   });
 
-  public readonly categoryImportFilterForm = form(this._formModel);
+  public readonly filterForm = form(this._formModel);
 
   private readonly _initialFilterEffectRef = effect(() => {
     if (this._initialFilterEmitted)
@@ -53,8 +53,8 @@ export class FilterForm {
 
   public async onSubmit() {
     let data: CategoryImportFilterModel | null = null;
-    const isValid = submit(this.categoryImportFilterForm, async (_) => {
-      data = this.categoryImportFilterForm().value();
+    const isValid = submit(this.filterForm, async (_) => {
+      data = this.filterForm().value();
     });
 
     if (!isValid || isNil(data))
@@ -64,12 +64,12 @@ export class FilterForm {
   }
 
   public clear() {
-    this.categoryImportFilterForm().reset({ searchTerm: '' });
+    this.filterForm().reset({ searchTerm: '' });
     this.onSubmit();
   }
 
-  private buildFilterCriteria(): GetAllCategoryImportsRequest {
-    const criteria = this.categoryImportFilterForm().value();
+  private buildFilterCriteria(): GetAllCategoryImportBatchesRequest {
+    const criteria = this.filterForm().value();
 
     return {
       ...this.filter(),

@@ -8,7 +8,8 @@ public interface IApplicationDbContext
 {
     DatabaseFacade Database { get; }
     DbSet<Category> Categories { get; }
-    DbSet<CategoryImport> CategoryImports { get; }
+    DbSet<CategoryImportBatch> CategoryImportBatches { get; }
+    DbSet<CategoryImportBatchFile> CategoryImportBatchFiles { get; }
     DbSet<ClassBalance> ClassBalances { get; }
     DbSet<FileMetadata> FileMetadata { get; }
     DbSet<Item> Items { get; }

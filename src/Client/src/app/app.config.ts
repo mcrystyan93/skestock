@@ -38,9 +38,9 @@ export const appConfig: ApplicationConfig = {
       eventMap: {
         [realtimeEventNames.categoryCreated]: realtimeEvents.categoryCreated,
         [realtimeEventNames.categoryUpdated]: realtimeEvents.categoryUpdated,
-        [realtimeEventNames.categoryImportCreated]: realtimeEvents.categoryImportCreated,
-        [realtimeEventNames.categoryImportProcessed]: realtimeEvents.categoryImportProcessed,
-        [realtimeEventNames.categoryImportConfirmed]: realtimeEvents.categoryImportConfirmed,
+        [realtimeEventNames.categoryImportBatchCreated]: realtimeEvents.categoryImportBatchCreated,
+        [realtimeEventNames.categoryImportBatchProcessed]: realtimeEvents.categoryImportBatchProcessed,
+        [realtimeEventNames.categoryImportBatchConfirmed]: realtimeEvents.categoryImportBatchConfirmed,
         [realtimeEventNames.itemCreated]: realtimeEvents.itemCreated,
         [realtimeEventNames.itemUpdated]: realtimeEvents.itemUpdated,
         [realtimeEventNames.itemDisabled]: realtimeEvents.itemDisabled,

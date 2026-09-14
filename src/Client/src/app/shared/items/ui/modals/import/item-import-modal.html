@@ -11,7 +11,7 @@
 @if (fileStorage.uploadLoading() || fileStorage.hasUploadFailures()) {
   <nz-progress [nzPercent]="fileStorage.uploadPercent()"
                [nzStatus]="progressStatus()"
-               [nzFormat]="progressFormat" />
+               [nzFormat]="progressFormat()" />
 
   @if (fileStorage.currentFileName(); as currentFileName) {
     <p nz-typography
@@ -32,9 +32,8 @@
   }
 }
 
-@if (store.itemImportProblemDetail(); as problemDetail) {
-  <ske-error-alert [problemDetail]="problemDetail" />
-}
+<ske-error-alert [problemDetail]="store.itemImportProblemDetail()"
+                 [validationErrors]="store.itemImportValidationErrors()" />
 
 <div *nzModalFooter>
   <nz-space>

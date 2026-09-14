@@ -11,7 +11,7 @@ public sealed class ItemExtractionSchemaFactory(IApplicationDbContext dbContext)
 {
     public string Prompt =>
         """
-        Extract and list every catalog item from the attached document (commonly a product catalog, price list, or inventory sheet, usually in Romanian). For each item found, identify and record the following attributes:
+        Extract and list every catalog item from the attached documents (commonly a product catalog, price list, or inventory sheet, usually in Romanian). For each item found, identify and record the following attributes:
 
         - SKU/product code (use "" if not present)
         - Name
@@ -34,6 +34,7 @@ public sealed class ItemExtractionSchemaFactory(IApplicationDbContext dbContext)
 
         **REMINDER:**
         Extract all items; for each, systematically reason through attribute selection before making conclusions. Output only the JSON as specified.
+        Remove duplicates (a duplicate is defined as an item with the same SKU).
         """;
 
     public async Task<JsonObject> Create(CancellationToken cancellationToken)
@@ -52,7 +53,7 @@ public sealed class ItemExtractionSchemaFactory(IApplicationDbContext dbContext)
 
         var existingCategoriesDescription = normalizedCategoryNames.Length == 0
             ? "There are no existing categories yet - infer a sensible category name for each item."
-            : "Prefer matching one of the existing categories (case-insensitive, whitespace-trimmed) " +
+            : "Prefer matching one of the existing categories (case-insensitive, whitespace-trimmed, romanian) " +
               $"when the item clearly belongs to it: {string.Join(", ", normalizedCategoryNames)}. " +
               "Otherwise use a new, sensible category name.";
 

@@ -23,13 +23,23 @@ public class GetAllItemsHandler(IApplicationDbContext dbContext)
             .AsNoTracking()
             .AsQueryable();
 
-        query = FilterQueryBuilder<Item>.Apply(query, request.Filters, FilterConfiguration);
+        query = FilterQueryBuilder<Item>.Apply(
+            query,
+            request.Filters,
+            FilterConfiguration,
+            TextSearchCollation.IsSqlServer(dbContext.Database));
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
             var term = request.SearchTerm.Trim();
-            query = query.Where(i =>
-                i.Name.Contains(term) || (i.Sku != null && i.Sku.Contains(term)));
+            query = TextSearchCollation.IsSqlServer(dbContext.Database)
+                ? query.Where(i =>
+                    EF.Functions.Collate(i.Name, TextSearchCollation.AccentInsensitive).Contains(term) ||
+                    (i.Sku != null &&
+                     EF.Functions.Collate(i.Sku, TextSearchCollation.AccentInsensitive).Contains(term)))
+                : query.Where(i =>
+                    i.Name.Contains(term) ||
+                    (i.Sku != null && i.Sku.Contains(term)));
         }
 
         if (cursorState?.KeyValues.Count > 0)

@@ -5,6 +5,7 @@ using skestock.Domain.Common;
 using skestock.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using skestock.Application.Common.Filtering;
 using skestock.Domain.Entities;
 using skestock.Domain.Queues;
 
@@ -15,7 +16,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
 
     public DbSet<Category> Categories => Set<Category>();
-    public DbSet<CategoryImport> CategoryImports => Set<CategoryImport>();
+    public DbSet<CategoryImportBatch> CategoryImportBatches => Set<CategoryImportBatch>();
+    public DbSet<CategoryImportBatchFile> CategoryImportBatchFiles => Set<CategoryImportBatchFile>();
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
     public DbSet<Item> Items => Set<Item>();
@@ -35,7 +37,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        
+
+        builder.UseCollation(TextSearchCollation.Romanian);
+
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         // Domain keys are generated app-side as GUID v7 by GuidV7ValueGenerator. It runs when an

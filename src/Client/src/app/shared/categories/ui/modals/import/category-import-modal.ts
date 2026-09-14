@@ -5,6 +5,7 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zorro-antd/modal';
 import { NzProgressComponent, NzProgressStatusType } from 'ng-zorro-antd/progress';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { NzUploadFile } from 'ng-zorro-antd/upload';
 import { tap } from 'rxjs';
 import { ErrorAlert } from '@ske/shared/errors';
@@ -16,8 +17,6 @@ import {
 import { CategoryImportState } from '../../../services/category-import.store';
 
 const NO_FILES_COUNT = 0;
-const SINGLE_FILE_COUNT = 1;
-
 @Component({
   imports: [
     NzModalTitleDirective,
@@ -27,7 +26,8 @@ const SINGLE_FILE_COUNT = 1;
     NzSpaceItemDirective,
     NzProgressComponent,
     ErrorAlert,
-    FileUpload
+    FileUpload,
+    NzTypographyComponent
   ],
   selector: 'ske-category-import-modal',
   templateUrl: './category-import-modal.html',
@@ -45,7 +45,7 @@ export class CategoryImportModal {
   public readonly store = inject(CategoryImportState);
   private readonly _fileList = signal<Array<NzUploadFile>>([]);
 
-  public readonly hasFiles = () => this._fileList().length > 0;
+  public readonly hasFiles = computed(() => this._fileList().length > 0);
 
   public readonly progressStatus = computed<NzProgressStatusType>(() => {
     if (this.fileStorage.hasUploadFailures())
@@ -57,8 +57,9 @@ export class CategoryImportModal {
     return 'active';
   });
 
-  public readonly progressFormat = (): string =>
-    `${this.fileStorage.completedCount()} din ${this.fileStorage.totalCount()}`;
+  public readonly progressFormat = computed(() => () =>
+    `${this.fileStorage.completedCount()} din ${this.fileStorage.totalCount()}`
+  );
 
   private readonly _uploadSuccessRef = this._events.on(fileStorageApiEvents.uploadSuccess)
     .pipe(
@@ -66,11 +67,6 @@ export class CategoryImportModal {
       tap(({ payload }) => {
         if (this.fileStorage.hasUploadFailures() || payload.length === NO_FILES_COUNT)
           return;
-
-        if (payload.length === SINGLE_FILE_COUNT) {
-          this.store.createImports([{ fileMetadataId: payload[0].id }]);
-          return;
-        }
 
         this.store.createBatch({
           fileMetadataIds: payload.map((file) => file.id),
@@ -81,11 +77,7 @@ export class CategoryImportModal {
     .subscribe();
 
   private readonly _closeAfterCreate = effect(() => {
-    const categoryImports = this.store.categoryImports();
-
-    if (categoryImports.length > 0)
-      this._modalRef.close(categoryImports);
-    else if (this.store.categoryImportBatch())
+    if (this.store.categoryImportBatch())
       this._modalRef.close(this.store.categoryImportBatch());
   });
 

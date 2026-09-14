@@ -40,7 +40,10 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
         var locationFilters = request.Filters.Where(filter =>
             string.Equals(filter.Field, "locationId", StringComparison.OrdinalIgnoreCase));
         batchesQuery = FilterQueryBuilder<StockBatch>.Apply(
-            batchesQuery, locationFilters, StockBatchFilterConfiguration);
+            batchesQuery,
+            locationFilters,
+            StockBatchFilterConfiguration,
+            TextSearchCollation.IsSqlServer(dbContext.Database));
 
         var stockByItemLocation = await batchesQuery
             .GroupBy(b => new { b.ItemId, b.LocationId })
@@ -59,12 +62,19 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
 
         var categoryFilters = request.Filters.Where(filter =>
             string.Equals(filter.Field, "categoryId", StringComparison.OrdinalIgnoreCase));
-        itemsQuery = FilterQueryBuilder<Item>.Apply(itemsQuery, categoryFilters, ItemFilterConfiguration);
+        itemsQuery = FilterQueryBuilder<Item>.Apply(
+            itemsQuery,
+            categoryFilters,
+            ItemFilterConfiguration,
+            TextSearchCollation.IsSqlServer(dbContext.Database));
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
             var term = request.SearchTerm.Trim();
-            itemsQuery = itemsQuery.Where(i => i.Name.Contains(term));
+            itemsQuery = TextSearchCollation.IsSqlServer(dbContext.Database)
+                ? itemsQuery.Where(i =>
+                    EF.Functions.Collate(i.Name, TextSearchCollation.AccentInsensitive).Contains(term))
+                : itemsQuery.Where(i => i.Name.Contains(term));
         }
 
         var items = await itemsQuery

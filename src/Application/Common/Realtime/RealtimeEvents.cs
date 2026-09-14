@@ -4,9 +4,9 @@ public static class RealtimeEvents
 {
     public const string CategoryCreated = "CategoryCreated";
     public const string CategoryUpdated = "CategoryUpdated";
-    public const string CategoryImportCreated = "CategoryImportCreated";
-    public const string CategoryImportProcessed = "CategoryImportProcessed";
-    public const string CategoryImportConfirmed = "CategoryImportConfirmed";
+    public const string CategoryImportBatchCreated = "CategoryImportBatchCreated";
+    public const string CategoryImportBatchProcessed = "CategoryImportBatchProcessed";
+    public const string CategoryImportBatchConfirmed = "CategoryImportBatchConfirmed";
     public const string GoodsReceiptImportCreated = "GoodsReceiptImportCreated";
     public const string GoodsReceiptImportProcessed = "GoodsReceiptImportProcessed";
     public const string GoodsReceiptImportConfirmed = "GoodsReceiptImportConfirmed";
