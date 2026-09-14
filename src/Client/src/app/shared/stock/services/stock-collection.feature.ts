@@ -85,7 +85,11 @@ export function withStockCollection() {
       return { load };
     }),
     withEventHandlers((store, events = inject(Events)) => ({
-      goodsReceiptImported: events.on(realtimeEvents.goodsReceiptImportConfirmed)
+      stockChanged: events.on(
+        realtimeEvents.goodsReceiptImportConfirmed,
+        realtimeEvents.stockAdjusted,
+        realtimeEvents.stockBatchCreated
+      )
         .pipe(
           map(() => store.filter()),
           tap((filter) => store.load(filter))

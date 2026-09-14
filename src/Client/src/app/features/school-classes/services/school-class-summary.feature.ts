@@ -54,7 +54,9 @@ export function withSchoolClassSummaryFeature() {
       goodsReceiptImportChanges: events.on(
         realtimeEvents.goodsReceiptImportProcessed,
         realtimeEvents.goodsReceiptImportCreated,
-        realtimeEvents.goodsReceiptImportConfirmed
+        realtimeEvents.goodsReceiptImportConfirmed,
+        realtimeEvents.stockAdjusted,
+        realtimeEvents.stockBatchCreated
       )
         .pipe(
           map(() => store.summary().id),

@@ -27,13 +27,4 @@
     <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Azure.Storage.Blobs">
-      <HintPath>..\..\..\..\.nuget\packages\azure.storage.blobs\12.28.0\lib\net10.0\Azure.Storage.Blobs.dll</HintPath>
-    </Reference>
-    <Reference Include="Azure.Storage.Queues">
-      <HintPath>..\..\..\..\.nuget\packages\azure.storage.queues\12.26.0\lib\net10.0\Azure.Storage.Queues.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

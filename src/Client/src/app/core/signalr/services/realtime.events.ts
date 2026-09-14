@@ -18,6 +18,8 @@ export const realtimeEvents = eventGroup({
     itemImportBatchConfirmed: type<{ itemImportBatchId: string }>(),
     goodsReceiptImportCreated: type<{ goodsReceiptImportId: string }>(),
     goodsReceiptImportProcessed: type<{ goodsReceiptImportId: string }>(),
-    goodsReceiptImportConfirmed: type<{ goodsReceiptImportId: string }>()
+    goodsReceiptImportConfirmed: type<{ goodsReceiptImportId: string }>(),
+    stockAdjusted: type<{ classId: string, locationId: string }>(),
+    stockBatchCreated: type<{ classId: string, locationId: string }>()
   }
 });

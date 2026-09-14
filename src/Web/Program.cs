@@ -28,6 +28,7 @@ else
 {
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+    await app.InitialiseDatabaseAsync();
 }
 
 app.UseHttpsRedirection();
@@ -64,9 +65,20 @@ app.UseExceptionHandler(options => { });
 
 app.Map("/", () => Results.Redirect("/scalar"));
 app.MapHub<AppHub>("/hubs/app").RequireAuthorization();
-
 app.MapDefaultEndpoints();
 app.MapEndpoints(typeof(Program).Assembly);
+app.MapFallback(async (HttpContext context) =>
+{
+    if (context.Request.Path.StartsWithSegments("/api")
+        || context.Request.Path.StartsWithSegments("/scalar")
+        || context.Request.Path.StartsWithSegments("/hubs"))
+    {
+        context.Response.StatusCode = StatusCodes.Status404NotFound;
+        return;
+    }
 
+    context.Response.ContentType = "text/html";
+    await context.Response.SendFileAsync(Path.Combine(app.Environment.WebRootPath!, "index.html"));
+});
 
 app.Run();

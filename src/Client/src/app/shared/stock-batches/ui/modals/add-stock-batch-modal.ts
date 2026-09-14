@@ -37,6 +37,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 export class AddStockBatchModal {
   public readonly modalData = signal<StockBatchDetailModalData>(inject(NZ_MODAL_DATA));
   public readonly store = inject(StockBatchStore);
+
   private readonly _close$ = new BehaviorSubject(false);
   private readonly _formComponent = viewChild(Form);
   private readonly _destroyRef = inject(DestroyRef);

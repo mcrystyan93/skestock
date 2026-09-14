@@ -9,4 +9,5 @@ public static class RealtimeGroups
     public const string ItemImportBatchesList = "item-import-batches-list";
 
     public static string User(string userId) => $"user:{userId}";
+    public static string SchoolClass(Guid classId) => $"school-class:{classId}";
 }

@@ -59,7 +59,10 @@
         </button>
       </nz-space>
       <nz-divider nzType="vertical"></nz-divider>
-      <button nz-button nzType="primary" type="button">
+      <button nz-button
+              nzType="primary"
+              type="button"
+              (click)="onAdd.emit()">
         <nz-icon nzType="icons:plus"></nz-icon>
         Adauga produs
       </button>

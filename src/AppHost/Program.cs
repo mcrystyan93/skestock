@@ -57,11 +57,19 @@ var cache = builder
 
 var openAiApiKey = builder.AddParameter($"{Services.OpenApiSettings}{Services.OpenApiKey}", secret:true);
 var openAiModel = builder.AddParameter($"{Services.OpenApiSettings}{Services.OpenApiModel}", "gpt-5.6-luna");
-// change
 var web = builder.AddProject<Projects.Web>(Services.WebApi)
+    .PublishAsDockerFile(container =>
+        container.WithDockerfile("../..", "src/Web/Dockerfile", "final"))
     .PublishAsDockerComposeService((resource, service) =>
     {
         service.Name = Services.WebApi;
+        service.Image = "skestock-webapi:latest";
+        service.Build = new Aspire.Hosting.Docker.Resources.ServiceNodes.Build
+        {
+            Context = "..",
+            Dockerfile = "src/Web/Dockerfile",
+            Target = "final"
+        };
     })
     .WithEnvironment($"{Services.OpenApiSettings}__{Services.OpenApiKey}", openAiApiKey)
     .WithEnvironment($"{Services.OpenApiSettings}__{Services.OpenApiModel}", openAiModel)
@@ -78,9 +86,18 @@ var web = builder.AddProject<Projects.Web>(Services.WebApi)
     });
 
 var worker = builder.AddProject<Projects.Worker>(Services.Worker)
+    .PublishAsDockerFile(container =>
+        container.WithDockerfile("../..", "src/Worker/Dockerfile", "final"))
     .PublishAsDockerComposeService((resource, service) =>
     {
         service.Name = Services.Worker;
+        service.Image = "skestock-worker:latest";
+        service.Build = new Aspire.Hosting.Docker.Resources.ServiceNodes.Build
+        {
+            Context = "..",
+            Dockerfile = "src/Worker/Dockerfile",
+            Target = "final"
+        };
     })
     .WithEnvironment($"{Services.OpenApiSettings}__{Services.OpenApiKey}", openAiApiKey)
     .WithEnvironment($"{Services.OpenApiSettings}__{Services.OpenApiModel}", openAiModel)
@@ -102,10 +119,12 @@ if (builder.ExecutionContext.IsPublishMode)
         })
         .WithComputeEnvironment(compose)
         .WithArgs(
+            "azurite",
             "--location", "/data",
             "--blobHost", "0.0.0.0",
             "--queueHost", "0.0.0.0",
-            "--tableHost", "0.0.0.0")
+            "--tableHost", "0.0.0.0",
+            "--skipApiVersionCheck")
         .WithVolume(Services.StorageVolumes, "/data")
         .WithEndpoint(targetPort: 10000, port: 10000, name: "blob", isExternal: true)
         .WithEndpoint(targetPort: 10001, port: 10001, name: "queue", isExternal: true)
@@ -133,7 +152,7 @@ if (builder.ExecutionContext.IsPublishMode)
 
     const string accountName = "devstoreaccount1";
     const string accountKey =
-        "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1Oc8g4w8r3F2mZ8T9h5e0r3p5m7m8r9s0u1v2w3x4y5z6A7B8C9D0E1F2G3H4I5J6K7L8M9N0";
+        "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
     var blobConnectionString =
         $"DefaultEndpointsProtocol=http;AccountName={accountName};AccountKey={accountKey};" +
         $"BlobEndpoint=http://{storageHost}:10000/{accountName}";
@@ -204,9 +223,5 @@ for (var index = 0; index < publicOrigins.Length; index++)
 {
     web.WithEnvironment($"Cors__AllowedOrigins__{index}", publicOrigins[index]);
 }
-
-// In publish mode the Angular build is copied into Web/wwwroot. Web already serves that directory,
-// so the frontend is build-only for deployment while remaining a Vite dev server in run mode.
-web.PublishWithContainerFiles(webfrontend, "wwwroot");
 
 builder.Build().Run();
