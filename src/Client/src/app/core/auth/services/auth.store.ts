@@ -8,6 +8,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, switchMap, tap } from 'rxjs';
 import { AuthHttp } from './auth.http';
 import { mapResponse } from '@ngrx/operators';
+import { SignalRBridge } from '@ske/signalr';
 
 type AuthState = { isAuthenticated: boolean };
 
@@ -22,7 +23,8 @@ export const AuthStore = signalStore(
   withProps(() => ({
     activatedRoute: inject(ActivatedRoute),
     router: inject(Router),
-    authHttp: inject(AuthHttp)
+    authHttp: inject(AuthHttp),
+    signalR: inject(SignalRBridge)
   })),
   withMethods((store) => {
     const login = rxMethod<Credentials>(
@@ -38,6 +40,9 @@ export const AuthStore = signalStore(
               mapResponse({
                 next: () => {
                   store.setLoginLoaded();
+                  void store.signalR.connect().catch((error: unknown) => {
+                    console.error('[SignalR] connection after login failed', error);
+                  });
                   store.router.navigate(['./categories']);
                 },
                 error: (error) => {
@@ -65,7 +70,10 @@ export const AuthStore = signalStore(
                 next: () => {
                   patchState(store, { isAuthenticated: false });
                   store.setLoginLoaded();
-                  store.router.navigate(['./login']);
+                  void store.router.navigate(['./login']).then(
+                    () => store.signalR.disconnect(),
+                    () => store.signalR.disconnect()
+                  );
                 },
                 error: (error) => {
                   patchState(store, { isAuthenticated: true });
@@ -93,6 +101,9 @@ export const AuthStore = signalStore(
                 // cookie still valid
                 store.setAuthLoaded();
                 patchState(store, { isAuthenticated: true });
+                void store.signalR.connect().catch((error: unknown) => {
+                  console.error('[SignalR] connection after session restore failed', error);
+                });
               },
               error: (error) => {
                 // cookie invalid, redirect to login
