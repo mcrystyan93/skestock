@@ -13,6 +13,8 @@ concurrency:
 env:
   DOTNET_VERSION: "10.0.x"
   NODE_VERSION: "22.x"
+  CLOUDFLARED_VERSION: "2026.9.1"
+  CLOUDFLARED_SHA256: "53b7a7a5420d188758d24341294acb0d1bca54296548ac05e38811a694ac6134"
   IMAGE_TAG: sha-${{ github.sha }}
 
 jobs:
@@ -137,9 +139,11 @@ jobs:
       DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
       DEPLOY_USER: ${{ vars.DEPLOY_USER }}
       PUBLIC_ORIGINS: ${{ vars.PUBLIC_ORIGINS }}
-      STORAGE_PUBLIC_HOST: ${{ vars.STORAGE_PUBLIC_HOST }}
+      STORAGE_PUBLIC_BLOB_ENDPOINT: ${{ vars.STORAGE_PUBLIC_BLOB_ENDPOINT }}
       OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
       DEPLOY_HEALTH_URL: ${{ vars.DEPLOY_HEALTH_URL }}
+      CLOUDFLARE_ACCESS_CLIENT_ID: ${{ secrets.CLOUDFLARE_ACCESS_CLIENT_ID }}
+      CLOUDFLARE_ACCESS_CLIENT_SECRET: ${{ secrets.CLOUDFLARE_ACCESS_CLIENT_SECRET }}
       SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
       REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -157,9 +161,11 @@ jobs:
           test -n "$DEPLOY_HOST" || { echo "::error::Missing vars.DEPLOY_HOST"; exit 1; }
           test -n "$DEPLOY_USER" || { echo "::error::Missing vars.DEPLOY_USER"; exit 1; }
           test -n "$PUBLIC_ORIGINS" || { echo "::error::Missing vars.PUBLIC_ORIGINS"; exit 1; }
-          test -n "$STORAGE_PUBLIC_HOST" || { echo "::error::Missing vars.STORAGE_PUBLIC_HOST"; exit 1; }
+          test -n "$STORAGE_PUBLIC_BLOB_ENDPOINT" || { echo "::error::Missing vars.STORAGE_PUBLIC_BLOB_ENDPOINT"; exit 1; }
           test -n "$OPENAI_MODEL" || { echo "::error::Missing vars.OPENAI_MODEL"; exit 1; }
           test -n "$DEPLOY_HEALTH_URL" || { echo "::error::Missing vars.DEPLOY_HEALTH_URL"; exit 1; }
+          test -n "$CLOUDFLARE_ACCESS_CLIENT_ID" || { echo "::error::Missing secrets.CLOUDFLARE_ACCESS_CLIENT_ID"; exit 1; }
+          test -n "$CLOUDFLARE_ACCESS_CLIENT_SECRET" || { echo "::error::Missing secrets.CLOUDFLARE_ACCESS_CLIENT_SECRET"; exit 1; }
           test -n "$SQL_PASSWORD" || { echo "::error::Missing secrets.SQL_PASSWORD"; exit 1; }
           test -n "$REDIS_PASSWORD" || { echo "::error::Missing secrets.REDIS_PASSWORD"; exit 1; }
           test -n "$OPENAI_API_KEY" || { echo "::error::Missing secrets.OPENAI_API_KEY"; exit 1; }
@@ -178,8 +184,8 @@ jobs:
           runtime_env="$RUNNER_TEMP/skestock-production.env"
           azurite_account_key="Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
           image_owner="$(printf '%s' "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')"
-          blob_connection_string="DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=${azurite_account_key};BlobEndpoint=http://${STORAGE_PUBLIC_HOST}:10000/devstoreaccount1"
-          queue_connection_string="DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=${azurite_account_key};QueueEndpoint=http://${STORAGE_PUBLIC_HOST}:10001/devstoreaccount1"
+          blob_connection_string="DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=${azurite_account_key};BlobEndpoint=http://skestock-storage:10000/devstoreaccount1"
+          queue_connection_string="DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=${azurite_account_key};QueueEndpoint=http://skestock-storage:10001/devstoreaccount1"
 
           {
             printf 'SKESTOCK_IMAGE_TAG=%s\n' "$IMAGE_TAG"
@@ -198,6 +204,7 @@ jobs:
             printf 'ConnectionStrings__skestock-cache=%s\n' "skestock-cache:6379,password=${REDIS_PASSWORD}"
             printf 'ConnectionStrings__blobservice=%s\n' "$blob_connection_string"
             printf 'ConnectionStrings__queues=%s\n' "$queue_connection_string"
+            printf 'Storage__PublicBlobEndpoint=%s\n' "$STORAGE_PUBLIC_BLOB_ENDPOINT"
           } > "$runtime_env"
 
           origin_index=0
@@ -207,9 +214,30 @@ jobs:
             origin_index=$((origin_index + 1))
           done < <(printf '%s' "$PUBLIC_ORIGINS" | tr ',' '\n')
 
+      - name: Install cloudflared
+        run: |
+          set -euo pipefail
+          cloudflared_path="$RUNNER_TEMP/cloudflared"
+          curl --fail --silent --show-error --location \
+            --output "$cloudflared_path" \
+            "https://github.com/cloudflare/cloudflared/releases/download/${CLOUDFLARED_VERSION}/cloudflared-linux-amd64"
+          printf '%s  %s\n' "$CLOUDFLARED_SHA256" "$cloudflared_path" | sha256sum --check --strict
+          chmod 755 "$cloudflared_path"
+          "$cloudflared_path" --version
+
       - name: Configure SSH
         run: |
           set -euo pipefail
+          cloudflared_proxy="$RUNNER_TEMP/skestock-cloudflared-ssh"
+          cat > "$cloudflared_proxy" <<'EOF'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          exec "$RUNNER_TEMP/cloudflared" access ssh \
+            --hostname "$1" \
+            --service-token-id "$CLOUDFLARE_ACCESS_CLIENT_ID" \
+            --service-token-secret "$CLOUDFLARE_ACCESS_CLIENT_SECRET"
+          EOF
+          chmod 700 "$cloudflared_proxy"
           printf '%s\n' "$DEPLOY_SSH_PRIVATE_KEY" > "$RUNNER_TEMP/skestock_deploy_key"
           printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/skestock_known_hosts"
           chmod 600 "$RUNNER_TEMP/skestock_deploy_key" "$RUNNER_TEMP/skestock_known_hosts"
@@ -217,14 +245,14 @@ jobs:
       - name: Prepare deployment directories
         run: |
           set -euo pipefail
-          ssh_args=(-i "$RUNNER_TEMP/skestock_deploy_key" -o IdentitiesOnly=yes -o UserKnownHostsFile="$RUNNER_TEMP/skestock_known_hosts" -o StrictHostKeyChecking=yes)
+          ssh_args=(-i "$RUNNER_TEMP/skestock_deploy_key" -o IdentitiesOnly=yes -o UserKnownHostsFile="$RUNNER_TEMP/skestock_known_hosts" -o StrictHostKeyChecking=yes -o "ProxyCommand=$RUNNER_TEMP/skestock-cloudflared-ssh %h")
           ssh "${ssh_args[@]}" "$DEPLOY_USER@$DEPLOY_HOST" \
             'install -d -m 700 "$HOME/.config/skestock" "$HOME/.config/skestock/quadlet" "$HOME/.config/containers/systemd"'
 
       - name: Upload deployment files
         run: |
           set -euo pipefail
-          ssh_args=(-i "$RUNNER_TEMP/skestock_deploy_key" -o IdentitiesOnly=yes -o UserKnownHostsFile="$RUNNER_TEMP/skestock_known_hosts" -o StrictHostKeyChecking=yes)
+          ssh_args=(-i "$RUNNER_TEMP/skestock_deploy_key" -o IdentitiesOnly=yes -o UserKnownHostsFile="$RUNNER_TEMP/skestock_known_hosts" -o StrictHostKeyChecking=yes -o "ProxyCommand=$RUNNER_TEMP/skestock-cloudflared-ssh %h")
           scp "${ssh_args[@]}" "$RUNNER_TEMP/skestock-production.env" \
             "$DEPLOY_USER@$DEPLOY_HOST:.config/skestock/production.env.new"
           scp "${ssh_args[@]}" deploy/deploy.sh \
@@ -235,14 +263,14 @@ jobs:
       - name: Log in to GHCR on the Fedora host
         run: |
           set -euo pipefail
-          ssh_args=(-i "$RUNNER_TEMP/skestock_deploy_key" -o IdentitiesOnly=yes -o UserKnownHostsFile="$RUNNER_TEMP/skestock_known_hosts" -o StrictHostKeyChecking=yes)
+          ssh_args=(-i "$RUNNER_TEMP/skestock_deploy_key" -o IdentitiesOnly=yes -o UserKnownHostsFile="$RUNNER_TEMP/skestock_known_hosts" -o StrictHostKeyChecking=yes -o "ProxyCommand=$RUNNER_TEMP/skestock-cloudflared-ssh %h")
           printf '%s' "$GHCR_DEPLOY_TOKEN" | ssh "${ssh_args[@]}" "$DEPLOY_USER@$DEPLOY_HOST" \
             "podman login ghcr.io --username '$GHCR_DEPLOY_USERNAME' --password-stdin"
 
       - name: Activate release
         run: |
           set -euo pipefail
-          ssh_args=(-i "$RUNNER_TEMP/skestock_deploy_key" -o IdentitiesOnly=yes -o UserKnownHostsFile="$RUNNER_TEMP/skestock_known_hosts" -o StrictHostKeyChecking=yes)
+          ssh_args=(-i "$RUNNER_TEMP/skestock_deploy_key" -o IdentitiesOnly=yes -o UserKnownHostsFile="$RUNNER_TEMP/skestock_known_hosts" -o StrictHostKeyChecking=yes -o "ProxyCommand=$RUNNER_TEMP/skestock-cloudflared-ssh %h")
           ssh "${ssh_args[@]}" "$DEPLOY_USER@$DEPLOY_HOST" \
             'chmod 700 "$HOME/.config/skestock/deploy.sh.new" && bash "$HOME/.config/skestock/deploy.sh.new"'
 
