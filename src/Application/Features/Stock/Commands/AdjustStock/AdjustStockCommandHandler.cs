@@ -2,6 +2,7 @@ using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Stock.Models;
 using skestock.Domain.Entities;
 using skestock.Domain.Enums;
+using skestock.Domain.Events.Stock;
 
 namespace skestock.Application.Features.Stock.Commands.AdjustStock;
 
@@ -62,6 +63,8 @@ public class AdjustStockCommandHandler(IApplicationDbContext dbContext, IUser us
                     Reason = request.Reason.ToString()
                 });
             }
+
+            batches[0].AddDomainEvent(new StockAdjustedEvent(request.ClassId, request.LocationId));
         }
         else
         {
@@ -81,6 +84,7 @@ public class AdjustStockCommandHandler(IApplicationDbContext dbContext, IUser us
                 GoodsReceiptId = null
             };
 
+            surplusBatch.AddDomainEvent(new StockAdjustedEvent(request.ClassId, request.LocationId));
             dbContext.StockBatches.Add(surplusBatch);
 
             dbContext.StockTransactions.Add(new StockTransaction

@@ -4,6 +4,7 @@ using skestock.Application.Features.Stock.Commands.AdjustStock;
 using skestock.Application.UnitTests.Features.GoodsReceipts.Commands.CreateGoodsReceipt;
 using skestock.Domain.Entities;
 using skestock.Domain.Enums;
+using skestock.Domain.Events.Stock;
 using NUnit.Framework;
 using Shouldly;
 
@@ -96,6 +97,10 @@ public class AdjustStockCommandHandlerTests
         transaction.Reason.ShouldBe(nameof(AdjustmentReason.Miscount));
         transaction.UserId.ShouldBe(userProfile.IdentityId);
         transaction.ClassId.ShouldBe(schoolClass.Id);
+
+        var stockAdjustedEvent = batch.DomainEvents.Single().ShouldBeOfType<StockAdjustedEvent>();
+        stockAdjustedEvent.ClassId.ShouldBe(schoolClass.Id);
+        stockAdjustedEvent.LocationId.ShouldBe(location.Id);
     }
 
     [Test]

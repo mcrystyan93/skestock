@@ -13,7 +13,9 @@ export const realtimeEventNames = {
   itemImportBatchConfirmed: 'ItemImportBatchConfirmed',
   goodsReceiptImportCreated: 'GoodsReceiptImportCreated',
   goodsReceiptImportProcessed: 'GoodsReceiptImportProcessed',
-  goodsReceiptImportConfirmed: 'GoodsReceiptImportConfirmed'
+  goodsReceiptImportConfirmed: 'GoodsReceiptImportConfirmed',
+  stockAdjusted: 'StockAdjusted',
+  stockBatchCreated: 'StockBatchCreated'
 } as const;
 
 export type RealtimeEventName = typeof realtimeEventNames[keyof typeof realtimeEventNames];

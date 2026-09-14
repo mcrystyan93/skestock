@@ -11,6 +11,7 @@ import { NzDatePickerComponent } from 'ng-zorro-antd/date-picker';
 import { CategoryDropdown } from '@ske/shared/categories';
 import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
 import { LocationDropdown } from '@ske/shared/locations';
+import { isNil } from 'lodash-es';
 
 @Component({
   imports: [
@@ -42,7 +43,7 @@ export class Form {
       initialState: this._initialState()
     }),
     computation: (state) => (
-      <StockBatchFormModel>{ ...state.initialState, category: state.category }
+      <StockBatchFormModel>{ ...state.initialState, category: isNil(state.category?.id) ? null : state.category }
     )
   });
 
@@ -66,7 +67,7 @@ export class Form {
     required(schemaPath.quantity, {
       message: 'Cantitatea este obligatorie.'
     });
-    required(schemaPath.location,{
+    required(schemaPath.location, {
       message: 'Locația este obligatorie.'
     });
     validate(schemaPath.quantity, (ctx) => {

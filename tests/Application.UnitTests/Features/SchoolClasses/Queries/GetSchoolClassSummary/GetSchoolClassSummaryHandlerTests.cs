@@ -283,7 +283,7 @@ public class GetSchoolClassSummaryHandlerTests
     }
 
     [Test]
-    public async Task Handle_SumsQuantityAcrossLocationsBeforeComparingToThreshold()
+    public async Task Handle_CountsItemOnceWhenAnyLocationIsBelowThreshold()
     {
         await using var context = CreateContext();
         var schoolClass = CreateSchoolClass();
@@ -294,8 +294,8 @@ public class GetSchoolClassSummaryHandlerTests
         context.AddRange(schoolClass, category, locationA, locationB, item);
         await context.SaveChangesAsync(CancellationToken.None);
 
-        // 6 + 6 = 12 >= 10 threshold when summed across locations, so it should NOT be low stock,
-        // even though each individual location's batch (6) is below the threshold on its own.
+        // Each location has 6, which is below the threshold. The item should still be counted
+        // only once even though it is low stock in both locations.
         context.StockBatches.AddRange(
             CreateBatch(item, locationA, schoolClass, quantity: 6),
             CreateBatch(item, locationB, schoolClass, quantity: 6));
@@ -305,6 +305,6 @@ public class GetSchoolClassSummaryHandlerTests
         var result = await handler.Handle(new GetSchoolClassSummaryQuery { Id = schoolClass.Id }, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.LowStockItemsCount.ShouldBe(0);
+        result.Value.LowStockItemsCount.ShouldBe(1);
     }
 }

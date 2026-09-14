@@ -2,6 +2,7 @@ using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.StockBatches.Models;
 using skestock.Domain.Entities;
 using skestock.Domain.Enums;
+using skestock.Domain.Events.StockBatches;
 
 namespace skestock.Application.Features.StockBatches.Commands.CreateStockBatch;
 
@@ -42,6 +43,7 @@ public class CreateStockBatchCommandHandler(IApplicationDbContext dbContext, IUs
             GoodsReceiptId = null
         };
 
+        batch.AddDomainEvent(new StockBatchCreatedEvent(request.ReceivedClassId, request.LocationId));
         dbContext.StockBatches.Add(batch);
         dbContext.StockTransactions.Add(transaction);
 

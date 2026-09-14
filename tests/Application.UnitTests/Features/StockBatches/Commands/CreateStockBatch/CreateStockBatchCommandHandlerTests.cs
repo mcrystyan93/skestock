@@ -3,6 +3,7 @@ using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.StockBatches.Commands.CreateStockBatch;
 using skestock.Domain.Entities;
 using skestock.Domain.Enums;
+using skestock.Domain.Events.StockBatches;
 using NUnit.Framework;
 using Shouldly;
 
@@ -97,6 +98,10 @@ public class CreateStockBatchCommandHandlerTests
         transaction.ClassId.ShouldBe(schoolClass.Id);
         transaction.GoodsReceiptId.ShouldBeNull();
         transaction.BatchId.ShouldBe(batch.Id);
+
+        var stockBatchCreatedEvent = batch.DomainEvents.Single().ShouldBeOfType<StockBatchCreatedEvent>();
+        stockBatchCreatedEvent.ClassId.ShouldBe(schoolClass.Id);
+        stockBatchCreatedEvent.LocationId.ShouldBe(location.Id);
     }
 
     [Test]

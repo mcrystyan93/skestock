@@ -17,4 +17,6 @@ public static class RealtimeEvents
     public const string ItemImportBatchCreated = "ItemImportBatchCreated";
     public const string ItemImportBatchProcessed = "ItemImportBatchProcessed";
     public const string ItemImportBatchConfirmed = "ItemImportBatchConfirmed";
+    public const string StockAdjusted = "StockAdjusted";
+    public const string StockBatchCreated = "StockBatchCreated";
 }

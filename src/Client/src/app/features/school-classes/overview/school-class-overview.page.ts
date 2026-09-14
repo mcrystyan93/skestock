@@ -42,10 +42,12 @@ export class SchoolClassOverviewPage implements OnInit, OnDestroy {
 
   public ngOnInit() {
     this._signalRGroupManager.join(realtimeGroups.goodsReceiptImportsList);
+    this._signalRGroupManager.join(realtimeGroups.schoolClass(this.id()));
   }
 
   public ngOnDestroy() {
     this._signalRGroupManager.leave(realtimeGroups.goodsReceiptImportsList);
+    this._signalRGroupManager.leave(realtimeGroups.schoolClass(this.id()));
   }
 
   private readonly _idEffectRef = effect(() => {

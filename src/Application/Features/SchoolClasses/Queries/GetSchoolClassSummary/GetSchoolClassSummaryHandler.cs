@@ -24,16 +24,21 @@ public class GetSchoolClassSummaryHandler(IApplicationDbContext dbContext)
         if (summary is null)
             return Result.Fail(new SchoolClassErrors.SchoolClassNotFound(request.Id));
 
-        // Low stock = sum of StockBatch.Quantity per item, across all locations for this class,
-        // is less than the item's MinThreshold. Items with no batches for this class are excluded
-        // (mirrors GetClassLocationStockHandler's "no batches -> doesn't appear" behaviour).
+        // Low stock = sum of StockBatch.Quantity per item and location for this class is less
+        // than the item's MinThreshold. Each item is counted once if any location is low.
+        // Items with no batches for this class are excluded (mirrors
+        // GetClassLocationStockHandler's "no batches -> doesn't appear" behaviour).
         var lowStockItemsCount = await dbContext.StockBatches
             .AsNoTracking()
             .Where(b => b.ReceivedClassId == request.Id)
-            .GroupBy(b => b.ItemId)
-            .Select(g => new { ItemId = g.Key, Quantity = g.Sum(b => b.Quantity) })
-            .Join(dbContext.Items, s => s.ItemId, i => i.Id, (s, i) => new { s.Quantity, i.MinThreshold })
-            .CountAsync(x => x.Quantity < x.MinThreshold, cancellationToken);
+            .GroupBy(b => new { b.ItemId, b.LocationId })
+            .Select(g => new { g.Key.ItemId, Quantity = g.Sum(b => b.Quantity) })
+            .Join(dbContext.Items, s => s.ItemId, i => i.Id,
+                (s, i) => new { s.ItemId, s.Quantity, i.MinThreshold })
+            .Where(x => x.Quantity < x.MinThreshold)
+            .Select(x => x.ItemId)
+            .Distinct()
+            .CountAsync(cancellationToken);
 
         var importCountsByStatus = await dbContext.GoodsReceiptImports
             .AsNoTracking()

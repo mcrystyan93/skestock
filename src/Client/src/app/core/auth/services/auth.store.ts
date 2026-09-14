@@ -38,7 +38,7 @@ export const AuthStore = signalStore(
               mapResponse({
                 next: () => {
                   store.setLoginLoaded();
-                  store.router.navigate(['./home']);
+                  store.router.navigate(['./categories']);
                 },
                 error: (error) => {
                   store.handleAuthError(error);

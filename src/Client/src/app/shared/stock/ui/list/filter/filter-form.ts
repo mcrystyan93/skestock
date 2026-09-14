@@ -1,10 +1,5 @@
 import { Component, input, linkedSignal, output } from '@angular/core';
-import {
-  CategoryDropdownValue,
-  ColumnFilter,
-  GetClassLocationStockRequest,
-  LocationDropdownValue
-} from '@ske/models';
+import { CategoryDropdownValue, ColumnFilter, GetClassLocationStockRequest, LocationDropdownValue } from '@ske/models';
 import { form, FormField, submit } from '@angular/forms/signals';
 import { isNil } from 'lodash-es';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +11,7 @@ import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { CategoryDropdown } from '@ske/shared/categories';
 import { LocationDropdown } from '@ske/shared/locations';
-import {NzDividerComponent} from 'ng-zorro-antd/divider';
+import { NzDividerComponent } from 'ng-zorro-antd/divider';
 
 @Component({
   imports: [
@@ -44,6 +39,7 @@ export class FilterForm {
   public readonly filter = input.required<GetClassLocationStockRequest>();
 
   public readonly onFilterChange = output<GetClassLocationStockRequest>();
+  public readonly onAdd = output<void>();
 
   private readonly _formModel = linkedSignal({
     source: () => this.filter(),
