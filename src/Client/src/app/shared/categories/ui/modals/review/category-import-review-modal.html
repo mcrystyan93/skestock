@@ -1,56 +1,69 @@
-<div *nzModalTitle>Revizuire import categorii</div>
+<div *nzModalTitle>
+  <nz-space>
+    <span *nzSpaceItem>
+      Revizuire import categorii
+      @if (store.review(); as review) {
+        <span> - {{ statusLabels[review.status] }}</span>
+      }
+    </span>
+    @if (store.review(); as review) {
+      <nz-tag *nzSpaceItem
+              [nzColor]="statusColors[review.status]">
+        {{ statusLabels[review.status] }}
+      </nz-tag>
+    }
+  </nz-space>
+</div>
 
 <ske-error-alert [problemDetail]="store.reviewProblemDetail()"
                  [validationErrors]="store.reviewValidationErrors()" />
 
-@if (store.review(); as review) {
-  <p class="mb-3 text-sm text-gray-600">Stare: {{ review.status }}</p>
-
-  @if (store.files().length > 0) {
-    <p class="mb-1 text-sm font-medium">Fisiere procesate</p>
-    <ul class="mb-4 text-sm text-gray-600">
-      @for (file of store.files(); track file.fileMetadataId) {
-        <li>{{ file.originalName }}</li>
-      }
-    </ul>
-  }
-
-  @if (store.history().length > 0) {
-    <p class="mb-1 text-sm font-medium">Istoric procesare</p>
-    <ul class="mb-4 text-sm text-gray-600">
-      @for (entry of store.history(); track $index) {
-        <li>{{ entry.status }} - incercarea {{ entry.attempt }} ({{ entry.createdAtUtc }})</li>
-      }
-    </ul>
-  }
-
-  @if (store.names().length > 0) {
-    <p class="mb-2 text-sm font-medium">Categorii propuse</p>
-    <div class="flex max-h-96 flex-col gap-2 overflow-auto">
-      @for (name of store.names(); track $index; let index = $index) {
-        <div class="flex items-center gap-2">
-          <input nz-input
-                 [value]="name"
-                 [attr.aria-label]="'Denumire categorie ' + (index + 1)"
-                 (input)="store.updateName(index, $event)" />
-          <button nz-button
-                  nzType="link"
-                  type="button"
-                  [attr.aria-label]="'Elimina categoria ' + (index + 1)"
-                  (click)="store.removeName(index)">
-            Elimina
-          </button>
+<nz-tabs>
+  <nz-tab nzTitle="Rezumat">
+    @if (store.review(); as review) {
+      @if (store.files().length > 0) {
+        <p nz-typography>Fisiere procesate</p>
+        <div class="flex gap-2 mb-2">
+          @for (file of store.files(); track file.fileMetadataId) {
+            <nz-tag nzColor="geekblue">
+              <nz-space class="p-1">
+                <nz-icon *nzSpaceItem
+                         nzType="icons:file"></nz-icon>
+                <strong *nzSpaceItem
+                        nz-typography>{{ file.originalName }}</strong>
+              </nz-space>
+            </nz-tag>
+          }
         </div>
       }
-    </div>
-  } @else {
-    <p class="text-sm text-gray-600">Nu au fost extrase categorii.</p>
-  }
 
-  @if (review.errorMessage; as errorMessage) {
-    <p class="mt-3 text-sm text-red-500">{{ errorMessage }}</p>
-  }
-}
+      @if (review.errorMessage; as errorMessage) {
+        <p nz-typography
+           nzType="danger">{{ errorMessage }}</p>
+      }
+    }
+
+
+    <ske-category-import-review-table [lines]="store.lines()"
+                                      [loading]="store.reviewLoading()" />
+  </nz-tab>
+  <nz-tab nzTitle="Istoric">
+    @if (store.history().length > 0) {
+      <nz-timeline nzReverse>
+        @for (entry of store.history(); track $index) {
+          <nz-timeline-item>
+            <p>{{ historyStatusLabels[entry.status] }} - incercarea {{ entry.attempt }}</p>
+            <p>{{ entry.createdAtUtc | date:'short' }}</p>
+            @if (entry.message) {
+              <p nz-typography
+                 nzType="secondary">{{ entry.message }}</p>
+            }
+          </nz-timeline-item>
+        }
+      </nz-timeline>
+    }
+  </nz-tab>
+</nz-tabs>
 
 <div *nzModalFooter>
   <nz-space>
@@ -58,17 +71,15 @@
             *nzSpaceItem
             nzType="default"
             type="button"
-            (click)="close()">
-      Inchide
+            (click)="close()">Inchide
     </button>
     <button nz-button
             *nzSpaceItem
             nzType="primary"
             type="button"
             [nzLoading]="store.reviewConfirmLoading()"
-            [disabled]="store.reviewLoading() || store.review()?.status !== 'pendingReview' || !store.names().length"
-            (click)="store.confirm()">
-      Confirma si creeaza categoriile
+            [disabled]="store.reviewLoading() || store.review()?.status !== 'pendingReview' || !store.lines().length"
+            (click)="save()">Confirma si creeaza categoriile
     </button>
   </nz-space>
 </div>

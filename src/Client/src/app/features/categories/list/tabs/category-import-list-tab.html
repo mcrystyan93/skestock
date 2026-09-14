@@ -4,5 +4,5 @@
                  [validationErrors]="store.categoryImportListValidationErrors()" />
 
 <div class="grow relative">
-  <ske-category-import-table-container />
+  <ske-category-import-table-container (review)="review.emit($event)" />
 </div>

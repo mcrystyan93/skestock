@@ -74,9 +74,12 @@ public class EditItemCommandValidator : AbstractValidator<EditItemCommand>
     private static async Task<bool> IsSkuUniqueAsync(IApplicationDbContext dbContext, Guid id, string sku, CancellationToken cancellationToken)
     {
         var normalized = sku.Trim().ToLower();
-        return !await dbContext.Items
-            .AsNoTracking()
-            .AnyAsync(i => i.Id != id && i.Sku != null && i.Sku.ToLower() == normalized, cancellationToken);
+        var query = dbContext.Items.AsNoTracking().AsQueryable();
+        query = TextSearchCollation.IsSqlServer(dbContext.Database)
+            ? query.Where(i => i.Id != id && i.Sku != null &&
+                EF.Functions.Collate(i.Sku.Trim(), TextSearchCollation.AccentInsensitive) == normalized)
+            : query.Where(i => i.Id != id && i.Sku != null && i.Sku.Trim().ToLower() == normalized);
+        return !await query.AnyAsync(cancellationToken);
     }
 
     private static async Task<bool> CategoryExistsAsync(IApplicationDbContext dbContext, Guid categoryId, CancellationToken cancellationToken)

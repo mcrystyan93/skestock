@@ -52,7 +52,7 @@ public class ApplicationDbContextInitialiser
             {
                 // This repository has no migrations; recreating the schema applies model removals such
                 // as the legacy ItemImports table through the existing supported initialization path.
-                // await _context.Database.EnsureDeletedAsync();
+                 await _context.Database.EnsureDeletedAsync();
                 await _context.Database.EnsureCreatedAsync();
             }
         }
@@ -119,9 +119,9 @@ public class ApplicationDbContextInitialiser
 
         await SeedCategoriesAsync(administrator!.Id);
         await SeedLocationsAsync(administrator!.Id);
-        await SeedSchoolClassesAsync(administrator!.Id);
-        await SeedItemsAsync(administrator!.Id);
-        await SeedGoodsReceiptAsync(administrator!.Id);
+        // await SeedSchoolClassesAsync(administrator!.Id);
+        // await SeedItemsAsync(administrator!.Id);
+        // await SeedGoodsReceiptAsync(administrator!.Id);
     }
 
     private static readonly (string Name, string Type, bool IsDefault)[] DefaultLocations =
@@ -135,27 +135,130 @@ public class ApplicationDbContextInitialiser
 
     private static readonly string[] DefaultCategoryNames =
     [
-        "Lactate și Ouă",
-        "Brânzeturi",
-        "Carne Proaspătă",
-        "Pește și Fructe de Mare",
-        "Mezeluri și Specialități",
-        "Legume Proaspete",
-        "Fructe Proaspete",
-        "Produse Congelate",
-        "Conserve",
-        "Semipreparate și Tartinabile",
-        "Alimente de Bază",
-        "Paste și Orez",
-        "Ulei și Oțet",
-        "Condimente și Ingrediente",
-        "Nuci și Fructe Uscate",
-        "Cereale și Mic Dejun",
-        "Dulciuri și Biscuiți",
-        "Ingrediente Patiserie",
-        "Băuturi Vegetale și Solubile",
-        "Detergenți și Dezinfectanți",
-        "Consumabile Menaj"
+        // Lactate și derivate
+        "Lapte",
+        "Lapte fără lactoză",
+        "Iaurt",
+        "Brânză (cașcaval, telemea, brânză proaspătă)",
+        "Unt",
+        "Smântână/frișcă",
+        "Ouă",
+        "Produse lactate fermentate (chefir, sana)",
+ 
+        // Carne și pește
+        "Carne de porc",
+        "Carne de vită",
+        "Carne de pui",
+        "Carne de curcan",
+        "Carne de miel",
+        "Mezeluri (șuncă, salam, cârnați)",
+        "Pește proaspăt",
+        "Fructe de mare",
+        "Pește afumat/sărat",
+        "Carne tocată",
+ 
+        // Congelate
+        "Legume congelate",
+        "Fructe congelate",
+        "Pește/fructe de mare congelate",
+        "Pizza congelată",
+        "Înghețată",
+        "Semipreparate congelate (chiftele, șnițele)",
+        "Aluaturi congelate",
+        "Cartofi congelați (pommes frites)",
+        "Deserturi congelate",
+ 
+        // Fructe și legume proaspete
+        "Legume cu frunze (salată, spanac)",
+        "Legume rădăcinoase (morcov, sfeclă)",
+        "Roșii, ardei, castraveți",
+        "Ceapă, usturoi, praz",
+        "Cartofi",
+        "Fructe autohtone (mere, pere)",
+        "Fructe exotice (banane, kiwi)",
+        "Citrice",
+        "Ciuperci",
+        "Verdețuri și ierburi aromatice",
+ 
+        // Panificație și cofetărie
+        "Pâine albă",
+        "Pâine integrală/specială",
+        "Produse de patiserie",
+        "Cereale de mic dejun",
+        "Biscuiți",
+        "Prăjituri/torturi",
+        "Covrigi/lipii",
+        "Batoane de cereale",
+ 
+        // Băuturi
+        "Apă plată",
+        "Apă minerală",
+        "Sucuri naturale",
+        "Băuturi carbogazoase",
+        "Cafea boabe/măcinată",
+        "Cafea instant",
+        "Ceai",
+        "Bere",
+        "Vin",
+        "Băuturi spirtoase",
+ 
+        // Băcănie/produse de bază
+        "Paste făinoase",
+        "Orez",
+        "Ulei de gătit",
+        "Oțet",
+        "Zahăr",
+        "Îndulcitori",
+        "Făină",
+        "Conserve legume",
+        "Conserve pește",
+        "Conserve carne",
+        "Condimente și mirodenii",
+        "Sosuri (ketchup, maioneză, muștar)",
+        "Muraturi",
+        "Miere și gemuri",
+        "Cereale/leguminoase uscate (linte, fasole)",
+ 
+        // Snacksuri și dulciuri
+        "Chipsuri",
+        "Nuci și semințe",
+        "Ciocolată",
+        "Bomboane",
+        "Gumă de mestecat",
+        "Popcorn",
+ 
+        // Produse pentru copii
+        "Lapte praf/formule",
+        "Alimente pentru bebeluși",
+        "Scutece",
+        "Șervețele umede pentru copii",
+ 
+        // Îngrijire personală
+        "Șampon",
+        "Balsam de păr",
+        "Gel de duș",
+        "Săpun solid",
+        "Pastă de dinți",
+        "Periuțe de dinți",
+        "Deodorant",
+        "Produse de igienă feminină",
+        "Aparate/lame de ras",
+        "Produse cosmetice de bază (creme, loțiuni)",
+ 
+        // Curățenie casă
+        "Detergent de rufe",
+        "Balsam de rufe",
+        "Detergent de vase",
+        "Produse de curățat universale",
+        "Produse de curățat geamuri",
+        "Produse de curățat baie/WC",
+        "Pungi de gunoi",
+        "Șervețele de bucătărie/hârtie igienică",
+ 
+        // Diverse
+        "Produse pentru animale de companie",
+        "Baterii/consumabile pentru casă"
+
     ];
 
     private async Task SeedCategoriesAsync(Guid administratorIdentityId)

@@ -1,6 +1,6 @@
 export const realtimeGroups = {
   categoriesList: 'categories-list',
-  categoryImportsList: 'category-imports-list',
+  categoryImportBatchesList: 'category-import-batches-list',
   itemsList: 'items-list',
   itemImportBatchesList: 'item-import-batches-list',
   goodsReceiptImportsList: 'goods-receipts-import-list',

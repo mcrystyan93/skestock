@@ -13,8 +13,11 @@ public static class FilterQueryBuilder<TEntity>
     public static IQueryable<TEntity> Apply(
         IQueryable<TEntity> query,
         IEnumerable<ColumnFilter> clauses,
-        IFilterConfiguration<TEntity> config)
+        IFilterConfiguration<TEntity> config,
+        bool useDatabaseCollation = true)
     {
+        useDatabaseCollation &= query.Provider is not EnumerableQuery<TEntity>;
+
         foreach (var filter in clauses)
         {
             if (!config.Fields.TryGetValue(filter.Field, out var field))
@@ -30,7 +33,7 @@ public static class FilterQueryBuilder<TEntity>
                 if (inValues.Count == 0)
                     continue;
 
-                query = ApplyInClause(query, selector, memberType, targetType, inValues);
+                query = ApplyInClause(query, selector, memberType, targetType, inValues, useDatabaseCollation);
                 continue;
             }
 
@@ -40,7 +43,14 @@ public static class FilterQueryBuilder<TEntity>
                 if (rangeValues is null)
                     continue;
 
-                query = ApplyBetweenClause(query, selector, memberType, targetType, rangeValues.Value.Start, rangeValues.Value.End);
+                query = ApplyBetweenClause(
+                    query,
+                    selector,
+                    memberType,
+                    targetType,
+                    rangeValues.Value.Start,
+                    rangeValues.Value.End,
+                    useDatabaseCollation);
                 continue;
             }
 
@@ -48,7 +58,14 @@ public static class FilterQueryBuilder<TEntity>
             if (typedValue is null)
                 continue;
 
-            query = ApplySingleValueClause(query, selector, memberType, targetType, filter.Operator, typedValue);
+            query = ApplySingleValueClause(
+                query,
+                selector,
+                memberType,
+                targetType,
+                filter.Operator,
+                typedValue,
+                useDatabaseCollation);
         }
 
         return query;
@@ -60,10 +77,11 @@ public static class FilterQueryBuilder<TEntity>
         Type memberType,
         Type targetType,
         FilterOperator op,
-        object value)
+        object value,
+        bool useDatabaseCollation)
     {
         var parameter = selector.Parameters[0];
-        var body = selector.Body;
+        var body = CollateString(selector.Body, targetType, useDatabaseCollation);
         var constant = BuildTypedConstantExpression(value, memberType, targetType);
         if (constant is null)
             return query;
@@ -88,10 +106,11 @@ public static class FilterQueryBuilder<TEntity>
         LambdaExpression selector,
         Type memberType,
         Type targetType,
-        IReadOnlyList<object?> values)
+        IReadOnlyList<object?> values,
+        bool useDatabaseCollation)
     {
         var parameter = selector.Parameters[0];
-        var body = selector.Body;
+        var body = CollateString(selector.Body, targetType, useDatabaseCollation);
 
         var typedList = CreateTypedList(memberType, targetType, values);
         var containsMethod = typeof(Enumerable)
@@ -114,10 +133,11 @@ public static class FilterQueryBuilder<TEntity>
         Type memberType,
         Type targetType,
         object start,
-        object end)
+        object end,
+        bool useDatabaseCollation)
     {
         var parameter = selector.Parameters[0];
-        var body = selector.Body;
+        var body = CollateString(selector.Body, targetType, useDatabaseCollation);
         var comparer = Comparer<object>.Default;
 
         var normalizedStart = comparer.Compare(start, end) <= 0 ? start : end;
@@ -135,6 +155,19 @@ public static class FilterQueryBuilder<TEntity>
         var predicate = Expression.Lambda<Func<TEntity, bool>>(betweenExpression, parameter);
         return query.Where(predicate);
     }
+
+    private static Expression CollateString(Expression expression, Type targetType, bool useDatabaseCollation) =>
+        targetType == typeof(string) && useDatabaseCollation
+            ? Expression.Call(
+                typeof(RelationalDbFunctionsExtensions)
+                    .GetMethods()
+                    .Single(method => method.Name == nameof(RelationalDbFunctionsExtensions.Collate)
+                                      && method.IsGenericMethodDefinition)
+                    .MakeGenericMethod(typeof(string)),
+                Expression.Property(null, typeof(EF), nameof(EF.Functions)),
+                expression,
+                Expression.Constant(TextSearchCollation.AccentInsensitive))
+            : expression;
 
     private static object? ConvertToType(object? value, Type targetType)
     {

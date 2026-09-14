@@ -46,11 +46,15 @@ public class GetGoodsReceiptImportByIdHandler(IApplicationDbContext dbContext)
 
         if (productCodes.Count > 0)
         {
-            // Compare on ToUpper() on both sides (translatable to SQL) so SKU matching is
-            // case-insensitive regardless of the extracted product code's casing.
-            var matchedItems = await dbContext.Items
+            // Apply an accent-insensitive collation so SKU matching is case- and accent-insensitive.
+            var matchedItemsQuery = dbContext.Items
                 .AsNoTracking()
-                .Where(item => item.IsActive && item.Sku != null && productCodes.Contains(item.Sku.ToUpper()))
+                .Where(item => item.IsActive && item.Sku != null);
+            matchedItemsQuery = TextSearchCollation.IsSqlServer(dbContext.Database)
+                ? matchedItemsQuery.Where(item => productCodes.Contains(
+                    EF.Functions.Collate(item.Sku!.Trim(), TextSearchCollation.AccentInsensitive)))
+                : matchedItemsQuery.Where(item => productCodes.Contains(item.Sku!.Trim().ToUpper()));
+            var matchedItems = await matchedItemsQuery
                 .Select(item => new GoodsReceiptImportReviewMatchDto
                 {
                     Id = item.Id,

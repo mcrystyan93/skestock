@@ -23,13 +23,23 @@ public class GetAllGoodsReceiptsHandler(IApplicationDbContext dbContext)
             .AsNoTracking()
             .AsQueryable();
 
-        query = FilterQueryBuilder<GoodsReceipt>.Apply(query, request.Filters, FilterConfiguration);
+        query = FilterQueryBuilder<GoodsReceipt>.Apply(
+            query,
+            request.Filters,
+            FilterConfiguration,
+            TextSearchCollation.IsSqlServer(dbContext.Database));
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
             var term = request.SearchTerm.Trim();
-            query = query.Where(r =>
-                r.Note.Contains(term) || (r.SupplierReference != null && r.SupplierReference.Contains(term)));
+            query = TextSearchCollation.IsSqlServer(dbContext.Database)
+                ? query.Where(r =>
+                    EF.Functions.Collate(r.Note, TextSearchCollation.AccentInsensitive).Contains(term) ||
+                    (r.SupplierReference != null &&
+                     EF.Functions.Collate(r.SupplierReference, TextSearchCollation.AccentInsensitive).Contains(term)))
+                : query.Where(r =>
+                    r.Note.Contains(term) ||
+                    (r.SupplierReference != null && r.SupplierReference.Contains(term)));
         }
 
         if (cursorState?.KeyValues.Count > 0)

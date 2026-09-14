@@ -1,7 +1,8 @@
 <div *nzModalTitle>Importă categorii</div>
 
-<p class="mb-4 text-sm text-gray-600">
-  Încarcă un document sau mai multe cu categoriile care vor fi analizate automat.
+<p nz-typography
+   nzType="secondary">
+  Încarcă un document sau mai multe cu produsele care vor fi analizate automat.
 </p>
 
 <ske-file-upload [multiple]="true"
@@ -10,25 +11,29 @@
 @if (fileStorage.uploadLoading() || fileStorage.hasUploadFailures()) {
   <nz-progress [nzPercent]="fileStorage.uploadPercent()"
                [nzStatus]="progressStatus()"
-               [nzFormat]="progressFormat" />
+               [nzFormat]="progressFormat()" />
 
   @if (fileStorage.currentFileName(); as currentFileName) {
-    <p class="mt-2 text-sm text-gray-500">Se încarcă {{ currentFileName }}</p>
+    <p nz-typography
+       nzType="secondary">Se încarcă {{ currentFileName }}</p>
   }
 
   @if (fileStorage.hasUploadFailures()) {
-    <p class="mt-2 text-sm text-red-500">Fisiere ce nu au putut fi incarcate:</p>
-    <ul class="text-sm text-red-500">
+    <p nz-typography
+       nzType="danger">Fisiere ce nu au putut fi incarcate:</p>
+    <ul>
       @for (failedFile of fileStorage.failedFiles(); track failedFile.name) {
-        <li>{{ failedFile.name }}</li>
+        <li nz-typography
+            nzType="danger">
+          {{ failedFile.name }}
+        </li>
       }
     </ul>
   }
 }
 
-@if (store.categoryImportProblemDetail(); as problemDetail) {
-  <ske-error-alert [problemDetail]="problemDetail" />
-}
+<ske-error-alert [problemDetail]="store.categoryImportProblemDetail()"
+                 [validationErrors]="store.categoryImportValidationErrors()" />
 
 <div *nzModalFooter>
   <nz-space>

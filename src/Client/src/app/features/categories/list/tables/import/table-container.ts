@@ -1,5 +1,5 @@
-import { Component, inject } from '@angular/core';
-import { CategoryImportListItemDto } from '@ske/models';
+import { Component, inject, output } from '@angular/core';
+import { CategoryImportBatchFileDto, CategoryImportBatchListItemDto } from '@ske/models';
 import { FileStorageState } from '@ske/shared/storage';
 import { CategoryImportState } from '@ske/shared/categories';
 import { Table } from './table';
@@ -17,9 +17,10 @@ import { Table } from './table';
 })
 export class TableContainer {
   public readonly store = inject(CategoryImportState);
-  public readonly fileStorageState = inject(FileStorageState);
+  private readonly _fileStorage = inject(FileStorageState);
+  public readonly review = output<CategoryImportBatchListItemDto>();
 
-  public downloadFile(importDto: CategoryImportListItemDto) {
-    this.fileStorageState.downloadFile(importDto.fileMetadataId);
+  public download(file: CategoryImportBatchFileDto) {
+    this._fileStorage.downloadFile(file.fileMetadataId);
   }
 }

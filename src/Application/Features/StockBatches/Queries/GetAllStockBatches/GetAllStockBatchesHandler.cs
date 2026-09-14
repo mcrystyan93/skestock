@@ -23,12 +23,22 @@ public class GetAllStockBatchesHandler(IApplicationDbContext dbContext)
             .AsNoTracking()
             .AsQueryable();
 
-        query = FilterQueryBuilder<StockBatch>.Apply(query, request.Filters, FilterConfiguration);
+        query = FilterQueryBuilder<StockBatch>.Apply(
+            query,
+            request.Filters,
+            FilterConfiguration,
+            TextSearchCollation.IsSqlServer(dbContext.Database));
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
             var term = request.SearchTerm.Trim();
-            query = query.Where(b => b.Item.Name.Contains(term) || b.Location.Name.Contains(term));
+            query = TextSearchCollation.IsSqlServer(dbContext.Database)
+                ? query.Where(b =>
+                    EF.Functions.Collate(b.Item.Name, TextSearchCollation.AccentInsensitive).Contains(term) ||
+                    EF.Functions.Collate(b.Location.Name, TextSearchCollation.AccentInsensitive).Contains(term))
+                : query.Where(b =>
+                    b.Item.Name.Contains(term) ||
+                    b.Location.Name.Contains(term));
         }
 
         if (cursorState?.KeyValues.Count > 0)

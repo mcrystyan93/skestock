@@ -5,8 +5,8 @@
     </span>
     @if (store.review(); as review) {
       <nz-tag *nzSpaceItem
-              [nzColor]="review.status === 'pendingReview' ? 'blue' : (review.status === 'confirmed' ? 'green' : 'red')">
-        {{ review.status }}
+              [nzColor]="statusColors[review.status]">
+        {{ statusLabels[review.status] }}
       </nz-tag>
     }
   </nz-space>
@@ -47,8 +47,12 @@
       <nz-timeline nzReverse>
         @for (entry of store.history(); track $index) {
           <nz-timeline-item>
-            <p >{{ entry.status }} - incercarea {{ entry.attempt }}</p>
-            <p >{{ entry.createdAtUtc | date:'short' }}</p>
+            <p>{{ historyStatusLabels[entry.status] }} - incercarea {{ entry.attempt }}</p>
+            <p>{{ entry.createdAtUtc | date:'short' }}</p>
+            @if (entry.message) {
+              <p nz-typography
+                 nzType="secondary">{{ entry.message }}</p>
+            }
           </nz-timeline-item>
         }
       </nz-timeline>

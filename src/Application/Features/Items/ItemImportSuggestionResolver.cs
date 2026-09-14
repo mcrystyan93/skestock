@@ -63,11 +63,13 @@ public static class ItemImportSuggestionResolver
         {
             var upperNames = categoryNames.Select(n => n.ToUpperInvariant()).ToList();
 
-            // Compare on ToUpper() on both sides (translatable to SQL) so the "already exists" flag is
-            // case-insensitive regardless of the suggested category name's casing.
-            var matchedCategories = await dbContext.Categories
-                .AsNoTracking()
-                .Where(c => upperNames.Contains(c.Name.Trim().ToUpper()))
+            // Apply an accent-insensitive collation so the "already exists" flag ignores diacritics.
+            var matchedCategoriesQuery = dbContext.Categories.AsNoTracking().AsQueryable();
+            matchedCategoriesQuery = TextSearchCollation.IsSqlServer(dbContext.Database)
+                ? matchedCategoriesQuery.Where(c => upperNames.Contains(
+                    EF.Functions.Collate(c.Name.Trim(), TextSearchCollation.AccentInsensitive)))
+                : matchedCategoriesQuery.Where(c => upperNames.Contains(c.Name.Trim().ToUpper()));
+            var matchedCategories = await matchedCategoriesQuery
                 .Select(c => new ItemImportBatchReviewCategoryDto
                 {
                     Id = c.Id,
@@ -85,10 +87,17 @@ public static class ItemImportSuggestionResolver
         {
             var upperItemNames = itemNames.Select(n => n.ToUpperInvariant()).ToList();
             var upperSkus = skus.Select(s => s.ToUpperInvariant()).ToList();
-            existingItems = await dbContext.Items
-                .AsNoTracking()
-                .Where(i => upperItemNames.Contains(i.Name.Trim().ToUpper()) ||
-                            (i.Sku != null && upperSkus.Contains(i.Sku.Trim().ToUpper())))
+            var existingItemsQuery = dbContext.Items.AsNoTracking().AsQueryable();
+            existingItemsQuery = TextSearchCollation.IsSqlServer(dbContext.Database)
+                ? existingItemsQuery.Where(i =>
+                    upperItemNames.Contains(
+                        EF.Functions.Collate(i.Name.Trim(), TextSearchCollation.AccentInsensitive)) ||
+                    (i.Sku != null && upperSkus.Contains(
+                        EF.Functions.Collate(i.Sku.Trim(), TextSearchCollation.AccentInsensitive))))
+                : existingItemsQuery.Where(i =>
+                    upperItemNames.Contains(i.Name.Trim().ToUpper()) ||
+                    (i.Sku != null && upperSkus.Contains(i.Sku.Trim().ToUpper())));
+            existingItems = await existingItemsQuery
                 .Select(i => new ItemImportBatchReviewItemDto
                 {
                     Id = i.Id,

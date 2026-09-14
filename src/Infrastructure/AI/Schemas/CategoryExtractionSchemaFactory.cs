@@ -10,10 +10,11 @@ public sealed class CategoryExtractionSchemaFactory(IApplicationDbContext dbCont
     : IExtractionSchemaFactory<CategoryExtractionResult>
 {
     public string Prompt =>
-        "Inspect the attached document and identify category names that are present in the document " +
+        "Inspect the attached documents and identify category names that are present in the documents " +
         "but are not already in the existing category list. Return only newly discovered categories. " +
         "Compare names case-insensitively after trimming whitespace, and do not return duplicates. " +
-        "If no new categories are found, return an empty categories array.";
+        "If no new categories are found, return an empty categories array. Return categories in romanian. " +
+        "The category should be specific enough to be useful for filtering items in the future.";
 
     public async Task<JsonObject> Create(CancellationToken cancellationToken)
     {

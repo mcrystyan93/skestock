@@ -44,8 +44,11 @@ public class UpdateSchoolClassCommandValidator : AbstractValidator<UpdateSchoolC
     private static async Task<bool> IsNameUniqueAsync(IApplicationDbContext dbContext, Guid id, string name, CancellationToken cancellationToken)
     {
         var normalized = name.Trim().ToLower();
-        return !await dbContext.SchoolClasses
-            .AsNoTracking()
-            .AnyAsync(c => c.Id != id && c.Name.ToLower() == normalized, cancellationToken);
+        var query = dbContext.SchoolClasses.AsNoTracking().AsQueryable();
+        query = TextSearchCollation.IsSqlServer(dbContext.Database)
+            ? query.Where(c => c.Id != id &&
+                EF.Functions.Collate(c.Name.Trim(), TextSearchCollation.AccentInsensitive) == normalized)
+            : query.Where(c => c.Id != id && c.Name.Trim().ToLower() == normalized);
+        return !await query.AnyAsync(cancellationToken);
     }
 }

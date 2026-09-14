@@ -1,9 +1,9 @@
 export const realtimeEventNames = {
   categoryCreated: 'CategoryCreated',
   categoryUpdated: 'CategoryUpdated',
-  categoryImportCreated: 'CategoryImportCreated',
-  categoryImportProcessed: 'CategoryImportProcessed',
-  categoryImportConfirmed: 'CategoryImportConfirmed',
+  categoryImportBatchCreated: 'CategoryImportBatchCreated',
+  categoryImportBatchProcessed: 'CategoryImportBatchProcessed',
+  categoryImportBatchConfirmed: 'CategoryImportBatchConfirmed',
   itemCreated: 'ItemCreated',
   itemUpdated: 'ItemUpdated',
   itemDisabled: 'ItemDisabled',

@@ -1,6 +1,6 @@
 import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CategoryListState } from '../services/category-list.store';
-import { CategoryDto, GetAllCategoriesRequest } from '@ske/models';
+import { CategoryDto, CategoryImportBatchListItemDto, GetAllCategoriesRequest } from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { Header } from './header/header';
 import {
@@ -56,17 +56,21 @@ export class CategoriesPage implements OnInit, OnDestroy {
   }
 
   public onImport() {
-    const modalRef = this._modalService.create({
+    this._modalService.create({
       nzContent: CategoryImportModal,
       nzCentered: true,
       nzMaskClosable: false
     });
   }
 
+  public onReview(categoryImport: CategoryImportBatchListItemDto) {
+    this.openCategoryImportReview(categoryImport.id);
+  }
+
   private openCategoryImportReview(importId: string) {
     const modalRef = this._modalService.create({
       nzContent: CategoryImportReviewModal,
-      nzData: { importId, isBatch: true },
+      nzData: importId,
       nzWidth: '720px',
       nzCentered: true,
       nzMaskClosable: false
@@ -80,12 +84,12 @@ export class CategoriesPage implements OnInit, OnDestroy {
 
   public ngOnInit() {
     this._signalRGroupManager.join(realtimeGroups.categoriesList);
-    this._signalRGroupManager.join(realtimeGroups.categoryImportsList);
+    this._signalRGroupManager.join(realtimeGroups.categoryImportBatchesList);
   }
 
   public ngOnDestroy() {
     this._signalRGroupManager.leave(realtimeGroups.categoriesList);
-    this._signalRGroupManager.leave(realtimeGroups.categoryImportsList);
+    this._signalRGroupManager.leave(realtimeGroups.categoryImportBatchesList);
   }
 
   private openCategoryModal(category: CategoryDto | null = null) {

@@ -41,9 +41,12 @@ public class CreateLocationCommandValidator : AbstractValidator<CreateLocationCo
     private static async Task<bool> IsNameUniqueAsync(IApplicationDbContext dbContext, string name, CancellationToken cancellationToken)
     {
         var normalized = name.Trim().ToLower();
-        return !await dbContext.Locations
-            .AsNoTracking()
-            .AnyAsync(l => l.Name.ToLower() == normalized, cancellationToken);
+        var query = dbContext.Locations.AsNoTracking().AsQueryable();
+        query = TextSearchCollation.IsSqlServer(dbContext.Database)
+            ? query.Where(l =>
+                EF.Functions.Collate(l.Name.Trim(), TextSearchCollation.AccentInsensitive) == normalized)
+            : query.Where(l => l.Name.Trim().ToLower() == normalized);
+        return !await query.AnyAsync(cancellationToken);
     }
 
     private static async Task<bool> ParentLocationExistsAsync(IApplicationDbContext dbContext, Guid? parentLocationId, CancellationToken cancellationToken)
