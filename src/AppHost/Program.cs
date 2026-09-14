@@ -131,34 +131,25 @@ if (builder.ExecutionContext.IsPublishMode)
         .WithEndpoint(targetPort: 10002, port: 10002, name: "table", isExternal: true);
 
     builder
-        .AddContainer(Services.CacheCommander, "rediscommander/redis-commander:latest")
+        .AddContainer(Services.CacheCommander, "docker.io/rediscommander/redis-commander:latest")
         .PublishAsDockerComposeService((resource, service) =>
         {
             service.Name = Services.CacheCommander;
         })
         .WithComputeEnvironment(compose)
-        .WithEnvironment("REDIS_HOSTS", $"local:{Services.Cache}:6379")
-        .WithEnvironment("REDIS_PASSWORD", redisPassword)
+        .WithEnvironment("REDIS_HOSTS", $"local:{Services.Cache}:6379:0:{redisPassword}")
         .WithEndpoint(targetPort: 8081, port: 8081, name: "http", isExternal: true)
         .WaitFor(cache);
-
-    var storageHost = builder.Configuration["StoragePublicHost"]
-        ?? new Uri(publicOrigins[0]).Host;
-    if (storageHost is "localhost" or "127.0.0.1" or "::1")
-    {
-        throw new InvalidOperationException(
-            "StoragePublicHost or PublicOrigins must use a hostname reachable from the deployed containers and browser.");
-    }
 
     const string accountName = "devstoreaccount1";
     const string accountKey =
         "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
     var blobConnectionString =
         $"DefaultEndpointsProtocol=http;AccountName={accountName};AccountKey={accountKey};" +
-        $"BlobEndpoint=http://{storageHost}:10000/{accountName}";
+        $"BlobEndpoint=http://{Services.Storage}:10000/{accountName}";
     var queueConnectionString =
         $"DefaultEndpointsProtocol=http;AccountName={accountName};AccountKey={accountKey};" +
-        $"QueueEndpoint=http://{storageHost}:10001/{accountName}";
+        $"QueueEndpoint=http://{Services.Storage}:10001/{accountName}";
 
     web
         .WithEnvironment($"ConnectionStrings__{Services.BlobService}", blobConnectionString)
@@ -168,6 +159,16 @@ if (builder.ExecutionContext.IsPublishMode)
         .WithEnvironment($"ConnectionStrings__{Services.BlobService}", blobConnectionString)
         .WithEnvironment($"ConnectionStrings__{Services.Queues}", queueConnectionString)
         .WaitFor(azurite);
+
+    var publicBlobEndpoint = builder.Configuration["StoragePublicBlobEndpoint"];
+    if (string.IsNullOrWhiteSpace(publicBlobEndpoint))
+    {
+        throw new InvalidOperationException(
+            "StoragePublicBlobEndpoint must be configured when publishing.");
+    }
+
+    web.WithEnvironment("Storage__PublicBlobEndpoint", publicBlobEndpoint);
+    worker.WithEnvironment("Storage__PublicBlobEndpoint", publicBlobEndpoint);
 }
 else
 {

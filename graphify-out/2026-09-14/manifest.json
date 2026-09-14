@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "src/AppHost/Program.cs": {
-    "mtime": 1789327439.4684982,
-    "seen": 1789327470.1865232,
-    "ast_hash": "3e658a40cd0bc44890741bf125d37d5b",
+    "mtime": 1789379646.0284255,
+    "seen": 1789379666.8482294,
+    "ast_hash": "9b743b1fe81abb3b30ae54e0700b752d",
     "semantic_hash": ""
   },
   "src/AppHost/Properties/launchSettings.json": {
@@ -3798,8 +3798,8 @@
     "semantic_hash": "5b973a02eace6b2c3e55adf6fb0701e2"
   },
   "src/Client/src/app/shared/icons/icon-catalog.generated.ts": {
-    "mtime": 1789322406.6483314,
-    "seen": 1789322418.3179219,
+    "mtime": 1789364739.9528902,
+    "seen": 1789364879.332982,
     "ast_hash": "9f18a0461fd8e197b5b5f0e2f49f1049",
     "semantic_hash": "9f18a0461fd8e197b5b5f0e2f49f1049"
   },
@@ -25080,9 +25080,9 @@
     "semantic_hash": ""
   },
   "aspire-output/docker-compose.yaml": {
-    "mtime": 1789327439.477498,
-    "seen": 1789327470.187231,
-    "ast_hash": "fadfed2fc289c7a12f978f5cb5bfb082",
+    "mtime": 1789379646.0385606,
+    "seen": 1789379666.8489447,
+    "ast_hash": "920c96ed761c7cc6b7e4eb67516d47c7",
     "semantic_hash": ""
   },
   "src/Application/Documents/Interfaces/IItemDocumentExtractionService.cs": {
@@ -25893,6 +25893,24 @@
     "mtime": 1789320676.992,
     "seen": 1789322418.3182673,
     "ast_hash": "4190726257ba64438f5d2b32605971ef",
+    "semantic_hash": ""
+  },
+  "deploy/deploy.sh": {
+    "mtime": 1789364659.931738,
+    "seen": 1789364879.3326132,
+    "ast_hash": "6d6f2b681239693f8aff558f4bd87896",
+    "semantic_hash": ""
+  },
+  ".github/workflows/deploy-production.yml": {
+    "mtime": 1789376539.7889147,
+    "seen": 1789376564.651607,
+    "ast_hash": "fbc15b75e72b512713627d26f12ee478",
+    "semantic_hash": ""
+  },
+  "deploy/README.md": {
+    "mtime": 1789376539.7959146,
+    "seen": 1789376564.651612,
+    "ast_hash": "a32d94a6a86f23a132f20d490ae79194",
     "semantic_hash": ""
   }
 }

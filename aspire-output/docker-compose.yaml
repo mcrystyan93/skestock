@@ -4,7 +4,7 @@ services:
     environment:
       ASPIRE_DASHBOARD_FORWARDEDHEADERS_ENABLED: "true"
     ports:
-      - "8080:18888"
+      - "18080:18888"
     expose:
       - "18889"
       - "18890"
@@ -44,7 +44,11 @@ services:
     networks:
       - "aspire"
   webapi:
-    image: "${WEBAPI_IMAGE}"
+    image: "skestock-webapi:latest"
+    build:
+      context: ".."
+      dockerfile: "src/Web/Dockerfile"
+      target: "final"
     environment:
       OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
       ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
@@ -65,16 +69,17 @@ services:
       SKESTOCK_CACHE_PASSWORD: "${REDIS_PASSWORD}"
       SKESTOCK_CACHE_URI: "redis://:${REDIS_PASSWORD}@skestock-cache:6379"
       ASPNETCORE_ENVIRONMENT: "Production"
-      ConnectionStrings__blobservice: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1Oc8g4w8r3F2mZ8T9h5e0r3p5m7m8r9s0u1v2w3x4y5z6A7B8C9D0E1F2G3H4I5J6K7L8M9N0;BlobEndpoint=http://MINI_PC_IP:10000/devstoreaccount1"
-      ConnectionStrings__queues: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1Oc8g4w8r3F2mZ8T9h5e0r3p5m7m8r9s0u1v2w3x4y5z6A7B8C9D0E1F2G3H4I5J6K7L8M9N0;QueueEndpoint=http://MINI_PC_IP:10001/devstoreaccount1"
-      Cors__AllowedOrigins__0: "http://MINI_PC_IP:7001"
+      ConnectionStrings__blobservice: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://storage:10000/devstoreaccount1"
+      ConnectionStrings__queues: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://storage:10001/devstoreaccount1"
+      Storage__PublicBlobEndpoint: "https://blob.cristian-cloud.com"
+      Cors__AllowedOrigins__0: "https://ske.cristian-cloud.com"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://env-dashboard:18889"
       OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
       OTEL_SERVICE_NAME: "webapi"
     ports:
       - "7001:8080"
     expose:
-      - "${WEBAPI_PORT}"
+      - "8080"
     depends_on:
       dbserver:
         condition: "service_started"
@@ -85,7 +90,11 @@ services:
     networks:
       - "aspire"
   worker:
-    image: "${WORKER_IMAGE}"
+    image: "skestock-worker:latest"
+    build:
+      context: ".."
+      dockerfile: "src/Worker/Dockerfile"
+      target: "final"
     environment:
       OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
       OpenApiSettings__ApiKey: "${OPENAPISETTINGSAPIKEY}"
@@ -103,8 +112,9 @@ services:
       SKESTOCK_CACHE_PORT: "6379"
       SKESTOCK_CACHE_PASSWORD: "${REDIS_PASSWORD}"
       SKESTOCK_CACHE_URI: "redis://:${REDIS_PASSWORD}@skestock-cache:6379"
-      ConnectionStrings__blobservice: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1Oc8g4w8r3F2mZ8T9h5e0r3p5m7m8r9s0u1v2w3x4y5z6A7B8C9D0E1F2G3H4I5J6K7L8M9N0;BlobEndpoint=http://MINI_PC_IP:10000/devstoreaccount1"
-      ConnectionStrings__queues: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1Oc8g4w8r3F2mZ8T9h5e0r3p5m7m8r9s0u1v2w3x4y5z6A7B8C9D0E1F2G3H4I5J6K7L8M9N0;QueueEndpoint=http://MINI_PC_IP:10001/devstoreaccount1"
+      ConnectionStrings__blobservice: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://storage:10000/devstoreaccount1"
+      ConnectionStrings__queues: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://storage:10001/devstoreaccount1"
+      Storage__PublicBlobEndpoint: "https://blob.cristian-cloud.com"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://env-dashboard:18889"
       OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
       OTEL_SERVICE_NAME: "worker"
@@ -120,6 +130,7 @@ services:
   storage:
     image: "mcr.microsoft.com/azure-storage/azurite:3.35.0"
     command:
+      - "azurite"
       - "--location"
       - "/data"
       - "--blobHost"
@@ -128,6 +139,7 @@ services:
       - "0.0.0.0"
       - "--tableHost"
       - "0.0.0.0"
+      - "--skipApiVersionCheck"
     ports:
       - "10000:10000"
       - "10001:10001"
@@ -140,10 +152,9 @@ services:
     networks:
       - "aspire"
   redis-commander:
-    image: "rediscommander/redis-commander:latest"
+    image: "docker.io/rediscommander/redis-commander:latest"
     environment:
-      REDIS_HOSTS: "local:skestock-cache:6379"
-      REDIS_PASSWORD: "${REDIS_PASSWORD}"
+      REDIS_HOSTS: "local:skestock-cache:6379:0:${REDIS_PASSWORD}"
     ports:
       - "8081:8081"
     depends_on:
