@@ -1,0 +1,50 @@
+<cdk-virtual-scroll-viewport itemSize="73" class="h-full w-full" (scroll)="onScroll($event)">
+  <nz-list>
+    @if (items().length === 0) {
+      <nz-list-empty />
+    }
+
+    <nz-list-item *cdkVirtualFor="let item of items(); trackBy: (index, item) => item.id">
+      <nz-list-item-meta>
+        <nz-list-item-meta-title>
+          <span class="block truncate" [attr.title]="item.name">
+            {{ item.name }}
+          </span>
+        </nz-list-item-meta-title>
+
+        <nz-list-item-meta-description>
+          <div class="flex min-w-0 items-center">
+            @if (item.sku) {
+              <span class="shrink-0">{{ item.sku }}</span>
+              <nz-divider nzType="vertical" />
+            }
+            <span class="min-w-0 truncate" [attr.title]="item.categoryName || undefined">
+              {{ item.categoryName || '-' }}
+            </span>
+            <nz-divider nzType="vertical" />
+            <span class="shrink-0">{{ item.unit }}</span>
+            <nz-divider nzType="vertical" />
+            <nz-tag [nzColor]="item.isActive ? 'success' : 'error'">
+              {{ item.isActive ? 'Activ' : 'Inactiv' }}
+            </nz-tag>
+          </div>
+        </nz-list-item-meta-description>
+      </nz-list-item-meta>
+
+      <ul nz-list-item-actions>
+        <nz-list-item-action>
+          <button
+            type="button"
+            nz-button
+            nzType="link"
+            title="Editeaza"
+            aria-label="Editeaza"
+            (click)="onEdit.emit(item)"
+          >
+            <nz-icon nzType="icons:pencil" />
+          </button>
+        </nz-list-item-action>
+      </ul>
+    </nz-list-item>
+  </nz-list>
+</cdk-virtual-scroll-viewport>

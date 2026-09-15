@@ -1,7 +1,8 @@
 import { Component, DestroyRef, inject } from '@angular/core';
 import { SchoolClassListState } from '../services/school-class-list.store';
 import { FilterContainer } from './filter/filter-container';
-import { Table } from './table/table';
+import { Table } from './table/large/table';
+import { SchoolClassListSmall } from './table/small/school-class-list-small';
 import { GetAllSchoolClassesRequest, SchoolClassDto } from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { Header } from './header/header';
@@ -9,20 +10,16 @@ import { SchoolClassDetailModal } from '@ske/shared/school-classes';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { ErrorAlert } from '@ske/shared/errors';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 
 @Component({
-  imports: [
-    FilterContainer,
-    Table,
-    Header,
-    ErrorAlert
-  ],
+  imports: [FilterContainer, Table, SchoolClassListSmall, Header, ErrorAlert, LayoutBreakpoint],
   selector: 'ske-school-classes-page',
   templateUrl: './school-classes.page.html',
   providers: [SchoolClassListState, NzModalService],
   host: {
-    class: 'flex flex-col grow gap-4'
-  }
+    class: 'flex flex-col grow gap-4',
+  },
 })
 export class SchoolClassesPage {
   public readonly store = inject(SchoolClassListState);
@@ -55,15 +52,13 @@ export class SchoolClassesPage {
     const modalRef = this._modalService.create({
       nzContent: SchoolClassDetailModal,
       nzData: {
-        schoolClass
+        schoolClass,
       },
       nzCentered: true,
-      nzMaskClosable: false
+      nzMaskClosable: false,
     });
 
-    modalRef.afterClose.pipe(
-      takeUntilDestroyed(this._destroyRef)
-    ).subscribe(() => {
+    modalRef.afterClose.pipe(takeUntilDestroyed(this._destroyRef)).subscribe(() => {
       this.store.reload();
     });
   }

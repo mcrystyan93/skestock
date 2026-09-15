@@ -6,7 +6,7 @@ import {
   ClassStatus,
   GetAllSchoolClassesRequest,
   SCHOOL_CLASS_TABLE_COLUMNS,
-  SchoolClassDto
+  SchoolClassDto,
 } from '@ske/models';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { DatePipe } from '@angular/common';
@@ -15,19 +15,13 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
 
 @Component({
-  imports: [
-    DatePipe,
-    NzButtonComponent,
-    NzIconDirective,
-    NzTagComponent,
-    NzTableModule
-  ],
+  imports: [DatePipe, NzButtonComponent, NzIconDirective, NzTagComponent, NzTableModule],
   selector: 'ske-school-class-table',
   styles: ``,
   templateUrl: './table.html',
   host: {
-    class: 'absolute block inset-0'
-  }
+    class: 'absolute block inset-0',
+  },
 })
 export class Table extends BaseTable<SchoolClassDto, GetAllSchoolClassesRequest> {
   public readonly loading = input.required<boolean>();

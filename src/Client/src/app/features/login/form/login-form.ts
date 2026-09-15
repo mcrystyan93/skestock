@@ -5,7 +5,12 @@ import { NzFormControlComponent, NzFormDirective, NzFormItemComponent } from 'ng
 import { FormsModule } from '@angular/forms';
 import { isNil } from 'lodash-es';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
-import { NzInputDirective, NzInputPasswordDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
+import {
+  NzInputDirective,
+  NzInputPasswordDirective,
+  NzInputPrefixDirective,
+  NzInputWrapperComponent
+} from 'ng-zorro-antd/input';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 
@@ -22,7 +27,9 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
     FormField,
     NzInputPasswordDirective,
     NzButtonComponent,
-    NzInputDirective
+    NzInputDirective,
+    NzInputPrefixDirective,
+    
   ],
   selector: 'ske-login-form',
   templateUrl: './login-form.html',
