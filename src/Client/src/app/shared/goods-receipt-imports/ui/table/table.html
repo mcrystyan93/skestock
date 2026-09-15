@@ -14,10 +14,10 @@
           [nzScroll]="{x:dimensions.width, y:dimensions.height}">
   <thead>
   <tr>
+<!--    <th nzWidth="150px">-->
+<!--      {{ columns.className.label }}-->
+<!--    </th>-->
     <th nzWidth="150px">
-      {{ columns.className.label }}
-    </th>
-    <th nzWidth="120px">
       {{ columns.status.label }}
     </th>
     <th nzWidth="150px">
@@ -45,9 +45,9 @@
   <ng-template nz-virtual-scroll
                let-goodsReceiptImport>
     <tr>
-      <td>
-        {{ goodsReceiptImport.className }}
-      </td>
+<!--      <td>-->
+<!--        {{ goodsReceiptImport.className }}-->
+<!--      </td>-->
       <td>
         <nz-tag [nzColor]="statusColor(goodsReceiptImport.status)">{{ statusLabel(goodsReceiptImport.status) }}</nz-tag>
       </td>
@@ -70,17 +70,21 @@
         <button type="button"
                 nz-button
                 nzType="link"
+                [attr.aria-label]="'Descarca fisierele pentru importul ' + goodsReceiptImport.id"
+                [attr.title]="'Descarca fisierele pentru importul ' + goodsReceiptImport.id"
                 (click)="downloadFile.emit(goodsReceiptImport)">
           <nz-icon nzType="icons:download"></nz-icon>
-          Descarca
+<!--          Descarca-->
         </button>
         @if (goodsReceiptImport.status === 'pendingReview') {
           <button type="button"
                   nz-button
                   nzType="link"
+                  [attr.aria-label]="'Revizuieste importul ' + goodsReceiptImport.id"
+                  [attr.title]="'Revizuieste importul ' + goodsReceiptImport.id"
                   (click)="review.emit(goodsReceiptImport)">
             <nz-icon nzType="icons:eye"></nz-icon>
-            Revizuieste
+<!--            Revizuieste-->
           </button>
         }
       </td>

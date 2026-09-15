@@ -10,7 +10,7 @@ using skestock.Domain.Entities;
 namespace skestock.Application.Features.Stock.Queries.GetClassLocationStock;
 
 public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
-    : IRequestHandler<GetClassLocationStockQuery, Result<List<StockItemDto>>>
+    : IRequestHandler<GetClassLocationStockQuery, Result<StockReportDto>>
 {
     private static readonly IFilterConfiguration<StockBatch> StockBatchFilterConfiguration =
         new StockBatchFilterConfiguration();
@@ -18,7 +18,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
     private static readonly IFilterConfiguration<Item> ItemFilterConfiguration =
         new ItemFilterConfiguration();
 
-    public async ValueTask<Result<List<StockItemDto>>> Handle(GetClassLocationStockQuery request,
+    public async ValueTask<Result<StockReportDto>> Handle(GetClassLocationStockQuery request,
         CancellationToken cancellationToken)
     {
         var classExists = await dbContext.SchoolClasses
@@ -26,6 +26,8 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
             .AnyAsync(c => c.Id == request.ClassId, cancellationToken);
         if (!classExists)
             return Result.Fail(new SchoolClassErrors.SchoolClassNotFound(request.ClassId));
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
         // Current stock for an item at a location = sum of the remaining Quantity across every
         // StockBatch received by this class at that location. Items/locations with no batches
@@ -47,11 +49,20 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
 
         var stockByItemLocation = await batchesQuery
             .GroupBy(b => new { b.ItemId, b.LocationId })
-            .Select(g => new { g.Key.ItemId, g.Key.LocationId, Quantity = g.Sum(b => b.Quantity) })
+            .Select(g => new
+            {
+                g.Key.ItemId,
+                g.Key.LocationId,
+                Quantity = g.Sum(b => b.Quantity),
+                HasExpiredBatch = g.Any(b =>
+                    b.Quantity > 0 &&
+                    b.ExpiryDate.HasValue &&
+                    b.ExpiryDate.Value <= today)
+            })
             .ToListAsync(cancellationToken);
 
         if (stockByItemLocation.Count == 0)
-            return Result.Ok(new List<StockItemDto>());
+            return Result.Ok(new StockReportDto());
 
         // Item and Location lookups are done as separate queries rather than reading them off the
         // group (e.g. g.First().Item) - that pattern doesn't translate to SQL.
@@ -86,7 +97,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
         stockByItemLocation = stockByItemLocation.Where(x => items.ContainsKey(x.ItemId)).ToList();
 
         if (stockByItemLocation.Count == 0)
-            return Result.Ok(new List<StockItemDto>());
+            return Result.Ok(new StockReportDto());
 
         var locationIds = stockByItemLocation.Select(x => x.LocationId).Distinct().ToList();
         var locations = await dbContext.Locations
@@ -132,6 +143,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
                     LocationName = location.Name,
                     Unit = item.Unit,
                     IsPerishable = item.IsPerishable,
+                    IsExpired = item.IsPerishable && x.HasExpiredBatch,
                     Quantity = x.Quantity,
                     IsLowStock = x.Quantity < item.MinThreshold
                 };
@@ -140,6 +152,10 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
             .ThenBy(x => x.LocationName)
             .ToList();
 
-        return Result.Ok(data);
+        return Result.Ok(new StockReportDto
+        {
+            Items = data,
+            HasExpiredItems = data.Any(item => item.IsExpired)
+        });
     }
 }

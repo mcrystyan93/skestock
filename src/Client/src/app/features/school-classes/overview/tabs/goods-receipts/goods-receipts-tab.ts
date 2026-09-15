@@ -2,12 +2,14 @@ import { Component, effect, inject, input, untracked } from '@angular/core';
 import { Table } from '@ske/shared/goods-receipts';
 import { SchoolClassOverviewStore } from '../../../services/school-class-overview.store';
 import { isNil } from 'lodash-es';
-import { ColumnFilter } from '@ske/models';
+import { ColumnFilter, GoodsReceiptListItemDto } from '@ske/models';
+import { FileStorageState } from '@ske/shared/storage';
 
 @Component({
   imports: [
     Table
   ],
+  providers: [FileStorageState],
   selector: 'ske-school-class-overview-goods-receipts-tab',
   styles: ``,
   template: `
@@ -19,7 +21,8 @@ import { ColumnFilter } from '@ske/models';
                               [hasNextPage]="store.hasGoodsReceiptsNextPage()"
                               [isLoadingMore]="store.isLoadingMoreGoodsReceipts()"
                               (onFilterChange)="store.loadGoodsReceipts($event)"
-                              (onLoadMore)="store.loadMoreGoodsReceipts()" />
+                              (onLoadMore)="store.loadMoreGoodsReceipts()"
+                              (downloadFile)="downloadFile($event)" />
 
   `
 })
@@ -27,6 +30,14 @@ export class GoodsReceiptsTab {
   public readonly classId = input.required<string | null>();
   public readonly receiptId = input<string | null>(null);
   public readonly store = inject(SchoolClassOverviewStore);
+  private readonly _fileStorageState = inject(FileStorageState);
+
+  public downloadFile(receipt: GoodsReceiptListItemDto): void {
+    if (!receipt.fileMetadataId)
+      return;
+
+    this._fileStorageState.downloadFile(receipt.fileMetadataId);
+  }
 
   private readonly _classIdEffectRef = effect(() => {
     const classIdValue = this.classId();

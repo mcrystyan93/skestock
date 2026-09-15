@@ -69,7 +69,11 @@ public class GetAllGoodsReceiptsHandler(IApplicationDbContext dbContext)
                     TotalQuantity = r.Batches.Sum(b => (int?)b.Quantity) ?? 0,
                     TotalAmount = r.TotalAmount,
                     CreatedByName = r.CreatedBy != null ? r.CreatedBy.FullName : null,
-                    CreatedDate = r.CreatedDate
+                    CreatedDate = r.CreatedDate,
+                    FileMetadataId = dbContext.GoodsReceiptImports
+                        .Where(i => i.ResultingGoodsReceiptId == r.Id)
+                        .Select(i => (Guid?)i.FileMetadataId)
+                        .FirstOrDefault()
                 }
             })
             .Take(pageSize + 1)

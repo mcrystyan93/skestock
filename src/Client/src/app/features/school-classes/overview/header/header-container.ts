@@ -1,12 +1,10 @@
-import {Component, DestroyRef, inject, input, model} from '@angular/core';
-import {SchoolClassOverviewStore} from '../../services/school-class-overview.store';
-import {Header} from './header';
-import {NzModalService} from 'ng-zorro-antd/modal';
-import {AddGoodsReceiptModal} from '@ske/shared/goods-receipts';
-import {ReviewModal, ReviewModalData} from '@ske/shared/goods-receipt-imports';
-import {GoodsReceiptImportDto} from '@ske/models';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {Router} from '@angular/router';
+import { Component, DestroyRef, inject, input, model } from '@angular/core';
+import { SchoolClassOverviewStore } from '../../services/school-class-overview.store';
+import { Header } from './header';
+import { NzModalService } from 'ng-zorro-antd/modal';
+import { AddGoodsReceiptModal } from '@ske/shared/goods-receipts';
+import { ReviewModal, ReviewModalData } from '@ske/shared/goods-receipt-imports';
+import { Router } from '@angular/router';
 
 @Component({
   imports: [
@@ -27,22 +25,13 @@ export class HeaderContainer {
   private readonly _destroyRef = inject(DestroyRef);
 
   public addGoodsReceipt() {
-    const modalRef = this._nzModalService.create({
+    this._nzModalService.create({
       nzContent: AddGoodsReceiptModal,
       nzData: {
         classId: this.classId()
       },
       nzCentered: true,
       nzClosable: false
-    });
-
-    modalRef.afterClose.pipe(takeUntilDestroyed(this._destroyRef)).subscribe((result: unknown) => {
-      if (!Array.isArray(result))
-        return;
-
-      result
-        .filter((item): item is GoodsReceiptImportDto => this.isGoodsReceiptImportResult(item))
-        .forEach((item) => this.openGoodsReceiptImportReview(item.id));
     });
   }
 
@@ -54,13 +43,6 @@ export class HeaderContainer {
       nzCentered: true,
       nzMaskClosable: false
     });
-  }
-
-  private isGoodsReceiptImportResult(result: unknown): result is GoodsReceiptImportDto {
-    return typeof result === 'object'
-      && result !== null
-      && 'id' in result
-      && typeof result.id === 'string';
   }
 
   public openAnalytics() {

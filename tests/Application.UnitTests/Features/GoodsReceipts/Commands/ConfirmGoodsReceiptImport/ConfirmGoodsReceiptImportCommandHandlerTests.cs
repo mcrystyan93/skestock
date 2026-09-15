@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using Shouldly;
 using skestock.Application.Features.GoodsReceipts.Commands.ConfirmGoodsReceiptImport;
+using skestock.Application.Features.GoodsReceipts.Models;
 using skestock.Application.UnitTests.Features.GoodsReceipts.Commands.CreateGoodsReceipt;
 using skestock.Domain.Entities;
 using skestock.Domain.Enums;
@@ -107,6 +108,33 @@ public class ConfirmGoodsReceiptImportCommandHandlerTests
         var reloaded = await context.GoodsReceiptImports.SingleAsync(i => i.Id == import.Id, CancellationToken.None);
         reloaded.Status.ShouldBe(GoodsReceiptImportStatus.Confirmed);
         reloaded.ResultingGoodsReceiptId.ShouldBe(result.Value.Id);
+    }
+
+    [Test]
+    public async Task Handle_WithExtractedReceivedAt_UsesItForReceiptAndBatches()
+    {
+        var (context, item, _, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        var import = await AddPendingImportAsync(context, schoolClass.Id);
+        var extractedDate = new DateOnly(2026, 8, 17);
+        import.ApplyExtractionResult(new GoodsReceiptExtractionResult { ReceivedAt = extractedDate }.ToJson());
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new ConfirmGoodsReceiptImportCommandHandler(context, new FakeUser(userProfile.IdentityId));
+
+        var result = await handler.Handle(new ConfirmGoodsReceiptImportCommand
+        {
+            ImportId = import.Id,
+            Lines = [new ConfirmGoodsReceiptImportLine { ItemId = item.Id, LocationId = location.Id, Quantity = 5, UnitPrice = 1m }]
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+
+        var receipt = await context.GoodsReceipts.SingleAsync(CancellationToken.None);
+        receipt.ReceivedAt.ShouldBe(extractedDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc));
+
+        var batch = await context.StockBatches.SingleAsync(CancellationToken.None);
+        batch.ReceivedDate.ShouldBe(extractedDate);
     }
 
     [Test]

@@ -13,8 +13,15 @@ export type StockItemDto = {
   locationName: string;
   unit: string;
   isPerishable: boolean;
+  isExpired: boolean;
   quantity: number;
   isLowStock: boolean;
+};
+
+/** Mirrors src/Application/Features/Stock/Models/StockDto.cs (StockReportDto). */
+export type StockReportDto = {
+  items: StockItemDto[];
+  hasExpiredItems: boolean;
 };
 
 export type StockItemCategoryGroup = {

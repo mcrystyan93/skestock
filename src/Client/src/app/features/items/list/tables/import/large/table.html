@@ -46,10 +46,11 @@
             nz-button
             nzType="link"
             [disabled]="itemImport.status !== 'pendingReview'"
+            title="Revizuieste"
+            aria-label="Revizuieste"
             (click)="review.emit(itemImport)"
           >
             <nz-icon nzType="icons:eye"></nz-icon>
-            Revizuieste
           </button>
           <button
             type="button"
@@ -57,10 +58,10 @@
             nzType="link"
             nz-dropdown
             [nzDropdownMenu]="menu"
+            title="Descarca fisierele"
             [attr.aria-label]="'Actiuni pentru importul ' + itemImport.id"
           >
-            <nz-icon nzType="icons:files"></nz-icon>
-            Descarca fisierele
+            <nz-icon nzType="icons:file-arrow-down"></nz-icon>
           </button>
           <nz-dropdown-menu #menu="nzDropdownMenu">
             <ul nz-menu>

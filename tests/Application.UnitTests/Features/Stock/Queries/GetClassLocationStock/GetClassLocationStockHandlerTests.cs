@@ -86,8 +86,8 @@ public class GetClassLocationStockHandlerTests
             CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Count.ShouldBe(1);
-        var line = result.Value.Single();
+        result.Value.Items.Count.ShouldBe(1);
+        var line = result.Value.Items.Single();
         line.ItemId.ShouldBe(item.Id);
         line.ItemName.ShouldBe("Rice");
         line.Sku.ShouldBe("RICE-001");
@@ -98,6 +98,122 @@ public class GetClassLocationStockHandlerTests
         line.Unit.ShouldBe("kg");
         line.Quantity.ShouldBe(18);
         line.IsLowStock.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task Handle_PerishableItemWithExpiredRemainingBatch_FlagsRowAndReport()
+    {
+        await using var context = CreateContext();
+        var (item, location, schoolClass) = await SeedBaseData(
+            context,
+            minThreshold: 5,
+            isPerishable: true);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        context.StockBatches.AddRange(
+            new StockBatch
+            {
+                Item = item,
+                Location = location,
+                ReceivedClass = schoolClass,
+                Quantity = 4,
+                ExpiryDate = today.AddDays(-1),
+                ReceivedDate = today.AddDays(-10)
+            },
+            new StockBatch
+            {
+                Item = item,
+                Location = location,
+                ReceivedClass = schoolClass,
+                Quantity = 6,
+                ExpiryDate = today.AddDays(5),
+                ReceivedDate = today.AddDays(-2)
+            });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new GetClassLocationStockHandler(context);
+        var result = await handler.Handle(
+            new GetClassLocationStockQuery
+            {
+                ClassId = schoolClass.Id,
+                Filters = [EqualsFilter("locationId", location.Id)]
+            },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.HasExpiredItems.ShouldBeTrue();
+        result.Value.Items.Single().IsExpired.ShouldBeTrue();
+        result.Value.Items.Single().Quantity.ShouldBe(10);
+    }
+
+    [Test]
+    public async Task Handle_PerishableItemWithFutureExpiry_IsNotFlagged()
+    {
+        await using var context = CreateContext();
+        var (item, location, schoolClass) = await SeedBaseData(
+            context,
+            isPerishable: true);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        context.StockBatches.Add(
+            new StockBatch
+            {
+                Item = item,
+                Location = location,
+                ReceivedClass = schoolClass,
+                Quantity = 4,
+                ExpiryDate = today.AddDays(1),
+                ReceivedDate = today
+            });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new GetClassLocationStockHandler(context);
+        var result = await handler.Handle(
+            new GetClassLocationStockQuery
+            {
+                ClassId = schoolClass.Id,
+                Filters = [EqualsFilter("locationId", location.Id)]
+            },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.HasExpiredItems.ShouldBeFalse();
+        result.Value.Items.Single().IsExpired.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task Handle_DepletedExpiredBatch_IsNotFlagged()
+    {
+        await using var context = CreateContext();
+        var (item, location, schoolClass) = await SeedBaseData(
+            context,
+            isPerishable: true);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        context.StockBatches.Add(
+            new StockBatch
+            {
+                Item = item,
+                Location = location,
+                ReceivedClass = schoolClass,
+                Quantity = 0,
+                ExpiryDate = today.AddDays(-1),
+                ReceivedDate = today.AddDays(-10)
+            });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new GetClassLocationStockHandler(context);
+        var result = await handler.Handle(
+            new GetClassLocationStockQuery
+            {
+                ClassId = schoolClass.Id,
+                Filters = [EqualsFilter("locationId", location.Id)]
+            },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.HasExpiredItems.ShouldBeFalse();
+        result.Value.Items.Single().IsExpired.ShouldBeFalse();
     }
 
     [Test]
@@ -120,7 +236,7 @@ public class GetClassLocationStockHandlerTests
             CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Single().IsLowStock.ShouldBeTrue();
+        result.Value.Items.Single().IsLowStock.ShouldBeTrue();
     }
 
     [Test]
@@ -147,7 +263,7 @@ public class GetClassLocationStockHandlerTests
             CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Single().Quantity.ShouldBe(12);
+        result.Value.Items.Single().Quantity.ShouldBe(12);
     }
 
     [Test]
@@ -166,7 +282,7 @@ public class GetClassLocationStockHandlerTests
             CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBeEmpty();
+        result.Value.Items.ShouldBeEmpty();
     }
 
     [Test]
@@ -205,8 +321,8 @@ public class GetClassLocationStockHandlerTests
             CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Count.ShouldBe(1);
-        result.Value.Single().ItemName.ShouldBe("Rice");
+        result.Value.Items.Count.ShouldBe(1);
+        result.Value.Items.Single().ItemName.ShouldBe("Rice");
     }
 
     [Test]
@@ -230,7 +346,7 @@ public class GetClassLocationStockHandlerTests
             CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBeEmpty();
+        result.Value.Items.ShouldBeEmpty();
     }
 
     [Test]
@@ -254,7 +370,7 @@ public class GetClassLocationStockHandlerTests
             CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Count.ShouldBe(1);
+        result.Value.Items.Count.ShouldBe(1);
     }
 
     [Test]
@@ -302,8 +418,8 @@ public class GetClassLocationStockHandlerTests
             CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Count.ShouldBe(1);
-        result.Value.Single().ItemId.ShouldBe(item.Id);
+        result.Value.Items.Count.ShouldBe(1);
+        result.Value.Items.Single().ItemId.ShouldBe(item.Id);
     }
 
     [Test]
@@ -365,10 +481,10 @@ public class GetClassLocationStockHandlerTests
             CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Count.ShouldBe(1);
-        result.Value.Single().ItemId.ShouldBe(item.Id);
-        result.Value.Single().LocationId.ShouldBe(location.Id);
-        result.Value.Single().Quantity.ShouldBe(10);
+        result.Value.Items.Count.ShouldBe(1);
+        result.Value.Items.Single().ItemId.ShouldBe(item.Id);
+        result.Value.Items.Single().LocationId.ShouldBe(location.Id);
+        result.Value.Items.Single().Quantity.ShouldBe(10);
     }
 
     [Test]
@@ -410,9 +526,9 @@ public class GetClassLocationStockHandlerTests
             CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Count.ShouldBe(2);
-        result.Value.ShouldContain(x => x.LocationId == location.Id && x.Quantity == 10);
-        result.Value.ShouldContain(x => x.LocationId == otherLocation.Id && x.Quantity == 7);
+        result.Value.Items.Count.ShouldBe(2);
+        result.Value.Items.ShouldContain(x => x.LocationId == location.Id && x.Quantity == 10);
+        result.Value.Items.ShouldContain(x => x.LocationId == otherLocation.Id && x.Quantity == 7);
     }
 
     [Test]

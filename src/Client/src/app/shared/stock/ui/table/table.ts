@@ -38,6 +38,11 @@ export class Table {
   public readonly onAdd = output<Partial<CategoryDto> | null>();
 
   public readonly columns = STOCK_TABLE_COLUMNS;
+
+  public categoryHasExpiredItems(items: StockItemDto[]): boolean {
+    return items.some(item => item.isExpired);
+  }
+
   public add(category: StockItemCategoryGroup | null = null) {
     this.onAdd.emit(!isNil(category) ? { id: category.categoryId, name: category.categoryName } : null);
   }

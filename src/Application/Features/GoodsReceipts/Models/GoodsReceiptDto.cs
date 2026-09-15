@@ -47,4 +47,5 @@ public record GoodsReceiptListItemDto
     public decimal TotalAmount { get; init; }
     public string? CreatedByName { get; init; }
     public DateTimeOffset CreatedDate { get; init; }
+    public Guid? FileMetadataId { get; init; }
 }

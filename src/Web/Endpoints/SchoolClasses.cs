@@ -56,7 +56,7 @@ public class SchoolClasses : IEndpointGroup
     }
 
     [EndpointSummary("Get a school class summary")]
-    [EndpointDescription("Retrieves the goods-receipt summary (count and total amount) for a school class.")]
+    [EndpointDescription("Retrieves the goods-receipt and inventory summary for a school class.")]
     public static async Task<Results<Ok<SchoolClassSummary>, ProblemHttpResult>> GetSchoolClassSummary(
         ISender sender, Guid id, CancellationToken cancellationToken)
     {

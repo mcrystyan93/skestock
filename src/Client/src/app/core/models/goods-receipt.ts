@@ -1,6 +1,5 @@
 import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
 import { PAGINATION_PAGE_SIZE } from './category';
-import { GetAllSchoolClassesRequest } from './school-class';
 
 /** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptDto.cs. */
 export type GoodsReceiptLineDto = {
@@ -45,6 +44,7 @@ export type GoodsReceiptListItemDto = {
   createdByName?: string | null;
   createdDate: string;
   totalAmount: number;
+  fileMetadataId?: string | null;
 };
 
 /** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptRequests.cs. */
@@ -224,7 +224,7 @@ export const GOODS_RECEIPT_TABLE_COLUMNS: TableColumnDefinition<GoodsReceiptTabl
 
 export const GOODS_RECEIPT_IMPORT_STATUS_LABELS: Record<GoodsReceiptImportStatus, string> = {
   processing: 'In procesare',
-  pendingReview: 'In asteptare revizuire',
+  pendingReview: 'In asteptare',
   confirmed: 'Confirmat',
   failed: 'Eroare'
 };
