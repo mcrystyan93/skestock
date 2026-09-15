@@ -7,8 +7,13 @@
         <nz-icon [nzType]="category.categoryIcon?.fileName ? ('icons:' + category.categoryIcon?.fileName) : 'icons:box'" class="text-3xl text-blue-500!"></nz-icon>
         <!--        <nz-avatar [nzIcon]="" />-->
         <div class="flex flex-col">
-          <h3 nz-typography
-              class="mb-0!">{{ category.categoryName }}</h3>
+          <div class="flex flex-wrap items-center gap-2">
+            <h3 nz-typography
+                class="mb-0!">{{ category.categoryName }}</h3>
+            @if (categoryHasExpiredItems(items)) {
+              <nz-tag nzColor="red">Posibil expirat</nz-tag>
+            }
+          </div>
           <span nz-typography
                 nzType="secondary"
                 class="mb-0!">{{ items.length }} articole in stoc</span>
@@ -88,11 +93,16 @@
                 {{ item.unit }}
               </td>
               <td>
-                @if (item.isPerishable) {
-                  <nz-tag nzColor="orange">Perisabil</nz-tag>
-                } @else {
-                  <nz-tag>Nu</nz-tag>
-                }
+                <div class="flex flex-wrap gap-1">
+                  @if (item.isPerishable) {
+                    <nz-tag nzColor="orange">Perisabil</nz-tag>
+                    @if (item.isExpired) {
+                      <nz-tag nzColor="red">Posibil expirat</nz-tag>
+                    }
+                  } @else {
+                    <nz-tag>Nu</nz-tag>
+                  }
+                </div>
               </td>
               <td>
                 {{ item.quantity }}
@@ -108,10 +118,10 @@
                 <button nz-button
                         nzType="link"
                         type="button"
+                        [attr.title]="'Ajusteaza stoc pentru ' + item.itemName"
                         [attr.aria-label]="'Ajusteaza stoc pentru ' + item.itemName"
                         (click)="onAdjust.emit(item)">
                   <nz-icon nzType="icons:pencil"></nz-icon>
-                  Ajusteaza
                 </button>
               </td>
             </tr>

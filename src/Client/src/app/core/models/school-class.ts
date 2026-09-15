@@ -7,10 +7,10 @@ import { PAGINATION_PAGE_SIZE } from './category';
  * in the same declaration order as the C# enum.
  */
 export enum ClassStatus {
-  Upcoming = 0,
-  Active = 1,
-  Paused = 2,
-  Closed = 3,
+  Upcoming = 'upcoming',
+  Active = 'active',
+  Paused = 'paused',
+  Closed = 'closed',
 }
 
 /** Mirrors src/Application/Features/SchoolClasses/Models/SchoolClassDto.cs. */
@@ -33,6 +33,7 @@ export type SchoolClassSummary = {
   id: string;
   noOfGoodsReceipt: number;
   totalAmount: number;
+  distinctItemsCount: number;
   lowStockItemsCount: number;
   processingImportsCount: number;
   pendingReviewImportsCount: number;

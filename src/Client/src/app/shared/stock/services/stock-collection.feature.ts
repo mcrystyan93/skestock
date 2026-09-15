@@ -1,4 +1,8 @@
-import { GetClassLocationStockRequest, StockItemCategoryGroup, StockItemDto } from '@ske/models';
+import {
+  GetClassLocationStockRequest,
+  StockItemCategoryGroup,
+  StockItemDto
+} from '@ske/models';
 import { patchState, signalStoreFeature, withMethods, withProps, withState } from '@ngrx/signals';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
@@ -12,12 +16,14 @@ import { realtimeEvents } from '@ske/signalr';
 
 type StockCollectionState = {
   stockItems: StockItemDto[];
+  hasExpiredItems: boolean;
   filter: GetClassLocationStockRequest;
   groupedStockItems: Map<StockItemCategoryGroup, StockItemDto[]>;
 };
 
 const initialState: StockCollectionState = {
   stockItems: [],
+  hasExpiredItems: false,
   filter: {
     classId: '',
     filters: [],
@@ -55,7 +61,7 @@ export function withStockCollection() {
                     const groupedStockItems = new Map<StockItemCategoryGroup, StockItemDto[]>();
                     const groupsByCategoryId = new Map<string, StockItemCategoryGroup>();
 
-                    for (const item of result) {
+                    for (const item of result.items) {
                       let group = groupsByCategoryId.get(item.categoryId);
                       if (!group) {
                         group = {
@@ -69,7 +75,11 @@ export function withStockCollection() {
                       groupedStockItems.get(group)!.push(item);
                     }
 
-                    patchState(store, { stockItems: result, groupedStockItems });
+                    patchState(store, {
+                      stockItems: result.items,
+                      hasExpiredItems: result.hasExpiredItems,
+                      groupedStockItems
+                    });
                     store.setStockItemsLoaded();
                   },
                   error: (error) => {

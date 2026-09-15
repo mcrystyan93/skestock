@@ -1,3 +1,4 @@
+using System.Text.Json;
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Common.Security;
@@ -52,15 +53,15 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
             .Select(i => new { i.Id, i.IsPerishable, i.ShelfLifeDays })
             .ToDictionaryAsync(i => i.Id, i => (i.IsPerishable, i.ShelfLifeDays), cancellationToken);
 
+        var receivedDate = ResolveReceivedDate(import.ExtractedDataJson);
         var receipt = new GoodsReceipt
         {
+            ReceivedAt = receivedDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc),
             ClassId = import.ClassId,
             Class = null!,
             SupplierReference = string.IsNullOrWhiteSpace(request.SupplierReference) ? null : request.SupplierReference.Trim(),
             Note = request.Note.Trim(),
         };
-
-        var receivedDate = DateOnly.FromDateTime(DateTime.UtcNow);
 
         foreach (var line in request.Lines)
         {
@@ -202,6 +203,18 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
         !string.IsNullOrWhiteSpace(line.Sku)
             ? $"sku:{line.Sku.Trim().ToLowerInvariant()}"
             : $"name:{line.Name?.Trim().ToLowerInvariant()}|cat:{line.CategoryName?.Trim().ToLowerInvariant()}";
+
+    private static DateOnly ResolveReceivedDate(string? extractedDataJson)
+    {
+        if (!string.IsNullOrWhiteSpace(extractedDataJson))
+        {
+            var extraction = JsonSerializer.Deserialize<GoodsReceiptExtractionResult>(extractedDataJson);
+            if (extraction?.ReceivedAt is { } extractedDate)
+                return extractedDate;
+        }
+
+        return DateOnly.FromDateTime(DateTime.UtcNow);
+    }
 
     private async Task<Result<GoodsReceiptDto>> ProjectReceiptAsync(Guid receiptId, CancellationToken cancellationToken)
     {

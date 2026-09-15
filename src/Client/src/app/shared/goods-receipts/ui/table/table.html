@@ -37,9 +37,10 @@
     <th nzWidth="150px">
       {{ columns.createdDate.label }}
     </th>
-<!--    <th>-->
-<!--      Actiuni-->
-<!--    </th>-->
+    <th nzRight
+        nzWidth="100px">
+      Actiuni
+    </th>
   </tr>
   </thead>
   <tbody>
@@ -71,16 +72,17 @@
       <td>
         {{ goodsReceipt.createdDate | date }}
       </td>
-<!--      <td>-->
-<!--        <div class="flex items-center gap-2">-->
-<!--          <button nz-button-->
-<!--                  nzType="link"-->
-<!--                  type="button"-->
-<!--                  [attr.aria-label]="'Vizualizeaza'">-->
-<!--            <nz-icon nzType="icons:eye"></nz-icon>-->
-<!--          </button>-->
-<!--        </div>-->
-<!--      </td>-->
+      <td nzRight>
+        <button type="button"
+                nz-button
+                nzType="link"
+                [disabled]="!goodsReceipt.fileMetadataId"
+                title="Descarca fisierul"
+                [attr.aria-label]="'Descarca fisierul folosit pentru receptia ' + goodsReceipt.id"
+                (click)="downloadFile.emit(goodsReceipt)">
+          <nz-icon nzType="icons:download"></nz-icon>
+        </button>
+      </td>
     </tr>
 
     <tr [nzExpand]="expandedRows().has(goodsReceipt.id)">

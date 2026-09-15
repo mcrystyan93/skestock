@@ -208,6 +208,7 @@ public class GetSchoolClassSummaryHandlerTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.NoOfGoodsReceipt.ShouldBe(0);
         result.Value.TotalAmount.ShouldBe(0m);
+        result.Value.DistinctItemsCount.ShouldBe(0);
         result.Value.LowStockItemsCount.ShouldBe(0);
         result.Value.ProcessingImportsCount.ShouldBe(0);
         result.Value.PendingReviewImportsCount.ShouldBe(0);
@@ -232,7 +233,36 @@ public class GetSchoolClassSummaryHandlerTests
         var result = await handler.Handle(new GetSchoolClassSummaryQuery { Id = schoolClass.Id }, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
+        result.Value.DistinctItemsCount.ShouldBe(1);
         result.Value.LowStockItemsCount.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Handle_CountsDistinctItemsForCurrentClassOnly()
+    {
+        await using var context = CreateContext();
+        var schoolClass = CreateSchoolClass();
+        var otherClass = CreateSchoolClass();
+        var category = CreateCategory();
+        var location = CreateLocation();
+        var firstItem = CreateItem(category, minThreshold: 1, name: "Rice");
+        var secondItem = CreateItem(category, minThreshold: 1, name: "Beans");
+        var otherClassItem = CreateItem(category, minThreshold: 1, name: "Flour");
+        context.AddRange(schoolClass, otherClass, category, location, firstItem, secondItem, otherClassItem);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        context.StockBatches.AddRange(
+            CreateBatch(firstItem, location, schoolClass, quantity: 5),
+            CreateBatch(firstItem, location, schoolClass, quantity: 3),
+            CreateBatch(secondItem, location, schoolClass, quantity: 4),
+            CreateBatch(otherClassItem, location, otherClass, quantity: 7));
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new GetSchoolClassSummaryHandler(context);
+        var result = await handler.Handle(new GetSchoolClassSummaryQuery { Id = schoolClass.Id }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.DistinctItemsCount.ShouldBe(2);
     }
 
     [Test]

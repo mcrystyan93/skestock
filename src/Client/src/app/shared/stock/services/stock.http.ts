@@ -1,6 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
-import { AdjustStockRequest, GetClassLocationStockRequest, StockItemDto } from '@ske/models';
+import {
+  AdjustStockRequest,
+  GetClassLocationStockRequest,
+  StockItemDto,
+  StockReportDto
+} from '@ske/models';
 
 /**
  * HTTP client for src/Web/Endpoints/Stock.cs, mapped under /api/Stock.
@@ -12,7 +17,7 @@ export class StockHttp {
   public getClassLocationStock(request: GetClassLocationStockRequest) {
     const { classId, ...body } = request;
 
-    return this._httpClient.post<StockItemDto[]>(`/api/Stock/class/${classId}`, body);
+    return this._httpClient.post<StockReportDto>(`/api/Stock/class/${classId}`, body);
   }
 
   public adjustStock(request: AdjustStockRequest) {

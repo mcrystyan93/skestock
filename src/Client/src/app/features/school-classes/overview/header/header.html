@@ -21,6 +21,10 @@
         </nz-statistic>
       </nz-col>
       <nz-col nzFlex>
+        <nz-statistic nzTitle="Nr total de articole"
+                      [nzValue]="summary().distinctItemsCount ?? 0" />
+      </nz-col>
+      <nz-col nzFlex>
         <nz-statistic nzTitle="Articole cu stoc redus"
                       [nzValueTemplate]="lowStockItemsCountTemplate">
           <ng-template #lowStockItemsCountTemplate>

@@ -4,7 +4,7 @@ using skestock.Application.Features.Stock.Models;
 
 namespace skestock.Application.Features.Stock.Queries.GetClassLocationStock;
 
-public class GetClassLocationStockQuery : IRequest<Result<List<StockItemDto>>>, ICacheableQuery
+public class GetClassLocationStockQuery : IRequest<Result<StockReportDto>>, ICacheableQuery
 {
     public Guid ClassId { get; init; }
 
@@ -29,6 +29,7 @@ public class GetClassLocationStockQuery : IRequest<Result<List<StockItemDto>>>, 
 
     public string BuildCacheKey() =>
         $"{CacheConstants.Stock}:class:{ClassId}:" +
+        $"asOf={DateOnly.FromDateTime(DateTime.UtcNow):yyyy-MM-dd}:" +
         $"search={CacheKeyNormalization.Text(SearchTerm)}:" +
         $"filters={CacheKeyNormalization.Filters(Filters)}";
 }

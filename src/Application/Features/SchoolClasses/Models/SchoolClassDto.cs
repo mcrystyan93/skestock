@@ -19,6 +19,7 @@ public record SchoolClassSummary(
     Guid Id,
     int NoOfGoodsReceipt,
     decimal TotalAmount,
+    int DistinctItemsCount,
     int LowStockItemsCount,
     int ProcessingImportsCount,
     int PendingReviewImportsCount,

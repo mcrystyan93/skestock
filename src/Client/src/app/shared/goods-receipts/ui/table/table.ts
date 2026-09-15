@@ -1,13 +1,17 @@
-import { Component, effect, input, signal, untracked } from '@angular/core';
+import { Component, effect, input, output, signal, untracked } from '@angular/core';
 import { BaseTable } from '@ske/shared/tables';
 import { GetAllGoodsReceiptsRequest, GOODS_RECEIPT_TABLE_COLUMNS, GoodsReceiptListItemDto } from '@ske/models';
 import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { TableContainer as StockBatchesTableContainer } from '@ske/shared/stock-batches';
 
 @Component({
   imports: [
     NzTableModule,
+    NzButtonComponent,
+    NzIconDirective,
     DatePipe,
     StockBatchesTableContainer,
     CurrencyPipe,
@@ -24,7 +28,7 @@ export class Table extends BaseTable<GoodsReceiptListItemDto, GetAllGoodsReceipt
   public readonly loading = input.required<boolean>();
   public readonly expandedReceiptId = input<string | null>(null);
 
-  // public readonly onView = output<GoodsReceiptListItemDto>();
+  public readonly downloadFile = output<GoodsReceiptListItemDto>();
   public readonly columns = GOODS_RECEIPT_TABLE_COLUMNS;
   public readonly expandedRows = signal<Set<string>>(new Set<string>());
 

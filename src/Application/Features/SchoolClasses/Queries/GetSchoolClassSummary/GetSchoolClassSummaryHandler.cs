@@ -24,6 +24,13 @@ public class GetSchoolClassSummaryHandler(IApplicationDbContext dbContext)
         if (summary is null)
             return Result.Fail(new SchoolClassErrors.SchoolClassNotFound(request.Id));
 
+        var distinctItemsCount = await dbContext.StockBatches
+            .AsNoTracking()
+            .Where(b => b.ReceivedClassId == request.Id)
+            .Select(b => b.ItemId)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
         // Low stock = sum of StockBatch.Quantity per item and location for this class is less
         // than the item's MinThreshold. Each item is counted once if any location is low.
         // Items with no batches for this class are excluded (mirrors
@@ -54,6 +61,7 @@ public class GetSchoolClassSummaryHandler(IApplicationDbContext dbContext)
             summary.Id,
             summary.NoOfGoodsReceipt,
             summary.TotalAmount,
+            distinctItemsCount,
             lowStockItemsCount,
             CountFor(GoodsReceiptImportStatus.Processing),
             CountFor(GoodsReceiptImportStatus.PendingReview),

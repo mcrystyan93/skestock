@@ -2,6 +2,12 @@ using skestock.Application.Features.Categories.Models;
 
 namespace skestock.Application.Features.Stock.Models;
 
+public record StockReportDto
+{
+    public List<StockItemDto> Items { get; init; } = [];
+    public bool HasExpiredItems { get; init; }
+}
+
 public record StockItemDto
 {
     public Guid ItemId { get; init; }
@@ -14,6 +20,7 @@ public record StockItemDto
     public string LocationName { get; init; } = string.Empty;
     public string Unit { get; init; } = string.Empty;
     public bool IsPerishable { get; init; }
+    public bool IsExpired { get; init; }
     public int Quantity { get; init; }
     public bool IsLowStock { get; init; }
 }

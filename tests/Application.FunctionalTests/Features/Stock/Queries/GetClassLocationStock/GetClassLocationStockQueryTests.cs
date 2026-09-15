@@ -37,13 +37,17 @@ public class GetClassLocationStockQueryTests : TestBase
         await TestApp.AddAsync(_schoolClass);
     }
 
-    private async Task<Item> SeedItemAsync(string name, int minThreshold = 5)
+    private async Task<Item> SeedItemAsync(
+        string name,
+        int minThreshold = 5,
+        bool isPerishable = false)
     {
         var item = new Item
         {
             Name = $"{_prefix}-{name}",
             Unit = "unit",
             MinThreshold = minThreshold,
+            IsPerishable = isPerishable,
             CategoryId = _category.Id
         };
         await TestApp.AddAsync(item);
@@ -61,12 +65,21 @@ public class GetClassLocationStockQueryTests : TestBase
         return receipt;
     }
 
-    private async Task SeedBatchAsync(Item item, GoodsReceipt receipt, int quantity)
+    private async Task SeedBatchAsync(
+        Item item,
+        GoodsReceipt receipt,
+        int quantity,
+        DateOnly? expiryDate = null)
     {
-        await SeedBatchAsync(item, receipt, _location.Id, quantity);
+        await SeedBatchAsync(item, receipt, _location.Id, quantity, expiryDate);
     }
 
-    private async Task SeedBatchAsync(Item item, GoodsReceipt receipt, Guid locationId, int quantity)
+    private async Task SeedBatchAsync(
+        Item item,
+        GoodsReceipt receipt,
+        Guid locationId,
+        int quantity,
+        DateOnly? expiryDate = null)
     {
         // Only FK scalars are set here (Item/Location/ReceivedClass/GoodsReceipt navigations are
         // left at their null! default) - item/receipt/location/schoolClass were persisted via
@@ -80,6 +93,7 @@ public class GetClassLocationStockQueryTests : TestBase
             ReceivedClassId = _schoolClass.Id,
             GoodsReceiptId = receipt.Id,
             Quantity = quantity,
+            ExpiryDate = expiryDate,
             UnitPrice = 1m,
             ReceivedDate = new DateOnly(2024, 1, 1)
         };
@@ -107,8 +121,8 @@ public class GetClassLocationStockQueryTests : TestBase
         });
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Count.ShouldBe(1);
-        result.Value.Single().ItemName.ShouldBe(flour.Name);
+        result.Value.Items.Count.ShouldBe(1);
+        result.Value.Items.Single().ItemName.ShouldBe(flour.Name);
     }
 
     [Test]
@@ -126,8 +140,27 @@ public class GetClassLocationStockQueryTests : TestBase
         });
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Count.ShouldBe(1);
-        result.Value.Single().ItemName.ShouldBe(flour.Name);
+        result.Value.Items.Count.ShouldBe(1);
+        result.Value.Items.Single().ItemName.ShouldBe(flour.Name);
+    }
+
+    [Test]
+    public async Task Handle_ExpiredPerishableBatch_ReturnsRowAndReportExpiryFlags()
+    {
+        var milk = await SeedItemAsync("Milk", isPerishable: true);
+        var receipt = await SeedGoodsReceiptAsync();
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        await SeedBatchAsync(milk, receipt, 10, today.AddDays(-1));
+
+        var result = await TestApp.SendAsync(new GetClassLocationStockQuery
+        {
+            ClassId = _schoolClass.Id,
+            Filters = [EqualsFilter("locationId", _location.Id)]
+        });
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.HasExpiredItems.ShouldBeTrue();
+        result.Value.Items.Single().IsExpired.ShouldBeTrue();
     }
 
     [Test]
@@ -145,7 +178,7 @@ public class GetClassLocationStockQueryTests : TestBase
         });
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBeEmpty();
+        result.Value.Items.ShouldBeEmpty();
     }
 
     [Test]
@@ -163,8 +196,8 @@ public class GetClassLocationStockQueryTests : TestBase
         });
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Count.ShouldBe(2);
-        result.Value.Select(x => x.ItemName).ShouldBe([flour.Name, pasta.Name], ignoreOrder: true);
+        result.Value.Items.Count.ShouldBe(2);
+        result.Value.Items.Select(x => x.ItemName).ShouldBe([flour.Name, pasta.Name], ignoreOrder: true);
     }
 
     [Test]
@@ -201,9 +234,9 @@ public class GetClassLocationStockQueryTests : TestBase
         });
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Count.ShouldBe(1);
-        result.Value.Single().ItemId.ShouldBe(flour.Id);
-        result.Value.Single().LocationId.ShouldBe(_location.Id);
-        result.Value.Single().Quantity.ShouldBe(10);
+        result.Value.Items.Count.ShouldBe(1);
+        result.Value.Items.Single().ItemId.ShouldBe(flour.Id);
+        result.Value.Items.Single().LocationId.ShouldBe(_location.Id);
+        result.Value.Items.Single().Quantity.ShouldBe(10);
     }
 }
