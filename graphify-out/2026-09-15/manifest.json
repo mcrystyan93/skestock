@@ -1788,10 +1788,16 @@
     "semantic_hash": "3025a057e12c16b36febc74f68c07d16"
   },
   "src/Client/src/app/features/school-classes/list/school-classes.page.ts": {
-    "mtime": 1789475725.1864629,
-    "seen": 1789475757.9438019,
-    "ast_hash": "fd61f95f7988457a0325cf8f1e010631",
-    "semantic_hash": ""
+    "mtime": 1788777868.711,
+    "seen": 1788844386.8771534,
+    "ast_hash": "60477fc959b82ba91aca60a6f303291b",
+    "semantic_hash": "60477fc959b82ba91aca60a6f303291b"
+  },
+  "src/Client/src/app/features/school-classes/list/table/table.ts": {
+    "mtime": 1788258782.748,
+    "seen": 1788844386.8771536,
+    "ast_hash": "0b82b094014579f4257f2234a7088e5c",
+    "semantic_hash": "0b82b094014579f4257f2234a7088e5c"
   },
   "src/Client/src/app/features/school-classes/overview/header/header-container.ts": {
     "mtime": 1789285921.2371929,
@@ -3792,8 +3798,8 @@
     "semantic_hash": "5b973a02eace6b2c3e55adf6fb0701e2"
   },
   "src/Client/src/app/shared/icons/icon-catalog.generated.ts": {
-    "mtime": 1789476225.7400107,
-    "seen": 1789476243.5183625,
+    "mtime": 1789475480.8762133,
+    "seen": 1789475501.2729175,
     "ast_hash": "9f18a0461fd8e197b5b5f0e2f49f1049",
     "semantic_hash": "9f18a0461fd8e197b5b5f0e2f49f1049"
   },
@@ -5034,9 +5040,15 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/list/school-classes.page.html": {
-    "mtime": 1789475725.1944628,
-    "seen": 1789475757.9442024,
-    "ast_hash": "32f4777cac3fbf541b86cb8778bb6eec",
+    "mtime": 1788777868.717,
+    "seen": 1788861962.6187637,
+    "ast_hash": "66a9b3d400d61e8401f0034c9bff5784",
+    "semantic_hash": ""
+  },
+  "src/Client/src/app/features/school-classes/list/table/table.html": {
+    "mtime": 1789403568.4575367,
+    "seen": 1789403622.211007,
+    "ast_hash": "246819e3f9aae0aa64a881629399a783",
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/overview/header/header-container.html": {
@@ -5046,9 +5058,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/overview/header/header.html": {
-    "mtime": 1789476086.776,
-    "seen": 1789476243.518807,
-    "ast_hash": "319d14b923ce259f3ce0b97f9f227dfb",
+    "mtime": 1789041245.9352021,
+    "seen": 1789041642.3900893,
+    "ast_hash": "34d378eee3e131780b9ccf8ba11de21e",
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/overview/school-class-overview.page.html": {
@@ -26061,36 +26073,6 @@
     "mtime": 1789475468.6542008,
     "seen": 1789475501.273291,
     "ast_hash": "6275dd349379ccb54e149e3066634916",
-    "semantic_hash": ""
-  },
-  "src/Client/src/app/features/school-classes/list/table/large/table.ts": {
-    "mtime": 1789475725.1234627,
-    "seen": 1789475757.9438033,
-    "ast_hash": "78312c0adb1dc22ade85ac38c1bde5a3",
-    "semantic_hash": ""
-  },
-  "src/Client/src/app/features/school-classes/list/table/small/school-class-list-small.spec.ts": {
-    "mtime": 1789475725.1814628,
-    "seen": 1789475757.9438045,
-    "ast_hash": "c133bee02b90c018740662d9fc5a9ef7",
-    "semantic_hash": ""
-  },
-  "src/Client/src/app/features/school-classes/list/table/small/school-class-list-small.ts": {
-    "mtime": 1789475725.1674628,
-    "seen": 1789475757.943805,
-    "ast_hash": "a95b6025b7e67d54de3c4243151320dc",
-    "semantic_hash": ""
-  },
-  "src/Client/src/app/features/school-classes/list/table/large/table.html": {
-    "mtime": 1789475725.1610289,
-    "seen": 1789475757.9442034,
-    "ast_hash": "56a6080bf777cf8945e803d5bfa0f0a2",
-    "semantic_hash": ""
-  },
-  "src/Client/src/app/features/school-classes/list/table/small/school-class-list-small.html": {
-    "mtime": 1789475725.1754627,
-    "seen": 1789475757.9442039,
-    "ast_hash": "f68f995955f500a7afb3ef68f7d3de96",
     "semantic_hash": ""
   }
 }

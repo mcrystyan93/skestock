@@ -1,38 +1,51 @@
 import { Component, input, output } from '@angular/core';
 import { ErrorAlert } from '@ske/shared/errors';
 import { FilterContainer } from '../filter/regular/filter-container';
-import { Table } from '../tables/regular/table';
+import { Table } from '../tables/regular/large/table';
+import { ItemListSmall } from '../tables/regular/small/item-list-small';
 import { GetAllItemsRequest, ItemDto, ProblemDetails, ValidationProblemDetails } from '@ske/models';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 
 @Component({
-  imports: [
-    ErrorAlert,
-    FilterContainer,
-    Table
-  ],
+  imports: [ErrorAlert, FilterContainer, Table, LayoutBreakpoint, ItemListSmall],
   selector: 'ske-item-list-tab',
   template: `
     <ske-item-filter-container />
 
-    <ske-error-alert [problemDetail]="problemDetail()"
-                     [validationErrors]="validationErrors()" />
+    <ske-error-alert [problemDetail]="problemDetail()" [validationErrors]="validationErrors()" />
 
     <div class="grow relative">
-      <ske-item-table [items]="items()"
-                      [filter]="filter()"
-                      [loading]="loading()"
-                      [hasNextPage]="hasNextPage()"
-                      [isLoadingMore]="isLoadingMore()"
-                      (onFilterChange)="onFilterChange.emit($event)"
-                      (onLoadMore)="onLoadMore.emit()"
-                      (onEdit)="onEdit.emit($event)"
-                      (onToggleActive)="onToggleActive.emit($event)"
-                      [togglingItemId]="togglingItemId()" />
+      <ng-container *skeLayoutBreakpoint="'xl'; else smallScreenListTemplate">
+        <ske-item-table
+          [items]="items()"
+          [filter]="filter()"
+          [loading]="loading()"
+          [hasNextPage]="hasNextPage()"
+          [isLoadingMore]="isLoadingMore()"
+          (onFilterChange)="onFilterChange.emit($event)"
+          (onLoadMore)="onLoadMore.emit()"
+          (onEdit)="onEdit.emit($event)"
+          (onToggleActive)="onToggleActive.emit($event)"
+          [togglingItemId]="togglingItemId()"
+        />
+      </ng-container>
+      <ng-template #smallScreenListTemplate>
+        <ske-item-list-small
+          [items]="items()"
+          [filter]="filter()"
+          [loading]="loading()"
+          [hasNextPage]="hasNextPage()"
+          [isLoadingMore]="isLoadingMore()"
+          (onFilterChange)="onFilterChange.emit($event)"
+          (onLoadMore)="onLoadMore.emit()"
+          (onEdit)="onEdit.emit($event)"
+        />
+      </ng-template>
     </div>
   `,
   host: {
-    class: 'flex grow flex-col gap-2 absolute inset-0'
-  }
+    class: 'flex grow flex-col gap-2 absolute inset-0',
+  },
 })
 export class ItemListTab {
   public readonly problemDetail = input<ProblemDetails | null>();

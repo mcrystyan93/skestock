@@ -1,14 +1,18 @@
 import { Component, input, output } from '@angular/core';
 import { ErrorAlert } from '@ske/shared/errors';
 import { FilterContainer } from '../filter/filter-container';
-import { Table } from '../tables/regular/table';
+import { Table } from '../tables/regular/large/table';
 import { CategoryDto, GetAllCategoriesRequest, ProblemDetails, ValidationProblemDetails } from '@ske/models';
+import { LayoutBreakpoint } from '@ske/shared/directives';
+import { CategoryListSmall } from '../tables/regular/small/category-list-small';
 
 @Component({
   imports: [
     ErrorAlert,
     FilterContainer,
-    Table
+    Table,
+    LayoutBreakpoint,
+    CategoryListSmall
   ],
   selector: 'ske-category-list-tab',
   host: {
@@ -21,16 +25,28 @@ import { CategoryDto, GetAllCategoriesRequest, ProblemDetails, ValidationProblem
                      [validationErrors]="validationErrors()" />
 
     <div class="grow relative">
-      <ske-category-table [items]="categories()"
-                          [filter]="filter()"
-                          [loading]="loading()"
-                          [hasNextPage]="hasNextPage()"
-                          [isLoadingMore]="isLoadingMore()"
-                          (onFilterChange)="onFilterChange.emit($event)"
-                          (onLoadMore)="onLoadMore.emit()"
-                          (onEdit)="onEdit.emit($event)"
-                          (onDelete)="onDelete.emit($event)"
-                          [deletingCategoryId]="deletingCategoryId()" />
+      <ng-container *skeLayoutBreakpoint="'xl';else:smallScreenListTemplate">
+        <ske-category-table [items]="categories()"
+                            [filter]="filter()"
+                            [loading]="loading()"
+                            [hasNextPage]="hasNextPage()"
+                            [isLoadingMore]="isLoadingMore()"
+                            (onFilterChange)="onFilterChange.emit($event)"
+                            (onLoadMore)="onLoadMore.emit()"
+                            (onEdit)="onEdit.emit($event)"
+                            (onDelete)="onDelete.emit($event)"
+                            [deletingCategoryId]="deletingCategoryId()" />
+      </ng-container>
+      <ng-template #smallScreenListTemplate>
+        <ske-category-list-small [items]="categories()"
+                                 [filter]="filter()"
+                                 [loading]="loading()"
+                                 [hasNextPage]="hasNextPage()"
+                                 [isLoadingMore]="isLoadingMore()"
+                                 (onLoadMore)="onLoadMore.emit()"
+                                 (onEdit)="onEdit.emit($event)" />
+      </ng-template>
+
     </div>
   `
 })

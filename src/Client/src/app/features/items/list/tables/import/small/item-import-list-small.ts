@@ -1,41 +1,70 @@
 import { DatePipe } from '@angular/common';
 import { Component, input, output } from '@angular/core';
-import { BaseTable } from '@ske/shared/tables';
+import { BaseList } from '@ske/shared/tables';
 import {
   ITEM_IMPORT_BATCH_STATUS_COLORS,
   ITEM_IMPORT_BATCH_STATUS_LABELS,
-  ITEM_IMPORT_BATCH_TABLE_COLUMNS,
   GetAllItemImportBatchesRequest,
   ItemImportBatchFileDto,
   ItemImportBatchListItemDto,
-  ItemImportBatchStatus
+  ItemImportBatchStatus,
 } from '@ske/models';
+import {
+  CdkFixedSizeVirtualScroll,
+  CdkVirtualForOf,
+  CdkVirtualScrollViewport,
+} from '@angular/cdk/scrolling';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { NzDividerComponent } from 'ng-zorro-antd/divider';
 import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
+import {
+  NzListComponent,
+  NzListEmptyComponent,
+  NzListItemActionComponent,
+  NzListItemActionsComponent,
+  NzListItemComponent,
+  NzListItemMetaComponent,
+  NzListItemMetaDescriptionComponent,
+  NzListItemMetaTitleComponent,
+} from 'ng-zorro-antd/list';
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
-import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
 
 @Component({
   imports: [
-    NzTableModule,
     DatePipe,
-    NzTagComponent,
+    CdkFixedSizeVirtualScroll,
+    CdkVirtualForOf,
+    CdkVirtualScrollViewport,
     NzButtonComponent,
+    NzDividerComponent,
     NzDropdownDirective,
     NzDropdownMenuComponent,
     NzIconDirective,
+    NzListComponent,
+    NzListEmptyComponent,
+    NzListItemActionComponent,
+    NzListItemActionsComponent,
+    NzListItemComponent,
+    NzListItemMetaComponent,
+    NzListItemMetaDescriptionComponent,
+    NzListItemMetaTitleComponent,
     NzMenuDirective,
-    NzMenuItemComponent
+    NzMenuItemComponent,
+    NzTagComponent,
   ],
-  selector: 'ske-item-import-table',
-  templateUrl: './table.html',
-  host: { class: 'absolute block inset-0' }
+  selector: 'ske-item-import-list-small',
+  templateUrl: './item-import-list-small.html',
+  host: {
+    class: 'absolute block inset-0',
+  },
 })
-export class ItemImportTable extends BaseTable<ItemImportBatchListItemDto, GetAllItemImportBatchesRequest> {
+export class ItemImportListSmall extends BaseList<
+  ItemImportBatchListItemDto,
+  GetAllItemImportBatchesRequest
+> {
   public readonly loading = input.required<boolean>();
-  public readonly columns = ITEM_IMPORT_BATCH_TABLE_COLUMNS;
   public readonly downloadFile = output<ItemImportBatchFileDto>();
   public readonly review = output<ItemImportBatchListItemDto>();
 

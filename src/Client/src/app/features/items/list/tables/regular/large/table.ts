@@ -8,19 +8,13 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
 
 @Component({
-  imports: [
-    DatePipe,
-    NzButtonComponent,
-    NzIconDirective,
-    NzTagComponent,
-    NzTableModule
-  ],
+  imports: [DatePipe, NzButtonComponent, NzIconDirective, NzTagComponent, NzTableModule],
   selector: 'ske-item-table',
   styles: ``,
   templateUrl: './table.html',
   host: {
-    class: 'absolute block inset-0'
-  }
+    class: 'absolute block inset-0',
+  },
 })
 export class Table extends BaseTable<ItemDto, GetAllItemsRequest> {
   public readonly loading = input.required<boolean>();

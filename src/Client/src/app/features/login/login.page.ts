@@ -4,6 +4,7 @@ import { ThemeSwitcher } from '@ske/shared/theme';
 import { LoginForm } from './form/login-form';
 import { AuthStore } from '@ske/auth';
 import { Credentials } from '@ske/models';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
 
 @Component({
   selector: 'ske-login-page',
@@ -11,10 +12,11 @@ import { Credentials } from '@ske/models';
   imports: [
     NzCardComponent,
     ThemeSwitcher,
-    LoginForm
+    LoginForm,
+    NzIconDirective
   ],
   host: {
-    class: 'flex h-screen w-screen flex-row'
+    class: 'flex h-screen w-screen flex-row items-center justify-center'
   }
 })
 export class LoginPage {

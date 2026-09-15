@@ -1,5 +1,18 @@
 @import 'tailwindcss';
 
+@theme {
+  --breakpoint-*: initial;
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1600px;
+  --breakpoint-xxxl: 1920px;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
 html, body, ske-root {
   @apply block h-screen w-screen;
 }

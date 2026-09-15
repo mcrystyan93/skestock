@@ -1,9 +1,24 @@
-<ske-category-import-table [items]="store.categoryImportListItems()"
-                           [filter]="store.categoryImportListFilter()"
-                           [loading]="store.categoryImportListLoading()"
-                           [hasNextPage]="store.categoryImportListHasNextPage()"
-                           [isLoadingMore]="store.categoryImportListLoadingMore()"
-                           (onFilterChange)="store.load($event)"
-                           (onLoadMore)="store.loadMore()"
-                           (downloadFile)="download($event)"
-                           (review)="review.emit($event)" />
+<ng-container *skeLayoutBreakpoint="'xl'; else smallScreenListTemplate">
+  <ske-category-import-table [items]="store.categoryImportListItems()"
+                             [filter]="store.categoryImportListFilter()"
+                             [loading]="store.categoryImportListLoading()"
+                             [hasNextPage]="store.categoryImportListHasNextPage()"
+                             [isLoadingMore]="store.categoryImportListLoadingMore()"
+                             (onFilterChange)="store.load($event)"
+                             (onLoadMore)="store.loadMore()"
+                             (downloadFile)="download($event)"
+                             (review)="review.emit($event)"
+  />
+</ng-container>
+<ng-template #smallScreenListTemplate>
+  <ske-category-import-list-small [items]="store.categoryImportListItems()"
+                                  [filter]="store.categoryImportListFilter()"
+                                  [loading]="store.categoryImportListLoading()"
+                                  [hasNextPage]="store.categoryImportListHasNextPage()"
+                                  [isLoadingMore]="store.categoryImportListLoadingMore()"
+                                  (onFilterChange)="store.load($event)"
+                                  (onLoadMore)="store.loadMore()"
+                                  (downloadFile)="download($event)"
+                                  (review)="review.emit($event)"
+  />
+</ng-template>

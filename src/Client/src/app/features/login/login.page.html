@@ -1,12 +1,19 @@
 <div class="absolute top-[10px] right-[10px]">
   <ske-theme-switcher />
 </div>
+<nz-card>
+  <div class="flex flex-col items-center justify-center p-6 text-center">
+    <div class="flex items-center justify-center">
+      <div class="w-16 h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-lg shadow-sky-100 dark:shadow-none flex items-center justify-center mb-6 border border-white/60 dark:border-slate-700">
+        <nz-icon nzType="icons:right-to-bracket"
+                 class="text-4xl"></nz-icon>
+      </div>
+    </div>
 
-<div class="flex items-center justify-center basis-1/2 bg-[#1c1c3e]">
-  <img src="login_image.jpg" alt="login_image">
-</div>
-<div class="flex items-center justify-center basis-1/2">
-  <nz-card>
-    <ske-login-form [loading]="store.loginLoading()" (onSubmit)="login($event)" />
-  </nz-card>
-</div>
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-slate-100 tracking-tight mb-2">
+      Loghează-te în contul tău
+    </h1>
+  </div>
+  <ske-login-form [loading]="store.loginLoading()"
+                  (onSubmit)="login($event)" />
+</nz-card>

@@ -1,0 +1,77 @@
+<cdk-virtual-scroll-viewport itemSize="73"
+                             class="h-full w-full"
+                             (scroll)="onScroll($event)">
+  <nz-list>
+    @if (items().length === 0) {
+      <nz-list-empty/>
+    }
+
+    <nz-list-item *cdkVirtualFor="let categoryImport of items(); trackBy: (index, item) => item.id">
+      <nz-list-item-meta>
+        <nz-list-item-meta-title>
+          <span class="block truncate"
+                [attr.title]="fileNames(categoryImport)">
+            {{ fileNames(categoryImport) }}
+          </span>
+        </nz-list-item-meta-title>
+
+        <nz-list-item-meta-description>
+          <div class="flex min-w-0 items-center">
+            <span class="shrink-0">
+              <nz-tag [nzColor]="statusColor(categoryImport.status)">
+                {{ statusLabel(categoryImport.status) }}
+              </nz-tag>
+            </span>
+            <nz-divider nzType="vertical"/>
+            <span class="shrink-0">
+              <nz-icon nzType="icons:clock"/>
+              {{ categoryImport.uploadedAt | date: 'short' }}
+            </span>
+            <!--            @if (categoryImport.errorMessage) {-->
+            <!--              <nz-divider nzType="vertical"/>-->
+            <!--              <span class="min-w-0 truncate"-->
+            <!--                    [attr.title]="categoryImport.errorMessage">-->
+            <!--                {{ categoryImport.errorMessage }}-->
+            <!--              </span>-->
+            <!--            }-->
+          </div>
+        </nz-list-item-meta-description>
+      </nz-list-item-meta>
+
+      <ul nz-list-item-actions>
+        <nz-list-item-action>
+          <button type="button"
+                  nz-button
+                  nzType="link"
+                  [disabled]="categoryImport.status !== 'pendingReview'"
+                  (click)="review.emit(categoryImport)">
+            <nz-icon nzType="icons:eye"/>
+          </button>
+        </nz-list-item-action>
+        <nz-list-item-action>
+          <button
+            type="button"
+            nz-button
+            nzType="link"
+            nz-dropdown
+            [nzDropdownMenu]="menu"
+            [attr.aria-label]="'Actiuni pentru importul ' + categoryImport.id"
+          >
+            <nz-icon nzType="icons:files"/>
+          </button>
+          <nz-dropdown-menu #menu="nzDropdownMenu">
+            <ul nz-menu>
+              @for (file of categoryImport.files; track file.fileMetadataId) {
+                <li nz-menu-item
+                    (click)="downloadFile.emit(file)">
+                  <nz-icon nzType="icons:download"/>
+                  Descarca {{ file.originalName }}
+                </li>
+              }
+            </ul>
+          </nz-dropdown-menu>
+        </nz-list-item-action>
+      </ul>
+    </nz-list-item>
+  </nz-list>
+</cdk-virtual-scroll-viewport>

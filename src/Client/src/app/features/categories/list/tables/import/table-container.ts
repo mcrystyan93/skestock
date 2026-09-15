@@ -2,18 +2,18 @@ import { Component, inject, output } from '@angular/core';
 import { CategoryImportBatchFileDto, CategoryImportBatchListItemDto } from '@ske/models';
 import { FileStorageState } from '@ske/shared/storage';
 import { CategoryImportState } from '@ske/shared/categories';
-import { Table } from './table';
+import { Table } from './large/table';
+import { CategoryImportListSmall } from './small/category-import-list-small';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 
 @Component({
-  imports: [
-    Table
-  ],
+  imports: [Table, CategoryImportListSmall, LayoutBreakpoint],
   selector: 'ske-category-import-table-container',
   templateUrl: './table-container.html',
   host: {
-    class: 'absolute block inset-0'
+    class: 'absolute block inset-0',
   },
-  providers: [FileStorageState]
+  providers: [FileStorageState],
 })
 export class TableContainer {
   public readonly store = inject(CategoryImportState);

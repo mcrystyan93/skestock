@@ -6,8 +6,6 @@ import {
   effect,
   ElementRef,
   inject,
-  input,
-  output,
   signal,
   viewChild
 } from '@angular/core';
@@ -17,22 +15,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NzTableComponent, NzTableSortOrder } from 'ng-zorro-antd/table';
 import { BasePaginationFilter, PaginationSort } from '@ske/models';
 import { isNil } from 'lodash-es';
+import { BaseList } from './base-list';
 
 @Component({
   template: ''
 })
-export class BaseTable<T, K extends BasePaginationFilter> implements AfterViewInit {
-  public readonly items = input.required<Array<T>>();
-  public readonly filter = input.required<K>();
-
-  public readonly isReady = input(false);
-  public readonly hasNextPage = input.required<boolean>();
-  public readonly isLoadingMore = input.required<boolean>();
-
-  public readonly onLoadMore = output<void>();
-  public readonly onFilterChange = output<K>();
-
-
+export class BaseTable<T, K extends BasePaginationFilter> extends BaseList<T, K> implements AfterViewInit {
   public readonly itemsVirtualData = computed<Array<VirtualData<T>>>(() =>
     this.items().map((item, index) => ({ ...item, index }))
   );
@@ -106,10 +94,6 @@ export class BaseTable<T, K extends BasePaginationFilter> implements AfterViewIn
       });
   }
 
-  private shouldLoadMore(distanceToBottom: number): boolean {
-    return distanceToBottom <= SCROLL_THRESHOLD_PX && this.hasNextPage() && !this.isLoadingMore();
-  }
-
   private toSortMap(sort: K['sort'] | undefined): Map<string, NzTableSortOrder> {
     const map = new Map<string, NzTableSortOrder>();
 
@@ -176,7 +160,6 @@ export type TableDimensions = {
   isLoaded: boolean;
 };
 const initialTableDimensions: TableDimensions = { width: '0px', height: '0px', isLoaded: false };
-const SCROLL_THRESHOLD_PX = 200;
 
 export type VirtualData<T> = T & {
   index: number;
