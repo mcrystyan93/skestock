@@ -16,9 +16,12 @@
         <nz-statistic nzTitle="Totalul comenzilor"
                       [nzValueTemplate]="totalAmountTemplate">
           <ng-template #totalAmountTemplate>
-            {{ summary().totalAmount ?? 0| currency:'RON' }}
+            {{ summary().totalAmount ?? 0 | currency:'RON' }}
           </ng-template>
         </nz-statistic>
+      </nz-col>
+      <nz-col nzFlex>
+        <ske-goods-receipt-cost-statistic [receipts]="summary().goodsReceipts ?? []" />
       </nz-col>
       <nz-col nzFlex>
         <nz-statistic nzTitle="Nr total de articole"

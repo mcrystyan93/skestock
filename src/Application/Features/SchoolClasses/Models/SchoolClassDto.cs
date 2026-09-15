@@ -15,6 +15,11 @@ public record SchoolClassDto
     public DateTimeOffset LastModifiedDate { get; init; }
 }
 
+public record GoodsReceiptSummary(
+    Guid Id,
+    DateTime ReceivedAt,
+    decimal TotalAmount);
+
 public record SchoolClassSummary(
     Guid Id,
     int NoOfGoodsReceipt,
@@ -23,4 +28,5 @@ public record SchoolClassSummary(
     int LowStockItemsCount,
     int ProcessingImportsCount,
     int PendingReviewImportsCount,
-    int FailedImportsCount);
+    int FailedImportsCount,
+    IReadOnlyList<GoodsReceiptSummary> GoodsReceipts);

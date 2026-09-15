@@ -28,6 +28,12 @@ export type SchoolClassDto = {
 
 export type SchoolClassDropdownValue = SchoolClassDto | Partial<SchoolClassDto> | null;
 
+export type SchoolClassGoodsReceiptSummary = {
+  id: string;
+  receivedAt: string;
+  totalAmount: number;
+};
+
 /** Mirrors src/Application/Features/SchoolClasses/Models/SchoolClassDto.cs. */
 export type SchoolClassSummary = {
   id: string;
@@ -38,6 +44,7 @@ export type SchoolClassSummary = {
   processingImportsCount: number;
   pendingReviewImportsCount: number;
   failedImportsCount: number;
+  goodsReceipts: SchoolClassGoodsReceiptSummary[];
 };
 
 /** Mirrors src/Application/Features/SchoolClasses/Models/SchoolClassRequests.cs. */
