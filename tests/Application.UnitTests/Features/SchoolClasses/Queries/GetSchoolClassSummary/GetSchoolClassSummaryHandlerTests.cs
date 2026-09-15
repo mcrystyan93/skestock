@@ -183,6 +183,18 @@ public class GetSchoolClassSummaryHandlerTests
         Status = status
     };
 
+    private static GoodsReceipt CreateReceipt(
+        SchoolClass schoolClass,
+        DateTime receivedAt,
+        decimal totalAmount) => new()
+    {
+        ClassId = schoolClass.Id,
+        Class = schoolClass,
+        ReceivedAt = receivedAt,
+        TotalAmount = totalAmount,
+        Note = "Receipt"
+    };
+
     [Test]
     public async Task Handle_WithNonExistentId_ReturnsFailedResult()
     {
@@ -213,6 +225,34 @@ public class GetSchoolClassSummaryHandlerTests
         result.Value.ProcessingImportsCount.ShouldBe(0);
         result.Value.PendingReviewImportsCount.ShouldBe(0);
         result.Value.FailedImportsCount.ShouldBe(0);
+        result.Value.GoodsReceipts.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task Handle_ReturnsGoodsReceiptSummariesInChronologicalOrderForCurrentClass()
+    {
+        await using var context = CreateContext();
+        var schoolClass = CreateSchoolClass();
+        var otherClass = CreateSchoolClass();
+        context.SchoolClasses.AddRange(schoolClass, otherClass);
+
+        var laterReceipt = CreateReceipt(schoolClass, new DateTime(2026, 10, 1), 250m);
+        var earlierReceipt = CreateReceipt(schoolClass, new DateTime(2026, 9, 1), 100m);
+        var otherClassReceipt = CreateReceipt(otherClass, new DateTime(2026, 9, 15), 999m);
+        context.GoodsReceipts.AddRange(laterReceipt, earlierReceipt, otherClassReceipt);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new GetSchoolClassSummaryHandler(context).Handle(
+            new GetSchoolClassSummaryQuery { Id = schoolClass.Id },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.GoodsReceipts.Select(receipt => receipt.Id)
+            .ShouldBe([earlierReceipt.Id, laterReceipt.Id]);
+        result.Value.GoodsReceipts.Select(receipt => receipt.ReceivedAt)
+            .ShouldBe([earlierReceipt.ReceivedAt, laterReceipt.ReceivedAt]);
+        result.Value.GoodsReceipts.Select(receipt => receipt.TotalAmount)
+            .ShouldBe([earlierReceipt.TotalAmount, laterReceipt.TotalAmount]);
     }
 
     [Test]

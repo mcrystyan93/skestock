@@ -516,9 +516,9 @@
     "semantic_hash": ""
   },
   "src/Application/Features/GoodsReceipts/Commands/ConfirmGoodsReceiptImport/ConfirmGoodsReceiptImportCommandHandler.cs": {
-    "mtime": 1789398228.3121204,
-    "seen": 1789398361.509285,
-    "ast_hash": "7fdc9fae8774d20f329f2d6f089e788d",
+    "mtime": 1789492345.0979083,
+    "seen": 1789492376.317664,
+    "ast_hash": "773c0e4501560f3453d4bf638cd7886d",
     "semantic_hash": ""
   },
   "src/Application/Features/GoodsReceipts/Commands/ConfirmGoodsReceiptImport/ConfirmGoodsReceiptImportCommandValidator.cs": {
@@ -1038,9 +1038,9 @@
     "semantic_hash": ""
   },
   "src/Application/Features/SchoolClasses/Models/SchoolClassDto.cs": {
-    "mtime": 1789487233.9869468,
-    "seen": 1789487282.5685978,
-    "ast_hash": "556ef2c0b81f201aaca51e113144b4c8",
+    "mtime": 1789493482.196998,
+    "seen": 1789493594.2141533,
+    "ast_hash": "ace2702a98c39d8d515115064cdf626c",
     "semantic_hash": ""
   },
   "src/Application/Features/SchoolClasses/Models/SchoolClassRequests.cs": {
@@ -1086,9 +1086,9 @@
     "semantic_hash": "c77410692dc6612824e39a034dcd0fe3"
   },
   "src/Application/Features/SchoolClasses/Queries/GetSchoolClassSummary/GetSchoolClassSummaryHandler.cs": {
-    "mtime": 1789487233.9919467,
-    "seen": 1789487282.5686026,
-    "ast_hash": "bb53c94bcd5ef30938f375f0a6c1dcb6",
+    "mtime": 1789493482.2019978,
+    "seen": 1789493594.2141597,
+    "ast_hash": "439166d79ef3fd5b600158cc1cd005b8",
     "semantic_hash": ""
   },
   "src/Application/Features/SchoolClasses/Queries/GetSchoolClassSummary/GetSchoolClassSummaryQuery.cs": {
@@ -1590,9 +1590,9 @@
     "semantic_hash": "8f9a2efdde886a7308adeb17f8cb2042"
   },
   "src/Client/src/app/core/models/school-class.ts": {
-    "mtime": 1789487234.0119467,
-    "seen": 1789487282.568672,
-    "ast_hash": "1d9bac30d2bdb55679dd5fb8131fe3d1",
+    "mtime": 1789493486.8080022,
+    "seen": 1789493594.2142339,
+    "ast_hash": "487ea9509defe42fccd8c045ec09481c",
     "semantic_hash": ""
   },
   "src/Client/src/app/core/models/stock-batch.ts": {
@@ -1800,9 +1800,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/overview/header/header.ts": {
-    "mtime": 1789041237.780163,
-    "seen": 1789041642.3897247,
-    "ast_hash": "557223bea1fec512551e68627aebde1f",
+    "mtime": 1789493895.027403,
+    "seen": 1789493926.0680218,
+    "ast_hash": "42645934c7974564c07a32e1356621ab",
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/overview/school-class-overview.page.ts": {
@@ -3324,10 +3324,10 @@
     "semantic_hash": "8fe19a6a2bd2512978439d95fb18b3e9"
   },
   "tests/Application.UnitTests/Features/GoodsReceipts/Commands/ConfirmGoodsReceiptImport/ConfirmGoodsReceiptImportCommandHandlerTests.cs": {
-    "mtime": 1788759167.7468343,
-    "seen": 1788844386.8772624,
-    "ast_hash": "10d275c321db569473c4236a49bd4d6c",
-    "semantic_hash": "10d275c321db569473c4236a49bd4d6c"
+    "mtime": 1789492345.1049082,
+    "seen": 1789492376.3181326,
+    "ast_hash": "13add1f23d8763931d8c9c62f06aa005",
+    "semantic_hash": ""
   },
   "tests/Application.UnitTests/Features/GoodsReceipts/Commands/ConfirmGoodsReceiptImport/ConfirmImportTestDbContext.cs": {
     "mtime": 1789384576.8998003,
@@ -3594,9 +3594,9 @@
     "semantic_hash": "5e3d7497e3edc3f027586c3cb53d2c4e"
   },
   "tests/Application.UnitTests/Features/SchoolClasses/Queries/GetSchoolClassSummary/GetSchoolClassSummaryHandlerTests.cs": {
-    "mtime": 1789487234.0039468,
-    "seen": 1789487282.568994,
-    "ast_hash": "162da4c756119b33a37c8b62f401a2fd",
+    "mtime": 1789493529.9400446,
+    "seen": 1789493594.2146127,
+    "ast_hash": "b007b303df109a745cee075be88bf10d",
     "semantic_hash": ""
   },
   "tests/Application.UnitTests/Features/Stock/Commands/AdjustStock/AdjustStockCommandHandlerTests.cs": {
@@ -3792,8 +3792,8 @@
     "semantic_hash": "5b973a02eace6b2c3e55adf6fb0701e2"
   },
   "src/Client/src/app/shared/icons/icon-catalog.generated.ts": {
-    "mtime": 1789488664.3473206,
-    "seen": 1789488735.53373,
+    "mtime": 1789495377.9818618,
+    "seen": 1789495400.8162835,
     "ast_hash": "9f18a0461fd8e197b5b5f0e2f49f1049",
     "semantic_hash": "9f18a0461fd8e197b5b5f0e2f49f1049"
   },
@@ -5046,9 +5046,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/overview/header/header.html": {
-    "mtime": 1789487895.637,
-    "seen": 1789488735.534088,
-    "ast_hash": "b0ddc3e61eda688d541ecc305a1e8a8e",
+    "mtime": 1789493895.0339022,
+    "seen": 1789493926.068993,
+    "ast_hash": "245ef39a106652ca00d5435590b68642",
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/overview/school-class-overview.page.html": {
@@ -26103,6 +26103,12 @@
     "mtime": 1789488642.1312988,
     "seen": 1789488735.5339334,
     "ast_hash": "d57c541e041a6090025548689b03996a",
+    "semantic_hash": ""
+  },
+  "src/Client/src/app/features/school-classes/overview/header/goods-receipt-cost-statistic.ts": {
+    "mtime": 1789495366.16785,
+    "seen": 1789495400.8162475,
+    "ast_hash": "2a8aa7742e6d600483f59dc485a0fdc7",
     "semantic_hash": ""
   }
 }

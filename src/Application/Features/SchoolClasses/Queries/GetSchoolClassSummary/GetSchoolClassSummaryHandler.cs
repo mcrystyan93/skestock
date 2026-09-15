@@ -24,6 +24,17 @@ public class GetSchoolClassSummaryHandler(IApplicationDbContext dbContext)
         if (summary is null)
             return Result.Fail(new SchoolClassErrors.SchoolClassNotFound(request.Id));
 
+        var goodsReceipts = await dbContext.GoodsReceipts
+            .AsNoTracking()
+            .Where(receipt => receipt.ClassId == request.Id)
+            .OrderBy(receipt => receipt.ReceivedAt)
+            .ThenBy(receipt => receipt.Id)
+            .Select(receipt => new GoodsReceiptSummary(
+                receipt.Id,
+                receipt.ReceivedAt,
+                receipt.TotalAmount))
+            .ToListAsync(cancellationToken);
+
         var distinctItemsCount = await dbContext.StockBatches
             .AsNoTracking()
             .Where(b => b.ReceivedClassId == request.Id)
@@ -65,6 +76,7 @@ public class GetSchoolClassSummaryHandler(IApplicationDbContext dbContext)
             lowStockItemsCount,
             CountFor(GoodsReceiptImportStatus.Processing),
             CountFor(GoodsReceiptImportStatus.PendingReview),
-            CountFor(GoodsReceiptImportStatus.Failed)));
+            CountFor(GoodsReceiptImportStatus.Failed),
+            goodsReceipts));
     }
 }
