@@ -4,7 +4,7 @@ import { mapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import {
   buildCategoryImportBatchListFilter,
-  CategoryImportBatchDto,
+  CategoryImportBatchMutationDto,
   CategoryImportBatchListItemDto,
   CreateCategoryImportBatchRequest,
   GetAllCategoryImportBatchesRequest,
@@ -19,7 +19,7 @@ import { Events, withEventHandlers } from '@ngrx/signals/events';
 import { realtimeEvents } from '@ske/signalr';
 
 type CategoryImportStateModel = {
-  categoryImportBatch: CategoryImportBatchDto | null;
+  categoryImportBatch: CategoryImportBatchMutationDto | null;
   categoryImportListItems: CategoryImportBatchListItemDto[];
   categoryImportListPaginationData: PaginatedResponseData | null;
   categoryImportListFilter: GetAllCategoryImportBatchesRequest;

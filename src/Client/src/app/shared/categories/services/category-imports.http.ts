@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import {
-  CategoryImportBatchDto,
+  CategoryImportBatchMutationDto,
   CategoryImportBatchReviewDto,
   CategoryImportBatchListItemDto,
   ConfirmCategoryImportBatchRequest,
@@ -16,7 +16,7 @@ export class CategoryImportsHttp {
   private readonly _httpClient = inject(HttpClient);
 
   public createBatch(request: CreateCategoryImportBatchRequest) {
-    return this._httpClient.post<CategoryImportBatchDto>('/api/CategoryImportBatches', request);
+    return this._httpClient.post<CategoryImportBatchMutationDto>('/api/CategoryImportBatches', request);
   }
 
   public getAll(request: GetAllCategoryImportBatchesRequest | Partial<GetAllCategoryImportBatchesRequest>) {

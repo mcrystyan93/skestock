@@ -51,8 +51,8 @@ public class ConfirmCategoryImportBatchCommandTests : TestBase
         });
 
         result.IsSuccess.ShouldBeTrue();
+        result.Value.BatchId.ShouldBe(import.Id);
         result.Value.Status.ShouldBe(CategoryImportBatchStatus.Confirmed);
-        result.Value.Categories.Count.ShouldBe(2);
 
         var dairy = await TestApp.SingleOrDefaultAsync<Category>(c => c.Name == dairyName);
         dairy.ShouldNotBeNull();

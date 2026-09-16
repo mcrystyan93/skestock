@@ -3792,8 +3792,8 @@
     "semantic_hash": "5b973a02eace6b2c3e55adf6fb0701e2"
   },
   "src/Client/src/app/shared/icons/icon-catalog.generated.ts": {
-    "mtime": 1789542670.0841148,
-    "seen": 1789542772.290616,
+    "mtime": 1789541784.1396585,
+    "seen": 1789541946.9463856,
     "ast_hash": "9f18a0461fd8e197b5b5f0e2f49f1049",
     "semantic_hash": "9f18a0461fd8e197b5b5f0e2f49f1049"
   },
@@ -24630,21 +24630,21 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/core/models/category-import.ts": {
-    "mtime": 1789542666.2190971,
-    "seen": 1789542772.2905128,
-    "ast_hash": "cf5407c01564392d0364cb4f28761de5",
+    "mtime": 1789389422.585301,
+    "seen": 1789389535.057767,
+    "ast_hash": "01329ddca70980ede55ec9b4bb3ba41c",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/categories/services/category-import.store.ts": {
-    "mtime": 1789542631.016901,
-    "seen": 1789542772.2905943,
-    "ast_hash": "cede19d215306709f619bca0d0ba6ad7",
+    "mtime": 1789385989.9780102,
+    "seen": 1789386300.652451,
+    "ast_hash": "03ac32a49e2b1a817e130ad49a08a0ef",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/categories/services/category-imports.http.ts": {
-    "mtime": 1789542631.008901,
-    "seen": 1789542772.290595,
-    "ast_hash": "752c020f4f40d2e93f6c5f945c8874d0",
+    "mtime": 1789385970.8449776,
+    "seen": 1789386300.6524518,
+    "ast_hash": "22621aa70d6a908322b82c3f566614f8",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/storage/ui/file-upload.ts": {
@@ -25584,15 +25584,15 @@
     "semantic_hash": ""
   },
   "src/Application/Features/Categories/Commands/ConfirmCategoryImportBatch/ConfirmCategoryImportBatchCommand.cs": {
-    "mtime": 1789542630.9769008,
-    "seen": 1789542772.2903395,
-    "ast_hash": "ce1361ace0d658b13b370209054cfe3a",
+    "mtime": 1789384274.2422922,
+    "seen": 1789386300.6521761,
+    "ast_hash": "e92c2b1fab8e1ee2ad88eb65b02af85c",
     "semantic_hash": ""
   },
   "src/Application/Features/Categories/Commands/ConfirmCategoryImportBatch/ConfirmCategoryImportBatchCommandHandler.cs": {
-    "mtime": 1789542630.9849007,
-    "seen": 1789542772.2903411,
-    "ast_hash": "4e1776c32a3d687c2ecd6f841d669788",
+    "mtime": 1789398228.2971206,
+    "seen": 1789398361.5092478,
+    "ast_hash": "e22f47115e602264fe0155968a94639b",
     "semantic_hash": ""
   },
   "src/Application/Features/Categories/Commands/ConfirmCategoryImportBatch/ConfirmCategoryImportBatchCommandValidator.cs": {
@@ -25602,15 +25602,15 @@
     "semantic_hash": ""
   },
   "src/Application/Features/Categories/Commands/CreateCategoryImportBatch/CreateCategoryImportBatchCommand.cs": {
-    "mtime": 1789542630.9439006,
-    "seen": 1789542772.2903457,
-    "ast_hash": "a4ed46817745f862d640843e1005170d",
+    "mtime": 1789384245.479244,
+    "seen": 1789386300.6521814,
+    "ast_hash": "f140754dc091023ed21b8cfb9d21c974",
     "semantic_hash": ""
   },
   "src/Application/Features/Categories/Commands/CreateCategoryImportBatch/CreateCategoryImportBatchCommandHandler.cs": {
-    "mtime": 1789542630.9519005,
-    "seen": 1789542772.2903469,
-    "ast_hash": "e96439bc050c378bfef5aecda917bb28",
+    "mtime": 1789384401.680506,
+    "seen": 1789386300.6521826,
+    "ast_hash": "055c26ba702f71381faff42c7fa9920a",
     "semantic_hash": ""
   },
   "src/Application/Features/Categories/Commands/CreateCategoryImportBatch/CreateCategoryImportBatchCommandValidator.cs": {
@@ -25662,9 +25662,15 @@
     "semantic_hash": ""
   },
   "src/Application/Features/Categories/Models/CategoryImportBatchConfirmationResultDto.cs": {
-    "mtime": 1789542630.9609005,
-    "seen": 1789542772.290361,
+    "mtime": 1789384211.044186,
+    "seen": 1789386300.6522102,
     "ast_hash": "8d2ffe3da91765b7d5585946279a1b42",
+    "semantic_hash": ""
+  },
+  "src/Application/Features/Categories/Models/CategoryImportBatchDto.cs": {
+    "mtime": 1789384211.015186,
+    "seen": 1789386300.6522114,
+    "ast_hash": "e213683d21879c3982f59ab2249653cb",
     "semantic_hash": ""
   },
   "src/Application/Features/Categories/Models/CategoryImportBatchFileDto.cs": {
@@ -25782,9 +25788,9 @@
     "semantic_hash": ""
   },
   "src/Web/Endpoints/CategoryImportBatches.cs": {
-    "mtime": 1789542630.991901,
-    "seen": 1789542772.2907343,
-    "ast_hash": "ba663c0e00bbf7bf50e316e9c10bed69",
+    "mtime": 1789384523.5047107,
+    "seen": 1789386300.6525881,
+    "ast_hash": "baba3b1fd44c39360ceaf0ed1bdc7a9d",
     "semantic_hash": ""
   },
   "src/Worker/Queues/CategoryImportBatchQueueProcessingService.cs": {
@@ -25794,21 +25800,21 @@
     "semantic_hash": ""
   },
   "tests/Application.FunctionalTests/Features/Categories/Commands/ConfirmCategoryImportBatch/ConfirmCategoryImportBatchCommandTests.cs": {
-    "mtime": 1789542631.0499012,
-    "seen": 1789542772.2907557,
-    "ast_hash": "40266748894fb118d71941d0438ad99b",
+    "mtime": 1789386437.1957724,
+    "seen": 1789386496.4461076,
+    "ast_hash": "30e7181df522f886dfbaae1c4862e5bd",
     "semantic_hash": ""
   },
   "tests/Application.FunctionalTests/Features/Categories/Commands/CreateCategoryImportBatch/CreateCategoryImportBatchCommandTests.cs": {
-    "mtime": 1789542631.041901,
-    "seen": 1789542772.2907577,
-    "ast_hash": "c43e751ba0ea34fdcc21e3f0aca8d979",
+    "mtime": 1789386437.1817725,
+    "seen": 1789386496.4461098,
+    "ast_hash": "4c699d3561a1f807548ce47cc44a3b4c",
     "semantic_hash": ""
   },
   "tests/Application.UnitTests/Features/Categories/Commands/ConfirmCategoryImportBatch/ConfirmCategoryImportBatchCommandHandlerTests.cs": {
-    "mtime": 1789542631.0319011,
-    "seen": 1789542772.290784,
-    "ast_hash": "52e67402a4a3ec7e95556f3089303c3f",
+    "mtime": 1789386448.2857914,
+    "seen": 1789386496.4461374,
+    "ast_hash": "9e453e8fe70ba0cb35cb0c48ea6bcfff",
     "semantic_hash": ""
   },
   "tests/Application.UnitTests/Features/Categories/Commands/ConfirmCategoryImportBatch/ConfirmCategoryImportBatchCommandValidatorTests.cs": {
@@ -25830,9 +25836,9 @@
     "semantic_hash": ""
   },
   "tests/Application.UnitTests/Features/Categories/Commands/CreateCategoryImportBatch/CreateCategoryImportBatchCommandHandlerTests.cs": {
-    "mtime": 1789542631.0249012,
-    "seen": 1789542772.290789,
-    "ast_hash": "303f39c8bf121fcc148692ff372b4dec",
+    "mtime": 1789386459.880811,
+    "seen": 1789386496.446141,
+    "ast_hash": "2ba2ec9d1c1fbbd498d1a0632b6c50c3",
     "semantic_hash": ""
   },
   "tests/Application.UnitTests/Features/Categories/Commands/CreateCategoryImportBatch/CreateCategoryImportBatchCommandValidatorTests.cs": {
@@ -26109,18 +26115,6 @@
     "mtime": 1789541749.1284387,
     "seen": 1789541946.9461267,
     "ast_hash": "a84607189914712e8c0c88f61858ff80",
-    "semantic_hash": ""
-  },
-  "src/Application/Features/Categories/Models/CategoryImportBatchConfirmationResponseDto.cs": {
-    "mtime": 1789542630.9689007,
-    "seen": 1789542772.290359,
-    "ast_hash": "38d978f8980534252b1426fbed12b80a",
-    "semantic_hash": ""
-  },
-  "src/Application/Features/Categories/Models/CategoryImportBatchMutationDto.cs": {
-    "mtime": 1789542630.9369004,
-    "seen": 1789542772.2903636,
-    "ast_hash": "df6c6e31bac97e1ac00ac4e9cd8b7c0c",
     "semantic_hash": ""
   }
 }

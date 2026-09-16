@@ -13,6 +13,13 @@ export type CategoryDto = {
   icon?: IconPickerValue | null;
 };
 
+/** Mirrors src/Application/Features/Categories/Models/CategoryMutationDto.cs. */
+export type CategoryMutationDto = {
+  id: string;
+  name: string;
+  icon?: IconPickerValue | null;
+};
+
 /** Mirrors src/Application/Features/Categories/Models/CategoryRequests.cs. */
 export type GetAllCategoriesRequest = BasePaginationFilter & {
   filters: ColumnFilter[];

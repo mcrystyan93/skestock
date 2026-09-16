@@ -2,7 +2,6 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
-using skestock.Application.Common.Models;
 using skestock.Application.Features.Categories.Commands.ProcessCategoryImportBatch;
 using skestock.Application.Features.Categories.Models;
 using skestock.Domain.Entities;
@@ -12,9 +11,9 @@ using skestock.Shared;
 namespace skestock.Application.Features.Categories.Commands.CreateCategoryImportBatch;
 
 public class CreateCategoryImportBatchCommandHandler(IApplicationDbContext dbContext, IUser user)
-    : IRequestHandler<CreateCategoryImportBatchCommand, Result<CategoryImportBatchDto>>
+    : IRequestHandler<CreateCategoryImportBatchCommand, Result<CategoryImportBatchMutationDto>>
 {
-    public async ValueTask<Result<CategoryImportBatchDto>> Handle(
+    public async ValueTask<Result<CategoryImportBatchMutationDto>> Handle(
         CreateCategoryImportBatchCommand request, CancellationToken cancellationToken)
     {
         var identityId = Guard.Against.Null(user.Id,
@@ -35,7 +34,7 @@ public class CreateCategoryImportBatchCommandHandler(IApplicationDbContext dbCon
                     .SequenceEqual(request.FileMetadataIds))
                     return Result.Fail(new CategoryImportBatchErrors.IdempotencyConflict(clientRequestId));
 
-                return Result.Ok(await LoadDtoAsync(dbContext, existing.Id, cancellationToken));
+                return Result.Ok(ToMutationDto(existing));
             }
         }
 
@@ -70,47 +69,18 @@ public class CreateCategoryImportBatchCommandHandler(IApplicationDbContext dbCon
                 .SequenceEqual(request.FileMetadataIds))
                 return Result.Fail(new CategoryImportBatchErrors.IdempotencyConflict(request.ClientRequestId.Value));
 
-            return Result.Ok(await LoadDtoAsync(dbContext, existing.Id, cancellationToken));
+            return Result.Ok(ToMutationDto(existing));
         }
 
-        return Result.Ok(await LoadDtoAsync(dbContext, batch.Id, cancellationToken));
+        return Result.Ok(ToMutationDto(batch));
     }
 
-    internal static async Task<CategoryImportBatchDto> LoadDtoAsync(
-        IApplicationDbContext dbContext, Guid batchId, CancellationToken cancellationToken)
+    private static CategoryImportBatchMutationDto ToMutationDto(CategoryImportBatch batch)
     {
-        var batch = await dbContext.CategoryImportBatches
-            .AsNoTracking()
-            .Include(importBatch => importBatch.Files).ThenInclude(file => file.FileMetadata)
-            .Include(importBatch => importBatch.History)
-            .SingleAsync(importBatch => importBatch.Id == batchId, cancellationToken);
-
-        return new CategoryImportBatchDto
+        return new CategoryImportBatchMutationDto
         {
             Id = batch.Id,
-            Status = batch.Status,
-            ClientRequestId = batch.ClientRequestId,
-            AttemptCount = batch.AttemptCount,
-            UploadedAt = batch.UploadedAt,
-            ProcessedAt = batch.ProcessedAt,
-            ErrorMessage = batch.ErrorMessage,
-            Files = batch.Files.OrderBy(file => file.SortOrder).Select(file => new CategoryImportBatchFileDto
-            {
-                FileMetadataId = file.FileMetadataId,
-                OriginalName = file.FileMetadata.OriginalName,
-                BlobPath = file.FileMetadata.BlobPath,
-                ContentType = file.FileMetadata.ContentType,
-                SizeBytes = file.FileMetadata.SizeBytes,
-                Status = file.FileMetadata.Status,
-                SortOrder = file.SortOrder
-            }).ToList(),
-            History = batch.History.OrderBy(history => history.CreatedAtUtc).Select(history => new ImportBatchHistoryDto
-            {
-                Status = history.Status,
-                Attempt = history.Attempt,
-                Message = history.Message,
-                CreatedAtUtc = history.CreatedAtUtc
-            }).ToList()
+            Status = batch.Status
         };
     }
 }

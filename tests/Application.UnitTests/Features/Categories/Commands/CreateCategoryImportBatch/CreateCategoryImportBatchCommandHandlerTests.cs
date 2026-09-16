@@ -48,7 +48,7 @@ public class CreateCategoryImportBatchCommandHandlerTests
     }
 
     [Test]
-    public async Task Handle_WithValidData_CreatesProcessingImportAndReturnsDto()
+    public async Task Handle_WithValidData_CreatesProcessingImportAndReturnsMutationDto()
     {
         var (context, file, userProfile) = await CreateContextAsync();
         await using var _ = context;
@@ -61,8 +61,6 @@ public class CreateCategoryImportBatchCommandHandlerTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.Id.ShouldNotBe(Guid.Empty);
         result.Value.Status.ShouldBe(CategoryImportBatchStatus.Processing);
-        result.Value.Files.Single().FileMetadataId.ShouldBe(file.Id);
-        result.Value.Files.Single().BlobPath.ShouldBe(file.BlobPath);
     }
 
     [Test]

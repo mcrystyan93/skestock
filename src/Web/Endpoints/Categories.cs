@@ -31,7 +31,7 @@ public class Categories : IEndpointGroup
             SearchTerm = request.SearchTerm,
             PageSize = request.PageSize
         };
-        
+
         var result = await sender.Send(query, cancellationToken);
 
         if (result.IsFailed)
@@ -55,7 +55,7 @@ public class Categories : IEndpointGroup
 
     [EndpointSummary("Create a new category")]
     [EndpointDescription("Creates a new category in the database.")]
-    public static async Task<Results<Created<CategoryDto>, ProblemHttpResult>> CreateCategory(
+    public static async Task<Results<Created<CategoryMutationDto>, ProblemHttpResult>> CreateCategory(
         ISender sender, CategoryRequests.CreateCategoryRequest request, CancellationToken cancellationToken)
     {
         var command = new CreateCategoryCommand { Name = request.Name, Icon = request.Icon };
@@ -70,7 +70,7 @@ public class Categories : IEndpointGroup
 
     [EndpointSummary("Update an existing category")]
     [EndpointDescription("Updates an existing category in the database.")]
-    public static async Task<Results<Ok<CategoryDto>, ProblemHttpResult>> UpdateCategory(
+    public static async Task<Results<Ok<CategoryMutationDto>, ProblemHttpResult>> UpdateCategory(
         ISender sender, Guid id, CategoryRequests.UpdateCategoryRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateCategoryCommand { Id = id, Name = request.Name, Icon = request.Icon };

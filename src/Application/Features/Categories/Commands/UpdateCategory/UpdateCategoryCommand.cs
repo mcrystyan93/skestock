@@ -3,7 +3,7 @@ using skestock.Application.Features.Categories.Models;
 
 namespace skestock.Application.Features.Categories.Commands.UpdateCategory;
 
-public class UpdateCategoryCommand : IRequest<Result<CategoryDto>>, ICacheInvalidation
+public class UpdateCategoryCommand : IRequest<Result<CategoryMutationDto>>, ICacheInvalidation
 {
     public Guid Id { get; init; }
     public string Name { get; init; } = string.Empty;

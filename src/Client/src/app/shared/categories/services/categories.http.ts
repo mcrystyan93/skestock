@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import {
   CategoryDto,
+  CategoryMutationDto,
   CreateCategoryRequest,
   GetAllCategoriesRequest,
   PaginatedResponse,
@@ -24,10 +25,10 @@ export class CategoriesHttp {
   }
 
   public create(request: CreateCategoryRequest) {
-    return this._httpClient.post<CategoryDto>('/api/Categories', request);
+    return this._httpClient.post<CategoryMutationDto>('/api/Categories', request);
   }
 
   public update(id: string, request: UpdateCategoryRequest) {
-    return this._httpClient.put<CategoryDto>(`/api/Categories/${id}`, request);
+    return this._httpClient.put<CategoryMutationDto>(`/api/Categories/${id}`, request);
   }
 }
