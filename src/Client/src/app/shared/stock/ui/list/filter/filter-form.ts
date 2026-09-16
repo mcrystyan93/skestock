@@ -1,4 +1,4 @@
-import {Component, computed, effect, input, linkedSignal, output, untracked} from '@angular/core';
+import {Component, computed, effect, inject, input, linkedSignal, output, untracked} from '@angular/core';
 import {CategoryDropdownValue, ColumnFilter, GetClassLocationStockRequest, LocationDropdownValue} from '@ske/models';
 import {form, FormField, submit} from '@angular/forms/signals';
 import {isNil} from 'lodash-es';
@@ -12,6 +12,9 @@ import {NzButtonComponent} from 'ng-zorro-antd/button';
 import {CategoryDropdown} from '@ske/shared/categories';
 import {LocationDropdown} from '@ske/shared/locations';
 import {NzDividerComponent} from 'ng-zorro-antd/divider';
+import {NzCheckboxComponent} from 'ng-zorro-antd/checkbox';
+import {StockPreferencesService} from '../../../services/stock-preferences.service';
+import {NzSwitchComponent} from 'ng-zorro-antd/switch';
 
 @Component({
   imports: [
@@ -28,7 +31,9 @@ import {NzDividerComponent} from 'ng-zorro-antd/divider';
     NzButtonComponent,
     CategoryDropdown,
     LocationDropdown,
-    NzDividerComponent
+    NzDividerComponent,
+    NzCheckboxComponent,
+    NzSwitchComponent
   ],
   selector: 'ske-stock-filter-form',
   styles: ``,
@@ -46,7 +51,10 @@ export class FilterForm {
     computation: (filter) => (<StockListFilterModel>{
       searchTerm: filter.searchTerm ?? '',
       location: getDropdownFilterValue(filter.filters, 'locationId'),
-      category: getDropdownFilterValue(filter.filters, 'categoryId')
+      category: getDropdownFilterValue(filter.filters, 'categoryId'),
+      includeHidden: filter.includeHidden ?? false,
+      lowStockOnly: filter.lowStockOnly ?? false,
+      expiredOnly: filter.expiredOnly ?? false
     })
   });
 
@@ -70,6 +78,32 @@ export class FilterForm {
       return;
 
     untracked(() => this.onSubmit());
+  });
+
+  private readonly _includeHiddenEffectChange = effect(() => {
+    const includeHiddenValue = this.stockListFilterForm().value().includeHidden;
+
+    untracked(() => this.onSubmit())
+  });
+
+  private readonly _lowStockOnlyEffectChange = effect(() => {
+    const lowStockOnlyValue = this.stockListFilterForm().value().lowStockOnly;
+    const currentFilter = this.filter();
+
+    if (lowStockOnlyValue === (currentFilter.lowStockOnly ?? false))
+      return;
+
+    untracked(() => this.onSubmit())
+  });
+
+  private readonly _expiredOnlyEffectChange = effect(() => {
+    const expiredOnlyValue = this.stockListFilterForm().value().expiredOnly;
+    const currentFilter = this.filter();
+
+    if (expiredOnlyValue === (currentFilter.expiredOnly ?? false))
+      return;
+
+    untracked(() => this.onSubmit())
   });
 
   private readonly _getLocationValue = computed(() => {
@@ -96,7 +130,10 @@ export class FilterForm {
           buildEqualsFilter('locationId', criteria.location),
           buildEqualsFilter('categoryId', criteria.category)
         ].filter((filter): filter is ColumnFilter => filter !== null)
-      ]
+      ],
+      includeHidden: criteria.includeHidden,
+      lowStockOnly: criteria.lowStockOnly,
+      expiredOnly: criteria.expiredOnly
     };
   }
 
@@ -119,7 +156,10 @@ export class FilterForm {
     this.stockListFilterForm().reset({
       searchTerm: '',
       location: null,
-      category: null
+      category: null,
+      includeHidden: false,
+      lowStockOnly: false,
+      expiredOnly: false
     });
 
     this.onSubmit();
@@ -130,6 +170,9 @@ type StockListFilterModel = {
   searchTerm: string;
   location: LocationDropdownValue;
   category: CategoryDropdownValue;
+  includeHidden: boolean;
+  lowStockOnly: boolean;
+  expiredOnly: boolean;
 }
 
 const STOCK_FILTER_FIELDS = new Set(['locationId', 'categoryId']);
@@ -165,4 +208,3 @@ function buildEqualsFilter(
     displayValue: value.name
   };
 }
-

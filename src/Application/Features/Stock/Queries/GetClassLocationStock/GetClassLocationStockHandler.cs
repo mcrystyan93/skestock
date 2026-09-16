@@ -54,10 +54,11 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
                 g.Key.ItemId,
                 g.Key.LocationId,
                 Quantity = g.Sum(b => b.Quantity),
-                HasExpiredBatch = g.Any(b =>
-                    b.Quantity > 0 &&
-                    b.ExpiryDate.HasValue &&
-                    b.ExpiryDate.Value <= today)
+                ExpiredQuantity = g.Where(b =>
+                        b.Quantity > 0 &&
+                        b.ExpiryDate.HasValue &&
+                        b.ExpiryDate.Value <= today)
+                    .Sum(b => b.Quantity)
             })
             .ToListAsync(cancellationToken);
 
@@ -99,6 +100,48 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
         if (stockByItemLocation.Count == 0)
             return Result.Ok(new StockReportDto());
 
+        var visibleItemIds = stockByItemLocation.Select(x => x.ItemId).Distinct().ToList();
+        var classTotalsByItemId = await dbContext.StockBatches
+            .AsNoTracking()
+            .Where(b => b.ReceivedClassId == request.ClassId && visibleItemIds.Contains(b.ItemId))
+            .GroupBy(b => b.ItemId)
+            .Select(g => new
+            {
+                g.Key,
+                Quantity = g.Sum(b => b.Quantity)
+            })
+            .ToDictionaryAsync(x => x.Key, x => x.Quantity, cancellationToken);
+
+        var visibilityByItemId = await dbContext.ClassItemStockVisibilities
+            .AsNoTracking()
+            .Where(v => v.ClassId == request.ClassId
+                        && visibleItemIds.Contains(v.ItemId)
+                        && v.HideWhenZeroStock)
+            .Select(v => v.ItemId)
+            .ToDictionaryAsync(itemId => itemId, _ => true, cancellationToken);
+
+        stockByItemLocation = stockByItemLocation
+            .Where(x =>
+            {
+                var isHidden = visibilityByItemId.ContainsKey(x.ItemId)
+                               && classTotalsByItemId.GetValueOrDefault(x.ItemId) <= 0;
+                return request.IncludeHidden ? isHidden : !isHidden;
+            })
+            .ToList();
+
+        if (request.LowStockOnly)
+            stockByItemLocation = stockByItemLocation
+                .Where(x => x.Quantity < items[x.ItemId].MinThreshold)
+                .ToList();
+
+        if (request.ExpiredOnly)
+            stockByItemLocation = stockByItemLocation
+                .Where(x => items[x.ItemId].IsPerishable && x.ExpiredQuantity > 0)
+                .ToList();
+
+        if (stockByItemLocation.Count == 0)
+            return Result.Ok(new StockReportDto());
+
         var locationIds = stockByItemLocation.Select(x => x.LocationId).Distinct().ToList();
         var locations = await dbContext.Locations
             .AsNoTracking()
@@ -131,6 +174,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
                 var item = items[x.ItemId];
                 var location = locations[x.LocationId];
                 var category = categories[item.CategoryId];
+                var hideWhenZeroStock = visibilityByItemId.ContainsKey(x.ItemId);
                 return new StockItemDto
                 {
                     ItemId = x.ItemId,
@@ -143,9 +187,11 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
                     LocationName = location.Name,
                     Unit = item.Unit,
                     IsPerishable = item.IsPerishable,
-                    IsExpired = item.IsPerishable && x.HasExpiredBatch,
+                    IsExpired = item.IsPerishable && x.ExpiredQuantity > 0,
+                    ExpiredQuantity = item.IsPerishable ? x.ExpiredQuantity : 0,
                     Quantity = x.Quantity,
-                    IsLowStock = x.Quantity < item.MinThreshold
+                    IsLowStock = x.Quantity < item.MinThreshold,
+                    HideWhenZeroStock = hideWhenZeroStock
                 };
             })
             .OrderBy(x => x.ItemName)

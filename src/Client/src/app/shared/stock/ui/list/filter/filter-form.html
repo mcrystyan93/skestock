@@ -15,7 +15,7 @@
                    id="searchTerm"
                    placeholder="Cautați..."
                    nzVariant="borderless"
-                   [formField]="stockListFilterForm.searchTerm" />
+                   [formField]="stockListFilterForm.searchTerm"/>
           </nz-input-wrapper>
         </nz-form-control>
       </nz-form-item>
@@ -24,7 +24,7 @@
       <nz-form-item>
         <nz-form-control nzSpan="24">
           <ske-location-dropdown [formField]="stockListFilterForm.location"
-                                 [allowClear]="true" />
+                                 [allowClear]="true"/>
         </nz-form-control>
       </nz-form-item>
     </nz-col>
@@ -34,7 +34,7 @@
           <ske-category-dropdown [formField]="stockListFilterForm.category"
                                  [allowClear]="true"
                                  [allowCreate]="false"
-                                 [allowEdit]="false" />
+                                 [allowEdit]="false"/>
         </nz-form-control>
       </nz-form-item>
     </nz-col>
@@ -66,6 +66,32 @@
         <nz-icon nzType="icons:plus"></nz-icon>
         Adauga produs
       </button>
+    </nz-col>
+  </nz-row>
+  <nz-row [nzGutter]="[16, 0]">
+    <nz-col nzFlex="none">
+      <nz-form-item class="gap-2 items-center">
+        <nz-form-label>Afișează produsele ascunse</nz-form-label>
+        <nz-form-control>
+          <nz-switch [formField]="stockListFilterForm.includeHidden"/>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col nzFlex="none">
+      <nz-form-item class="gap-2 items-center">
+        <nz-form-label>Afișează cele cu stoc redus</nz-form-label>
+        <nz-form-control>
+          <nz-switch [formField]="stockListFilterForm.lowStockOnly"/>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col nzFlex="none">
+      <nz-form-item class="gap-2 items-center">
+        <nz-form-label>Afișează cele expirate</nz-form-label>
+        <nz-form-control>
+          <nz-switch [formField]="stockListFilterForm.expiredOnly"/>
+        </nz-form-control>
+      </nz-form-item>
     </nz-col>
   </nz-row>
 </form>

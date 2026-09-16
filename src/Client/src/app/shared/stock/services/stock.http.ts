@@ -4,6 +4,8 @@ import {
   AdjustStockRequest,
   GetClassLocationStockRequest,
   MoveStockRequest,
+  RemoveExpiredStockRequest,
+  SetClassItemStockVisibilityRequest,
   StockItemDto,
   StockReportDto
 } from '@ske/models';
@@ -25,7 +27,22 @@ export class StockHttp {
     return this._httpClient.post<StockItemDto>('/api/Stock/adjust', request);
   }
 
+  public removeExpiredStock(request: RemoveExpiredStockRequest) {
+    return this._httpClient.post<void>('/api/Stock/remove-expired', request);
+  }
+
   public moveStock(request: MoveStockRequest) {
     return this._httpClient.post<void>('/api/Stock/move', request);
+  }
+
+  public setClassItemStockVisibility(
+    classId: string,
+    itemId: string,
+    request: SetClassItemStockVisibilityRequest
+  ) {
+    return this._httpClient.patch<void>(
+      `/api/Stock/class/${classId}/item/${itemId}/visibility`,
+      request
+    );
   }
 }

@@ -10,6 +10,9 @@ public static class StockRequests
     {
         public string? SearchTerm { get; init; }
         public List<ColumnFilter> Filters { get; init; } = [];
+        public bool IncludeHidden { get; init; }
+        public bool LowStockOnly { get; init; }
+        public bool ExpiredOnly { get; init; }
     }
 
     public class AdjustStockRequest
@@ -19,6 +22,13 @@ public static class StockRequests
         public Guid LocationId { get; init; }
         public int ActualQuantity { get; init; }
         public AdjustmentReason Reason { get; init; }
+    }
+
+    public class RemoveExpiredStockRequest
+    {
+        public Guid ClassId { get; init; }
+        public Guid ItemId { get; init; }
+        public Guid LocationId { get; init; }
     }
 
     public class MoveStockRequest
@@ -33,5 +43,10 @@ public static class StockRequests
         public Guid DestinationLocationId { get; init; }
 
         [JsonPropertyName("quantity")] public int Quantity { get; init; }
+    }
+
+    public class SetClassItemStockVisibilityRequest
+    {
+        public bool HideWhenZeroStock { get; init; }
     }
 }

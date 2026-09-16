@@ -116,6 +116,15 @@ public class AdjustStockCommandHandler(IApplicationDbContext dbContext, IUser us
             .Select(l => l.Name)
             .SingleAsync(cancellationToken);
 
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var expiredQuantity = item.IsPerishable
+            ? batches
+                .Where(b => b.Quantity > 0
+                            && b.ExpiryDate.HasValue
+                            && b.ExpiryDate.Value <= today)
+                .Sum(b => b.Quantity)
+            : 0;
+
         var dto = new StockItemDto
         {
             ItemId = request.ItemId,
@@ -124,6 +133,8 @@ public class AdjustStockCommandHandler(IApplicationDbContext dbContext, IUser us
             LocationName = location,
             Unit = item.Unit,
             IsPerishable = item.IsPerishable,
+            IsExpired = expiredQuantity > 0,
+            ExpiredQuantity = expiredQuantity,
             Quantity = request.ActualQuantity,
             IsLowStock = request.ActualQuantity < item.MinThreshold
         };

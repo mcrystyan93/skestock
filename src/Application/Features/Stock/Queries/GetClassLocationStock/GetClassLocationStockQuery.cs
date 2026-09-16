@@ -16,6 +16,12 @@ public class GetClassLocationStockQuery : IRequest<Result<StockReportDto>>, ICac
     /// </summary>
     public string? SearchTerm { get; init; }
 
+    public bool IncludeHidden { get; init; }
+
+    public bool LowStockOnly { get; init; }
+
+    public bool ExpiredOnly { get; init; }
+
     public IReadOnlyCollection<string> Tags =>
     [
         CacheConstants.BuildClassTag(ClassId),
@@ -31,5 +37,8 @@ public class GetClassLocationStockQuery : IRequest<Result<StockReportDto>>, ICac
         $"{CacheConstants.Stock}:class:{ClassId}:" +
         $"asOf={DateOnly.FromDateTime(DateTime.UtcNow):yyyy-MM-dd}:" +
         $"search={CacheKeyNormalization.Text(SearchTerm)}:" +
-        $"filters={CacheKeyNormalization.Filters(Filters)}";
+        $"filters={CacheKeyNormalization.Filters(Filters)}:" +
+        $"includeHidden={IncludeHidden}:" +
+        $"lowStockOnly={LowStockOnly}:" +
+        $"expiredOnly={ExpiredOnly}";
 }
