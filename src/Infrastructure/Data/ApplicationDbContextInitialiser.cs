@@ -126,6 +126,7 @@ public class ApplicationDbContextInitialiser
     private static readonly (string Name, string Type, bool IsDefault)[] DefaultLocations =
     [
         ("Frigider", "Bucatarie", false),
+        ("Congelator", "Bucatarie", false),
         ("Dulap servire", "Sala de mese", false),
         ("Rafturi", "Bucatarie", false),
         ("Camara", "Bucatarie", true),
