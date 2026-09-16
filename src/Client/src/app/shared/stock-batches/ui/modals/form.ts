@@ -1,5 +1,5 @@
-import { Component, input, linkedSignal, signal } from '@angular/core';
-import { CategoryDto, ItemDto, LocationDto } from '@ske/models';
+import { Component, effect, input, linkedSignal, signal, untracked } from '@angular/core';
+import { CategoryDto, getDateForShelfLife, ItemDto, LocationDto } from '@ske/models';
 import { disabled, form, FormField, required, submit, validate } from '@angular/forms/signals';
 import { NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
 import { ItemDropdown } from '@ske/shared/items';
@@ -78,6 +78,19 @@ export class Form {
         kind: 'invalidQuantity',
         message: 'Cantitatea trebuie să fie mai mare decât 0.'
       };
+    });
+  });
+
+  private readonly _itemChangeEffectRef = effect(() => {
+    const item = this.stockBatchForm.item().value();
+
+    untracked(() => {
+      if (!item?.isPerishable || !item.shelfLifeDays || item.shelfLifeDays <= 0) {
+        this.stockBatchForm.expiryDate().value.set(null);
+        return;
+      }
+
+      this.stockBatchForm.expiryDate().value.set(getDateForShelfLife(item.shelfLifeDays));
     });
   });
 
