@@ -4,6 +4,26 @@ namespace skestock.Application.Common.Errors;
 
 public static class StockErrors
 {
+    public sealed class NoExpiredQuantity : Error
+    {
+        public const string ErrorCode = "stock.no_expired_quantity";
+
+        public NoExpiredQuantity(Guid classId, Guid itemId, Guid locationId)
+            : base("There is no expired stock remaining for this item at this location.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
+            Metadata.Add(ErrorMetadataKeys.Title, "No expired stock");
+            Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
+            Metadata.Add(ErrorMetadataKeys.Params,
+                new Dictionary<string, object>
+                {
+                    ["classId"] = classId,
+                    ["itemId"] = itemId,
+                    ["locationId"] = locationId
+                });
+        }
+    }
+
     public sealed class InsufficientQuantity : Error
     {
         public const string ErrorCode = "stock.insufficient_quantity";

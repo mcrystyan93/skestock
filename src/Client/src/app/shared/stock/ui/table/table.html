@@ -4,7 +4,8 @@
 
     <ng-template #cardTitle>
       <div class="flex items-center gap-4">
-        <nz-icon [nzType]="category.categoryIcon?.fileName ? ('icons:' + category.categoryIcon?.fileName) : 'icons:box'" class="text-3xl text-blue-500!"></nz-icon>
+        <nz-icon [nzType]="category.categoryIcon?.fileName ? ('icons:' + category.categoryIcon?.fileName) : 'icons:box'"
+                 class="text-3xl text-blue-500!"></nz-icon>
         <!--        <nz-avatar [nzIcon]="" />-->
         <div class="flex flex-col">
           <div class="flex flex-wrap items-center gap-2">
@@ -50,12 +51,8 @@
             <strong>{{ columns.itemName.label }}</strong>
           </th>
           <th nzColumnKey="locationName"
-              nzWidth="180px">
+              nzWidth="150px">
             <strong>{{ columns.locationName.label }}</strong>
-          </th>
-          <th nzColumnKey="unit"
-              nzWidth="110px">
-            <strong>{{ columns.unit.label }}</strong>
           </th>
           <th nzColumnKey="isPerishable"
               nzWidth="150px">
@@ -77,7 +74,11 @@
         </thead>
         <tbody>
           @for (item of items; track item.itemId + ':' + item.locationId) {
-            <tr>
+            <tr [class]="item.isLowStock
+              ? '[&>td]:!bg-yellow-500/20'
+              : item.isExpired
+                ? '[&>td]:!bg-red-500/15'
+                : ''">
               <td nzRight>
                 <div class="flex flex-col">
                   <strong>{{ item.itemName }}</strong>
@@ -92,22 +93,25 @@
                   <button nz-button
                           nzType="link"
                           type="button"
-                          [attr.title]="'Mută stocul pentru ' + item.itemName"
-                          [attr.aria-label]="'Mută stocul pentru ' + item.itemName"
+                          nz-tooltip
+                          [nzTooltipTitle]="item.quantity > 0
+                            ? 'Mută stocul pentru ' + item.itemName
+                            : 'Mutarea nu este disponibilă pentru stoc 0 sau negativ'"
+                          [attr.aria-label]="item.quantity > 0
+                            ? 'Mută stocul pentru ' + item.itemName
+                            : 'Mutarea nu este disponibilă pentru stoc 0 sau negativ'"
+                          [disabled]="item.quantity <= 0"
                           (click)="onMove.emit(item)">
                     <nz-icon nzType="icons:arrow-right-arrow-left"></nz-icon>
                   </button>
                 </div>
               </td>
               <td>
-                {{ item.unit }}
-              </td>
-              <td>
                 <div class="flex flex-wrap gap-1">
                   @if (item.isPerishable) {
                     <nz-tag nzColor="orange">Perisabil</nz-tag>
                     @if (item.isExpired) {
-                      <nz-tag nzColor="red">Posibil expirat</nz-tag>
+                      <nz-tag nzColor="red">Posibil expirat ({{ item.expiredQuantity }})</nz-tag>
                     }
                   } @else {
                     <nz-tag>Nu</nz-tag>
@@ -115,7 +119,7 @@
                 </div>
               </td>
               <td>
-                {{ item.quantity }}
+                <span>{{ item.quantity }} {{ item.unit }}</span>
               </td>
               <td>
                 @if (item.isLowStock) {
@@ -128,10 +132,38 @@
                 <button nz-button
                         nzType="link"
                         type="button"
-                        [attr.title]="'Ajusteaza stoc pentru ' + item.itemName"
+                        nz-tooltip
+                        [nzTooltipTitle]="'Ajusteaza stoc pentru ' + item.itemName"
                         [attr.aria-label]="'Ajusteaza stoc pentru ' + item.itemName"
-                        (click)="onAdjust.emit(item)">
+                (click)="onAdjust.emit(item)">
                   <nz-icon nzType="icons:pencil"></nz-icon>
+                </button>
+                @if (item.expiredQuantity > 0) {
+                 <button nz-button
+                         nzType="link"
+                         type="button"
+                         nz-popconfirm
+                         nz-tooltip
+                         nzPopconfirmPlacement="topRight"
+                         nzTooltipTitle="Elimină articolele expirate"
+                         [nzPopconfirmTitle]="'Elimini cele ' + item.expiredQuantity + ' articole expirate pentru ' + item.itemName + '?'"
+                         [attr.aria-label]="'Elimini cele ' + item.expiredQuantity + ' articole expirate pentru ' + item.itemName"
+                         (nzOnConfirm)="onRemoveExpired.emit(item)">
+                   <nz-icon nzType="icons:trash"></nz-icon>
+                 </button>
+                }
+                <button nz-button
+                        nzType="link"
+                        type="button"
+                        nz-tooltip
+                        [nzTooltipTitle]="(item.hideWhenZeroStock
+                         ? 'Nu mai ascunde la stoc 0 pentru '
+                         : 'Ascunde când stocul ajunge la 0 pentru ') + item.itemName"
+                        [attr.aria-label]="(item.hideWhenZeroStock
+                         ? 'Nu mai ascunde la stoc 0 pentru '
+                         : 'Ascunde când stocul ajunge la 0 pentru ') + item.itemName"
+                        (click)="onVisibilityChange.emit(item)">
+                  <nz-icon [nzType]="item.hideWhenZeroStock ? 'icons:eye' : 'icons:eye-slash'"></nz-icon>
                 </button>
               </td>
             </tr>

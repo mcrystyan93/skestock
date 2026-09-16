@@ -20,4 +20,5 @@ public static class RealtimeEvents
     public const string StockAdjusted = "StockAdjusted";
     public const string StockMoved = "StockMoved";
     public const string StockBatchCreated = "StockBatchCreated";
+    public const string ClassItemStockVisibilityChanged = "ClassItemStockVisibilityChanged";
 }

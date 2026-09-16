@@ -14,8 +14,10 @@ export type StockItemDto = {
   unit: string;
   isPerishable: boolean;
   isExpired: boolean;
+  expiredQuantity: number;
   quantity: number;
   isLowStock: boolean;
+  hideWhenZeroStock: boolean;
 };
 
 /** Mirrors src/Application/Features/Stock/Models/StockDto.cs (StockReportDto). */
@@ -39,6 +41,9 @@ export type GetClassLocationStockRequest = {
   filters: ColumnFilter[];
   /** Optional - when provided, only items whose name contains this term (case-insensitive) are included. */
   searchTerm?: string | null;
+  includeHidden: boolean;
+  lowStockOnly: boolean;
+  expiredOnly: boolean;
 };
 
 /**
@@ -73,6 +78,13 @@ export type AdjustStockRequest = {
   reason: AdjustmentReason;
 };
 
+/** Mirrors src/Application/Features/Stock/Models/StockRequests.cs (RemoveExpiredStockRequest). */
+export type RemoveExpiredStockRequest = {
+  classId: string;
+  itemId: string;
+  locationId: string;
+};
+
 /** Mirrors the move-stock request handled by src/Web/Endpoints/Stock.cs. */
 export type MoveStockRequest = {
   classId: string;
@@ -80,6 +92,10 @@ export type MoveStockRequest = {
   sourceLocationId: string;
   destinationLocationId: string;
   quantity: number;
+};
+
+export type SetClassItemStockVisibilityRequest = {
+  hideWhenZeroStock: boolean;
 };
 
 export type StockTableColumn =

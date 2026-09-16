@@ -1,4 +1,5 @@
 using skestock.Application.Features.Stock.Queries.GetClassLocationStock;
+using skestock.Application.Features.Stock.Commands.SetClassItemStockVisibility;
 using skestock.Application.Common.Filtering;
 using skestock.Domain.Entities;
 
@@ -161,6 +162,7 @@ public class GetClassLocationStockQueryTests : TestBase
         result.IsSuccess.ShouldBeTrue();
         result.Value.HasExpiredItems.ShouldBeTrue();
         result.Value.Items.Single().IsExpired.ShouldBeTrue();
+        result.Value.Items.Single().ExpiredQuantity.ShouldBe(10);
     }
 
     [Test]
@@ -238,5 +240,47 @@ public class GetClassLocationStockQueryTests : TestBase
         result.Value.Items.Single().ItemId.ShouldBe(flour.Id);
         result.Value.Items.Single().LocationId.ShouldBe(_location.Id);
         result.Value.Items.Single().Quantity.ShouldBe(10);
+    }
+
+    [Test]
+    public async Task Handle_MarkedZeroStock_IsHiddenFromNormalReportAndReturnedWhenIncluded()
+    {
+        var item = await SeedItemAsync("Depleted");
+        var receipt = await SeedGoodsReceiptAsync();
+        await SeedBatchAsync(item, receipt, 0);
+
+        var userId = await TestApp.RunAsDefaultUserAsync();
+        await TestApp.AddAsync(new UserProfile
+        {
+            IdentityId = userId!.Value,
+            FirstName = "Test",
+            LastName = "User"
+        });
+
+        var visibilityResult = await TestApp.SendAsync(new SetClassItemStockVisibilityCommand
+        {
+            ClassId = _schoolClass.Id,
+            ItemId = item.Id,
+            HideWhenZeroStock = true
+        });
+        visibilityResult.IsSuccess.ShouldBeTrue();
+
+        var normalResult = await TestApp.SendAsync(new GetClassLocationStockQuery
+        {
+            ClassId = _schoolClass.Id,
+            Filters = [EqualsFilter("locationId", _location.Id)]
+        });
+        var hiddenResult = await TestApp.SendAsync(new GetClassLocationStockQuery
+        {
+            ClassId = _schoolClass.Id,
+            Filters = [EqualsFilter("locationId", _location.Id)],
+            IncludeHidden = true
+        });
+
+        normalResult.IsSuccess.ShouldBeTrue();
+        normalResult.Value.Items.ShouldBeEmpty();
+        hiddenResult.IsSuccess.ShouldBeTrue();
+        hiddenResult.Value.Items.Single().ItemId.ShouldBe(item.Id);
+        hiddenResult.Value.Items.Single().HideWhenZeroStock.ShouldBeTrue();
     }
 }

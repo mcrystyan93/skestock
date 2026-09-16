@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using skestock.Application.Features.Stock.Commands.AdjustStock;
 using skestock.Application.Features.Stock.Commands.MoveStock;
+using skestock.Application.Features.Stock.Commands.RemoveExpiredStock;
+using skestock.Application.Features.Stock.Commands.SetClassItemStockVisibility;
 using skestock.Application.Features.Stock.Models;
 using skestock.Application.Features.Stock.Queries.GetClassLocationStock;
 using static skestock.Application.Features.Stock.Models.StockRequests;
@@ -13,7 +15,10 @@ public class Stock : IEndpointGroup
     {
         groupBuilder.MapPost(GetClassLocationStock, "class/{classId}");
         groupBuilder.MapPost(AdjustStock, "adjust");
+        groupBuilder.MapPost(RemoveExpiredStock, "remove-expired");
         groupBuilder.MapPost(MoveStock, "move");
+        groupBuilder.MapPatch(SetClassItemStockVisibility, "class/{classId}/item/{itemId}/visibility")
+            .RequireAuthorization();
     }
 
     [EndpointSummary("Get current stock for a class with optional column filters")]
@@ -23,7 +28,8 @@ public class Stock : IEndpointGroup
                           "expired perishable batches. The response also exposes whether any " +
                           "visible item may be expired. The optional 'locationId' and 'categoryId' " +
                           "equals filters scope the report, and the 'searchTerm' property filters " +
-                          "item names case-insensitively.")]
+                          "item names case-insensitively. The 'lowStockOnly' and 'expiredOnly' " +
+                          "flags restrict the report to matching rows when enabled.")]
     public static async Task<Results<Ok<StockReportDto>, ProblemHttpResult>> GetClassLocationStock(
         ISender sender, Guid classId, StockRequests.GetClassLocationStockRequest request,
         CancellationToken cancellationToken)
@@ -32,7 +38,10 @@ public class Stock : IEndpointGroup
         {
             ClassId = classId,
             Filters = request.Filters,
-            SearchTerm = request.SearchTerm
+            SearchTerm = request.SearchTerm,
+            IncludeHidden = request.IncludeHidden,
+            LowStockOnly = request.LowStockOnly,
+            ExpiredOnly = request.ExpiredOnly
         };
 
         var result = await sender.Send(query, cancellationToken);
@@ -70,6 +79,28 @@ public class Stock : IEndpointGroup
         return TypedResults.Ok(result.Value);
     }
 
+    [EndpointSummary("Remove expired stock for an item at a location")]
+    [EndpointDescription("Removes only the remaining quantity from expired perishable stock batches " +
+                          "for the requested class, item and location. Each affected batch is audited " +
+                          "as an expired stock adjustment, and the stock-adjusted realtime event is emitted.")]
+    public static async Task<Results<Ok, ProblemHttpResult>> RemoveExpiredStock(
+        ISender sender, RemoveExpiredStockRequest request, CancellationToken cancellationToken)
+    {
+        var command = new RemoveExpiredStockCommand
+        {
+            ClassId = request.ClassId,
+            ItemId = request.ItemId,
+            LocationId = request.LocationId
+        };
+
+        var result = await sender.Send(command, cancellationToken);
+
+        if (result.IsFailed)
+            return result.ToProblemHttpResult();
+
+        return TypedResults.Ok();
+    }
+
     [EndpointSummary("Move stock between two locations")]
     [EndpointDescription("Moves a positive quantity of an item from one location to another within " +
                          "the same school-class stock scope. Source batches are consumed oldest " +
@@ -85,6 +116,31 @@ public class Stock : IEndpointGroup
             SourceLocationId = request.SourceLocationId,
             DestinationLocationId = request.DestinationLocationId,
             Quantity = request.Quantity
+        };
+
+        var result = await sender.Send(command, cancellationToken);
+
+        if (result.IsFailed)
+            return result.ToProblemHttpResult();
+
+        return TypedResults.Ok();
+    }
+
+    [EndpointSummary("Change zero-stock visibility for an item in a class")]
+    [EndpointDescription("Stores whether the selected item should be hidden from the normal class " +
+                         "stock report after its total quantity across all locations reaches zero.")]
+    public static async Task<Results<Ok, ProblemHttpResult>> SetClassItemStockVisibility(
+        ISender sender,
+        Guid classId,
+        Guid itemId,
+        SetClassItemStockVisibilityRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = new SetClassItemStockVisibilityCommand
+        {
+            ClassId = classId,
+            ItemId = itemId,
+            HideWhenZeroStock = request.HideWhenZeroStock
         };
 
         var result = await sender.Send(command, cancellationToken);

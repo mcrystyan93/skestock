@@ -7,6 +7,8 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { isNil } from 'lodash-es';
 import { NzCardComponent } from 'ng-zorro-antd/card';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
+import { NzPopconfirmDirective } from 'ng-zorro-antd/popconfirm';
 
 /**
  * Renders the full stock report for a class in one shot - no cursor/`loadMore`, since
@@ -19,7 +21,9 @@ import { NzTypographyComponent } from 'ng-zorro-antd/typography';
     NzButtonComponent,
     NzIconDirective,
     NzCardComponent,
-    NzTypographyComponent
+    NzTypographyComponent,
+    NzTooltipDirective,
+    NzPopconfirmDirective
   ],
   selector: 'ske-stock-table',
   styles: ``,
@@ -34,6 +38,8 @@ export class Table {
 
   public readonly onAdjust = output<StockItemDto>();
   public readonly onMove = output<StockItemDto>();
+  public readonly onRemoveExpired = output<StockItemDto>();
+  public readonly onVisibilityChange = output<StockItemDto>();
   public readonly onAdd = output<Partial<CategoryDto> | null>();
 
   public readonly columns = STOCK_TABLE_COLUMNS;

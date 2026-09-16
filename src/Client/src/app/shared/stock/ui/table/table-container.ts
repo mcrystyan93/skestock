@@ -8,6 +8,9 @@ import { StockMoveModal, StockMoveModalData } from '../modals/move/stock-move-mo
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AddStockBatchModal } from '@ske/shared/stock-batches';
 import { NzEmptyComponent } from 'ng-zorro-antd/empty';
+import { StockHttp } from '../../services/stock.http';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { EMPTY, catchError, tap } from 'rxjs';
 
 @Component({
   imports: [
@@ -27,6 +30,8 @@ export class TableContainer {
 
   private readonly _nzModalService = inject(NzModalService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _stockHttp = inject(StockHttp);
+  private readonly _nzMessageService = inject(NzMessageService);
 
   public onAdjust(item: StockItemDto) {
     const classId = this.store.filter().classId;
@@ -62,6 +67,26 @@ export class TableContainer {
     });
   }
 
+  public onRemoveExpired(item: StockItemDto): void {
+    const classId = this.store.filter().classId;
+
+    this._stockHttp.removeExpiredStock({
+      classId,
+      itemId: item.itemId,
+      locationId: item.locationId
+    }).pipe(
+      takeUntilDestroyed(this._destroyRef),
+      tap(() => {
+        this._nzMessageService.success(`Au fost eliminate ${item.expiredQuantity} articole expirate.`);
+        this.store.load(this.store.filter());
+      }),
+      catchError(() => {
+        this._nzMessageService.error('Articolele expirate nu au putut fi eliminate.');
+        return EMPTY;
+      })
+    ).subscribe();
+  }
+
   public addStock(category: Partial<CategoryDto> | null = null) {
     const classId = this.store.filter().classId;
 
@@ -77,5 +102,28 @@ export class TableContainer {
     ).subscribe(() => {
       this.store.load(this.store.filter());
     });
+  }
+
+  public onVisibilityChange(item: StockItemDto): void {
+    const classId = this.store.filter().classId;
+    const hideWhenZeroStock = !item.hideWhenZeroStock;
+
+    this._stockHttp.setClassItemStockVisibility(classId, item.itemId, { hideWhenZeroStock })
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        tap(() => {
+          this._nzMessageService.success(
+            hideWhenZeroStock
+              ? 'Produsul va fi ascuns când stocul ajunge la 0.'
+              : 'Produsul nu va mai fi ascuns la stoc 0.'
+          );
+          this.store.load(this.store.filter());
+        }),
+        catchError(() => {
+          this._nzMessageService.error('Setarea vizibilității produsului nu a putut fi salvată.');
+          return EMPTY;
+        })
+      )
+      .subscribe();
   }
 }

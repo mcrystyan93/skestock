@@ -21,6 +21,8 @@ public record StockItemDto
     public string Unit { get; init; } = string.Empty;
     public bool IsPerishable { get; init; }
     public bool IsExpired { get; init; }
+    public int ExpiredQuantity { get; init; }
     public int Quantity { get; init; }
     public bool IsLowStock { get; init; }
+    public bool HideWhenZeroStock { get; init; }
 }

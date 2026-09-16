@@ -143,6 +143,7 @@ public class GetClassLocationStockHandlerTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.HasExpiredItems.ShouldBeTrue();
         result.Value.Items.Single().IsExpired.ShouldBeTrue();
+        result.Value.Items.Single().ExpiredQuantity.ShouldBe(4);
         result.Value.Items.Single().Quantity.ShouldBe(10);
     }
 
@@ -179,6 +180,7 @@ public class GetClassLocationStockHandlerTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.HasExpiredItems.ShouldBeFalse();
         result.Value.Items.Single().IsExpired.ShouldBeFalse();
+        result.Value.Items.Single().ExpiredQuantity.ShouldBe(0);
     }
 
     [Test]
@@ -237,6 +239,178 @@ public class GetClassLocationStockHandlerTests
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Items.Single().IsLowStock.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task Handle_LowStockOnly_ReturnsOnlyRowsBelowThreshold()
+    {
+        await using var context = CreateContext();
+        var (lowStockItem, location, schoolClass) = await SeedBaseData(context, minThreshold: 10);
+        var regularItem = new Item
+        {
+            Name = "Beans",
+            Unit = "kg",
+            MinThreshold = 10,
+            CategoryId = lowStockItem.CategoryId
+        };
+        context.Items.Add(regularItem);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        context.StockBatches.AddRange(
+            new StockBatch
+            {
+                Item = lowStockItem,
+                Location = location,
+                ReceivedClass = schoolClass,
+                Quantity = 5,
+                ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow)
+            },
+            new StockBatch
+            {
+                Item = regularItem,
+                Location = location,
+                ReceivedClass = schoolClass,
+                Quantity = 10,
+                ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow)
+            });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new GetClassLocationStockHandler(context).Handle(
+            new GetClassLocationStockQuery
+            {
+                ClassId = schoolClass.Id,
+                LowStockOnly = true
+            },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Count.ShouldBe(1);
+        result.Value.Items.Single().ItemId.ShouldBe(lowStockItem.Id);
+    }
+
+    [Test]
+    public async Task Handle_ExpiredOnly_ReturnsOnlyRowsWithExpiredRemainingStock()
+    {
+        await using var context = CreateContext();
+        var (expiredItem, location, schoolClass) = await SeedBaseData(
+            context,
+            isPerishable: true);
+        var freshItem = new Item
+        {
+            Name = "Canned beans",
+            Unit = "unit",
+            MinThreshold = 5,
+            CategoryId = expiredItem.CategoryId
+        };
+        context.Items.Add(freshItem);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        context.StockBatches.AddRange(
+            new StockBatch
+            {
+                Item = expiredItem,
+                Location = location,
+                ReceivedClass = schoolClass,
+                Quantity = 5,
+                ExpiryDate = today.AddDays(-1),
+                ReceivedDate = today.AddDays(-10)
+            },
+            new StockBatch
+            {
+                Item = freshItem,
+                Location = location,
+                ReceivedClass = schoolClass,
+                Quantity = 5,
+                ExpiryDate = today.AddDays(10),
+                ReceivedDate = today
+            });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new GetClassLocationStockHandler(context).Handle(
+            new GetClassLocationStockQuery
+            {
+                ClassId = schoolClass.Id,
+                ExpiredOnly = true
+            },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Count.ShouldBe(1);
+        result.Value.Items.Single().ItemId.ShouldBe(expiredItem.Id);
+        result.Value.Items.Single().IsExpired.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task Handle_LowStockAndExpiredOnly_ReturnsOnlyRowsMatchingBothFilters()
+    {
+        await using var context = CreateContext();
+        var (lowAndExpiredItem, location, schoolClass) = await SeedBaseData(
+            context,
+            minThreshold: 10,
+            isPerishable: true);
+        var lowOnlyItem = new Item
+        {
+            Name = "Fresh vegetables",
+            Unit = "kg",
+            MinThreshold = 10,
+            IsPerishable = true,
+            CategoryId = lowAndExpiredItem.CategoryId
+        };
+        var expiredOnlyItem = new Item
+        {
+            Name = "Expired canned beans",
+            Unit = "unit",
+            MinThreshold = 5,
+            IsPerishable = true,
+            CategoryId = lowAndExpiredItem.CategoryId
+        };
+        context.Items.AddRange(lowOnlyItem, expiredOnlyItem);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        context.StockBatches.AddRange(
+            new StockBatch
+            {
+                Item = lowAndExpiredItem,
+                Location = location,
+                ReceivedClass = schoolClass,
+                Quantity = 5,
+                ExpiryDate = today.AddDays(-1),
+                ReceivedDate = today.AddDays(-10)
+            },
+            new StockBatch
+            {
+                Item = lowOnlyItem,
+                Location = location,
+                ReceivedClass = schoolClass,
+                Quantity = 5,
+                ExpiryDate = today.AddDays(10),
+                ReceivedDate = today
+            },
+            new StockBatch
+            {
+                Item = expiredOnlyItem,
+                Location = location,
+                ReceivedClass = schoolClass,
+                Quantity = 10,
+                ExpiryDate = today.AddDays(-1),
+                ReceivedDate = today.AddDays(-10)
+            });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new GetClassLocationStockHandler(context).Handle(
+            new GetClassLocationStockQuery
+            {
+                ClassId = schoolClass.Id,
+                LowStockOnly = true,
+                ExpiredOnly = true
+            },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Count.ShouldBe(1);
+        result.Value.Items.Single().ItemId.ShouldBe(lowAndExpiredItem.Id);
     }
 
     [Test]
@@ -543,5 +717,159 @@ public class GetClassLocationStockHandlerTests
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.Single().Message.ShouldContain("School class");
+    }
+
+    [Test]
+    public async Task Handle_UnmarkedZeroStock_RemainsVisibleInNormalMode()
+    {
+        await using var context = CreateContext();
+        var (item, location, schoolClass) = await SeedBaseData(context);
+
+        context.StockBatches.Add(new StockBatch
+        {
+            Item = item,
+            Location = location,
+            ReceivedClass = schoolClass,
+            Quantity = 0,
+            ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow)
+        });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new GetClassLocationStockHandler(context).Handle(
+            new GetClassLocationStockQuery { ClassId = schoolClass.Id },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Count.ShouldBe(1);
+        result.Value.Items.Single().Quantity.ShouldBe(0);
+        result.Value.Items.Single().HideWhenZeroStock.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task Handle_MarkedZeroStock_IsHiddenNormallyAndReturnedByIncludeHidden()
+    {
+        await using var context = CreateContext();
+        var (item, location, schoolClass) = await SeedBaseData(context);
+
+        context.StockBatches.Add(new StockBatch
+        {
+            Item = item,
+            Location = location,
+            ReceivedClass = schoolClass,
+            Quantity = 0,
+            ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow)
+        });
+        context.ClassItemStockVisibilities.Add(new ClassItemStockVisibility
+        {
+            ClassId = schoolClass.Id,
+            ItemId = item.Id,
+            HideWhenZeroStock = true
+        });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new GetClassLocationStockHandler(context);
+        var normalResult = await handler.Handle(
+            new GetClassLocationStockQuery { ClassId = schoolClass.Id },
+            CancellationToken.None);
+        var hiddenResult = await handler.Handle(
+            new GetClassLocationStockQuery { ClassId = schoolClass.Id, IncludeHidden = true },
+            CancellationToken.None);
+
+        normalResult.IsSuccess.ShouldBeTrue();
+        normalResult.Value.Items.ShouldBeEmpty();
+        hiddenResult.IsSuccess.ShouldBeTrue();
+        hiddenResult.Value.Items.Count.ShouldBe(1);
+        hiddenResult.Value.Items.Single().HideWhenZeroStock.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task Handle_MarkedStockUsesClassWideTotal_WhenLocationFilterSelectsDepletedLocation()
+    {
+        await using var context = CreateContext();
+        var (item, location, schoolClass) = await SeedBaseData(context);
+        var otherLocation = new Location { Name = "Storage Room", Type = "StorageRoom" };
+        context.Locations.Add(otherLocation);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        context.StockBatches.AddRange(
+            new StockBatch
+            {
+                Item = item,
+                Location = location,
+                ReceivedClass = schoolClass,
+                Quantity = 0,
+                ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow)
+            },
+            new StockBatch
+            {
+                Item = item,
+                Location = otherLocation,
+                ReceivedClass = schoolClass,
+                Quantity = 5,
+                ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow)
+            });
+        context.ClassItemStockVisibilities.Add(new ClassItemStockVisibility
+        {
+            ClassId = schoolClass.Id,
+            ItemId = item.Id,
+            HideWhenZeroStock = true
+        });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new GetClassLocationStockHandler(context);
+        var normalResult = await handler.Handle(
+            new GetClassLocationStockQuery
+            {
+                ClassId = schoolClass.Id,
+                Filters = [EqualsFilter("locationId", location.Id)]
+            },
+            CancellationToken.None);
+        var hiddenResult = await handler.Handle(
+            new GetClassLocationStockQuery
+            {
+                ClassId = schoolClass.Id,
+                IncludeHidden = true,
+                Filters = [EqualsFilter("locationId", location.Id)]
+            },
+            CancellationToken.None);
+
+        normalResult.IsSuccess.ShouldBeTrue();
+        normalResult.Value.Items.Single().Quantity.ShouldBe(0);
+        hiddenResult.IsSuccess.ShouldBeTrue();
+        hiddenResult.Value.Items.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task Handle_MarkedNegativeStock_IsReturnedOnlyByIncludeHidden()
+    {
+        await using var context = CreateContext();
+        var (item, location, schoolClass) = await SeedBaseData(context);
+
+        context.StockBatches.Add(new StockBatch
+        {
+            Item = item,
+            Location = location,
+            ReceivedClass = schoolClass,
+            Quantity = -2,
+            ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow)
+        });
+        context.ClassItemStockVisibilities.Add(new ClassItemStockVisibility
+        {
+            ClassId = schoolClass.Id,
+            ItemId = item.Id,
+            HideWhenZeroStock = true
+        });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new GetClassLocationStockHandler(context);
+        var normalResult = await handler.Handle(
+            new GetClassLocationStockQuery { ClassId = schoolClass.Id },
+            CancellationToken.None);
+        var hiddenResult = await handler.Handle(
+            new GetClassLocationStockQuery { ClassId = schoolClass.Id, IncludeHidden = true },
+            CancellationToken.None);
+
+        normalResult.Value.Items.ShouldBeEmpty();
+        hiddenResult.Value.Items.Single().Quantity.ShouldBe(-2);
     }
 }

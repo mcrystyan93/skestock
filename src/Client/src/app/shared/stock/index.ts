@@ -1,4 +1,5 @@
 export * from './services/stock.http';
+export * from './services/stock-preferences.service';
 export * from './services/stock-adjustment.store';
 export * from './services/stock-move.store';
 export * from './services/stock-collection.feature';

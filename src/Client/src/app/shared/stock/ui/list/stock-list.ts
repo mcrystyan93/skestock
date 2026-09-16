@@ -5,6 +5,7 @@ import { FilterContainer } from './filter/filter-container';
 import { isNil } from 'lodash-es';
 import { ErrorAlert } from '@ske/shared/errors';
 import { ColumnFilter } from '@ske/models';
+import { StockPreferencesService } from '../../services/stock-preferences.service';
 
 @Component({
   imports: [
@@ -26,11 +27,13 @@ export class StockList {
   public readonly locationId = input<string | null>(null);
 
   public readonly store = inject(StockStore);
+  private readonly _stockPreferences = inject(StockPreferencesService);
 
   private readonly _loadEffectRef = effect(() => {
     const classId = this.classId();
     const categoryId = this.store.categoryIdQueryParam();
     const locationId = this.store.locationIdQueryParam();
+    const includeHidden = untracked(() => this._stockPreferences.showHiddenProducts());
 
     if (isNil(classId))
       return;
@@ -41,7 +44,13 @@ export class StockList {
         ...(locationId ? [this.getLocationIdFilter(locationId)] : [])
       ];
 
-      this.store.load({ classId, filters });
+      this.store.load({
+        classId,
+        filters,
+        includeHidden,
+        lowStockOnly: false,
+        expiredOnly: false
+      });
     });
   });
 

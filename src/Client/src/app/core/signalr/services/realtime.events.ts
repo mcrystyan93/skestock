@@ -27,6 +27,11 @@ export const realtimeEvents = eventGroup({
       destinationLocationId: string,
       quantity: number
     }>(),
-    stockBatchCreated: type<{ classId: string, locationId: string }>()
+    stockBatchCreated: type<{ classId: string, locationId: string }>(),
+    classItemStockVisibilityChanged: type<{
+      classId: string,
+      itemId: string,
+      hideWhenZeroStock: boolean
+    }>()
   }
 });

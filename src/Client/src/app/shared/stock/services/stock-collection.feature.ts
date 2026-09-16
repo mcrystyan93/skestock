@@ -3,16 +3,17 @@ import {
   StockItemCategoryGroup,
   StockItemDto
 } from '@ske/models';
-import { patchState, signalStoreFeature, withMethods, withProps, withState } from '@ngrx/signals';
-import { withLoadingFeature } from '@ske/shared/loader';
-import { withProblemDetailsFeature } from '@ske/shared/errors';
-import { inject } from '@angular/core';
-import { StockHttp } from './stock.http';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { map, pipe, switchMap, tap } from 'rxjs';
-import { mapResponse } from '@ngrx/operators';
-import { Events, withEventHandlers } from '@ngrx/signals/events';
-import { realtimeEvents } from '@ske/signalr';
+import {patchState, signalStoreFeature, withMethods, withProps, withState} from '@ngrx/signals';
+import {withLoadingFeature} from '@ske/shared/loader';
+import {withProblemDetailsFeature} from '@ske/shared/errors';
+import {inject} from '@angular/core';
+import {StockHttp} from './stock.http';
+import {rxMethod} from '@ngrx/signals/rxjs-interop';
+import {map, pipe, switchMap, tap} from 'rxjs';
+import {mapResponse} from '@ngrx/operators';
+import {Events, withEventHandlers} from '@ngrx/signals/events';
+import {realtimeEvents} from '@ske/signalr';
+import {StockPreferencesService} from './stock-preferences.service';
 
 type StockCollectionState = {
   stockItems: StockItemDto[];
@@ -27,7 +28,10 @@ const initialState: StockCollectionState = {
   filter: {
     classId: '',
     filters: [],
-    searchTerm: null
+    searchTerm: null,
+    includeHidden: false,
+    lowStockOnly: false,
+    expiredOnly: false
   },
   groupedStockItems: new Map()
 };
@@ -43,7 +47,8 @@ export function withStockCollection() {
     withLoadingFeature('stockItems'),
     withProblemDetailsFeature('stockItems'),
     withProps(() => ({
-      stockHttp: inject(StockHttp)
+      stockHttp: inject(StockHttp),
+      stockPreferences: inject(StockPreferencesService)
     })),
     withMethods((store) => {
       const load = rxMethod<GetClassLocationStockRequest>(
@@ -51,7 +56,8 @@ export function withStockCollection() {
           tap((request) => {
             store.setStockItemsLoading();
             store.clearStockItemsErrors();
-            patchState(store, { filter: request });
+            store.stockPreferences.setShowHiddenProducts(request.includeHidden);
+            patchState(store, {filter: request});
           }),
           switchMap((request) =>
             store.stockHttp.getClassLocationStock(request)
@@ -92,14 +98,15 @@ export function withStockCollection() {
         )
       );
 
-      return { load };
+      return {load};
     }),
     withEventHandlers((store, events = inject(Events)) => ({
       stockChanged: events.on(
         realtimeEvents.goodsReceiptImportConfirmed,
         realtimeEvents.stockAdjusted,
         realtimeEvents.stockMoved,
-        realtimeEvents.stockBatchCreated
+        realtimeEvents.stockBatchCreated,
+        realtimeEvents.classItemStockVisibilityChanged
       )
         .pipe(
           map(() => store.filter()),

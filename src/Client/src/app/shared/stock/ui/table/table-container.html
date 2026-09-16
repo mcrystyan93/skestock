@@ -7,5 +7,7 @@
                    [loading]="store.stockItemsLoading()"
                    (onAdjust)="onAdjust($event)"
                    (onMove)="onMove($event)"
+                   (onRemoveExpired)="onRemoveExpired($event)"
+                   (onVisibilityChange)="onVisibilityChange($event)"
                    (onAdd)="addStock($event)" />
 }
