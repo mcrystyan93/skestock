@@ -13,7 +13,7 @@ namespace skestock.Infrastructure.Data.Migrations
         {
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
-                columns: table => new
+                columns: table => new 
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
