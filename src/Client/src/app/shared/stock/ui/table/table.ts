@@ -5,7 +5,6 @@ import { CategoryDto, STOCK_TABLE_COLUMNS, StockItemCategoryGroup, StockItemDto 
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { isNil } from 'lodash-es';
-import { NzAvatarComponent } from 'ng-zorro-antd/avatar';
 import { NzCardComponent } from 'ng-zorro-antd/card';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 
@@ -19,7 +18,6 @@ import { NzTypographyComponent } from 'ng-zorro-antd/typography';
     NzTagComponent,
     NzButtonComponent,
     NzIconDirective,
-    NzAvatarComponent,
     NzCardComponent,
     NzTypographyComponent
   ],
@@ -35,6 +33,7 @@ export class Table {
   public readonly loading = input.required<boolean>();
 
   public readonly onAdjust = output<StockItemDto>();
+  public readonly onMove = output<StockItemDto>();
   public readonly onAdd = output<Partial<CategoryDto> | null>();
 
   public readonly columns = STOCK_TABLE_COLUMNS;

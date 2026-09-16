@@ -3,6 +3,7 @@ import { inject, Service } from '@angular/core';
 import {
   AdjustStockRequest,
   GetClassLocationStockRequest,
+  MoveStockRequest,
   StockItemDto,
   StockReportDto
 } from '@ske/models';
@@ -22,5 +23,9 @@ export class StockHttp {
 
   public adjustStock(request: AdjustStockRequest) {
     return this._httpClient.post<StockItemDto>('/api/Stock/adjust', request);
+  }
+
+  public moveStock(request: MoveStockRequest) {
+    return this._httpClient.post<void>('/api/Stock/move', request);
   }
 }

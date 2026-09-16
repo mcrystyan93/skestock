@@ -1,5 +1,5 @@
 import { Component, DestroyRef, inject, signal, viewChild } from '@angular/core';
-import { StockAdjustmentState, stockApiEvents } from '../../services/stock-adjustment.store';
+import { StockAdjustmentState, stockApiEvents } from '../../../services/stock-adjustment.store';
 import { AdjustStockRequest, StockItemDto } from '@ske/models';
 import { NZ_MODAL_DATA, NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zorro-antd/modal';
 import { NzSpaceCompactComponent, NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';

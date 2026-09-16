@@ -87,7 +87,17 @@
                 </div>
               </td>
               <td>
-                {{ item.locationName }}
+                <div class="flex items-center justify-between gap-2">
+                  <span>{{ item.locationName }}</span>
+                  <button nz-button
+                          nzType="link"
+                          type="button"
+                          [attr.title]="'Mută stocul pentru ' + item.itemName"
+                          [attr.aria-label]="'Mută stocul pentru ' + item.itemName"
+                          (click)="onMove.emit(item)">
+                    <nz-icon nzType="icons:arrow-right-arrow-left"></nz-icon>
+                  </button>
+                </div>
               </td>
               <td>
                 {{ item.unit }}

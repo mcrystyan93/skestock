@@ -52,6 +52,7 @@ export const appConfig: ApplicationConfig = {
         [realtimeEventNames.goodsReceiptImportProcessed]: realtimeEvents.goodsReceiptImportProcessed,
         [realtimeEventNames.goodsReceiptImportConfirmed]: realtimeEvents.goodsReceiptImportConfirmed,
         [realtimeEventNames.stockAdjusted]: realtimeEvents.stockAdjusted,
+        [realtimeEventNames.stockMoved]: realtimeEvents.stockMoved,
         [realtimeEventNames.stockBatchCreated]: realtimeEvents.stockBatchCreated
       }
     })

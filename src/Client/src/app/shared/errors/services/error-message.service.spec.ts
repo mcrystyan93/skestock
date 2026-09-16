@@ -61,6 +61,11 @@ describe('ErrorMessageService', () => {
     }
   });
 
+  it('resolves stock transfer errors to Romanian copy', () => {
+    expect(service.resolveCode(ErrorCodes.stock.insufficientQuantity))
+      .toBe('Stocul disponibil nu este suficient pentru transfer.');
+  });
+
   it('returns the default message for a null/empty code', () => {
     expect(service.resolveCode(null)).toBe(RO_DEFAULT_ERROR_MESSAGE);
     expect(service.resolveCode('')).toBe(RO_DEFAULT_ERROR_MESSAGE);

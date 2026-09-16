@@ -42,6 +42,11 @@ export const ErrorCodes = {
     blobNotFound: 'storage.blob_not_found',
   },
 
+  // ── Stock errors ──────────────────────────────────────────────────────────
+  stock: {
+    insufficientQuantity: 'stock.insufficient_quantity',
+  },
+
   // ── Validation errors ────────────────────────────────────────────────────
   validation: {
     // Top-level / request-shape codes (emitted by the exception handler)
@@ -106,6 +111,9 @@ export type AuthErrorCode = ValueOf<typeof ErrorCodes.auth>;
 /** Union of every known resource error code. */
 export type ResourceErrorCode = ValueOf<typeof ErrorCodes.resource>;
 
+/** Union of every known stock error code. */
+export type StockErrorCode = ValueOf<typeof ErrorCodes.stock>;
+
 /** Union of every known validation error code. */
 export type ValidationErrorCode = ValueOf<typeof ErrorCodes.validation>;
 
@@ -114,4 +122,5 @@ export type ErrorCode =
   | CommonErrorCode
   | AuthErrorCode
   | ResourceErrorCode
+  | StockErrorCode
   | ValidationErrorCode;

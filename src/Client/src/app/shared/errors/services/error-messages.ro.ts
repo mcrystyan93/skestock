@@ -55,6 +55,10 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
   [ErrorCodes.resource.fileNotFound]: 'Fișierul nu a fost găsit.',
   [ErrorCodes.resource.blobNotFound]: 'Încărcarea fișierului nu a fost finalizată.',
 
+  // ── Stock errors ──────────────────────────────────────────────────────────
+  [ErrorCodes.stock.insufficientQuantity]:
+    'Stocul disponibil nu este suficient pentru transfer.',
+
   // ── Validation: top-level / request-shape codes ──────────────────────────
   [ErrorCodes.validation.failed]: 'Datele trimise nu sunt valide.',
   [ErrorCodes.validation.invalidRequest]: 'Cererea nu este validă.',
