@@ -1,0 +1,58 @@
+<nz-space class="w-full"
+          nzDirection="vertical">
+  <form nz-form
+        nzNoColon
+        *nzSpaceItem>
+    <nz-form-item>
+      <nz-form-label nzRequired>
+        Locație destinație
+      </nz-form-label>
+      <nz-form-control [nzErrorTip]="destinationErrorTemplate">
+        <ske-location-dropdown [formField]="stockMoveForm.destination"
+                               [excludedLocationId]="item().locationId"
+                               [loadOnInit]="true"
+                               placeholder="Selectați locația destinație" />
+
+        <ng-template #destinationErrorTemplate>
+          @if (stockMoveForm.destination().errors(); as errors) {
+            @for (error of errors; track $index) {
+              <div class="ant-form-item-explain-error">
+                {{ error.message }}
+              </div>
+            }
+          }
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired>
+        Cantitate
+      </nz-form-label>
+      <nz-form-control [nzErrorTip]="quantityErrorTemplate">
+        <nz-input-number [formField]="stockMoveForm.quantity"
+                         [nzMin]="1"
+                         [nzMax]="item().quantity"
+                         [nzStep]="1"
+                         class="w-full!" />
+
+        <ng-template #quantityErrorTemplate>
+          @if (stockMoveForm.quantity().errors(); as errors) {
+            @for (error of errors; track $index) {
+              <div class="ant-form-item-explain-error">
+                {{ error.message }}
+              </div>
+            }
+          }
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+
+  @if (stockMoveForm.quantity().value() === item().quantity && item().quantity > 0) {
+    <nz-alert *nzSpaceItem
+              nzType="warning"
+              nzShowIcon
+              nzMessage="Atenție: vei muta întreaga cantitate disponibilă din locația sursă." />
+  }
+</nz-space>

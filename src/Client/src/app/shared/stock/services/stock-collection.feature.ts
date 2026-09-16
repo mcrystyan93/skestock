@@ -98,6 +98,7 @@ export function withStockCollection() {
       stockChanged: events.on(
         realtimeEvents.goodsReceiptImportConfirmed,
         realtimeEvents.stockAdjusted,
+        realtimeEvents.stockMoved,
         realtimeEvents.stockBatchCreated
       )
         .pipe(

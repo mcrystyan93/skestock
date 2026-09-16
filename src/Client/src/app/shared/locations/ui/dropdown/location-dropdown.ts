@@ -1,6 +1,7 @@
 import {
   booleanAttribute,
   Component,
+  computed,
   effect,
   inject,
   input,
@@ -39,12 +40,14 @@ import { NzSpinComponent } from 'ng-zorro-antd/spin';
                (nzScrollToBottom)="loadMore()"
                [nzPlaceHolder]="placeholder()">
       @if (value(); as location) {
+        @if (location.id !== excludedLocationId()) {
         <nz-option [nzValue]="location"
                    nzHide
                    [nzLabel]="location.name ?? ''"></nz-option>
+        }
       }
 
-      @for (location of store.locations(); track location.id) {
+      @for (location of availableLocations(); track location.id) {
         <nz-option [nzValue]="location"
                    [nzLabel]="location.name ?? ''"></nz-option>
       }
@@ -63,10 +66,19 @@ export class LocationDropdown implements FormValueControl<LocationDropdownValue>
   public readonly allowClear = input<boolean>(false);
   public readonly placeholder = input<string>('Selectați o locație');
   public readonly prePopulateWithDefault = input<boolean>(false);
+  public readonly excludedLocationId = input<string | null>(null);
+  public readonly loadOnInit = input<boolean>(false);
 
   public readonly store = inject(LocationDropdownStore);
   private readonly _search$ = new Subject<string>();
   private readonly _defaultRequested = signal(false);
+  private readonly _initialLoadRequested = signal(false);
+
+  public readonly availableLocations = computed(() => {
+    const excludedLocationId = this.excludedLocationId();
+
+    return this.store.locations().filter(location => location.id !== excludedLocationId);
+  });
 
   private readonly _formModel = linkedSignal({
     source: () => this.value(),
@@ -89,6 +101,15 @@ export class LocationDropdown implements FormValueControl<LocationDropdownValue>
 
     this._defaultRequested.set(true);
     this.store.loadDefault();
+  });
+
+  private readonly _loadOnInitEffectRef = effect(() => {
+    if (!this.loadOnInit() || this._initialLoadRequested()) {
+      return;
+    }
+
+    this._initialLoadRequested.set(true);
+    untracked(() => this.store.load(this.buildFilter({ searchTerm: null })));
   });
 
   // Apply the resolved default only while the user hasn't already picked/cleared a value.

@@ -15,6 +15,7 @@ export const realtimeEventNames = {
   goodsReceiptImportProcessed: 'GoodsReceiptImportProcessed',
   goodsReceiptImportConfirmed: 'GoodsReceiptImportConfirmed',
   stockAdjusted: 'StockAdjusted',
+  stockMoved: 'StockMoved',
   stockBatchCreated: 'StockBatchCreated'
 } as const;
 

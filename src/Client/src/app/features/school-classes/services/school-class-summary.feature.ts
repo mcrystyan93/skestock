@@ -56,6 +56,7 @@ export function withSchoolClassSummaryFeature() {
         realtimeEvents.goodsReceiptImportCreated,
         realtimeEvents.goodsReceiptImportConfirmed,
         realtimeEvents.stockAdjusted,
+        realtimeEvents.stockMoved,
         realtimeEvents.stockBatchCreated
       )
         .pipe(

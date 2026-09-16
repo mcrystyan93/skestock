@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using skestock.Application.Features.Stock.Commands.AdjustStock;
+using skestock.Application.Features.Stock.Commands.MoveStock;
 using skestock.Application.Features.Stock.Models;
 using skestock.Application.Features.Stock.Queries.GetClassLocationStock;
 using static skestock.Application.Features.Stock.Models.StockRequests;
@@ -12,6 +13,7 @@ public class Stock : IEndpointGroup
     {
         groupBuilder.MapPost(GetClassLocationStock, "class/{classId}");
         groupBuilder.MapPost(AdjustStock, "adjust");
+        groupBuilder.MapPost(MoveStock, "move");
     }
 
     [EndpointSummary("Get current stock for a class with optional column filters")]
@@ -66,5 +68,30 @@ public class Stock : IEndpointGroup
             return result.ToProblemHttpResult();
 
         return TypedResults.Ok(result.Value);
+    }
+
+    [EndpointSummary("Move stock between two locations")]
+    [EndpointDescription("Moves a positive quantity of an item from one location to another within " +
+                         "the same school-class stock scope. Source batches are consumed oldest " +
+                         "expiry first and their metadata is preserved in distinct destination " +
+                         "batches. Returns an empty successful response.")]
+    public static async Task<Results<Ok, ProblemHttpResult>> MoveStock(
+        ISender sender, MoveStockRequest request, CancellationToken cancellationToken)
+    {
+        var command = new MoveStockCommand
+        {
+            ClassId = request.ClassId,
+            ItemId = request.ItemId,
+            SourceLocationId = request.SourceLocationId,
+            DestinationLocationId = request.DestinationLocationId,
+            Quantity = request.Quantity
+        };
+
+        var result = await sender.Send(command, cancellationToken);
+
+        if (result.IsFailed)
+            return result.ToProblemHttpResult();
+
+        return TypedResults.Ok();
     }
 }

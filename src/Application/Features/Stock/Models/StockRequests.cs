@@ -1,5 +1,6 @@
 using skestock.Application.Common.Filtering;
 using skestock.Domain.Enums;
+using System.Text.Json.Serialization;
 
 namespace skestock.Application.Features.Stock.Models;
 
@@ -18,5 +19,19 @@ public static class StockRequests
         public Guid LocationId { get; init; }
         public int ActualQuantity { get; init; }
         public AdjustmentReason Reason { get; init; }
+    }
+
+    public class MoveStockRequest
+    {
+        [JsonPropertyName("classId")] public Guid ClassId { get; init; }
+
+        [JsonPropertyName("itemId")] public Guid ItemId { get; init; }
+
+        [JsonPropertyName("sourceLocationId")] public Guid SourceLocationId { get; init; }
+
+        [JsonPropertyName("destinationLocationId")]
+        public Guid DestinationLocationId { get; init; }
+
+        [JsonPropertyName("quantity")] public int Quantity { get; init; }
     }
 }

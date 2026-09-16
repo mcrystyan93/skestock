@@ -73,6 +73,15 @@ export type AdjustStockRequest = {
   reason: AdjustmentReason;
 };
 
+/** Mirrors the move-stock request handled by src/Web/Endpoints/Stock.cs. */
+export type MoveStockRequest = {
+  classId: string;
+  itemId: string;
+  sourceLocationId: string;
+  destinationLocationId: string;
+  quantity: number;
+};
+
 export type StockTableColumn =
   | 'itemName'
   | 'locationName'

@@ -3,7 +3,8 @@ import { Table } from './table';
 import { StockStore } from '../../services/stock.store';
 import { CategoryDto, StockItemDto } from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { StockAdjustmentModal, StockAdjustmentModalData } from '../modals/stock-adjustment-modal';
+import { StockAdjustmentModal, StockAdjustmentModalData } from '../modals/adjust/stock-adjustment-modal';
+import { StockMoveModal, StockMoveModalData } from '../modals/move/stock-move-modal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AddStockBatchModal } from '@ske/shared/stock-batches';
 import { NzEmptyComponent } from 'ng-zorro-antd/empty';
@@ -32,6 +33,23 @@ export class TableContainer {
 
     const modalRef = this._nzModalService.create<StockAdjustmentModal, StockAdjustmentModalData>({
       nzContent: StockAdjustmentModal,
+      nzData: { classId, item },
+      nzCentered: true,
+      nzMaskClosable: false
+    });
+
+    modalRef.afterClose.pipe(
+      takeUntilDestroyed(this._destroyRef)
+    ).subscribe(() => {
+      this.store.load(this.store.filter());
+    });
+  }
+
+  public onMove(item: StockItemDto) {
+    const classId = this.store.filter().classId;
+
+    const modalRef = this._nzModalService.create<StockMoveModal, StockMoveModalData>({
+      nzContent: StockMoveModal,
       nzData: { classId, item },
       nzCentered: true,
       nzMaskClosable: false
