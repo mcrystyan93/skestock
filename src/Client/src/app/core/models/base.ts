@@ -9,3 +9,8 @@ export const toDateOnlyString = (date: Date | null): string | null => {
 
   return `${year}-${month}-${day}`;
 };
+
+export const getDateForShelfLife = (shelfLifeDays: number): Date => {
+  const now = new Date();
+  return new Date(now.getTime() + shelfLifeDays * 24 * 60 * 60 * 1000);
+};

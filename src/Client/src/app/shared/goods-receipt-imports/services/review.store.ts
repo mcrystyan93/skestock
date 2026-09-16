@@ -14,6 +14,7 @@ import {
   GoodsReceiptImportReviewLineDto,
   ItemDropdownValue,
   LocationDropdownValue,
+  getDateForShelfLife,
   toDateOnlyString
 } from '@ske/models';
 
@@ -113,11 +114,6 @@ function buildEditableLine(line: GoodsReceiptImportReviewLineDto, sourceLineInde
     expiryDate: matchedItem?.shelfLifeDays && matchedItem?.isPerishable ? getDateForShelfLife(matchedItem.shelfLifeDays) : null,
     unitPrice: line.unitPrice ?? 0
   };
-}
-
-export function getDateForShelfLife(shelfLifeDays: number): Date {
-  const now = new Date();
-  return new Date(now.getTime() + shelfLifeDays * 24 * 60 * 60 * 1000);
 }
 
 /**
