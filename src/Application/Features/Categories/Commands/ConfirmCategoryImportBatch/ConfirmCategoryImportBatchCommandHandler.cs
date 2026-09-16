@@ -9,9 +9,9 @@ using skestock.Domain.Enums;
 namespace skestock.Application.Features.Categories.Commands.ConfirmCategoryImportBatch;
 
 public class ConfirmCategoryImportBatchCommandHandler(IApplicationDbContext dbContext, IUser user)
-    : IRequestHandler<ConfirmCategoryImportBatchCommand, Result<CategoryImportBatchConfirmationResultDto>>
+    : IRequestHandler<ConfirmCategoryImportBatchCommand, Result<CategoryImportBatchConfirmationResponseDto>>
 {
-    public async ValueTask<Result<CategoryImportBatchConfirmationResultDto>> Handle(
+    public async ValueTask<Result<CategoryImportBatchConfirmationResponseDto>> Handle(
         ConfirmCategoryImportBatchCommand request, CancellationToken cancellationToken)
     {
         if (user.Id is not { } identityId)
@@ -31,11 +31,11 @@ public class ConfirmCategoryImportBatchCommandHandler(IApplicationDbContext dbCo
         {
             var stored = JsonSerializer.Deserialize<CategoryImportBatchConfirmationResultDto>(
                 batch.ConfirmationResultJson);
-            return Result.Ok(stored ?? new CategoryImportBatchConfirmationResultDto
+            return Result.Ok(ToResponse(stored ?? new CategoryImportBatchConfirmationResultDto
             {
                 BatchId = batch.Id,
                 Status = batch.Status
-            });
+            }));
         }
 
         if (batch.Status != CategoryImportBatchStatus.PendingReview)
@@ -76,13 +76,23 @@ public class ConfirmCategoryImportBatchCommandHandler(IApplicationDbContext dbCo
                 var stored = JsonSerializer.Deserialize<CategoryImportBatchConfirmationResultDto>(
                     currentBatch.ConfirmationResultJson);
                 if (stored is not null)
-                    return Result.Ok(stored);
+                    return Result.Ok(ToResponse(stored));
             }
 
             throw;
         }
 
-        return Result.Ok(result);
+        return Result.Ok(ToResponse(result));
+    }
+
+    private static CategoryImportBatchConfirmationResponseDto ToResponse(
+        CategoryImportBatchConfirmationResultDto result)
+    {
+        return new CategoryImportBatchConfirmationResponseDto
+        {
+            BatchId = result.BatchId,
+            Status = result.Status
+        };
     }
 
     private async Task<List<CategoryImportBatchResultCategoryDto>> ResolveCategoriesAsync(

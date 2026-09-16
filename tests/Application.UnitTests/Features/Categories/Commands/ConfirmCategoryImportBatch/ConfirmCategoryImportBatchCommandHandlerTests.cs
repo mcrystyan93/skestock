@@ -49,14 +49,15 @@ public class ConfirmCategoryImportBatchCommandHandlerTests
         var result = await handler.Handle(command, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
+        result.Value.BatchId.ShouldBe(import.Id);
         result.Value.Status.ShouldBe(CategoryImportBatchStatus.Confirmed);
-        result.Value.Categories.Count.ShouldBe(2);
-        result.Value.Categories.ShouldAllBe(c => c.Created);
 
         (await context.Categories.CountAsync(CancellationToken.None)).ShouldBe(2);
 
         var reloaded = await context.CategoryImportBatches.SingleAsync(i => i.Id == import.Id, CancellationToken.None);
         reloaded.Status.ShouldBe(CategoryImportBatchStatus.Confirmed);
+        using var storedResult = System.Text.Json.JsonDocument.Parse(reloaded.ConfirmationResultJson!);
+        storedResult.RootElement.GetProperty("Categories").GetArrayLength().ShouldBe(2);
     }
 
     [Test]
@@ -75,8 +76,8 @@ public class ConfirmCategoryImportBatchCommandHandlerTests
         var result = await handler.Handle(command, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Categories.Count.ShouldBe(1);
-        result.Value.Categories[0].Name.ShouldBe("Dairy");
+        result.Value.BatchId.ShouldBe(import.Id);
+        result.Value.Status.ShouldBe(CategoryImportBatchStatus.Confirmed);
 
         (await context.Categories.CountAsync(CancellationToken.None)).ShouldBe(1);
     }
@@ -101,12 +102,12 @@ public class ConfirmCategoryImportBatchCommandHandlerTests
         var result = await handler.Handle(command, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        // one already existed (not created), one new (created)
-        result.Value.Categories.Count(c => c.Created).ShouldBe(1);
-        result.Value.Categories.Count(c => !c.Created).ShouldBe(1);
+        result.Value.BatchId.ShouldBe(import.Id);
+        result.Value.Status.ShouldBe(CategoryImportBatchStatus.Confirmed);
 
         (await context.Categories.CountAsync(CancellationToken.None)).ShouldBe(2);
-        result.Value.Categories.Single(c => !c.Created).Id.ShouldBe(existing.Id);
+        (await context.Categories.SingleAsync(c => c.Name == existing.Name, CancellationToken.None))
+            .Id.ShouldBe(existing.Id);
     }
 
     [Test]
@@ -133,7 +134,8 @@ public class ConfirmCategoryImportBatchCommandHandlerTests
         }, CancellationToken.None);
 
         second.IsSuccess.ShouldBeTrue();
-        second.Value.Categories.Select(c => c.Id).ShouldBe(first.Value.Categories.Select(c => c.Id));
+        second.Value.BatchId.ShouldBe(first.Value.BatchId);
+        second.Value.Status.ShouldBe(first.Value.Status);
         (await context.Categories.CountAsync(CancellationToken.None)).ShouldBe(2);
     }
 

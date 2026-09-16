@@ -7,9 +7,9 @@ using skestock.Domain.Events.Categories;
 namespace skestock.Application.Features.Categories.Commands.UpdateCategory;
 
 public class UpdateCategoryCommandHandler(IApplicationDbContext dbContext)
-    : IRequestHandler<UpdateCategoryCommand, Result<CategoryDto>>
+    : IRequestHandler<UpdateCategoryCommand, Result<CategoryMutationDto>>
 {
-    public async ValueTask<Result<CategoryDto>> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Result<CategoryMutationDto>> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
     {
         var category = await dbContext.Categories
             .SingleOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
@@ -21,17 +21,15 @@ public class UpdateCategoryCommandHandler(IApplicationDbContext dbContext)
         category.Icon = request.Icon is null
             ? null
             : new CategoryIcon(request.Icon.Name, request.Icon.FileName, request.Icon.Path);
-        
+
         category.AddDomainEvent(new CategoryUpdatedEvent(category));
 
         await dbContext.SaveChangesAsync(cancellationToken);
-        var itemCount = await dbContext.Items.CountAsync(i => i.CategoryId == category.Id, cancellationToken);
 
-        return Result.Ok(new CategoryDto
+        return Result.Ok(new CategoryMutationDto
         {
             Id = category.Id,
             Name = category.Name,
-            ItemCount = itemCount,
             Icon = category.Icon is null
                 ? null
                 : new CategoryIconDto
@@ -39,11 +37,7 @@ public class UpdateCategoryCommandHandler(IApplicationDbContext dbContext)
                     Name = category.Icon.Name,
                     FileName = category.Icon.FileName,
                     Path = category.Icon.Path
-                },
-            CreatedByName = category.CreatedBy?.FullName,
-            LastModifiedByName = category.LastModifiedBy?.FullName,
-            CreatedDate = category.CreatedDate,
-            LastModifiedDate = category.LastModifiedDate
+                }
         });
     }
 }

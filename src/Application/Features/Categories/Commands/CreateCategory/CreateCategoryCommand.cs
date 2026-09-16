@@ -3,7 +3,7 @@ using skestock.Application.Features.Categories.Models;
 
 namespace skestock.Application.Features.Categories.Commands.CreateCategory;
 
-public class CreateCategoryCommand : IRequest<Result<CategoryDto>>, ICacheInvalidation
+public class CreateCategoryCommand : IRequest<Result<CategoryMutationDto>>, ICacheInvalidation
 {
     public string Name { get; init; } = string.Empty;
     public CategoryIconDto? Icon { get; init; }

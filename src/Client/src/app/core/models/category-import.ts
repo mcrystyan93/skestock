@@ -14,16 +14,9 @@ export type CreateCategoryImportBatchRequest = {
 export type CategoryImportBatchFileDto = ImportBatchFileDto;
 export type CategoryImportBatchStatus = ImportBatchStatus;
 
-export type CategoryImportBatchDto = {
+export type CategoryImportBatchMutationDto = {
   id: string;
   status: CategoryImportBatchStatus;
-  clientRequestId?: string | null;
-  attemptCount: number;
-  files: CategoryImportBatchFileDto[];
-  history: ImportBatchHistoryDto[];
-  uploadedAt: string;
-  processedAt?: string | null;
-  errorMessage?: string | null;
 };
 
 export type CategoryImportBatchListItemDto = {
@@ -113,9 +106,4 @@ export type ConfirmCategoryImportBatchRequest = {
 export type ConfirmCategoryImportBatchResponse = {
   batchId: string;
   status: CategoryImportBatchStatus;
-  categories: Array<{
-    id: string;
-    name: string;
-    created: boolean;
-  }>;
 };

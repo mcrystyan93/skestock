@@ -4,7 +4,7 @@ using skestock.Application.Features.Categories.Models;
 namespace skestock.Application.Features.Categories.Commands.CreateCategoryImportBatch;
 
 [Authorize]
-public class CreateCategoryImportBatchCommand : IRequest<Result<CategoryImportBatchDto>>
+public class CreateCategoryImportBatchCommand : IRequest<Result<CategoryImportBatchMutationDto>>
 {
     public List<Guid> FileMetadataIds { get; init; } = [];
     public Guid? ClientRequestId { get; init; }

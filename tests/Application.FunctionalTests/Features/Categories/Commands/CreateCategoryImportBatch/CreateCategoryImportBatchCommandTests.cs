@@ -43,7 +43,7 @@ public class CreateCategoryImportBatchCommandTests : TestBase
     }
 
     [Test]
-    public async Task Handle_WithValidData_PersistsProcessingImportAndReturnsDto()
+    public async Task Handle_WithValidData_PersistsProcessingImportAndReturnsMutationDto()
     {
         var file = await SeedFileMetadataAsync();
         await RunAsUserWithProfileAsync();
@@ -53,8 +53,6 @@ public class CreateCategoryImportBatchCommandTests : TestBase
         result.IsSuccess.ShouldBeTrue();
         result.Value.Id.ShouldNotBe(Guid.Empty);
         result.Value.Status.ShouldBe(CategoryImportBatchStatus.Processing);
-        result.Value.Files.Single().FileMetadataId.ShouldBe(file.Id);
-        result.Value.Files.Single().BlobPath.ShouldBe(file.BlobPath);
 
         var persisted = await TestApp.FindAsync<CategoryImportBatch>(result.Value.Id);
         persisted.ShouldNotBeNull();

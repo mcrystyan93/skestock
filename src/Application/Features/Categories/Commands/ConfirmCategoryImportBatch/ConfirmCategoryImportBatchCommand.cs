@@ -6,7 +6,7 @@ using StockCacheConstants = skestock.Application.Features.Stock.CacheConstants;
 namespace skestock.Application.Features.Categories.Commands.ConfirmCategoryImportBatch;
 
 [Authorize]
-public class ConfirmCategoryImportBatchCommand : IRequest<Result<CategoryImportBatchConfirmationResultDto>>, ICacheInvalidation
+public class ConfirmCategoryImportBatchCommand : IRequest<Result<CategoryImportBatchConfirmationResponseDto>>, ICacheInvalidation
 {
     public Guid BatchId { get; init; }
     public List<string> CategoryNames { get; init; } = [];

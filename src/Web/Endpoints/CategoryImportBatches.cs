@@ -20,7 +20,7 @@ public class CategoryImportBatches : IEndpointGroup
 
     [EndpointSummary("Create a new category import")]
     [EndpointDescription("Starts a category import batch for previously uploaded files.")]
-    public static async Task<Results<Created<CategoryImportBatchDto>, ProblemHttpResult>> CreateCategoryImportBatch(
+    public static async Task<Results<Created<CategoryImportBatchMutationDto>, ProblemHttpResult>> CreateCategoryImportBatch(
         ISender sender,
         CategoryImportBatchRequests.CreateCategoryImportBatchRequest request,
         CancellationToken cancellationToken)
@@ -80,7 +80,7 @@ public class CategoryImportBatches : IEndpointGroup
 
     [EndpointSummary("Confirm a category import")]
     [EndpointDescription("Confirms a reviewed category import using the explicit reviewed names.")]
-    public static async Task<Results<Ok<CategoryImportBatchConfirmationResultDto>, ProblemHttpResult>> ConfirmCategoryImportBatch(
+    public static async Task<Results<Ok<CategoryImportBatchConfirmationResponseDto>, ProblemHttpResult>> ConfirmCategoryImportBatch(
         ISender sender,
         Guid id,
         CategoryImportBatchRequests.ConfirmCategoryImportBatchRequest request,

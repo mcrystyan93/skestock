@@ -5,9 +5,9 @@ using skestock.Domain.Entities;
 namespace skestock.Application.Features.Categories.Commands.CreateCategory;
 
 public class CreateCategoryCommandHandler(IApplicationDbContext dbContext)
-    : IRequestHandler<CreateCategoryCommand, Result<CategoryDto>>
+    : IRequestHandler<CreateCategoryCommand, Result<CategoryMutationDto>>
 {
-    public async ValueTask<Result<CategoryDto>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Result<CategoryMutationDto>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
         var category = new Category
         {
@@ -20,14 +20,10 @@ public class CreateCategoryCommandHandler(IApplicationDbContext dbContext)
         dbContext.Categories.Add(category);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        // CreatedBy/LastModifiedBy navigations aren't loaded on a freshly-inserted entity
-        // (only the *Id FKs are set by AuditableEntityInterceptor), so the *Name fields are
-        // null here by design - callers needing the name can re-fetch via GetAllCategories.
-        return Result.Ok(new CategoryDto
+        return Result.Ok(new CategoryMutationDto
         {
             Id = category.Id,
             Name = category.Name,
-            ItemCount = 0,
             Icon = category.Icon is null
                 ? null
                 : new CategoryIconDto
@@ -35,11 +31,7 @@ public class CreateCategoryCommandHandler(IApplicationDbContext dbContext)
                     Name = category.Icon.Name,
                     FileName = category.Icon.FileName,
                     Path = category.Icon.Path
-                },
-            CreatedByName = category.CreatedBy?.FullName,
-            LastModifiedByName = category.LastModifiedBy?.FullName,
-            CreatedDate = category.CreatedDate,
-            LastModifiedDate = category.LastModifiedDate
+                }
         });
     }
 }

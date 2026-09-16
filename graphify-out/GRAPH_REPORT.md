@@ -1,54 +1,54 @@
-# Graph Report - skestock  (2026-09-15)
+# Graph Report - skestock  (2026-09-16)
 
 ## Corpus Check
-- 1038 files · ~813,805 words
+- 1040 files · ~813,645 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 9860 nodes · 20403 edges · 506 communities (484 shown, 16 thin omitted)
-- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 1371 edges (avg confidence: 0.84)
+- 9862 nodes · 20406 edges · 495 communities (475 shown, 14 thin omitted)
+- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 1369 edges (avg confidence: 0.84)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `cb6c9468`
+- Built from commit: `ded73fdb`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- skestock.Domain.Entities
+- skestock.Application.Common.Models
 - GetAllStockBatchesQuery
 - GetAllGoodsReceiptImportsQuery
 - review.store.ts
-- item-import.store.ts
-- BaseTable
-- @angular/core
-- school-class.ts
+- items.page.ts
+- CategoryDto
+- @angular/router
+- models/index.ts
 - CategoryImportBatch
-- stock/ui/list/filter/filter-form.ts
-- ImportBatchOptions
+- lodash-es
+- CreateCategoryImportBatchCommand
 - CreateGoodsReceiptCommand
 - .github/skills/acquire-codebase-knowledge/scripts/scan.py
-- CreateGoodsReceiptImportCommand
 - .Handle
-- IRequestHandler
+- GetClassLocationStockQuery
+- GetAllItemImportBatchesQuery
 - skestock.Application.Common.Exceptions
 - TestApp
 - ResultCache
-- package.json
+- @angular/core
 - GetAllCategoryImportBatchesQuery
 - ske
-- BasePaginationFilter
+- ConfirmGoodsReceiptImportLineRequest
 - GetAllSchoolClassesQuery
-- .Handle
-- icon-catalog.ts
+- ImportBatchOptions
+- CategoriesPage
 - ItemTestDbContext
 - .Filters
-- skestock.Application.Features.Items.Commands.CreateItem
-- CreateLocationCommandValidator
+- skestock.Domain.Entities
+- CreateLocationCommand
 - skestock.Application.Features.GoodsReceipts.Models
 - Client/.github/skills/acquire-codebase-knowledge/scripts/scan.py
 - DefaultLocationTestDbContext
-- stock-batch.store.ts
+- skestock.Application.Features.Items.Models
 - IKeysetSortConfiguration
 - CreateItemCommand
 - ConfirmImportTestDbContext
@@ -57,58 +57,58 @@
 - FileMetadataTestDbContext
 - rxjs
 - IFilterConfiguration
-- Category
-- category-import.store.ts
-- CategoryImportBatchReviewTestDbContext
+- GoodsReceiptTestDbContext
+- categories.page.ts
+- GoodsReceiptImport
 - .SendAsync
 - CacheableTestQuery
 - ImportBatchHistory
-- ConfirmGoodsReceiptImportCommand
-- OutboxMessage
+- ConfirmGoodsReceiptImportLine
+- BaseTable
 - EnableItemCommand
 - UpdateSchoolClassCommand
-- school-class-overview.page.ts
+- stock-batch.store.ts
 - GetAllStockBatchesQueryTests
 - skestock.Domain.Queues
 - ItemImportBatchReviewLineDto
 - .Handle
 - item-import.ts
-- .Logout
+- ApplicationUser
 - GetSchoolClassSummaryQuery
 - ConfirmUploadCommand
 - Signal Forms
-- CategoryDto
+- GetCategoryByIdQuery
 - ColumnFilter
 - ProcessGoodsReceiptImportCommand
 - DisableItemCommand
 - KeysetTestItem
 - .ConfirmGoodsReceiptImport
-- FilterQueryBuilder
+- .TryParseBoolean
 - environmentVariables
 - problem-detail.feature.ts
-- CategoryImportBatchReviewDto
+- .Handle
 - .Handle
 - CreateSchoolClassCommand
 - InitialCreate
 - GetAllGoodsReceiptImportsQueryTests
-- ApplicationUser
+- IIdentityService
 - .CreateContextAsync
 - GoodsReceiptDto
-- UserProfile
+- Item
 - .ToInt
-- .CreateHarness
+- AzureBlobStorageService
 - .ApplyOrderBy
 - CreateItemRequest
 - ProcessCategoryImportBatchTestDbContext
-- ProcessedMessage
+- OutboxMessage
 - StockBatch
 - ItemTestDbContext
 - Architecture — Deep Dive
 - .EditItem
 - Architecture — Deep Dive
-- .CreateContextAsync
+- EditItemCommand
 - GetSchoolClassByIdQuery
-- .AddWebServices
+- IUser
 - .ConfirmUpload
 - .GetAllLocations
 - .GetAllSchoolClasses
@@ -118,62 +118,62 @@
 - MessageEnvelope
 - CreateCategoryCommand
 - .Handle
-- .IsSqlServer
+- Theme
 - ClassStatus
 - GetAllCategoriesQueryTests
 - .GetAllCategories
 - GetAllItemsQuery
-- .ValidateAsync
+- ConfirmGoodsReceiptImportCommand
 - IRealtimeNotifier
 - GetLocationByIdQuery
 - GetAllItemsQueryTests
-- GoodsReceiptImportLine
-- Item
+- Location
+- CategoryTestDbContext
 - CategoryTestDbContext
 - GoodsReceiptImportTestDbContext
-- ProcessGoodsReceiptImportTestDbContext
-- GoodsReceiptImport
-- skestock.Infrastructure.Identity
+- CategoryImportBatchFile
+- ClassBalance
+- CategoryImportBatchReviewTestDbContext
 - .NET quick checklist
 - ItemTestDbContext
 - AdjustStockCommand
-- CategoryImportBatchFile
+- ItemTestDbContext
 - ItemTestDbContext
 - LocationTestDbContext
-- ClassBalance
-- Location
+- LocationTestDbContext
+- Category
 - LocationTestDbContext
 - SchoolClassTestDbContext
-- GoodsReceipt
 - SchoolClassTestDbContext
 - SchoolClassTestDbContext
-- CreateStockBatchTestDbContext
-- SchoolClass
+- SchoolClassTestDbContext
+- GoodsReceiptImportLine
+- StockBatchTestDbContext
 - .ApplyKeysetPredicate
 - .NET quick checklist
 - DispatchDomainEventsInterceptor
 - .ProcessMessageAsync
-- ApplicationDbContext
+- ItemImportBatchFile
 - Application.UnitTests.csproj
 - AppHost.csproj
 - ItemDto
 - GetAllLocationsQueryTests
 - GetAllSchoolClassesQueryTests
-- GoodsReceiptImportReviewTestDbContext
+- SchoolClass
 - Core Patterns
-- skestock.Application.Common.Behaviours
+- RequestLoggerTests
 - GetGoodsReceiptImportByIdQuery
-- models/index.ts
+- ItemDto
 - Core Patterns
 - http
 - CacheInvalidationBehaviorTests
 - Signal Forms
 - skestock.Application.Features.SchoolClasses.Models
 - GetClassLocationStockQueryTests
-- CreateCategoryImportBatchRequest
+- StockBatchListItemDto
 - What You Must Do When Invoked
 - What You Must Do When Invoked
-- Error
+- IRequest
 - Infrastructure.csproj
 - .Handle
 - NgRx SignalStore - Reference
@@ -181,31 +181,31 @@
 - NgRx SignalStore - Reference
 - UpdateLocationCommand
 - skestock.slnx
-- CreateLocationCommand
+- ValidationException
 - .ProcessMessageAsync
 - BaseEntity
 - .CreateContextAsync
 - UpdateCategoryCommand
 - .github/skills/angular-developer/SKILL.md
-- AdjustStockCommandHandlerTests.cs
-- FakeBlobStorageService
-- .ExtractAsync_SendsSchemaFactoryPromptAndDeserializesCategoryResult
+- skestock.Domain.Enums
+- IBlobStorageService
+- OpenAiDocumentExtractionClient
 - .SeedPrerequisitesAsync
-- .SetBlobCorsRules
+- AzureBlobCorsInitializer
 - .GetClassGoodsReceiptCosts
-- .CreateContextAsync
+- StockTransaction
 - GetFileDownloadQuery
 - GoodsReceiptImportCompletedEvent
 - StockBatchSortConfiguration
 - .Handle
-- .SeedAsync
-- GetClassLocationStockQuery
-- ItemTestDbContext
+- CategoryImportBatchFileDto
+- .ResolveNewItemsAsync
+- GoodsReceipt
 - FlexibleDateOnlyJsonConverter
 - skestock.Web.Infrastructure
-- .Handle
+- CategoryMutationDto
 - Client/.github/skills/angular-developer/SKILL.md
-- IUser
+- ItemImportBatchDto
 - NgRx SignalStore - Core Examples
 - NgRx SignalStore - Core Examples
 - ItemImportBatch
@@ -223,51 +223,51 @@
 - Command Reference
 - skestock.Domain.Common
 - CategoryIconDto
-- AzureBlobStorageService
+- .GetClassLocationStock
 - GetItemByIdQuery
 - MCP Server — Complete Reference
 - skestock.Application.Common.Interfaces
 - Web.csproj
 - NgRx SignalStore - Migration Examples
-- IRequest
+- .GetAllStockBatches
 - GoodsReceiptImportReviewDto
 - Command Reference
 - MCP Server — Complete Reference
-- IStockDocumentExtractionService
-- .GetClassLocationStock
-- .TryParseBoolean
+- TransientExtractionException
+- CategoryImportBatchReviewDto
+- .ConfirmCategoryImportBatch
 - NgRx SignalStore - Migration Examples
 - skestock.Application.Features.Locations.Models
 - skestock Copilot Instructions
 - IdentityApiOperationTransformer
 - Angular Aria
-- AzureBlobCorsInitializer
+- CategoryDto
 - .CreateContextAsync
-- FileStatus
+- ItemImportBatchConfirmationResultDto
 - .TransformAsync
 - EndpointRouteBuilderExtensions
 - .GetRandomizedSlidingExpiration
 - NgRx SignalStore - Effects Examples
-- ICacheInvalidation
+- ConfirmItemImportBatchCommand
 - GuidV7ValueGenerator
 - dependencies
 - Copilot Instructions — skestock
 - .AnonymousMethod
 - GoodsReceiptImportConfirmedEventHandler
 - CategoryImportBatchCompletedEvent
-- .Handle
+- .Handle_WithValidData_PersistsProcessingImportAndReturnsDto
 - Angular Aria
 - .TransformAsync
 - NgRx SignalStore - Effects Examples
-- .ExtractAsync
+- .AddInfrastructureServices
 - BackgroundService
 - KeysetTestItemSortConfiguration
 - ConfirmUploadRequest
 - SignalRBridge
 - ItemImportBatchReviewDto
-- CreateCategoryImportBatchCommand
+- .Handle
 - Worker
-- .ExtractAsync_DeserializesItemFields
+- .Handle_WithDisabledItem_SetsIsActiveTrue
 - .SaveChangesAsync
 - FunctionalTestSetup
 - Extensions
@@ -283,13 +283,13 @@
 - Aspire — Polyglot Distributed-App Orchestration
 - Deployment — Complete Reference
 - run-functional-tests.sh
-- StockTransaction
+- UserProfile
 - Aspire — Polyglot Distributed-App Orchestration
 - Community (CommunityToolkit/Aspire)
 - ClassStockByCategoryDto
 - NgRx SignalStore - Testing Examples
 - proxy.conf.js
-- IExtractionSchemaFactory
+- CreateSchoolClassCommandTests
 - Community (CommunityToolkit/Aspire)
 - NgRx SignalStore - Testing Examples
 - AGENTS.md
@@ -301,12 +301,12 @@
 - NgRx SignalStore - Custom Features Examples
 - Acquire Codebase Knowledge
 - .github/skills/aspire/SKILL.md
-- .Handle
-- .AddInfrastructureServices
+- GetCategoryByIdQueryTests
+- GetSchoolClassByIdQueryTests
 - Acquire Codebase Knowledge
 - Client/.github/skills/aspire/SKILL.md
-- .CategoryImportBatchExistsAsync
-- .CreateContextAsync
+- CategoryImportBatchConfirmationResultDto
+- CreateGoodsReceiptImportCommand
 - Core Sections (Required)
 - Core Tasks
 - Component Styling
@@ -341,7 +341,7 @@
 - Components
 - Angular CLI MCP Server
 - Template-Driven Forms
-- .GetPropertyExpression
+- ItemImportBatchSortConfiguration
 - graphify reference: extra exports and benchmark
 - graphify reference: extra exports and benchmark
 - DatabaseResetter
@@ -362,7 +362,7 @@
 - Define Routes
 - Inputs
 - Reactive Forms
-- PerformanceBehaviour
+- skestock.Application.Common.Behaviours
 - Manual Setup (Tailwind v4)
 - .github/instructions/angular-guidelines.instructions.md
 - Core Sections (Required)
@@ -394,7 +394,6 @@
 - Show Routes with Outlets
 - Debugging strategies
 - README.md
-- OpenAiDocumentExtractionClient
 - Defining Dependency Providers
 - Environment configuration
 - Navigate to Routes
@@ -438,7 +437,7 @@
 - .claude/skills/graphify/references/extraction-spec.md
 - .copilot/skills/graphify/references/extraction-spec.md
 - GoodsReceiptImportReviewLineDto
-- CreateStockBatchRequest
+- BasePaginationFilter
 - StockItemDto
 - CategoryImportBatchSortConfiguration
 - IApplicationDbContext
@@ -446,30 +445,23 @@
 - .Handle_GroupsPositiveQuantitiesAcrossLocationsAndIncludesDisabledItems
 - ConfirmCategoryImportBatchCommand
 - GetAllGoodsReceiptsQuery
-- DisableItemCommandTests
-- AbstractValidator
+- Item
 - CreateLocationRequest
 - .Handle
 - CreateStockBatchCommand
 - INotificationHandler
 - .Handle
-- CategoryIcon
-- .Handle_WithValidData_PersistsProcessingImportAndReturnsDto
 - GetClassStockByCategoryQuery
 - ItemCreatedEventHandler
 - ItemDisabledEventHandler
-- UpdateLocationCommandTests
+- ImportBatchHistoryDto
 - ApplicationDbContextInitialiser
 - BaseEvent
 - .ProcessMessageAsync
 - GetLocationByIdQueryTests
-- GoodsReceiptImportFailedEvent
 - .ExtractAsync
 - SchoolClassSortConfiguration
-- UpdateSchoolClassCommandTests
 - .AddAsync
-- ItemImportBatchCreatedEventHandler
-- GoodsReceiptImportCreatedEventHandler
 - GoodsReceiptLineItem
 - AppHub
 - ItemEnabledEventHandler
@@ -477,38 +469,35 @@
 - Handling Errors
 - GetClassGoodsReceiptCostsHandler
 - Fedora deployment
-- GetSchoolClassByIdQueryTests
 - ItemUpdatedEventHandler
-- GetCategoryByIdQueryTests
-- FilterOperator
+- CreateItemImportBatchCommand
+- CategorySortConfiguration
 - UpdateCategoryCommandTests
 - CategoryExtractionSchemaFactory
-- GoodsReceiptImportDto
 - GetAllLocationsQuery
 - GoodsReceiptExtractionResult
-- ICacheableQuery
-- skestock.Domain.Enums
 - deploy.sh
-- .Handle_WithDisabledItem_SetsIsActiveTrue
 - skestock.Application.Common.Errors
 - .InvokeAsync
 - Router Lifecycle and Events
-- FilterValueParser
-- ValidationException
-- .IsNameUniqueAsync
+- CreateCategoryCommandTests
+- ItemImportBatchFileDto
 - GetClassGoodsReceiptCostsRequest
 - Handling Errors
-- ValueObject
+- CacheInvalidationBehavior
 - .Handle
-- .IsNameUniqueAsync
-- .FileMetadataExistsAsync
 - .CategoryExistsAsync
-- EditItemCommand
+- .SeedCategoryAsync
 - .ConfirmItemImportBatch
 - ConfirmItemImportBatchRequestItem
 - Infrastructure.IntegrationTests.csproj
+- ValidationCodeMapper
 - Router Lifecycle and Events
+- StockTransactionType
+- ConfirmCategoryImportBatchCommandValidatorTests
 - ItemImportBatchCompletedEvent
+- .BuildEffectiveSort
+- ICacheInvalidation
 - ItemImportBatchConfirmedEventHandler
 - ItemImportBatchFailedEventHandler
 - GoodsReceiptImportSortConfiguration
@@ -518,17 +507,19 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `skestock.Domain.Entities` - 206 edges
-2. `IApplicationDbContext` - 166 edges
+2. `IApplicationDbContext` - 165 edges
 3. `@angular/core` - 156 edges
 4. `skestock.Application.Common.Interfaces` - 153 edges
 5. `SchoolClass` - 145 edges
 6. `StockBatch` - 136 edges
 7. `GoodsReceiptImport` - 120 edges
 8. `skestock.Application.Common.Errors` - 119 edges
-9. `Item` - 116 edges
-10. `CategoryImportBatch` - 115 edges
+9. `CategoryImportBatch` - 116 edges
+10. `Item` - 116 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `CacheInvalidationBehaviorTests` --references--> `CacheInvalidationBehavior`  [EXTRACTED]
+  tests/Application.UnitTests/Common/Behaviours/CacheInvalidationBehaviorTests.cs → src/Application/Common/Behaviours/CacheInvalidationBehavior.cs
 - `InvalidationTestCommand` --implements--> `ICacheInvalidation`  [EXTRACTED]
   tests/Application.UnitTests/Common/Behaviours/CacheInvalidationBehaviorTests.cs → src/Application/Common/Caching/ICacheInvalidation.cs
 - `CacheableTestQuery` --implements--> `ICacheableQuery`  [EXTRACTED]
@@ -537,21 +528,19 @@
   tests/Application.UnitTests/Common/Filtering/FilterTestEntities.cs → src/Application/Common/Filtering/FilterField.cs
 - `FilterTestItemFilterConfiguration` --implements--> `IFilterConfiguration`  [EXTRACTED]
   tests/Application.UnitTests/Common/Filtering/FilterTestEntities.cs → src/Application/Common/Filtering/IFilterConfiguration.cs
-- `ConfirmCategoryImportBatchTestDbContext` --implements--> `IApplicationDbContext`  [EXTRACTED]
-  tests/Application.UnitTests/Features/Categories/Commands/ConfirmCategoryImportBatch/ConfirmCategoryImportBatchTestDbContext.cs → src/Application/Common/Interfaces/IApplicationDbContext.cs
 
 ## Import Cycles
 - None detected.
 
-## Communities (506 total, 16 thin omitted)
+## Communities (495 total, 14 thin omitted)
 
-### Community 0 - "skestock.Domain.Entities"
-Cohesion: 0.04
-Nodes (38): skestock.Application.Features.Items.Commands.ConfirmItemImportBatch, skestock.Application.Common.Caching, skestock.Application.Features.Items.Queries.GetItemImportBatchById, skestock.Application.Features.StockBatches.Queries.GetAllStockBatches, skestock.Application.UnitTests.Common.Caching, skestock.Application.Features.Items.Queries.GetAllItemImportBatches, skestock.Application.Features.StockBatches, skestock.Application.Features.GoodsReceipts.Queries.GetAllGoodsReceiptImports (+30 more)
+### Community 0 - "skestock.Application.Common.Models"
+Cohesion: 0.06
+Nodes (24): skestock.Application.Common.Caching, skestock.Application.UnitTests.Features.SchoolClasses.Queries.GetAllSchoolClasses, skestock.Application.UnitTests.Common.Caching, skestock.Application.Features.Items.Queries.GetAllItemImportBatches, skestock.Application.Features.GoodsReceipts.Queries.GetAllGoodsReceiptImports, skestock.Application.FunctionalTests.Features.Categories.Queries.GetAllCategories, skestock.Application.FunctionalTests.Features.SchoolClasses.Queries.GetAllSchoolClasses, skestock.Application.FunctionalTests.Features.Locations.Queries.GetAllLocations (+16 more)
 
 ### Community 1 - "GetAllStockBatchesQuery"
-Cohesion: 0.05
-Nodes (61): CreateStockBatchRequest, GetAllStockBatchesRequest, DateOnly, DateTimeOffset, Guid, StockBatchListItemDto, CreatedDate, ExpiryDate (+53 more)
+Cohesion: 0.12
+Nodes (26): IReadOnlyCollection, List, Result, TimeSpan, GetAllStockBatchesQuery, BypassCache, Filters, SlidingExpiration (+18 more)
 
 ### Community 2 - "GetAllGoodsReceiptImportsQuery"
 Cohesion: 0.06
@@ -559,59 +548,59 @@ Nodes (52): DateTime, DateTimeOffset, Guid, GoodsReceiptImportListItemDto, BlobP
 
 ### Community 3 - "review.store.ts"
 Cohesion: 0.04
-Nodes (61): ConfirmGoodsReceiptImportLineRequest, ConfirmGoodsReceiptImportRequest, CreateGoodsReceiptImportRequest, CreateGoodsReceiptLineRequest, CreateGoodsReceiptRequest, GetAllGoodsReceiptImportsRequest, GetAllGoodsReceiptsRequest, GOODS_RECEIPT_IMPORT_STATUS_COLORS (+53 more)
+Nodes (60): toDateOnlyString(), ConfirmGoodsReceiptImportLineRequest, ConfirmGoodsReceiptImportRequest, CreateGoodsReceiptLineRequest, GetAllGoodsReceiptImportsRequest, GOODS_RECEIPT_IMPORT_STATUS_COLORS, GOODS_RECEIPT_IMPORT_STATUS_LABELS, GOODS_RECEIPT_IMPORT_TABLE_COLUMNS (+52 more)
 
-### Community 4 - "item-import.store.ts"
+### Community 4 - "items.page.ts"
+Cohesion: 0.06
+Nodes (28): @angular/common, GetAllItemImportBatchesRequest, ITEM_IMPORT_BATCH_STATUS_COLORS, ITEM_IMPORT_BATCH_STATUS_LABELS, ITEM_IMPORT_BATCH_TABLE_COLUMNS, ItemImportBatchDto, ItemImportBatchFileDto, ItemImportBatchListItemDto (+20 more)
+
+### Community 5 - "CategoryDto"
+Cohesion: 0.05
+Nodes (36): CATEGORY_TABLE_COLUMNS, CategoryDto, CategoryMutationDto, CreateCategoryRequest, GetAllCategoriesRequest, UpdateCategoryRequest, PaginatedResponse, FilterContainer (+28 more)
+
+### Community 6 - "@angular/router"
 Cohesion: 0.04
-Nodes (42): @angular/common, buildItemImportBatchListFilter(), CreateItemImportBatchRequest, GetAllItemImportBatchesRequest, ITEM_IMPORT_BATCH_STATUS_COLORS, ITEM_IMPORT_BATCH_STATUS_LABELS, ITEM_IMPORT_BATCH_TABLE_COLUMNS, ItemImportBatchDto (+34 more)
+Nodes (43): @angular/platform-browser, @angular/router, App, appConfig, appInitializer(), routes, Component, authGuard() (+35 more)
 
-### Community 5 - "BaseTable"
+### Community 7 - "models/index.ts"
 Cohesion: 0.03
-Nodes (52): CATEGORY_TABLE_COLUMNS, CategoryDto, CreateCategoryRequest, GetAllCategoriesRequest, UpdateCategoryRequest, PaginationSort, SignalRGroupManagerStore, CategoriesPage (+44 more)
-
-### Community 6 - "@angular/core"
-Cohesion: 0.03
-Nodes (57): @angular/core, @angular/platform-browser, @angular/router, App, appConfig, appInitializer(), Component, authGuard() (+49 more)
-
-### Community 7 - "school-class.ts"
-Cohesion: 0.04
-Nodes (54): CLASS_STATUS_COLORS, CLASS_STATUS_LABELS, CLASS_STATUS_OPTIONS, ClassStatus, Active, Closed, Paused, Upcoming (+46 more)
+Nodes (54): ClassAnalysisFilter, ClassAnalysisFilterFormData, ClassGoodsReceiptCostsDto, ClassStockByCategoryDto, CLASS_STATUS_COLORS, CLASS_STATUS_LABELS, CLASS_STATUS_OPTIONS, ClassStatus (+46 more)
 
 ### Community 8 - "CategoryImportBatch"
-Cohesion: 0.10
-Nodes (18): DateTime, Guid, ICollection, IReadOnlyCollection, CategoryImportBatch, AttemptCount, ClientRequestId, ConcurrencyStamp (+10 more)
+Cohesion: 0.09
+Nodes (20): DateTime, Guid, ICollection, IReadOnlyCollection, CategoryImportBatch, AttemptCount, ClientRequestId, ConcurrencyStamp (+12 more)
 
-### Community 9 - "stock/ui/list/filter/filter-form.ts"
-Cohesion: 0.04
-Nodes (47): ADJUSTMENT_REASON_OPTIONS, AdjustmentReason, Adjustment, Damaged, Expired, Found, Miscount, Other (+39 more)
+### Community 9 - "lodash-es"
+Cohesion: 0.05
+Nodes (41): lodash-es, ADJUSTMENT_REASON_OPTIONS, AdjustmentReason, Adjustment, Damaged, Expired, Found, Miscount (+33 more)
 
-### Community 10 - "ImportBatchOptions"
-Cohesion: 0.12
-Nodes (23): ImportBatchOptions, AllowedContentTypes, MaxEncodedPayloadBytes, MaxFiles, MaxFileSizeBytes, MaxProcessingAttempts, MaxTotalSizeBytes, ProcessingLeaseSeconds (+15 more)
+### Community 10 - "CreateCategoryImportBatchCommand"
+Cohesion: 0.17
+Nodes (16): Guid, List, Result, CreateCategoryImportBatchCommand, ClientRequestId, FileMetadataIds, CancellationToken, Task (+8 more)
 
 ### Community 11 - "CreateGoodsReceiptCommand"
-Cohesion: 0.12
-Nodes (30): DateOnly, Guid, IReadOnlyCollection, List, Result, CreateGoodsReceiptCommand, ClassId, Lines (+22 more)
+Cohesion: 0.08
+Nodes (48): DateOnly, Guid, IReadOnlyCollection, List, Result, CreateGoodsReceiptCommand, ClassId, Lines (+40 more)
 
 ### Community 12 - ".github/skills/acquire-codebase-knowledge/scripts/scan.py"
 Cohesion: 0.08
 Nodes (41): collect_code_metrics(), detect_ci_cd_pipelines(), detect_containers(), detect_monorepo(), detect_performance_markers(), detect_security_configs(), find_entry_points(), find_env_templates() (+33 more)
 
-### Community 13 - "CreateGoodsReceiptImportCommand"
-Cohesion: 0.12
-Nodes (24): Guid, Result, CreateGoodsReceiptImportCommand, ClassId, FileMetadataId, CancellationToken, GoodsReceiptImportDto, Result (+16 more)
+### Community 13 - ".Handle"
+Cohesion: 0.09
+Nodes (29): CancellationToken, GoodsReceiptImportDto, Result, ValueTask, CreateGoodsReceiptImportCommandHandler, DateTime, Guid, GoodsReceiptImportDto (+21 more)
 
-### Community 14 - ".Handle"
-Cohesion: 0.31
-Nodes (11): CancellationToken, Result, StockReportDto, ValueTask, GetClassLocationStockHandler, Guid, Item, Location (+3 more)
+### Community 14 - "GetClassLocationStockQuery"
+Cohesion: 0.19
+Nodes (23): CancellationToken, Result, StockReportDto, ValueTask, GetClassLocationStockHandler, Guid, IReadOnlyCollection, List (+15 more)
 
-### Community 15 - "IRequestHandler"
-Cohesion: 0.05
-Nodes (40): IRequestHandler, Guid, ItemImportBatchFileDto, BlobPath, ContentType, FileMetadataId, OriginalName, SizeBytes (+32 more)
+### Community 15 - "GetAllItemImportBatchesQuery"
+Cohesion: 0.07
+Nodes (30): DateTime, DateTimeOffset, Guid, List, ItemImportBatchListItemDto, CreatedDate, ErrorMessage, Files (+22 more)
 
 ### Community 16 - "skestock.Application.Common.Exceptions"
-Cohesion: 0.09
-Nodes (19): skestock.Application.Storage.Commands.RequestUpload, skestock.Application.Storage.DTOs, skestock.Application.UnitTests.Documents, skestock.Infrastructure.Storage, skestock.Application.UnitTests.Features.Storage.Commands.ConfirmUpload, skestock.Application.Storage.Interfaces, skestock.Application.Documents.Interfaces, skestock.Application.UnitTests.Infrastructure.Storage (+11 more)
+Cohesion: 0.08
+Nodes (20): skestock.Application.Features.GoodsReceipts.Commands.ProcessGoodsReceiptImport, skestock.Application.Storage.Commands.RequestUpload, skestock.Application.Storage.DTOs, skestock.Application.UnitTests.Documents, skestock.Infrastructure.Storage, skestock.Application.UnitTests.Features.Storage.Commands.ConfirmUpload, skestock.Application.Storage.Interfaces, skestock.Application.Documents.Interfaces (+12 more)
 
 ### Community 17 - "TestApp"
 Cohesion: 0.13
@@ -621,33 +610,33 @@ Nodes (12): IWebHostBuilder, Expression, Guid, IdentityRole, List, RoleManager, 
 Cohesion: 0.12
 Nodes (12): List, CachedError, ErrorType, Message, ResultCache, Errors, IsSuccess, Value (+4 more)
 
-### Community 19 - "package.json"
-Cohesion: 0.03
-Nodes (63): @angular/build, @angular/cli, @angular/compiler, @angular/compiler-cli, apexcharts, jsdom, less, @microsoft/signalr (+55 more)
+### Community 19 - "@angular/core"
+Cohesion: 0.02
+Nodes (76): @angular/build, @angular/cli, @angular/compiler, @angular/compiler-cli, @angular/core, apexcharts, jsdom, less (+68 more)
 
 ### Community 20 - "GetAllCategoryImportBatchesQuery"
-Cohesion: 0.06
-Nodes (39): Guid, CategoryImportBatchFileDto, BlobPath, ContentType, FileMetadataId, OriginalName, SizeBytes, SortOrder (+31 more)
+Cohesion: 0.07
+Nodes (30): DateTime, DateTimeOffset, Guid, List, CategoryImportBatchListItemDto, CreatedDate, ErrorMessage, Files (+22 more)
 
 ### Community 21 - "ske"
 Cohesion: 0.04
 Nodes (48): build, serve, test, builder, configurations, defaultConfiguration, options, cli (+40 more)
 
-### Community 22 - "BasePaginationFilter"
-Cohesion: 0.05
-Nodes (47): ConfirmGoodsReceiptImportLineRequest, CreateGoodsReceiptLineRequest, List, BasePaginationFilter, Cursor, PageSize, SearchTerm, Sort (+39 more)
+### Community 22 - "ConfirmGoodsReceiptImportLineRequest"
+Cohesion: 0.06
+Nodes (40): ConfirmGoodsReceiptImportLineRequest, CreateGoodsReceiptLineRequest, DateOnly, Guid, List, ConfirmGoodsReceiptImportLineRequest, CategoryName, ExpiryDate (+32 more)
 
 ### Community 23 - "GetAllSchoolClassesQuery"
 Cohesion: 0.14
 Nodes (19): IReadOnlyCollection, List, Result, TimeSpan, GetAllSchoolClassesQuery, BypassCache, Filters, SlidingExpiration (+11 more)
 
-### Community 24 - ".Handle"
-Cohesion: 0.15
-Nodes (24): List, CategoryExtractionResult, Categories, ExtractedCategory, Name, Stream, DocumentExtractionInput, Guid (+16 more)
+### Community 24 - "ImportBatchOptions"
+Cohesion: 0.11
+Nodes (32): ImportBatchOptions, AllowedContentTypes, MaxEncodedPayloadBytes, MaxFiles, MaxFileSizeBytes, MaxProcessingAttempts, MaxTotalSizeBytes, ProcessingLeaseSeconds (+24 more)
 
-### Community 25 - "icon-catalog.ts"
-Cohesion: 0.20
-Nodes (9): buildIconAssetPath(), ICON_ASSET_NAMES, ICON_CATALOG, toHumanReadableIconName(), toIconFileName(), IconPicker, IconPickerFormModel, isIconPickerValue() (+1 more)
+### Community 25 - "CategoriesPage"
+Cohesion: 0.09
+Nodes (12): CategoriesPage, Component, buildIconAssetPath(), ICON_ASSET_NAMES, ICON_CATALOG, IconPickerValue, toHumanReadableIconName(), toIconFileName() (+4 more)
 
 ### Community 26 - "ItemTestDbContext"
 Cohesion: 0.09
@@ -657,17 +646,17 @@ Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, ItemTestDbConte
 Cohesion: 0.13
 Nodes (6): DateTimeOffset, IReadOnlyList, CacheKeyNormalization, Test, TestCase, CacheKeyNormalizationTests
 
-### Community 28 - "skestock.Application.Features.Items.Commands.CreateItem"
-Cohesion: 0.07
-Nodes (12): skestock.Application.FunctionalTests.Features.Items.Commands.DisableItem, skestock.Application.UnitTests.Features.Items.Commands.CreateItem, skestock.Application.UnitTests.Features.Items.Commands.EnableItem, skestock.Application.Features.Items.Commands.EnableItem, skestock.Application.Features.Items.Commands.DisableItem, skestock.Application.UnitTests.Features.Items.Commands.DisableItem, skestock.Application.Features.Items.Commands.CreateItem, skestock.Application.UnitTests.Features.Items.Commands.EditItem (+4 more)
+### Community 28 - "skestock.Domain.Entities"
+Cohesion: 0.04
+Nodes (26): skestock.Application.UnitTests.Features.StockBatches.Commands.CreateStockBatch, skestock.Application.Features.StockBatches.Queries.GetAllStockBatches, skestock.Application.Features.StockBatches, skestock.Application.UnitTests.Features.Statistics.Queries.GetClassGoodsReceiptCosts, skestock.Domain.Events.GoodsReceipt, skestock.Application.FunctionalTests.Features.StockBatches.Queries.GetAllStockBatches, skestock.Application.Features.StockBatches.Commands.CreateStockBatch, skestock.Application.UnitTests.Features.StockBatches.Queries.GetAllStockBatches (+18 more)
 
-### Community 29 - "CreateLocationCommandValidator"
-Cohesion: 0.42
-Nodes (5): CreateLocationCommandValidator, LocationTestDbContext, Task, Test, CreateLocationCommandValidatorTests
+### Community 29 - "CreateLocationCommand"
+Cohesion: 0.12
+Nodes (25): Guid, IReadOnlyCollection, Result, CreateLocationCommand, Name, ParentLocationId, Tags, Type (+17 more)
 
 ### Community 30 - "skestock.Application.Features.GoodsReceipts.Models"
-Cohesion: 0.05
-Nodes (19): skestock.Application.Features.GoodsReceipts.Queries.GetGoodsReceiptImportById, skestock.Application.Features.Statistics.Queries.GetClassGoodsReceiptCosts, skestock.Application.Features.GoodsReceipts.Commands.ConfirmGoodsReceiptImport, skestock.Application.UnitTests.Features.GoodsReceipts.Queries.GetGoodsReceiptImportById, skestock.Application.UnitTests.Features.Statistics.Queries.GetClassGoodsReceiptCosts, skestock.Application.Common.Security, skestock.Application.Features.Statistics.Models, skestock.Application.Features.GoodsReceipts.Queries.GetGoodsReceiptById (+11 more)
+Cohesion: 0.06
+Nodes (14): skestock.Application.Features.GoodsReceipts.Queries.GetGoodsReceiptImportById, skestock.Application.Features.GoodsReceipts.Commands.ConfirmGoodsReceiptImport, skestock.Application.Features.GoodsReceipts.Commands.CreateGoodsReceiptImport, skestock.Application.UnitTests.Features.GoodsReceipts.Queries.GetGoodsReceiptImportById, skestock.Application.Common.Security, skestock.Application.UnitTests.Features.GoodsReceipts.Commands.CreateGoodsReceiptImport, skestock.Application.Features.GoodsReceipts.Queries.GetGoodsReceiptById, skestock.Application.Features.GoodsReceipts.Commands.CreateGoodsReceipt (+6 more)
 
 ### Community 31 - "Client/.github/skills/acquire-codebase-knowledge/scripts/scan.py"
 Cohesion: 0.08
@@ -677,13 +666,13 @@ Nodes (41): collect_code_metrics(), detect_ci_cd_pipelines(), detect_containers(
 Cohesion: 0.09
 Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, DefaultLocationTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
 
-### Community 33 - "stock-batch.store.ts"
-Cohesion: 0.07
-Nodes (25): toDateOnlyString(), CreateStockBatchRequest, GetAllStockBatchesRequest, STOCK_BATCH_TABLE_COLUMNS, StockBatchListItemDto, ClassAnalyticsStore, initialState, StockBatchListStore (+17 more)
+### Community 33 - "skestock.Application.Features.Items.Models"
+Cohesion: 0.04
+Nodes (25): skestock.Application.Features.Items.Commands.ConfirmItemImportBatch, skestock.Application.Features.Items.Queries.GetItemImportBatchById, skestock.Application.FunctionalTests.Features.Items.Commands.DisableItem, skestock.Application.FunctionalTests.Features.Items.Queries.GetItemById, skestock.Application.UnitTests.Features.Items.Commands.CreateItem, skestock.Application.UnitTests.Features.Items.Commands.EnableItem, skestock.Application.Features.Items.Models, skestock.Application.Features.Items.Commands.EnableItem (+17 more)
 
 ### Community 34 - "IKeysetSortConfiguration"
-Cohesion: 0.09
-Nodes (22): JsonSerializerOptions, List, CursorCodec, CursorSortItem, Direction, Key, Dictionary, List (+14 more)
+Cohesion: 0.11
+Nodes (19): JsonSerializerOptions, List, CursorCodec, CursorSortItem, Direction, Key, Dictionary, List (+11 more)
 
 ### Community 35 - "CreateItemCommand"
 Cohesion: 0.17
@@ -702,68 +691,68 @@ Cohesion: 0.14
 Nodes (18): CancellationToken, LocationDto, Result, ValueTask, GetDefaultLocationHandler, IReadOnlyCollection, Result, TimeSpan (+10 more)
 
 ### Community 39 - "FileMetadataTestDbContext"
-Cohesion: 0.09
-Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, FileMetadataTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
+Cohesion: 0.08
+Nodes (24): DbContext, DbContextOptions, DbSet, FileMetadata, ModelBuilder, FileMetadataTestDbContext, Categories, CategoryImportBatches (+16 more)
 
 ### Community 40 - "rxjs"
 Cohesion: 0.05
-Nodes (71): @ngrx/operators, @ngrx/signals, rxjs, routes, PAGINATION_PAGE_SIZE, buildGoodsReceiptImportListFilter(), buildGoodsReceiptListFilter(), PaginatedResponseData (+63 more)
+Nodes (77): @microsoft/signalr, @ngrx/operators, @ngrx/signals, rxjs, PAGINATION_PAGE_SIZE, buildGoodsReceiptImportListFilter(), buildGoodsReceiptListFilter(), LocationDropdownValue (+69 more)
 
 ### Community 41 - "IFilterConfiguration"
 Cohesion: 0.07
 Nodes (33): LambdaExpression, Type, FilterField, IReadOnlyDictionary, IFilterConfiguration, Fields, IReadOnlyDictionary, CategoryFilterConfiguration (+25 more)
 
-### Community 42 - "Category"
-Cohesion: 0.06
-Nodes (35): dynamic, Expression, Func, IReadOnlyDictionary, List, CategorySortConfiguration, AllowedSortKeys, DefaultSort (+27 more)
-
-### Community 43 - "category-import.store.ts"
-Cohesion: 0.04
-Nodes (46): buildCategoryImportBatchListFilter(), CATEGORY_IMPORT_BATCH_STATUS_COLORS, CATEGORY_IMPORT_BATCH_STATUS_LABELS, CATEGORY_IMPORT_BATCH_TABLE_COLUMNS, CategoryImportBatchDto, CategoryImportBatchFileDto, CategoryImportBatchListItemDto, CategoryImportBatchReviewDto (+38 more)
-
-### Community 44 - "CategoryImportBatchReviewTestDbContext"
+### Community 42 - "GoodsReceiptTestDbContext"
 Cohesion: 0.09
-Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, CategoryImportBatchReviewTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
+Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, GoodsReceiptTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
+
+### Community 43 - "categories.page.ts"
+Cohesion: 0.04
+Nodes (48): @angular/forms, CATEGORY_IMPORT_BATCH_STATUS_COLORS, CATEGORY_IMPORT_BATCH_STATUS_LABELS, CATEGORY_IMPORT_BATCH_TABLE_COLUMNS, CategoryImportBatchFileDto, CategoryImportBatchListItemDto, CategoryImportBatchMutationDto, CategoryImportBatchReviewDto (+40 more)
+
+### Community 44 - "GoodsReceiptImport"
+Cohesion: 0.09
+Nodes (21): DateTime, Guid, ICollection, GoodsReceiptImport, BlobPath, Class, ClassId, ErrorMessage (+13 more)
 
 ### Community 45 - ".SendAsync"
-Cohesion: 0.17
-Nodes (12): IBaseRequest, Category, SetUp, Task, Test, CreateItemCommandTests, SetUp, Task (+4 more)
+Cohesion: 0.12
+Nodes (15): IBaseRequest, SetUp, Task, Test, CreateLocationCommandTests, SetUp, Task, Test (+7 more)
 
 ### Community 46 - "CacheableTestQuery"
-Cohesion: 0.13
+Cohesion: 0.14
 Nodes (19): CancellationToken, HybridCache, MessageHandlerDelegate, ValueTask, CachingBehavior, CancellationToken, HybridCache, IReadOnlyCollection (+11 more)
 
 ### Community 47 - "ImportBatchHistory"
+Cohesion: 0.10
+Nodes (18): Guid, Result, ProcessItemImportBatchCommand, ItemImportBatchId, CancellationToken, ILogger, IOptions, Result (+10 more)
+
+### Community 48 - "ConfirmGoodsReceiptImportLine"
+Cohesion: 0.13
+Nodes (26): DateOnly, ConfirmGoodsReceiptImportLine, CategoryName, ExpiryDate, IsPerishable, ItemId, LocationId, Name (+18 more)
+
+### Community 49 - "BaseTable"
 Cohesion: 0.06
-Nodes (30): Guid, ImportBatchProcessingInProgressException, Guid, Result, ProcessItemImportBatchCommand, ItemImportBatchId, CancellationToken, ILogger (+22 more)
-
-### Community 48 - "ConfirmGoodsReceiptImportCommand"
-Cohesion: 0.08
-Nodes (46): DateOnly, Guid, IReadOnlyCollection, List, Result, ConfirmGoodsReceiptImportCommand, ClassId, ImportId (+38 more)
-
-### Community 49 - "OutboxMessage"
-Cohesion: 0.05
-Nodes (32): skestock.Infrastructure.Data.Configurations, IEntityTypeConfiguration, DateTime, Guid, OutboxMessage, CreatedAtUtc, Error, Id (+24 more)
+Nodes (23): GetAllItemsRequest, ITEM_TABLE_COLUMNS, PaginationSort, FilterContainer, Component, FilterForm, ItemListFilterModel, Component (+15 more)
 
 ### Community 50 - "EnableItemCommand"
-Cohesion: 0.13
-Nodes (21): Guid, IReadOnlyCollection, Result, EnableItemCommand, Id, Tags, CancellationToken, ItemDto (+13 more)
+Cohesion: 0.14
+Nodes (19): Guid, IReadOnlyCollection, Result, EnableItemCommand, Id, Tags, CancellationToken, ItemDto (+11 more)
 
 ### Community 51 - "UpdateSchoolClassCommand"
 Cohesion: 0.18
 Nodes (17): DateOnly, Guid, IReadOnlyCollection, Result, UpdateSchoolClassCommand, EndDate, Id, Name (+9 more)
 
-### Community 52 - "school-class-overview.page.ts"
+### Community 52 - "stock-batch.store.ts"
 Cohesion: 0.06
-Nodes (17): QueryParamState, Service, HeaderContainer, Component, Header, Component, SchoolClassOverviewPage, Component (+9 more)
+Nodes (26): CreateStockBatchRequest, GetAllStockBatchesRequest, STOCK_BATCH_TABLE_COLUMNS, StockBatchListItemDto, LocationDropdown, Component, initialState, StockBatchListStore (+18 more)
 
 ### Community 53 - "GetAllStockBatchesQueryTests"
 Cohesion: 0.26
 Nodes (12): Category, ColumnFilter, DateOnly, GoodsReceipt, Item, List, Location, PaginationSort (+4 more)
 
 ### Community 54 - "skestock.Domain.Queues"
-Cohesion: 0.06
-Nodes (20): skestock.Application.Features.GoodsReceipts.Commands.ProcessGoodsReceiptImport, skestock.Application.Features.GoodsReceipts.Commands.CreateGoodsReceiptImport, Worker.Queues, skestock.Application.Queues, skestock.Domain.Queues, skestock.Application.UnitTests.Features.GoodsReceipts.Commands.ProcessGoodsReceiptImport, skestock.Application.UnitTests.Features.SchoolClasses.Queries.GetSchoolClassSummary, skestock.Application.UnitTests.Queues (+12 more)
+Cohesion: 0.04
+Nodes (28): Worker.Queues, skestock.Application.FunctionalTests.Infrastructure, skestock.Application.Queues, skestock.Web.Services, skestock.Domain.Queues, skestock.Application.UnitTests.Features.GoodsReceipts.Commands.ProcessGoodsReceiptImport, skestock.Application.UnitTests.Queues, skestock.Infrastructure (+20 more)
 
 ### Community 55 - "ItemImportBatchReviewLineDto"
 Cohesion: 0.08
@@ -774,12 +763,12 @@ Cohesion: 0.16
 Nodes (9): Guid, CancellationToken, HybridCache, ValueTask, StockBatchCreatedEventHandler, Guid, StockBatchCreatedEvent, ClassId (+1 more)
 
 ### Community 57 - "item-import.ts"
-Cohesion: 0.07
-Nodes (44): buildCategoryListFilter(), CategoryDropdownValue, CategoryTableColumn, CategoryImportBatchTableColumn, ImportBatchFileDto, ImportBatchHistoryDto, ImportBatchHistoryStatus, ImportBatchStatus (+36 more)
+Cohesion: 0.05
+Nodes (54): buildCategoryListFilter(), CategoryDropdownValue, CategoryTableColumn, buildCategoryImportBatchListFilter(), CategoryImportBatchTableColumn, ImportBatchFileDto, ImportBatchHistoryDto, ImportBatchHistoryStatus (+46 more)
 
-### Community 58 - ".Logout"
-Cohesion: 0.18
-Nodes (9): SignInManager, EndpointDescription, EndpointSummary, Ok, Results, RouteGroupBuilder, Task, Users (+1 more)
+### Community 58 - "ApplicationUser"
+Cohesion: 0.12
+Nodes (16): IdentityUser, SignInManager, EntityTypeBuilder, UserProfile, UserProfileConfiguration, Guid, UserProfile, ApplicationUser (+8 more)
 
 ### Community 59 - "GetSchoolClassSummaryQuery"
 Cohesion: 0.23
@@ -793,21 +782,21 @@ Nodes (18): Guid, Result, ConfirmUploadCommand, FileId, CancellationToken, FileM
 Cohesion: 0.08
 Nodes (25): Accessing State, Big Form Example, Binding, Common Pitfalls (DO NOT DO THESE), Creating a Form, Disabled / Readonly / Hidden, `Expected 3 arguments, but got 2` for applyWhen, FieldState vs FormField: The Parental Requirement (+17 more)
 
-### Community 62 - "CategoryDto"
-Cohesion: 0.10
-Nodes (23): CategoryErrors, CategoryNotFound, DateTimeOffset, Guid, CategoryDto, CreatedByName, CreatedDate, Icon (+15 more)
+### Community 62 - "GetCategoryByIdQuery"
+Cohesion: 0.13
+Nodes (20): CategoryErrors, CategoryNotFound, CancellationToken, CategoryDto, Result, ValueTask, GetCategoryByIdHandler, Guid (+12 more)
 
 ### Community 63 - "ColumnFilter"
 Cohesion: 0.25
 Nodes (5): ColumnFilter, List, Test, FilterQueryBuilderTests, Items
 
 ### Community 64 - "ProcessGoodsReceiptImportCommand"
-Cohesion: 0.14
-Nodes (21): Guid, Result, ProcessGoodsReceiptImportCommand, GoodsReceiptImportId, CancellationToken, ILogger, Result, ValueTask (+13 more)
+Cohesion: 0.21
+Nodes (15): Guid, Result, ProcessGoodsReceiptImportCommand, GoodsReceiptImportId, CancellationToken, ILogger, Result, ValueTask (+7 more)
 
 ### Community 65 - "DisableItemCommand"
-Cohesion: 0.12
-Nodes (23): ItemErrors, ItemNotFound, Guid, IReadOnlyCollection, Result, DisableItemCommand, Id, Tags (+15 more)
+Cohesion: 0.10
+Nodes (26): Guid, IReadOnlyCollection, Result, DisableItemCommand, Id, Tags, CancellationToken, ItemDto (+18 more)
 
 ### Community 66 - "KeysetTestItem"
 Cohesion: 0.18
@@ -817,9 +806,9 @@ Nodes (11): Test, CursorCodecTests, List, Test, KeysetPredicateBuilderTests, Dat
 Cohesion: 0.24
 Nodes (17): ConfirmGoodsReceiptImportRequest, CreateGoodsReceiptImportRequest, CreateGoodsReceiptRequest, GetAllGoodsReceiptImportsRequest, GetAllGoodsReceiptsRequest, CancellationToken, Created, EndpointDescription (+9 more)
 
-### Community 68 - "FilterQueryBuilder"
-Cohesion: 0.21
-Nodes (12): End, NotSupportedException, Expression, Func, IEnumerable, IQueryable, IReadOnlyList, JsonElement (+4 more)
+### Community 68 - ".TryParseBoolean"
+Cohesion: 0.08
+Nodes (25): End, NotSupportedException, FilterOperator, Between, Contains, Equals, GreaterThan, In (+17 more)
 
 ### Community 69 - "environmentVariables"
 Cohesion: 0.10
@@ -829,13 +818,13 @@ Nodes (24): ASPIRE_ALLOW_UNSECURED_TRANSPORT, ASPNETCORE_ENVIRONMENT, DOTNET_DAS
 Cohesion: 0.07
 Nodes (31): AuthErrorCode, CommonErrorCode, ErrorCode, ErrorCodes, ResourceErrorCode, ValidationErrorCode, ValueOf, BackendErrorDiagnostics (+23 more)
 
-### Community 71 - "CategoryImportBatchReviewDto"
-Cohesion: 0.07
-Nodes (38): DateTime, Guid, List, CategoryImportBatchReviewDto, AttemptCount, ClientRequestId, ErrorMessage, Files (+30 more)
+### Community 71 - ".Handle"
+Cohesion: 0.18
+Nodes (17): CancellationToken, CategoryImportBatchReviewDto, Result, ValueTask, GetCategoryImportBatchByIdHandler, Guid, Result, GetCategoryImportBatchByIdQuery (+9 more)
 
 ### Community 72 - ".Handle"
-Cohesion: 0.28
-Nodes (11): CancellationToken, ItemDto, Result, ValueTask, EditItemCommandHandler, Category, Context, Item (+3 more)
+Cohesion: 0.23
+Nodes (13): ItemErrors, ItemNotFound, CancellationToken, ItemDto, Result, ValueTask, EditItemCommandHandler, Category (+5 more)
 
 ### Community 73 - "CreateSchoolClassCommand"
 Cohesion: 0.23
@@ -849,29 +838,29 @@ Nodes (20): skestock.Infrastructure.Data.Migrations, Migration, MigrationBuilder
 Cohesion: 0.29
 Nodes (10): ColumnFilter, DateTime, FileMetadata, List, PaginationSort, SetUp, Task, Test (+2 more)
 
-### Community 76 - "ApplicationUser"
-Cohesion: 0.11
-Nodes (20): IAuthorizationService, IdentityUser, IUserClaimsPrincipalFactory, Guid, Result, Task, UserId, IIdentityService (+12 more)
+### Community 76 - "IIdentityService"
+Cohesion: 0.17
+Nodes (13): IAuthorizationService, IUserClaimsPrincipalFactory, Guid, Result, Task, UserId, IIdentityService, Guid (+5 more)
 
 ### Community 77 - ".CreateContextAsync"
-Cohesion: 0.25
-Nodes (13): CancellationToken, Result, StockItemDto, ValueTask, AdjustStockCommandHandler, Context, DateOnly, Item (+5 more)
+Cohesion: 0.18
+Nodes (17): CancellationToken, Result, StockItemDto, ValueTask, AdjustStockCommandHandler, Guid, StockAdjustedEvent, ClassId (+9 more)
 
 ### Community 78 - "GoodsReceiptDto"
 Cohesion: 0.05
 Nodes (41): DateOnly, DateTime, DateTimeOffset, Guid, List, GoodsReceiptDto, ClassId, ClassName (+33 more)
 
-### Community 79 - "UserProfile"
-Cohesion: 0.06
-Nodes (32): Guid, ICollection, UserProfile, FirstName, FullName, GoodsReceipts, IdentityId, LastName (+24 more)
+### Community 79 - "Item"
+Cohesion: 0.08
+Nodes (26): Item, EntityTypeBuilder, ItemConfiguration, DbContextOptions, DbSet, FileMetadata, ModelBuilder, CategoryTestDbContext (+18 more)
 
 ### Community 80 - ".ToInt"
 Cohesion: 0.24
 Nodes (4): skestock.Application.UnitTests.Common.Keyset, KeysetTestIds, Test, OrderByBuilderTests
 
-### Community 81 - ".CreateHarness"
-Cohesion: 0.18
-Nodes (17): BlobClient, BlobContainerClient, BlobDownloadOptions, BlobRequestConditions, BlobSasBuilder, DeleteSnapshotsOption, Harness, Response (+9 more)
+### Community 81 - "AzureBlobStorageService"
+Cohesion: 0.12
+Nodes (24): BlobClient, BlobContainerClient, BlobDownloadOptions, BlobRequestConditions, BlobSasBuilder, DeleteSnapshotsOption, Harness, Response (+16 more)
 
 ### Community 82 - ".ApplyOrderBy"
 Cohesion: 0.11
@@ -885,13 +874,13 @@ Nodes (23): Guid, List, CreateItemRequest, CategoryId, Description, IsPerishable
 Cohesion: 0.09
 Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, ProcessCategoryImportBatchTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
 
-### Community 85 - "ProcessedMessage"
-Cohesion: 0.07
-Nodes (28): DateTime, Guid, ProcessedMessage, Id, ProcessedAtUtc, DbContextOptions, DbSet, FileMetadata (+20 more)
+### Community 85 - "OutboxMessage"
+Cohesion: 0.04
+Nodes (47): skestock.Infrastructure.Data.Configurations, IEntityTypeConfiguration, DateTime, Guid, OutboxMessage, CreatedAtUtc, Error, Id (+39 more)
 
 ### Community 86 - "StockBatch"
-Cohesion: 0.05
-Nodes (44): BaseAuditableEntity, IKeysetEntity, DateTimeOffset, Guid, FileMetadata, BlobContainer, BlobPath, CompletedDate (+36 more)
+Cohesion: 0.04
+Nodes (46): BaseAuditableEntity, IKeysetEntity, DateTimeOffset, Guid, FileMetadata, BlobContainer, BlobPath, CompletedDate (+38 more)
 
 ### Community 87 - "ItemTestDbContext"
 Cohesion: 0.09
@@ -909,21 +898,21 @@ Nodes (14): CreateItemRequest, EditItemRequest, GetAllItemsRequest, Cancellation
 Cohesion: 0.06
 Nodes (30): Annotations, Architecture — Deep Dive, Available events, Built-in health checks, Configuration, Configuration sources, Configuring non-.NET services, Connection strings (+22 more)
 
-### Community 91 - ".CreateContextAsync"
-Cohesion: 0.24
-Nodes (11): CancellationToken, Guid, Task, EditItemCommandValidator, Category, Context, Item, ItemTestDbContext (+3 more)
+### Community 91 - "EditItemCommand"
+Cohesion: 0.12
+Nodes (25): Guid, IReadOnlyCollection, Result, EditItemCommand, CategoryId, Description, Id, IsPerishable (+17 more)
 
 ### Community 92 - "GetSchoolClassByIdQuery"
 Cohesion: 0.16
 Nodes (16): CancellationToken, Result, SchoolClassDto, ValueTask, GetSchoolClassByIdHandler, Guid, Result, GetSchoolClassByIdQuery (+8 more)
 
-### Community 93 - ".AddWebServices"
-Cohesion: 0.14
-Nodes (13): ApiBehaviorOptions, ApiExceptionOperationTransformer, BearerSecuritySchemeTransformer, IdentityApiOperationTransformer, IHttpContextAccessor, ProblemDetailsExceptionHandler, IHostApplicationBuilder, DependencyInjection (+5 more)
+### Community 93 - "IUser"
+Cohesion: 0.10
+Nodes (18): ApiBehaviorOptions, ApiExceptionOperationTransformer, BearerSecuritySchemeTransformer, IdentityApiOperationTransformer, IHttpContextAccessor, ProblemDetailsExceptionHandler, Guid, List (+10 more)
 
 ### Community 94 - ".ConfirmUpload"
-Cohesion: 0.24
-Nodes (13): ConfirmUploadRequest, RequestUploadRequest, CancellationToken, EndpointDescription, EndpointSummary, Guid, ISender, Ok (+5 more)
+Cohesion: 0.12
+Nodes (21): ConfirmUploadRequest, RequestUploadRequest, DateTimeOffset, Guid, FileMetadataDto, FileStatus, Completed, Deleted (+13 more)
 
 ### Community 95 - ".GetAllLocations"
 Cohesion: 0.25
@@ -934,8 +923,8 @@ Cohesion: 0.25
 Nodes (15): CreateSchoolClassRequest, GetAllSchoolClassesRequest, CancellationToken, Created, EndpointDescription, EndpointSummary, Guid, ISender (+7 more)
 
 ### Community 97 - "PaginatedResponse"
-Cohesion: 0.07
-Nodes (28): IEnumerable, List, PaginatedResponse, Data, HasNextPage, NextCursor, Sort, PaginationSort (+20 more)
+Cohesion: 0.04
+Nodes (46): DatabaseFacade, TextSearchCollation, IEnumerable, List, PaginatedResponse, Data, HasNextPage, NextCursor (+38 more)
 
 ### Community 98 - "SchoolClassSummaryTestDbContext"
 Cohesion: 0.09
@@ -954,12 +943,12 @@ Cohesion: 0.29
 Nodes (11): IReadOnlyCollection, Result, CreateCategoryCommand, Icon, Name, Tags, CreateCategoryCommandValidator, CategoryTestDbContext (+3 more)
 
 ### Community 102 - ".Handle"
-Cohesion: 0.32
-Nodes (9): CancellationToken, CategoryDto, Result, ValueTask, UpdateCategoryCommandHandler, Category, Task, Test (+1 more)
+Cohesion: 0.29
+Nodes (10): CancellationToken, CategoryMutationDto, Result, ValueTask, UpdateCategoryCommandHandler, CategoryIcon, Category, Task (+2 more)
 
-### Community 103 - ".IsSqlServer"
-Cohesion: 0.11
-Nodes (12): DatabaseFacade, TextSearchCollation, CancellationToken, Task, CancellationToken, Guid, Task, CancellationToken (+4 more)
+### Community 103 - "Theme"
+Cohesion: 0.08
+Nodes (17): Full, Component, Header, Component, Theme, compact, dark, default (+9 more)
 
 ### Community 104 - "ClassStatus"
 Cohesion: 0.10
@@ -974,16 +963,16 @@ Cohesion: 0.25
 Nodes (14): CreateCategoryRequest, GetAllCategoriesRequest, CancellationToken, EndpointDescription, EndpointSummary, Guid, ISender, Ok (+6 more)
 
 ### Community 107 - "GetAllItemsQuery"
-Cohesion: 0.14
-Nodes (16): IReadOnlyCollection, List, Result, TimeSpan, GetAllItemsQuery, BypassCache, Filters, SlidingExpiration (+8 more)
+Cohesion: 0.13
+Nodes (22): IReadOnlyCollection, List, Result, TimeSpan, GetAllItemsQuery, BypassCache, Filters, SlidingExpiration (+14 more)
 
-### Community 108 - ".ValidateAsync"
-Cohesion: 0.38
-Nodes (5): CancellationToken, DateOnly, Task, ValidationContext, ConfirmGoodsReceiptImportCommandValidator
+### Community 108 - "ConfirmGoodsReceiptImportCommand"
+Cohesion: 0.13
+Nodes (17): Guid, IReadOnlyCollection, List, Result, ConfirmGoodsReceiptImportCommand, ClassId, ImportId, Lines (+9 more)
 
 ### Community 109 - "IRealtimeNotifier"
-Cohesion: 0.20
-Nodes (9): IHubContext, CancellationToken, Task, IRealtimeNotifier, Guid, RealtimeEnvelope, CancellationToken, Task (+1 more)
+Cohesion: 0.12
+Nodes (16): IHubContext, CancellationToken, Task, IRealtimeNotifier, CancellationToken, HybridCache, IReadOnlyCollection, ValueTask (+8 more)
 
 ### Community 110 - "GetLocationByIdQuery"
 Cohesion: 0.16
@@ -993,13 +982,13 @@ Nodes (17): CancellationToken, LocationDto, Result, ValueTask, GetLocationByIdHa
 Cohesion: 0.28
 Nodes (9): Category, ColumnFilter, Item, List, PaginationSort, SetUp, Task, Test (+1 more)
 
-### Community 112 - "GoodsReceiptImportLine"
-Cohesion: 0.05
-Nodes (36): DateOnly, Guid, GoodsReceiptImportLine, ExpiryDate, ImportId, Location, LocationId, MatchedItem (+28 more)
-
-### Community 113 - "Item"
+### Community 112 - "Location"
 Cohesion: 0.06
-Nodes (34): dynamic, Expression, Func, IReadOnlyDictionary, List, ItemSortConfiguration, AllowedSortKeys, DefaultSort (+26 more)
+Nodes (34): dynamic, Expression, Func, IReadOnlyDictionary, List, LocationSortConfiguration, AllowedSortKeys, DefaultSort (+26 more)
+
+### Community 113 - "CategoryTestDbContext"
+Cohesion: 0.09
+Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, CategoryTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
 
 ### Community 114 - "CategoryTestDbContext"
 Cohesion: 0.09
@@ -1009,17 +998,17 @@ Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, CategoryTestDbC
 Cohesion: 0.09
 Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, GoodsReceiptImportTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
 
-### Community 116 - "ProcessGoodsReceiptImportTestDbContext"
+### Community 116 - "CategoryImportBatchFile"
+Cohesion: 0.06
+Nodes (31): Guid, CategoryImportBatchFile, Batch, CategoryImportBatchId, FileMetadataId, SortOrder, EntityTypeBuilder, CategoryImportBatchFileConfiguration (+23 more)
+
+### Community 117 - "ClassBalance"
+Cohesion: 0.06
+Nodes (32): Guid, ClassBalance, ClassId, ClosingQty, ItemId, LocationId, OpeningQty, EntityTypeBuilder (+24 more)
+
+### Community 118 - "CategoryImportBatchReviewTestDbContext"
 Cohesion: 0.09
-Nodes (23): DbContext, DbContextOptions, DbSet, FileMetadata, ModelBuilder, ProcessGoodsReceiptImportTestDbContext, Categories, CategoryImportBatches (+15 more)
-
-### Community 117 - "GoodsReceiptImport"
-Cohesion: 0.05
-Nodes (42): DateTime, Guid, ICollection, GoodsReceiptImport, BlobPath, Class, ClassId, ErrorMessage (+34 more)
-
-### Community 118 - "skestock.Infrastructure.Identity"
-Cohesion: 0.08
-Nodes (14): skestock.Application.FunctionalTests.Infrastructure, skestock.Infrastructure, skestock.Infrastructure.Data, skestock.ServiceDefaults, skestock.Infrastructure.Identity, skestock.Web, skestock.Domain.Constants, skestock.Application (+6 more)
+Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, CategoryImportBatchReviewTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
 
 ### Community 119 - ".NET quick checklist"
 Cohesion: 0.07
@@ -1033,9 +1022,9 @@ Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, ItemTestDbConte
 Cohesion: 0.16
 Nodes (20): Guid, IReadOnlyCollection, Result, AdjustStockCommand, ActualQuantity, ClassId, ItemId, LocationId (+12 more)
 
-### Community 122 - "CategoryImportBatchFile"
-Cohesion: 0.06
-Nodes (30): Guid, CategoryImportBatchFile, Batch, CategoryImportBatchId, FileMetadataId, SortOrder, EntityTypeBuilder, DbContextOptions (+22 more)
+### Community 122 - "ItemTestDbContext"
+Cohesion: 0.09
+Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, ItemTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
 
 ### Community 123 - "ItemTestDbContext"
 Cohesion: 0.09
@@ -1045,13 +1034,13 @@ Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, ItemTestDbConte
 Cohesion: 0.09
 Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, LocationTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
 
-### Community 125 - "ClassBalance"
-Cohesion: 0.06
-Nodes (32): Guid, ClassBalance, ClassId, ClosingQty, ItemId, LocationId, OpeningQty, EntityTypeBuilder (+24 more)
+### Community 125 - "LocationTestDbContext"
+Cohesion: 0.09
+Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, LocationTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
 
-### Community 126 - "Location"
-Cohesion: 0.06
-Nodes (34): dynamic, Expression, Func, IReadOnlyDictionary, List, LocationSortConfiguration, AllowedSortKeys, DefaultSort (+26 more)
+### Community 126 - "Category"
+Cohesion: 0.07
+Nodes (29): ICollection, Category, Icon, Items, EntityTypeBuilder, CategoryConfiguration, DbContextOptions, DbSet (+21 more)
 
 ### Community 127 - "LocationTestDbContext"
 Cohesion: 0.09
@@ -1061,9 +1050,9 @@ Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, LocationTestDbC
 Cohesion: 0.09
 Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, SchoolClassTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
 
-### Community 129 - "GoodsReceipt"
-Cohesion: 0.05
-Nodes (37): DateTime, Guid, ICollection, GoodsReceipt, Batches, Class, ClassId, Note (+29 more)
+### Community 129 - "SchoolClassTestDbContext"
+Cohesion: 0.09
+Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, SchoolClassTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
 
 ### Community 130 - "SchoolClassTestDbContext"
 Cohesion: 0.09
@@ -1073,13 +1062,13 @@ Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, SchoolClassTest
 Cohesion: 0.09
 Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, SchoolClassTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
 
-### Community 132 - "CreateStockBatchTestDbContext"
-Cohesion: 0.09
-Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, CreateStockBatchTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
+### Community 132 - "GoodsReceiptImportLine"
+Cohesion: 0.05
+Nodes (37): DateOnly, Guid, GoodsReceiptImportLine, ExpiryDate, Import, ImportId, Location, LocationId (+29 more)
 
-### Community 133 - "SchoolClass"
-Cohesion: 0.06
-Nodes (34): DateOnly, ICollection, SchoolClass, Balances, BatchesReceived, GoodsReceipts, Name, Status (+26 more)
+### Community 133 - "StockBatchTestDbContext"
+Cohesion: 0.09
+Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, StockBatchTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
 
 ### Community 134 - ".ApplyKeysetPredicate"
 Cohesion: 0.21
@@ -1097,9 +1086,9 @@ Nodes (11): DbContextErrorEventData, IMediator, SaveChangesCompletedEventData, C
 Cohesion: 0.23
 Nodes (11): CancellationToken, DbUpdateException, ILogger, ISender, IServiceScopeFactory, QueueClient, QueueMessage, QueueServiceClient (+3 more)
 
-### Community 138 - "ApplicationDbContext"
-Cohesion: 0.08
-Nodes (26): IdentityDbContext, DbContextOptions, DbSet, FileMetadata, Guid, IdentityRole, UserProfile, ApplicationDbContext (+18 more)
+### Community 138 - "ItemImportBatchFile"
+Cohesion: 0.05
+Nodes (35): IdentityDbContext, Guid, ItemImportBatchFile, Batch, FileMetadata, FileMetadataId, ItemImportBatchId, SortOrder (+27 more)
 
 ### Community 139 - "Application.UnitTests.csproj"
 Cohesion: 0.17
@@ -1110,8 +1099,8 @@ Cohesion: 0.25
 Nodes (7): Aspire.Hosting.Azure.AppContainers, Aspire.Hosting.Docker, Aspire.Hosting.JavaScript, Aspire.Hosting.AppHost, Aspire.Hosting.Azure.Sql, Aspire.Hosting.Redis, Aspire.AppHost.Sdk/13.5.2
 
 ### Community 141 - "ItemDto"
-Cohesion: 0.08
-Nodes (24): DateTimeOffset, Guid, ItemDto, CategoryId, CategoryName, CreatedByName, CreatedDate, Description (+16 more)
+Cohesion: 0.11
+Nodes (18): DateTimeOffset, Guid, ItemDto, CategoryId, CategoryName, CreatedByName, CreatedDate, Description (+10 more)
 
 ### Community 142 - "GetAllLocationsQueryTests"
 Cohesion: 0.30
@@ -1121,25 +1110,25 @@ Nodes (8): ColumnFilter, List, Location, PaginationSort, SetUp, Task, Test, GetA
 Cohesion: 0.32
 Nodes (7): ColumnFilter, List, PaginationSort, SetUp, Task, Test, GetAllSchoolClassesQueryTests
 
-### Community 144 - "GoodsReceiptImportReviewTestDbContext"
-Cohesion: 0.09
-Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, GoodsReceiptImportReviewTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
+### Community 144 - "SchoolClass"
+Cohesion: 0.06
+Nodes (34): DateOnly, ICollection, SchoolClass, Balances, BatchesReceived, GoodsReceipts, Name, Status (+26 more)
 
 ### Community 145 - "Core Patterns"
 Cohesion: 0.07
 Nodes (29): Available Hooks, Available Updaters, Benefits, Common Use Cases, Core Patterns, Feature Ordering, Key Behaviors, Key Behaviors (+21 more)
 
-### Community 146 - "skestock.Application.Common.Behaviours"
-Cohesion: 0.14
-Nodes (15): skestock.Application.UnitTests.Common.Behaviours, skestock.Application.Common.Behaviours, MessagePreProcessor, CancellationToken, ILogger, ValueTask, LoggingBehaviour, Guid (+7 more)
+### Community 146 - "RequestLoggerTests"
+Cohesion: 0.17
+Nodes (13): MessagePreProcessor, CancellationToken, ILogger, ValueTask, LoggingBehaviour, Guid, ILogger, Mock (+5 more)
 
 ### Community 147 - "GetGoodsReceiptImportByIdQuery"
 Cohesion: 0.29
 Nodes (11): GetGoodsReceiptImportByIdHandler, Guid, Result, GetGoodsReceiptImportByIdQuery, Id, Category, Context, Guid (+3 more)
 
-### Community 148 - "models/index.ts"
+### Community 148 - "ItemDto"
 Cohesion: 0.04
-Nodes (37): @angular/forms, lodash-es, CreateItemRequest, EditItemRequest, GetAllItemsRequest, ItemDropdownOption, ItemDto, CategoryListFilterModel (+29 more)
+Nodes (31): CreateItemRequest, EditItemRequest, ItemDropdownOption, ItemDto, ItemsPage, Component, CategoryDropdown, Component (+23 more)
 
 ### Community 149 - "Core Patterns"
 Cohesion: 0.07
@@ -1150,24 +1139,24 @@ Cohesion: 0.12
 Nodes (17): ASPNETCORE_ENVIRONMENT, applicationUrl, commandName, dotnetRunMessages, environmentVariables, launchBrowser, launchUrl, applicationUrl (+9 more)
 
 ### Community 151 - "CacheInvalidationBehaviorTests"
-Cohesion: 0.16
-Nodes (16): CancellationToken, HybridCache, ILogger, MessageHandlerDelegate, ValueTask, CacheInvalidationBehavior, HybridCache, ILogger (+8 more)
+Cohesion: 0.29
+Nodes (10): HybridCache, ILogger, IReadOnlyCollection, Mock, Result, SetUp, Task, Test (+2 more)
 
 ### Community 152 - "Signal Forms"
 Cohesion: 0.08
 Nodes (25): Accessing State, Big Form Example, Binding, Common Pitfalls (DO NOT DO THESE), Creating a Form, Disabled / Readonly / Hidden, `Expected 3 arguments, but got 2` for applyWhen, FieldState vs FormField: The Parental Requirement (+17 more)
 
 ### Community 153 - "skestock.Application.Features.SchoolClasses.Models"
-Cohesion: 0.07
-Nodes (14): skestock.Application.Features.SchoolClasses.Commands.UpdateSchoolClass, skestock.Application.FunctionalTests.Features.SchoolClasses.Commands.CreateSchoolClass, skestock.Application.UnitTests.Features.SchoolClasses.Queries.GetAllSchoolClasses, skestock.Application.UnitTests.Features.SchoolClasses.Commands.UpdateSchoolClass, skestock.Application.UnitTests.Features.SchoolClasses.Queries.GetSchoolClassById, skestock.Application.FunctionalTests.Features.SchoolClasses.Commands.UpdateSchoolClass, skestock.Application.FunctionalTests.Features.SchoolClasses.Queries.GetAllSchoolClasses, skestock.Application.Features.SchoolClasses.Queries.GetSchoolClassById (+6 more)
+Cohesion: 0.08
+Nodes (12): skestock.Application.Features.SchoolClasses.Commands.UpdateSchoolClass, skestock.Application.FunctionalTests.Features.SchoolClasses.Commands.CreateSchoolClass, skestock.Application.UnitTests.Features.SchoolClasses.Commands.UpdateSchoolClass, skestock.Application.UnitTests.Features.SchoolClasses.Queries.GetSchoolClassById, skestock.Application.FunctionalTests.Features.SchoolClasses.Commands.UpdateSchoolClass, skestock.Application.Features.SchoolClasses.Queries.GetSchoolClassById, skestock.Application.Features.SchoolClasses.Commands.CreateSchoolClass, skestock.Application.FunctionalTests.Features.SchoolClasses.Queries.GetSchoolClassById (+4 more)
 
 ### Community 154 - "GetClassLocationStockQueryTests"
 Cohesion: 0.30
 Nodes (10): Category, DateOnly, GoodsReceipt, Guid, Item, Location, SetUp, Task (+2 more)
 
-### Community 155 - "CreateCategoryImportBatchRequest"
-Cohesion: 0.24
-Nodes (10): Guid, List, CategoryImportBatchRequests, ConfirmCategoryImportBatchRequest, Names, CreateCategoryImportBatchRequest, ClientRequestId, FileMetadataIds (+2 more)
+### Community 155 - "StockBatchListItemDto"
+Cohesion: 0.12
+Nodes (16): DateOnly, DateTimeOffset, Guid, StockBatchListItemDto, CreatedDate, ExpiryDate, GoodsReceiptId, Id (+8 more)
 
 ### Community 156 - "What You Must Do When Invoked"
 Cohesion: 0.08
@@ -1177,9 +1166,9 @@ Nodes (24): For /graphify add and --watch, For /graphify query, For the commit h
 Cohesion: 0.08
 Nodes (24): For /graphify add and --watch, For /graphify query, For the commit hook and native CLAUDE.md integration, For --update and --cluster-only, /graphify, Honesty Rules, Interpreter guard for subcommands, Part A - Structural extraction for code files (+16 more)
 
-### Community 158 - "Error"
-Cohesion: 0.05
-Nodes (43): Error, CategoryImportBatchErrors, CategoryImportBatchNotFound, CategoryImportBatchNotInReview, IdempotencyConflict, GoodsReceiptErrors, GoodsReceiptImportErrors, GoodsReceiptImportNotFound (+35 more)
+### Community 158 - "IRequest"
+Cohesion: 0.07
+Nodes (36): Error, IRequest, IRequestHandler, CategoryImportBatchErrors, CategoryImportBatchNotFound, CategoryImportBatchNotInReview, IdempotencyConflict, GoodsReceiptErrors (+28 more)
 
 ### Community 159 - "Infrastructure.csproj"
 Cohesion: 0.12
@@ -1202,28 +1191,28 @@ Cohesion: 0.08
 Nodes (25): Anti-Patterns, Array Instead of withEntities, Async Without rxMethod, Decision Framework, DevTools Usage, Direct State Mutation, Entity Lookups, External State Modification (+17 more)
 
 ### Community 164 - "UpdateLocationCommand"
-Cohesion: 0.24
-Nodes (14): Guid, IReadOnlyCollection, Result, UpdateLocationCommand, Id, Name, ParentLocationId, Tags (+6 more)
+Cohesion: 0.12
+Nodes (26): Guid, IReadOnlyCollection, Result, UpdateLocationCommand, Id, Name, ParentLocationId, Tags (+18 more)
 
 ### Community 165 - "skestock.slnx"
 Cohesion: 0.17
 Nodes (10): Client, Mediator.Abstractions, Microsoft.NET.Sdk, coverlet.collector, Microsoft.NET.Test.Sdk, nunit, NUnit3TestAdapter, NUnit.Analyzers (+2 more)
 
-### Community 166 - "CreateLocationCommand"
+### Community 166 - "ValidationException"
 Cohesion: 0.19
-Nodes (12): Guid, IReadOnlyCollection, Result, CreateLocationCommand, Name, ParentLocationId, Tags, Type (+4 more)
+Nodes (11): IDictionary, ValidationException, Errors, Category, SetUp, Task, Test, CreateItemCommandTests (+3 more)
 
 ### Community 167 - ".ProcessMessageAsync"
 Cohesion: 0.21
 Nodes (11): CancellationToken, DbUpdateException, ILogger, ISender, IServiceScopeFactory, QueueClient, QueueMessage, QueueServiceClient (+3 more)
 
 ### Community 168 - "BaseEntity"
-Cohesion: 0.18
+Cohesion: 0.16
 Nodes (8): INotification, Guid, IReadOnlyCollection, List, BaseEntity, DomainEvents, Id, BaseEvent
 
 ### Community 169 - ".CreateContextAsync"
 Cohesion: 0.13
-Nodes (19): CancellationToken, Result, StockBatchListItemDto, ValueTask, CreateStockBatchCommandHandler, Class, Context, Guid (+11 more)
+Nodes (18): CancellationToken, Result, StockBatchListItemDto, ValueTask, CreateStockBatchCommandHandler, Context, Guid, Item (+10 more)
 
 ### Community 170 - "UpdateCategoryCommand"
 Cohesion: 0.25
@@ -1233,33 +1222,33 @@ Nodes (13): Guid, IReadOnlyCollection, Result, UpdateCategoryCommand, Icon, Id, 
 Cohesion: 0.09
 Nodes (17): Example: Testing with a `MatButtonHarness`, Key Concepts, Testing with Component Harnesses, Using a Harness in a Unit Test, Why Use Harnesses?, Custom & Enterprise Testing Tools, End-to-End (E2E) Testing, Setting Up and Running E2E Tests (+9 more)
 
-### Community 172 - "AdjustStockCommandHandlerTests.cs"
-Cohesion: 0.13
-Nodes (7): skestock.Application.Features.Stock.Commands.AdjustStock, skestock.Domain.Events.Stock, skestock.Application.Features.Stock.Models, skestock.Application.UnitTests.Features.Stock.Commands.AdjustStock, skestock.Application.FunctionalTests.Features.Stock.Queries.GetClassLocationStock, skestock.Application.Features.Stock.Queries.GetClassLocationStock, skestock.Application.UnitTests.Features.Stock.Queries.GetClassLocationStock
+### Community 172 - "skestock.Domain.Enums"
+Cohesion: 0.04
+Nodes (18): skestock.Application.UnitTests.Features.Categories.Queries.GetCategoryImportBatchById, skestock.Application.Features.Stock.Commands.AdjustStock, skestock.Domain.Events.Stock, skestock.Application.Features.Categories.Commands.ProcessCategoryImportBatch, skestock.Application.Features.Stock.Models, skestock.Application.UnitTests.Features.Stock.Commands.AdjustStock, skestock.Application.UnitTests.Features.Categories.Commands.CreateCategoryImportBatch, skestock.Application.Features.Categories.Commands.CreateCategoryImportBatch (+10 more)
 
-### Community 173 - "FakeBlobStorageService"
-Cohesion: 0.24
-Nodes (7): DeleteDto, BlobInfo, CancellationToken, Stream, Task, Uri, FakeBlobStorageService
+### Community 173 - "IBlobStorageService"
+Cohesion: 0.16
+Nodes (12): DeleteDto, CancellationToken, Stream, Task, Uri, IBlobStorageService, BlobInfo, CancellationToken (+4 more)
 
-### Community 174 - ".ExtractAsync_SendsSchemaFactoryPromptAndDeserializesCategoryResult"
-Cohesion: 0.23
-Nodes (12): JsonArray, CancellationToken, Func, HttpRequestMessage, HttpResponseMessage, JsonObject, Task, Test (+4 more)
+### Community 174 - "OpenAiDocumentExtractionClient"
+Cohesion: 0.07
+Nodes (39): HttpClient, HttpMessageHandler, IServiceProvider, JsonArray, CancellationToken, JsonObject, Task, IExtractionSchemaFactory (+31 more)
 
 ### Community 175 - ".SeedPrerequisitesAsync"
 Cohesion: 0.29
 Nodes (8): Category, Item, Location, PerishableItem, SetUp, Task, Test, CreateStockBatchCommandTests
 
-### Community 176 - ".SetBlobCorsRules"
-Cohesion: 0.20
-Nodes (7): AzureStorageResource, BlobCorsRule, BlobService, skestock.AppHost, IResourceBuilder, IEnumerable, AspireExtensions
+### Community 176 - "AzureBlobCorsInitializer"
+Cohesion: 0.11
+Nodes (14): AzureStorageResource, BlobCorsRule, BlobService, skestock.AppHost, IHostedService, IResourceBuilder, IEnumerable, AspireExtensions (+6 more)
 
 ### Community 177 - ".GetClassGoodsReceiptCosts"
 Cohesion: 0.17
 Nodes (15): GetClassGoodsReceiptCostsRequest, GetClassStockByCategoryRequest, IEndpointGroup, CancellationToken, EndpointDescription, EndpointSummary, Guid, ISender (+7 more)
 
-### Community 178 - ".CreateContextAsync"
-Cohesion: 0.19
-Nodes (18): CancellationToken, GoodsReceiptDto, Result, ValueTask, CreateGoodsReceiptCommandHandler, Context, Guid, Item (+10 more)
+### Community 178 - "StockTransaction"
+Cohesion: 0.09
+Nodes (21): DateTime, Guid, StockTransaction, Batch, BatchId, Class, ClassId, CreatedAt (+13 more)
 
 ### Community 179 - "GetFileDownloadQuery"
 Cohesion: 0.13
@@ -1270,24 +1259,24 @@ Cohesion: 0.20
 Nodes (9): CancellationToken, HybridCache, IReadOnlyCollection, ValueTask, GoodsReceiptImportCompletedEventHandler, Guid, GoodsReceiptImportCompletedEvent, ImportId (+1 more)
 
 ### Community 181 - "StockBatchSortConfiguration"
-Cohesion: 0.20
-Nodes (8): dynamic, Expression, Func, IReadOnlyDictionary, List, StockBatchSortConfiguration, AllowedSortKeys, DefaultSort
+Cohesion: 0.13
+Nodes (11): dynamic, Expression, Func, dynamic, Expression, Func, IReadOnlyDictionary, List (+3 more)
 
 ### Community 182 - ".Handle"
 Cohesion: 0.30
 Nodes (10): CancellationToken, ItemDto, Result, ValueTask, CreateItemCommandHandler, Category, Context, Task (+2 more)
 
-### Community 183 - ".SeedAsync"
-Cohesion: 0.39
-Nodes (6): Category, Func, Item, Task, Test, GetAllItemsHandlerTests
+### Community 183 - "CategoryImportBatchFileDto"
+Cohesion: 0.22
+Nodes (9): Guid, CategoryImportBatchFileDto, BlobPath, ContentType, FileMetadataId, OriginalName, SizeBytes, SortOrder (+1 more)
 
-### Community 184 - "GetClassLocationStockQuery"
-Cohesion: 0.17
-Nodes (12): Guid, IReadOnlyCollection, List, Result, TimeSpan, GetClassLocationStockQuery, BypassCache, ClassId (+4 more)
+### Community 184 - ".ResolveNewItemsAsync"
+Cohesion: 0.27
+Nodes (8): CancellationToken, Category, Dictionary, GoodsReceiptDto, Guid, Item, List, Task
 
-### Community 185 - "ItemTestDbContext"
-Cohesion: 0.09
-Nodes (23): DbContextOptions, DbSet, FileMetadata, ModelBuilder, ItemTestDbContext, Categories, CategoryImportBatches, CategoryImportBatchFiles (+15 more)
+### Community 185 - "GoodsReceipt"
+Cohesion: 0.05
+Nodes (37): DateTime, Guid, ICollection, GoodsReceipt, Batches, Class, ClassId, Note (+29 more)
 
 ### Community 186 - "FlexibleDateOnlyJsonConverter"
 Cohesion: 0.19
@@ -1297,17 +1286,17 @@ Nodes (9): skestock.Shared.Helpers, JsonConverter, StringHelpers, DateOnly, Json
 Cohesion: 0.14
 Nodes (7): Assembly, skestock.Web.Infrastructure, RouteGroupBuilder, IEndpointGroup, RoutePrefix, WebApplication, WebApplicationExtensions
 
-### Community 188 - ".Handle"
-Cohesion: 0.29
-Nodes (9): CancellationToken, CategoryDto, Result, ValueTask, CreateCategoryCommandHandler, CategoryIcon, Task, Test (+1 more)
+### Community 188 - "CategoryMutationDto"
+Cohesion: 0.19
+Nodes (13): CancellationToken, CategoryMutationDto, Result, ValueTask, CreateCategoryCommandHandler, Guid, CategoryMutationDto, Icon (+5 more)
 
 ### Community 189 - "Client/.github/skills/angular-developer/SKILL.md"
 Cohesion: 0.09
 Nodes (17): Example: Testing with a `MatButtonHarness`, Key Concepts, Testing with Component Harnesses, Using a Harness in a Unit Test, Why Use Harnesses?, Custom & Enterprise Testing Tools, End-to-End (E2E) Testing, Setting Up and Running E2E Tests (+9 more)
 
-### Community 190 - "IUser"
-Cohesion: 0.06
-Nodes (35): Guid, List, IUser, Id, Roles, Guid, List, Result (+27 more)
+### Community 190 - "ItemImportBatchDto"
+Cohesion: 0.11
+Nodes (20): CancellationToken, Guid, ItemImportBatchDto, Result, Task, ValueTask, CreateItemImportBatchCommandHandler, DateTime (+12 more)
 
 ### Community 191 - "NgRx SignalStore - Core Examples"
 Cohesion: 0.10
@@ -1319,7 +1308,7 @@ Nodes (21): Bad Example - Direct Mutation and Magic Numbers, Bad Example - FormG
 
 ### Community 193 - "ItemImportBatch"
 Cohesion: 0.04
-Nodes (51): DateTime, Guid, ICollection, IReadOnlyCollection, ItemImportBatch, AttemptCount, ClientRequestId, ConcurrencyStamp (+43 more)
+Nodes (44): DateTime, Guid, ICollection, IReadOnlyCollection, ItemImportBatch, AttemptCount, ClientRequestId, ConcurrencyStamp (+36 more)
 
 ### Community 194 - ".ToProblemHttpResult"
 Cohesion: 0.27
@@ -1338,8 +1327,8 @@ Cohesion: 0.10
 Nodes (20): Authentication, Configure your services, Console logs, Copilot integration, Dashboard — Complete Reference, Dashboard configuration, Dashboard URL, Distributed traces (+12 more)
 
 ### Community 198 - ".IsPermanent"
-Cohesion: 0.18
-Nodes (9): DocumentExtractionException, TransientExtractionException, UnprocessableDocumentException, Exception, Exception, Test, TestCase, Type (+1 more)
+Cohesion: 0.27
+Nodes (7): Exception, MessageFailureClassifier, Exception, Test, TestCase, Type, MessageFailureClassifierTests
 
 ### Community 199 - "ItemExtractionResult"
 Cohesion: 0.12
@@ -1370,28 +1359,28 @@ Cohesion: 0.11
 Nodes (19): `aspire add`, `aspire cache`, `aspire config`, `aspire deploy` (Preview), `aspire do` (Preview), `aspire init`, `aspire mcp`, `aspire mcp init` (+11 more)
 
 ### Community 206 - "skestock.Domain.Common"
-Cohesion: 0.13
-Nodes (9): skestock.Domain.Common, skestock.Infrastructure.Data.Interceptors, DateTimeOffset, Guid, IKeysetEntity, CreatedDate, Id, EntityEntry (+1 more)
+Cohesion: 0.10
+Nodes (11): skestock.Domain.Common, skestock.Infrastructure.Data.Interceptors, DateTimeOffset, Guid, IKeysetEntity, CreatedDate, Id, IEnumerable (+3 more)
 
 ### Community 207 - "CategoryIconDto"
-Cohesion: 0.14
-Nodes (14): CategoryIconDto, FileName, Name, Path, List, CategoryRequests, CreateCategoryRequest, Icon (+6 more)
+Cohesion: 0.18
+Nodes (11): CategoryIconDto, FileName, Name, Path, CategoryRequests, CreateCategoryRequest, Icon, Name (+3 more)
 
-### Community 208 - "AzureBlobStorageService"
-Cohesion: 0.31
-Nodes (7): BlobServiceClient, CancellationToken, IConfiguration, Stream, Task, Uri, AzureBlobStorageService
+### Community 208 - ".GetClassLocationStock"
+Cohesion: 0.19
+Nodes (13): AdjustStockRequest, GetClassLocationStockRequest, CancellationToken, EndpointDescription, EndpointSummary, Guid, ISender, Ok (+5 more)
 
 ### Community 209 - "GetItemByIdQuery"
-Cohesion: 0.16
-Nodes (18): CancellationToken, ItemDto, Result, ValueTask, GetItemByIdHandler, Guid, Result, GetItemByIdQuery (+10 more)
+Cohesion: 0.17
+Nodes (16): CancellationToken, ItemDto, Result, ValueTask, GetItemByIdHandler, Guid, Result, GetItemByIdQuery (+8 more)
 
 ### Community 210 - "MCP Server — Complete Reference"
 Cohesion: 0.11
 Nodes (19): AppHost management tools, Debugging with AI assistance, Excluding Resources from MCP, Fallback for documentation (13.1 users), Integration tools, Limitations, MCP Server — Complete Reference, MCP Tools (+11 more)
 
 ### Community 211 - "skestock.Application.Common.Interfaces"
-Cohesion: 0.06
-Nodes (23): skestock.Application.UnitTests.Features.StockBatches.Commands.CreateStockBatch, skestock.Web.Services, skestock.Domain.Events.Categories, skestock.Domain.Events.GoodsReceipt, skestock.Domain.Events.Items, skestock.Application.Features.StockBatches.Commands.CreateStockBatch, skestock.Application.Features.Stock, skestock.Application.Features.Items.EventHandlers (+15 more)
+Cohesion: 0.12
+Nodes (14): skestock.Domain.Events.Categories, skestock.Domain.Events.Items, skestock.Application.Features.Stock, skestock.Application.Features.Items.EventHandlers, skestock.Application.Features.Categories.EventHandlers, skestock.Application.Features.StockBatches.EventHandlers, skestock.Application.Common.Interfaces, skestock.Application.Features.GoodsReceipts.EventHandlers (+6 more)
 
 ### Community 212 - "Web.csproj"
 Cohesion: 0.20
@@ -1401,9 +1390,9 @@ Nodes (9): Azure.Extensions.AspNetCore.Configuration.Secrets, Microsoft.AspNetCo
 Cohesion: 0.11
 Nodes (19): Good Example - Hybrid Approach During Migration, Migration Checklist, NgRx SignalStore - Migration Examples, Pattern 1: Migrating Actions to Methods, Pattern 2: Migrating Reducers to patchState, Pattern 3: Migrating Selectors to withComputed, Pattern 4: Migrating Effects to rxMethod, Pattern 5: Migrating Entity State (+11 more)
 
-### Community 214 - "IRequest"
-Cohesion: 0.22
-Nodes (10): IRequest, CancellationToken, GoodsReceiptDto, Result, ValueTask, GetGoodsReceiptByIdHandler, Guid, Result (+2 more)
+### Community 214 - ".GetAllStockBatches"
+Cohesion: 0.18
+Nodes (13): CreateStockBatchRequest, GetAllStockBatchesRequest, CancellationToken, Created, EndpointDescription, EndpointSummary, ISender, Ok (+5 more)
 
 ### Community 215 - "GoodsReceiptImportReviewDto"
 Cohesion: 0.20
@@ -1417,17 +1406,17 @@ Nodes (19): `aspire add`, `aspire cache`, `aspire config`, `aspire deploy` (Prev
 Cohesion: 0.11
 Nodes (19): AppHost management tools, Debugging with AI assistance, Excluding Resources from MCP, Fallback for documentation (13.1 users), Integration tools, Limitations, MCP Server — Complete Reference, MCP Tools (+11 more)
 
-### Community 218 - "IStockDocumentExtractionService"
-Cohesion: 0.20
-Nodes (8): CancellationToken, Stream, Task, IStockDocumentExtractionService, CancellationToken, Stream, Task, OpenAiStockDocumentExtractionService
+### Community 218 - "TransientExtractionException"
+Cohesion: 0.17
+Nodes (7): Exception, DocumentExtractionException, ForbiddenAccessException, Guid, ImportBatchProcessingInProgressException, TransientExtractionException, UnprocessableDocumentException
 
-### Community 219 - ".GetClassLocationStock"
-Cohesion: 0.19
-Nodes (13): AdjustStockRequest, GetClassLocationStockRequest, CancellationToken, EndpointDescription, EndpointSummary, Guid, ISender, Ok (+5 more)
+### Community 219 - "CategoryImportBatchReviewDto"
+Cohesion: 0.10
+Nodes (21): DateTime, Guid, List, CategoryImportBatchReviewDto, AttemptCount, ClientRequestId, ErrorMessage, Files (+13 more)
 
-### Community 220 - ".TryParseBoolean"
-Cohesion: 0.30
-Nodes (3): Test, TestCase, FilterValueParserTests
+### Community 220 - ".ConfirmCategoryImportBatch"
+Cohesion: 0.25
+Nodes (14): ConfirmCategoryImportBatchRequest, CreateCategoryImportBatchRequest, GetAllCategoryImportBatchesRequest, CancellationToken, EndpointDescription, EndpointSummary, Guid, ISender (+6 more)
 
 ### Community 221 - "NgRx SignalStore - Migration Examples"
 Cohesion: 0.11
@@ -1449,17 +1438,17 @@ Nodes (8): CancellationToken, Description, Dictionary, OpenApiOperation, OpenApi
 Cohesion: 0.11
 Nodes (17): 10. Integration with Signal Forms, 1. Accordion, 2. Listbox, 3. Combobox, Select, and Multiselect, 4. Menu and Menubar, 5. Tabs, 6. Toolbar, 7. Tree (+9 more)
 
-### Community 226 - "AzureBlobCorsInitializer"
-Cohesion: 0.24
-Nodes (7): IHostedService, BlobServiceClient, CancellationToken, IConfiguration, ILogger, Task, AzureBlobCorsInitializer
+### Community 226 - "CategoryDto"
+Cohesion: 0.12
+Nodes (17): DateTimeOffset, Guid, CategoryDto, CreatedByName, CreatedDate, Icon, Id, ItemCount (+9 more)
 
 ### Community 227 - ".CreateContextAsync"
 Cohesion: 0.28
 Nodes (11): CancellationToken, Task, ValidationContext, CreateStockBatchCommandValidator, Context, Item, Location, PerishableItem (+3 more)
 
-### Community 228 - "FileStatus"
-Cohesion: 0.20
-Nodes (8): DateTimeOffset, Guid, FileMetadataDto, FileStatus, Completed, Deleted, Failed, Pending
+### Community 228 - "ItemImportBatchConfirmationResultDto"
+Cohesion: 0.11
+Nodes (18): Guid, List, ItemImportBatchConfirmationResultDto, BatchId, Items, Status, ItemImportBatchResultItemDto, CategoryCreated (+10 more)
 
 ### Community 229 - ".TransformAsync"
 Cohesion: 0.22
@@ -1477,9 +1466,9 @@ Nodes (4): TimeSpan, SlidingExpirationHelper, Test, SlidingExpirationHelperTests
 Cohesion: 0.11
 Nodes (18): Bad Example - async/await Without Cancellation, Good Example - Connecting Signal to rxMethod, Good Example - Coordinated Effects, Good Example - Different Input Types, Good Example - Polling with Stop Capability, Good Example - Retry Logic with exponentialBackoff, Good Example - rxMethod with switchMap, Good Example - Using signalMethod Without RxJS (+10 more)
 
-### Community 233 - "ICacheInvalidation"
-Cohesion: 0.11
-Nodes (19): IReadOnlyCollection, ICacheInvalidation, Tags, Guid, IReadOnlyCollection, List, Result, ConfirmItemImportBatchCommand (+11 more)
+### Community 233 - "ConfirmItemImportBatchCommand"
+Cohesion: 0.13
+Nodes (16): Guid, IReadOnlyCollection, List, Result, ConfirmItemImportBatchCommand, BatchId, Items, Tags (+8 more)
 
 ### Community 234 - "GuidV7ValueGenerator"
 Cohesion: 0.25
@@ -1505,9 +1494,9 @@ Nodes (8): CancellationToken, HybridCache, IReadOnlyCollection, ValueTask, Goods
 Cohesion: 0.20
 Nodes (9): CancellationToken, HybridCache, IReadOnlyCollection, ValueTask, CategoryImportBatchCompletedEventHandler, Guid, CategoryImportBatchCompletedEvent, BatchId (+1 more)
 
-### Community 240 - ".Handle"
-Cohesion: 0.34
-Nodes (9): CancellationToken, LocationDto, Result, ValueTask, UpdateLocationCommandHandler, Location, Task, Test (+1 more)
+### Community 240 - ".Handle_WithValidData_PersistsProcessingImportAndReturnsDto"
+Cohesion: 0.38
+Nodes (5): FileMetadata, SetUp, Task, Test, CreateGoodsReceiptImportCommandTests
 
 ### Community 241 - "Angular Aria"
 Cohesion: 0.11
@@ -1521,9 +1510,9 @@ Nodes (6): IOpenApiOperationTransformer, CancellationToken, OpenApiOperation, Op
 Cohesion: 0.11
 Nodes (18): Bad Example - async/await Without Cancellation, Good Example - Connecting Signal to rxMethod, Good Example - Coordinated Effects, Good Example - Different Input Types, Good Example - Polling with Stop Capability, Good Example - Retry Logic with exponentialBackoff, Good Example - rxMethod with switchMap, Good Example - Using signalMethod Without RxJS (+10 more)
 
-### Community 244 - ".ExtractAsync"
-Cohesion: 0.17
-Nodes (10): CancellationToken, IReadOnlyList, Stream, Task, IItemDocumentExtractionService, CancellationToken, IReadOnlyList, Stream (+2 more)
+### Community 244 - ".AddInfrastructureServices"
+Cohesion: 0.06
+Nodes (31): ISaveChangesInterceptor, OpenAiApiSettings, ApiKey, Model, CancellationToken, IReadOnlyList, Stream, Task (+23 more)
 
 ### Community 245 - "BackgroundService"
 Cohesion: 0.25
@@ -1538,24 +1527,24 @@ Cohesion: 0.25
 Nodes (7): Guid, ConfirmUploadRequest, FileId, RequestUploadRequest, ContentType, FileName, StorageRequests
 
 ### Community 249 - "ItemImportBatchReviewDto"
-Cohesion: 0.08
-Nodes (30): DateTimeOffset, ImportBatchHistoryDto, Attempt, CreatedAtUtc, Message, Status, DateTime, Guid (+22 more)
+Cohesion: 0.09
+Nodes (24): DateTime, Guid, List, ItemImportBatchReviewDto, AttemptCount, ClientRequestId, ErrorMessage, Files (+16 more)
 
-### Community 250 - "CreateCategoryImportBatchCommand"
-Cohesion: 0.08
-Nodes (34): Guid, List, Result, CreateCategoryImportBatchCommand, ClientRequestId, FileMetadataIds, CancellationToken, CategoryImportBatchDto (+26 more)
+### Community 250 - ".Handle"
+Cohesion: 0.13
+Nodes (22): CancellationToken, CategoryImportBatchMutationDto, Result, ValueTask, CreateCategoryImportBatchCommandHandler, Guid, CategoryImportBatchMutationDto, Id (+14 more)
 
 ### Community 251 - "Worker"
 Cohesion: 0.25
 Nodes (7): DOTNET_ENVIRONMENT, profiles, Worker, $schema, commandName, dotnetRunMessages, environmentVariables
 
-### Community 252 - ".ExtractAsync_DeserializesItemFields"
-Cohesion: 0.20
-Nodes (13): HttpMessageHandler, CancellationToken, Func, HttpRequestMessage, HttpResponseMessage, JsonObject, Task, Test (+5 more)
+### Community 252 - ".Handle_WithDisabledItem_SetsIsActiveTrue"
+Cohesion: 0.35
+Nodes (5): Category, SetUp, Task, Test, EnableItemCommandTests
 
 ### Community 253 - ".SaveChangesAsync"
-Cohesion: 0.10
-Nodes (21): CancellationToken, Task, FileMetadata, Result, RequestUploadCommand, ContentType, FileName, CancellationToken (+13 more)
+Cohesion: 0.14
+Nodes (15): CancellationToken, Task, FileMetadata, Result, RequestUploadCommand, ContentType, FileName, CancellationToken (+7 more)
 
 ### Community 254 - "FunctionalTestSetup"
 Cohesion: 0.13
@@ -1609,9 +1598,9 @@ Nodes (15): Azure App Service, Azure Container Apps, Azure DevOps example, CI/CD
 Cohesion: 0.50
 Nodes (3): DOCKER_HOST, DOTNET_ASPIRE_CONTAINER_RUNTIME, run-functional-tests.sh script
 
-### Community 268 - "StockTransaction"
-Cohesion: 0.05
-Nodes (42): DateTime, Guid, StockTransaction, Batch, BatchId, Class, ClassId, CreatedAt (+34 more)
+### Community 268 - "UserProfile"
+Cohesion: 0.06
+Nodes (32): Guid, ICollection, UserProfile, FirstName, FullName, GoodsReceipts, IdentityId, LastName (+24 more)
 
 ### Community 269 - "Aspire — Polyglot Distributed-App Orchestration"
 Cohesion: 0.12
@@ -1629,9 +1618,9 @@ Nodes (14): CategoryStockSummaryDto, CategoryId, CategoryName, ItemCount, Quanti
 Cohesion: 0.13
 Nodes (15): Good Example - Avoiding onInit Side Effects in Tests, Good Example - Mocking HttpClient in Store Tests, Good Example - Testing Async Effects, Good Example - Testing Component with Store, Good Example - Testing Store Methods, Good Example - Testing withEntities Store, Good Example - Using unprotected for State Access (v19.1+), NgRx SignalStore - Testing Examples (+7 more)
 
-### Community 274 - "IExtractionSchemaFactory"
-Cohesion: 0.16
-Nodes (10): CancellationToken, JsonObject, Task, IExtractionSchemaFactory, Prompt, CancellationToken, JsonObject, Task (+2 more)
+### Community 274 - "CreateSchoolClassCommandTests"
+Cohesion: 0.36
+Nodes (4): SetUp, Task, Test, CreateSchoolClassCommandTests
 
 ### Community 277 - "Community (CommunityToolkit/Aspire)"
 Cohesion: 0.13
@@ -1677,13 +1666,13 @@ Nodes (12): Acquire Codebase Knowledge, Anti-Patterns, Bundled Assets, Enhanced 
 Cohesion: 0.24
 Nodes (5): Categories at a glance, Discovering integrations (MCP tools), Integration pattern, Integrations Catalog, Workflow
 
-### Community 289 - ".Handle"
-Cohesion: 0.30
-Nodes (9): CancellationToken, LocationDto, Result, ValueTask, CreateLocationCommandHandler, Location, Task, Test (+1 more)
+### Community 289 - "GetCategoryByIdQueryTests"
+Cohesion: 0.39
+Nodes (4): SetUp, Task, Test, GetCategoryByIdQueryTests
 
-### Community 290 - ".AddInfrastructureServices"
-Cohesion: 0.21
-Nodes (8): ISaveChangesInterceptor, OpenAiApiSettings, ApiKey, Model, Guid, IdentityRole, IHostApplicationBuilder, DependencyInjection
+### Community 290 - "GetSchoolClassByIdQueryTests"
+Cohesion: 0.39
+Nodes (4): SetUp, Task, Test, GetSchoolClassByIdQueryTests
 
 ### Community 291 - "Acquire Codebase Knowledge"
 Cohesion: 0.17
@@ -1693,13 +1682,13 @@ Nodes (12): Acquire Codebase Knowledge, Anti-Patterns, Bundled Assets, Enhanced 
 Cohesion: 0.24
 Nodes (5): Categories at a glance, Discovering integrations (MCP tools), Integration pattern, Integrations Catalog, Workflow
 
-### Community 293 - ".CategoryImportBatchExistsAsync"
-Cohesion: 0.40
-Nodes (4): CancellationToken, Guid, Task, ProcessCategoryImportBatchCommandValidator
+### Community 293 - "CategoryImportBatchConfirmationResultDto"
+Cohesion: 0.13
+Nodes (15): Guid, List, CategoryImportBatchConfirmationResultDto, BatchId, Categories, Status, CategoryImportBatchResultCategoryDto, Created (+7 more)
 
-### Community 294 - ".CreateContextAsync"
-Cohesion: 0.34
-Nodes (8): CreateGoodsReceiptImportCommandValidator, Context, File, FileMetadata, GoodsReceiptImportTestDbContext, Task, Test, CreateGoodsReceiptImportCommandValidatorTests
+### Community 294 - "CreateGoodsReceiptImportCommand"
+Cohesion: 0.18
+Nodes (16): Guid, Result, CreateGoodsReceiptImportCommand, ClassId, FileMetadataId, CancellationToken, Guid, Task (+8 more)
 
 ### Community 295 - "Core Sections (Required)"
 Cohesion: 0.18
@@ -1837,9 +1826,9 @@ Nodes (9): Angular CLI MCP Server, Antigravity IDE, Available Tools (Default), C
 Cohesion: 0.20
 Nodes (9): Building the Form Template, Core Directives, Form and Control State, Resetting the Form, Setup, Submitting the Form, Template-Driven Forms, Two-Way Binding with `[(ngModel)]` (+1 more)
 
-### Community 329 - ".GetPropertyExpression"
-Cohesion: 0.50
-Nodes (3): dynamic, Expression, Func
+### Community 329 - "ItemImportBatchSortConfiguration"
+Cohesion: 0.20
+Nodes (8): dynamic, Expression, Func, IReadOnlyDictionary, List, ItemImportBatchSortConfiguration, AllowedSortKeys, DefaultSort
 
 ### Community 330 - "graphify reference: extra exports and benchmark"
 Cohesion: 0.22
@@ -1921,9 +1910,9 @@ Nodes (8): Best Practices, Configuration Options, Decorator-based Inputs (@Input
 Cohesion: 0.22
 Nodes (8): Accessing Controls, Core Classes, Manual State Management, Reactive Forms, Setup, Template Binding, Unified Change Events, Updating Values
 
-### Community 350 - "PerformanceBehaviour"
-Cohesion: 0.08
-Nodes (19): IPipelineBehavior, IValidator, AuthorizationBehaviour, CancellationToken, ILogger, MessageHandlerDelegate, ValueTask, PerformanceBehaviour (+11 more)
+### Community 350 - "skestock.Application.Common.Behaviours"
+Cohesion: 0.06
+Nodes (23): skestock.Application.UnitTests.Common.Behaviours, skestock.Application.Common.Behaviours, IPipelineBehavior, IValidator, AuthorizationBehaviour, CancellationToken, ILogger, MessageHandlerDelegate (+15 more)
 
 ### Community 351 - "Manual Setup (Tailwind v4)"
 Cohesion: 0.22
@@ -2048,10 +2037,6 @@ Nodes (7): 1. Check the dashboard first, 2. Check environment variables, 3. Read
 ### Community 383 - "README.md"
 Cohesion: 0.29
 Nodes (6): Build, Code Scaffolding, Code Styles & Formatting, Help, Run, Test
-
-### Community 384 - "OpenAiDocumentExtractionClient"
-Cohesion: 0.26
-Nodes (9): HttpClient, IServiceProvider, CancellationToken, IOptions, IReadOnlyList, JsonObject, Stream, Task (+1 more)
 
 ### Community 385 - "Defining Dependency Providers"
 Cohesion: 0.29
@@ -2185,9 +2170,9 @@ Nodes (3): For --cluster-only, For --update (incremental re-extraction), graphif
 Cohesion: 0.20
 Nodes (10): GoodsReceiptImportReviewLineDto, Category, IsPerishable, MatchedItem, Name, ProductCode, Quantity, RawItemText (+2 more)
 
-### Community 429 - "CreateStockBatchRequest"
-Cohesion: 0.14
-Nodes (14): DateOnly, Guid, List, CreateStockBatchRequest, ExpiryDate, ItemId, LocationId, Quantity (+6 more)
+### Community 429 - "BasePaginationFilter"
+Cohesion: 0.06
+Nodes (34): List, BasePaginationFilter, Cursor, PageSize, SearchTerm, Sort, PaginationConstants, Guid (+26 more)
 
 ### Community 430 - "StockItemDto"
 Cohesion: 0.11
@@ -2210,20 +2195,16 @@ Cohesion: 0.42
 Nodes (4): GetClassStockByCategoryHandler, Task, Test, GetClassStockByCategoryHandlerTests
 
 ### Community 435 - "ConfirmCategoryImportBatchCommand"
-Cohesion: 0.06
-Nodes (55): ConfirmCategoryImportBatchRequest, CreateCategoryImportBatchRequest, GetAllCategoryImportBatchesRequest, Guid, IReadOnlyCollection, List, Result, ConfirmCategoryImportBatchCommand (+47 more)
+Cohesion: 0.13
+Nodes (26): Guid, IReadOnlyCollection, List, Result, ConfirmCategoryImportBatchCommand, BatchId, CategoryNames, Tags (+18 more)
 
 ### Community 436 - "GetAllGoodsReceiptsQuery"
-Cohesion: 0.11
-Nodes (18): IReadOnlyCollection, List, Result, TimeSpan, GetAllGoodsReceiptsQuery, BypassCache, Filters, SlidingExpiration (+10 more)
+Cohesion: 0.08
+Nodes (24): IReadOnlyCollection, TimeSpan, ICacheableQuery, BypassCache, SlidingExpiration, Tags, IReadOnlyCollection, List (+16 more)
 
-### Community 437 - "DisableItemCommandTests"
-Cohesion: 0.35
-Nodes (5): Category, SetUp, Task, Test, DisableItemCommandTests
-
-### Community 438 - "AbstractValidator"
-Cohesion: 0.17
-Nodes (14): AbstractValidator, Guid, Result, GetCategoryByIdQuery, Id, GetCategoryByIdQueryValidator, GetCategoryImportBatchByIdQueryValidator, GetGoodsReceiptByIdQueryValidator (+6 more)
+### Community 438 - "Item"
+Cohesion: 0.12
+Nodes (16): Guid, ICollection, Item, Batches, Category, CategoryId, ClassBalances, Description (+8 more)
 
 ### Community 439 - "CreateLocationRequest"
 Cohesion: 0.17
@@ -2238,20 +2219,12 @@ Cohesion: 0.15
 Nodes (13): DateOnly, Guid, IReadOnlyCollection, Result, CreateStockBatchCommand, ExpiryDate, ItemId, LocationId (+5 more)
 
 ### Community 442 - "INotificationHandler"
-Cohesion: 0.20
-Nodes (9): INotificationHandler, CancellationToken, HybridCache, ValueTask, StockAdjustedEventHandler, Guid, StockAdjustedEvent, ClassId (+1 more)
+Cohesion: 0.15
+Nodes (11): INotificationHandler, CancellationToken, ValueTask, GoodsReceiptImportFailedEventHandler, CancellationToken, HybridCache, ValueTask, StockAdjustedEventHandler (+3 more)
 
 ### Community 443 - ".Handle"
-Cohesion: 0.17
-Nodes (9): Attribute, Exception, CancellationToken, MessageHandlerDelegate, ValueTask, ForbiddenAccessException, AuthorizeAttribute, Policy (+1 more)
-
-### Community 444 - "CategoryIcon"
-Cohesion: 0.40
-Nodes (4): CategoryIcon, FileName, Name, Path
-
-### Community 445 - ".Handle_WithValidData_PersistsProcessingImportAndReturnsDto"
-Cohesion: 0.38
-Nodes (5): FileMetadata, SetUp, Task, Test, CreateGoodsReceiptImportCommandTests
+Cohesion: 0.22
+Nodes (7): Attribute, CancellationToken, MessageHandlerDelegate, ValueTask, AuthorizeAttribute, Policy, Roles
 
 ### Community 446 - "GetClassStockByCategoryQuery"
 Cohesion: 0.17
@@ -2265,17 +2238,17 @@ Nodes (8): CancellationToken, HybridCache, IReadOnlyCollection, ValueTask, ItemC
 Cohesion: 0.25
 Nodes (8): CancellationToken, HybridCache, IReadOnlyCollection, ValueTask, ItemDisabledEventHandler, Item, ItemDisabledEvent, Item
 
-### Community 449 - "UpdateLocationCommandTests"
-Cohesion: 0.35
-Nodes (4): SetUp, Task, Test, UpdateLocationCommandTests
+### Community 449 - "ImportBatchHistoryDto"
+Cohesion: 0.15
+Nodes (12): DateTimeOffset, ImportBatchHistoryDto, Attempt, CreatedAtUtc, Message, Status, ImportBatchHistoryStatus, Completed (+4 more)
 
 ### Community 450 - "ApplicationDbContextInitialiser"
-Cohesion: 0.07
-Nodes (34): Name, Status, UnitPrice, Guid, ICollection, Item, Batches, Category (+26 more)
+Cohesion: 0.12
+Nodes (18): Name, Status, UnitPrice, EndDate, StartDate, Category, DateOnly, Guid (+10 more)
 
 ### Community 451 - "BaseEvent"
-Cohesion: 0.25
-Nodes (8): BaseEvent, CancellationToken, HybridCache, IReadOnlyCollection, ValueTask, CategoryImportBatchCreatedEventHandler, CategoryImportBatchCreatedEvent, Batch
+Cohesion: 0.13
+Nodes (15): BaseEvent, CancellationToken, HybridCache, IReadOnlyCollection, ValueTask, CategoryImportBatchCreatedEventHandler, CancellationToken, HybridCache (+7 more)
 
 ### Community 452 - ".ProcessMessageAsync"
 Cohesion: 0.23
@@ -2285,33 +2258,17 @@ Nodes (11): CancellationToken, DbUpdateException, ILogger, ISender, IServiceScop
 Cohesion: 0.39
 Nodes (4): SetUp, Task, Test, GetLocationByIdQueryTests
 
-### Community 455 - "GoodsReceiptImportFailedEvent"
-Cohesion: 0.29
-Nodes (6): CancellationToken, ValueTask, GoodsReceiptImportFailedEventHandler, Guid, GoodsReceiptImportFailedEvent, ImportId
-
 ### Community 456 - ".ExtractAsync"
-Cohesion: 0.17
+Cohesion: 0.18
 Nodes (10): CancellationToken, IReadOnlyList, Stream, Task, ICategoryDocumentExtractionService, CancellationToken, IReadOnlyList, Stream (+2 more)
 
 ### Community 457 - "SchoolClassSortConfiguration"
 Cohesion: 0.20
 Nodes (8): dynamic, Expression, Func, IReadOnlyDictionary, List, SchoolClassSortConfiguration, AllowedSortKeys, DefaultSort
 
-### Community 458 - "UpdateSchoolClassCommandTests"
-Cohesion: 0.38
-Nodes (4): SetUp, Task, Test, UpdateSchoolClassCommandTests
-
 ### Community 459 - ".AddAsync"
 Cohesion: 0.10
 Nodes (18): TestBase, SetUp, Task, Test, ConfirmCategoryImportBatchCommandTests, Category, SetUp, Task (+10 more)
-
-### Community 460 - "ItemImportBatchCreatedEventHandler"
-Cohesion: 0.29
-Nodes (7): CancellationToken, HybridCache, IReadOnlyCollection, ValueTask, ItemImportBatchCreatedEventHandler, ItemImportBatchCreatedEvent, Batch
-
-### Community 461 - "GoodsReceiptImportCreatedEventHandler"
-Cohesion: 0.29
-Nodes (7): CancellationToken, HybridCache, IReadOnlyCollection, ValueTask, GoodsReceiptImportCreatedEventHandler, GoodsReceiptImportCreatedEvent, Import
 
 ### Community 462 - "GoodsReceiptLineItem"
 Cohesion: 0.18
@@ -2341,21 +2298,17 @@ Nodes (5): GetClassGoodsReceiptCostsHandler, DateTime, Task, Test, GetClassGoods
 Cohesion: 0.33
 Nodes (5): Cloudflare Access SSH, Fedora deployment, Fedora prerequisites, GitHub production Environment, Rollback
 
-### Community 469 - "GetSchoolClassByIdQueryTests"
-Cohesion: 0.39
-Nodes (4): SetUp, Task, Test, GetSchoolClassByIdQueryTests
-
 ### Community 470 - "ItemUpdatedEventHandler"
 Cohesion: 0.25
 Nodes (8): CancellationToken, HybridCache, IReadOnlyCollection, ValueTask, ItemUpdatedEventHandler, Item, ItemUpdatedEvent, Item
 
-### Community 472 - "GetCategoryByIdQueryTests"
-Cohesion: 0.39
-Nodes (4): SetUp, Task, Test, GetCategoryByIdQueryTests
+### Community 471 - "CreateItemImportBatchCommand"
+Cohesion: 0.20
+Nodes (10): Guid, List, Result, CreateItemImportBatchCommand, ClientRequestId, FileMetadataIds, CancellationToken, Task (+2 more)
 
-### Community 473 - "FilterOperator"
-Cohesion: 0.22
-Nodes (8): FilterOperator, Between, Contains, Equals, GreaterThan, In, LessThan, NotEquals
+### Community 473 - "CategorySortConfiguration"
+Cohesion: 0.20
+Nodes (8): dynamic, Expression, Func, IReadOnlyDictionary, List, CategorySortConfiguration, AllowedSortKeys, DefaultSort
 
 ### Community 474 - "UpdateCategoryCommandTests"
 Cohesion: 0.35
@@ -2365,10 +2318,6 @@ Nodes (4): SetUp, Task, Test, UpdateCategoryCommandTests
 Cohesion: 0.25
 Nodes (8): CancellationToken, JsonObject, Task, CategoryExtractionSchemaFactory, Prompt, Task, Test, CategoryExtractionSchemaFactoryTests
 
-### Community 476 - "GoodsReceiptImportDto"
-Cohesion: 0.22
-Nodes (9): DateTime, Guid, GoodsReceiptImportDto, BlobPath, ClassId, FileMetadataId, Id, Status (+1 more)
-
 ### Community 477 - "GetAllLocationsQuery"
 Cohesion: 0.14
 Nodes (16): IReadOnlyCollection, List, Result, TimeSpan, GetAllLocationsQuery, BypassCache, Filters, SlidingExpiration (+8 more)
@@ -2377,21 +2326,9 @@ Nodes (16): IReadOnlyCollection, List, Result, TimeSpan, GetAllLocationsQuery, B
 Cohesion: 0.29
 Nodes (6): DateOnly, List, GoodsReceiptExtractionResult, LineItems, ReceivedAt, SupplierReference
 
-### Community 479 - "ICacheableQuery"
-Cohesion: 0.25
-Nodes (6): IReadOnlyCollection, TimeSpan, ICacheableQuery, BypassCache, SlidingExpiration, Tags
-
-### Community 480 - "skestock.Domain.Enums"
-Cohesion: 0.04
-Nodes (21): skestock.Application.UnitTests.Features.Categories.Queries.GetCategoryImportBatchById, skestock.Application.UnitTests.Features.Categories.Commands.CreateCategory, skestock.Application.Features.Categories.Commands.ProcessCategoryImportBatch, skestock.Application.Features.Categories.Commands.CreateCategory, skestock.Application.UnitTests.Features.Categories.Commands.CreateCategoryImportBatch, skestock.Application.Features.Categories.Commands.CreateCategoryImportBatch, skestock.Application.UnitTests.Features.Categories.Commands.ConfirmCategoryImportBatch, skestock.Application.Features.Categories.Queries.GetCategoryImportBatchById (+13 more)
-
-### Community 482 - ".Handle_WithDisabledItem_SetsIsActiveTrue"
-Cohesion: 0.35
-Nodes (5): Category, SetUp, Task, Test, EnableItemCommandTests
-
 ### Community 483 - "skestock.Application.Common.Errors"
-Cohesion: 0.06
-Nodes (15): skestock.Application.UnitTests.Features.Categories.Commands.UpdateCategory, skestock.Application.FunctionalTests.Features.Items.Queries.GetItemById, skestock.Application.Features.Categories.Queries.GetCategoryById, skestock.Application.FunctionalTests.Features.Categories.Commands.UpdateCategory, skestock.Application.Features.Items.Queries.GetItemById, skestock.Application.FunctionalTests.Features.Categories.Queries.GetCategoryById, skestock.Application.Features.Categories.Commands.UpdateCategory, skestock.Application.UnitTests.Features.Categories.Queries.GetCategoryById (+7 more)
+Cohesion: 0.03
+Nodes (38): AbstractValidator, skestock.Application.Features.Statistics.Queries.GetClassGoodsReceiptCosts, skestock.Application.UnitTests.Features.Categories.Commands.UpdateCategory, skestock.Application.Features.Categories.Queries.GetCategoryById, skestock.Application.UnitTests.Features.Categories.Commands.CreateCategory, skestock.Application.Features.Statistics.Models, skestock.Application.FunctionalTests.Features.Categories.Commands.UpdateCategory, skestock.Web.Endpoints (+30 more)
 
 ### Community 484 - ".InvokeAsync"
 Cohesion: 0.29
@@ -2401,13 +2338,13 @@ Nodes (4): PathString, AntiforgeryExemptPaths, HttpContext, Task
 Cohesion: 0.33
 Nodes (5): Common Router Events (Chronological), Common Use Cases, Debugging, Router Lifecycle and Events, Subscribing to Events
 
-### Community 487 - "ValidationException"
-Cohesion: 0.13
-Nodes (15): IDictionary, IReadOnlyDictionary, ValidationCodeMapper, IDictionary, IReadOnlyDictionary, ValidationException, Errors, ValidationFieldError (+7 more)
+### Community 487 - "CreateCategoryCommandTests"
+Cohesion: 0.39
+Nodes (4): SetUp, Task, Test, CreateCategoryCommandTests
 
-### Community 488 - ".IsNameUniqueAsync"
-Cohesion: 0.60
-Nodes (3): CancellationToken, Guid, Task
+### Community 488 - "ItemImportBatchFileDto"
+Cohesion: 0.22
+Nodes (9): Guid, ItemImportBatchFileDto, BlobPath, ContentType, FileMetadataId, OriginalName, SizeBytes, SortOrder (+1 more)
 
 ### Community 489 - "GetClassGoodsReceiptCostsRequest"
 Cohesion: 0.22
@@ -2417,25 +2354,21 @@ Nodes (8): DateOnly, Guid, GetClassGoodsReceiptCostsRequest, EndDate, StartDate,
 Cohesion: 0.22
 Nodes (9): Async Validation, Conditional Validation, Context, Disabling Form Button, Handling Errors, IMPORTANT: Paths are NOT Signals, Multiple Items, Nested @for Loops (+1 more)
 
+### Community 491 - "CacheInvalidationBehavior"
+Cohesion: 0.25
+Nodes (6): CancellationToken, HybridCache, ILogger, MessageHandlerDelegate, ValueTask, CacheInvalidationBehavior
+
 ### Community 492 - ".Handle"
 Cohesion: 0.40
 Nodes (4): CancellationToken, GoodsReceiptImportReviewDto, Result, ValueTask
-
-### Community 493 - ".IsNameUniqueAsync"
-Cohesion: 0.50
-Nodes (3): CancellationToken, Guid, Task
-
-### Community 494 - ".FileMetadataExistsAsync"
-Cohesion: 0.60
-Nodes (3): CancellationToken, Guid, Task
 
 ### Community 495 - ".CategoryExistsAsync"
 Cohesion: 0.50
 Nodes (3): CancellationToken, Guid, Task
 
-### Community 497 - "EditItemCommand"
-Cohesion: 0.14
-Nodes (19): Guid, IReadOnlyCollection, Result, EditItemCommand, CategoryId, Description, Id, IsPerishable (+11 more)
+### Community 497 - ".SeedCategoryAsync"
+Cohesion: 0.36
+Nodes (5): Category, SetUp, Task, Test, EditItemCommandTests
 
 ### Community 498 - ".ConfirmItemImportBatch"
 Cohesion: 0.25
@@ -2449,13 +2382,33 @@ Nodes (18): ConfirmItemImportBatchRequestItem, Guid, List, ConfirmItemImportBatc
 Cohesion: 0.29
 Nodes (6): coverlet.collector, Microsoft.NET.Test.Sdk, NUnit, NUnit3TestAdapter, NUnit.Analyzers, Microsoft.NET.Sdk
 
+### Community 501 - "ValidationCodeMapper"
+Cohesion: 0.43
+Nodes (5): IDictionary, IReadOnlyDictionary, ValidationCodeMapper, IReadOnlyDictionary, ValidationFieldError
+
 ### Community 503 - "Router Lifecycle and Events"
 Cohesion: 0.33
 Nodes (5): Common Router Events (Chronological), Common Use Cases, Debugging, Router Lifecycle and Events, Subscribing to Events
 
+### Community 505 - "StockTransactionType"
+Cohesion: 0.25
+Nodes (7): StockTransactionType, Adjustment, ExpiryWriteoff, Order, Rollover, Transfer, Usage
+
+### Community 506 - "ConfirmCategoryImportBatchCommandValidatorTests"
+Cohesion: 0.48
+Nodes (4): ConfirmCategoryImportBatchCommandValidator, Task, Test, ConfirmCategoryImportBatchCommandValidatorTests
+
 ### Community 508 - "ItemImportBatchCompletedEvent"
-Cohesion: 0.18
+Cohesion: 0.20
 Nodes (9): CancellationToken, HybridCache, IReadOnlyCollection, ValueTask, ItemImportBatchCompletedEventHandler, Guid, ItemImportBatchCompletedEvent, BatchId (+1 more)
+
+### Community 509 - ".BuildEffectiveSort"
+Cohesion: 0.50
+Nodes (3): Key, List, DynamicSortBuilder
+
+### Community 510 - "ICacheInvalidation"
+Cohesion: 0.50
+Nodes (3): IReadOnlyCollection, ICacheInvalidation, Tags
 
 ### Community 513 - "ItemImportBatchConfirmedEventHandler"
 Cohesion: 0.20
@@ -2478,28 +2431,28 @@ Cohesion: 0.36
 Nodes (6): CancellationToken, ILogger, IServiceScopeFactory, Task, TimeSpan, OutboxPublisherService
 
 ### Community 544 - "AmbientUser"
-Cohesion: 0.33
+Cohesion: 0.40
 Nodes (5): Guid, List, AmbientUser, Id, Roles
 
 ## Knowledge Gaps
-- **3352 isolated node(s):** `run-functional-tests.sh script`, `DOCKER_HOST`, `DOTNET_ASPIRE_CONTAINER_RUNTIME`, `Client`, `Aspire.Hosting.AppHost` (+3347 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 4970 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **16 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **3350 isolated node(s):** `run-functional-tests.sh script`, `DOCKER_HOST`, `DOTNET_ASPIRE_CONTAINER_RUNTIME`, `Client`, `Aspire.Hosting.AppHost` (+3345 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 4967 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **14 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `IApplicationDbContext` connect `IApplicationDbContext` to `GetAllStockBatchesQuery`, `GetAllGoodsReceiptImportsQuery`, `CategoryImportBatch`, `ImportBatchOptions`, `CreateGoodsReceiptCommand`, `CreateGoodsReceiptImportCommand`, `.Handle`, `IRequestHandler`, `GetAllCategoryImportBatchesQuery`, `GetAllSchoolClassesQuery`, `.Handle`, `OutboxPublisherService`, `ItemTestDbContext`, `DefaultLocationTestDbContext`, `ConfirmImportTestDbContext`, `GetAllCategoriesQuery`, `GetDefaultLocationQuery`, `FileMetadataTestDbContext`, `Category`, `CategoryImportBatchReviewTestDbContext`, `ImportBatchHistory`, `ConfirmGoodsReceiptImportCommand`, `OutboxMessage`, `EnableItemCommand`, `skestock.Domain.Queues`, `ItemImportBatchReviewLineDto`, `GetSchoolClassSummaryQuery`, `ConfirmUploadCommand`, `CategoryDto`, `ProcessGoodsReceiptImportCommand`, `DisableItemCommand`, `CategoryImportBatchReviewDto`, `.Handle`, `.CreateContextAsync`, `UserProfile`, `ProcessCategoryImportBatchTestDbContext`, `ProcessedMessage`, `StockBatch`, `ItemTestDbContext`, `.CreateContextAsync`, `GetSchoolClassByIdQuery`, `PaginatedResponse`, `SchoolClassSummaryTestDbContext`, `.Handle`, `.IsSqlServer`, `.ValidateAsync`, `GetLocationByIdQuery`, `GoodsReceiptImportLine`, `Item`, `CategoryTestDbContext`, `GoodsReceiptImportTestDbContext`, `ProcessGoodsReceiptImportTestDbContext`, `GoodsReceiptImport`, `ItemTestDbContext`, `AdjustStockCommand`, `CategoryImportBatchFile`, `ItemTestDbContext`, `LocationTestDbContext`, `ClassBalance`, `Location`, `LocationTestDbContext`, `SchoolClassTestDbContext`, `GoodsReceipt`, `SchoolClassTestDbContext`, `SchoolClassTestDbContext`, `CreateStockBatchTestDbContext`, `SchoolClass`, `.ProcessMessageAsync`, `ApplicationDbContext`, `ItemDto`, `GoodsReceiptImportReviewTestDbContext`, `GetGoodsReceiptImportByIdQuery`, `Error`, `.Handle`, `.ProcessMessageAsync`, `.CreateContextAsync`, `.CreateContextAsync`, `GetFileDownloadQuery`, `.Handle`, `.SeedAsync`, `ItemTestDbContext`, `.Handle`, `IUser`, `ItemImportBatch`, `ItemExtractionResult`, `GetItemByIdQuery`, `IRequest`, `.CreateContextAsync`, `.Handle`, `ItemImportBatchReviewDto`, `CreateCategoryImportBatchCommand`, `.SaveChangesAsync`, `StockTransaction`, `IExtractionSchemaFactory`, `.Handle`, `.AddInfrastructureServices`, `.CategoryImportBatchExistsAsync`, `LocationDto`, `.SeedAsync`, `.Handle_GroupsPositiveQuantitiesAcrossLocationsAndIncludesDisabledItems`, `ConfirmCategoryImportBatchCommand`, `GetAllGoodsReceiptsQuery`, `.Handle`, `.ProcessMessageAsync`, `GetClassGoodsReceiptCostsHandler`, `CategoryExtractionSchemaFactory`, `.IsNameUniqueAsync`, `.IsNameUniqueAsync`, `.FileMetadataExistsAsync`, `.CategoryExistsAsync`?**
-  _High betweenness centrality (0.101) - this node is a cross-community bridge._
-- **Why does `skestock.Domain.Entities` connect `skestock.Domain.Entities` to `GoodsReceipt`, `SchoolClass`, `skestock.Application.Common.Exceptions`, `skestock.Application.Features.SchoolClasses.Models`, `skestock.Application.Features.Items.Commands.CreateItem`, `skestock.Application.Features.GoodsReceipts.Models`, `Category`, `AdjustStockCommandHandlerTests.cs`, `OutboxMessage`, `skestock.Domain.Queues`, `CategoryIcon`, `ItemImportBatch`, `ApplicationDbContextInitialiser`, `FileMetadata`, `skestock.Domain.Common`, `UserProfile`, `skestock.Application.Common.Interfaces`, `StockBatch`, `skestock.Application.Features.Locations.Models`, `skestock.Domain.Enums`, `skestock.Application.Common.Errors`, `GoodsReceiptImportLine`, `Item`, `skestock.Infrastructure.Identity`, `CategoryImportBatchFile`, `ClassBalance`, `Location`?**
-  _High betweenness centrality (0.032) - this node is a cross-community bridge._
-- **Why does `skestock.Application.Common.Interfaces` connect `skestock.Application.Common.Interfaces` to `skestock.Domain.Enums`, `skestock.Domain.Entities`, `AmbientUser`, `skestock.Application.Common.Errors`, `ApplicationUser`, `IRealtimeNotifier`, `skestock.Application.Features.Items.Commands.CreateItem`, `AdjustStockCommandHandlerTests.cs`, `skestock.Application.Common.Exceptions`, `skestock.Domain.Common`, `skestock.Application.Common.Behaviours`, `skestock.Domain.Queues`, `skestock.Application.Features.GoodsReceipts.Models`, `skestock.Infrastructure.Identity`, `skestock.Application.Features.SchoolClasses.Models`, `IUser`, `skestock.Application.Features.Locations.Models`, `PerformanceBehaviour`?**
-  _High betweenness centrality (0.031) - this node is a cross-community bridge._
+- **Why does `IApplicationDbContext` connect `IApplicationDbContext` to `GetAllStockBatchesQuery`, `GetAllGoodsReceiptImportsQuery`, `CategoryImportBatch`, `CreateCategoryImportBatchCommand`, `CreateGoodsReceiptCommand`, `.Handle`, `GetClassLocationStockQuery`, `GetAllItemImportBatchesQuery`, `GetAllCategoryImportBatchesQuery`, `GetAllSchoolClassesQuery`, `ImportBatchOptions`, `OutboxPublisherService`, `ItemTestDbContext`, `CreateLocationCommand`, `DefaultLocationTestDbContext`, `ConfirmImportTestDbContext`, `GetAllCategoriesQuery`, `GetDefaultLocationQuery`, `FileMetadataTestDbContext`, `GoodsReceiptTestDbContext`, `GoodsReceiptImport`, `ImportBatchHistory`, `ConfirmGoodsReceiptImportLine`, `EnableItemCommand`, `skestock.Domain.Queues`, `ItemImportBatchReviewLineDto`, `GetSchoolClassSummaryQuery`, `ConfirmUploadCommand`, `GetCategoryByIdQuery`, `ProcessGoodsReceiptImportCommand`, `DisableItemCommand`, `.Handle`, `.Handle`, `.CreateContextAsync`, `Item`, `ProcessCategoryImportBatchTestDbContext`, `OutboxMessage`, `StockBatch`, `ItemTestDbContext`, `EditItemCommand`, `GetSchoolClassByIdQuery`, `PaginatedResponse`, `SchoolClassSummaryTestDbContext`, `.Handle`, `GetAllItemsQuery`, `ConfirmGoodsReceiptImportCommand`, `GetLocationByIdQuery`, `Location`, `CategoryTestDbContext`, `CategoryTestDbContext`, `GoodsReceiptImportTestDbContext`, `CategoryImportBatchFile`, `ClassBalance`, `CategoryImportBatchReviewTestDbContext`, `ItemTestDbContext`, `AdjustStockCommand`, `ItemTestDbContext`, `ItemTestDbContext`, `LocationTestDbContext`, `LocationTestDbContext`, `Category`, `LocationTestDbContext`, `SchoolClassTestDbContext`, `SchoolClassTestDbContext`, `SchoolClassTestDbContext`, `SchoolClassTestDbContext`, `GoodsReceiptImportLine`, `StockBatchTestDbContext`, `.ProcessMessageAsync`, `ItemImportBatchFile`, `SchoolClass`, `GetGoodsReceiptImportByIdQuery`, `IRequest`, `.Handle`, `UpdateLocationCommand`, `.ProcessMessageAsync`, `.CreateContextAsync`, `StockTransaction`, `GetFileDownloadQuery`, `.Handle`, `GoodsReceipt`, `CategoryMutationDto`, `ItemImportBatchDto`, `ItemImportBatch`, `ItemExtractionResult`, `GetItemByIdQuery`, `CategoryDto`, `.CreateContextAsync`, `.AddInfrastructureServices`, `ItemImportBatchReviewDto`, `.Handle`, `.SaveChangesAsync`, `UserProfile`, `CreateGoodsReceiptImportCommand`, `LocationDto`, `.SeedAsync`, `.Handle_GroupsPositiveQuantitiesAcrossLocationsAndIncludesDisabledItems`, `ConfirmCategoryImportBatchCommand`, `GetAllGoodsReceiptsQuery`, `.Handle`, `.ProcessMessageAsync`, `GetClassGoodsReceiptCostsHandler`, `CreateItemImportBatchCommand`, `CategoryExtractionSchemaFactory`, `skestock.Application.Common.Errors`, `.CategoryExistsAsync`?**
+  _High betweenness centrality (0.108) - this node is a cross-community bridge._
+- **Why does `skestock.Domain.Entities` connect `skestock.Domain.Entities` to `skestock.Application.Common.Models`, `GoodsReceiptImportLine`, `CategoryImportBatch`, `ItemImportBatchFile`, `UserProfile`, `skestock.Application.Common.Exceptions`, `SchoolClass`, `skestock.Application.Features.SchoolClasses.Models`, `skestock.Application.Features.GoodsReceipts.Models`, `skestock.Application.Features.Items.Models`, `skestock.Domain.Enums`, `GoodsReceiptImport`, `StockTransaction`, `skestock.Domain.Queues`, `Item`, `GoodsReceipt`, `ItemImportBatch`, `FileMetadata`, `skestock.Domain.Common`, `skestock.Application.Common.Interfaces`, `OutboxMessage`, `StockBatch`, `skestock.Application.Features.Locations.Models`, `skestock.Application.Common.Errors`, `CategoryImportBatchFile`, `ClassBalance`, `Category`?**
+  _High betweenness centrality (0.049) - this node is a cross-community bridge._
+- **Why does `skestock.Application.Common.Interfaces` connect `skestock.Application.Common.Interfaces` to `skestock.Application.Common.Models`, `skestock.Application.Features.Items.Models`, `skestock.Application.Common.Errors`, `IIdentityService`, `IRealtimeNotifier`, `skestock.Domain.Enums`, `skestock.Domain.Common`, `skestock.Application.Common.Exceptions`, `RequestLoggerTests`, `skestock.Application.Features.Locations.Models`, `skestock.Domain.Queues`, `skestock.Application.Features.GoodsReceipts.Models`, `skestock.Application.Features.SchoolClasses.Models`, `skestock.Domain.Entities`, `IUser`, `skestock.Application.Common.Behaviours`?**
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
 - **What connects `run-functional-tests.sh script`, `DOCKER_HOST`, `DOTNET_ASPIRE_CONTAINER_RUNTIME` to the rest of the system?**
-  _3352 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `skestock.Domain.Entities` be split into smaller, more focused modules?**
-  _Cohesion score 0.0382673100662103 - nodes in this community are weakly interconnected._
+  _3350 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `skestock.Application.Common.Models` be split into smaller, more focused modules?**
+  _Cohesion score 0.05661005661005661 - nodes in this community are weakly interconnected._
 - **Should `GetAllStockBatchesQuery` be split into smaller, more focused modules?**
-  _Cohesion score 0.05043859649122807 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.11717171717171718 - nodes in this community are weakly interconnected._
 - **Should `GetAllGoodsReceiptImportsQuery` be split into smaller, more focused modules?**
   _Cohesion score 0.05938037865748709 - nodes in this community are weakly interconnected._
