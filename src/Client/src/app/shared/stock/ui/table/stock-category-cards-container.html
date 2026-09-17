@@ -1,0 +1,13 @@
+@if (store.stockItems().length === 0) {
+  <div class="w-full flex justify-center items-center h-full">
+    <nz-empty></nz-empty>
+  </div>
+} @else {
+  <ske-stock-category-cards [groupItems]="store.groupedStockItems()"
+                            [loading]="store.stockItemsLoading()"
+                            (adjust)="onAdjust($event)"
+                            (move)="onMove($event)"
+                            (removeExpired)="onRemoveExpired($event)"
+                            (visibilityChange)="onVisibilityChange($event)"
+                            (add)="addStock($event)" />
+}

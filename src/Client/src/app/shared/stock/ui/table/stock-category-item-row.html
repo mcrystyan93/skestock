@@ -1,0 +1,89 @@
+@let stockItem = item();
+
+<td nzRight>
+  <div class="flex flex-col">
+    <strong>{{ stockItem.itemName }}</strong>
+    <span nz-typography
+          nzType="secondary"
+          class="mb-0!">{{ stockItem.sku ?? '-' }}</span>
+  </div>
+</td>
+<td>
+  <div class="flex items-center justify-between gap-2">
+    <span>{{ stockItem.locationName }}</span>
+    <button nz-button nzSize="small"
+            nzType="link"
+            type="button"
+            nz-tooltip
+            [nzTooltipTitle]="stockItem.quantity > 0
+              ? 'Mută stocul pentru ' + stockItem.itemName
+              : 'Mutarea nu este disponibilă pentru stoc 0 sau negativ'"
+            [attr.aria-label]="stockItem.quantity > 0
+              ? 'Mută stocul pentru ' + stockItem.itemName
+              : 'Mutarea nu este disponibilă pentru stoc 0 sau negativ'"
+            [disabled]="stockItem.quantity <= 0"
+            (click)="move.emit(stockItem)">
+      <nz-icon nzType="icons:arrow-right-arrow-left"></nz-icon>
+    </button>
+  </div>
+</td>
+<td>
+  <div class="flex flex-wrap gap-1">
+    @if (stockItem.isPerishable) {
+      <nz-tag nzColor="orange">Perisabil</nz-tag>
+      @if (stockItem.isExpired) {
+        <nz-tag nzColor="red">Posibil expirat ({{ stockItem.expiredQuantity }})</nz-tag>
+      }
+    } @else {
+      <nz-tag>Nu</nz-tag>
+    }
+  </div>
+</td>
+<td>
+  <span>{{ stockItem.quantity }} {{ stockItem.unit }}</span>
+</td>
+<td>
+  @if (stockItem.isLowStock) {
+    <nz-tag nzColor="red">Stoc redus</nz-tag>
+  } @else {
+    <nz-tag nzColor="green">OK</nz-tag>
+  }
+</td>
+<td>
+  <button nz-button nzSize="small"
+          nzType="link"
+          type="button"
+          nz-tooltip
+          [nzTooltipTitle]="'Ajusteaza stoc pentru ' + stockItem.itemName"
+          [attr.aria-label]="'Ajusteaza stoc pentru ' + stockItem.itemName"
+          (click)="adjust.emit(stockItem)">
+    <nz-icon nzType="icons:pencil"></nz-icon>
+  </button>
+  @if (stockItem.expiredQuantity > 0) {
+    <button nz-button nzSize="small"
+            nzType="link"
+            type="button"
+            nz-popconfirm
+            nz-tooltip
+            nzPopconfirmPlacement="topRight"
+            nzTooltipTitle="Elimină articolele expirate"
+            [nzPopconfirmTitle]="'Elimini cele ' + stockItem.expiredQuantity + ' articole expirate pentru ' + stockItem.itemName + '?'"
+            [attr.aria-label]="'Elimini cele ' + stockItem.expiredQuantity + ' articole expirate pentru ' + stockItem.itemName"
+            (nzOnConfirm)="removeExpired.emit(stockItem)">
+      <nz-icon nzType="icons:trash"></nz-icon>
+    </button>
+  }
+  <button nz-button nzSize="small"
+          nzType="link"
+          type="button"
+          nz-tooltip
+          [nzTooltipTitle]="(stockItem.hideWhenZeroStock
+            ? 'Nu mai ascunde la stoc 0 pentru '
+            : 'Ascunde când stocul ajunge la 0 pentru ') + stockItem.itemName"
+          [attr.aria-label]="(stockItem.hideWhenZeroStock
+            ? 'Nu mai ascunde la stoc 0 pentru '
+            : 'Ascunde când stocul ajunge la 0 pentru ') + stockItem.itemName"
+          (click)="visibilityChange.emit(stockItem)">
+    <nz-icon [nzType]="stockItem.hideWhenZeroStock ? 'icons:eye' : 'icons:eye-slash'"></nz-icon>
+  </button>
+</td>

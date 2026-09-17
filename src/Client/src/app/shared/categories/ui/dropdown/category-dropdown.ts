@@ -51,7 +51,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
         }
       </nz-select>
       @if (allowEdit() && value()?.id && !categoryForm().disabled()) {
-        <button nz-button
+        <button nz-button nzSize="small"
                 nzType="primary"
                 type="button"
                 (click)="onEdit(value())">
@@ -59,7 +59,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
         </button>
       }
       @if (allowCreate() && !categoryForm().disabled()) {
-        <button nz-button
+        <button nz-button nzSize="small"
                 nzType="primary"
                 type="button"
                 (click)="onAdd()">

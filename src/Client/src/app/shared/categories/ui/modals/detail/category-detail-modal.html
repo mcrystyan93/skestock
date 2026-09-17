@@ -11,14 +11,15 @@
 </div>
 
 <ske-error-alert [problemDetail]="store.categoryProblemDetail()"
-                 [validationErrors]="store.categoryValidationErrors()" />
+                 [validationErrors]="store.categoryValidationErrors()"/>
 
 <ske-form [loading]="store.categoryLoading()"
-          [category]="store.category()" />
+          [category]="store.category()"/>
 
 <div *nzModalFooter>
   <nz-space>
     <button nz-button
+            nzSize="small"
             *nzSpaceItem
             nzType="default"
             type="button"
@@ -27,8 +28,10 @@
       Inchide
     </button>
 
-    <nz-space-compact *nzSpaceItem>
+    <nz-space-compact *nzSpaceItem
+                      nzSize="small">
       <button nz-button
+              nzSize="small"
               nzType="primary"
               type="button"
               (click)="save()"
@@ -36,6 +39,7 @@
         Salveaza si inchide
       </button>
       <button nz-button
+              nzSize="small"
               nzType="primary"
               type="button"
               nz-dropdown

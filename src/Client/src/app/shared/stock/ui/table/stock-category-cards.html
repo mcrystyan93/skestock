@@ -1,0 +1,18 @@
+<cdk-virtual-scroll-viewport dynamicItemSize
+                             [estimatedItemSize]="320"
+                             [minBufferPx]="600"
+                             [maxBufferPx]="1200"
+                             class="absolute! inset-0">
+  <div *cdkVirtualFor="let group of categories(); let i = index; trackBy: trackCategory"
+       [skeVirtualItem]="i"
+       class="pb-2">
+    <ske-stock-category-card [category]="group.category"
+                             [items]="group.items"
+                             [loading]="loading()"
+                             (adjust)="adjust.emit($event)"
+                             (move)="move.emit($event)"
+                             (removeExpired)="removeExpired.emit($event)"
+                             (visibilityChange)="visibilityChange.emit($event)"
+                             (add)="add.emit($event)" />
+  </div>
+</cdk-virtual-scroll-viewport>

@@ -37,14 +37,14 @@
 
 <div *nzModalFooter>
   <nz-space>
-    <button nz-button
+    <button nz-button nzSize="small"
             *nzSpaceItem
             nzType="default"
             type="button"
             [disabled]="fileStorage.uploadLoading() || store.itemImportLoading()"
             (click)="close()">Inchide
     </button>
-    <button nz-button
+    <button nz-button nzSize="small"
             *nzSpaceItem
             nzType="primary"
             type="button"

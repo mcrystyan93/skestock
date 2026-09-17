@@ -1404,10 +1404,10 @@
     "semantic_hash": "903821282d5c5b46a4673a263eeb9dee"
   },
   "src/Client/angular.json": {
-    "mtime": 1788851107.541,
-    "seen": 1788854927.9524949,
-    "ast_hash": "e70f14d5c2426cec90d92b3d82b6e152",
-    "semantic_hash": "e70f14d5c2426cec90d92b3d82b6e152"
+    "mtime": 1789639697.512,
+    "seen": 1789641737.2412066,
+    "ast_hash": "d5b288a8e357f4f37fd563831bc40d02",
+    "semantic_hash": ""
   },
   "src/Client/aspnetcore-https.js": {
     "mtime": 1787754032.968,
@@ -2268,16 +2268,16 @@
     "semantic_hash": "8f7b8e979eae2902901393c402da9fdf"
   },
   "src/Client/src/app/shared/theme/theme-switcher-form.ts": {
-    "mtime": 1787851992.089,
-    "seen": 1788844386.8771937,
-    "ast_hash": "ff96f32f5ae2cb5f39d5ae37bfcc1212",
-    "semantic_hash": "ff96f32f5ae2cb5f39d5ae37bfcc1212"
+    "mtime": 1789639759.942,
+    "seen": 1789641737.2413857,
+    "ast_hash": "09e3ef750b270285cf94d8458274fc08",
+    "semantic_hash": ""
   },
   "src/Client/src/app/shared/theme/theme-switcher.ts": {
-    "mtime": 1788030845.838,
-    "seen": 1788844386.8771942,
-    "ast_hash": "f49d8e105472bb731123b216f55915ba",
-    "semantic_hash": "f49d8e105472bb731123b216f55915ba"
+    "mtime": 1789639759.815,
+    "seen": 1789641737.2413864,
+    "ast_hash": "178889fc5d469ca82ee704e8d393db6f",
+    "semantic_hash": ""
   },
   "src/Client/src/main.ts": {
     "mtime": 1788173965.23,
@@ -2298,9 +2298,9 @@
     "semantic_hash": "29f821a68d363b73fb7ad01c47cd590c"
   },
   "src/Client/tsconfig.json": {
-    "mtime": 1789407280.87,
-    "seen": 1789458601.6813407,
-    "ast_hash": "c436e9803560656f17a550c230c3f4b0",
+    "mtime": 1789636860.7825546,
+    "seen": 1789636994.9107802,
+    "ast_hash": "76a401c16e3fd4b3962a53a3bb7714f8",
     "semantic_hash": ""
   },
   "src/Client/tsconfig.spec.json": {
@@ -5160,9 +5160,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/stock/ui/list/filter/filter-form.html": {
-    "mtime": 1789584799.6810238,
-    "seen": 1789584874.4805074,
-    "ast_hash": "0dfa0446c93ec5386a8afa33a1e9dc2b",
+    "mtime": 1789639656.058,
+    "seen": 1789641737.2417324,
+    "ast_hash": "676538d34cdc795462c15cbe2473684d",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/stock/ui/list/stock-list.html": {
@@ -26310,9 +26310,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/stock/ui/table/stock-category-cards.ts": {
-    "mtime": 1789635255.4763753,
-    "seen": 1789635288.2707546,
-    "ast_hash": "765f5f8260cb9a8e98ad204e91df82df",
+    "mtime": 1789637152.331,
+    "seen": 1789641737.241377,
+    "ast_hash": "f4e2b44f1261cd123af8d47de26e1923",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/stock/ui/table/stock-category-item-row.ts": {
@@ -26346,9 +26346,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/stock/ui/table/stock-category-cards.html": {
-    "mtime": 1789635255.4813755,
-    "seen": 1789635288.271116,
-    "ast_hash": "932943110166e2ece4c242473997e225",
+    "mtime": 1789637878.568,
+    "seen": 1789641737.241738,
+    "ast_hash": "5bc0de782f2fcb6f9f9cb39713572bfd",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/stock/ui/table/stock-category-item-row.html": {
@@ -26373,6 +26373,30 @@
     "mtime": 1789635464.4485273,
     "seen": 1789635502.954131,
     "ast_hash": "2c610552c86b7a43aefaa79bd1a3bea7",
+    "semantic_hash": ""
+  },
+  "src/Client/src/app/shared/ui/virtual-scroll/dynamic-size-virtual-scroll.strategy.spec.ts": {
+    "mtime": 1789636910.0682368,
+    "seen": 1789636994.9107745,
+    "ast_hash": "51a5a5e9993dcf9d7dbb5729a8f09539",
+    "semantic_hash": ""
+  },
+  "src/Client/src/app/shared/ui/virtual-scroll/dynamic-size-virtual-scroll.strategy.ts": {
+    "mtime": 1789636839.3085384,
+    "seen": 1789636994.9107757,
+    "ast_hash": "4bec2704c6fb9a5426bb8f077dd022b2",
+    "semantic_hash": ""
+  },
+  "src/Client/src/app/shared/ui/virtual-scroll/dynamic-virtual-scroll-item.directive.ts": {
+    "mtime": 1789636849.328546,
+    "seen": 1789636994.9107761,
+    "ast_hash": "e5f1351c518f8add405a69a2627c2cd9",
+    "semantic_hash": ""
+  },
+  "src/Client/src/app/shared/ui/virtual-scroll/index.ts": {
+    "mtime": 1789636852.6384282,
+    "seen": 1789636994.9107769,
+    "ast_hash": "cf784d26d5a685bb2202c020db06b0a7",
     "semantic_hash": ""
   }
 }

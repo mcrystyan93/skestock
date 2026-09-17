@@ -15,7 +15,7 @@
 
 <div *nzModalFooter>
   <nz-space>
-    <button nz-button
+    <button nz-button nzSize="small"
             *nzSpaceItem
             nzType="default"
             type="button"
@@ -24,15 +24,15 @@
       Inchide
     </button>
 
-    <nz-space-compact *nzSpaceItem>
-      <button nz-button
+    <nz-space-compact *nzSpaceItem nzSize="small">
+      <button nz-button nzSize="small"
               nzType="primary"
               type="button"
               (click)="save()"
               [nzLoading]="store.schoolClassLoading()">
         Salveaza si inchide
       </button>
-      <button nz-button
+      <button nz-button nzSize="small"
               nzType="primary"
               type="button"
               nz-dropdown

@@ -44,7 +44,7 @@
       <td>{{ categoryImport.createdDate | date:'medium' }}</td>
       <td nzRight>
         <button type="button"
-                nz-button
+                nz-button nzSize="small"
                 nzType="link"
                 [disabled]="categoryImport.status !== 'pendingReview'"
                 title="Revizuieste"
@@ -53,7 +53,7 @@
           <nz-icon nzType="icons:eye"></nz-icon>
         </button>
         <button type="button"
-                nz-button
+                nz-button nzSize="small"
                 nzType="link"
                 nz-dropdown
                 [nzDropdownMenu]="menu"

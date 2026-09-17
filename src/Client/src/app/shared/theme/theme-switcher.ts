@@ -7,9 +7,8 @@ import { Theme } from '@ske/models';
   selector: 'ske-theme-switcher',
   imports: [ThemeSwitcherFormComponent],
   template: `
-    <app-theme-switcher-form
-      [currentTheme]="currentTheme()"
-      (onThemeChange)="onThemeChange($event)"
+    <app-theme-switcher-form [currentTheme]="currentTheme()"
+                             (onThemeChange)="onThemeChange($event)"
     />
   `,
 })
