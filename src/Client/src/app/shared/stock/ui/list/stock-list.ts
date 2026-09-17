@@ -1,6 +1,6 @@
 import { Component, effect, inject, input, untracked } from '@angular/core';
 import { StockStore } from '../../services/stock.store';
-import { TableContainer } from '../table/table-container';
+import { StockCategoryCardsContainer } from '../table/stock-category-cards-container';
 import { FilterContainer } from './filter/filter-container';
 import { isNil } from 'lodash-es';
 import { ErrorAlert } from '@ske/shared/errors';
@@ -9,7 +9,7 @@ import { StockPreferencesService } from '../../services/stock-preferences.servic
 
 @Component({
   imports: [
-    TableContainer,
+    StockCategoryCardsContainer,
     FilterContainer,
     ErrorAlert
   ],

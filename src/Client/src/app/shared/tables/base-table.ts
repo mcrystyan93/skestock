@@ -1,40 +1,19 @@
-import {
-  AfterViewInit,
-  Component,
-  computed,
-  DestroyRef,
-  effect,
-  ElementRef,
-  inject,
-  signal,
-  viewChild
-} from '@angular/core';
-import { CdkScrollable, ScrollDispatcher } from '@angular/cdk/scrolling';
-import { filter } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { NzTableComponent, NzTableSortOrder } from 'ng-zorro-antd/table';
-import { BasePaginationFilter, PaginationSort } from '@ske/models';
+import { AfterViewInit, Component, DestroyRef, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { NzTableComponent } from 'ng-zorro-antd/table';
 import { isNil } from 'lodash-es';
-import { BaseList } from './base-list';
+import { TableDimensions } from './table-dimensions';
 
 @Component({
   template: ''
 })
-export class BaseTable<T, K extends BasePaginationFilter> extends BaseList<T, K> implements AfterViewInit {
-  public readonly itemsVirtualData = computed<Array<VirtualData<T>>>(() =>
-    this.items().map((item, index) => ({ ...item, index }))
-  );
-  public readonly sortByKey = computed(() => this.toSortMap(this.filter().sort));
-  public readonly virtualItemSize = signal(49);
-  public readonly tableDimensions = signal<TableDimensions>(initialTableDimensions);
-  public readonly virtualMinBufferPx = computed(() => this.virtualItemSize() * 2);
-  public readonly virtualMaxBufferPx = computed(() => this.virtualItemSize() * 4);
+export class BaseTable implements AfterViewInit {
+  protected readonly _afterViewInit = signal(false);
+  protected readonly _table = viewChild<NzTableComponent<unknown>>('table');
 
   protected readonly _elementRef: ElementRef<HTMLElement> = inject(ElementRef<HTMLElement>);
   protected readonly _destroyRef = inject(DestroyRef);
-  protected readonly _scrollDispatcher = inject(ScrollDispatcher);
-  protected readonly _afterViewInit = signal(false);
-  protected readonly _table = viewChild<NzTableComponent<T>>('table');
+
+  public readonly tableDimensions = signal<TableDimensions>(initialTableDimensions);
 
   private readonly measureEffect = effect(() => {
     if (!this._afterViewInit()) return;
@@ -42,86 +21,8 @@ export class BaseTable<T, K extends BasePaginationFilter> extends BaseList<T, K>
     this.measureHost();
   });
 
-  private readonly refreshVirtualViewportEffect = effect(() => {
-    if (!this._afterViewInit()) return;
-
-    this.tableDimensions();
-    this.virtualItemSize();
-
-    this.refreshVirtualViewport();
-  });
-
   public ngAfterViewInit(): void {
     this._afterViewInit.set(true);
-
-    this.observeTableScroll();
-  }
-
-  public onSortChange(value: NzTableSortOrder, key: string): void {
-    const nextSort = this.buildNextSort(this.filter().sort ?? [], key, value);
-
-    this.onFilterChange.emit({
-      ...this.filter(),
-      sort: nextSort
-    });
-  }
-
-  protected refreshVirtualViewport(): void {
-    queueMicrotask(() => {
-      this._table()?.cdkVirtualScrollViewport?.checkViewportSize();
-    });
-  }
-
-  private observeTableScroll(): void {
-    this._scrollDispatcher
-      .scrolled()
-      .pipe(
-        takeUntilDestroyed(this._destroyRef),
-        filter((scrollable): scrollable is CdkScrollable => !!scrollable),
-        filter((scrollable) => {
-          if (isNil(this._elementRef)) return false;
-          return this._elementRef.nativeElement.contains(scrollable.getElementRef().nativeElement);
-        })
-      )
-      .subscribe((scrollable) => {
-        const element = scrollable.getElementRef()?.nativeElement ?? null;
-        if (isNil(element)) return;
-        const distanceToBottom = element.scrollHeight - element.scrollTop - element.clientHeight;
-
-        if (this.shouldLoadMore(distanceToBottom)) {
-          this.onLoadMore.emit();
-        }
-      });
-  }
-
-  private toSortMap(sort: K['sort'] | undefined): Map<string, NzTableSortOrder> {
-    const map = new Map<string, NzTableSortOrder>();
-
-    for (const item of sort ?? []) {
-      map.set(item.key, item.value);
-    }
-
-    return map;
-  }
-
-  private buildNextSort(
-    currentSort: PaginationSort[],
-    key: string,
-    order: NzTableSortOrder
-  ): PaginationSort[] {
-    if (order === null) {
-      return currentSort.filter((item) => item.key !== key);
-    }
-
-    const nextSort = [...currentSort];
-    const existingIndex = nextSort.findIndex((item) => item.key === key);
-    if (existingIndex >= 0) {
-      nextSort[existingIndex] = { ...nextSort[existingIndex], value: order };
-      return nextSort;
-    }
-
-    nextSort.push({ key, value: order });
-    return nextSort;
   }
 
   private measureHost() {
@@ -133,7 +34,7 @@ export class BaseTable<T, K extends BasePaginationFilter> extends BaseList<T, K>
       const availableHeight = Math.max(element.clientHeight - headerHeight, 0);
 
       this.tableDimensions.set({
-        width: `${element.clientWidth - 20}px`,
+        width: `${element.clientWidth - 30}px`,
         height: `${availableHeight}px`,
         isLoaded: true
       });
@@ -154,13 +55,4 @@ export class BaseTable<T, K extends BasePaginationFilter> extends BaseList<T, K>
   }
 }
 
-export type TableDimensions = {
-  width: string;
-  height: string;
-  isLoaded: boolean;
-};
 const initialTableDimensions: TableDimensions = { width: '0px', height: '0px', isLoaded: false };
-
-export type VirtualData<T> = T & {
-  index: number;
-};

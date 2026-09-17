@@ -1,14 +1,14 @@
 import { DatePipe } from '@angular/common';
 import { Component, input, output } from '@angular/core';
-import { BaseTable } from '@ske/shared/tables';
+import { BaseTableWithFilter } from '@ske/shared/tables';
 import {
+  GetAllItemImportBatchesRequest,
   ITEM_IMPORT_BATCH_STATUS_COLORS,
   ITEM_IMPORT_BATCH_STATUS_LABELS,
   ITEM_IMPORT_BATCH_TABLE_COLUMNS,
-  GetAllItemImportBatchesRequest,
   ItemImportBatchFileDto,
   ItemImportBatchListItemDto,
-  ItemImportBatchStatus,
+  ItemImportBatchStatus
 } from '@ske/models';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
@@ -33,7 +33,7 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
   templateUrl: './table.html',
   host: { class: 'absolute block inset-0' },
 })
-export class ItemImportTable extends BaseTable<
+export class ItemImportTable extends BaseTableWithFilter<
   ItemImportBatchListItemDto,
   GetAllItemImportBatchesRequest
 > {

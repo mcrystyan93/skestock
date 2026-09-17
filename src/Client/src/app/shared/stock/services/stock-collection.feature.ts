@@ -1,19 +1,22 @@
 import {
   GetClassLocationStockRequest,
+  RemoveExpiredStockRequest,
+  SetClassItemStockVisibilityRequest,
   StockItemCategoryGroup,
   StockItemDto
 } from '@ske/models';
-import {patchState, signalStoreFeature, withMethods, withProps, withState} from '@ngrx/signals';
-import {withLoadingFeature} from '@ske/shared/loader';
-import {withProblemDetailsFeature} from '@ske/shared/errors';
-import {inject} from '@angular/core';
-import {StockHttp} from './stock.http';
-import {rxMethod} from '@ngrx/signals/rxjs-interop';
-import {map, pipe, switchMap, tap} from 'rxjs';
-import {mapResponse} from '@ngrx/operators';
-import {Events, withEventHandlers} from '@ngrx/signals/events';
-import {realtimeEvents} from '@ske/signalr';
-import {StockPreferencesService} from './stock-preferences.service';
+import { patchState, signalStoreFeature, withMethods, withProps, withState } from '@ngrx/signals';
+import { withLoadingFeature } from '@ske/shared/loader';
+import { withProblemDetailsFeature } from '@ske/shared/errors';
+import { inject } from '@angular/core';
+import { StockHttp } from './stock.http';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { map, pipe, switchMap, tap } from 'rxjs';
+import { mapResponse } from '@ngrx/operators';
+import { Events, withEventHandlers } from '@ngrx/signals/events';
+import { realtimeEvents } from '@ske/signalr';
+import { StockPreferencesService } from './stock-preferences.service';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 type StockCollectionState = {
   stockItems: StockItemDto[];
@@ -46,9 +49,12 @@ export function withStockCollection() {
     withState(initialState),
     withLoadingFeature('stockItems'),
     withProblemDetailsFeature('stockItems'),
+    withLoadingFeature('stockMutation'),
+    withProblemDetailsFeature('stockMutation'),
     withProps(() => ({
       stockHttp: inject(StockHttp),
-      stockPreferences: inject(StockPreferencesService)
+      stockPreferences: inject(StockPreferencesService),
+      messageService: inject(NzMessageService)
     })),
     withMethods((store) => {
       const load = rxMethod<GetClassLocationStockRequest>(
@@ -98,7 +104,68 @@ export function withStockCollection() {
         )
       );
 
-      return {load};
+      const removeExpiredStock = rxMethod<{
+        request: RemoveExpiredStockRequest;
+        expiredQuantity: number;
+      }>(
+        pipe(
+          tap(() => {
+            store.setStockMutationLoading();
+            store.clearStockMutationErrors();
+          }),
+          switchMap(({ request, expiredQuantity }) =>
+            store.stockHttp.removeExpiredStock(request).pipe(
+              mapResponse({
+                next: () => {
+                  store.messageService.success(`Au fost eliminate ${expiredQuantity} articole expirate.`);
+                  store.setStockMutationLoaded();
+                  load(store.filter());
+                },
+                error: (error) => {
+                  store.handleStockMutationError(error);
+                  store.messageService.error('Articolele expirate nu au putut fi eliminate.');
+                  store.setStockMutationLoaded();
+                }
+              })
+            )
+          )
+        )
+      );
+
+      const setClassItemStockVisibility = rxMethod<{
+        classId: string;
+        itemId: string;
+        request: SetClassItemStockVisibilityRequest;
+      }>(
+        pipe(
+          tap(() => {
+            store.setStockMutationLoading();
+            store.clearStockMutationErrors();
+          }),
+          switchMap(({ classId, itemId, request }) =>
+            store.stockHttp.setClassItemStockVisibility(classId, itemId, request).pipe(
+              mapResponse({
+                next: () => {
+                  store.messageService.success(
+                    request.hideWhenZeroStock
+                      ? 'Produsul va fi ascuns când stocul ajunge la 0.'
+                      : 'Produsul nu va mai fi ascuns la stoc 0.'
+                  );
+                  store.setStockMutationLoaded();
+                  load(store.filter());
+                },
+                error: (error) => {
+                  store.handleStockMutationError(error);
+                  store.messageService.error('Setarea vizibilității produsului nu a putut fi salvată.');
+                  store.setStockMutationLoaded();
+                }
+              })
+            )
+          )
+        )
+      );
+
+      return { load, removeExpiredStock, setClassItemStockVisibility };
     }),
     withEventHandlers((store, events = inject(Events)) => ({
       stockChanged: events.on(

@@ -24,7 +24,6 @@ public class GoodsReceiptImportQueueProcessingService(
 
     private readonly TimeSpan _pollInterval = TimeSpan.FromSeconds(5);
     private const int BatchSize = 10;
-    private const int MaxRetries = 5;
     private const int VisibilityTimeoutSeconds = 30;
     private const int MaxDequeueCount = 5;
 
@@ -64,7 +63,7 @@ public class GoodsReceiptImportQueueProcessingService(
     {
         using var scope = scopeFactory.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
-        var mediator = scope.ServiceProvider.GetRequiredService<ISender>(); // MediatR ISender, template convention
+        var mediator = scope.ServiceProvider.GetRequiredService<ISender>(); // Mediator ISender, template convention
 
         MessageEnvelope envelope;
         try
@@ -77,6 +76,7 @@ public class GoodsReceiptImportQueueProcessingService(
         {
             // malformed message — can't be retried into success, move it out immediately
             logger.LogError(ex, "Failed to deserialize envelope for message {Id}", message.MessageId);
+            await MoveRawToPoisonQueueAsync(message, cancellationToken);
             await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
             return;
         }
@@ -159,6 +159,14 @@ public class GoodsReceiptImportQueueProcessingService(
 
         logger.LogWarning("Message {Id} moved to poison queue after {Count} attempts",
             envelope.MessageId, msg.DequeueCount);
+    }
+
+    private async Task MoveRawToPoisonQueueAsync(QueueMessage message, CancellationToken cancellationToken)
+    {
+        var poisonQueue =
+            queueServiceClient.GetQueueClient($"{skestock.Shared.Services.GoodsReceiptImportQueue}-poison");
+        await poisonQueue.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+        await poisonQueue.SendMessageAsync(message.MessageText, cancellationToken: cancellationToken);
     }
 
     private static bool IsUniqueConstraintViolation(DbUpdateException ex) =>

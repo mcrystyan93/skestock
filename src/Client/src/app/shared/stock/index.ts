@@ -3,7 +3,7 @@ export * from './services/stock-preferences.service';
 export * from './services/stock-adjustment.store';
 export * from './services/stock-move.store';
 export * from './services/stock-collection.feature';
-export * from './ui/table/table-container';
+export * from './ui/table/stock-category-cards-container';
 export * from './ui/modals/adjust/stock-adjustment-modal';
 export * from './ui/modals/move/stock-move-modal';
 export * from './ui/list/filter/filter-container';

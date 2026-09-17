@@ -17,8 +17,7 @@ public class Stock : IEndpointGroup
         groupBuilder.MapPost(AdjustStock, "adjust");
         groupBuilder.MapPost(RemoveExpiredStock, "remove-expired");
         groupBuilder.MapPost(MoveStock, "move");
-        groupBuilder.MapPatch(SetClassItemStockVisibility, "class/{classId}/item/{itemId}/visibility")
-            .RequireAuthorization();
+        groupBuilder.MapPatch(SetClassItemStockVisibility, "class/{classId}/item/{itemId}/visibility");
     }
 
     [EndpointSummary("Get current stock for a class with optional column filters")]

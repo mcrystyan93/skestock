@@ -6,46 +6,57 @@
 
 | System | Type | Purpose | Auth model | Criticality | Evidence |
 |--------|------|---------|------------|--------------|----------|
-| SQL Server (containerized via Aspire, resource `Services.DatabaseServer`) | Relational DB | Primary datastore for all domain entities + ASP.NET Core Identity tables | Container-level password parameter (`sql-password`, Aspire secret parameter) | High | `src/AppHost/Program.cs`, `src/Infrastructure/Data/ApplicationDbContext.cs` |
-| Redis (containerized via Aspire, resource `Services.Cache`) | Distributed cache | L2 backing store for `HybridCache` (read-through query caching + tag-based invalidation) | Container-level password parameter (`redis-password`) | Medium — caching is a performance optimization, not a correctness dependency (queries recompute on cache miss) | `src/AppHost/Program.cs`, `src/Infrastructure/DependencyInjection.cs` (`AddRedisDistributedCache`, `AddHybridCache`) |
-| ASP.NET Core Identity (self-hosted, backed by the same SQL Server via EF Core) | Auth/identity provider | User accounts, Guid-keyed roles (`IdentityRole<Guid>`), cookie and bearer authentication | Application cookie is default; bearer tokens are also registered | High | `src/Infrastructure/DependencyInjection.cs`, `src/Infrastructure/Identity/{ApplicationUser,IdentityService}.cs` |
-| Azure Key Vault (optional) | Secrets/config source | Conditionally adds Key Vault as a configuration provider if configured | Azure Identity (`Azure.Identity` package) | Low/optional — `AddKeyVaultIfConfigured()` is conditional, exact trigger condition not independently re-verified in this pass | `src/Web/DependencyInjection.cs` (referenced in `Program.cs` as `AddKeyVaultIfConfigured()`) — `[TODO]` confirm exact activation condition by reading `Web/DependencyInjection.cs` in full |
-| OpenTelemetry OTLP exporter | Observability/telemetry sink | Traces/metrics/logs export target (destination endpoint not hardcoded in repo — configured via standard OTEL env vars) | N/A | Medium | `src/ServiceDefaults/Extensions.cs`, `Directory.Packages.props` (`OpenTelemetry.Exporter.OpenTelemetryProtocol`) |
-| Scalar (`/scalar`) | API documentation UI | Serves interactive OpenAPI reference in place of Swagger UI; also the Aspire dashboard's shortcut URL for the Web resource | N/A (dev/docs tooling) | Low | `src/Web/Program.cs` (`MapScalarApiReference()`), `src/AppHost/Program.cs` (`WithUrlForEndpoint`) |
+| SQL Server (containerized via Aspire, `Services.DatabaseServer`) | Relational DB | Primary datastore for all domain entities + ASP.NET Core Identity tables | Container-level password parameter (`sql-password`) | High | `src/AppHost/Program.cs`, `src/Infrastructure/Data/ApplicationDbContext.cs` |
+| Redis (containerized via Aspire, `Services.Cache`) | Distributed cache + SignalR backplane | L2 backing store for `HybridCache`; also backs the SignalR realtime hub across instances (`Microsoft.AspNetCore.SignalR.StackExchangeRedis`) | Container-level password parameter (`redis-password`) | Medium-High (caching degrades gracefully; SignalR backplane matters more once scaled beyond one instance) | `src/AppHost/Program.cs`, `src/Infrastructure/DependencyInjection.cs` |
+| Azurite (Azure Storage emulator via Aspire, persistent, ports 10000/10001/10002) | Blob + Queue storage emulator | Local/dev stand-in for Azure Blob Storage (file uploads) and Azure Storage Queues (async import/outbox processing) | Emulator connection string | High (imports and file uploads depend on it) | `src/AppHost/Program.cs` |
+| Azure Blob Storage (`app-files` container) | Object storage | Client-direct SAS uploads for imported documents/attachments; `RequestUploadCommand` issues an upload SAS, `ConfirmUploadCommand` verifies the blob | SAS tokens generated server-side; container CORS configured via `AzureBlobCorsInitializer` | High | `src/Infrastructure/Storage/{AzureBlobStorageService,AzureBlobCorsInitializer}.cs` |
+| Azure Storage Queues | Message queue | Transport for the transactional-outbox-driven async import flows (goods receipts, category imports, item imports) between `Web`'s `OutboxPublisherService` and `Worker`'s queue-processing services | Storage connection string (Aspire-managed) | High for the import features; app remains usable for other features if this is down | `src/Web/BackgroundJobs/OutboxPublisherService.cs`, `src/Worker/Queues/*.cs`, `src/Domain/Queues/OutboxMessage.cs` |
+| SignalR (`AppHub`) | Realtime push | Server → client notifications (e.g. import batch progress, stock changes) consumed by the Angular client's `signalr-bridge.ts` and routed into feature `signalStore`s | Cookie/bearer auth (same as REST API) | Medium | `src/Infrastructure/Realtime/{AppHub,SignalRRealtimeNotifier}.cs`, `src/Client/src/app/core/signalr/*` |
+| Document extraction (OpenAI-backed) | AI/LLM API | Extracts structured line-item data from uploaded documents (e.g. goods receipt imports) | API key configured via app settings/secrets | Medium — feature-specific, not required for core CRUD | `src/Infrastructure/AI/OpenAiDocumentExtractionClient.cs` |
+| ASP.NET Core Identity (self-hosted, same SQL Server) | Auth/identity provider | User accounts, Guid-keyed roles, cookie + bearer authentication | Application cookie default; bearer for non-browser clients | High | `src/Infrastructure/Identity/{ApplicationUser,IdentityService}.cs` |
+| Azure Key Vault (optional) | Secrets/config source | Conditionally adds Key Vault as a configuration provider | Azure Identity | Low/optional | `src/Web/DependencyInjection.cs` (`AddKeyVaultIfConfigured`) |
+| OpenTelemetry OTLP exporter | Observability/telemetry sink | Traces/metrics/logs export (destination configured via standard OTEL env vars) | N/A | Medium | `src/ServiceDefaults/Extensions.cs` |
+| Scalar (`/scalar`) | API documentation UI | Interactive OpenAPI reference; also the Aspire dashboard's shortcut URL for the Web resource | N/A | Low | `src/Web/Program.cs` |
+| Cloudflare Tunnel (`cloudflared`) | Ingress/edge | Used only by the production deployment pipeline (`deploy-production.yml`, `deploy/`), not local dev | N/A | Low for dev, High for prod availability | `.github/workflows/deploy-production.yml` |
 
 ### 2) Data Stores
 
 | Store | Role | Access layer | Key risk | Evidence |
 |-------|------|---------------|----------|----------|
-| SQL Server (`skestockDb`) | System of record for all Domain entities + Identity | `ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IApplicationDbContext`, accessed exclusively through the `IApplicationDbContext` interface from `Application` handlers | `src/Web/appsettings.json` contains a LocalDB fallback connection string that has no Redis equivalent — running `Web` standalone (outside Aspire) is a partially-broken configuration (see `STACK.md`) | `src/Infrastructure/Data/ApplicationDbContext.cs`, `src/Web/appsettings.json` |
-| Redis | HybridCache L2 (distributed) + likely session/output-cache backing (not confirmed for the latter) | `HybridCache` injected into `CachingBehavior`/`CacheInvalidationBehavior`; feature-level tags declared per `Features/<Feature>/CacheConstants.cs` | Cache invalidation is tag-based and lazy (`RemoveByTagAsync` marks a watermark, doesn't physically evict) — a bug in tag assignment could serve stale data indefinitely until the sliding expiration elapses | `src/Application/Common/Behaviours/CachingBehavior.cs`, `src/Application/Common/Caching/*` |
+| SQL Server (`skestockDb`) | System of record for all Domain entities + Identity | `ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IApplicationDbContext` | `src/Web/appsettings.json` still has a LocalDB fallback connection string with no Redis/Azurite equivalent | `src/Infrastructure/Data/ApplicationDbContext.cs`, `src/Web/appsettings.json` |
+| Redis | HybridCache L2 + SignalR backplane | `HybridCache` injected into `CachingBehavior`/`CacheInvalidationBehavior`; SignalR wired via `AddStackExchangeRedis` | Cache invalidation is tag-based and lazy (`RemoveByTagAsync` marks a watermark, doesn't physically evict) | `src/Application/Common/Behaviours/CachingBehavior.cs`, `src/Infrastructure/DependencyInjection.cs` |
+| Azurite Blob container (`app-files`) | Uploaded document/attachment storage | `AzureBlobStorageService`, accessed only through Application storage commands | Delivery is client-direct — a client that never calls `ConfirmUploadCommand` leaves an orphaned pending `FileMetadata` row | `src/Infrastructure/Storage/AzureBlobStorageService.cs` |
+| Azurite Queue storage | Outbox message transport | `AzureQueueSender` (Infrastructure) / Worker's `*QueueProcessingService`s | At-least-once delivery — consumers must be idempotent (mitigated via `ProcessedMessages` + poison queues) | `src/Worker/Queues/*.cs`, `src/Domain/Queues/{OutboxMessage,ProcessedMessage}.cs` |
 
 ### 3) Secrets and Credentials Handling
 
-- Credential sources: Aspire secret **parameters** (`builder.AddParameter("sql-password", secret: true)`, `builder.AddParameter("redis-password", secret: true)` in `src/AppHost/Program.cs`) rather than plain environment variables or a committed secrets file — Aspire resolves these via its standard parameter-resolution mechanism (typically .NET user-secrets or environment variables at the AppHost level; exact resolution path not independently verified — `[TODO]`).
-- Hardcoding check: no hardcoded passwords/API keys found in scanned source files; the one plaintext connection string in `src/Web/appsettings.json` (`skestockDb` LocalDB, `Trusted_Connection=True`) uses Windows Integrated Auth, not a stored password, and only applies to the LocalDB fallback path.
-- Rotation/lifecycle notes: `[TODO]` — no rotation policy or Key Vault reference documented in-repo for the Aspire secret parameters; `AddKeyVaultIfConfigured()` suggests Key Vault is an optional/future secret source for non-local environments.
+- Credential sources: Aspire secret **parameters** (`builder.AddParameter("sql-password", secret: true)`, `"redis-password"`, plus Azure Storage/queue connection strings) rather than plain environment variables. `[TODO]` confirm exact resolution path (user-secrets vs. environment) — not independently re-verified this pass.
+- Production deployment secrets: `deploy/production.env.example` documents the required env vars for the Docker Compose/Podman quadlet-based production deployment (separate from local Aspire dev).
+- Hardcoding check: no hardcoded passwords/API keys found in scanned source; the LocalDB connection string in `src/Web/appsettings.json` uses Windows Integrated Auth (`Trusted_Connection=True`), not a stored password.
+- Document extraction (OpenAI) API key: `[TODO]` confirm exact configuration key/secret source in `Infrastructure/AI/OpenAiDocumentExtractionClient.cs` — not independently re-verified this pass.
 
 ### 4) Reliability and Failure Behavior
 
-- Retry/backoff behavior: document extraction HTTP clients configure standard resilience with two exponential-backoff retries, per-attempt and total timeouts, and a circuit breaker in `src/Infrastructure/DependencyInjection.cs`; ServiceDefaults also applies standard resilience defaults to HttpClient.
-- Timeout policy: `FunctionalTestSetup.OneTimeSetUp` uses an explicit 90-second `CancellationTokenSource` when booting the test Aspire host and waiting for SQL/Redis health — no equivalent hard timeout was found for the production `AppHost` boot path.
-- Circuit-breaker/fallback: Aspire's `WaitFor(databaseServer)`/`WaitFor(cache)` on the `webapi` resource (`src/AppHost/Program.cs`) delays the Web project's startup until SQL Server and Redis report healthy, rather than implementing a runtime circuit breaker — this is a startup-order guarantee, not a request-time fallback.
+- Retry/backoff: document extraction HTTP clients configure standard resilience (exponential-backoff retries, per-attempt/total timeouts, circuit breaker) in `src/Infrastructure/DependencyInjection.cs`; `ServiceDefaults` applies standard resilience defaults to `HttpClient` generally.
+- Outbox retry policy: `OutboxPublisherService` polls periodically, sends a bounded batch, and stops retrying a given message after a retry cap — permanent failures are surfaced via message state rather than retried forever.
+- Worker retry/poison-queue: each `*QueueProcessingService` uses a visibility timeout, retries a bounded number of times, and routes exhausted/poison messages to a dedicated poison queue instead of blocking the main queue.
+- Timeout policy: `FunctionalTestSetup.OneTimeSetUp` uses an explicit 90-second timeout waiting for `Services.Database`/`Services.Cache` health when booting the test Aspire host.
+- Circuit-breaker/fallback: Aspire's `WaitFor(...)` dependencies on the `webapi`/`worker` resources delay startup until SQL Server/Redis/Azurite report healthy — a startup-order guarantee, not a request-time fallback.
 
 ### 5) Observability for Integrations
 
-- Logging around external calls: `ServiceDefaults.AddServiceDefaults()` wires OpenTelemetry instrumentation for ASP.NET Core, HTTP client, and .NET runtime metrics — this covers HTTP/DB/cache calls generically via OTEL auto-instrumentation rather than bespoke per-integration logging.
-- Metrics/tracing coverage: OpenTelemetry `Instrumentation.AspNetCore`/`Instrumentation.Http`/`Instrumentation.Runtime` + OTLP exporter are all present as pinned dependencies, and `MapDefaultEndpoints()` (health/readiness endpoints) is called in `Web/Program.cs`.
-- Missing visibility gaps: `[TODO]` — no EF Core-specific instrumentation package (e.g. `OpenTelemetry.Instrumentation.EntityFrameworkCore`) was found in `Directory.Packages.props`, so SQL query-level tracing may rely solely on ASP.NET Core span auto-instrumentation rather than per-query spans; confirm before relying on traces for DB performance debugging.
+- `ServiceDefaults.AddServiceDefaults()` wires OpenTelemetry instrumentation for ASP.NET Core, HTTP client, and .NET runtime metrics across Web and Worker.
+- `[TODO]` — no EF Core-specific OpenTelemetry instrumentation package confirmed in `Directory.Packages.props`; DB query-level tracing may rely on ASP.NET Core span auto-instrumentation only.
+- `[TODO]` — no explicit Azure Storage Queue/Blob or SignalR-specific tracing instrumentation confirmed beyond generic HTTP client instrumentation.
 
 ### 6) Evidence
 
-- `src/AppHost/Program.cs` (resource graph, secret parameters, health-wait chain)
-- `src/Infrastructure/DependencyInjection.cs` (SQL Server, Redis, HybridCache, Identity wiring)
-- `src/ServiceDefaults/Extensions.cs` (OpenTelemetry/health checks/service discovery)
-- `src/Web/appsettings.json` (LocalDB fallback connection string)
-- `Directory.Packages.props` (pinned integration-related package versions)
+- `src/AppHost/Program.cs` (resource graph: SQL Server, Redis, Azurite, secret parameters, health-wait chain)
+- `src/Infrastructure/DependencyInjection.cs` (SQL Server, Redis, HybridCache, SignalR backplane, Blob/Queue, Identity wiring)
+- `src/Infrastructure/{Storage,Realtime,AI}/*.cs`
+- `src/Web/BackgroundJobs/OutboxPublisherService.cs`, `src/Worker/Queues/*.cs`
+- `deploy/`, `.github/workflows/deploy-production.yml`
 
 ## Extended Sections (Optional)
 
-Not added — no per-endpoint external API catalog exists (this app has no outbound third-party API integrations beyond the datastore/cache/telemetry sinks documented above), and no auth-flow sequence diagram was requested.
+Not added — no other third-party API integrations beyond the datastore/cache/storage/queue/realtime/AI-extraction sinks documented above.

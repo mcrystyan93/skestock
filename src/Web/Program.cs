@@ -63,7 +63,7 @@ app.MapScalarApiReference();
 
 app.UseExceptionHandler(options => { });
 
-app.Map("/", () => Results.Redirect("/scalar"));
+app.Map("/", () => Results.Redirect("/login"));
 app.MapHub<AppHub>("/hubs/app").RequireAuthorization();
 app.MapDefaultEndpoints();
 app.MapEndpoints(typeof(Program).Assembly);
