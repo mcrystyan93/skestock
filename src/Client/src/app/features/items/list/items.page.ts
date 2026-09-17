@@ -1,6 +1,6 @@
 import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ItemListState } from '../services/item-list.store';
-import { GetAllItemsRequest, ItemDto, ItemImportBatchDto, ItemImportBatchListItemDto } from '@ske/models';
+import { GetAllItemsRequest, ItemDto, ItemImportBatchListItemDto } from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { Header } from './header/header';
 import { ItemDetailModal, ItemImportModal, ItemImportReviewModal, ItemImportState } from '@ske/shared/items';
@@ -73,7 +73,8 @@ export class ItemsPage implements OnInit, OnDestroy {
     const modalRef = this._modalService.create({
       nzContent: ItemImportReviewModal,
       nzData: importId,
-      nzWidth: '95vw',
+      // nzWidth: '95vw',
+      nzWrapClassName: 'modal-90',
       nzCentered: true,
       nzMaskClosable: false
     });

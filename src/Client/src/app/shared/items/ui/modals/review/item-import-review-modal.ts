@@ -13,17 +13,17 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
 import { NzTimelineComponent, NzTimelineItemComponent } from 'ng-zorro-antd/timeline';
 import { DatePipe } from '@angular/common';
-import {
-  ITEM_IMPORT_BATCH_STATUS_COLORS,
-  ITEM_IMPORT_BATCH_STATUS_LABELS
-} from '@ske/models';
+import { ITEM_IMPORT_BATCH_STATUS_COLORS, ITEM_IMPORT_BATCH_STATUS_LABELS } from '@ske/models';
 
 @Component({
   imports: [FormsModule, NzButtonComponent, NzModalFooterDirective,
     NzModalTitleDirective, NzSpaceComponent, NzSpaceItemDirective, ItemImportReviewTable, ErrorAlert, NzTagComponent, NzTypographyComponent, NzIconDirective, NzTabComponent, NzTabsComponent, NzTimelineComponent, NzTimelineItemComponent, DatePipe],
   selector: 'ske-item-import-review-modal',
   templateUrl: './item-import-review-modal.html',
-  providers: [ItemImportReviewState]
+  providers: [ItemImportReviewState],
+  host:{
+    class: 'grow flex flex-col'
+  }
 })
 export class ItemImportReviewModal {
   private readonly _modalRef = inject(NzModalRef);

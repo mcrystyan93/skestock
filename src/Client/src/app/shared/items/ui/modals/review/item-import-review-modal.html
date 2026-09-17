@@ -15,7 +15,7 @@
 
 <ske-error-alert [problemDetail]="store.reviewProblemDetail()"
                  [validationErrors]="store.reviewValidationErrors()" />
-<nz-tabs>
+<nz-tabs class="inner-scroll grow">
   <nz-tab nzTitle="Rezumat">
     @if (store.review(); as review) {
       @if (store.files().length > 0) {

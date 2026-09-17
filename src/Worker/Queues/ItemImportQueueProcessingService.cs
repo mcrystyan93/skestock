@@ -25,7 +25,6 @@ public class ItemImportQueueProcessingService(
 
     private readonly TimeSpan _pollInterval = TimeSpan.FromSeconds(5);
     private const int BatchSize = 10;
-    private const int MaxRetries = 5;
     private const int VisibilityTimeoutSeconds = 1200;
     private const int MaxDequeueCount = 5;
 
@@ -65,7 +64,7 @@ public class ItemImportQueueProcessingService(
     {
         using var scope = scopeFactory.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
-        var mediator = scope.ServiceProvider.GetRequiredService<ISender>(); // MediatR ISender, template convention
+        var mediator = scope.ServiceProvider.GetRequiredService<ISender>(); // Mediator ISender, template convention
 
         MessageEnvelope envelope;
         try

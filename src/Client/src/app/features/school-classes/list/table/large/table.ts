@@ -1,12 +1,12 @@
 import { Component, input, output } from '@angular/core';
-import { BaseTable } from '@ske/shared/tables';
+import { BaseTableWithFilter } from '@ske/shared/tables';
 import {
   CLASS_STATUS_COLORS,
   CLASS_STATUS_LABELS,
   ClassStatus,
   GetAllSchoolClassesRequest,
   SCHOOL_CLASS_TABLE_COLUMNS,
-  SchoolClassDto,
+  SchoolClassDto
 } from '@ske/models';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { DatePipe } from '@angular/common';
@@ -23,7 +23,7 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
     class: 'absolute block inset-0',
   },
 })
-export class Table extends BaseTable<SchoolClassDto, GetAllSchoolClassesRequest> {
+export class Table extends BaseTableWithFilter<SchoolClassDto, GetAllSchoolClassesRequest> {
   public readonly loading = input.required<boolean>();
 
   public readonly onEdit = output<SchoolClassDto>();

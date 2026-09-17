@@ -12,10 +12,10 @@ public class Categories : IEndpointGroup
 {
     public static void Map(RouteGroupBuilder groupBuilder)
     {
-        groupBuilder.MapPost(GetAllCategories, "get-all").RequireAuthorization();
-        groupBuilder.MapGet(GetCategoryById, "{id}").RequireAuthorization();
-        groupBuilder.MapPost(CreateCategory, "").RequireAuthorization();
-        groupBuilder.MapPut(UpdateCategory, "{id}").RequireAuthorization();
+        groupBuilder.MapPost(GetAllCategories, "get-all");
+        groupBuilder.MapGet(GetCategoryById, "{id}");
+        groupBuilder.MapPost(CreateCategory, "");
+        groupBuilder.MapPut(UpdateCategory, "{id}");
     }
 
     [EndpointSummary("Get all categories")]

@@ -11,7 +11,7 @@ public class Users : IEndpointGroup
     {
         groupBuilder.MapIdentityApi<ApplicationUser>();
 
-        groupBuilder.MapPost(Logout, "logout").RequireAuthorization();
+        groupBuilder.MapPost(Logout, "logout");
     }
 
     [EndpointSummary("Log out")]

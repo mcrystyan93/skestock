@@ -12,10 +12,10 @@ public class ItemImportBatches : IEndpointGroup
 {
     public static void Map(RouteGroupBuilder groupBuilder)
     {
-        groupBuilder.MapPost(CreateItemImportBatch, "").RequireAuthorization();
-        groupBuilder.MapPost(GetAllItemImportBatches, "get-all").RequireAuthorization();
-        groupBuilder.MapGet(GetItemImportBatchById, "{id}").RequireAuthorization();
-        groupBuilder.MapPost(ConfirmItemImportBatch, "{id}/confirm").RequireAuthorization();
+        groupBuilder.MapPost(CreateItemImportBatch, "");
+        groupBuilder.MapPost(GetAllItemImportBatches, "get-all");
+        groupBuilder.MapGet(GetItemImportBatchById, "{id}");
+        groupBuilder.MapPost(ConfirmItemImportBatch, "{id}/confirm");
     }
 
     [EndpointSummary("List item import batches")]

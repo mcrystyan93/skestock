@@ -34,7 +34,7 @@ export class TableContainer {
     const modalRef = this._nzModalService.create({
       nzContent: ReviewModal,
       nzData: <ReviewModalData>{ importId: importDto.id },
-      nzWidth: '90vw',
+      nzWrapClassName: 'modal-90',
       nzCentered: true,
       nzMaskClosable: false
     });

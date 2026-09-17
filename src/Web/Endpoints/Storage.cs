@@ -11,9 +11,9 @@ public class Storage : IEndpointGroup
 {
     public static void Map(RouteGroupBuilder groupBuilder)
     {
-        groupBuilder.MapPost(RequestUpload, "request-upload").RequireAuthorization();
-        groupBuilder.MapPost(ConfirmUpload, "confirm-upload").RequireAuthorization();
-        groupBuilder.MapGet(GetFileDownload, "{fileId:guid}/download").RequireAuthorization();
+        groupBuilder.MapPost(RequestUpload, "request-upload");
+        groupBuilder.MapPost(ConfirmUpload, "confirm-upload");
+        groupBuilder.MapGet(GetFileDownload, "{fileId:guid}/download");
     }
 
     [EndpointSummary("Request a file upload")]

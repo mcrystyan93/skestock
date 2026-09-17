@@ -1,9 +1,10 @@
+@let dimensions = tableDimensions();
 <nz-table nzSize="small"
           nzTableLayout="fixed"
           [nzTemplateMode]="true"
-          [nzScroll]="{ x: '1250px', y: '450px' }"
           [nzFrontPagination]="false"
-          [nzShowPagination]="false">
+          [nzShowPagination]="false"
+          [nzScroll]="{x:dimensions.width, y:dimensions.height}">
   <thead>
   <tr>
     <th nzWidth="100px">Cod</th>

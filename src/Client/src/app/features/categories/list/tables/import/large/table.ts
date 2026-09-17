@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, input, output } from '@angular/core';
-import { BaseTable } from '@ske/shared/tables';
+import { BaseTableWithFilter } from '@ske/shared/tables';
 import {
   CATEGORY_IMPORT_BATCH_STATUS_COLORS,
   CATEGORY_IMPORT_BATCH_STATUS_LABELS,
@@ -35,7 +35,7 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
     class: 'absolute block inset-0'
   }
 })
-export class Table extends BaseTable<CategoryImportBatchListItemDto, GetAllCategoryImportBatchesRequest> {
+export class Table extends BaseTableWithFilter<CategoryImportBatchListItemDto, GetAllCategoryImportBatchesRequest> {
   public readonly loading = input.required<boolean>();
   public readonly columns = CATEGORY_IMPORT_BATCH_TABLE_COLUMNS;
   public readonly downloadFile = output<CategoryImportBatchFileDto>();

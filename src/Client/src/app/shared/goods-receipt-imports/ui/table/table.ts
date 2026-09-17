@@ -1,15 +1,19 @@
-import {Component, input, output} from '@angular/core';
-import { BaseTable } from '@ske/shared/tables';
+import { Component, input, output } from '@angular/core';
+import { BaseTableWithFilter } from '@ske/shared/tables';
 import {
-  GetAllGoodsReceiptImportsRequest, GOODS_RECEIPT_IMPORT_STATUS_COLORS,
-  GOODS_RECEIPT_IMPORT_STATUS_LABELS, GOODS_RECEIPT_IMPORT_TABLE_COLUMNS, GoodsReceiptImportListItemDto,
+  GetAllGoodsReceiptImportsRequest,
+  GOODS_RECEIPT_IMPORT_STATUS_COLORS,
+  GOODS_RECEIPT_IMPORT_STATUS_LABELS,
+  GOODS_RECEIPT_IMPORT_TABLE_COLUMNS,
+  GoodsReceiptImportListItemDto,
   GoodsReceiptImportStatus
 } from '@ske/models';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { DatePipe } from '@angular/common';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
-import {NzButtonComponent} from 'ng-zorro-antd/button';
-import {NzIconDirective} from 'ng-zorro-antd/icon';
+import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
+import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
 
 @Component({
   imports: [
@@ -17,7 +21,8 @@ import {NzIconDirective} from 'ng-zorro-antd/icon';
     DatePipe,
     NzTagComponent,
     NzButtonComponent,
-    NzIconDirective
+    NzIconDirective,
+    NzTooltipDirective
   ],
   selector: 'ske-goods-receipt-imports-table',
   styles: ``,
@@ -26,7 +31,7 @@ import {NzIconDirective} from 'ng-zorro-antd/icon';
     class: 'absolute block inset-0'
   }
 })
-export class Table extends BaseTable<GoodsReceiptImportListItemDto, GetAllGoodsReceiptImportsRequest> {
+export class Table extends BaseTableWithFilter<GoodsReceiptImportListItemDto, GetAllGoodsReceiptImportsRequest> {
   public readonly loading = input.required<boolean>();
 
   public readonly downloadFile = output<GoodsReceiptImportListItemDto>();

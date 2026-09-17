@@ -12,10 +12,10 @@ public class CategoryImportBatches : IEndpointGroup
 {
     public static void Map(RouteGroupBuilder groupBuilder)
     {
-        groupBuilder.MapPost(CreateCategoryImportBatch, "").RequireAuthorization();
-        groupBuilder.MapPost(GetAllCategoryImportBatches, "get-all").RequireAuthorization();
-        groupBuilder.MapGet(GetCategoryImportBatchById, "{id}").RequireAuthorization();
-        groupBuilder.MapPost(ConfirmCategoryImportBatch, "{id}/confirm").RequireAuthorization();
+        groupBuilder.MapPost(CreateCategoryImportBatch, "");
+        groupBuilder.MapPost(GetAllCategoryImportBatches, "get-all");
+        groupBuilder.MapGet(GetCategoryImportBatchById, "{id}");
+        groupBuilder.MapPost(ConfirmCategoryImportBatch, "{id}/confirm");
     }
 
     [EndpointSummary("Create a new category import")]

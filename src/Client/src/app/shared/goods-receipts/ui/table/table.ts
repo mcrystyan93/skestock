@@ -1,5 +1,5 @@
 import { Component, effect, input, output, signal, untracked } from '@angular/core';
-import { BaseTable } from '@ske/shared/tables';
+import { BaseTableWithFilter } from '@ske/shared/tables';
 import { GetAllGoodsReceiptsRequest, GOODS_RECEIPT_TABLE_COLUMNS, GoodsReceiptListItemDto } from '@ske/models';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
@@ -24,7 +24,7 @@ import { TableContainer as StockBatchesTableContainer } from '@ske/shared/stock-
     class: 'absolute block inset-0'
   }
 })
-export class Table extends BaseTable<GoodsReceiptListItemDto, GetAllGoodsReceiptsRequest> {
+export class Table extends BaseTableWithFilter<GoodsReceiptListItemDto, GetAllGoodsReceiptsRequest> {
   public readonly loading = input.required<boolean>();
   public readonly expandedReceiptId = input<string | null>(null);
 

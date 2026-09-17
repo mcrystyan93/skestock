@@ -5,13 +5,15 @@ import { ItemImportReviewEditableLine } from '../../../services/item-import-revi
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { applyEach, form, required, schema, submit } from '@angular/forms/signals';
 import { ItemImportReviewLineRow } from './item-import-review-line-row';
+import { BaseTable } from '@ske/shared/tables';
 
 @Component({
   imports: [NzTableModule, ItemImportReviewLineRow],
   selector: 'ske-item-import-review-table',
-  templateUrl: './item-import-review-table.html'
+  templateUrl: './item-import-review-table.html',
+  host: { class: 'absolute block inset-0' }
 })
-export class ItemImportReviewTable {
+export class ItemImportReviewTable extends BaseTable {
   public readonly lines = input.required<ItemImportReviewEditableLine[]>();
   public readonly loading = input.required<boolean>();
 
@@ -27,6 +29,10 @@ export class ItemImportReviewTable {
   public readonly linesForm = form(this._linesModel, (schemaPath) => {
     applyEach(schemaPath.lines, this._lineSchema);
   });
+
+  constructor() {
+    super();
+  }
 
   public async submit(): Promise<ReviewLinesSubmitResult> {
     let isValid = false;
