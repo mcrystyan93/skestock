@@ -1,4 +1,4 @@
-import { Component, effect, input, linkedSignal, output, signal, untracked } from '@angular/core';
+import { Component, effect, input, linkedSignal, output, untracked } from '@angular/core';
 import { NzSwitchComponent } from 'ng-zorro-antd/switch';
 import { form, FormField } from '@angular/forms/signals';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
@@ -36,7 +36,7 @@ export class ThemeSwitcherFormComponent {
     effect(() => {
       const isDarkMode = this.themeForm.darkMode().value();
 
-      untracked(() => this.onThemeChange.emit(isDarkMode ? Theme.dark : Theme.default));
+      untracked(() => this.onThemeChange.emit(isDarkMode ? Theme.dark : Theme.compact));
     });
   }
 }

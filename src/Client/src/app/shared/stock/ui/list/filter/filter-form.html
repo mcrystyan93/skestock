@@ -15,7 +15,7 @@
                    id="searchTerm"
                    placeholder="Cautați..."
                    nzVariant="borderless"
-                   [formField]="stockListFilterForm.searchTerm"/>
+                   [formField]="stockListFilterForm.searchTerm" />
           </nz-input-wrapper>
         </nz-form-control>
       </nz-form-item>
@@ -24,7 +24,7 @@
       <nz-form-item>
         <nz-form-control nzSpan="24">
           <ske-location-dropdown [formField]="stockListFilterForm.location"
-                                 [allowClear]="true"/>
+                                 [allowClear]="true" />
         </nz-form-control>
       </nz-form-item>
     </nz-col>
@@ -34,7 +34,7 @@
           <ske-category-dropdown [formField]="stockListFilterForm.category"
                                  [allowClear]="true"
                                  [allowCreate]="false"
-                                 [allowEdit]="false"/>
+                                 [allowEdit]="false" />
         </nz-form-control>
       </nz-form-item>
     </nz-col>
@@ -43,6 +43,7 @@
         <button type="submit"
                 *nzSpaceItem
                 nz-button
+                nzSize="small"
                 nzType="primary"
                 [nzLoading]="loading()">
           <nz-icon nzType="icons:magnifying-glass"></nz-icon>
@@ -50,6 +51,7 @@
         </button>
         <button *nzSpaceItem
                 nz-button
+                nzSize="small"
                 type="button"
                 nzType="default"
                 [nzLoading]="loading()"
@@ -60,6 +62,7 @@
       </nz-space>
       <nz-divider nzType="vertical"></nz-divider>
       <button nz-button
+              nzSize="small"
               nzType="primary"
               type="button"
               (click)="onAdd.emit()">
@@ -81,7 +84,7 @@
       <nz-form-item class="gap-2 items-center">
         <nz-form-label>Afișează cele cu stoc redus</nz-form-label>
         <nz-form-control>
-          <nz-switch [formField]="stockListFilterForm.lowStockOnly"/>
+          <nz-switch [formField]="stockListFilterForm.lowStockOnly" />
         </nz-form-control>
       </nz-form-item>
     </nz-col>
@@ -89,7 +92,7 @@
       <nz-form-item class="gap-2 items-center">
         <nz-form-label>Afișează cele expirate</nz-form-label>
         <nz-form-control>
-          <nz-switch [formField]="stockListFilterForm.expiredOnly"/>
+          <nz-switch [formField]="stockListFilterForm.expiredOnly" />
         </nz-form-control>
       </nz-form-item>
     </nz-col>

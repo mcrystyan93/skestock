@@ -2,7 +2,7 @@
   <div class="flex h-full items-center">
     <ng-container *skeLayoutBreakpoint="'xl';else:menuToggleTemplate"></ng-container>
     <ng-template #menuToggleTemplate>
-      <button nz-button
+      <button nz-button nzSize="small"
               type="button"
               nzType="text"
               (click)="drawerToggle.emit()">

@@ -60,7 +60,7 @@ import {NzModalService} from 'ng-zorro-antd/modal';
       </nz-select>
 
       @if (allowEdit()) {
-        <button nz-button
+        <button nz-button nzSize="small"
                 nzType="primary"
                 type="button"
                 (click)="onEdit(value())"
@@ -69,7 +69,7 @@ import {NzModalService} from 'ng-zorro-antd/modal';
         </button>
       }
       @if (allowCreate()) {
-        <button nz-button
+        <button nz-button nzSize="small"
                 nzType="primary"
                 type="button"
                 (click)="onAdd()">

@@ -32,11 +32,12 @@
 
   <ske-stock-adjustment-form *nzSpaceItem
                              [loading]="store.stockAdjustmentLoading()"
-                             [item]="modalData().item" />
+                             [item]="modalData().item"/>
 </nz-space>
 <div *nzModalFooter>
   <nz-space>
     <button nz-button
+            nzSize="small"
             *nzSpaceItem
             nzType="default"
             type="button"
@@ -46,8 +47,10 @@
     </button>
 
 
-    <nz-space-compact *nzSpaceItem>
+    <nz-space-compact *nzSpaceItem
+                      nzSize="small">
       <button nz-button
+              nzSize="small"
               nzType="primary"
               type="button"
               (click)="save()"
@@ -55,6 +58,7 @@
         Salvează si inchide
       </button>
       <button nz-button
+              nzSize="small"
               nzType="primary"
               type="button"
               nz-dropdown

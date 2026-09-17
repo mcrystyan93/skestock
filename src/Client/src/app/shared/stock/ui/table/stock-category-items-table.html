@@ -1,0 +1,48 @@
+<nz-table #table
+          nzTableLayout="fixed"
+          [nzTemplateMode]="true"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          [nzLoading]="loading()"
+          nzSize="small"
+          class="block overflow-auto">
+  <thead>
+  <tr>
+    <th nzColumnKey="itemName"
+        nzWidth="280px">
+      <strong>{{ columns.itemName.label }}</strong>
+    </th>
+    <th nzColumnKey="locationName"
+        nzWidth="150px">
+      <strong>{{ columns.locationName.label }}</strong>
+    </th>
+    <th nzColumnKey="isPerishable"
+        nzWidth="150px">
+      <strong>{{ columns.isPerishable.label }}</strong>
+    </th>
+    <th nzColumnKey="quantity"
+        nzWidth="120px">
+      <strong>{{ columns.quantity.label }}</strong>
+    </th>
+    <th nzColumnKey="isLowStock"
+        nzWidth="150px">
+      <strong>{{ columns.isLowStock.label }}</strong>
+    </th>
+    <th nzRight
+        nzWidth="140px">
+      <strong>Actiuni</strong>
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+    @for (item of items(); track item.itemId + ':' + item.locationId) {
+      <tr ske-stock-category-item-row
+          [item]="item"
+          (adjust)="adjust.emit($event)"
+          (move)="move.emit($event)"
+          (removeExpired)="removeExpired.emit($event)"
+          (visibilityChange)="visibilityChange.emit($event)">
+      </tr>
+    }
+  </tbody>
+</nz-table>
