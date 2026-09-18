@@ -11,6 +11,7 @@ export type StockItemDto = {
   categoryIcon?: IconPickerValue | null;
   locationId: string;
   locationName: string;
+  lastUpdatedAt: string | null;
   unit: string;
   isPerishable: boolean;
   isExpired: boolean;
@@ -101,6 +102,7 @@ export type SetClassItemStockVisibilityRequest = {
 export type StockTableColumn =
   | 'itemName'
   | 'locationName'
+  | 'lastUpdatedAt'
   | 'unit'
   | 'isPerishable'
   | 'quantity'
@@ -116,6 +118,11 @@ export const STOCK_TABLE_COLUMNS: TableColumnDefinition<StockTableColumn> = {
     label: 'Locatie',
     value: 'locationName',
     fieldType: 'string'
+  },
+  lastUpdatedAt: {
+    label: 'Ultima actualizare',
+    value: 'lastUpdatedAt',
+    fieldType: 'date'
   },
   unit: {
     label: 'Unitate',

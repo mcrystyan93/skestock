@@ -1,5 +1,5 @@
 import { Component, effect, input, linkedSignal, output } from '@angular/core';
-import { ColumnFilter, GetAllCategoriesRequest } from '@ske/models';
+import { GetAllCategoriesRequest } from '@ske/models';
 import { form, FormField, submit } from '@angular/forms/signals';
 import { isNil } from 'lodash-es';
 import { FormsModule } from '@angular/forms';
@@ -9,6 +9,7 @@ import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { CategoryDropdown } from '@ske/shared/categories';
 
 @Component({
   imports: [
@@ -22,7 +23,8 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
     FormField,
     NzSpaceComponent,
     NzSpaceItemDirective,
-    NzButtonComponent
+    NzButtonComponent,
+    CategoryDropdown
   ],
   selector: 'ske-category-filter-form',
   styles: ``,
@@ -38,8 +40,7 @@ export class FilterForm {
   private readonly _formModel = linkedSignal({
     source: () => this.filter(),
     computation: (filter) => (<CategoryListFilterModel>{
-      searchTerm: filter.searchTerm ?? '',
-      filters: filter.filters ?? []
+      searchTerm: filter.searchTerm ?? ''
     })
   });
 
@@ -62,7 +63,7 @@ export class FilterForm {
     return {
       ...this.filter(),
       searchTerm: criteria.searchTerm,
-      filters: (criteria.filters ?? [])
+      filters: (this.filter().filters ?? [])
         .filter(
           (f) => !isNil(f.value) && !isNil(f.fieldType) && !isNil(f.operator) && !isNil(f.field)
         )
@@ -94,8 +95,7 @@ export class FilterForm {
 
   public clear() {
     this.categoryListFilterForm().reset({
-      searchTerm: '',
-      filters: []
+      searchTerm: ''
     });
 
     this.onSubmit();
@@ -104,5 +104,4 @@ export class FilterForm {
 
 type CategoryListFilterModel = {
   searchTerm: string;
-  filters: Array<ColumnFilter>;
 }

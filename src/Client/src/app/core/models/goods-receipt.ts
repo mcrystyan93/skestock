@@ -172,7 +172,7 @@ export function buildGoodsReceiptImportListFilter(
 export type GoodsReceiptTableColumn =
   | 'className'
   | 'receivedAt'
-  | 'supplierReference'
+  | 'note'
   | 'lineCount'
   | 'totalQuantity'
   | 'totalAmount'
@@ -190,9 +190,9 @@ export const GOODS_RECEIPT_TABLE_COLUMNS: TableColumnDefinition<GoodsReceiptTabl
     value: 'receivedAt',
     fieldType: 'date'
   },
-  supplierReference: {
-    label: 'Referinta furnizor',
-    value: 'supplierReference',
+  note: {
+    label: 'Detalii',
+    value: 'note',
     fieldType: 'string'
   },
   lineCount: {

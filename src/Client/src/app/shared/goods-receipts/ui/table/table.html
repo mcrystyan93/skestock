@@ -20,15 +20,18 @@
       {{ columns.receivedAt.label }}
     </th>
     <th nzWidth="180px">
-      {{ columns.supplierReference.label }}
+      {{ columns.note.label }}
     </th>
-    <th nzWidth="110px">
+    <th nzWidth="110px"
+        class="text-right!">
       {{ columns.lineCount.label }}
     </th>
-    <th nzWidth="130px">
+    <th nzWidth="130px"
+        class="text-right!">
       {{ columns.totalQuantity.label }}
     </th>
-    <th nzWidth="150px">
+    <th nzWidth="150px"
+        class="text-right!">
       {{ columns.totalAmount.label }}
     </th>
     <th nzWidth="180px">
@@ -55,15 +58,15 @@
         {{ goodsReceipt.receivedAt | date }}
       </td>
       <td>
-        {{ goodsReceipt.supplierReference }}
+        {{ goodsReceipt.note }}
       </td>
-      <td>
+      <td class="text-right pr-3!">
         {{ goodsReceipt.lineCount }}
       </td>
-      <td>
+      <td class="text-right pr-3!">
         {{ goodsReceipt.totalQuantity | number:'1.0-0' }}
       </td>
-      <td>
+      <td class="text-right pr-3!">
         {{ goodsReceipt.totalAmount | currency:'RON' }}
       </td>
       <td>
@@ -74,7 +77,8 @@
       </td>
       <td nzRight>
         <button type="button"
-                nz-button nzSize="small"
+                nz-button
+                nzSize="small"
                 nzType="link"
                 [disabled]="!goodsReceipt.fileMetadataId"
                 title="Descarca fisierul"

@@ -1,6 +1,7 @@
-<nz-layout>
-  <ske-header (drawerToggle)="drawerOpen.set(!drawerOpen())"></ske-header>
-  <nz-layout>
+<nz-layout class="min-w-0">
+  <ske-header (drawerToggle)="drawerOpen.set(!drawerOpen())"
+              class="min-w-0"></ske-header>
+  <nz-layout class="min-w-0">
     <ng-container *skeLayoutBreakpoint="'xl';else:drawerTemplate">
       <nz-sider>
         <ng-container *ngTemplateOutlet="menuTemplate"></ng-container>
@@ -22,7 +23,7 @@
       </nz-drawer>
     </ng-template>
 
-    <nz-content class="flex!">
+    <nz-content class="flex! min-w-0">
       <router-outlet></router-outlet>
     </nz-content>
   </nz-layout>

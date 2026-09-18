@@ -872,4 +872,107 @@ public class GetClassLocationStockHandlerTests
         normalResult.Value.Items.ShouldBeEmpty();
         hiddenResult.Value.Items.Single().Quantity.ShouldBe(-2);
     }
+
+    [Test]
+    public async Task Handle_ReturnsLatestTransactionForSelectedClassItemAndLocationScope()
+    {
+        await using var context = CreateContext();
+        var (item, location, schoolClass) = await SeedBaseData(context);
+        var otherLocation = new Location { Name = "Storage", Type = "Warehouse" };
+        var otherClass = new SchoolClass
+        {
+            Name = "Spring 2027",
+            StartDate = new DateOnly(2027, 2, 1),
+            EndDate = new DateOnly(2027, 7, 31)
+        };
+        context.Locations.Add(otherLocation);
+        context.SchoolClasses.Add(otherClass);
+        context.StockBatches.Add(new StockBatch
+        {
+            Item = item,
+            Location = location,
+            ReceivedClass = schoolClass,
+            Quantity = 5,
+            ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow)
+        });
+        context.StockBatches.Add(new StockBatch
+        {
+            Item = item,
+            Location = otherLocation,
+            ReceivedClass = schoolClass,
+            Quantity = 3,
+            ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow)
+        });
+
+        var expectedLastUpdatedAt = new DateTime(2026, 10, 2, 12, 0, 0, DateTimeKind.Utc);
+        context.StockTransactions.AddRange(
+            new StockTransaction
+            {
+                Item = item,
+                Location = location,
+                Class = schoolClass,
+                CreatedAt = expectedLastUpdatedAt.AddDays(-1)
+            },
+            new StockTransaction
+            {
+                Item = item,
+                Location = location,
+                Class = schoolClass,
+                CreatedAt = expectedLastUpdatedAt
+            },
+            new StockTransaction
+            {
+                Item = item,
+                Location = location,
+                Class = otherClass,
+                CreatedAt = expectedLastUpdatedAt.AddDays(2)
+            },
+            new StockTransaction
+            {
+                Item = item,
+                Location = otherLocation,
+                Class = schoolClass,
+                CreatedAt = expectedLastUpdatedAt.AddDays(3)
+            });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new GetClassLocationStockHandler(context);
+        var result = await handler.Handle(
+            new GetClassLocationStockQuery
+            {
+                ClassId = schoolClass.Id
+            },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Count.ShouldBe(2);
+        result.Value.Items.Single(itemRow => itemRow.LocationId == location.Id)
+            .LastUpdatedAt.ShouldBe(expectedLastUpdatedAt);
+        result.Value.Items.Single(itemRow => itemRow.LocationId == otherLocation.Id)
+            .LastUpdatedAt.ShouldBe(expectedLastUpdatedAt.AddDays(3));
+    }
+
+    [Test]
+    public async Task Handle_WhenNoMatchingTransactionsExist_ReturnsNullLastUpdatedAt()
+    {
+        await using var context = CreateContext();
+        var (item, location, schoolClass) = await SeedBaseData(context);
+        context.StockBatches.Add(new StockBatch
+        {
+            Item = item,
+            Location = location,
+            ReceivedClass = schoolClass,
+            Quantity = 5,
+            ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow)
+        });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new GetClassLocationStockHandler(context);
+        var result = await handler.Handle(
+            new GetClassLocationStockQuery { ClassId = schoolClass.Id },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Single().LastUpdatedAt.ShouldBeNull();
+    }
 }

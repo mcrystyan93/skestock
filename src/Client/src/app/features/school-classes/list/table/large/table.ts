@@ -13,9 +13,10 @@ import { DatePipe } from '@angular/common';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
+import { StopClick } from '@ske/shared/directives';
 
 @Component({
-  imports: [DatePipe, NzButtonComponent, NzIconDirective, NzTagComponent, NzTableModule],
+  imports: [DatePipe, NzButtonComponent, NzIconDirective, NzTagComponent, NzTableModule, StopClick],
   selector: 'ske-school-class-table',
   styles: ``,
   templateUrl: './table.html',

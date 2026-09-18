@@ -1,42 +1,46 @@
-import {Component, computed, effect, inject, input, linkedSignal, output, untracked} from '@angular/core';
-import {CategoryDropdownValue, ColumnFilter, GetClassLocationStockRequest, LocationDropdownValue} from '@ske/models';
-import {form, FormField, submit} from '@angular/forms/signals';
-import {isNil} from 'lodash-es';
-import {FormsModule} from '@angular/forms';
-import {NzFormDirective} from 'ng-zorro-antd/form';
-import {NzColDirective, NzRowDirective} from 'ng-zorro-antd/grid';
-import {NzInputDirective, NzInputWrapperComponent} from 'ng-zorro-antd/input';
-import {NzIconDirective} from 'ng-zorro-antd/icon';
-import {NzSpaceComponent, NzSpaceItemDirective} from 'ng-zorro-antd/space';
-import {NzButtonComponent} from 'ng-zorro-antd/button';
-import {CategoryDropdown} from '@ske/shared/categories';
-import {LocationDropdown} from '@ske/shared/locations';
-import {NzDividerComponent} from 'ng-zorro-antd/divider';
-import {NzCheckboxComponent} from 'ng-zorro-antd/checkbox';
-import {StockPreferencesService} from '../../../services/stock-preferences.service';
-import {NzSwitchComponent} from 'ng-zorro-antd/switch';
+import { Component, effect, input, linkedSignal, output, untracked } from '@angular/core';
+import {
+  buildEqualsFilter,
+  CategoryDropdownValue,
+  ColumnFilter,
+  GetClassLocationStockRequest,
+  getDropdownFilterValue,
+  LocationDropdownValue
+} from '@ske/models';
+import { debounce, form, FormField, submit } from '@angular/forms/signals';
+import { isEqual, isNil } from 'lodash-es';
+import { FormsModule } from '@angular/forms';
+import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
+import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
+import { LocationDropdown } from '@ske/shared/locations';
+import { CategoryDropdown } from '@ske/shared/categories';
+import { NzSegmentedComponent, NzSegmentedItemComponent } from 'ng-zorro-antd/segmented';
+import { NzInputDirective, NzInputPrefixDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
+import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { NzDividerComponent } from 'ng-zorro-antd/divider';
 
 @Component({
   imports: [
     FormsModule,
-    NzFormDirective,
     NzRowDirective,
     NzColDirective,
+    FormField,
+    LocationDropdown,
+    NzSpaceCompactComponent,
+    CategoryDropdown,
+    NzSegmentedComponent,
+    NzSegmentedItemComponent,
     NzInputWrapperComponent,
     NzIconDirective,
+    NzInputPrefixDirective,
     NzInputDirective,
-    FormField,
-    NzSpaceComponent,
-    NzSpaceItemDirective,
     NzButtonComponent,
-    CategoryDropdown,
-    LocationDropdown,
-    NzDividerComponent,
-    NzCheckboxComponent,
-    NzSwitchComponent
+    NzDividerComponent
   ],
   selector: 'ske-stock-filter-form',
-  styles: ``,
+  styles: `
+  `,
   templateUrl: './filter-form.html'
 })
 export class FilterForm {
@@ -45,6 +49,14 @@ export class FilterForm {
 
   public readonly onFilterChange = output<GetClassLocationStockRequest>();
   public readonly onAdd = output<void>();
+  private _initialFormChangeHandled = false;
+
+  public readonly booleanSegmentOptions = [
+    { label: 'Toate', value: StockBooleanField.All },
+    { label: 'Ascunse', value: StockBooleanField.IncludeHidden },
+    { label: 'Stoc redus', value: StockBooleanField.LowStockOnly },
+    { label: 'Expirate', value: StockBooleanField.ExpiredOnly }
+  ];
 
   private readonly _formModel = linkedSignal({
     source: () => this.filter(),
@@ -52,70 +64,31 @@ export class FilterForm {
       searchTerm: filter.searchTerm ?? '',
       location: getDropdownFilterValue(filter.filters, 'locationId'),
       category: getDropdownFilterValue(filter.filters, 'categoryId'),
-      includeHidden: filter.includeHidden ?? false,
-      lowStockOnly: filter.lowStockOnly ?? false,
-      expiredOnly: filter.expiredOnly ?? false
+      booleanSegmentValue: filter.includeHidden ? StockBooleanField.IncludeHidden :
+        filter.lowStockOnly ? StockBooleanField.LowStockOnly :
+          filter.expiredOnly ? StockBooleanField.ExpiredOnly : StockBooleanField.All
     })
   });
 
-  public readonly stockListFilterForm = form(this._formModel);
+  public readonly stockListFilterForm = form(this._formModel, (schemaPath) => {
+    debounce(schemaPath.searchTerm, 300);
+  });
 
-  private readonly _categoryEffectChange = effect(() => {
-    const categoryValue = this._getCategoryValue();
-    const categoryFormValue = this.stockListFilterForm().value().category;
+  private readonly _formEffectChange = effect(() => {
+    const formValue = this.stockListFilterForm().value();
 
-    if (categoryValue === (categoryFormValue?.id ?? null))
+    if (!this._initialFormChangeHandled) {
+      this._initialFormChangeHandled = true;
+      return;
+    }
+
+    const currentFilter = untracked(() => this.filter());
+    const nextFilter = untracked(() => this.buildFilterCriteria());
+
+    if (isEqual(currentFilter, nextFilter))
       return;
 
     untracked(() => this.onSubmit());
-  });
-
-  private readonly _locationEffectChange = effect(() => {
-    const locationValue = this._getLocationValue();
-    const locationFormValue = this.stockListFilterForm().value().location;
-
-    if (locationValue === (locationFormValue?.id ?? null))
-      return;
-
-    untracked(() => this.onSubmit());
-  });
-
-  private readonly _includeHiddenEffectChange = effect(() => {
-    const includeHiddenValue = this.stockListFilterForm().value().includeHidden;
-
-    untracked(() => this.onSubmit())
-  });
-
-  private readonly _lowStockOnlyEffectChange = effect(() => {
-    const lowStockOnlyValue = this.stockListFilterForm().value().lowStockOnly;
-    const currentFilter = this.filter();
-
-    if (lowStockOnlyValue === (currentFilter.lowStockOnly ?? false))
-      return;
-
-    untracked(() => this.onSubmit())
-  });
-
-  private readonly _expiredOnlyEffectChange = effect(() => {
-    const expiredOnlyValue = this.stockListFilterForm().value().expiredOnly;
-    const currentFilter = this.filter();
-
-    if (expiredOnlyValue === (currentFilter.expiredOnly ?? false))
-      return;
-
-    untracked(() => this.onSubmit())
-  });
-
-  private readonly _getLocationValue = computed(() => {
-    const currentFilter = this.filter();
-
-    return currentFilter.filters.find(filter => filter.field === 'locationId')?.value ?? null;
-  });
-
-  private readonly _getCategoryValue = computed(() => {
-    const currentFilter = this.filter();
-
-    return currentFilter.filters.find(filter => filter.field === 'categoryId')?.value ?? null;
   });
 
   private buildFilterCriteria(): GetClassLocationStockRequest {
@@ -131,9 +104,9 @@ export class FilterForm {
           buildEqualsFilter('categoryId', criteria.category)
         ].filter((filter): filter is ColumnFilter => filter !== null)
       ],
-      includeHidden: criteria.includeHidden,
-      lowStockOnly: criteria.lowStockOnly,
-      expiredOnly: criteria.expiredOnly
+      includeHidden: criteria.booleanSegmentValue === StockBooleanField.IncludeHidden,
+      lowStockOnly: criteria.booleanSegmentValue === StockBooleanField.LowStockOnly,
+      expiredOnly: criteria.booleanSegmentValue === StockBooleanField.ExpiredOnly
     };
   }
 
@@ -157,9 +130,7 @@ export class FilterForm {
       searchTerm: '',
       location: null,
       category: null,
-      includeHidden: false,
-      lowStockOnly: false,
-      expiredOnly: false
+      booleanSegmentValue: StockBooleanField.All
     });
 
     this.onSubmit();
@@ -170,41 +141,14 @@ type StockListFilterModel = {
   searchTerm: string;
   location: LocationDropdownValue;
   category: CategoryDropdownValue;
-  includeHidden: boolean;
-  lowStockOnly: boolean;
-  expiredOnly: boolean;
+  booleanSegmentValue: StockBooleanField;
 }
 
 const STOCK_FILTER_FIELDS = new Set(['locationId', 'categoryId']);
 
-function getDropdownFilterValue(
-  filters: ColumnFilter[],
-  field: string
-): { id: string; name: string } | null {
-  const selectedFilter = filters.find(filter =>
-    filter.field === field && filter.operator === 'equals');
-
-  if (isNil(selectedFilter?.value))
-    return null;
-
-  return {
-    id: String(selectedFilter.value),
-    name: selectedFilter.displayValue ?? ''
-  };
-}
-
-function buildEqualsFilter(
-  field: string,
-  value: { id?: string; name?: string } | null
-): ColumnFilter | null {
-  if (isNil(value?.id) || value.id.length === 0)
-    return null;
-
-  return {
-    field,
-    operator: 'equals',
-    value: value.id,
-    fieldType: 'select',
-    displayValue: value.name
-  };
+enum StockBooleanField {
+  All = 'all',
+  IncludeHidden = 'includeHidden',
+  LowStockOnly = 'lowStockOnly',
+  ExpiredOnly = 'expiredOnly'
 }

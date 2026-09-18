@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { ErrorAlert } from '@ske/shared/errors';
-import { FilterContainer } from '../filter/filter-container';
+import { FilterContainer } from '../filter/regular/filter-container';
 import { Table } from '../tables/regular/large/table';
 import { CategoryDto, GetAllCategoriesRequest, ProblemDetails, ValidationProblemDetails } from '@ske/models';
 import { LayoutBreakpoint } from '@ske/shared/directives';

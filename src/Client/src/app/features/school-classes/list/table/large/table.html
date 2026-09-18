@@ -15,86 +15,69 @@
   [nzScroll]="{ x: dimensions.width, y: dimensions.height }"
 >
   <thead>
-    <tr>
-      <th nzWidth="250px">
-        {{ columns.name.label }}
-      </th>
-      <th nzWidth="150px">
-        {{ columns.startDate.label }}
-      </th>
-      <th nzWidth="150px">
-        {{ columns.endDate.label }}
-      </th>
-      <th nzWidth="120px">
-        {{ columns.status.label }}
-      </th>
-      <th nzWidth="100px">
-        {{ columns.createdDate.label }}
-      </th>
-      <th nzWidth="100px">
-        {{ columns.createdByName.label }}
-      </th>
-      <th nzWidth="150px">
-        {{ columns.lastModifiedDate.label }}
-      </th>
-      <th nzWidth="100px">
-        {{ columns.lastModifiedByName.label }}
-      </th>
-      <th nzRight nzWidth="220px">Actiuni</th>
-    </tr>
+  <tr>
+    <th >
+      {{ columns.name.label }}
+    </th>
+    <th nzWidth="150px">
+      {{ columns.startDate.label }}
+    </th>
+    <th nzWidth="150px">
+      {{ columns.endDate.label }}
+    </th>
+    <th nzWidth="120px">
+      {{ columns.status.label }}
+    </th>
+    <th nzWidth="150px">
+      {{ columns.lastModifiedDate.label }}
+    </th>
+    <th nzWidth="200px">
+      {{ columns.lastModifiedByName.label }}
+    </th>
+    <th nzRight
+        nzWidth="220px">Actiuni
+    </th>
+  </tr>
   </thead>
   <tbody>
-    <ng-template nz-virtual-scroll let-item>
-      <tr>
-        <td>
-          {{ item.name }}
-        </td>
-        <td>
-          {{ item.startDate | date }}
-        </td>
-        <td>
-          {{ item.endDate | date }}
-        </td>
-        <td>
-          <nz-tag [nzColor]="statusColor(item.status)">{{ statusLabel(item.status) }}</nz-tag>
-        </td>
-        <td>
-          {{ item.createdDate | date }}
-        </td>
-        <td>
-          {{ item.createdByName }}
-        </td>
-        <td>
-          {{ item.lastModifiedDate | date }}
-        </td>
-        <td>
-          {{ item.lastModifiedByName }}
-        </td>
-        <td nzRight>
-          <div class="flex items-center">
-            <button
-              nz-button nzSize="small"
-              nzType="link"
-              type="button"
-              title="Vizualizeaza"
-              [attr.aria-label]="'Vizualizeaza'"
-              (click)="onView.emit(item)"
-            >
-              <nz-icon nzType="icons:eye"></nz-icon>
-            </button>
-            <button
-              nz-button nzSize="small"
-              nzType="link"
-              type="button"
-              title="Editeaza"
-              [attr.aria-label]="'Editeaza'"
-              (click)="onEdit.emit(item)"
-            >
-              <nz-icon nzType="icons:pencil"></nz-icon>
-            </button>
-          </div>
-        </td>
-      </tr>
-    </ng-template>
+  <ng-template nz-virtual-scroll
+               let-item>
+    <tr (click)="onView.emit(item)"
+        class="cursor-pointer">
+      <td>
+        {{ item.name }}
+      </td>
+      <td>
+        {{ item.startDate | date }}
+      </td>
+      <td>
+        {{ item.endDate | date }}
+      </td>
+      <td>
+        <nz-tag [nzColor]="statusColor(item.status)">{{ statusLabel(item.status) }}</nz-tag>
+      </td>
+      <td>
+        {{ item.lastModifiedDate | date }}
+      </td>
+      <td>
+        {{ item.lastModifiedByName }}
+      </td>
+      <td nzRight>
+        <div class="flex items-center">
+          <button nz-button
+                  skeStopClick
+                  nzSize="small"
+                  nzType="link"
+                  type="button"
+                  title="Editeaza"
+                  [attr.aria-label]="'Editeaza'"
+                  (click)="onEdit.emit(item)">
+            <nz-icon nzType="icons:pencil"></nz-icon>
+            Editeaza
+          </button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
   </tbody>
 </nz-table>

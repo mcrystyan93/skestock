@@ -101,6 +101,25 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
             return Result.Ok(new StockReportDto());
 
         var visibleItemIds = stockByItemLocation.Select(x => x.ItemId).Distinct().ToList();
+        var visibleLocationIds = stockByItemLocation.Select(x => x.LocationId).Distinct().ToList();
+        var lastUpdatedAtByItemLocation = (await dbContext.StockTransactions
+            .AsNoTracking()
+            .Where(transaction =>
+                transaction.ClassId == request.ClassId
+                && visibleItemIds.Contains(transaction.ItemId)
+                && visibleLocationIds.Contains(transaction.LocationId))
+            .GroupBy(transaction => new { transaction.ItemId, transaction.LocationId })
+            .Select(group => new
+            {
+                group.Key.ItemId,
+                group.Key.LocationId,
+                LastUpdatedAt = group.Max(transaction => transaction.CreatedAt)
+            })
+            .ToListAsync(cancellationToken))
+            .ToDictionary(
+                entry => (entry.ItemId, entry.LocationId),
+                entry => (DateTime?)entry.LastUpdatedAt);
+
         var classTotalsByItemId = await dbContext.StockBatches
             .AsNoTracking()
             .Where(b => b.ReceivedClassId == request.ClassId && visibleItemIds.Contains(b.ItemId))
@@ -185,6 +204,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
                     CategoryIcon = category.Icon,
                     LocationId = location.Id,
                     LocationName = location.Name,
+                    LastUpdatedAt = lastUpdatedAtByItemLocation.GetValueOrDefault((x.ItemId, x.LocationId)),
                     Unit = item.Unit,
                     IsPerishable = item.IsPerishable,
                     IsExpired = item.IsPerishable && x.ExpiredQuantity > 0,

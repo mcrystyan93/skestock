@@ -32,20 +32,17 @@
     <th [nzWidth]="columnLayout.lastModifiedByName.width">
       {{ columns.lastModifiedByName.label }}
     </th>
-    <th [nzWidth]="columnLayout.actions.width"
-        nzRight>
-      Actiuni
-    </th>
   </tr>
   </thead>
   <tbody>
   <ng-template nz-virtual-scroll
                let-category>
-    <tr>
+    <tr (click)="onEdit.emit(category)"
+        class="cursor-pointer">
       <td>
         <div class="flex gap-2 items-center">
           <nz-avatar class="shrink-0"
-                     [nzIcon]="category.icon?.fileName ? ('icons:'+category.icon.fileName) : 'icons:box'"/>
+                     [nzIcon]="category.icon?.fileName ? ('icons:'+category.icon.fileName) : 'icons:box'" />
           <span class="min-w-0 flex-1 truncate"
                 [attr.title]="category.name">
             {{ category.name }}
@@ -66,27 +63,6 @@
       </td>
       <td>
         {{ category.lastModifiedByName }}
-      </td>
-      <td nzRight>
-        <button nz-button nzSize="small"
-                nzType="link"
-                type="button"
-                class="px-0!"
-                title="Editeaza"
-                [attr.aria-label]="'Editeaza'"
-                (click)="onEdit.emit(category)">
-          <nz-icon nzType="icons:pencil"></nz-icon>
-        </button>
-        <!--          <button nz-button-->
-        <!--                  nzDanger-->
-        <!--                  nzType="link"-->
-        <!--                  type="button"-->
-        <!--                  [nzLoading]="deletingCategoryId() === category.id"-->
-        <!--                  [attr.aria-label]="'Sterge'"-->
-        <!--                  (click)="onDelete.emit(category)">-->
-        <!--            <nz-icon nzType="icons:trash-can"></nz-icon>-->
-        <!--            Dezactiveaza-->
-        <!--          </button>-->
       </td>
     </tr>
   </ng-template>

@@ -132,3 +132,35 @@ export const prioritizeSort = (
 
   return currentSort;
 };
+
+export function getDropdownFilterValue(
+  filters: ColumnFilter[],
+  field: string
+): { id: string; name: string } | null {
+  const selectedFilter = filters.find(filter =>
+    filter.field === field && filter.operator === 'equals');
+
+  if (isNil(selectedFilter?.value))
+    return null;
+
+  return {
+    id: String(selectedFilter.value),
+    name: selectedFilter.displayValue ?? ''
+  };
+}
+
+export function buildEqualsFilter(
+  field: string,
+  value: { id?: string; name?: string } | null
+): ColumnFilter | null {
+  if (isNil(value?.id) || value.id.length === 0)
+    return null;
+
+  return {
+    field,
+    operator: 'equals',
+    value: value.id,
+    fieldType: 'select',
+    displayValue: value.name
+  };
+}

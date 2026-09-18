@@ -17,15 +17,6 @@ import { ColumnFilter } from '@ske/models';
   providers: [StockBatchListStore]
 })
 export class TableContainer {
-  // public readonly items = input.required<Array<StockBatchListItemDto>>();
-  // public readonly filter = input.required<GetAllStockBatchesRequest>();
-  // public readonly loading = input.required<boolean>();
-  // public readonly isReady = input(false);
-  // public readonly hasNextPage = input.required<boolean>();
-  // public readonly isLoadingMore = input.required<boolean>();
-  //
-  // public readonly onFilterChange = output<GetAllStockBatchesRequest>();
-  // public readonly onLoadMore = output<void>();
   public readonly goodsReceiptId = input.required<string>();
 
   public readonly store = inject(StockBatchListStore);
