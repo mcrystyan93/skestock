@@ -4,7 +4,11 @@ WORKDIR /src/Client
 COPY src/Client/package.json src/Client/package-lock.json ./
 RUN npm ci
 COPY src/Client/ ./
-RUN npm run build -- --configuration production
+
+# Tie the Angular build layer to the release so stale remote BuildKit layers are not reused.
+ARG ANGULAR_BUILD_VERSION=local
+RUN printf 'Building Angular bundle %s\n' "$ANGULAR_BUILD_VERSION" \
+    && npm run build -- --configuration production
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 

@@ -105,6 +105,8 @@ jobs:
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
+          build-args: |
+            ANGULAR_BUILD_VERSION=${{ github.sha }}
           cache-from: type=gha,scope=skestock-web
           cache-to: type=gha,mode=max,scope=skestock-web
           provenance: true

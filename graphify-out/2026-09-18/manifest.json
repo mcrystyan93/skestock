@@ -1416,9 +1416,9 @@
     "semantic_hash": "2129374e20f484213f4aec10cfd6f03c"
   },
   "src/Client/package.json": {
-    "mtime": 1789040976.0599084,
-    "seen": 1789041642.3896563,
-    "ast_hash": "bd9d11cbb09758f2b3abdade1109d925",
+    "mtime": 1789648579.439,
+    "seen": 1789649172.5075445,
+    "ast_hash": "9180f42ea9b4ccb22a6e537c90d39e11",
     "semantic_hash": ""
   },
   "src/Client/src/app/app.config.ts": {
@@ -2886,9 +2886,9 @@
     "semantic_hash": ""
   },
   "src/Web/Program.cs": {
-    "mtime": 1789624883.5203893,
-    "seen": 1789624903.5448518,
-    "ast_hash": "4e2893f61e43b1456b983c8fab13c47c",
+    "mtime": 1789649113.4286616,
+    "seen": 1789649172.5078433,
+    "ast_hash": "fd340a9343ecb283511b7f6b04bb3086",
     "semantic_hash": ""
   },
   "src/Web/Properties/launchSettings.json": {
@@ -3768,8 +3768,8 @@
     "semantic_hash": "5b973a02eace6b2c3e55adf6fb0701e2"
   },
   "src/Client/src/app/shared/icons/icon-catalog.generated.ts": {
-    "mtime": 1789641960.719796,
-    "seen": 1789647531.051248,
+    "mtime": 1789649131.200127,
+    "seen": 1789649172.5076737,
     "ast_hash": "9f18a0461fd8e197b5b5f0e2f49f1049",
     "semantic_hash": "9f18a0461fd8e197b5b5f0e2f49f1049"
   },
@@ -25512,9 +25512,9 @@
     "semantic_hash": ""
   },
   ".github/workflows/deploy-production.yml": {
-    "mtime": 1789381099.9109333,
-    "seen": 1789381113.6457052,
-    "ast_hash": "0d736e2727c9f4e7473d6fe12a13470a",
+    "mtime": 1789649113.4243453,
+    "seen": 1789649172.5079894,
+    "ast_hash": "dfd0f47b47bee6ff8a81652907483be4",
     "semantic_hash": ""
   },
   "deploy/README.md": {

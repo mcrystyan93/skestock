@@ -8,6 +8,13 @@ using skestock.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
+static void DisableClientCaching(HttpResponse response)
+{
+    response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
+    response.Headers.Pragma = "no-cache";
+    response.Headers.Expires = "0";
+}
+
 // Add services to the container.
 builder.AddServiceDefaults();
 
@@ -56,7 +63,17 @@ app.UseAuthorization();
 // antiforgery tokens are bound to the current principal.
 // app.UseAntiforgeryValidation();
 
-app.UseFileServer();
+app.UseDefaultFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        if (context.File.Name.Equals("index.html", StringComparison.OrdinalIgnoreCase))
+        {
+            DisableClientCaching(context.Context.Response);
+        }
+    }
+});
 
 app.MapOpenApi();
 app.MapScalarApiReference();
@@ -78,6 +95,7 @@ app.MapFallback(async (HttpContext context) =>
     }
 
     context.Response.ContentType = "text/html";
+    DisableClientCaching(context.Response);
     await context.Response.SendFileAsync(Path.Combine(app.Environment.WebRootPath!, "index.html"));
 });
 
