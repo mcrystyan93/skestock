@@ -15,5 +15,10 @@ public interface IEndpointGroup
     /// </summary>
     static virtual string? RoutePrefix => null;
 
+    /// <summary>
+    /// Indicates whether authorization should be required for all endpoints in the group.
+    /// </summary>
+    static virtual bool RequiresAuthorization => true;
+
     static abstract void Map(RouteGroupBuilder groupBuilder);
 }

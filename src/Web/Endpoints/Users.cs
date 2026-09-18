@@ -7,11 +7,13 @@ namespace skestock.Web.Endpoints;
 
 public class Users : IEndpointGroup
 {
+    public static bool RequiresAuthorization => false;
+
     public static void Map(RouteGroupBuilder groupBuilder)
     {
         groupBuilder.MapIdentityApi<ApplicationUser>();
 
-        groupBuilder.MapPost(Logout, "logout");
+        groupBuilder.MapPost(Logout, "logout").RequireAuthorization();
     }
 
     [EndpointSummary("Log out")]
