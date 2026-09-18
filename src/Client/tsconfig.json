@@ -35,6 +35,7 @@
       "@ske/features/class-analytics": ["./src/app/features/class-analytics"],
       "@ske/shared/goods-receipts": ["./src/app/shared/goods-receipts"],
       "@ske/shared/goods-receipt-imports": ["./src/app/shared/goods-receipt-imports"],
+      "@ske/shared/order-lists": ["./src/app/shared/order-lists"],
       "@ske/shared/stock-batches": ["./src/app/shared/stock-batches"],
       "@ske/shared/stock": ["./src/app/shared/stock"],
       "@ske/shared/locations": ["./src/app/shared/locations"],

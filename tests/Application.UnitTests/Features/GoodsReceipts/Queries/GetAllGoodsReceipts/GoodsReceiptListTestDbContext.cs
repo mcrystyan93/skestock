@@ -26,10 +26,15 @@ public class GoodsReceiptListTestDbContext(DbContextOptions<GoodsReceiptListTest
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
+    public DbSet<OrderList> OrderLists => Set<OrderList>();
+    public DbSet<OrderListLine> OrderListLines => Set<OrderListLine>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Ignore<OrderList>();
+        builder.Ignore<OrderListLine>();
 
         builder.Ignore<Category>();
         builder.Ignore<CategoryImportBatch>();

@@ -24,6 +24,8 @@ public interface IApplicationDbContext
     DbSet<GoodsReceipt> GoodsReceipts { get; }
     DbSet<GoodsReceiptImport> GoodsReceiptImports { get; }
     DbSet<GoodsReceiptImportLine> GoodsReceiptImportLines { get; }
+    DbSet<OrderList> OrderLists { get; }
+    DbSet<OrderListLine> OrderListLines { get; }
     DbSet<UserProfile> UserProfiles { get; }
     DbSet<OutboxMessage> OutboxMessages { get; }
     DbSet<ProcessedMessage> ProcessedMessages { get; }

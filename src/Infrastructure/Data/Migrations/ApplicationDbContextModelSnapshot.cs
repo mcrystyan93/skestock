@@ -866,6 +866,107 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("Locations");
                 });
 
+            modelBuilder.Entity("skestock.Domain.Entities.OrderList", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClassId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("LastModifiedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassId");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("LastModifiedById");
+
+                    b.ToTable("OrderLists");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.OrderListLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("LastModifiedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid>("OrderListId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<string>("Unit")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("LastModifiedById");
+
+                    b.HasIndex("OrderListId");
+
+                    b.ToTable("OrderListLines");
+                });
+
             modelBuilder.Entity("skestock.Domain.Entities.SchoolClass", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1775,6 +1876,67 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("ParentLocation");
                 });
 
+            modelBuilder.Entity("skestock.Domain.Entities.OrderList", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.SchoolClass", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("LastModifiedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Class");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("LastModifiedBy");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.OrderListLine", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("LastModifiedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.OrderList", "OrderList")
+                        .WithMany("Lines")
+                        .HasForeignKey("OrderListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Item");
+
+                    b.Navigation("LastModifiedBy");
+
+                    b.Navigation("OrderList");
+                });
+
             modelBuilder.Entity("skestock.Domain.Entities.SchoolClass", b =>
                 {
                     b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
@@ -1978,6 +2140,11 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("ClassBalances");
 
                     b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.OrderList", b =>
+                {
+                    b.Navigation("Lines");
                 });
 
             modelBuilder.Entity("skestock.Domain.Entities.SchoolClass", b =>

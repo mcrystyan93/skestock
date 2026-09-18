@@ -31,6 +31,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<GoodsReceipt> GoodsReceipts => Set<GoodsReceipt>();
     public DbSet<GoodsReceiptImport> GoodsReceiptImports => Set<GoodsReceiptImport>();
     public DbSet<GoodsReceiptImportLine> GoodsReceiptImportLines => Set<GoodsReceiptImportLine>();
+    public DbSet<OrderList> OrderLists => Set<OrderList>();
+    public DbSet<OrderListLine> OrderListLines => Set<OrderListLine>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();

@@ -37,6 +37,8 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
+    public DbSet<OrderList> OrderLists => Set<OrderList>();
+    public DbSet<OrderListLine> OrderListLines => Set<OrderListLine>();
 
     public DbSet<GoodsReceiptImport> GoodsReceiptImports => Set<GoodsReceiptImport>();
     public DbSet<GoodsReceiptImportLine> GoodsReceiptImportLines => Set<GoodsReceiptImportLine>();
@@ -44,6 +46,9 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Ignore<OrderList>();
+        builder.Ignore<OrderListLine>();
 
 
         builder.Ignore<CategoryImportBatch>();
