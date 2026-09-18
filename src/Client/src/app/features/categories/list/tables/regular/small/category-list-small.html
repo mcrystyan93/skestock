@@ -3,14 +3,14 @@
                              (scroll)="onScroll($event)">
   <nz-list>
     @if (items().length === 0) {
-      <nz-list-empty />
+      <nz-list-empty/>
     }
 
     <nz-list-item *cdkVirtualFor="let item of items(); trackBy: (index, item) => item.id">
       <nz-list-item-meta>
         <nz-list-item-meta-avatar>
           <nz-avatar class="shrink-0"
-                     [nzIcon]="!!item.icon?.fileName ? ('icons:' + item.icon!.fileName) : 'icons:box'" />
+                     [nzIcon]="!!item.icon?.fileName ? ('icons:' + item.icon!.fileName) : 'icons:box'"/>
         </nz-list-item-meta-avatar>
 
         <nz-list-item-meta-title>
@@ -21,14 +21,14 @@
           <span>
             {{ columns.itemCount.label }}: {{ item.itemCount }}
           </span>
-          <nz-divider nzType="vertical" />
+          <nz-divider nzType="vertical"/>
           <span>
-            <nz-icon nzType="icons:clock" />
+            <nz-icon nzType="icons:clock"/>
             {{ item.lastModifiedDate | date:'short' }}
           </span>
-          <nz-divider nzType="vertical" />
+          <nz-divider nzType="vertical"/>
           <span>
-            <nz-icon nzType="icons:user-pen" />
+            <nz-icon nzType="icons:user-pen"/>
             {{ item.lastModifiedByName }}
           </span>
         </nz-list-item-meta-description>
@@ -36,14 +36,16 @@
 
       <ul nz-list-item-actions>
         <nz-list-item-action>
-          <button nz-button nzSize="small"
+          <button nz-button
+                  nzSize="small"
                   nzType="link"
                   type="button"
                   class="px-0!"
                   title="Editeaza"
                   [attr.aria-label]="'Editeaza'"
                   (click)="onEdit.emit(item)">
-                  <nz-icon nzType="icons:pencil"></nz-icon>
+            <nz-icon nzType="icons:pencil"></nz-icon>
+            Modifica
           </button>
         </nz-list-item-action>
       </ul>

@@ -254,6 +254,8 @@ internal sealed class WorkerTestDbContext(DbContextOptions<WorkerTestDbContext> 
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
+    public DbSet<OrderList> OrderLists => Set<OrderList>();
+    public DbSet<OrderListLine> OrderListLines => Set<OrderListLine>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -277,5 +279,7 @@ internal sealed class WorkerTestDbContext(DbContextOptions<WorkerTestDbContext> 
         modelBuilder.Ignore<GoodsReceiptImportLine>();
         modelBuilder.Ignore<UserProfile>();
         modelBuilder.Ignore<OutboxMessage>();
+        modelBuilder.Ignore<OrderList>();
+        modelBuilder.Ignore<OrderListLine>();
     }
 }

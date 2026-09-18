@@ -46,6 +46,7 @@
             (click)="review.emit(itemImport)"
           >
             <nz-icon nzType="icons:eye" />
+            Vizualizeaza
           </button>
         </nz-list-item-action>
         <nz-list-item-action>
@@ -59,6 +60,7 @@
             [attr.aria-label]="'Descarca fisierele pentru importul ' + itemImport.id"
           >
             <nz-icon nzType="icons:file-arrow-down" />
+            Descarca
           </button>
           <nz-dropdown-menu #menu="nzDropdownMenu">
             <ul nz-menu>

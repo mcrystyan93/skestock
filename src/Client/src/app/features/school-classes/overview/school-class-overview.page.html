@@ -12,6 +12,9 @@
     <ske-stock-list [classId]="store.schoolClass()?.id ?? null" />
   </nz-tab>
   <nz-tab>
+    <ske-school-class-overview-order-lists-tab [classId]="store.schoolClass()?.id ?? null" />
+  </nz-tab>
+  <nz-tab>
 
     <ske-error-alert [problemDetail]="store.goodsReceiptsProblemDetail()"
                      [validationErrors]="store.goodsReceiptsValidationErrors()"

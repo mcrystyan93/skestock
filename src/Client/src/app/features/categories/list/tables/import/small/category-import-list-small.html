@@ -48,6 +48,7 @@
                   [disabled]="categoryImport.status !== 'pendingReview'"
                   (click)="review.emit(categoryImport)">
             <nz-icon nzType="icons:eye"/>
+            Vizualizeaza
           </button>
         </nz-list-item-action>
         <nz-list-item-action>
@@ -61,6 +62,7 @@
             [attr.aria-label]="'Actiuni pentru importul ' + categoryImport.id"
           >
             <nz-icon nzType="icons:file-arrow-down"/>
+            Descarca
           </button>
           <nz-dropdown-menu #menu="nzDropdownMenu">
             <ul nz-menu>

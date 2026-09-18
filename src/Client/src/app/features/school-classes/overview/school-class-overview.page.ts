@@ -5,6 +5,7 @@ import { isNil } from 'lodash-es';
 import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
 import { GoodsReceiptsTab } from './tabs/goods-receipts/goods-receipts-tab';
 import { GoodsReceiptImportsTab } from './tabs/goods-receipt-imports/goods-receipt-imports-tab';
+import { OrderListsTab } from './tabs/order-lists/order-lists-tab';
 import { StockList } from '@ske/shared/stock';
 import { realtimeGroups, SignalRGroupManagerStore } from '@ske/signalr';
 import { ErrorAlert } from '@ske/shared/errors';
@@ -17,6 +18,7 @@ import { QueryParamState } from '@ske/routes';
     NzTabComponent,
     GoodsReceiptsTab,
     GoodsReceiptImportsTab,
+    OrderListsTab,
     StockList,
     ErrorAlert
   ],
