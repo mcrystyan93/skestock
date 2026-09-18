@@ -30,7 +30,8 @@
   <tbody>
   <ng-template nz-virtual-scroll
                let-categoryImport>
-    <tr>
+    <tr (click)="review.emit(categoryImport)"
+        class="cursor-pointer">
       <td>{{ fileNames(categoryImport) }}</td>
       <td>
         <nz-tag [nzColor]="statusColor(categoryImport.status)">
@@ -44,30 +45,27 @@
       <td>{{ categoryImport.createdDate | date:'medium' }}</td>
       <td nzRight>
         <button type="button"
-                nz-button nzSize="small"
-                nzType="link"
-                [disabled]="categoryImport.status !== 'pendingReview'"
-                title="Revizuieste"
-                [attr.aria-label]="'Revizuieste'"
-                (click)="review.emit(categoryImport)">
-          <nz-icon nzType="icons:eye"></nz-icon>
-        </button>
-        <button type="button"
-                nz-button nzSize="small"
+                skeStopClick
+                nz-button
+                nzSize="small"
                 nzType="link"
                 nz-dropdown
                 [nzDropdownMenu]="menu"
                 title="Descarca fisierele"
                 [attr.aria-label]="'Actiuni pentru importul ' + categoryImport.id">
-          <nz-icon nzType="icons:file-arrow-down"></nz-icon>
+          <nz-icon nzType="icons:file-arrow-down" />
+          Descarca
         </button>
         <nz-dropdown-menu #menu="nzDropdownMenu">
           <ul nz-menu>
             @for (file of categoryImport.files; track file.fileMetadataId) {
               <li nz-menu-item
                   (click)="downloadFile.emit(file)">
-                <nz-icon nzType="icons:download"></nz-icon>
-                Descarca {{ file.originalName }}
+                <nz-space>
+                  <nz-icon *nzSpaceItem
+                           nzType="icons:download"></nz-icon>
+                  <span *nzSpaceItem>Descarca {{ file.originalName }}</span>
+                </nz-space>
               </li>
             }
           </ul>

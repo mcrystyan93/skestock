@@ -16,6 +16,8 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
+import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
+import { StopClick } from '@ske/shared/directives';
 
 @Component({
   imports: [
@@ -27,7 +29,10 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
     NzDropdownDirective,
     NzDropdownMenuComponent,
     NzMenuDirective,
-    NzMenuItemComponent
+    NzMenuItemComponent,
+    NzSpaceComponent,
+    NzSpaceItemDirective,
+    StopClick
   ],
   selector: 'ske-category-import-table',
   templateUrl: './table.html',

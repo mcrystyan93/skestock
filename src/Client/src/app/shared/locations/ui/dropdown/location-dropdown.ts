@@ -1,18 +1,7 @@
-import {
-  booleanAttribute,
-  Component,
-  computed,
-  effect,
-  inject,
-  input,
-  linkedSignal,
-  model,
-  signal,
-  untracked
-} from '@angular/core';
+import { Component, computed, effect, inject, input, linkedSignal, model, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { form, FormField, type FormValueControl } from '@angular/forms/signals';
-import { type LocationDropdownValue, GetAllLocationsRequest, PAGINATION_PAGE_SIZE } from '@ske/models';
+import { GetAllLocationsRequest, type LocationDropdownValue, PAGINATION_PAGE_SIZE } from '@ske/models';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { LocationDropdownStore } from '../../services/location-dropdown.store';
 import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
@@ -36,14 +25,15 @@ import { NzSpinComponent } from 'ng-zorro-antd/spin';
                class="w-full"
                [compareWith]="(a, b) => a && b ? a.id === b.id : a === b"
                (nzOnSearch)="onSearch($event)"
+               [nzDropdownMatchSelectWidth]="false"
                [nzDropdownRender]="loadingMoreTemplate"
                (nzScrollToBottom)="loadMore()"
                [nzPlaceHolder]="placeholder()">
       @if (value(); as location) {
         @if (location.id !== excludedLocationId()) {
-        <nz-option [nzValue]="location"
-                   nzHide
-                   [nzLabel]="location.name ?? ''"></nz-option>
+          <nz-option [nzValue]="location"
+                     nzHide
+                     [nzLabel]="location.name ?? ''"></nz-option>
         }
       }
 

@@ -1,4 +1,5 @@
 import { Component, computed, input, output } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzPopconfirmDirective } from 'ng-zorro-antd/popconfirm';
@@ -7,16 +8,20 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
 import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { StockItemDto } from '@ske/models';
+import {NzSpaceComponent, NzSpaceItemDirective} from 'ng-zorro-antd/space';
 
 @Component({
   imports: [
+    DatePipe,
     NzButtonComponent,
     NzIconDirective,
     NzPopconfirmDirective,
     NzTableCellDirective,
     NzTagComponent,
     NzTooltipDirective,
-    NzTypographyComponent
+    NzTypographyComponent,
+    NzSpaceComponent,
+    NzSpaceItemDirective
   ],
   selector: 'tr[ske-stock-category-item-row]',
   templateUrl: './stock-category-item-row.html',

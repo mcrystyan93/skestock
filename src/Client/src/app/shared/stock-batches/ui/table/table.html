@@ -20,13 +20,16 @@
     <th nzWidth="150px">
       {{ columns.locationName.label }}
     </th>
-    <th nzWidth="100px">
+    <th nzWidth="100px"
+        class="text-right!">
       {{ columns.quantity.label }}
     </th>
-    <th nzWidth="100px">
+    <th nzWidth="100px"
+        class="text-right!">
       {{ columns.unitPrice.label }}
     </th>
-    <th nzWidth="120px">
+    <th nzWidth="120px"
+        class="text-right!">
       {{ columns.lineTotal.label }}
     </th>
     <th nzWidth="120px">
@@ -48,19 +51,21 @@
         {{ stockBatch.itemName }}
       </td>
       <td>
-        {{ stockBatch.locationName }}
+        <nz-tag>
+          {{ stockBatch.locationName }}
+        </nz-tag>
       </td>
-      <td>
+      <td class="text-right pr-2!">
         {{ stockBatch.quantity }}
       </td>
-      <td>
+      <td class="text-right pr-2!">
         {{ stockBatch.unitPrice }} RON
       </td>
-      <td>
+      <td class="text-right pr-2!">
         {{ stockBatch.lineTotal }} RON
       </td>
       <td>
-        {{ stockBatch.expiryDate | date }}
+        {{ (stockBatch.expiryDate | date) ?? '-' }}
       </td>
       <td>
         {{ stockBatch.receivedDate | date }}

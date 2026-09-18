@@ -5,12 +5,16 @@
 
 .ant-table-tbody > tr > td {
   height: 49px;
+  padding: 0 !important;
   //padding-top: 0 !important;
   //padding-bottom: 0 !important;
   box-sizing: border-box;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  &:first-child{
+    padding-left: 8px !important;
+  }
 }
 
 .ant-dropdown-menu-item {
@@ -28,4 +32,23 @@
 .ant-menu-title-content{
   display: flex;
   align-items: center;
+}
+
+
+
+.stock-form-compact {
+  ske-location-dropdown {
+    nz-select-top-control {
+      border-top-right-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+    }
+  }
+
+  ske-category-dropdown {
+    nz-select-top-control {
+      border-top-left-radius: 0 !important;
+      border-bottom-left-radius: 0 !important;
+      border-left-width: 0 !important;
+    }
+  }
 }

@@ -1,4 +1,5 @@
-<nz-page-header [nzGhost]="false">
+<nz-page-header [nzGhost]="false"
+                class="block min-w-0 max-w-full overflow-hidden">
   <nz-page-header-title>
     {{ schoolClass().name }}
   </nz-page-header-title>
@@ -6,29 +7,26 @@
     {{ schoolClass().startDate | date }} - {{ schoolClass().endDate | date }}
   </nz-page-header-subtitle>
 
-  <nz-page-header-content>
-    <nz-row [nzGutter]="[32, 16]">
-      <nz-col nzFlex>
-        <nz-statistic nzTitle="Comenzi receptionate"
-                      [nzValue]="summary().noOfGoodsReceipt ?? 0" />
-      </nz-col>
-      <nz-col nzFlex>
-        <nz-statistic nzTitle="Totalul comenzilor"
+  <nz-page-header-content class="block w-full min-w-0 max-w-full">
+    <div class="w-full min-w-0 max-w-full overflow-x-auto">
+      <div class="flex w-max min-w-full flex-nowrap gap-4">
+        <nz-statistic class="flex-none"
+                      nzTitle="Comenzi receptionate"
+                      [nzValue]="summary().noOfGoodsReceipt ?? 0"/>
+        <nz-statistic class="flex-none"
+                      nzTitle="Totalul comenzilor"
                       [nzValueTemplate]="totalAmountTemplate">
           <ng-template #totalAmountTemplate>
             {{ summary().totalAmount ?? 0 | currency:'RON' }}
           </ng-template>
         </nz-statistic>
-      </nz-col>
-      <nz-col nzFlex>
-        <ske-goods-receipt-cost-statistic [receipts]="summary().goodsReceipts ?? []" />
-      </nz-col>
-      <nz-col nzFlex>
-        <nz-statistic nzTitle="Nr total de articole"
-                      [nzValue]="summary().distinctItemsCount ?? 0" />
-      </nz-col>
-      <nz-col nzFlex>
-        <nz-statistic nzTitle="Articole cu stoc redus"
+        <ske-goods-receipt-cost-statistic class="flex-none"
+                                          [receipts]="summary().goodsReceipts ?? []"/>
+        <nz-statistic class="flex-none"
+                      nzTitle="Nr total de articole"
+                      [nzValue]="summary().distinctItemsCount ?? 0"/>
+        <nz-statistic class="flex-none"
+                      nzTitle="Articole cu stoc redus"
                       [nzValueTemplate]="lowStockItemsCountTemplate">
           <ng-template #lowStockItemsCountTemplate>
             <div nz-typography
@@ -38,17 +36,14 @@
             </div>
           </ng-template>
         </nz-statistic>
-      </nz-col>
-      <nz-col nzFlex>
-        <nz-statistic nzTitle="Comenzi in procesare"
-                      [nzValue]="summary().processingImportsCount ?? 0" />
-      </nz-col>
-      <nz-col nzFlex>
-        <nz-statistic nzTitle="Comenzi in asteptare"
-                      [nzValue]="summary().pendingReviewImportsCount ?? 0" />
-      </nz-col>
-      <nz-col nzFlex>
-        <nz-statistic nzTitle="Comenzi esuate"
+        <nz-statistic class="flex-none"
+                      nzTitle="Comenzi in procesare"
+                      [nzValue]="summary().processingImportsCount ?? 0"/>
+        <nz-statistic class="flex-none"
+                      nzTitle="Comenzi in asteptare"
+                      [nzValue]="summary().pendingReviewImportsCount ?? 0"/>
+        <nz-statistic class="flex-none"
+                      nzTitle="Comenzi esuate"
                       [nzValueTemplate]="failedImportsCountTemplate">
           <ng-template #failedImportsCountTemplate>
             <div nz-typography
@@ -58,13 +53,14 @@
             </div>
           </ng-template>
         </nz-statistic>
-      </nz-col>
-    </nz-row>
+      </div>
+    </div>
   </nz-page-header-content>
 
   <nz-page-header-extra>
     <nz-space>
-      <button nz-button nzSize="small"
+      <button nz-button
+              nzSize="small"
               *nzSpaceItem
               nzType="primary"
               type="button"
@@ -73,18 +69,10 @@
         Adauga comanda
       </button>
 
-<!--      <button type="button"-->
-<!--              *nzSpaceItem-->
-<!--              nz-button-->
-<!--              nzType="default"-->
-<!--              (click)="onAnalytics.emit()">-->
-<!--        <nz-icon nzType="icons:chart-bar"></nz-icon>-->
-<!--        Analiză-->
-<!--      </button>-->
-
       <button type="button"
               *nzSpaceItem
-              nz-button nzSize="small"
+              nz-button
+              nzSize="small"
               nzType="default"
               (click)="onClose.emit()">
         <nz-icon nzType="icons:xmark"></nz-icon>
@@ -93,10 +81,10 @@
     </nz-space>
   </nz-page-header-extra>
 
-  <nz-page-header-footer>
+  <nz-page-header-footer class="mt-0!">
     <nz-tabs [(nzSelectedIndex)]="selectedTabIndex">
-      <nz-tab nzTitle="Comenzi"></nz-tab>
       <nz-tab nzTitle="Stoc"></nz-tab>
+      <nz-tab nzTitle="Comenzi"></nz-tab>
       <nz-tab nzTitle="Comenzi importate"></nz-tab>
     </nz-tabs>
   </nz-page-header-footer>

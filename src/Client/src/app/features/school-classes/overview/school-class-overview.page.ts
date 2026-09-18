@@ -25,7 +25,7 @@ import { QueryParamState } from '@ske/routes';
   templateUrl: './school-class-overview.page.html',
   providers: [SchoolClassOverviewStore, QueryParamState],
   host: {
-    class: 'flex flex-col grow'
+    class: 'flex min-w-0 flex-col grow overflow-x-hidden'
   }
 })
 export class SchoolClassOverviewPage implements OnInit, OnDestroy {

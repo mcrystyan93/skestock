@@ -1,5 +1,11 @@
-import { Component, effect, input, linkedSignal, output } from '@angular/core';
-import { ColumnFilter, GetAllItemsRequest } from '@ske/models';
+import { Component, computed, effect, input, linkedSignal, output, untracked } from '@angular/core';
+import {
+  buildEqualsFilter,
+  CategoryDropdownValue,
+  ColumnFilter,
+  GetAllItemsRequest,
+  getDropdownFilterValue
+} from '@ske/models';
 import { form, FormField, submit } from '@angular/forms/signals';
 import { isNil } from 'lodash-es';
 import { FormsModule } from '@angular/forms';
@@ -9,6 +15,7 @@ import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { CategoryDropdown } from '@ske/shared/categories';
 
 @Component({
   imports: [
@@ -22,7 +29,8 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
     FormField,
     NzSpaceComponent,
     NzSpaceItemDirective,
-    NzButtonComponent
+    NzButtonComponent,
+    CategoryDropdown
   ],
   selector: 'ske-item-filter-form',
   styles: ``,
@@ -39,7 +47,7 @@ export class FilterForm {
     source: () => this.filter(),
     computation: (filter) => (<ItemListFilterModel>{
       searchTerm: filter.searchTerm ?? '',
-      filters: filter.filters ?? []
+      category: getDropdownFilterValue(filter.filters, 'categoryId') as CategoryDropdownValue
     })
   });
 
@@ -56,24 +64,34 @@ export class FilterForm {
     this.initialFilterEmitted = true;
   });
 
+  private readonly _categoryEffectChange = effect(() => {
+    const categoryValue = this._getCategoryValue();
+    const categoryFormValue = this.itemListFilterForm().value().category;
+
+    if (categoryValue === (categoryFormValue?.id ?? null))
+      return;
+
+    untracked(() => this.onSubmit());
+  });
+
+  private readonly _getCategoryValue = computed(() => {
+    const currentFilter = this.filter();
+
+    return currentFilter.filters.find(filter => filter.field === 'categoryId')?.value ?? null;
+  });
+
   private buildFilterCriteria(): GetAllItemsRequest {
     const criteria = this.itemListFilterForm().value();
 
     return {
       ...this.filter(),
       searchTerm: criteria.searchTerm,
-      filters: (criteria.filters ?? [])
-        .filter(
-          (f) => !isNil(f.value) && !isNil(f.fieldType) && !isNil(f.operator) && !isNil(f.field)
-        )
-        .map((f) => ({
-          value: f.value,
-          fieldType: f.fieldType,
-          operator: f.operator,
-          field: f.field,
-          displayValue: f.displayValue,
-          booleanDisplaySelector: f.booleanDisplaySelector
-        }))
+      filters: [
+        ...this.filter().filters.filter(filter => !ITEM_FILTER_FIELDS.has(filter.field)),
+        ...[
+          buildEqualsFilter('categoryId', criteria.category)
+        ].filter((filter): filter is ColumnFilter => filter !== null)
+      ]
     };
   }
 
@@ -95,7 +113,7 @@ export class FilterForm {
   public clear() {
     this.itemListFilterForm().reset({
       searchTerm: '',
-      filters: []
+      category: null
     });
 
     this.onSubmit();
@@ -104,5 +122,6 @@ export class FilterForm {
 
 type ItemListFilterModel = {
   searchTerm: string;
-  filters: Array<ColumnFilter>;
+  category: CategoryDropdownValue;
 }
+const ITEM_FILTER_FIELDS = new Set(['categoryId']);

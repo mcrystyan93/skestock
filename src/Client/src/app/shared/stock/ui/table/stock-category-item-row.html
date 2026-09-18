@@ -3,15 +3,27 @@
 <td nzRight>
   <div class="flex flex-col">
     <strong>{{ stockItem.itemName }}</strong>
-    <span nz-typography
-          nzType="secondary"
-          class="mb-0!">{{ stockItem.sku ?? '-' }}</span>
+    <div>
+      <span nz-typography
+            nzType="secondary"
+            class="mb-0!">{{ stockItem.sku ?? '-' }}</span>
+      <span> - </span>
+      <strong nz-typography
+              nzType="secondary">
+        <nz-icon nzType="icons:clock"></nz-icon>
+        {{ stockItem.lastUpdatedAt ? (stockItem.lastUpdatedAt | date:'medium') : '-' }}
+      </strong>
+    </div>
   </div>
 </td>
 <td>
   <div class="flex items-center justify-between gap-2">
-    <span>{{ stockItem.locationName }}</span>
-    <button nz-button nzSize="small"
+    <div class="flex gap-1">
+      <nz-icon nzType="icons:location-dot"></nz-icon>
+      <span>{{ stockItem.locationName }}</span>
+    </div>
+    <button nz-button
+            nzSize="small"
             nzType="link"
             type="button"
             nz-tooltip
@@ -40,17 +52,23 @@
   </div>
 </td>
 <td>
-  <span>{{ stockItem.quantity }} {{ stockItem.unit }}</span>
+  <nz-space nzAlign="center">
+    <h5 nz-typography class="mb-0!"
+        *nzSpaceItem>{{ stockItem.quantity }} {{ stockItem.unit }}</h5>
+    @if (stockItem.isLowStock) {
+      <nz-tag nzColor="red"
+              *nzSpaceItem>Stoc redus
+      </nz-tag>
+    } @else {
+      <nz-tag nzColor="green"
+              *nzSpaceItem>OK
+      </nz-tag>
+    }
+  </nz-space>
 </td>
 <td>
-  @if (stockItem.isLowStock) {
-    <nz-tag nzColor="red">Stoc redus</nz-tag>
-  } @else {
-    <nz-tag nzColor="green">OK</nz-tag>
-  }
-</td>
-<td>
-  <button nz-button nzSize="small"
+  <button nz-button
+          nzSize="small"
           nzType="link"
           type="button"
           nz-tooltip
@@ -60,7 +78,8 @@
     <nz-icon nzType="icons:pencil"></nz-icon>
   </button>
   @if (stockItem.expiredQuantity > 0) {
-    <button nz-button nzSize="small"
+    <button nz-button
+            nzSize="small"
             nzType="link"
             type="button"
             nz-popconfirm
@@ -73,7 +92,8 @@
       <nz-icon nzType="icons:trash"></nz-icon>
     </button>
   }
-  <button nz-button nzSize="small"
+  <button nz-button
+          nzSize="small"
           nzType="link"
           type="button"
           nz-tooltip

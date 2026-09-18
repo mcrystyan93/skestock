@@ -20,6 +20,16 @@
         </nz-form-control>
       </nz-form-item>
     </nz-col>
+    <nz-col nzFlex="250px">
+      <nz-form-item>
+        <nz-form-control nzSpan="24">
+          <ske-category-dropdown [formField]="itemListFilterForm.category"
+                                 [allowClear]="true"
+                                 [allowCreate]="false"
+                                 [allowEdit]="false" />
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
     <nz-col nzFlex="none">
       <nz-space class="ml-3">
         <button type="submit"
