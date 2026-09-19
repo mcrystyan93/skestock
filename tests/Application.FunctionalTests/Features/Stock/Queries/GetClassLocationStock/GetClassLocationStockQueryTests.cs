@@ -261,6 +261,7 @@ public class GetClassLocationStockQueryTests : TestBase
         {
             ClassId = _schoolClass.Id,
             ItemId = item.Id,
+            LocationId = _location.Id,
             HideWhenZeroStock = true
         });
         visibilityResult.IsSuccess.ShouldBeTrue();

@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GetClassLocationStockRequest } from '@ske/models';
-import { FilterForm } from './filter-form';
+import { FilterForm, type StockFilterAddPrefill } from './filter-form';
 
 describe('FilterForm', () => {
   let fixture: ComponentFixture<FilterForm>;
   let component: FilterForm;
   let emittedFilters: GetClassLocationStockRequest[];
+  let emittedAddPrefills: StockFilterAddPrefill[];
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -107,6 +108,37 @@ describe('FilterForm', () => {
     expect(emittedFilters).toEqual([]);
   });
 
+  it('emits selected category and location when adding a stock batch', async () => {
+    render(createFilter({
+      filters: [
+        {
+          field: 'categoryId',
+          operator: 'equals',
+          value: 'category-1',
+          fieldType: 'select',
+          displayValue: 'Papetarie'
+        },
+        {
+          field: 'locationId',
+          operator: 'equals',
+          value: 'location-1',
+          fieldType: 'select',
+          displayValue: 'Sala 1'
+        }
+      ]
+    }));
+    await settle();
+
+    component.addStockBatch();
+
+    expect(emittedAddPrefills).toEqual([
+      {
+        category: { id: 'category-1', name: 'Papetarie' },
+        location: { id: 'location-1', name: 'Sala 1' }
+      }
+    ]);
+  });
+
   async function settle() {
     fixture.detectChanges();
     await fixture.whenStable();
@@ -117,7 +149,9 @@ describe('FilterForm', () => {
     fixture = TestBed.createComponent(FilterForm);
     component = fixture.componentInstance;
     emittedFilters = [];
+    emittedAddPrefills = [];
     component.onFilterChange.subscribe(filter => emittedFilters.push(filter));
+    component.onAdd.subscribe(prefill => emittedAddPrefills.push(prefill));
     fixture.componentRef.setInput('loading', false);
     fixture.componentRef.setInput('filter', filter);
     fixture.detectChanges();

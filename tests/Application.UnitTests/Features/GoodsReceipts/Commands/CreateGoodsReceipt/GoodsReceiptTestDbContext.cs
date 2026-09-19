@@ -130,6 +130,7 @@ public class GoodsReceiptTestDbContext(DbContextOptions<GoodsReceiptTestDbContex
         {
             b.HasOne(v => v.CreatedBy).WithMany().HasForeignKey(v => v.CreatedById);
             b.HasOne(v => v.LastModifiedBy).WithMany().HasForeignKey(v => v.LastModifiedById);
+            b.HasOne<Location>().WithMany().HasForeignKey(v => v.LocationId);
         });
     }
 }

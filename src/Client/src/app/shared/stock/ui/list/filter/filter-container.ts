@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { GetClassLocationStockRequest } from '@ske/models';
 import { StockStore } from '../../../services/stock.store';
 import { NzCardComponent } from 'ng-zorro-antd/card';
-import { FilterForm } from './filter-form';
+import { FilterForm, type StockFilterAddPrefill } from './filter-form';
 import { isNil } from 'lodash-es';
 import { AddStockBatchModal } from '@ske/shared/stock-batches';
 import { NzModalService } from 'ng-zorro-antd/modal';
@@ -25,7 +25,7 @@ export class FilterContainer {
     this.store.load(filter);
   }
 
-  public onAdd() {
+  public onAdd(prefill: StockFilterAddPrefill) {
     const classId = this.store.filter().classId;
 
     if (isNil(classId))
@@ -33,7 +33,7 @@ export class FilterContainer {
 
     const modalRef = this._nzModalService.create({
       nzContent: AddStockBatchModal,
-      nzData: { schoolClassId: classId },
+      nzData: { schoolClassId: classId, ...prefill },
       nzCentered: true,
       nzMaskClosable: false
     });

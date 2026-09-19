@@ -8,7 +8,7 @@ public class ClassItemStockVisibilityConfiguration : IEntityTypeConfiguration<Cl
 {
     public void Configure(EntityTypeBuilder<ClassItemStockVisibility> builder)
     {
-        builder.HasIndex(x => new { x.ClassId, x.ItemId })
+        builder.HasIndex(x => new { x.ClassId, x.ItemId, x.LocationId })
             .IsUnique();
 
         builder.HasOne<SchoolClass>()
@@ -19,6 +19,11 @@ public class ClassItemStockVisibilityConfiguration : IEntityTypeConfiguration<Cl
         builder.HasOne<Item>()
             .WithMany()
             .HasForeignKey(x => x.ItemId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<Location>()
+            .WithMany()
+            .HasForeignKey(x => x.LocationId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(x => x.CreatedBy)

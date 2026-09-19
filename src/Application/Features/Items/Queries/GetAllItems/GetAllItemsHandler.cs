@@ -20,8 +20,7 @@ public class GetAllItemsHandler(IApplicationDbContext dbContext)
         var cursorState = CursorCodec<Item>.Decode(request.Cursor);
 
         var query = dbContext.Items
-            .AsNoTracking()
-            .AsQueryable();
+            .AsNoTracking();
 
         query = FilterQueryBuilder<Item>.Apply(
             query,
@@ -32,14 +31,11 @@ public class GetAllItemsHandler(IApplicationDbContext dbContext)
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
             var term = request.SearchTerm.Trim();
-            query = TextSearchCollation.IsSqlServer(dbContext.Database)
-                ? query.Where(i =>
-                    EF.Functions.Collate(i.Name, TextSearchCollation.AccentInsensitive).Contains(term) ||
-                    (i.Sku != null &&
-                     EF.Functions.Collate(i.Sku, TextSearchCollation.AccentInsensitive).Contains(term)))
-                : query.Where(i =>
-                    i.Name.Contains(term) ||
-                    (i.Sku != null && i.Sku.Contains(term)));
+            // Name/Sku carry the accent-insensitive collation at the column level (see ItemConfiguration),
+            // so the search needs no per-row EF.Functions.Collate and is provider-agnostic.
+            query = query.Where(i =>
+                i.Name.Contains(term) ||
+                (i.Sku != null && i.Sku.Contains(term)));
         }
 
         if (cursorState?.KeyValues.Count > 0)
@@ -56,7 +52,16 @@ public class GetAllItemsHandler(IApplicationDbContext dbContext)
         var items = await OrderByBuilder<Item>.ApplyOrderBy(query, effectiveSort, SortConfiguration)
             .Select(i => new
             {
-                CursorItem = i,
+                // Only the sort-key columns are needed to rebuild the next cursor.
+                CursorItem = new Item
+                {
+                    Id = i.Id,
+                    Name = i.Name,
+                    Sku = i.Sku,
+                    Unit = i.Unit,
+                    CreatedDate = i.CreatedDate,
+                    LastModifiedDate = i.LastModifiedDate
+                },
                 Data = new ItemDto
                 {
                     Id = i.Id,

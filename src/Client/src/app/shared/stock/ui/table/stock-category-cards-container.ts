@@ -80,7 +80,7 @@ export class StockCategoryCardsContainer {
 
     const modalRef = this._nzModalService.create({
       nzContent: AddStockBatchModal,
-      nzData: { schoolClassId: classId, category },
+      nzData: { schoolClassId: classId, category, location: null },
       nzCentered: true,
       nzMaskClosable: false
     });
@@ -99,6 +99,7 @@ export class StockCategoryCardsContainer {
     this.store.setClassItemStockVisibility({
       classId,
       itemId: item.itemId,
+      locationId: item.locationId,
       request: { hideWhenZeroStock }
     });
   }

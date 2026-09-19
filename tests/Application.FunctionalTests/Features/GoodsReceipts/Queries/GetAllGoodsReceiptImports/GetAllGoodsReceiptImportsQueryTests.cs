@@ -25,7 +25,10 @@ public class GetAllGoodsReceiptImportsQueryTests : TestBase
     {
         _prefix = $"FT{Guid.NewGuid():N}"[..10];
 
-        _uploadedBy = new UserProfile { IdentityId = Guid.NewGuid(), FirstName = "Staff", LastName = "Member" };
+        // UserProfile.IdentityId is a required FK to AspNetUsers.Id, so create the identity user
+        // first and reference its id (matches the other functional-test fixtures).
+        var userId = await TestApp.RunAsDefaultUserAsync();
+        _uploadedBy = new UserProfile { IdentityId = userId!.Value, FirstName = "Staff", LastName = "Member" };
         await TestApp.AddAsync(_uploadedBy);
     }
 

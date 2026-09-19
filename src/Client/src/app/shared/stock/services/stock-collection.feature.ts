@@ -135,6 +135,7 @@ export function withStockCollection() {
       const setClassItemStockVisibility = rxMethod<{
         classId: string;
         itemId: string;
+        locationId: string;
         request: SetClassItemStockVisibilityRequest;
       }>(
         pipe(
@@ -142,8 +143,8 @@ export function withStockCollection() {
             store.setStockMutationLoading();
             store.clearStockMutationErrors();
           }),
-          switchMap(({ classId, itemId, request }) =>
-            store.stockHttp.setClassItemStockVisibility(classId, itemId, request).pipe(
+          switchMap(({ classId, itemId, locationId, request }) =>
+            store.stockHttp.setClassItemStockVisibility(classId, itemId, locationId, request).pipe(
               mapResponse({
                 next: () => {
                   store.messageService.success(

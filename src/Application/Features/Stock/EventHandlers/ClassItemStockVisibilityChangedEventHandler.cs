@@ -27,6 +27,7 @@ public sealed class ClassItemStockVisibilityChangedEventHandler(
             {
                 classId = notification.ClassId,
                 itemId = notification.ItemId,
+                locationId = notification.LocationId,
                 hideWhenZeroStock = notification.HideWhenZeroStock
             },
             cancellationToken);

@@ -38,10 +38,11 @@ export class StockHttp {
   public setClassItemStockVisibility(
     classId: string,
     itemId: string,
+    locationId: string,
     request: SetClassItemStockVisibilityRequest
   ) {
     return this._httpClient.patch<void>(
-      `/api/Stock/class/${classId}/item/${itemId}/visibility`,
+      `/api/Stock/class/${classId}/item/${itemId}/location/${locationId}/visibility`,
       request
     );
   }

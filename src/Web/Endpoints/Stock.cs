@@ -17,7 +17,9 @@ public class Stock : IEndpointGroup
         groupBuilder.MapPost(AdjustStock, "adjust");
         groupBuilder.MapPost(RemoveExpiredStock, "remove-expired");
         groupBuilder.MapPost(MoveStock, "move");
-        groupBuilder.MapPatch(SetClassItemStockVisibility, "class/{classId}/item/{itemId}/visibility");
+        groupBuilder.MapPatch(
+            SetClassItemStockVisibility,
+            "class/{classId}/item/{itemId}/location/{locationId}/visibility");
     }
 
     [EndpointSummary("Get current stock for a class with optional column filters")]
@@ -127,11 +129,12 @@ public class Stock : IEndpointGroup
 
     [EndpointSummary("Change zero-stock visibility for an item in a class")]
     [EndpointDescription("Stores whether the selected item should be hidden from the normal class " +
-                         "stock report after its total quantity across all locations reaches zero.")]
+                         "stock report for the selected location after its quantity reaches zero.")]
     public static async Task<Results<Ok, ProblemHttpResult>> SetClassItemStockVisibility(
         ISender sender,
         Guid classId,
         Guid itemId,
+        Guid locationId,
         SetClassItemStockVisibilityRequest request,
         CancellationToken cancellationToken)
     {
@@ -139,6 +142,7 @@ public class Stock : IEndpointGroup
         {
             ClassId = classId,
             ItemId = itemId,
+            LocationId = locationId,
             HideWhenZeroStock = request.HideWhenZeroStock
         };
 

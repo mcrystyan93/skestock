@@ -385,6 +385,9 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("LastModifiedDate")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedById");
@@ -393,7 +396,9 @@ namespace skestock.Infrastructure.Data.Migrations
 
                     b.HasIndex("LastModifiedById");
 
-                    b.HasIndex("ClassId", "ItemId")
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("ClassId", "ItemId", "LocationId")
                         .IsUnique();
 
                     b.ToTable("ClassItemStockVisibilities");
@@ -675,14 +680,16 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .UseCollation("Latin1_General_100_CI_AI");
 
                     b.Property<int?>("ShelfLifeDays")
                         .HasColumnType("int");
 
                     b.Property<string>("Sku")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .UseCollation("Latin1_General_100_CI_AI");
 
                     b.Property<string>("Unit")
                         .IsRequired()
@@ -691,8 +698,6 @@ namespace skestock.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
                     b.HasIndex("CreatedById");
 
                     b.HasIndex("LastModifiedById");
@@ -700,6 +705,25 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.HasIndex("Sku")
                         .IsUnique()
                         .HasFilter("[Sku] IS NOT NULL");
+
+                    b.HasIndex("CreatedDate", "Id")
+                        .IsDescending()
+                        .HasDatabaseName("IX_Items_CreatedDate_Id");
+
+                    b.HasIndex("LastModifiedDate", "Id")
+                        .IsDescending()
+                        .HasDatabaseName("IX_Items_LastModifiedDate_Id");
+
+                    b.HasIndex("Name", "Id")
+                        .HasDatabaseName("IX_Items_Name_Id");
+
+                    b.HasIndex("CategoryId", "CreatedDate", "Id")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("IX_Items_CategoryId_CreatedDate_Id");
+
+                    b.HasIndex("IsActive", "CreatedDate", "Id")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("IX_Items_IsActive_CreatedDate_Id");
 
                     b.ToTable("Items");
                 });
@@ -766,6 +790,9 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.HasIndex("CreatedDate", "Id")
                         .HasDatabaseName("IX_ItemImportBatches_CreatedDate_Id");
 
+                    b.HasIndex("LastModifiedDate", "Id")
+                        .HasDatabaseName("IX_ItemImportBatches_LastModifiedDate_Id");
+
                     b.HasIndex("UploadedAt", "Id")
                         .HasDatabaseName("IX_ItemImportBatches_UploadedAt_Id");
 
@@ -773,6 +800,9 @@ namespace skestock.Infrastructure.Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_ItemImportBatches_UploadedByUserId_ClientRequestId")
                         .HasFilter("[ClientRequestId] IS NOT NULL");
+
+                    b.HasIndex("Status", "CreatedDate", "Id")
+                        .HasDatabaseName("IX_ItemImportBatches_Status_CreatedDate_Id");
 
                     b.ToTable("ItemImportBatches");
                 });
@@ -1575,6 +1605,12 @@ namespace skestock.Infrastructure.Data.Migrations
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.Location", null)
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("CreatedBy");
 

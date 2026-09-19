@@ -40,6 +40,12 @@ public class ItemImportBatchConfiguration : IEntityTypeConfiguration<ItemImportB
 
         builder.HasIndex(b => new { b.CreatedDate, b.Id }).HasDatabaseName("IX_ItemImportBatches_CreatedDate_Id");
         builder.HasIndex(b => new { b.UploadedAt, b.Id }).HasDatabaseName("IX_ItemImportBatches_UploadedAt_Id");
+        builder.HasIndex(b => new { b.LastModifiedDate, b.Id })
+            .HasDatabaseName("IX_ItemImportBatches_LastModifiedDate_Id");
+
+        // Supports listing filtered by Status combined with the default CreatedDate desc, Id desc sort/keyset.
+        builder.HasIndex(b => new { b.Status, b.CreatedDate, b.Id })
+            .HasDatabaseName("IX_ItemImportBatches_Status_CreatedDate_Id");
 
         builder.OwnsMany(b => b.History, history =>
         {

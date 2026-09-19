@@ -36,14 +36,20 @@ import { isNil } from 'lodash-es';
 })
 export class Form {
   public readonly category = input<Partial<CategoryDto> | null>();
+  public readonly location = input<Partial<LocationDto> | null>();
 
   private readonly _formModel = linkedSignal({
     source: () => ({
       category: this.category(),
+      location: this.location(),
       initialState: this._initialState()
     }),
     computation: (state) => (
-      <StockBatchFormModel>{ ...state.initialState, category: isNil(state.category?.id) ? null : state.category }
+      <StockBatchFormModel>{
+        ...state.initialState,
+        category: isNil(state.category?.id) ? null : state.category,
+        location: isNil(state.location?.id) ? null : state.location
+      }
     )
   });
 
