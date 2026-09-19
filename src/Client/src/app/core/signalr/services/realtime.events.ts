@@ -31,6 +31,7 @@ export const realtimeEvents = eventGroup({
     classItemStockVisibilityChanged: type<{
       classId: string,
       itemId: string,
+      locationId: string,
       hideWhenZeroStock: boolean
     }>()
   }

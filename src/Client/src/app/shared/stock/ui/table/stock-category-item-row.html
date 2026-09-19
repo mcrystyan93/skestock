@@ -99,10 +99,10 @@
           nz-tooltip
           [nzTooltipTitle]="(stockItem.hideWhenZeroStock
             ? 'Nu mai ascunde la stoc 0 pentru '
-            : 'Ascunde când stocul ajunge la 0 pentru ') + stockItem.itemName"
+            : 'Ascunde când stocul ajunge la 0 pentru ') + stockItem.itemName + ' la ' + stockItem.locationName"
           [attr.aria-label]="(stockItem.hideWhenZeroStock
             ? 'Nu mai ascunde la stoc 0 pentru '
-            : 'Ascunde când stocul ajunge la 0 pentru ') + stockItem.itemName"
+            : 'Ascunde când stocul ajunge la 0 pentru ') + stockItem.itemName + ' la ' + stockItem.locationName"
           (click)="visibilityChange.emit(stockItem)">
     <nz-icon [nzType]="stockItem.hideWhenZeroStock ? 'icons:eye' : 'icons:eye-slash'"></nz-icon>
   </button>

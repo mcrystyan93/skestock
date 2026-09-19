@@ -13,7 +13,9 @@ public class SetClassItemStockVisibilityCommandHandler(IApplicationDbContext dbC
     {
         var visibility = await dbContext.ClassItemStockVisibilities
             .SingleOrDefaultAsync(
-                x => x.ClassId == request.ClassId && x.ItemId == request.ItemId,
+                x => x.ClassId == request.ClassId
+                     && x.ItemId == request.ItemId
+                     && x.LocationId == request.LocationId,
                 cancellationToken);
 
         if (visibility is not null && visibility.HideWhenZeroStock == request.HideWhenZeroStock)
@@ -28,6 +30,7 @@ public class SetClassItemStockVisibilityCommandHandler(IApplicationDbContext dbC
             {
                 ClassId = request.ClassId,
                 ItemId = request.ItemId,
+                LocationId = request.LocationId,
                 HideWhenZeroStock = true
             };
 
@@ -41,6 +44,7 @@ public class SetClassItemStockVisibilityCommandHandler(IApplicationDbContext dbC
         visibility.AddDomainEvent(new ClassItemStockVisibilityChangedEvent(
             request.ClassId,
             request.ItemId,
+            request.LocationId,
             request.HideWhenZeroStock));
 
         await dbContext.SaveChangesAsync(cancellationToken);

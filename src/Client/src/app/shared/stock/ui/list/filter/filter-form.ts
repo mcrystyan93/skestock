@@ -48,7 +48,7 @@ export class FilterForm {
   public readonly filter = input.required<GetClassLocationStockRequest>();
 
   public readonly onFilterChange = output<GetClassLocationStockRequest>();
-  public readonly onAdd = output<void>();
+  public readonly onAdd = output<StockFilterAddPrefill>();
   private _initialFormChangeHandled = false;
 
   public readonly booleanSegmentOptions = [
@@ -135,6 +135,12 @@ export class FilterForm {
 
     this.onSubmit();
   }
+
+  public addStockBatch() {
+    const { category, location } = this.stockListFilterForm().value();
+
+    this.onAdd.emit({ category, location });
+  }
 }
 
 type StockListFilterModel = {
@@ -143,6 +149,11 @@ type StockListFilterModel = {
   category: CategoryDropdownValue;
   booleanSegmentValue: StockBooleanField;
 }
+
+export type StockFilterAddPrefill = {
+  category: CategoryDropdownValue;
+  location: LocationDropdownValue;
+};
 
 const STOCK_FILTER_FIELDS = new Set(['locationId', 'categoryId']);
 

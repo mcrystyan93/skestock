@@ -763,6 +763,7 @@ public class GetClassLocationStockHandlerTests
         {
             ClassId = schoolClass.Id,
             ItemId = item.Id,
+            LocationId = location.Id,
             HideWhenZeroStock = true
         });
         await context.SaveChangesAsync(CancellationToken.None);
@@ -783,7 +784,7 @@ public class GetClassLocationStockHandlerTests
     }
 
     [Test]
-    public async Task Handle_MarkedStockUsesClassWideTotal_WhenLocationFilterSelectsDepletedLocation()
+    public async Task Handle_MarkedStockVisibility_IsScopedToLocation()
     {
         await using var context = CreateContext();
         var (item, location, schoolClass) = await SeedBaseData(context);
@@ -812,6 +813,7 @@ public class GetClassLocationStockHandlerTests
         {
             ClassId = schoolClass.Id,
             ItemId = item.Id,
+            LocationId = location.Id,
             HideWhenZeroStock = true
         });
         await context.SaveChangesAsync(CancellationToken.None);
@@ -834,9 +836,21 @@ public class GetClassLocationStockHandlerTests
             CancellationToken.None);
 
         normalResult.IsSuccess.ShouldBeTrue();
-        normalResult.Value.Items.Single().Quantity.ShouldBe(0);
+        normalResult.Value.Items.ShouldBeEmpty();
         hiddenResult.IsSuccess.ShouldBeTrue();
-        hiddenResult.Value.Items.ShouldBeEmpty();
+        hiddenResult.Value.Items.Single().Quantity.ShouldBe(0);
+
+        var otherLocationResult = await handler.Handle(
+            new GetClassLocationStockQuery
+            {
+                ClassId = schoolClass.Id,
+                Filters = [EqualsFilter("locationId", otherLocation.Id)]
+            },
+            CancellationToken.None);
+
+        otherLocationResult.IsSuccess.ShouldBeTrue();
+        otherLocationResult.Value.Items.Single().Quantity.ShouldBe(5);
+        otherLocationResult.Value.Items.Single().HideWhenZeroStock.ShouldBeFalse();
     }
 
     [Test]
@@ -857,6 +871,7 @@ public class GetClassLocationStockHandlerTests
         {
             ClassId = schoolClass.Id,
             ItemId = item.Id,
+            LocationId = location.Id,
             HideWhenZeroStock = true
         });
         await context.SaveChangesAsync(CancellationToken.None);

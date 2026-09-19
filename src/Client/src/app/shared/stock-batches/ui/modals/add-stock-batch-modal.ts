@@ -9,7 +9,7 @@ import { NzSpaceCompactComponent, NzSpaceComponent, NzSpaceItemDirective } from 
 import { BehaviorSubject, filter, switchMap, tap } from 'rxjs';
 import { stockBatchApiEvents, StockBatchStore } from '../../services/stock-batch.store';
 import { isNil } from 'lodash-es';
-import { CategoryDto, CreateStockBatchRequest, toDateOnlyString } from '@ske/models';
+import { CategoryDto, CreateStockBatchRequest, LocationDto, toDateOnlyString } from '@ske/models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Events } from '@ngrx/signals/events';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -35,7 +35,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
   providers: [StockBatchStore]
 })
 export class AddStockBatchModal {
-  public readonly modalData = signal<StockBatchDetailModalData>(inject(NZ_MODAL_DATA));
+  public readonly modalData = signal<AddStockBatchModalData>(inject(NZ_MODAL_DATA));
   public readonly store = inject(StockBatchStore);
 
   private readonly _close$ = new BehaviorSubject(false);
@@ -89,7 +89,8 @@ export class AddStockBatchModal {
   }
 }
 
-type StockBatchDetailModalData = {
+export type AddStockBatchModalData = {
   schoolClassId: string;
   category: Partial<CategoryDto> | null;
+  location: Partial<LocationDto> | null;
 }

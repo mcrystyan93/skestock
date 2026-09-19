@@ -120,30 +120,23 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
                 entry => (entry.ItemId, entry.LocationId),
                 entry => (DateTime?)entry.LastUpdatedAt);
 
-        var classTotalsByItemId = await dbContext.StockBatches
-            .AsNoTracking()
-            .Where(b => b.ReceivedClassId == request.ClassId && visibleItemIds.Contains(b.ItemId))
-            .GroupBy(b => b.ItemId)
-            .Select(g => new
-            {
-                g.Key,
-                Quantity = g.Sum(b => b.Quantity)
-            })
-            .ToDictionaryAsync(x => x.Key, x => x.Quantity, cancellationToken);
-
-        var visibilityByItemId = await dbContext.ClassItemStockVisibilities
+        var visibilityByItemLocation = await dbContext.ClassItemStockVisibilities
             .AsNoTracking()
             .Where(v => v.ClassId == request.ClassId
                         && visibleItemIds.Contains(v.ItemId)
+                        && visibleLocationIds.Contains(v.LocationId)
                         && v.HideWhenZeroStock)
-            .Select(v => v.ItemId)
-            .ToDictionaryAsync(itemId => itemId, _ => true, cancellationToken);
+            .Select(v => new { v.ItemId, v.LocationId })
+            .ToDictionaryAsync(
+                visibility => (visibility.ItemId, visibility.LocationId),
+                _ => true,
+                cancellationToken);
 
         stockByItemLocation = stockByItemLocation
             .Where(x =>
             {
-                var isHidden = visibilityByItemId.ContainsKey(x.ItemId)
-                               && classTotalsByItemId.GetValueOrDefault(x.ItemId) <= 0;
+                var isHidden = visibilityByItemLocation.ContainsKey((x.ItemId, x.LocationId))
+                               && x.Quantity <= 0;
                 return request.IncludeHidden ? isHidden : !isHidden;
             })
             .ToList();
@@ -193,7 +186,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
                 var item = items[x.ItemId];
                 var location = locations[x.LocationId];
                 var category = categories[item.CategoryId];
-                var hideWhenZeroStock = visibilityByItemId.ContainsKey(x.ItemId);
+                var hideWhenZeroStock = visibilityByItemLocation.ContainsKey((x.ItemId, x.LocationId));
                 return new StockItemDto
                 {
                     ItemId = x.ItemId,

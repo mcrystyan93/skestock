@@ -6,4 +6,6 @@ public static class CacheConstants
     public const string ItemListTag = "items";
     public const string ItemImportBatch = "item_import_batch";
     public const string ItemImportBatchListTag = "item_import_batches";
+
+    public static string ItemTag(Guid id) => $"item:{id}";
 }

@@ -8,6 +8,7 @@ public class SetClassItemStockVisibilityCommand : IRequest<Result>, ICacheInvali
 {
     public Guid ClassId { get; init; }
     public Guid ItemId { get; init; }
+    public Guid LocationId { get; init; }
     public bool HideWhenZeroStock { get; init; }
 
     public IReadOnlyCollection<string> Tags =>
