@@ -29,6 +29,33 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
 
         var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime);
 
+        var locationFilters = request.Filters
+            .Where(filter => string.Equals(filter.Field, "locationId", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        var categoryFilters = request.Filters
+            .Where(filter => string.Equals(filter.Field, "categoryId", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        // Apply item filters before aggregation so category/search requests do not aggregate stock
+        // rows that will be discarded after the item lookup.
+        var filteredItemsQuery = dbContext.Items
+            .AsNoTracking();
+
+        filteredItemsQuery = FilterQueryBuilder<Item>.Apply(
+            filteredItemsQuery,
+            categoryFilters,
+            ItemFilterConfiguration,
+            TextSearchCollation.IsSqlServer(dbContext.Database));
+
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            var term = request.SearchTerm.Trim();
+            filteredItemsQuery = TextSearchCollation.IsSqlServer(dbContext.Database)
+                ? filteredItemsQuery.Where(i =>
+                    EF.Functions.Collate(i.Name, TextSearchCollation.AccentInsensitive).Contains(term))
+                : filteredItemsQuery.Where(i => i.Name.Contains(term));
+        }
+
         // Current stock for an item at a location = sum of the remaining Quantity across every
         // StockBatch received by this class at that location. Items/locations with no batches
         // simply don't appear, matching the "sum of stockBatches" definition literally.
@@ -39,13 +66,17 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
             .AsNoTracking()
             .Where(b => b.ReceivedClassId == request.ClassId);
 
-        var locationFilters = request.Filters.Where(filter =>
-            string.Equals(filter.Field, "locationId", StringComparison.OrdinalIgnoreCase));
         batchesQuery = FilterQueryBuilder<StockBatch>.Apply(
             batchesQuery,
             locationFilters,
             StockBatchFilterConfiguration,
             TextSearchCollation.IsSqlServer(dbContext.Database));
+
+        if (categoryFilters.Count > 0 || !string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            var eligibleItemIdsQuery = filteredItemsQuery.Select(item => item.Id);
+            batchesQuery = batchesQuery.Where(batch => eligibleItemIdsQuery.Contains(batch.ItemId));
+        }
 
         var stockByItemLocation = await batchesQuery
             .GroupBy(b => new { b.ItemId, b.LocationId })
@@ -68,26 +99,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
         // Item and Location lookups are done as separate queries rather than reading them off the
         // group (e.g. g.First().Item) - that pattern doesn't translate to SQL.
         var itemIds = stockByItemLocation.Select(x => x.ItemId).Distinct().ToList();
-        var itemsQuery = dbContext.Items
-            .AsNoTracking()
-            .Where(i => itemIds.Contains(i.Id));
-
-        var categoryFilters = request.Filters.Where(filter =>
-            string.Equals(filter.Field, "categoryId", StringComparison.OrdinalIgnoreCase));
-        itemsQuery = FilterQueryBuilder<Item>.Apply(
-            itemsQuery,
-            categoryFilters,
-            ItemFilterConfiguration,
-            TextSearchCollation.IsSqlServer(dbContext.Database));
-
-        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-        {
-            var term = request.SearchTerm.Trim();
-            itemsQuery = TextSearchCollation.IsSqlServer(dbContext.Database)
-                ? itemsQuery.Where(i =>
-                    EF.Functions.Collate(i.Name, TextSearchCollation.AccentInsensitive).Contains(term))
-                : itemsQuery.Where(i => i.Name.Contains(term));
-        }
+        var itemsQuery = filteredItemsQuery.Where(i => itemIds.Contains(i.Id));
 
         var items = await itemsQuery
             .Select(i => new { i.Id, i.Name, i.Sku, i.Unit, i.IsPerishable, i.MinThreshold, i.CategoryId })

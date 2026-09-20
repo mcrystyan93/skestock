@@ -20,6 +20,7 @@ export const AuthStore = signalStore(
   withLoadingFeature('auth'),
   withLoadingFeature('login'),
   withProblemDetailsFeature('auth'),
+  withProblemDetailsFeature('login'),
   withProps(() => ({
     activatedRoute: inject(ActivatedRoute),
     router: inject(Router),
@@ -30,7 +31,7 @@ export const AuthStore = signalStore(
     const login = rxMethod<Credentials>(
       pipe(
         tap(() => {
-          store.clearAuthErrors();
+          store.clearLoginErrors();
           store.setLoginLoading();
           patchState(store, { isAuthenticated: true });
         }),
@@ -46,7 +47,7 @@ export const AuthStore = signalStore(
                   store.router.navigate(['./categories']);
                 },
                 error: (error) => {
-                  store.handleAuthError(error);
+                  store.handleLoginError(error);
                   store.setLoginLoaded();
 
                   store.router.navigate(['./login']);

@@ -1,5 +1,5 @@
 import { Component, input, output, signal } from '@angular/core';
-import { Credentials } from '@ske/models';
+import { Credentials, ProblemDetails, ValidationProblemDetails } from '@ske/models';
 import { email, form, FormField, required, submit } from '@angular/forms/signals';
 import { NzFormControlComponent, NzFormDirective, NzFormItemComponent } from 'ng-zorro-antd/form';
 import { FormsModule } from '@angular/forms';
@@ -13,6 +13,7 @@ import {
 } from 'ng-zorro-antd/input';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { ErrorAlert } from '@ske/shared/errors';
 
 @Component({
   imports: [
@@ -29,7 +30,8 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
     NzButtonComponent,
     NzInputDirective,
     NzInputPrefixDirective,
-    
+    ErrorAlert
+
   ],
   selector: 'ske-login-form',
   templateUrl: './login-form.html',
@@ -39,6 +41,8 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
 })
 export class LoginForm {
   public readonly loading = input.required<boolean>();
+  public readonly problemDetail = input<ProblemDetails | null>();
+  public readonly validationErrors = input<ValidationProblemDetails | null>();
 
   public readonly onSubmit = output<Credentials>();
 

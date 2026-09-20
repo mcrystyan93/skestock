@@ -1,0 +1,48 @@
+<ske-error-display [problemDetail]="store.orderListProblemDetail()"
+                   [validationErrors]="store.orderListValidationErrors()" />
+
+<ske-order-list-detail-form [loading]="store.orderListLoading()"
+                            [orderList]="store.orderList()" />
+
+<div *nzModalFooter>
+  <nz-space>
+    <button nz-button
+            nzSize="small"
+            *nzSpaceItem
+            nzType="default"
+            type="button"
+            (click)="close()"
+            [nzLoading]="store.orderListLoading()">
+      Inchide
+    </button>
+
+    <nz-space-compact *nzSpaceItem
+                      nzSize="small">
+      <button nz-button
+              nzSize="small"
+              nzType="primary"
+              type="button"
+              (click)="save()"
+              [nzLoading]="store.orderListLoading()">
+        Salveaza si inchide
+      </button>
+      <button nz-button
+              nzSize="small"
+              nzType="primary"
+              type="button"
+              nz-dropdown
+              [nzDropdownMenu]="menu">
+        <nz-icon nzType="icons:chevron-down"></nz-icon>
+      </button>
+
+      <nz-dropdown-menu #menu="nzDropdownMenu">
+        <ul nz-menu>
+          <li nz-menu-item
+              (click)="save(false)">
+            Salveaza
+          </li>
+        </ul>
+      </nz-dropdown-menu>
+    </nz-space-compact>
+  </nz-space>
+</div>

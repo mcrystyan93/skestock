@@ -17,6 +17,22 @@
   </div>
 </td>
 <td>
+  <nz-space nzAlign="center">
+    <h5 nz-typography
+        class="mb-0!"
+        *nzSpaceItem>{{ stockItem.quantity }} {{ stockItem.unit }}</h5>
+    @if (stockItem.isLowStock) {
+      <nz-tag nzColor="red"
+              *nzSpaceItem>Stoc redus
+      </nz-tag>
+    } @else {
+      <nz-tag nzColor="green"
+              *nzSpaceItem>OK
+      </nz-tag>
+    }
+  </nz-space>
+</td>
+<td>
   <div class="flex items-center justify-between gap-2">
     <div class="flex gap-1">
       <nz-icon nzType="icons:location-dot"></nz-icon>
@@ -27,6 +43,7 @@
             nzType="link"
             type="button"
             nz-tooltip
+            skeStopClick
             [nzTooltipTitle]="stockItem.quantity > 0
               ? 'Mută stocul pentru ' + stockItem.itemName
               : 'Mutarea nu este disponibilă pentru stoc 0 sau negativ'"
@@ -52,37 +69,13 @@
   </div>
 </td>
 <td>
-  <nz-space nzAlign="center">
-    <h5 nz-typography class="mb-0!"
-        *nzSpaceItem>{{ stockItem.quantity }} {{ stockItem.unit }}</h5>
-    @if (stockItem.isLowStock) {
-      <nz-tag nzColor="red"
-              *nzSpaceItem>Stoc redus
-      </nz-tag>
-    } @else {
-      <nz-tag nzColor="green"
-              *nzSpaceItem>OK
-      </nz-tag>
-    }
-  </nz-space>
-</td>
-<td>
-  <button nz-button
-          nzSize="small"
-          nzType="link"
-          type="button"
-          nz-tooltip
-          [nzTooltipTitle]="'Ajusteaza stoc pentru ' + stockItem.itemName"
-          [attr.aria-label]="'Ajusteaza stoc pentru ' + stockItem.itemName"
-          (click)="adjust.emit(stockItem)">
-    <nz-icon nzType="icons:pencil"></nz-icon>
-  </button>
   @if (stockItem.expiredQuantity > 0) {
     <button nz-button
             nzSize="small"
             nzType="link"
             type="button"
             nz-popconfirm
+            skeStopClick
             nz-tooltip
             nzPopconfirmPlacement="topRight"
             nzTooltipTitle="Elimină articolele expirate"
@@ -90,9 +83,11 @@
             [attr.aria-label]="'Elimini cele ' + stockItem.expiredQuantity + ' articole expirate pentru ' + stockItem.itemName"
             (nzOnConfirm)="removeExpired.emit(stockItem)">
       <nz-icon nzType="icons:trash"></nz-icon>
+      Elimină expirate
     </button>
   }
   <button nz-button
+          skeStopClick
           nzSize="small"
           nzType="link"
           type="button"
@@ -105,5 +100,6 @@
             : 'Ascunde când stocul ajunge la 0 pentru ') + stockItem.itemName + ' la ' + stockItem.locationName"
           (click)="visibilityChange.emit(stockItem)">
     <nz-icon [nzType]="stockItem.hideWhenZeroStock ? 'icons:eye' : 'icons:eye-slash'"></nz-icon>
+    Ascunde
   </button>
 </td>

@@ -9,7 +9,7 @@
     }
   }
 </div>
-<ske-error-alert [problemDetail]="store.itemProblemDetail()"
+<ske-error-display [problemDetail]="store.itemProblemDetail()"
                  [validationErrors]="store.itemValidationErrors()" />
 <ske-item-form [loading]="store.itemLoading()"
                [item]="store.item()" />

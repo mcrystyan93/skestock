@@ -19,6 +19,7 @@ export const ErrorCodes = {
   auth: {
     unauthorized: 'auth.unauthorized',
     forbidden: 'auth.forbidden',
+    invalidCredentials: 'auth.invalid_credentials',
   },
 
   // ── Resource / domain errors ─────────────────────────────────────────────

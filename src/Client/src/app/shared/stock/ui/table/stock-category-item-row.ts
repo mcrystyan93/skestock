@@ -8,7 +8,8 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
 import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { StockItemDto } from '@ske/models';
-import {NzSpaceComponent, NzSpaceItemDirective} from 'ng-zorro-antd/space';
+import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
+import { StopClick } from '@ske/shared/directives';
 
 @Component({
   imports: [
@@ -21,7 +22,8 @@ import {NzSpaceComponent, NzSpaceItemDirective} from 'ng-zorro-antd/space';
     NzTooltipDirective,
     NzTypographyComponent,
     NzSpaceComponent,
-    NzSpaceItemDirective
+    NzSpaceItemDirective,
+    StopClick
   ],
   selector: 'tr[ske-stock-category-item-row]',
   templateUrl: './stock-category-item-row.html',
@@ -32,7 +34,6 @@ import {NzSpaceComponent, NzSpaceItemDirective} from 'ng-zorro-antd/space';
 export class StockCategoryItemRow {
   public readonly item = input.required<StockItemDto>();
 
-  public readonly adjust = output<StockItemDto>();
   public readonly move = output<StockItemDto>();
   public readonly removeExpired = output<StockItemDto>();
   public readonly visibilityChange = output<StockItemDto>();

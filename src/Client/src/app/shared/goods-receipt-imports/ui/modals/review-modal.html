@@ -1,6 +1,6 @@
 <div *nzModalTitle>Revizuire import receptie</div>
 
-<ske-error-alert [problemDetail]="store.reviewProblemDetail()"
+<ske-error-display [problemDetail]="store.reviewProblemDetail()"
                  [validationErrors]="store.reviewValidationErrors()" />
 
 <ske-goods-receipt-import-review-info [reviewInfo]="store.review()"

@@ -5,6 +5,7 @@ import { LoginForm } from './form/login-form';
 import { AuthStore } from '@ske/auth';
 import { Credentials } from '@ske/models';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
+import { ErrorAlert } from '@ske/shared/errors';
 
 @Component({
   selector: 'ske-login-page',
@@ -13,7 +14,8 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
     NzCardComponent,
     ThemeSwitcher,
     LoginForm,
-    NzIconDirective
+    NzIconDirective,
+    ErrorAlert
   ],
   host: {
     class: 'flex h-screen w-screen flex-row items-center justify-center'

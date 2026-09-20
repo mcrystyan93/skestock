@@ -12,7 +12,7 @@ import { LayoutBreakpoint } from '@ske/shared/directives';
   template: `
     <ske-item-filter-container />
 
-    <ske-error-alert [problemDetail]="problemDetail()" [validationErrors]="validationErrors()" />
+    <ske-error-display [problemDetail]="problemDetail()" [validationErrors]="validationErrors()" />
 
     <div class="grow relative">
       <ng-container *skeLayoutBreakpoint="'xl'; else smallScreenListTemplate">

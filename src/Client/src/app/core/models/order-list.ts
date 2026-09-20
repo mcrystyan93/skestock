@@ -1,5 +1,5 @@
-import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
-import { PAGINATION_PAGE_SIZE } from './category';
+import {BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition} from './pagination';
+import {PAGINATION_PAGE_SIZE} from './category';
 
 /** Mirrors src/Application/Features/OrderLists/Models/OrderListLineDto.cs. */
 export type OrderListLineDto = {
@@ -7,8 +7,8 @@ export type OrderListLineDto = {
   itemId?: string | null;
   productName: string;
   quantity: number;
-  unit?: string | null;
-  notes?: string | null;
+  unit: string|null;
+  notes: string|null;
 };
 
 /** Mirrors src/Domain/Enums/OrderListStatus.cs. */

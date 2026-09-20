@@ -87,10 +87,17 @@ export function withStockCollection() {
                       groupedStockItems.get(group)!.push(item);
                     }
 
+                    // sort the groups by category name
+                    const sortedGroupedStockItems = new Map(
+                      Array.from(groupedStockItems.entries()).sort((a, b) =>
+                        a[0].categoryName.localeCompare(b[0].categoryName)
+                      )
+                    );
+
                     patchState(store, {
                       stockItems: result.items,
                       hasExpiredItems: result.hasExpiredItems,
-                      groupedStockItems
+                      groupedStockItems: sortedGroupedStockItems
                     });
                     store.setStockItemsLoaded();
                   },

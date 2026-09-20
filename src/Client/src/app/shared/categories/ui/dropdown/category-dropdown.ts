@@ -1,17 +1,32 @@
-import { Component, DestroyRef, effect, inject, input, linkedSignal, model, untracked } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { disabled, form, FormField, type FormValueControl } from '@angular/forms/signals';
-import { type CategoryDropdownValue, CategoryDto, GetAllCategoriesRequest, PAGINATION_PAGE_SIZE } from '@ske/models';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
-import { CategoryDropdownStore } from '../../services/category-dropdown.store';
-import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
-import { NzSpinComponent } from 'ng-zorro-antd/spin';
-import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
-import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { isNil } from 'lodash-es';
-import { CategoryDetailModal } from '../modals/detail/category-detail-modal';
-import { NzModalService } from 'ng-zorro-antd/modal';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  linkedSignal,
+  model,
+  untracked,
+} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {disabled, form, FormField, type FormValueControl} from '@angular/forms/signals';
+import {
+  type CategoryDropdownValue,
+  type CategoryDto,
+  GetAllCategoriesRequest,
+  PAGINATION_PAGE_SIZE,
+} from '@ske/models';
+import {debounceTime, distinctUntilChanged, Subject} from 'rxjs';
+import {CategoryDropdownStore} from '../../services/category-dropdown.store';
+import {NzOptionComponent, NzSelectComponent} from 'ng-zorro-antd/select';
+import {NzSpinComponent} from 'ng-zorro-antd/spin';
+import {NzSpaceCompactComponent} from 'ng-zorro-antd/space';
+import {NzButtonComponent} from 'ng-zorro-antd/button';
+import {NzIconDirective} from 'ng-zorro-antd/icon';
+import {isNil} from 'lodash-es';
+import {CategoryDetailModal} from '../modals/detail/category-detail-modal';
+import {NzModalService} from 'ng-zorro-antd/modal';
 
 @Component({
   selector: 'ske-category-dropdown',
@@ -22,27 +37,29 @@ import { NzModalService } from 'ng-zorro-antd/modal';
     NzOptionComponent,
     NzSpaceCompactComponent,
     NzButtonComponent,
-    NzIconDirective
+    NzIconDirective,
   ],
   template: `
     <nz-space-compact class="w-full">
-      <nz-select [formField]="categoryForm.category"
-                 [nzPlaceHolder]="placeholder()"
-                 nzShowSearch
-                 nzShowArrow
-                 [nzLoading]="store.categoriesLoading()"
-                 [nzAllowClear]="allowClear()"
-                 nzServerSearch
-                 class="w-full"
-                 [compareWith]="(a, b) => a && b ? a.id === b.id : a === b"
-                 (nzOnSearch)="onSearch($event)"
-                 [nzDropdownMatchSelectWidth]="false"
-                 [nzDropdownRender]="loadingMoreTemplate"
-                 (nzScrollToBottom)="loadMore()">
+      <nz-select
+        [formField]="categoryForm.category"
+        [nzPlaceHolder]="placeholder()"
+        nzShowSearch
+        nzShowArrow
+        [nzLoading]="store.loading()"
+        [nzAllowClear]="allowClear()"
+        nzServerSearch
+        class="w-full"
+        [compareWith]="(a, b) => (a && b ? a.id === b.id : a === b)"
+        (nzOnSearch)="onSearch($event)"
+        [nzDropdownMatchSelectWidth]="false"
+        [nzDropdownRender]="loadingMoreTemplate"
+        (nzScrollToBottom)="loadMore()"
+      >
         @if (value(); as category) {
           <nz-option [nzValue]="category"
                      nzHide
-                     [nzLabel]="category.name ?? ''"></nz-option>
+                     [nzLabel]="selectedCategoryLabel()"></nz-option>
         }
 
         @for (category of store.categories(); track category.id) {
@@ -51,7 +68,8 @@ import { NzModalService } from 'ng-zorro-antd/modal';
         }
       </nz-select>
       @if (allowEdit() && value()?.id && !categoryForm().disabled()) {
-        <button nz-button nzSize="small"
+        <button nz-button
+                nzSize="small"
                 nzType="primary"
                 type="button"
                 (click)="onEdit(value())">
@@ -59,7 +77,8 @@ import { NzModalService } from 'ng-zorro-antd/modal';
         </button>
       }
       @if (allowCreate() && !categoryForm().disabled()) {
-        <button nz-button nzSize="small"
+        <button nz-button
+                nzSize="small"
                 nzType="primary"
                 type="button"
                 (click)="onAdd()">
@@ -74,7 +93,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
       }
     </ng-template>
   `,
-  providers: [CategoryDropdownStore, NzModalService]
+  providers: [CategoryDropdownStore, NzModalService],
 })
 export class CategoryDropdown implements FormValueControl<CategoryDropdownValue> {
   public readonly value = model<CategoryDropdownValue>(null);
@@ -92,11 +111,11 @@ export class CategoryDropdown implements FormValueControl<CategoryDropdownValue>
 
   private readonly _formModel = linkedSignal({
     source: () => this.value(),
-    computation: (value) => (<CategoryDropdownFormModel>{ category: value })
+    computation: (value) => <CategoryDropdownFormModel>{category: value},
   });
 
   public readonly categoryForm = form(this._formModel, (schemaPath) => {
-    disabled(schemaPath, { when: () => this.disabled() });
+    disabled(schemaPath, {when: () => this.disabled()});
   });
 
   private readonly _formCategoryChangeEffectRef = effect(() => {
@@ -106,14 +125,34 @@ export class CategoryDropdown implements FormValueControl<CategoryDropdownValue>
   });
 
   private readonly _searchSub = this._search$
-    .pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      takeUntilDestroyed()
-    )
+    .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
     .subscribe((searchTerm) => {
-      this.store.load(this.buildFilter({ searchTerm }));
+      this.store.load(this.buildFilter({searchTerm}));
     });
+
+  private readonly _selectedValueEffectRef = effect(() => {
+    const category = this.value();
+
+    untracked(() => this.store.resolveSelectedCategory(category));
+  });
+
+  public readonly selectedCategoryLabel = computed(() => {
+    const category = this.value();
+
+    if (!category?.id) return '';
+
+    const resolvedCategory = this.store.selectedCategory();
+
+    if (resolvedCategory?.id === category.id && resolvedCategory.name)
+      return this.categoryLabel(resolvedCategory);
+
+    if (this.store.selectedCategoryLoading()) return 'Se încarcă categoria…';
+
+    if (this.store.selectedCategoryUnavailable())
+      return `Categorie indisponibilă`;
+
+    return category.name ? this.categoryLabel(category) : 'Se încarcă categoria…';
+  });
 
   public loadMore() {
     this.store.loadMore();
@@ -123,54 +162,58 @@ export class CategoryDropdown implements FormValueControl<CategoryDropdownValue>
     this._search$.next(searchTerm);
   }
 
+  public categoryLabel(category: CategoryDropdownValue): string {
+    return category?.name ?? 'Categorie indisponibilă';
+  }
+
   public onAdd() {
     this.openCategoryModal(null, this.createPrefill());
   }
 
   public onEdit(category: CategoryDropdownValue) {
-    if (isNil(category))
-      return;
+    if (isNil(category)) return;
 
     this.openCategoryModal(category as CategoryDto);
   }
 
-  private openCategoryModal(category: CategoryDto | null = null, prefill: Partial<CategoryDto> | null = null) {
+  private openCategoryModal(
+    category: CategoryDto | null = null,
+    prefill: Partial<CategoryDto> | null = null,
+  ) {
     const modalRef = this._modalService.create({
       nzContent: CategoryDetailModal,
       nzData: {
         category,
-        prefill
+        prefill,
       },
       nzCentered: true,
-      nzMaskClosable: false
+      nzMaskClosable: false,
     });
 
-    modalRef.afterClose.pipe(
-      takeUntilDestroyed(this._destroyRef)
-    ).subscribe((savedCategory: Partial<CategoryDto> | null) => {
-      if (savedCategory?.id)
-        this.value.set(savedCategory);
+    modalRef.afterClose
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((savedCategory: Partial<CategoryDto> | null) => {
+        if (savedCategory?.id) this.value.set(savedCategory);
 
-      this.store.load(this.store.filter());
-    });
+        this.store.load(this.store.filter());
+      });
   }
 
-  private buildFilter(
-    partialFilter: Partial<GetAllCategoriesRequest>
-  ): GetAllCategoriesRequest {
+  private buildFilter(partialFilter: Partial<GetAllCategoriesRequest>): GetAllCategoriesRequest {
     return {
       ...partialFilter,
       pageSize: partialFilter.pageSize ?? PAGINATION_PAGE_SIZE,
       filters: partialFilter.filters ?? untracked(() => this.store.filter().filters),
-      sort: [{
-        value: 'ascend',
-        key: 'name'
-      }]
+      sort: [
+        {
+          value: 'ascend',
+          key: 'name',
+        },
+      ],
     };
   }
-
 }
 
 type CategoryDropdownFormModel = {
-  category: CategoryDropdownValue
+  category: CategoryDropdownValue;
 };

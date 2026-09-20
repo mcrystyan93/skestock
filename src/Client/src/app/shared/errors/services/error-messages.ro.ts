@@ -27,6 +27,7 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
   // ── Authentication / authorization errors ────────────────────────────────
   [ErrorCodes.auth.unauthorized]: 'Trebuie să fiți autentificat pentru a efectua această acțiune.',
   [ErrorCodes.auth.forbidden]: 'Nu aveți permisiunea de a efectua această acțiune.',
+  [ErrorCodes.auth.invalidCredentials]: 'Adresa de e-mail sau parola sunt incorecte.',
 
   // ── Resource / domain errors ─────────────────────────────────────────────
   [ErrorCodes.resource.categoryNotFound]: 'Categoria nu a fost găsită.',
