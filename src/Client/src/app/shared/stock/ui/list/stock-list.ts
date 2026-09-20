@@ -4,7 +4,6 @@ import { StockCategoryCardsContainer } from '../table/stock-category-cards-conta
 import { FilterContainer } from './filter/filter-container';
 import { isNil } from 'lodash-es';
 import { ErrorAlert } from '@ske/shared/errors';
-import { ColumnFilter } from '@ske/models';
 import { StockPreferencesService } from '../../services/stock-preferences.service';
 
 @Component({
@@ -31,8 +30,9 @@ export class StockList {
 
   private readonly _loadEffectRef = effect(() => {
     const classId = this.classId();
-    const categoryId = this.store.categoryIdQueryParam();
-    const locationId = this.store.locationIdQueryParam();
+    const filters = untracked(() => this.store.filter().filters ?? []);
+    const category = filters.find(x => x.field === 'categoryId') ?? null;
+    const location = filters.find(x => x.field === 'locationId') ?? null;
     const includeHidden = untracked(() => this._stockPreferences.showHiddenProducts());
 
     if (isNil(classId))
@@ -40,8 +40,8 @@ export class StockList {
 
     untracked(() => {
       const filters = [
-        ...(categoryId ? [this.getCategoryIdFilter(categoryId)] : []),
-        ...(locationId ? [this.getLocationIdFilter(locationId)] : [])
+        ...(category ? [category] : []),
+        ...(location ? [location] : [])
       ];
 
       this.store.load({
@@ -53,23 +53,5 @@ export class StockList {
       });
     });
   });
-
-  private getCategoryIdFilter(categoryId: string): ColumnFilter {
-    return {
-      value: categoryId,
-      operator: 'equals',
-      fieldType: 'number',
-      field: 'categoryId'
-    };
-  }
-
-  private getLocationIdFilter(locationId: string): ColumnFilter {
-    return {
-      value: locationId,
-      operator: 'equals',
-      fieldType: 'number',
-      field: 'locationId'
-    };
-  }
 
 }

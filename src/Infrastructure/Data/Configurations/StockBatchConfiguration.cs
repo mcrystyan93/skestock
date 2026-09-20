@@ -42,6 +42,12 @@ public class StockBatchConfiguration : IEntityTypeConfiguration<StockBatch>
         
         builder.Property(b => b.UnitPrice).HasColumnType("decimal(10,2)");
 
+        // The stock report always scopes by class, optionally by location, groups by item/location,
+        // and reads Quantity plus ExpiryDate for its aggregates.
+        builder.HasIndex(b => new { b.ReceivedClassId, b.LocationId, b.ItemId })
+            .HasDatabaseName("IX_StockBatches_ReceivedClassId_LocationId_ItemId")
+            .IncludeProperties(b => new { b.Quantity, b.ExpiryDate });
+
         // Optimistic-concurrency token. SQL Server maintains this rowversion automatically on every
         // UPDATE; EF adds it to the WHERE clause of updates so a stale write affects zero rows and
         // throws DbUpdateConcurrencyException instead of overwriting a concurrent Quantity change.

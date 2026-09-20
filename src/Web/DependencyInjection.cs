@@ -39,7 +39,35 @@ public static class DependencyInjection
 
         // Fallback ProblemDetails generation for exceptions not handled by ProblemDetailsExceptionHandler,
         // so any unhandled exception still returns an RFC 9110-compliant ProblemDetails response.
-        builder.Services.AddProblemDetails();
+        // Identity API login failures are returned as ProblemHttpResult values rather than thrown
+        // exceptions, so customize those results here instead of relying on the exception handler.
+        builder.Services.AddProblemDetails(options =>
+        {
+            var invalidCredentialsCode = "auth.invalid_credentials";
+
+            options.CustomizeProblemDetails = context =>
+            {
+                var isLoginRequest =
+                    context.HttpContext.Request.Path.Value?.EndsWith(
+                        "/login",
+                        StringComparison.OrdinalIgnoreCase) == true;
+
+                if (!isLoginRequest ||
+                    context.ProblemDetails.Status != StatusCodes.Status401Unauthorized)
+                {
+                    return;
+                }
+
+                context.ProblemDetails.Type =
+                    "https://tools.ietf.org/html/rfc9110#section-15.5.2";
+                context.ProblemDetails.Title = "Authentication failed";
+                context.ProblemDetails.Detail = "Invalid email or password.";
+                context.ProblemDetails.Extensions[ApiErrorExtensions.Error] =
+                    ApiErrorContractFactory.Create(
+                        code: invalidCredentialsCode,
+                        httpContext: context.HttpContext);
+            };
+        });
 
         builder.Services.ConfigureHttpJsonOptions(options =>
         {

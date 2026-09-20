@@ -21,7 +21,7 @@ import { CategoryListSmall } from '../tables/regular/small/category-list-small';
   template: `
     <ske-category-filter-container />
 
-    <ske-error-alert [problemDetail]="problemDetail()"
+    <ske-error-display [problemDetail]="problemDetail()"
                      [validationErrors]="validationErrors()" />
 
     <div class="grow relative">

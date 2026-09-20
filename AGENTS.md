@@ -1,103 +1,46 @@
-# AGENTS.md
+# Agent instructions
 
-## Overview
+## Source of truth
 
-`skestock` is a .NET 10 solution built from the **Jason Taylor Clean Architecture** template, orchestrated with **.NET Aspire**. Layers depend inward only: `Web` → `Infrastructure`/`Application` → `Domain`. `Shared` holds cross-cutting constants (e.g. service names) referenced by both `AppHost` and app projects — never hardcode service/connection-string names, use `skestock.Shared.Services`.
+- This is a .NET 10 solution (`global.json` SDK `10.0.110`, roll-forward `latestFeature`) using the XML solution `skestock.slnx`; it is not a classic `.sln`.
+- `Directory.Build.props` enables nullable/implicit usings and `TreatWarningsAsErrors`; central NuGet versions belong in `Directory.Packages.props`, never in project files.
+- `CLAUDE.md` contains the repo's graphify workflow. For broader coding conventions, storage/queue details, and Angular rules, consult `.github/copilot-instructions.md` rather than duplicating them here.
 
-- **Domain**: entities, value objects, domain events. No dependencies on other layers.
-- **Application**: CQRS via **[Mediator](https://github.com/martinothamar/Mediator)** (source-generator based, `Mediator.Abstractions`/`Mediator.SourceGenerator` — not MediatR). Contains feature-slice commands/queries, **FluentValidation** validators, storage/blob and queue interfaces, and cross-cutting `Behaviours` (pipeline order matters, see below). It references `Domain` and `Shared`, and uses only the `IApplicationDbContext` interface (in `Common/Interfaces`) rather than an EF Core provider.
-- **Infrastructure**: EF Core (`ApplicationDbContext`), ASP.NET Core Identity (`ApplicationUser`), SaveChanges interceptors, Redis/FusionCache, Azure Blob/Queue adapters, document extraction providers, and SignalR.
-- **Web**: Minimal API endpoints, OpenAPI/Scalar, exception handling middleware.
-- **Worker**: queue consumer host for goods-receipt imports; it processes messages from Azure Storage Queue with idempotency, retries, and a poison queue.
-- **AppHost**: Aspire orchestrator — defines SQL Server, Redis, Azurite Blob/Queue storage, Web, Worker, and the Angular Vite frontend.
-
-## Solution/Project layout
-
-Uses `.slnx` (`skestock.slnx`), not a classic `.sln`. Central package management via `Directory.Packages.props` — add package versions there, not inline in `.csproj` files.
-
-The solution currently contains nine source projects (`AppHost`, `ServiceDefaults`, `Application`, `Domain`, `Infrastructure`, `Shared`, `Web`, `Client`, `Worker`) and five test projects (`Application.FunctionalTests`, `TestAppHost`, `Application.UnitTests`, `Domain.UnitTests`, `Infrastructure.IntegrationTests`).
-
-## Critical workflows
+## Commands
 
 ```bash
-dotnet build                              # build entire solution
-dotnet run --project src/AppHost          # run app via Aspire (opens dashboard, starts SQL/Redis containers)
-dotnet test                               # run all unit/integration/functional tests
+dotnet build
+dotnet test
+dotnet test tests/Application.UnitTests
+dotnet test tests/Infrastructure.IntegrationTests
+dotnet test tests/Worker.UnitTests
+cd src/Client && npm ci && npm run build
+cd src/Client && npm test
 ```
 
-- Running via `AppHost` requires a container runtime (SQL Server, Redis, and Azurite are containerized via Aspire). Web and Worker receive database, cache, blob, and queue references; the frontend runs as an Aspire-managed Angular/Vite app on port 7001.
-- Functional tests (`Application.FunctionalTests`) spin up `TestAppHost` via `DistributedApplicationTestingBuilder` in `FunctionalTestSetup` — they need a container runtime and wait on `Services.Database` health before running.
-- Scalar API reference is served at `/scalar` (default root redirect), not Swagger UI.
+- The supported full-stack run is `dotnet run --project src/AppHost`; it needs Docker or a compatible container runtime and Node/npm. AppHost starts SQL Server, Redis, Azurite, Web, Worker, and the Angular/Vite client. The client is on port `7001`; the Aspire dashboard is on `18080`; Web's API reference is `/scalar`.
+- Functional tests require containers and are normally run with `./run-functional-tests.sh [extra dotnet test args...]` when using Podman. The script starts/checks the user Podman socket and sets the required `DOCKER_HOST`/Aspire runtime variables. The direct command is `dotnet test tests/Application.FunctionalTests` when Docker is already configured.
+- Functional-test setup starts `TestAppHost`, waits up to 90 seconds for its SQL/Redis/queue resources, and uses `DatabaseResetter`/Respawn. Do not assume a clean database outside that reset helper. `TestAppHost` does not exercise Azurite, the Worker, or the browser client.
 
-## Scaffolding new use cases (Application layer)
+## Architecture and boundaries
 
-The template ships a `dotnet new` template for CQRS features. Prefer this over hand-writing boilerplate:
+- Dependencies point inward: `Web`/`Infrastructure` → `Application` → `Domain`; `Shared` contains cross-project service/resource constants. `Client` is an independent Angular project. `AppHost` is only the Aspire resource graph, not the HTTP app.
+- `Application` uses Mediator source generation (not MediatR), FluentValidation, and only the `IApplicationDbContext` abstraction. EF providers/configuration and external adapters belong in `Infrastructure`.
+- `Web` and `Worker` are separate hosts. `Worker` consumes goods-receipt queue messages with idempotency/retry/poison-queue handling; do not add processing to the leftover sample loop in `src/Worker/Worker.cs`.
+- Use `skestock.Shared.Services` for every Aspire resource, queue, database, cache, volume, and configuration-section name; do not duplicate string literals.
 
-```bash
-dotnet new ca-usecase --name CreateTodoList --feature-name TodoLists --usecase-type command --return-type int
-dotnet new ca-usecase -n GetTodos -fn TodoLists -ut query -rt TodosVm
-```
+## Implementation patterns
 
-If `ca-usecase` template is missing: `dotnet new install Clean.Architecture.Solution.Template::10.8.0`. Run this from `src/Application/`.
+- Layer service registration is exposed from each layer's own namespace (`AddApplicationServices`, `AddInfrastructureServices`, `AddWebAuthenticationServices`, `AddWebServices`, `AddServiceDefaults`). `src/Web/Program.cs` composes them in this order: service defaults → optional Key Vault → Application → Infrastructure → Web auth → Web services.
+- Add HTTP features as endpoint-group classes under `src/Web/Endpoints` implementing `IEndpointGroup` with a static `Map(RouteGroupBuilder)`; reflection discovery via `MapEndpoints` means no manual endpoint registration. Dispatch business work through Application handlers and map failed `Result`s with the existing problem-result mapper.
+- Mediator behavior order in `src/Application/DependencyInjection.cs` is significant: `LoggingBehaviour` → `UnhandledExceptionBehaviour` → `AuthorizationBehaviour` → `ValidationBehaviour` → `PerformanceBehaviour` → `CachingBehavior` → `CacheInvalidationBehavior`.
+- Queries implement `ICacheableQuery`; commands implement `ICacheInvalidation`. Use HybridCache's tag invalidation with sensible expirations and both collection-level and entity-level tags.
+- For new CQRS use cases, run the `ca-usecase` template from `src/Application`; install `Clean.Architecture.Solution.Template::10.8.0` if the template is unavailable. Complete slice-specific pagination/filter/sort/cache files manually when the template does not create them.
+- Use `Guard.Against.*` for argument/configuration guards and preserve each project's existing `GlobalUsings.cs` and file-scoped namespace style.
 
-## Mediator pipeline (order is significant)
+## Data, auth, and client gotchas
 
-Defined in `src/Application/DependencyInjection.cs`:
-`LoggingBehaviour` (pre-processor) → `UnhandledExceptionBehaviour` → `AuthorizationBehaviour` → `ValidationBehaviour` → `PerformanceBehaviour` → `CachingBehavior` → `CacheInvalidationBehavior`. When adding a new cross-cutting `Behaviours/*` class, register it here in the intended position, not at the end by default.
-
-## Application feature slices
-
-Current use cases and shared list-query boilerplate are:
-
-| Slice | Use cases | Pagination/filter/sort/cache |
-|---|---|---|
-| `Categories` | `Create`, `Update`, `GetAll`, `GetById` | Yes |
-| `GoodsReceipts` | `CreateGoodsReceipt`, `CreateGoodsReceiptImport`, `ProcessGoodsReceiptImport`, `ConfirmGoodsReceiptImport`, `GetAllGoodsReceipts`, `GetGoodsReceiptById`, `GetAllGoodsReceiptImports`, `GetGoodsReceiptImportById` | Yes, for receipts and imports |
-| `Items` | `Create`, `Edit`, `Disable`, `Enable`, `GetAll`, `GetById` | Yes |
-| `Locations` | `Create`, `Update`, `GetAll`, `GetDefault`, `GetById` | Yes |
-| `SchoolClasses` | `Create`, `Update`, `GetAll`, `GetById`, `GetSchoolClassSummary` | Yes for `GetAll` |
-| `Stock` | `AdjustStock`, `GetClassLocationStock` | No; intentionally non-paginated |
-| `StockBatches` | `CreateStockBatch`, `GetAllStockBatches` | Yes |
-
-For paginated `GetAll` queries, add the slice's `CacheConstants`, filter configuration, and sort configuration alongside the use-case folders. `Stock.GetClassLocationStock` is the reference for a deliberately non-paginated query.
-
-## Web endpoints pattern
-
-Endpoints are NOT controllers. Each endpoint group is a class implementing `IEndpointGroup` (`src/Web/Infrastructure/IEndpointGroup.cs`) with a static `Map(RouteGroupBuilder)` method, e.g. `src/Web/Endpoints/Users.cs`. They are auto-discovered and mapped via `app.MapEndpoints(typeof(Program).Assembly)` (`EndpointRouteBuilderExtensions.cs`) — no manual registration needed, just drop a new class into `Web/Endpoints/`.
-
-## Global usings
-
-Each project (`Application`, `Web`, `Domain`, etc.) has its own `GlobalUsings.cs` importing `Ardalis.GuardClauses`, `Mediator`, `FluentValidation` (Application only), `Microsoft.EntityFrameworkCore` (Application only, interface-level). Use `Guard.Against.*` (Ardalis.GuardClauses) for argument/null validation instead of manual `if`/`throw`, matching existing usage (e.g. `Guard.Against.Null(connectionString, ...)` in `Infrastructure/DependencyInjection.cs`).
-
-## DI registration convention
-
-Each layer exposes a single `AddXServices(this IHostApplicationBuilder builder)` extension method in a top-level `DependencyInjection.cs` (or `Extensions.cs` for `ServiceDefaults`), in **its own project namespace** (`skestock.Application`, `skestock.Infrastructure`, `skestock.Web`, `skestock.ServiceDefaults`) — not `Microsoft.Extensions.DependencyInjection`. `Web/Program.cs` brings each layer's extension methods into scope with explicit `using skestock.Application;`, `using skestock.Infrastructure;`, `using skestock.ServiceDefaults;`, `using skestock.Web;` statements, then composes them: `AddServiceDefaults()` → `AddKeyVaultIfConfigured()` → `AddApplicationServices()` → `AddInfrastructureServices()` → `AddWebServices()`. Follow this same pattern for any new layer-level service registration: put the extension method in the layer's own namespace and add the `using` in `Program.cs`.
-
-## Caching (`src/Application/Common/Caching/`)
-
-Query-side caching and command-side invalidation are cross-cutting `Behaviours` too, wired
-into the same Mediator pipeline (after `PerformanceBehaviour`): `CachingBehavior<,>` then
-`CacheInvalidationBehavior<,>`. Both use `HybridCache`'s native **tag-based invalidation**
-(not a hand-rolled version counter):
-- A query implements `ICacheableQuery` (`Tags`, `BypassCache`, `SlidingExpiration`,
-  `BuildCacheKey()`) — `CachingBehavior` calls `HybridCache.GetOrCreateAsync(key, factory,
-  options, tags: message.Tags, ...)`, wrapping the `Result<TResponse>` via `ResultCache`/
-  `ResultCacheTransformer`.
-- A command implements `ICacheInvalidation` (`Tags`) — after a successful `Result`,
-  `CacheInvalidationBehavior` calls `HybridCache.RemoveByTagAsync(cacheInvalidation.Tags, ct)`
-  once for all tags.
-- Tag invalidation is **lazy/logical**: `RemoveByTagAsync` doesn't physically evict entries,
-  it marks a "created before this point is stale" watermark per tag; entries are recomputed
-  on next read. Always set a sensible `SlidingExpiration`/`Expiration` as a safety net too.
-- Use a mix of coarse (collection-level, e.g. `"items"`) and fine-grained (per-entity, e.g.
-  `"items:{id}"`) tags so commands can invalidate broadly or narrowly as needed.
-
-## Auth
-
-Identity uses ASP.NET Core Identity's built-in API endpoints (`MapIdentityApi<ApplicationUser>()`) with the application cookie as the default scheme and bearer tokens (`AddBearerToken(IdentityConstants.BearerScheme)`) for non-browser clients. Roles use `IdentityRole<Guid>`; `Administrator` is the only current application role. Custom endpoints like logout (`Users.Logout`) sit alongside the built-in identity endpoints in the same `IEndpointGroup`.
-
-Cookie-authenticated requests use an explicit CORS origin allowlist with credentials. Antiforgery validation is implemented and Angular-compatible, but its service registration and middleware call are currently commented out, so enforcement is disabled.
-
-## Tests
-
-Five test projects are present: `Domain.UnitTests` (currently empty), `Application.UnitTests` (including GoodsReceipts, Storage, and queue tests), `Application.FunctionalTests` (full Aspire-hosted stack via `TestAppHost`, covering Categories, GoodsReceipts, Items, Locations, SchoolClasses, Stock, StockBatches, and Storage), `Infrastructure.IntegrationTests`, and `TestAppHost`. Functional tests reset the DB per test/fixture via `DatabaseResetter` — don't assume a clean DB is provided automatically outside that helper.
+- Persisted instants use UTC `DateTimeOffset` (see `docs/adr/0001-utc-datetimeoffset-for-persisted-instants.md`). Keep EF configuration in `src/Infrastructure/Data`; application handlers use `IApplicationDbContext` and `SaveChangesAsync`.
+- Cookie auth requires explicit CORS origins with credentials; do not replace the configured allowlist with `AllowAnyOrigin()`. Antiforgery middleware is currently scaffolded but commented out, so do not assume it is enforced.
+- Client dependencies are locked by `src/Client/package-lock.json`; use `npm ci` for a clean install. The real frontend is `src/Client` (not the old `src/Web/ClientApp` path). Angular-specific conventions are in `.github/copilot-instructions.md` and `.github/instructions/`.
+- Do not hand-edit generated EF migration designer/snapshot files or other generated artifacts; update their source/configuration and regenerate using the repository's existing tooling.

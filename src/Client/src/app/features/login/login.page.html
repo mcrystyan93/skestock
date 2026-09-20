@@ -15,5 +15,7 @@
     </h1>
   </div>
   <ske-login-form [loading]="store.loginLoading()"
-                  (onSubmit)="login($event)" />
+                  (onSubmit)="login($event)"
+                  [problemDetail]="store.loginProblemDetail()"
+                  [validationErrors]="store.loginValidationErrors()" />
 </nz-card>

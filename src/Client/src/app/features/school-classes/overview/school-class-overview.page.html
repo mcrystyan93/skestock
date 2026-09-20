@@ -1,7 +1,7 @@
 <ske-school-class-overview-header-container [classId]="store.schoolClass()?.id ?? null"
                                              class="min-w-0" />
 
-<ske-error-alert [problemDetail]="store.schoolClassProblemDetail()"
+<ske-error-display [problemDetail]="store.schoolClassProblemDetail()"
                  [validationErrors]="store.schoolClassValidationErrors()"
                  class="mx-4" />
 
@@ -16,7 +16,7 @@
   </nz-tab>
   <nz-tab>
 
-    <ske-error-alert [problemDetail]="store.goodsReceiptsProblemDetail()"
+    <ske-error-display [problemDetail]="store.goodsReceiptsProblemDetail()"
                      [validationErrors]="store.goodsReceiptsValidationErrors()"
                      class="mx-4" />
 

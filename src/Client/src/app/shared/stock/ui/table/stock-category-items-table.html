@@ -11,6 +11,10 @@
     <th nzColumnKey="itemName">
       <strong>{{ columns.itemName.label }}</strong>
     </th>
+    <th nzColumnKey="quantity"
+        nzWidth="150px">
+      <strong>{{ columns.quantity.label }}</strong>
+    </th>
     <th nzColumnKey="locationName"
         nzWidth="150px">
       <strong>{{ columns.locationName.label }}</strong>
@@ -19,12 +23,8 @@
         nzWidth="150px">
       <strong>{{ columns.isPerishable.label }}</strong>
     </th>
-    <th nzColumnKey="quantity"
-        nzWidth="120px">
-      <strong>{{ columns.quantity.label }}</strong>
-    </th>
     <th nzRight
-        nzWidth="140px">
+        nzWidth="200px">
       <strong>Actiuni</strong>
     </th>
   </tr>
@@ -32,8 +32,9 @@
   <tbody>
     @for (item of items(); track item.itemId + ':' + item.locationId) {
       <tr ske-stock-category-item-row
+          class="cursor-pointer"
           [item]="item"
-          (adjust)="adjust.emit($event)"
+          (click)="adjust.emit(item)"
           (move)="move.emit($event)"
           (removeExpired)="removeExpired.emit($event)"
           (visibilityChange)="visibilityChange.emit($event)">

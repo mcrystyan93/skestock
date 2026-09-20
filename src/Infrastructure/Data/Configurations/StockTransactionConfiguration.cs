@@ -10,6 +10,13 @@ public class StockTransactionConfiguration : IEntityTypeConfiguration<StockTrans
     {
         builder.Property(t => t.Reason).HasMaxLength(250);
 
+        // The stock report filters by class/item/location and computes the latest CreatedAt for
+        // each item/location pair. Keeping CreatedAt in the key supports the grouped MAX without
+        // lookups and also supports a future TOP(1) latest-transaction query shape.
+        builder.HasIndex(t => new { t.ClassId, t.ItemId, t.LocationId, t.CreatedAt })
+            .HasDatabaseName("IX_StockTransactions_ClassId_ItemId_LocationId_CreatedAt")
+            .IsDescending(false, false, false, true);
+
         // Restrict on all FKs to avoid multiple cascade paths from Item/Location/SchoolClass
         // being referenced by several dependent entities (see StockBatchConfiguration).
         builder.HasOne(t => t.Item)

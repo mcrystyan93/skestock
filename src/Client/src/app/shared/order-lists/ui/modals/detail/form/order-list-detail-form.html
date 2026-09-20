@@ -1,0 +1,64 @@
+<ng-template #errorTemplate
+             let-control>
+  @let formControl = control.control;
+  @if (formControl.errors?.required; as requiredError) {
+    <nz-icon nzType="icons:circle-info"
+             class="mr-1"></nz-icon>
+    {{ requiredError.message }}
+  }
+  @if (formControl.errors?.maxLength; as maxLengthError) {
+    <nz-icon nzType="icons:circle-info"
+             class="mr-1"></nz-icon>
+    {{ maxLengthError.message }}
+  }
+</ng-template>
+<form nz-form
+      nzNoColon
+      nzLayout="vertical">
+  <nz-row [nzGutter]="[16, 16]">
+    <nz-col [nzXl]="12">
+      <nz-form-item nzLayout="vertical">
+        <nz-form-label nzRequired
+                       nzSpan="24">Nume
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="errorTemplate"
+                         nzSpan="24">
+          <nz-input-wrapper nzShowCount
+                            [nzCount]="{ max: orderListForm.name()?.maxLength() ?? 50 }">
+            <input type="text"
+                   [formField]="orderListForm.name"
+                   nz-input>
+          </nz-input-wrapper>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label nzRequired>Status</nz-form-label>
+        <nz-form-control [nzErrorTip]="errorTemplate">
+          <nz-select [formField]="orderListForm.status"
+                     nzShowArrow
+                     nzPlaceHolder="Alege un status"
+                     [nzDropdownMatchSelectWidth]="false">
+            <nz-option nzValue="Draft"
+                       nzLabel="Ciorna" />
+            <nz-option nzValue="Submitted"
+                       nzLabel="Finalizata" />
+            <nz-option nzValue="Cancelled"
+                       nzLabel="Anulata" />
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col [nzXl]="12">
+      <nz-form-item>
+        <nz-form-label nzSpan="24">Nota</nz-form-label>
+        <nz-form-control [nzErrorTip]="errorTemplate">
+          <nz-textarea-count [nzMaxCharacterCount]="orderListForm.note()?.maxLength() ?? 1000">
+      <textarea nz-input
+                [formField]="orderListForm.note"
+                rows="4"></textarea>
+          </nz-textarea-count>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+  </nz-row>
+</form>

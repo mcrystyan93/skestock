@@ -1098,7 +1098,10 @@ namespace skestock.Infrastructure.Data.Migrations
 
                     b.HasIndex("LocationId");
 
-                    b.HasIndex("ReceivedClassId");
+                    b.HasIndex("ReceivedClassId", "LocationId", "ItemId")
+                        .HasDatabaseName("IX_StockBatches_ReceivedClassId_LocationId_ItemId");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("ReceivedClassId", "LocationId", "ItemId"), new[] { "Quantity", "ExpiryDate" });
 
                     b.ToTable("StockBatches");
                 });
@@ -1156,8 +1159,6 @@ namespace skestock.Infrastructure.Data.Migrations
 
                     b.HasIndex("BatchId");
 
-                    b.HasIndex("ClassId");
-
                     b.HasIndex("CreatedById");
 
                     b.HasIndex("GoodsReceiptId");
@@ -1169,6 +1170,10 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.HasIndex("LocationId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("ClassId", "ItemId", "LocationId", "CreatedAt")
+                        .IsDescending(false, false, false, true)
+                        .HasDatabaseName("IX_StockTransactions_ClassId_ItemId_LocationId_CreatedAt");
 
                     b.ToTable("StockTransactions");
                 });

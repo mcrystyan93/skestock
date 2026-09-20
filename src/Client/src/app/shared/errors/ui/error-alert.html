@@ -1,5 +1,16 @@
-@if (problemDetail()) {
-  <ske-problem-detail-alert [problemDetail]="problemDetail()" />
-} @else if (validationErrors()) {
-  <ske-validation-problem-detail-alert [validationErrors]="validationErrors()" />
+@switch (type()) {
+  @case ('alert') {
+    @if (problemDetail()) {
+      <ske-problem-detail-alert [problemDetail]="problemDetail()" />
+    } @else if (validationErrors()) {
+      <ske-validation-problem-detail-alert [validationErrors]="validationErrors()" />
+    }
+  }
+  @case ('text') {
+    @if (problemDetail()) {
+      <ske-problem-detail-text [problemDetail]="problemDetail()" />
+    }
+  }
 }
+
+

@@ -19,7 +19,7 @@ import { NzSpinComponent } from 'ng-zorro-antd/spin';
     <nz-select [formField]="locationForm.location"
                nzShowSearch
                nzShowArrow
-               [nzLoading]="store.locationsLoading()"
+               [nzLoading]="store.loading()"
                [nzAllowClear]="allowClear()"
                nzServerSearch
                class="w-full"
@@ -33,7 +33,7 @@ import { NzSpinComponent } from 'ng-zorro-antd/spin';
         @if (location.id !== excludedLocationId()) {
           <nz-option [nzValue]="location"
                      nzHide
-                     [nzLabel]="location.name ?? ''"></nz-option>
+                     [nzLabel]="selectedLocationLabel()"></nz-option>
         }
       }
 
@@ -48,7 +48,8 @@ import { NzSpinComponent } from 'ng-zorro-antd/spin';
         <nz-spin></nz-spin>
       }
     </ng-template>
-  `
+  `,
+  providers: [LocationDropdownStore]
 })
 export class LocationDropdown implements FormValueControl<LocationDropdownValue> {
   public readonly value = model<LocationDropdownValue>(null);
@@ -81,6 +82,12 @@ export class LocationDropdown implements FormValueControl<LocationDropdownValue>
     const location = this.locationForm.location().value();
 
     untracked(() => this.value.set(location));
+  });
+
+  private readonly _selectedValueEffectRef = effect(() => {
+    const location = this.value();
+
+    untracked(() => this.store.resolveSelectedLocation(location));
   });
 
   // When enabled, request the default location once (SignalStore owns the async fetch + state).
@@ -127,12 +134,36 @@ export class LocationDropdown implements FormValueControl<LocationDropdownValue>
       this.store.load(this.buildFilter({ searchTerm }));
     });
 
+  public readonly selectedLocationLabel = computed(() => {
+    const location = this.value();
+
+    if (!location?.id)
+      return '';
+
+    const resolvedLocation = this.store.selectedLocation();
+
+    if (resolvedLocation?.id === location.id && resolvedLocation.name)
+      return this.locationLabel(resolvedLocation);
+
+    if (this.store.selectedLocationLoading())
+      return 'Se încarcă locația…';
+
+    if (this.store.selectedLocationUnavailable())
+      return `Locație indisponibilă`;
+
+    return location.name ? this.locationLabel(location) : 'Se încarcă locația…';
+  });
+
   public loadMore() {
     this.store.loadMore();
   }
 
   public onSearch(searchTerm: string) {
     this._search$.next(searchTerm);
+  }
+
+  public locationLabel(location: LocationDropdownValue): string {
+    return location?.name ?? 'Locație indisponibilă';
   }
 
   private buildFilter(

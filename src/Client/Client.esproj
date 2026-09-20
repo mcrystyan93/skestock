@@ -9,5 +9,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="src\app\core\auth\" />
+    <Folder Include="src\app\shared\order-lists\ui\" />
   </ItemGroup>
 </Project>

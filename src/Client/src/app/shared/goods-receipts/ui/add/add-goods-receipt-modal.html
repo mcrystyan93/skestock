@@ -23,7 +23,7 @@
 }
 
 @if (store.goodsReceiptImportProblemDetail(); as problemDetail) {
-  <ske-error-alert [problemDetail]="problemDetail"/>
+  <ske-error-display [problemDetail]="problemDetail"/>
 }
 
 <div *nzModalFooter>

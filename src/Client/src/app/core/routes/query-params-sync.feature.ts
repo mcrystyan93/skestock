@@ -24,8 +24,7 @@ export function withQueryParamsSync<T>(options: {
         effect(() => {
           const value = options.getValue(store)();
 
-          if (!isNil(value))
-            qp.set(options.key, options.serialize(value));
+          qp.set(options.key, isNil(value) ? null : options.serialize(value));
         });
 
         effect(() => {
