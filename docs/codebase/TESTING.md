@@ -4,7 +4,7 @@
 
 ### 1) Test Stack and Commands
 
-- Primary .NET test framework: **NUnit 4.6.1** (`NUnit3TestAdapter` 6.3.0, `NUnit.Analyzers`) — not xUnit, across `Application.UnitTests`, `Application.FunctionalTests`, `Domain.UnitTests`, `Infrastructure.IntegrationTests`; `TestAppHost` is a supporting Aspire host project, not a test project.
+- Primary .NET test framework: **NUnit 4.6.1** (`NUnit3TestAdapter` 6.3.0, `NUnit.Analyzers`) — not xUnit, across `Application.UnitTests`, `Application.FunctionalTests`, `Domain.UnitTests`, `Infrastructure.IntegrationTests`, and `Worker.UnitTests`; `TestAppHost` is a supporting Aspire host project, not a test project.
 - Assertion/mocking tools: **Shouldly 4.3.0**, **Moq 4.20.72**, **Respawn 7.0.0** (DB reset for functional tests), `coverlet.collector` 10.0.1 (no enforced threshold found).
 - Client test framework: **Vitest 4** (`src/Client`), run via `npm test`.
 - Commands:
@@ -21,7 +21,7 @@ cd src/Client && npm test                             # Angular client Vitest su
 
 ### 2) Test Layout
 
-- Placement pattern: **mirrors the source tree feature-for-feature**, not co-located with source files. `tests/Application.UnitTests/` and `tests/Application.FunctionalTests/` replicate `src/Application/`'s folders 1:1, now covering `Common/{Behaviours,Caching,Filtering,Keyset}` and `Features/{Categories,GoodsReceipts,Items,Locations,SchoolClasses,Statistics,Stock,StockBatches,Storage}`.
+- Placement pattern: **mirrors the source tree feature-for-feature**, not co-located with source files. `tests/Application.UnitTests/` and `tests/Application.FunctionalTests/` replicate `src/Application/`'s folders 1:1, now covering `Common/{Behaviours,Caching,Filtering,Keyset}` and `Features/{Categories,GoodsReceipts,Items,Locations,OrderLists,SchoolClasses,Statistics,Stock,StockBatches,Storage}`. `tests/Worker.UnitTests/Queues/` mirrors `src/Worker/Queues/`.
 - Naming convention: `<UseCase><Role>Tests.cs`, e.g. `GetAllCategoriesHandlerTests.cs` (unit), `GetAllCategoriesQueryTests.cs` (functional). Import-batch flows follow the same pattern (e.g. `ConfirmCategoryImportBatchCommandHandlerTests.cs`), with per-use-case `*TestDbContext.cs` fixtures (e.g. `CategoryImportBatchTestDbContext`, `ProcessGoodsReceiptImportTestDbContext`).
 - Setup files: `tests/Application.FunctionalTests/FunctionalTestSetup.cs` is an NUnit `[SetUpFixture]` — boots `TestAppHost` via `DistributedApplicationTestingBuilder`, waits (90s timeout) for `Services.Database`/`Services.Cache` health, builds a `WebApiFactory`, creates a `DatabaseResetter`. `tests/Application.FunctionalTests/Infrastructure/{TestApp,TestBase,WebApiFactory,DatabaseResetter}.cs` provide shared scaffolding.
 
@@ -33,7 +33,7 @@ cd src/Client && npm test                             # Angular client Vitest su
 | Integration | Yes | `tests/Infrastructure.IntegrationTests` — exercises `ApplicationDbContext`/EF Core directly against a real database | Requires Docker/Podman |
 | Functional (HTTP end-to-end) | Yes | `tests/Application.FunctionalTests` — full HTTP pipeline via `WebApiFactory`, driven by a live Aspire-hosted SQL Server + Redis (`TestAppHost`) | `TestAppHost` provides only SQL Server + Redis, so functional tests do **not** exercise Azurite/queues/Worker/SignalR/browser UI |
 | Domain unit tests | **No** | `tests/Domain.UnitTests` project exists but **still contains zero test files** (confirmed again this pass — only the `.csproj` present) | Domain now has richer entities (`ClassItemStockVisibility`, `CategoryImportBatch`, etc.) but none are independently unit-tested at the Domain layer |
-| Worker/queue processing | **No dedicated test project** | `src/Worker/Queues/*QueueProcessingService.cs` | Queue message handling (dedup, retry, poison-queue routing) is not exercised by `Application.FunctionalTests` (no Worker/Azurite in `TestAppHost`) and has no unit test project of its own — `[TODO]` confirm whether any coverage exists via a different mechanism |
+| Worker/queue processing | Yes (unit) | `tests/Worker.UnitTests/Queues/QueueProcessingServiceTests.cs` with `QueueProcessingTestHarness.cs` | Processor logic (dedup, retry, poison-queue classification) is unit-tested in isolation; the real publisher→Azure Queue→consumer wiring is still **not** covered end-to-end (no Azurite/Worker in `TestAppHost`) |
 | Client unit/component tests | Yes | Vitest (`src/Client`, `npm test`) | No dedicated browser/E2E runner declared |
 | E2E (browser/UI) | No dedicated suite declared | — | — |
 
@@ -47,7 +47,7 @@ cd src/Client && npm test                             # Angular client Vitest su
 
 - Coverage tool + threshold: `coverlet.collector` is pinned, but **no coverage threshold/gate** was found in any `.csproj`/`.runsettings`, and the one GitHub Actions workflow (`deploy-production.yml`) is `workflow_dispatch`-only (production deploy), not a build/test gate on push/PR — there is currently no CI enforcement of `dotnet test` or `npm test` passing before merge.
 - Current reported coverage: `[TODO]` — not measured in this pass.
-- Known gaps/flaky areas: `Domain.UnitTests` remains zero-coverage; Worker/queue processing has no dedicated automated test coverage; functional/integration tests depend on Docker/Podman availability and are the most environment-sensitive tier.
+- Known gaps/flaky areas: `Domain.UnitTests` remains zero-coverage; Worker/queue processing now has unit coverage (`Worker.UnitTests`) but no end-to-end publisher→queue→worker integration test; functional/integration tests depend on Docker/Podman availability and are the most environment-sensitive tier.
 
 ### 6) Evidence
 
@@ -55,7 +55,7 @@ cd src/Client && npm test                             # Angular client Vitest su
 - `tests/Application.FunctionalTests/FunctionalTestSetup.cs`, `tests/Application.FunctionalTests/Infrastructure/*.cs`
 - `tests/TestAppHost/Program.cs`
 - `run-functional-tests.sh`, `functional-tests.runsettings`
-- Directory listings of `tests/Application.UnitTests/Features/*` (8 feature slices) and `tests/Domain.UnitTests/` (confirmed still empty)
+- Directory listings of `tests/Application.UnitTests/Features/*` (10 feature slices incl. OrderLists), `tests/Worker.UnitTests/Queues/*`, and `tests/Domain.UnitTests/` (confirmed still empty)
 - `.github/workflows/deploy-production.yml` (confirmed `workflow_dispatch`-only, no build/test gate)
 
 ## Extended Sections (Optional)

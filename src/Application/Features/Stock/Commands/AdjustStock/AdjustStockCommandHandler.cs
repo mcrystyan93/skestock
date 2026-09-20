@@ -1,3 +1,4 @@
+using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Stock.Models;
 using skestock.Domain.Entities;
@@ -101,8 +102,21 @@ public class AdjustStockCommandHandler(IApplicationDbContext dbContext, IUser us
         }
 
         // A single SaveChangesAsync wraps every batch update + new transaction row in one
-        // implicit DB transaction - if anything fails, nothing partially saves.
-        await dbContext.SaveChangesAsync(cancellationToken);
+        // implicit DB transaction - if anything fails, nothing partially saves. The StockBatch
+        // rowversion token means a concurrent draw-down that changed one of these batches first
+        // makes this UPDATE match zero rows, raising DbUpdateConcurrencyException instead of
+        // silently overwriting the other operation's result.
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Result.Fail<StockItemDto>(new StockErrors.ConcurrencyConflict(
+                request.ClassId,
+                request.ItemId,
+                request.LocationId));
+        }
 
         var item = await dbContext.Items
             .AsNoTracking()

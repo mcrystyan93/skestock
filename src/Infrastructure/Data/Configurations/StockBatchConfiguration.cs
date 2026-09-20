@@ -41,5 +41,10 @@ public class StockBatchConfiguration : IEntityTypeConfiguration<StockBatch>
             .OnDelete(DeleteBehavior.Restrict);
         
         builder.Property(b => b.UnitPrice).HasColumnType("decimal(10,2)");
+
+        // Optimistic-concurrency token. SQL Server maintains this rowversion automatically on every
+        // UPDATE; EF adds it to the WHERE clause of updates so a stale write affects zero rows and
+        // throws DbUpdateConcurrencyException instead of overwriting a concurrent Quantity change.
+        builder.Property(b => b.Version).IsRowVersion();
     }
 }

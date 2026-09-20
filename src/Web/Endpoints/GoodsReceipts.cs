@@ -40,10 +40,7 @@ public class GoodsReceipts : IEndpointGroup
 
         var result = await sender.Send(query, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Get a goods receipt by id")]
@@ -53,10 +50,7 @@ public class GoodsReceipts : IEndpointGroup
     {
         var result = await sender.Send(new GetGoodsReceiptByIdQuery { Id = id }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Create a new goods receipt")]
@@ -81,10 +75,7 @@ public class GoodsReceipts : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Created($"/api/GoodsReceipts/{result.Value.Id}", result.Value);
+        return result.ToCreated(v => $"/api/GoodsReceipts/{v.Id}");
     }
 
     [EndpointSummary("Create a new goods receipt import")]
@@ -100,10 +91,7 @@ public class GoodsReceipts : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Created($"/api/GoodsReceipts/imports/{result.Value.Id}", result.Value);
+        return result.ToCreated(v => $"/api/GoodsReceipts/imports/{v.Id}");
     }
 
     [EndpointSummary("Get all goods receipt imports")]
@@ -122,10 +110,7 @@ public class GoodsReceipts : IEndpointGroup
 
         var result = await sender.Send(query, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Get a goods receipt import for review")]
@@ -135,10 +120,7 @@ public class GoodsReceipts : IEndpointGroup
     {
         var result = await sender.Send(new GetGoodsReceiptImportByIdQuery { Id = id }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Confirm a goods receipt import")]
@@ -169,9 +151,6 @@ public class GoodsReceipts : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Created($"/api/GoodsReceipts/{result.Value.Id}", result.Value);
+        return result.ToCreated(v => $"/api/GoodsReceipts/{v.Id}");
     }
 }

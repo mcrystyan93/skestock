@@ -29,10 +29,7 @@ public class Storage : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Confirm a file upload")]
@@ -42,10 +39,7 @@ public class Storage : IEndpointGroup
     {
         var result = await sender.Send(new ConfirmUploadCommand { FileId = request.FileId }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(FileMetadataDto.FromEntity(result.Value));
+        return result.ToOk(FileMetadataDto.FromEntity);
     }
 
     [EndpointSummary("Get a file download link")]
@@ -55,9 +49,6 @@ public class Storage : IEndpointGroup
     {
         var result = await sender.Send(new GetFileDownloadQuery { Id = fileId }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 }

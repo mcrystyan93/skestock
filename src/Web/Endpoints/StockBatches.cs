@@ -30,10 +30,7 @@ public class StockBatches : IEndpointGroup
 
         var result = await sender.Send(query, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Create a new stock batch")]
@@ -54,9 +51,6 @@ public class StockBatches : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Created($"/api/StockBatches/{result.Value.Id}", result.Value);
+        return result.ToCreated(v => $"/api/StockBatches/{v.Id}");
     }
 }

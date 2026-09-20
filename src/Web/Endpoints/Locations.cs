@@ -36,10 +36,7 @@ public class Locations : IEndpointGroup
 
         var result = await sender.Send(query, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Get the default location")]
@@ -49,10 +46,7 @@ public class Locations : IEndpointGroup
     {
         var result = await sender.Send(new GetDefaultLocationQuery(), cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok<LocationDto?>(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Get a location by id")]
@@ -62,10 +56,7 @@ public class Locations : IEndpointGroup
     {
         var result = await sender.Send(new GetLocationByIdQuery { Id = id }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Create a new location")]
@@ -82,10 +73,7 @@ public class Locations : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Created($"/locations/{result.Value.Id}", result.Value);
+        return result.ToCreated(v => $"/locations/{v.Id}");
     }
 
     [EndpointSummary("Update an existing location")]
@@ -103,9 +91,6 @@ public class Locations : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 }

@@ -29,9 +29,10 @@
 | `src/Shared/` | Cross-cutting resource/service-name constants (`skestock.Shared.Services`) | `src/Shared/Services.cs` |
 | `src/Client/` | Angular ^22.1.0 SPA (`Client.esproj`), independent npm project, no .NET project references | `src/Client/package.json`, `Client.esproj` |
 | `tests/Domain.UnitTests/` | Project shell exists; **still contains zero test files** (confirmed) | only `Domain.UnitTests.csproj` present |
-| `tests/Application.UnitTests/` | NUnit unit tests, mirrors `src/Application/` feature-for-feature (now includes Categories, GoodsReceipts, Items, Locations, SchoolClasses, Statistics, Stock, StockBatches, Storage) | directory listing |
+| `tests/Application.UnitTests/` | NUnit unit tests, mirrors `src/Application/` feature-for-feature (now includes Categories, GoodsReceipts, Items, Locations, OrderLists, SchoolClasses, Statistics, Stock, StockBatches, Storage) | directory listing |
 | `tests/Application.FunctionalTests/` | Full HTTP-level tests via a real Aspire-hosted stack (`TestAppHost`) | `tests/Application.FunctionalTests/FunctionalTestSetup.cs` |
 | `tests/Infrastructure.IntegrationTests/` | EF Core/`ApplicationDbContext`-level tests | `tests/Infrastructure.IntegrationTests/Infrastructure.IntegrationTests.csproj` |
+| `tests/Worker.UnitTests/` | NUnit tests for the queue-processing pipeline (`Queues/QueueProcessingServiceTests.cs`, `QueueProcessingTestHarness.cs`) | `tests/Worker.UnitTests/Worker.UnitTests.csproj` |
 | `tests/TestAppHost/` | Slimmed Aspire host (SQL Server + Redis only) used only by functional tests | `tests/TestAppHost/Program.cs` |
 | `.github/agents/`, `.github/instructions/`, `.github/skills/` | Custom agent definitions, path-scoped coding-style instructions, and Copilot skills | `.github/` |
 | `docs/codebase/` | This codebase map (generated/maintained by the `acquire-codebase-knowledge` skill) | `docs/codebase/` |
@@ -61,7 +62,7 @@
 
 ### 4) Naming and Organization Rules
 
-- **Feature-slice organization** inside `Application`: `Features/<FeatureName>/{Commands,Queries}/<UseCase>/{<UseCase>Command|Query.cs, Handler.cs, Validator.cs}`, plus per-feature `<FeatureName>FilterConfiguration.cs`, `<FeatureName>SortConfiguration.cs`, `CacheConstants.cs` for paginated slices. Implemented feature slices: `Categories`, `GoodsReceipts`, `Items`, `Locations`, `SchoolClasses`, `Statistics`, `Stock`, `StockBatches` — all under `src/Application/Features/`.
+- **Feature-slice organization** inside `Application`: `Features/<FeatureName>/{Commands,Queries}/<UseCase>/{<UseCase>Command|Query.cs, Handler.cs, Validator.cs}`, plus per-feature `<FeatureName>FilterConfiguration.cs`, `<FeatureName>SortConfiguration.cs`, `CacheConstants.cs` for paginated slices. Implemented feature slices: `Categories`, `GoodsReceipts`, `Items`, `Locations`, `OrderLists`, `SchoolClasses`, `Statistics`, `Stock`, `StockBatches` — all under `src/Application/Features/`.
 - **File naming**: PascalCase throughout, one primary type per file, file name matches the type name.
 - **Test mirroring**: `tests/Application.UnitTests/` and `tests/Application.FunctionalTests/` mirror `src/Application/`'s folder tree feature-for-feature.
 - **No import-alias system** in .NET — namespaces mirror folder paths 1:1. The Angular client, however, uses TS path aliases (`@ske/...`, see `tsconfig.json`) — map those before assuming a deep relative import path.

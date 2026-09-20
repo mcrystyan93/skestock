@@ -36,10 +36,7 @@ public class SchoolClasses : IEndpointGroup
 
         var result = await sender.Send(query, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Get a school class by id")]
@@ -49,10 +46,7 @@ public class SchoolClasses : IEndpointGroup
     {
         var result = await sender.Send(new GetSchoolClassByIdQuery { Id = id }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Get a school class summary")]
@@ -62,10 +56,7 @@ public class SchoolClasses : IEndpointGroup
     {
         var result = await sender.Send(new GetSchoolClassSummaryQuery { Id = id }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Create a new school class")]
@@ -83,10 +74,7 @@ public class SchoolClasses : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Created($"/schoolclasses/{result.Value.Id}", result.Value);
+        return result.ToCreated(v => $"/schoolclasses/{v.Id}");
     }
 
     [EndpointSummary("Update an existing school class")]
@@ -105,9 +93,6 @@ public class SchoolClasses : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 }

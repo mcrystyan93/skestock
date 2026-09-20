@@ -66,7 +66,19 @@ public class RemoveExpiredStockCommandHandler(IApplicationDbContext dbContext, I
             request.ClassId,
             request.LocationId));
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        // The StockBatch rowversion token turns a concurrent change to one of these expired
+        // batches into a DbUpdateConcurrencyException here instead of a lost update.
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Result.Fail(new StockErrors.ConcurrencyConflict(
+                request.ClassId,
+                request.ItemId,
+                request.LocationId));
+        }
 
         return Result.Ok();
     }

@@ -4,6 +4,7 @@ using Azure;
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
 using Mediator;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -25,6 +26,7 @@ internal sealed class QueueProcessingTestHarness : IDisposable
 {
     private readonly CancellationTokenSource _stopSource = new();
     private readonly ServiceProvider _serviceProvider;
+    private readonly SqliteConnection _connection;
 
     public QueueProcessingTestHarness(QueueProcessorKind kind, QueueMessage message)
     {
@@ -42,10 +44,14 @@ internal sealed class QueueProcessingTestHarness : IDisposable
         PoisonQueueClient = new Mock<QueueClient>(MockBehavior.Strict, "UseDevelopmentStorage=true", PoisonQueueName);
         Sender = new Mock<ISender>(MockBehavior.Strict);
 
+        _connection = new SqliteConnection("Data Source=:memory:");
+        _connection.Open();
+
         var dbOptions = new DbContextOptionsBuilder<WorkerTestDbContext>()
-            .UseInMemoryDatabase($"worker-tests-{Guid.NewGuid():N}")
+            .UseSqlite(_connection)
             .Options;
         DbContext = new WorkerTestDbContext(dbOptions);
+        DbContext.Database.EnsureCreated();
 
         var services = new ServiceCollection();
         services.AddSingleton<IApplicationDbContext>(DbContext);
@@ -116,6 +122,7 @@ internal sealed class QueueProcessingTestHarness : IDisposable
         _stopSource.Dispose();
         _serviceProvider.Dispose();
         DbContext.Dispose();
+        _connection.Dispose();
     }
 
     private List<AmbientUser> AmbientUsers { get; } = [];
@@ -256,12 +263,14 @@ internal sealed class WorkerTestDbContext(DbContextOptions<WorkerTestDbContext> 
     public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
     public DbSet<OrderList> OrderLists => Set<OrderList>();
     public DbSet<OrderListLine> OrderListLines => Set<OrderListLine>();
+    public DbSet<WorkerTestEffect> TestEffects => Set<WorkerTestEffect>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<ProcessedMessage>().HasKey(message => message.Id);
+        modelBuilder.Entity<WorkerTestEffect>().HasKey(effect => effect.Id);
         modelBuilder.Ignore<Category>();
         modelBuilder.Ignore<CategoryImportBatch>();
         modelBuilder.Ignore<CategoryImportBatchFile>();
@@ -282,4 +291,9 @@ internal sealed class WorkerTestDbContext(DbContextOptions<WorkerTestDbContext> 
         modelBuilder.Ignore<OrderList>();
         modelBuilder.Ignore<OrderListLine>();
     }
+}
+
+internal sealed class WorkerTestEffect
+{
+    public Guid Id { get; set; }
 }

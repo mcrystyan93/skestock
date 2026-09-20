@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using FluentResults;
 using Microsoft.AspNetCore.Http.HttpResults;
 using skestock.Application.Common.Errors;
@@ -64,10 +63,8 @@ public static class ResultProblemDetailsMapper
             title: title,
             type: type);
 
-        problem.ProblemDetails.Extensions[ApiErrorExtensions.Error] = new ApiErrorContract(
-            Code: globalCode,
-            Errors: errorItems,
-            Diagnostics: new ApiDiagnosticsContract(Activity.Current?.Id));
+        problem.ProblemDetails.Extensions[ApiErrorExtensions.Error] =
+            ApiErrorContractFactory.Create(globalCode, errorItems);
 
         return problem;
     }

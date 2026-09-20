@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Errors;
 using skestock.Application.Features.Stock.Commands.MoveStock;
+using skestock.Application.UnitTests.Features.GoodsReceipts.Commands.CreateGoodsReceipt;
 using skestock.Domain.Entities;
 using skestock.Domain.Enums;
 using skestock.Domain.Events.Stock;
@@ -234,6 +235,55 @@ public class MoveStockCommandHandlerTests
         (await fixture.Context.StockBatches.CountAsync(CancellationToken.None)).ShouldBe(1);
         (await fixture.Context.StockBatches.SingleAsync(CancellationToken.None)).Quantity.ShouldBe(2);
         (await fixture.Context.StockTransactions.CountAsync(CancellationToken.None)).ShouldBe(0);
+    }
+
+    [Test]
+    public async Task Handle_WhenSaveHitsConcurrencyConflict_ReturnsTypedConflict()
+    {
+        var options = new DbContextOptionsBuilder<GoodsReceiptTestDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        await using var context = new ConcurrencyThrowingDbContext(options);
+
+        var category = new Category { Name = "Pantry" };
+        var item = new Item { Name = "Rice", Unit = "kg", MinThreshold = 10, IsPerishable = true, Category = category };
+        var sourceLocation = new Location { Name = "Main Storage", Type = "StorageRoom" };
+        var destinationLocation = new Location { Name = "Classroom", Type = "Classroom" };
+        var schoolClass = new SchoolClass
+        {
+            Name = "Fall 2026",
+            StartDate = new DateOnly(2026, 9, 1),
+            EndDate = new DateOnly(2026, 12, 20)
+        };
+        var userProfile = new UserProfile { IdentityId = Guid.NewGuid(), FirstName = "Staff", LastName = "Member" };
+        context.Categories.Add(category);
+        context.Items.Add(item);
+        context.Locations.AddRange(sourceLocation, destinationLocation);
+        context.SchoolClasses.Add(schoolClass);
+        context.UserProfiles.Add(userProfile);
+        context.StockBatches.Add(new StockBatch
+        {
+            ItemId = item.Id,
+            LocationId = sourceLocation.Id,
+            ReceivedClassId = schoolClass.Id,
+            Quantity = 10,
+            ExpiryDate = new DateOnly(2026, 10, 1),
+            ReceivedDate = new DateOnly(2026, 1, 1),
+            UnitPrice = 2.5m
+        });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var fixture = new MoveStockFixture(context, item, sourceLocation, destinationLocation, schoolClass, userProfile);
+
+        // Arm the simulated rowversion conflict for the handler's save only.
+        context.ThrowOnNextSave = true;
+
+        var result = await CreateHandler(fixture).Handle(CreateCommand(fixture, 4), CancellationToken.None);
+
+        result.IsFailed.ShouldBeTrue();
+        var error = result.Errors.Single();
+        error.Metadata[ErrorMetadataKeys.Code].ShouldBe(StockErrors.ConcurrencyConflict.ErrorCode);
+        error.Metadata[ErrorMetadataKeys.StatusCode].ShouldBe(409);
     }
 
     private static MoveStockCommandHandler CreateHandler(MoveStockFixture fixture) =>

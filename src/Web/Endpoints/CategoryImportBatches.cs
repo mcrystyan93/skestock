@@ -33,10 +33,7 @@ public class CategoryImportBatches : IEndpointGroup
             },
             cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Created($"/api/CategoryImportBatches/{result.Value.Id}", result.Value);
+        return result.ToCreated(v => $"/api/CategoryImportBatches/{v.Id}");
     }
 
     [EndpointSummary("Get all category imports")]
@@ -57,10 +54,7 @@ public class CategoryImportBatches : IEndpointGroup
 
         var result = await sender.Send(query, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Get a category import for review")]
@@ -72,10 +66,7 @@ public class CategoryImportBatches : IEndpointGroup
     {
         var result = await sender.Send(new GetCategoryImportBatchByIdQuery { Id = id }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Confirm a category import")]
@@ -94,9 +85,6 @@ public class CategoryImportBatches : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 }
