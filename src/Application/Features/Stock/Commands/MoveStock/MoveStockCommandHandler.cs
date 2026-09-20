@@ -115,8 +115,20 @@ public class MoveStockCommandHandler(IApplicationDbContext dbContext, IUser user
             request.Quantity));
 
         // One SaveChangesAsync persists all decrements, destination rows and paired transactions
-        // together. Relational providers wrap the complete change set in one transaction.
-        await dbContext.SaveChangesAsync(cancellationToken);
+        // together. Relational providers wrap the complete change set in one transaction. The
+        // source-batch rowversion token turns a concurrent draw-down into a
+        // DbUpdateConcurrencyException here rather than a lost update.
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Result.Fail(new StockErrors.ConcurrencyConflict(
+                request.ClassId,
+                request.ItemId,
+                request.SourceLocationId));
+        }
 
         return Result.Ok();
     }

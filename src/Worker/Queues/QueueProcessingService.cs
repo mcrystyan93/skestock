@@ -105,29 +105,25 @@ public abstract class QueueProcessingService<TProcessor>(
             var request = JsonSerializer.Deserialize(envelope.Payload, type)
                           ?? throw new InvalidOperationException("Empty payload");
 
-            var response = await mediator.Send(request, cancellationToken);
+            var processed = await DispatchWithinTransactionAsync(
+                request,
+                envelope,
+                dbContext,
+                mediator,
+                cancellationToken);
 
-            if (response is IResultBase { IsSuccess: false } failedResult)
+            if (!processed)
             {
-                logger.LogError(
-                    "{QueueName} message {Id} failed: {Errors}",
-                    queueName,
-                    envelope.MessageId,
-                    string.Join("; ", failedResult.Errors.Select(e => e.Message)));
-
                 await MoveToPoisonQueueAsync(message, envelope, cancellationToken);
                 await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
                 return;
             }
 
-            dbContext.ProcessedMessages.Add(new ProcessedMessage
-            {
-                Id = envelope.MessageId,
-                ProcessedAtUtc = DateTime.UtcNow
-            });
-            await dbContext.SaveChangesAsync(cancellationToken);
-
             await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
         {
@@ -158,6 +154,59 @@ public abstract class QueueProcessingService<TProcessor>(
                 await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
             }
         }
+    }
+
+    private async Task<bool> DispatchWithinTransactionAsync(
+        object request,
+        MessageEnvelope envelope,
+        IApplicationDbContext dbContext,
+        ISender mediator,
+        CancellationToken cancellationToken)
+    {
+        var executionStrategy = dbContext.Database.CreateExecutionStrategy();
+
+        return await executionStrategy.ExecuteAsync(
+            strategyCancellationToken => DispatchWithinTransactionCoreAsync(
+                request,
+                envelope,
+                dbContext,
+                mediator,
+                strategyCancellationToken),
+            cancellationToken);
+    }
+
+    private async Task<bool> DispatchWithinTransactionCoreAsync(
+        object request,
+        MessageEnvelope envelope,
+        IApplicationDbContext dbContext,
+        ISender mediator,
+        CancellationToken cancellationToken)
+    {
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        var response = await mediator.Send(request, cancellationToken);
+
+        if (response is IResultBase { IsSuccess: false } failedResult)
+        {
+            logger.LogError(
+                "{QueueName} message {Id} failed: {Errors}",
+                queueName,
+                envelope.MessageId,
+                string.Join("; ", failedResult.Errors.Select(e => e.Message)));
+
+            await transaction.RollbackAsync(cancellationToken);
+            return false;
+        }
+
+        dbContext.ProcessedMessages.Add(new ProcessedMessage
+        {
+            Id = envelope.MessageId,
+            ProcessedAtUtc = DateTime.UtcNow
+        });
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        return true;
     }
 
     private async Task MoveToPoisonQueueAsync(

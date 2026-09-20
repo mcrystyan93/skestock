@@ -1,0 +1,70 @@
+<div *nzModalTitle>
+  <h4 nz-typography>Mută stoc</h4>
+  <div class="flex flex-row gap-2 items-center">
+    @if (modalData().item.categoryIcon; as categoryIcon) {
+      <span class="text-4xl text-blue-500">
+        <nz-icon [nzType]="'icons:' + categoryIcon.fileName"></nz-icon>
+      </span>
+    } @else {
+      <span class="text-4xl text-blue-500">
+        <nz-icon nzType="icons:shelves"></nz-icon>
+      </span>
+    }
+    <div nz-typography
+         nzType="secondary"
+         class="mb-0!">
+      {{ modalData().item.itemName }}
+    </div>
+  </div>
+</div>
+
+<ske-error-alert [problemDetail]="store.stockMoveProblemDetail()"
+                 [validationErrors]="store.stockMoveValidationErrors()" />
+
+<nz-space nzDirection="vertical"
+          class="w-full">
+  <nz-card nzSize="small"
+           *nzSpaceItem>
+    <div class="flex items-center justify-between">
+      <h4 nz-typography
+          class="mb-0!">Locație sursă</h4>
+      <strong nz-typography
+              class="mb-0!">
+        {{ modalData().item.locationName }}
+      </strong>
+    </div>
+    <div class="mt-2 flex items-center justify-between">
+      <h4 nz-typography
+          class="mb-0!">Cantitatea curentă</h4>
+      <strong nz-typography
+              class="mb-0!">
+        {{ modalData().item.quantity | number:'1.0-2' }}
+      </strong>
+    </div>
+  </nz-card>
+
+  <ske-stock-move-form *nzSpaceItem
+                       [loading]="store.stockMoveLoading()"
+                       [item]="modalData().item" />
+</nz-space>
+
+<div *nzModalFooter>
+  <nz-space>
+    <button nz-button
+            *nzSpaceItem
+            nzType="default"
+            type="button"
+            (click)="close()"
+            [nzLoading]="store.stockMoveLoading()">
+      Închide
+    </button>
+    <button nz-button
+            *nzSpaceItem
+            nzType="primary"
+            type="button"
+            (click)="save()"
+            [nzLoading]="store.stockMoveLoading()">
+      Mută stocul
+    </button>
+  </nz-space>
+</div>

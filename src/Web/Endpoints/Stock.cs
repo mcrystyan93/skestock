@@ -47,10 +47,7 @@ public class Stock : IEndpointGroup
 
         var result = await sender.Send(query, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Adjust stock for an item at a location after a physical recount")]
@@ -74,10 +71,7 @@ public class Stock : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Remove expired stock for an item at a location")]
@@ -96,10 +90,7 @@ public class Stock : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok();
+        return result.ToOk();
     }
 
     [EndpointSummary("Move stock between two locations")]
@@ -121,10 +112,7 @@ public class Stock : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok();
+        return result.ToOk();
     }
 
     [EndpointSummary("Change zero-stock visibility for an item in a class")]
@@ -148,9 +136,6 @@ public class Stock : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok();
+        return result.ToOk();
     }
 }

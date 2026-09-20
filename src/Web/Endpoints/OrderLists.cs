@@ -40,10 +40,7 @@ public class OrderLists : IEndpointGroup
 
         var result = await sender.Send(query, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Get an order list by id")]
@@ -53,10 +50,7 @@ public class OrderLists : IEndpointGroup
     {
         var result = await sender.Send(new GetOrderListByIdQuery { Id = id }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Create a new order list")]
@@ -74,10 +68,7 @@ public class OrderLists : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Created($"/api/OrderLists/{result.Value.Id}", result.Value);
+        return result.ToCreated(v => $"/api/OrderLists/{v.Id}");
     }
 
     [EndpointSummary("Update an order list")]
@@ -95,10 +86,7 @@ public class OrderLists : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Submit an order list")]
@@ -108,10 +96,7 @@ public class OrderLists : IEndpointGroup
     {
         var result = await sender.Send(new SubmitOrderListCommand { Id = id }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Cancel an order list")]
@@ -121,10 +106,7 @@ public class OrderLists : IEndpointGroup
     {
         var result = await sender.Send(new CancelOrderListCommand { Id = id }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Delete an order list")]
@@ -134,10 +116,7 @@ public class OrderLists : IEndpointGroup
     {
         var result = await sender.Send(new DeleteOrderListCommand { Id = id }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.NoContent();
+        return result.ToNoContent();
     }
 
     private static OrderListLineInput ToLineInput(OrderListRequests.OrderListLineRequest line) => new()

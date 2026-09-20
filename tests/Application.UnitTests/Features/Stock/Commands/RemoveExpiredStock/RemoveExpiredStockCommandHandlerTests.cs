@@ -78,6 +78,50 @@ public class RemoveExpiredStockCommandHandlerTests
         (await context.StockTransactions.CountAsync()).ShouldBe(0);
     }
 
+    [Test]
+    public async Task Handle_WhenSaveHitsConcurrencyConflict_ReturnsTypedConflict()
+    {
+        var options = new DbContextOptionsBuilder<GoodsReceiptTestDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        await using var context = new ConcurrencyThrowingDbContext(options);
+
+        var category = new Category { Name = "Pantry" };
+        var item = new Item { Name = "Milk", Unit = "buc", MinThreshold = 2, IsPerishable = true, Category = category };
+        var location = new Location { Name = "Main Storage", Type = "StorageRoom" };
+        var schoolClass = new SchoolClass
+        {
+            Name = "Fall 2026",
+            StartDate = new DateOnly(2026, 9, 1),
+            EndDate = new DateOnly(2026, 12, 20)
+        };
+        var userProfile = new UserProfile { IdentityId = Guid.NewGuid(), FirstName = "Staff", LastName = "Member" };
+        context.Categories.Add(category);
+        context.Items.Add(item);
+        context.Locations.Add(location);
+        context.SchoolClasses.Add(schoolClass);
+        context.UserProfiles.Add(userProfile);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        context.StockBatches.Add(CreateBatch(item, location, schoolClass, 5, today.AddDays(-1)));
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        // Arm the simulated rowversion conflict for the handler's save only.
+        context.ThrowOnNextSave = true;
+
+        var handler = new RemoveExpiredStockCommandHandler(context, new FakeUser(userProfile.IdentityId));
+        var result = await handler.Handle(new RemoveExpiredStockCommand
+        {
+            ClassId = schoolClass.Id,
+            ItemId = item.Id,
+            LocationId = location.Id
+        }, CancellationToken.None);
+
+        result.IsFailed.ShouldBeTrue();
+        var error = result.Errors.Single();
+        error.Metadata[ErrorMetadataKeys.Code].ShouldBe(StockErrors.ConcurrencyConflict.ErrorCode);
+        error.Metadata[ErrorMetadataKeys.StatusCode].ShouldBe(409);
+    }
+
     private static async Task<(GoodsReceiptTestDbContext Context, Item Item, Location Location, SchoolClass Class, UserProfile UserProfile)> CreateContextAsync()
     {
         var options = new DbContextOptionsBuilder<GoodsReceiptTestDbContext>()

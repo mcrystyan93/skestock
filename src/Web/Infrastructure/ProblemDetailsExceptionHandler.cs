@@ -7,16 +7,14 @@ namespace skestock.Web.Infrastructure;
 
 /// <summary>
 /// Converts well-known application exceptions into RFC 9110-compliant <see cref="ProblemDetails"/> responses,
-/// mapping <see cref="ValidationException"/> → 400, <see cref="NotFoundException"/> → 404,
+/// mapping <see cref="ValidationException"/> and <see cref="BadHttpRequestException"/> → 400,
 /// <see cref="UnauthorizedAccessException"/> → 401, and <see cref="ForbiddenAccessException"/> → 403.
-/// Unrecognised exceptions are not handled and fall through to the default middleware.
+/// Any other exception is mapped to a 500 response.
 /// </summary>
 public class ProblemDetailsExceptionHandler : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        var correlationId = httpContext.TraceIdentifier;
-
         // validation exceptions are handled specially because they contain a dictionary of errors that can be serialized directly into a ValidationProblemDetails object.
         if (exception is ValidationException ve)
         {
@@ -28,15 +26,15 @@ public class ProblemDetailsExceptionHandler : IExceptionHandler
                 Title = "Validation failed"
             };
 
-            validationProblemDetails.Extensions[ApiErrorExtensions.Error] = new ApiErrorContract(
-                Code: "validation.failed",
-                Errors: ve.Errors
+            validationProblemDetails.Extensions[ApiErrorExtensions.Error] = ApiErrorContractFactory.Create(
+                code: "validation.failed",
+                errors: ve.Errors
                     .SelectMany(kvp => kvp.Value.Select(fieldError => new ApiErrorItemContract(
                         Field: kvp.Key,
                         Code: fieldError.Code,
                         Params: fieldError.Params)))
                     .ToList(),
-                Diagnostics: new ApiDiagnosticsContract(correlationId));
+                httpContext: httpContext);
 
             // pass contentType explicitly: WriteAsJsonAsync overwrites Response.ContentType with
             // "application/json; charset=utf-8" by default, so it must be set via this overload rather
@@ -63,10 +61,10 @@ public class ProblemDetailsExceptionHandler : IExceptionHandler
             var isJsonBindingError = badHttpRequestException.InnerException is null || badHttpRequestException.InnerException is JsonException;
             var errorCode = isJsonBindingError ? "validation.invalid_json" : "validation.invalid_request";
 
-            badRequestProblemDetails.Extensions[ApiErrorExtensions.Error] = new ApiErrorContract(
-                Code: errorCode,
-                Errors: BuildBadRequestErrors(badHttpRequestException.InnerException, jsonField),
-                Diagnostics: new ApiDiagnosticsContract(correlationId));
+            badRequestProblemDetails.Extensions[ApiErrorExtensions.Error] = ApiErrorContractFactory.Create(
+                code: errorCode,
+                errors: BuildBadRequestErrors(badHttpRequestException.InnerException, jsonField),
+                httpContext: httpContext);
 
             await httpContext.Response.WriteAsJsonAsync(badRequestProblemDetails, options: null, contentType: "application/problem+json", cancellationToken: cancellationToken);
             return true;
@@ -75,12 +73,6 @@ public class ProblemDetailsExceptionHandler : IExceptionHandler
         // other well-known exceptions are handled by mapping them to a status code and a ProblemDetails object.
         var (statusCode, problemDetails) = exception switch
         {
-            NotFoundException => (StatusCodes.Status404NotFound, new ProblemDetails
-            {
-                Status = StatusCodes.Status404NotFound,
-                Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5",
-                Title = "Resource not found"
-            }),
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, new ProblemDetails
             {
                 Status = StatusCodes.Status401Unauthorized,
@@ -102,15 +94,14 @@ public class ProblemDetailsExceptionHandler : IExceptionHandler
             })
         };
 
-        problemDetails.Extensions[ApiErrorExtensions.Error] = new ApiErrorContract(
-            Code: exception switch
+        problemDetails.Extensions[ApiErrorExtensions.Error] = ApiErrorContractFactory.Create(
+            code: exception switch
             {
-                NotFoundException => "common.not_found",
                 UnauthorizedAccessException => "auth.unauthorized",
                 ForbiddenAccessException => "auth.forbidden",
                 _ => "common.unexpected"
             },
-            Diagnostics: new ApiDiagnosticsContract(correlationId));
+            httpContext: httpContext);
 
         httpContext.Response.StatusCode = statusCode;
         // pass contentType explicitly: WriteAsJsonAsync overwrites Response.ContentType with

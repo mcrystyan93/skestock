@@ -39,11 +39,14 @@ public class FunctionalTestSetup
             Services.Database, cancellationToken);
         await _app.ResourceNotifications.WaitForResourceHealthyAsync(
             Services.Cache, cancellationToken);
+        await _app.ResourceNotifications.WaitForResourceHealthyAsync(
+            Services.Queues, cancellationToken);
 
         var connectionString = (await _app.GetConnectionStringAsync(Services.Database))!;
         var cacheConnectionString = (await _app.GetConnectionStringAsync(Services.Cache))!;
+        var queueConnectionString = (await _app.GetConnectionStringAsync(Services.Queues))!;
 
-        _factory = new WebApiFactory(connectionString, cacheConnectionString);
+        _factory = new WebApiFactory(connectionString, cacheConnectionString, queueConnectionString);
         ScopeFactory = _factory.Services.GetRequiredService<IServiceScopeFactory>();
         DbResetter = await DatabaseResetter.CreateAsync(connectionString);
     }

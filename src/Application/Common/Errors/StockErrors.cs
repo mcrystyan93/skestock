@@ -45,4 +45,25 @@ public static class StockErrors
                 });
         }
     }
+
+    public sealed class ConcurrencyConflict : Error
+    {
+        public const string ErrorCode = "stock.concurrency_conflict";
+
+        public ConcurrencyConflict(Guid classId, Guid itemId, Guid locationId)
+            : base(
+                "The stock for this item was changed by another operation. Please reload and try again.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
+            Metadata.Add(ErrorMetadataKeys.Title, "Stock changed concurrently");
+            Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
+            Metadata.Add(ErrorMetadataKeys.Params,
+                new Dictionary<string, object>
+                {
+                    ["classId"] = classId,
+                    ["itemId"] = itemId,
+                    ["locationId"] = locationId
+                });
+        }
+    }
 }

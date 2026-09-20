@@ -38,10 +38,7 @@ public class Items : IEndpointGroup
 
         var result = await sender.Send(query, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Get an item by id")]
@@ -51,10 +48,7 @@ public class Items : IEndpointGroup
     {
         var result = await sender.Send(new GetItemByIdQuery { Id = id }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Create a new item")]
@@ -76,10 +70,7 @@ public class Items : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Created($"/items/{result.Value.Id}", result.Value);
+        return result.ToCreated(v => $"/items/{v.Id}");
     }
 
     [EndpointSummary("Edit an existing item")]
@@ -102,10 +93,7 @@ public class Items : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Enable an item")]
@@ -115,10 +103,7 @@ public class Items : IEndpointGroup
     {
         var result = await sender.Send(new EnableItemCommand { Id = id }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Disable an item")]
@@ -128,9 +113,6 @@ public class Items : IEndpointGroup
     {
         var result = await sender.Send(new DisableItemCommand { Id = id }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 }

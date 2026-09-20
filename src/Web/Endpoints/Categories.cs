@@ -34,10 +34,7 @@ public class Categories : IEndpointGroup
 
         var result = await sender.Send(query, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Get a category by id")]
@@ -47,10 +44,7 @@ public class Categories : IEndpointGroup
     {
         var result = await sender.Send(new GetCategoryByIdQuery { Id = id }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Create a new category")]
@@ -62,10 +56,7 @@ public class Categories : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Created($"/categories/{result.Value.Id}", result.Value);
+        return result.ToCreated(v => $"/categories/{v.Id}");
     }
 
     [EndpointSummary("Update an existing category")]
@@ -77,10 +68,7 @@ public class Categories : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
 }

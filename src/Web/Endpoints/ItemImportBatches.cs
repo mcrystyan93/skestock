@@ -35,10 +35,7 @@ public class ItemImportBatches : IEndpointGroup
             Sort = request.Sort
         }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Create a new item import batch")]
@@ -56,10 +53,7 @@ public class ItemImportBatches : IEndpointGroup
             },
             cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Created($"/api/ItemImportBatches/{result.Value.Id}", result.Value);
+        return result.ToCreated(v => $"/api/ItemImportBatches/{v.Id}");
     }
 
     [EndpointSummary("Get an item import batch for review")]
@@ -71,10 +65,7 @@ public class ItemImportBatches : IEndpointGroup
     {
         var result = await sender.Send(new GetItemImportBatchByIdQuery { Id = id }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Confirm an item import batch")]
@@ -101,9 +92,6 @@ public class ItemImportBatches : IEndpointGroup
 
         var result = await sender.Send(command, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 }

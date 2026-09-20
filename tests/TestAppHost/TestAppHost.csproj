@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Shared\Shared.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\..\src\Worker\Worker.csproj" />
   </ItemGroup>
 
 </Project>

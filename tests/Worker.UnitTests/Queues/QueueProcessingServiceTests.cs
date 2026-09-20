@@ -24,14 +24,17 @@ public sealed class QueueProcessingServiceTests
     {
         var messageId = Guid.NewGuid();
         var userId = Guid.NewGuid();
+        var effectId = Guid.NewGuid();
         using var harness = CreateHarness(kind, messageId, userId);
-        harness.ConfigureSender((_, _) => ValueTask.FromResult<object?>(Result.Ok()));
+        harness.ConfigureSender((_, cancellationToken) =>
+            SaveEffectAndReturnSuccessAsync(harness, effectId, cancellationToken));
 
         await RunProcessorAsync(kind, harness);
 
         harness.SentRequests.Count.ShouldBe(1);
         harness.SentRequests[0].GetType().ShouldBe(GetExpectedCommandType(kind));
         harness.ObservedUserIds.ShouldBe([userId]);
+        harness.DbContext.TestEffects.Any(effect => effect.Id == effectId).ShouldBeTrue();
         harness.DbContext.ProcessedMessages.Any(message => message.Id == messageId).ShouldBeTrue();
         harness.DeleteCount.ShouldBe(1);
         harness.PoisonMessages.ShouldBeEmpty();
@@ -43,6 +46,25 @@ public sealed class QueueProcessingServiceTests
                 It.IsAny<IDictionary<string, string>?>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
+    }
+
+    [TestCase(QueueProcessorKind.Category)]
+    [TestCase(QueueProcessorKind.GoodsReceipt)]
+    [TestCase(QueueProcessorKind.Item)]
+    public async Task Handler_side_effect_is_rolled_back_when_dispatch_fails(QueueProcessorKind kind)
+    {
+        var messageId = Guid.NewGuid();
+        var effectId = Guid.NewGuid();
+        using var harness = CreateHarness(kind, messageId);
+        harness.ConfigureSender((_, cancellationToken) =>
+            SaveEffectThenThrowAsync(harness, effectId, cancellationToken));
+
+        await RunProcessorAsync(kind, harness);
+
+        harness.DbContext.TestEffects.ShouldBeEmpty();
+        harness.DbContext.ProcessedMessages.ShouldBeEmpty();
+        harness.DeleteCount.ShouldBe(0);
+        harness.PoisonMessages.ShouldBeEmpty();
     }
 
     [TestCase(QueueProcessorKind.Category)]
@@ -68,12 +90,15 @@ public sealed class QueueProcessingServiceTests
     public async Task Failed_result_is_poisoned_and_deleted(QueueProcessorKind kind)
     {
         var messageId = Guid.NewGuid();
+        var effectId = Guid.NewGuid();
         using var harness = CreateHarness(kind, messageId);
-        harness.ConfigureSender((_, _) => ValueTask.FromResult<object?>(Result.Fail("The import no longer exists.")));
+        harness.ConfigureSender((_, cancellationToken) =>
+            SaveEffectAndReturnFailureAsync(harness, effectId, cancellationToken));
 
         await RunProcessorAsync(kind, harness);
 
         harness.SentRequests.Count.ShouldBe(1);
+        harness.DbContext.TestEffects.ShouldBeEmpty();
         harness.DbContext.ProcessedMessages.ShouldBeEmpty();
         harness.PoisonMessages.ShouldHaveSingleItem();
         harness.PoisonMessages[0].ShouldBe(harness.SourceMessageText);
@@ -245,6 +270,37 @@ public sealed class QueueProcessingServiceTests
         kind == QueueProcessorKind.GoodsReceipt
             ? TimeSpan.FromSeconds(30)
             : TimeSpan.FromSeconds(1200);
+
+    private static async ValueTask<object?> SaveEffectAndReturnSuccessAsync(
+        QueueProcessingTestHarness harness,
+        Guid effectId,
+        CancellationToken cancellationToken)
+    {
+        harness.DbContext.TestEffects.Add(new WorkerTestEffect { Id = effectId });
+        await harness.DbContext.SaveChangesAsync(cancellationToken);
+        return Result.Ok();
+    }
+
+    private static async ValueTask<object?> SaveEffectAndReturnFailureAsync(
+        QueueProcessingTestHarness harness,
+        Guid effectId,
+        CancellationToken cancellationToken)
+    {
+        harness.DbContext.TestEffects.Add(new WorkerTestEffect { Id = effectId });
+        await harness.DbContext.SaveChangesAsync(cancellationToken);
+        return Result.Fail("The import no longer exists.");
+    }
+
+    private static async ValueTask<object?> SaveEffectThenThrowAsync(
+        QueueProcessingTestHarness harness,
+        Guid effectId,
+        CancellationToken cancellationToken)
+    {
+        harness.DbContext.TestEffects.Add(new WorkerTestEffect { Id = effectId });
+        await harness.DbContext.SaveChangesAsync(cancellationToken);
+        harness.Stop();
+        throw new InvalidOperationException("Temporary dependency failure.");
+    }
 
     private sealed class TestableCategoryProcessor(
         QueueServiceClient queueServiceClient,

@@ -30,10 +30,7 @@ public class Statistics : IEndpointGroup
             LocationId = request.LocationId
         }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 
     [EndpointSummary("Get goods receipt cost points")]
@@ -52,9 +49,6 @@ public class Statistics : IEndpointGroup
             EndDate = request.EndDate
         }, cancellationToken);
 
-        if (result.IsFailed)
-            return result.ToProblemHttpResult();
-
-        return TypedResults.Ok(result.Value);
+        return result.ToOk();
     }
 }
