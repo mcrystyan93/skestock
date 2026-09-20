@@ -131,7 +131,8 @@ public class ConfirmGoodsReceiptImportCommandHandlerTests
         result.IsSuccess.ShouldBeTrue();
 
         var receipt = await context.GoodsReceipts.SingleAsync(CancellationToken.None);
-        receipt.ReceivedAt.ShouldBe(extractedDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc));
+        receipt.ReceivedAt.ShouldBe(new DateTimeOffset(
+            extractedDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero));
 
         var batch = await context.StockBatches.SingleAsync(CancellationToken.None);
         batch.ReceivedDate.ShouldBe(extractedDate);

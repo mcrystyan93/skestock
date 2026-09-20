@@ -84,6 +84,7 @@ public static class DependencyInjection
 
         builder.Services.AddScoped<IBlobStorageService, AzureBlobStorageService>();
         builder.Services.AddScoped<IQueueSender, AzureQueueSender>();
+        builder.Services.AddScoped<IOutboxClaimStore, OutboxClaimStore>();
 
         builder.Services
             .AddScoped<IExtractionSchemaFactory<GoodsReceiptExtractionResult>,

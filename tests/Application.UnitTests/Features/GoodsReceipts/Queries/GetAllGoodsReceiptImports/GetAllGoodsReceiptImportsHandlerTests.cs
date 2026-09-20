@@ -56,7 +56,7 @@ public class GetAllGoodsReceiptImportsHandlerTests
     private static GoodsReceiptImport MakeImport(
         SchoolClass schoolClass, FileMetadata file, UserProfile uploadedBy,
         DateTimeOffset createdDate, GoodsReceiptImportStatus status = GoodsReceiptImportStatus.Processing,
-        DateTime? uploadedAt = null) => new()
+        DateTimeOffset? uploadedAt = null) => new()
     {
         ClassId = schoolClass.Id,
         Class = schoolClass,
@@ -66,7 +66,7 @@ public class GetAllGoodsReceiptImportsHandlerTests
         UploadedByUser = uploadedBy,
         BlobPath = file.BlobPath,
         Status = status,
-        UploadedAt = uploadedAt ?? createdDate.UtcDateTime,
+        UploadedAt = uploadedAt ?? createdDate,
         CreatedDate = createdDate,
         LastModifiedDate = createdDate
     };
@@ -299,9 +299,15 @@ public class GetAllGoodsReceiptImportsHandlerTests
     public async Task Handle_WithUploadedAtSortAscending_ReturnsItemsInUploadedAtOrder()
     {
         var (context, schoolClass, file, user) = await SeedPrerequisitesAsync();
-        context.GoodsReceiptImports.Add(MakeImport(schoolClass, file, user, DateTimeOffset.UtcNow, uploadedAt: new DateTime(2024, 3, 1)));
-        context.GoodsReceiptImports.Add(MakeImport(schoolClass, file, user, DateTimeOffset.UtcNow.AddMinutes(1), uploadedAt: new DateTime(2024, 1, 1)));
-        context.GoodsReceiptImports.Add(MakeImport(schoolClass, file, user, DateTimeOffset.UtcNow.AddMinutes(2), uploadedAt: new DateTime(2024, 2, 1)));
+        context.GoodsReceiptImports.Add(MakeImport(
+            schoolClass, file, user, DateTimeOffset.UtcNow,
+            uploadedAt: new DateTimeOffset(2024, 3, 1, 0, 0, 0, TimeSpan.Zero)));
+        context.GoodsReceiptImports.Add(MakeImport(
+            schoolClass, file, user, DateTimeOffset.UtcNow.AddMinutes(1),
+            uploadedAt: new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero)));
+        context.GoodsReceiptImports.Add(MakeImport(
+            schoolClass, file, user, DateTimeOffset.UtcNow.AddMinutes(2),
+            uploadedAt: new DateTimeOffset(2024, 2, 1, 0, 0, 0, TimeSpan.Zero)));
         await context.SaveChangesAsync(CancellationToken.None);
         var handler = CreateHandler(context);
 
@@ -312,7 +318,12 @@ public class GetAllGoodsReceiptImportsHandlerTests
         var result = await handler.Handle(query, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Data.Select(i => i.UploadedAt).ShouldBe([new DateTime(2024, 1, 1), new DateTime(2024, 2, 1), new DateTime(2024, 3, 1)]);
+        result.Value.Data.Select(i => i.UploadedAt).ShouldBe(
+        [
+            new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero),
+            new DateTimeOffset(2024, 2, 1, 0, 0, 0, TimeSpan.Zero),
+            new DateTimeOffset(2024, 3, 1, 0, 0, 0, TimeSpan.Zero)
+        ]);
         result.Value.Sort.ShouldContain(s => s.Key == "uploadedAt" && s.Value == "ascend");
     }
 

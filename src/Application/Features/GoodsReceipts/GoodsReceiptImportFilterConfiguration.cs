@@ -13,7 +13,7 @@ public class GoodsReceiptImportFilterConfiguration : IFilterConfiguration<GoodsR
         ["classId"] = new((Expression<Func<GoodsReceiptImport, Guid>>)(i => i.ClassId), typeof(Guid)),
         ["status"] = new((Expression<Func<GoodsReceiptImport, GoodsReceiptImportStatus>>)(i => i.Status), typeof(GoodsReceiptImportStatus)),
         ["fileMetadataId"] = new((Expression<Func<GoodsReceiptImport, Guid>>)(i => i.FileMetadataId), typeof(Guid)),
-        ["uploadedAt"] = new((Expression<Func<GoodsReceiptImport, DateTime>>)(i => i.UploadedAt), typeof(DateTime)),
+        ["uploadedAt"] = new((Expression<Func<GoodsReceiptImport, DateTimeOffset>>)(i => i.UploadedAt), typeof(DateTimeOffset)),
         ["createdDate"] = new((Expression<Func<GoodsReceiptImport, DateTimeOffset>>)(i => i.CreatedDate), typeof(DateTimeOffset)),
         ["lastModifiedDate"] = new((Expression<Func<GoodsReceiptImport, DateTimeOffset>>)(i => i.LastModifiedDate), typeof(DateTimeOffset))
     };

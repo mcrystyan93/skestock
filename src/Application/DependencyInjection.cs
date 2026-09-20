@@ -2,6 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using skestock.Application.Common.Behaviours;
+using skestock.Application.Queues;
+using skestock.Application.Queues.Interfaces;
 
 namespace skestock.Application;
 
@@ -10,6 +12,7 @@ public static class DependencyInjection
     public static void AddApplicationServices(this IHostApplicationBuilder builder)
     {
         builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        builder.Services.AddSingleton<IMessageEnvelopeSerializer, MessageEnvelopeSerializer>();
 
         builder.Services.AddMediator(options =>
         {

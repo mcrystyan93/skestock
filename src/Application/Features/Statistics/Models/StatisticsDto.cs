@@ -19,7 +19,7 @@ public record ClassStockByCategoryDto
 public record GoodsReceiptCostPointDto
 {
     public Guid Id { get; init; }
-    public DateTime ReceivedAt { get; init; }
+    public DateTimeOffset ReceivedAt { get; init; }
     public decimal TotalAmount { get; init; }
     public string? SupplierReference { get; init; }
 }

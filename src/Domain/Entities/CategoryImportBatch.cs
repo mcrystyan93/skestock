@@ -16,14 +16,14 @@ public class CategoryImportBatch : BaseAuditableEntity, IKeysetEntity
     public UserProfile UploadedByUser { get; set; } = null!;
 
     public Guid? ClientRequestId { get; set; }
-    public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? ProcessedAt { get; set; }
+    public DateTimeOffset UploadedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? ProcessedAt { get; set; }
     public int AttemptCount { get; private set; }
 
     public string? ExtractedDataJson { get; private set; }
     public string? ConfirmationResultJson { get; private set; }
     public Guid ConcurrencyStamp { get; private set; } = Guid.NewGuid();
-    public DateTime? ProcessingLeaseUntilUtc { get; private set; }
+    public DateTimeOffset? ProcessingLeaseUntilUtc { get; private set; }
 
     public ICollection<CategoryImportBatchFile> Files { get; set; } = new List<CategoryImportBatchFile>();
     public ICollection<ImportBatchHistory> History { get; set; } = new List<ImportBatchHistory>();
@@ -60,14 +60,14 @@ public class CategoryImportBatch : BaseAuditableEntity, IKeysetEntity
         return batch;
     }
 
-    public void RecordAttempt(DateTime processingLeaseUntilUtc)
+    public void RecordAttempt(DateTimeOffset processingLeaseUntilUtc)
     {
         AttemptCount++;
         ProcessingLeaseUntilUtc = processingLeaseUntilUtc;
         ConcurrencyStamp = Guid.NewGuid();
     }
 
-    public bool HasActiveProcessingLease(DateTime utcNow) =>
+    public bool HasActiveProcessingLease(DateTimeOffset utcNow) =>
         Status == CategoryImportBatchStatus.Processing &&
         ProcessingLeaseUntilUtc is { } leaseUntilUtc &&
         leaseUntilUtc > utcNow;
@@ -83,7 +83,7 @@ public class CategoryImportBatch : BaseAuditableEntity, IKeysetEntity
     {
         ExtractedDataJson = extractedDataJson;
         Status = CategoryImportBatchStatus.PendingReview;
-        ProcessedAt = DateTime.UtcNow;
+        ProcessedAt = DateTimeOffset.UtcNow;
         ProcessingLeaseUntilUtc = null;
         ConcurrencyStamp = Guid.NewGuid();
         AddDomainEvent(new CategoryImportBatchCompletedEvent(Id, UploadedByUserId));
@@ -102,7 +102,7 @@ public class CategoryImportBatch : BaseAuditableEntity, IKeysetEntity
     {
         Status = CategoryImportBatchStatus.Confirmed;
         ConfirmationResultJson = confirmationResultJson;
-        ProcessedAt ??= DateTime.UtcNow;
+        ProcessedAt ??= DateTimeOffset.UtcNow;
         ProcessingLeaseUntilUtc = null;
         ConcurrencyStamp = Guid.NewGuid();
         AddDomainEvent(new CategoryImportBatchConfirmedEvent(Id));

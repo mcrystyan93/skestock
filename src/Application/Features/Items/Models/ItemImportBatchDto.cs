@@ -11,7 +11,7 @@ public record ItemImportBatchDto
     public int AttemptCount { get; init; }
     public List<ItemImportBatchFileDto> Files { get; init; } = [];
     public List<ImportBatchHistoryDto> History { get; init; } = [];
-    public DateTime UploadedAt { get; init; }
-    public DateTime? ProcessedAt { get; init; }
+    public DateTimeOffset UploadedAt { get; init; }
+    public DateTimeOffset? ProcessedAt { get; init; }
     public string? ErrorMessage { get; init; }
 }

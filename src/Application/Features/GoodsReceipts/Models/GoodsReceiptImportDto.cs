@@ -9,5 +9,5 @@ public record GoodsReceiptImportDto
     public Guid ClassId { get; init; }
     public Guid FileMetadataId { get; init; }
     public string BlobPath { get; init; } = string.Empty;
-    public DateTime UploadedAt { get; init; }
+    public DateTimeOffset UploadedAt { get; init; }
 }

@@ -18,7 +18,7 @@ public record GoodsReceiptDto
     public Guid Id { get; init; }
     public Guid ClassId { get; init; }
     public string ClassName { get; init; } = string.Empty;
-    public DateTime ReceivedAt { get; init; }
+    public DateTimeOffset ReceivedAt { get; init; }
     public string? SupplierReference { get; init; }
     public string Note { get; init; } = string.Empty;
     public decimal TotalAmount { get; init; }
@@ -39,7 +39,7 @@ public record GoodsReceiptListItemDto
     public Guid Id { get; init; }
     public Guid ClassId { get; init; }
     public string ClassName { get; init; } = string.Empty;
-    public DateTime ReceivedAt { get; init; }
+    public DateTimeOffset ReceivedAt { get; init; }
     public string? SupplierReference { get; init; }
     public string Note { get; init; } = string.Empty;
     public int LineCount { get; init; }

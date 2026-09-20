@@ -9,7 +9,7 @@ public record CategoryImportBatchListItemDto
     public List<CategoryImportBatchFileDto> Files { get; init; } = [];
     public string? ErrorMessage { get; init; }
     public string? UploadedByName { get; init; }
-    public DateTime UploadedAt { get; init; }
-    public DateTime? ProcessedAt { get; init; }
+    public DateTimeOffset UploadedAt { get; init; }
+    public DateTimeOffset? ProcessedAt { get; init; }
     public DateTimeOffset CreatedDate { get; init; }
 }

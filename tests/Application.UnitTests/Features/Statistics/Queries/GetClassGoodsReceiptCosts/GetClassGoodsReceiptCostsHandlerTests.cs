@@ -27,7 +27,7 @@ public class GetClassGoodsReceiptCostsHandlerTests
 
     private static GoodsReceipt CreateReceipt(
         SchoolClass schoolClass,
-        DateTime receivedAt,
+        DateTimeOffset receivedAt,
         decimal totalAmount,
         string? supplierReference = null) => new()
     {
@@ -47,10 +47,10 @@ public class GetClassGoodsReceiptCostsHandlerTests
         var otherClass = CreateClass("Spring 2027");
         context.SchoolClasses.AddRange(schoolClass, otherClass);
         context.GoodsReceipts.AddRange(
-            CreateReceipt(schoolClass, new DateTime(2026, 1, 1, 0, 0, 0), 100m, "PO-001"),
-            CreateReceipt(schoolClass, new DateTime(2026, 6, 30, 23, 59, 59), 250m, "PO-002"),
-            CreateReceipt(schoolClass, new DateTime(2026, 7, 1, 0, 0, 0), 999m, "PO-003"),
-            CreateReceipt(otherClass, new DateTime(2026, 3, 1), 500m, "OTHER"));
+            CreateReceipt(schoolClass, new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero), 100m, "PO-001"),
+            CreateReceipt(schoolClass, new DateTimeOffset(2026, 6, 30, 23, 59, 59, TimeSpan.Zero), 250m, "PO-002"),
+            CreateReceipt(schoolClass, new DateTimeOffset(2026, 7, 1, 0, 0, 0, TimeSpan.Zero), 999m, "PO-003"),
+            CreateReceipt(otherClass, new DateTimeOffset(2026, 3, 1, 0, 0, 0, TimeSpan.Zero), 500m, "OTHER"));
         await context.SaveChangesAsync(CancellationToken.None);
 
         var result = await new GetClassGoodsReceiptCostsHandler(context).Handle(
@@ -78,7 +78,10 @@ public class GetClassGoodsReceiptCostsHandlerTests
         var category = new Category { Name = "Pantry" };
         var item = new Item { Name = "Rice", Category = category };
         var location = new Location { Name = "Kitchen", Type = "StorageRoom" };
-        var receipt = CreateReceipt(schoolClass, new DateTime(2026, 2, 1), 125m);
+        var receipt = CreateReceipt(
+            schoolClass,
+            new DateTimeOffset(2026, 2, 1, 0, 0, 0, TimeSpan.Zero),
+            125m);
         receipt.Batches.Add(new StockBatch
         {
             Item = item,

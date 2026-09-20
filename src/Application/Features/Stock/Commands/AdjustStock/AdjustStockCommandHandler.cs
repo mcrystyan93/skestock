@@ -80,7 +80,7 @@ public class AdjustStockCommandHandler(IApplicationDbContext dbContext, IUser us
                 ReceivedClassId = request.ClassId,
                 Quantity = delta,
                 ExpiryDate = null,
-                ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow),
+                ReceivedDate = DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime),
                 UnitPrice = 0,
                 GoodsReceiptId = null
             };
@@ -130,7 +130,7 @@ public class AdjustStockCommandHandler(IApplicationDbContext dbContext, IUser us
             .Select(l => l.Name)
             .SingleAsync(cancellationToken);
 
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime);
         var expiredQuantity = item.IsPerishable
             ? batches
                 .Where(b => b.Quantity > 0

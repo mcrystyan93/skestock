@@ -13,7 +13,7 @@ public class OutboxMessageConfiguration: IEntityTypeConfiguration<OutboxMessage>
         builder.Property(x => x.Payload).IsRequired();
 
         // critical for the poller's query performance
-        builder.HasIndex(x => new { x.ProcessedAtUtc, x.CreatedAtUtc })
+        builder.HasIndex(x => new { x.ProcessedAtUtc, x.ClaimedUntilUtc, x.CreatedAtUtc })
             .HasFilter("[ProcessedAtUtc] IS NULL"); // SQL Server filtered index; adjust for your provider
     }
 }

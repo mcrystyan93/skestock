@@ -10,7 +10,7 @@ public class GoodsReceiptFilterConfiguration : IFilterConfiguration<GoodsReceipt
     {
         ["id"] = new((Expression<Func<GoodsReceipt, Guid>>)(r => r.Id), typeof(Guid)),
         ["classId"] = new((Expression<Func<GoodsReceipt, Guid>>)(r => r.ClassId), typeof(Guid)),
-        ["receivedAt"] = new((Expression<Func<GoodsReceipt, DateTime>>)(r => r.ReceivedAt), typeof(DateTime)),
+        ["receivedAt"] = new((Expression<Func<GoodsReceipt, DateTimeOffset>>)(r => r.ReceivedAt), typeof(DateTimeOffset)),
         ["supplierReference"] = new((Expression<Func<GoodsReceipt, string?>>)(r => r.SupplierReference), typeof(string)),
         ["createdDate"] = new((Expression<Func<GoodsReceipt, DateTimeOffset>>)(r => r.CreatedDate), typeof(DateTimeOffset)),
         ["lastModifiedDate"] = new((Expression<Func<GoodsReceipt, DateTimeOffset>>)(r => r.LastModifiedDate), typeof(DateTimeOffset))

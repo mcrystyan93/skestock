@@ -24,13 +24,14 @@ public class GetClassGoodsReceiptCostsHandler(IApplicationDbContext dbContext)
 
         if (request.StartDate is { } startDate)
         {
-            var startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
+            var startDateTime = new DateTimeOffset(startDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
             receiptsQuery = receiptsQuery.Where(r => r.ReceivedAt >= startDateTime);
         }
 
         if (request.EndDate is { } endDate)
         {
-            var endDateExclusive = endDate.AddDays(1).ToDateTime(TimeOnly.MinValue);
+            var endDateExclusive = new DateTimeOffset(
+                endDate.AddDays(1).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
             receiptsQuery = receiptsQuery.Where(r => r.ReceivedAt < endDateExclusive);
         }
 

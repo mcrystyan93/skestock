@@ -17,7 +17,7 @@ public class RemoveExpiredStockCommandHandler(IApplicationDbContext dbContext, I
             user.Id,
             message: "Removing expired stock requires an authenticated user.");
 
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime);
         var isPerishable = await dbContext.Items
             .AsNoTracking()
             .Where(i => i.Id == request.ItemId)

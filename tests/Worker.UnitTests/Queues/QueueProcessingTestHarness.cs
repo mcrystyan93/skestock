@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using Azure;
 using Azure.Storage.Queues;
@@ -9,9 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Queues;
+using skestock.Application.Queues.Interfaces;
 using skestock.Domain.Entities;
 using skestock.Domain.Queues;
 using Worker.Services;
+using Worker.Queues;
 
 namespace Worker.UnitTests.Queues;
 
@@ -54,6 +56,8 @@ internal sealed class QueueProcessingTestHarness : IDisposable
         DbContext.Database.EnsureCreated();
 
         var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton<IMessageEnvelopeSerializer, MessageEnvelopeSerializer>();
         services.AddSingleton<IApplicationDbContext>(DbContext);
         services.AddScoped<ISender>(_ => Sender.Object);
         services.AddScoped<AmbientUser>(_ =>
@@ -62,6 +66,8 @@ internal sealed class QueueProcessingTestHarness : IDisposable
             AmbientUsers.Add(ambientUser);
             return ambientUser;
         });
+        services.AddScoped<IQueueMessageProcessor, QueueMessageProcessor>();
+        services.AddSingleton(TimeProvider.System);
         _serviceProvider = services.BuildServiceProvider();
 
         QueueServiceClient
@@ -110,7 +116,7 @@ internal sealed class QueueProcessingTestHarness : IDisposable
         DbContext.ProcessedMessages.Add(new ProcessedMessage
         {
             Id = messageId,
-            ProcessedAtUtc = DateTime.UtcNow
+            ProcessedAtUtc = DateTimeOffset.UtcNow
         });
         DbContext.SaveChanges();
     }
@@ -223,8 +229,7 @@ internal static class QueueMessageFactory
 
     public static QueueMessage CreateRaw(MessageEnvelope envelope, int dequeueCount = 1)
     {
-        var json = JsonSerializer.Serialize(envelope);
-        var messageText = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+        var messageText = new MessageEnvelopeSerializer().Serialize(envelope);
         return QueuesModelFactory.QueueMessage(
             messageId: Guid.NewGuid().ToString(),
             popReceipt: "pop-receipt",

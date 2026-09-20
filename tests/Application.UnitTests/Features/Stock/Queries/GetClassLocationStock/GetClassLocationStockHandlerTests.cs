@@ -919,7 +919,7 @@ public class GetClassLocationStockHandlerTests
             ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow)
         });
 
-        var expectedLastUpdatedAt = new DateTime(2026, 10, 2, 12, 0, 0, DateTimeKind.Utc);
+        var expectedLastUpdatedAt = new DateTimeOffset(2026, 10, 2, 12, 0, 0, TimeSpan.Zero);
         context.StockTransactions.AddRange(
             new StockTransaction
             {

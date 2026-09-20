@@ -2,7 +2,7 @@ namespace skestock.Domain.Entities;
 
 public class GoodsReceipt: BaseAuditableEntity, IKeysetEntity
 {
-    public DateTime ReceivedAt { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset ReceivedAt { get; set; } = DateTimeOffset.UtcNow;
     public required Guid ClassId { get; set; }
     public required SchoolClass Class { get; set; }
     public string? SupplierReference { get; set; } // PO number, invoice ref, free text
