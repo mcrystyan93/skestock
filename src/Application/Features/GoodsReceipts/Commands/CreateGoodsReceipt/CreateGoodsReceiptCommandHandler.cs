@@ -24,7 +24,7 @@ public class CreateGoodsReceiptCommandHandler(IApplicationDbContext dbContext, I
             Note = request.Note.Trim()
         };
 
-        var receivedDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        var receivedDate = DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime);
 
         // Load the perishable flag + shelf life for the referenced items so a line that omits an
         // expiry date can have it derived (ReceivedDate + ShelfLifeDays) for perishable items.
@@ -121,4 +121,3 @@ public class CreateGoodsReceiptCommandHandler(IApplicationDbContext dbContext, I
         return Result.Ok(dto);
     }
 }
-

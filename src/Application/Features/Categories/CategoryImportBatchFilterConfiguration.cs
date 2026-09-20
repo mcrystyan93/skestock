@@ -13,8 +13,8 @@ public sealed class CategoryImportBatchFilterConfiguration : IFilterConfiguratio
             ["id"] = new((Expression<Func<CategoryImportBatch, Guid>>)(batch => batch.Id), typeof(Guid)),
             ["status"] = new((Expression<Func<CategoryImportBatch, CategoryImportBatchStatus>>)(batch => batch.Status),
                 typeof(CategoryImportBatchStatus)),
-            ["uploadedAt"] = new((Expression<Func<CategoryImportBatch, DateTime>>)(batch => batch.UploadedAt),
-                typeof(DateTime)),
+            ["uploadedAt"] = new((Expression<Func<CategoryImportBatch, DateTimeOffset>>)(batch => batch.UploadedAt),
+                typeof(DateTimeOffset)),
             ["createdDate"] = new((Expression<Func<CategoryImportBatch, DateTimeOffset>>)(batch => batch.CreatedDate),
                 typeof(DateTimeOffset)),
             ["lastModifiedDate"] = new(

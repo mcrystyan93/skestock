@@ -62,7 +62,7 @@ public class GetAllGoodsReceiptImportsQueryTests : TestBase
 
     private async Task<GoodsReceiptImport> SeedImportAsync(
         SchoolClass schoolClass, FileMetadata file, GoodsReceiptImportStatus status = GoodsReceiptImportStatus.Processing,
-        DateTime? uploadedAt = null)
+        DateTimeOffset? uploadedAt = null)
     {
         // Only FK scalars are set here (Class/FileMetadata/UploadedByUser navigations are left at
         // their null! default) - schoolClass/file/_uploadedBy were persisted via previous
@@ -79,7 +79,7 @@ public class GetAllGoodsReceiptImportsQueryTests : TestBase
             UploadedByUser = null!,
             BlobPath = file.BlobPath,
             Status = status,
-            UploadedAt = uploadedAt ?? new DateTime(2024, 1, 1)
+            UploadedAt = uploadedAt ?? new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero)
         };
 
         await TestApp.AddAsync(import);
@@ -185,9 +185,9 @@ public class GetAllGoodsReceiptImportsQueryTests : TestBase
     {
         var schoolClass = await SeedSchoolClassAsync("Class");
         var file = await SeedFileMetadataAsync();
-        await SeedImportAsync(schoolClass, file, uploadedAt: new DateTime(2024, 3, 1));
-        await SeedImportAsync(schoolClass, file, uploadedAt: new DateTime(2024, 1, 1));
-        await SeedImportAsync(schoolClass, file, uploadedAt: new DateTime(2024, 2, 1));
+        await SeedImportAsync(schoolClass, file, uploadedAt: new DateTimeOffset(2024, 3, 1, 0, 0, 0, TimeSpan.Zero));
+        await SeedImportAsync(schoolClass, file, uploadedAt: new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero));
+        await SeedImportAsync(schoolClass, file, uploadedAt: new DateTimeOffset(2024, 2, 1, 0, 0, 0, TimeSpan.Zero));
 
         var result = await TestApp.SendAsync(Query(
             _prefix,
@@ -195,7 +195,11 @@ public class GetAllGoodsReceiptImportsQueryTests : TestBase
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Data.Select(i => i.UploadedAt).ShouldBe(
-            [new DateTime(2024, 1, 1), new DateTime(2024, 2, 1), new DateTime(2024, 3, 1)]);
+            [
+                new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2024, 2, 1, 0, 0, 0, TimeSpan.Zero),
+                new DateTimeOffset(2024, 3, 1, 0, 0, 0, TimeSpan.Zero)
+            ]);
     }
 
     [Test]
@@ -260,9 +264,9 @@ public class GetAllGoodsReceiptImportsQueryTests : TestBase
     {
         var schoolClass = await SeedSchoolClassAsync("Class");
         var file = await SeedFileMetadataAsync();
-        await SeedImportAsync(schoolClass, file, uploadedAt: new DateTime(2024, 1, 1));
-        await SeedImportAsync(schoolClass, file, uploadedAt: new DateTime(2024, 2, 1));
-        await SeedImportAsync(schoolClass, file, uploadedAt: new DateTime(2024, 3, 1));
+        await SeedImportAsync(schoolClass, file, uploadedAt: new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero));
+        await SeedImportAsync(schoolClass, file, uploadedAt: new DateTimeOffset(2024, 2, 1, 0, 0, 0, TimeSpan.Zero));
+        await SeedImportAsync(schoolClass, file, uploadedAt: new DateTimeOffset(2024, 3, 1, 0, 0, 0, TimeSpan.Zero));
 
         var firstPage = await TestApp.SendAsync(Query(
             _prefix,

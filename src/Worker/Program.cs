@@ -15,6 +15,7 @@ builder.AddInfrastructureServices();
 // populate) and as IUser (for handlers/behaviours to consume).
 builder.Services.AddScoped<AmbientUser>();
 builder.Services.AddScoped<IUser>(sp => sp.GetRequiredService<AmbientUser>());
+builder.Services.AddScoped<IQueueMessageProcessor, QueueMessageProcessor>();
 
 builder.Services.AddHostedService<GoodsReceiptImportQueueProcessingService>();
 builder.Services.AddHostedService<CategoryImportBatchQueueProcessingService>();

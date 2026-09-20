@@ -28,7 +28,7 @@ public class ConfirmUploadCommandHandler(IApplicationDbContext dbContext, IBlobS
         file.SizeBytes = blobInfo.SizeBytes;
         file.ETag = blobInfo.ETag;
         file.Status = FileStatus.Completed;
-        file.CompletedDate = DateTime.UtcNow;
+        file.CompletedDate = DateTimeOffset.UtcNow;
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

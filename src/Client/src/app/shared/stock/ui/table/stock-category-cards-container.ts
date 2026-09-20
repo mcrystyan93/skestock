@@ -1,13 +1,13 @@
-import { Component, DestroyRef, inject } from '@angular/core';
-import { StockCategoryCards } from './stock-category-cards';
-import { StockStore } from '../../services/stock.store';
-import { CategoryDto, StockItemDto } from '@ske/models';
-import { NzModalService } from 'ng-zorro-antd/modal';
-import { StockAdjustmentModal, StockAdjustmentModalData } from '../modals/adjust/stock-adjustment-modal';
-import { StockMoveModal, StockMoveModalData } from '../modals/move/stock-move-modal';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AddStockBatchModal } from '@ske/shared/stock-batches';
-import { NzEmptyComponent } from 'ng-zorro-antd/empty';
+import {Component, DestroyRef, inject} from '@angular/core';
+import {StockCategoryCards} from './stock-category-cards';
+import {StockStore} from '../../services/stock.store';
+import {CategoryDto, getDropdownFilterValue, StockItemDto} from '@ske/models';
+import {NzModalService} from 'ng-zorro-antd/modal';
+import {StockAdjustmentModal, StockAdjustmentModalData} from '../modals/adjust/stock-adjustment-modal';
+import {StockMoveModal, StockMoveModalData} from '../modals/move/stock-move-modal';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {AddStockBatchModal} from '@ske/shared/stock-batches';
+import {NzEmptyComponent} from 'ng-zorro-antd/empty';
 
 @Component({
   imports: [
@@ -33,7 +33,7 @@ export class StockCategoryCardsContainer {
 
     const modalRef = this._nzModalService.create<StockAdjustmentModal, StockAdjustmentModalData>({
       nzContent: StockAdjustmentModal,
-      nzData: { classId, item },
+      nzData: {classId, item},
       nzCentered: true,
       nzMaskClosable: false
     });
@@ -50,7 +50,7 @@ export class StockCategoryCardsContainer {
 
     const modalRef = this._nzModalService.create<StockMoveModal, StockMoveModalData>({
       nzContent: StockMoveModal,
-      nzData: { classId, item },
+      nzData: {classId, item},
       nzCentered: true,
       nzMaskClosable: false
     });
@@ -77,10 +77,11 @@ export class StockCategoryCardsContainer {
 
   public addStock(category: Partial<CategoryDto> | null = null) {
     const classId = this.store.filter().classId;
+    const location = getDropdownFilterValue(this.store.filter().filters, 'locationId');
 
     const modalRef = this._nzModalService.create({
       nzContent: AddStockBatchModal,
-      nzData: { schoolClassId: classId, category, location: null },
+      nzData: {schoolClassId: classId, category, location},
       nzCentered: true,
       nzMaskClosable: false
     });
@@ -100,7 +101,7 @@ export class StockCategoryCardsContainer {
       classId,
       itemId: item.itemId,
       locationId: item.locationId,
-      request: { hideWhenZeroStock }
+      request: {hideWhenZeroStock}
     });
   }
 }

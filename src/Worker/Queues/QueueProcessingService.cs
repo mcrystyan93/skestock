@@ -1,19 +1,15 @@
-using System.Text;
-using System.Text.Json;
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
-using FluentResults;
-using Mediator;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using skestock.Application.Common.Exceptions;
-using skestock.Application.Common.Interfaces;
-using skestock.Application.Queues;
+using Microsoft.Extensions.DependencyInjection;
 using skestock.Domain.Queues;
-using Worker.Services;
 
 namespace Worker.Queues;
 
+/// <summary>
+/// Hosts the transport lifecycle for one Azure Queue: poll, delegate one message to the scoped
+/// processor, then acknowledge or poison it according to the returned decision. Business dispatch
+/// and database transactions live in <see cref="IQueueMessageProcessor"/>.
+/// </summary>
 public abstract class QueueProcessingService<TProcessor>(
     QueueServiceClient queueServiceClient,
     ILogger<TProcessor> logger,
@@ -49,9 +45,7 @@ public abstract class QueueProcessingService<TProcessor>(
                 }
 
                 foreach (var message in response.Value)
-                {
                     await ProcessMessageAsync(message, stoppingToken);
-                }
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
@@ -61,153 +55,60 @@ public abstract class QueueProcessingService<TProcessor>(
         }
     }
 
-    private async Task ProcessMessageAsync(QueueMessage message, CancellationToken cancellationToken)
+    private async Task ProcessMessageAsync(
+        QueueMessage message,
+        CancellationToken cancellationToken)
     {
         using var scope = scopeFactory.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
-        var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
+        var processor = scope.ServiceProvider.GetRequiredService<IQueueMessageProcessor>();
+        var result = await processor.ProcessAsync(message, cancellationToken);
 
-        MessageEnvelope envelope;
-        try
+        switch (result.Status)
         {
-            var json = Encoding.UTF8.GetString(Convert.FromBase64String(message.MessageText));
-            envelope = JsonSerializer.Deserialize<MessageEnvelope>(json)
-                       ?? throw new InvalidOperationException("Empty envelope");
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(
-                ex,
-                "Failed to deserialize envelope for {QueueName} message {Id}",
-                queueName,
-                message.MessageId);
-            await MoveToPoisonQueueAsync(message, null, cancellationToken);
-            await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
-            return;
-        }
+            case QueueMessageProcessingStatus.Succeeded:
+            case QueueMessageProcessingStatus.Duplicate:
+                await DeleteMessageAsync(message, cancellationToken);
+                break;
 
-        scope.ServiceProvider.GetRequiredService<AmbientUser>().Id = envelope.UserId;
+            case QueueMessageProcessingStatus.PermanentFailure:
+                logger.LogError(
+                    "Message {Id} is permanent and will be moved to the poison queue {PoisonQueueName}.",
+                    message.MessageId,
+                    $"{queueName}-poison");
+                await MoveToPoisonQueueAsync(message, result.Envelope, cancellationToken);
+                await DeleteMessageAsync(message, cancellationToken);
+                break;
 
-        var alreadyProcessed = await dbContext.ProcessedMessages
-            .AnyAsync(x => x.Id == envelope.MessageId, cancellationToken);
+            case QueueMessageProcessingStatus.RetryableFailure when
+                message.DequeueCount >= MaxDequeueCount:
+                logger.LogWarning(
+                    "Message {Id} reached the retry limit for queue {QueueName}.",
+                    message.MessageId,
+                    queueName);
+                await MoveToPoisonQueueAsync(message, result.Envelope, cancellationToken);
+                await DeleteMessageAsync(message, cancellationToken);
+                break;
 
-        if (alreadyProcessed)
-        {
-            logger.LogInformation("Message {Id} already processed, skipping", envelope.MessageId);
-            await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
-            return;
-        }
+            case QueueMessageProcessingStatus.RetryableFailure:
+                // Leaving the message undeleted lets Azure Queue make it visible again after the
+                // visibility timeout. No retry counter is stored in the database because Azure
+                // owns the delivery count for transport failures.
+                logger.LogWarning(
+                    "Message {Id} will be retried from queue {QueueName}; dequeue count is {DequeueCount}.",
+                    message.MessageId,
+                    queueName,
+                    message.DequeueCount);
+                break;
 
-        try
-        {
-            var type = Type.GetType(envelope.Type)
-                       ?? throw new InvalidOperationException($"Unknown message type: {envelope.Type}");
-            var request = JsonSerializer.Deserialize(envelope.Payload, type)
-                          ?? throw new InvalidOperationException("Empty payload");
-
-            var processed = await DispatchWithinTransactionAsync(
-                request,
-                envelope,
-                dbContext,
-                mediator,
-                cancellationToken);
-
-            if (!processed)
-            {
-                await MoveToPoisonQueueAsync(message, envelope, cancellationToken);
-                await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
-                return;
-            }
-
-            await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            throw;
-        }
-        catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
-        {
-            logger.LogInformation(
-                "Message {Id} processed concurrently by another instance",
-                envelope.MessageId);
-            await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
-        }
-        catch (ImportBatchProcessingInProgressException)
-        {
-            logger.LogInformation(
-                "Import batch for message {Id} is already being processed",
-                envelope.MessageId);
-            await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(
-                ex,
-                "Failed processing {QueueName} message {Id}, dequeue count {Count}",
-                queueName,
-                envelope.MessageId,
-                message.DequeueCount);
-
-            if (MessageFailureClassifier.IsPermanent(ex) || message.DequeueCount >= MaxDequeueCount)
-            {
-                await MoveToPoisonQueueAsync(message, envelope, cancellationToken);
-                await _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
-            }
+            default:
+                throw new ArgumentOutOfRangeException();
         }
     }
 
-    private async Task<bool> DispatchWithinTransactionAsync(
-        object request,
-        MessageEnvelope envelope,
-        IApplicationDbContext dbContext,
-        ISender mediator,
-        CancellationToken cancellationToken)
-    {
-        var executionStrategy = dbContext.Database.CreateExecutionStrategy();
-
-        return await executionStrategy.ExecuteAsync(
-            strategyCancellationToken => DispatchWithinTransactionCoreAsync(
-                request,
-                envelope,
-                dbContext,
-                mediator,
-                strategyCancellationToken),
-            cancellationToken);
-    }
-
-    private async Task<bool> DispatchWithinTransactionCoreAsync(
-        object request,
-        MessageEnvelope envelope,
-        IApplicationDbContext dbContext,
-        ISender mediator,
-        CancellationToken cancellationToken)
-    {
-        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-
-        var response = await mediator.Send(request, cancellationToken);
-
-        if (response is IResultBase { IsSuccess: false } failedResult)
-        {
-            logger.LogError(
-                "{QueueName} message {Id} failed: {Errors}",
-                queueName,
-                envelope.MessageId,
-                string.Join("; ", failedResult.Errors.Select(e => e.Message)));
-
-            await transaction.RollbackAsync(cancellationToken);
-            return false;
-        }
-
-        dbContext.ProcessedMessages.Add(new ProcessedMessage
-        {
-            Id = envelope.MessageId,
-            ProcessedAtUtc = DateTime.UtcNow
-        });
-        await dbContext.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-
-        return true;
-    }
+    private Task DeleteMessageAsync(
+        QueueMessage message,
+        CancellationToken cancellationToken) =>
+        _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
 
     private async Task MoveToPoisonQueueAsync(
         QueueMessage message,
@@ -218,15 +119,10 @@ public abstract class QueueProcessingService<TProcessor>(
         await poisonQueue.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
         await poisonQueue.SendMessageAsync(message.MessageText, cancellationToken: cancellationToken);
 
-        if (envelope is not null)
-        {
-            logger.LogWarning(
-                "Message {Id} moved to poison queue after {Count} attempts",
-                envelope.MessageId,
-                message.DequeueCount);
-        }
+        logger.LogWarning(
+            "Message {Id} moved to poison queue {PoisonQueueName}. Envelope decoded: {HasEnvelope}.",
+            envelope?.MessageId ?? Guid.Empty,
+            $"{queueName}-poison",
+            envelope is not null);
     }
-
-    private static bool IsUniqueConstraintViolation(DbUpdateException ex) =>
-        ex.InnerException is SqlException sqlEx && sqlEx.Number is 2627 or 2601;
 }

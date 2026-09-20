@@ -23,7 +23,7 @@ public class StockTransaction: BaseAuditableEntity
     public StockTransactionType Type { get; set; }
     public int QuantityChange { get; set; } // positive or negative
     public string? Reason { get; set; }      // e.g. "expired", "damaged", "restock"
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     
     public Guid? GoodsReceiptId { get; set; } // null for transactions not tied to a bulk receipt
     public GoodsReceipt? GoodsReceipt { get; set; }

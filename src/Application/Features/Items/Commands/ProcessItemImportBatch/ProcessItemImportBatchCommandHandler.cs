@@ -41,10 +41,11 @@ public class ProcessItemImportBatchCommandHandler(
             return Result.Ok();
         }
 
-        if (batch.HasActiveProcessingLease(DateTime.UtcNow))
+        var now = DateTimeOffset.UtcNow;
+        if (batch.HasActiveProcessingLease(now))
             throw new ImportBatchProcessingInProgressException(batch.Id);
 
-        batch.RecordAttempt(DateTime.UtcNow.AddSeconds(importBatchOptions.Value.ProcessingLeaseSeconds));
+        batch.RecordAttempt(now.AddSeconds(importBatchOptions.Value.ProcessingLeaseSeconds));
         batch.History.Add(ImportBatchHistory.Processing(batch.AttemptCount));
         try
         {

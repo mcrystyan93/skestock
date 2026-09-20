@@ -66,6 +66,8 @@ public class OutboxWorkerIntegrationTests : TestBase
         var persistedOutboxMessage = await TestApp.FindAsync<OutboxMessage>(outboxMessageId);
         persistedOutboxMessage.ShouldNotBeNull();
         persistedOutboxMessage.ProcessedAtUtc.ShouldNotBeNull();
+        persistedOutboxMessage.ClaimId.ShouldBeNull();
+        persistedOutboxMessage.ClaimedUntilUtc.ShouldBeNull();
         persistedOutboxMessage.RetryCount.ShouldBe(0);
 
         var persistedImport = await TestApp.FindAsync<GoodsReceiptImport>(importId);
@@ -88,11 +90,11 @@ public class OutboxWorkerIntegrationTests : TestBase
 
     private static async Task WaitForProcessedMessageAsync(Guid messageId, Guid importId)
     {
-        var deadline = DateTime.UtcNow.AddSeconds(30);
+        var deadline = DateTimeOffset.UtcNow.AddSeconds(30);
         OutboxMessage? lastOutboxMessage = null;
         GoodsReceiptImport? lastImport = null;
 
-        while (DateTime.UtcNow < deadline)
+        while (DateTimeOffset.UtcNow < deadline)
         {
             if (await TestApp.FindAsync<ProcessedMessage>(messageId) is not null)
                 return;

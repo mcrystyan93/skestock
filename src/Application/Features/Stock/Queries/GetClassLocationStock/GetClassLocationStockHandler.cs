@@ -27,7 +27,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
         if (!classExists)
             return Result.Fail(new SchoolClassErrors.SchoolClassNotFound(request.ClassId));
 
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime);
 
         // Current stock for an item at a location = sum of the remaining Quantity across every
         // StockBatch received by this class at that location. Items/locations with no batches
@@ -118,7 +118,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
             .ToListAsync(cancellationToken))
             .ToDictionary(
                 entry => (entry.ItemId, entry.LocationId),
-                entry => (DateTime?)entry.LastUpdatedAt);
+                entry => (DateTimeOffset?)entry.LastUpdatedAt);
 
         var visibilityByItemLocation = await dbContext.ClassItemStockVisibilities
             .AsNoTracking()

@@ -233,17 +233,17 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("LastModifiedDate")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("ProcessedAt")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime?>("ProcessingLeaseUntilUtc")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("ProcessingLeaseUntilUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("UploadedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<Guid>("UploadedByUserId")
                         .HasColumnType("uniqueidentifier");
@@ -493,8 +493,8 @@ namespace skestock.Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<DateTime>("ReceivedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("ReceivedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("SupplierReference")
                         .HasMaxLength(200)
@@ -555,8 +555,8 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("LastModifiedDate")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("ProcessedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<Guid?>("ResultingGoodsReceiptId")
                         .HasColumnType("uniqueidentifier");
@@ -564,8 +564,8 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("UploadedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<Guid>("UploadedByUserId")
                         .HasColumnType("uniqueidentifier");
@@ -766,17 +766,17 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("LastModifiedDate")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("ProcessedAt")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime?>("ProcessingLeaseUntilUtc")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("ProcessingLeaseUntilUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("UploadedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<Guid>("UploadedByUserId")
                         .HasColumnType("uniqueidentifier");
@@ -930,8 +930,8 @@ namespace skestock.Infrastructure.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<DateTime?>("SubmittedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("SubmittedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
 
@@ -1115,8 +1115,8 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Property<Guid>("ClassId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<Guid?>("CreatedById")
                         .HasColumnType("uniqueidentifier");
@@ -1228,8 +1228,14 @@ namespace skestock.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .HasColumnType("datetime2");
+                    b.Property<Guid?>("ClaimId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("ClaimedUntilUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Error")
                         .HasColumnType("nvarchar(max)");
@@ -1238,8 +1244,8 @@ namespace skestock.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("ProcessedAtUtc")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("ProcessedAtUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("QueueName")
                         .HasColumnType("nvarchar(max)");
@@ -1257,7 +1263,7 @@ namespace skestock.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProcessedAtUtc", "CreatedAtUtc")
+                    b.HasIndex("ProcessedAtUtc", "ClaimedUntilUtc", "CreatedAtUtc")
                         .HasFilter("[ProcessedAtUtc] IS NULL");
 
                     b.ToTable("OutboxMessages");
@@ -1269,8 +1275,8 @@ namespace skestock.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("ProcessedAtUtc")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("ProcessedAtUtc")
+                        .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
 

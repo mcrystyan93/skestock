@@ -18,8 +18,8 @@ public class GoodsReceiptImport : BaseAuditableEntity, IKeysetEntity
     public Guid UploadedByUserId { get; set; }
     public UserProfile UploadedByUser { get; set; } = null!;
 
-    public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? ProcessedAt { get; set; }
+    public DateTimeOffset UploadedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? ProcessedAt { get; set; }
 
     // Set only once the user confirms and a real GoodsReceipt is created from this import
     public Guid? ResultingGoodsReceiptId { get; set; }
@@ -53,7 +53,7 @@ public class GoodsReceiptImport : BaseAuditableEntity, IKeysetEntity
     {
         ExtractedDataJson = extractedDataJson;
         Status = GoodsReceiptImportStatus.PendingReview;
-        ProcessedAt = DateTime.UtcNow;
+        ProcessedAt = DateTimeOffset.UtcNow;
         
         AddDomainEvent(new GoodsReceiptImportCompletedEvent(Id, UploadedByUserId));
     }
@@ -72,7 +72,7 @@ public class GoodsReceiptImport : BaseAuditableEntity, IKeysetEntity
     {
         Status = GoodsReceiptImportStatus.Confirmed;
         ResultingGoodsReceiptId = goodsReceiptId;
-        ProcessedAt ??= DateTime.UtcNow;
+        ProcessedAt ??= DateTimeOffset.UtcNow;
         
         AddDomainEvent(new GoodsReceiptImportConfirmedEvent(Id));
     }

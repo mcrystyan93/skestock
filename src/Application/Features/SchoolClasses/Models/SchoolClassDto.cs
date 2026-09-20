@@ -17,7 +17,7 @@ public record SchoolClassDto
 
 public record GoodsReceiptSummary(
     Guid Id,
-    DateTime ReceivedAt,
+    DateTimeOffset ReceivedAt,
     decimal TotalAmount);
 
 public record SchoolClassSummary(

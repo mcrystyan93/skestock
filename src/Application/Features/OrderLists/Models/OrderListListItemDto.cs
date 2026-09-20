@@ -8,7 +8,7 @@ public record OrderListListItemDto
     public string? Name { get; init; }
     public string Status { get; init; } = string.Empty;
     public int LineCount { get; init; }
-    public DateTime? SubmittedAt { get; init; }
+    public DateTimeOffset? SubmittedAt { get; init; }
     public string? CreatedByName { get; init; }
     public DateTimeOffset CreatedDate { get; init; }
     public DateTimeOffset LastModifiedDate { get; init; }

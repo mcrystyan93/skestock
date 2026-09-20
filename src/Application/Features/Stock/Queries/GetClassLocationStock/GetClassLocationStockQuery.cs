@@ -35,7 +35,7 @@ public class GetClassLocationStockQuery : IRequest<Result<StockReportDto>>, ICac
 
     public string BuildCacheKey() =>
         $"{CacheConstants.Stock}:class:{ClassId}:" +
-        $"asOf={DateOnly.FromDateTime(DateTime.UtcNow):yyyy-MM-dd}:" +
+        $"asOf={DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime):yyyy-MM-dd}:" +
         $"search={CacheKeyNormalization.Text(SearchTerm)}:" +
         $"filters={CacheKeyNormalization.Filters(Filters)}:" +
         $"includeHidden={IncludeHidden}:" +

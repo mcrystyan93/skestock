@@ -1,5 +1,3 @@
-using System.Text;
-using System.Text.Json;
 using Azure.Storage.Queues;
 using Microsoft.Extensions.Logging;
 using skestock.Application.Queues.Interfaces;
@@ -7,8 +5,15 @@ using skestock.Domain.Queues;
 
 namespace skestock.Infrastructure.Queues;
 
-public class AzureQueueSender(QueueServiceClient queueServiceClient, ILogger<AzureQueueSender> logger) : IQueueSender
+public class AzureQueueSender(
+    QueueServiceClient queueServiceClient,
+    IMessageEnvelopeSerializer envelopeSerializer,
+    ILogger<AzureQueueSender> logger) : IQueueSender
 {
+    /// <summary>
+    /// Creates the destination queue on demand and writes the shared envelope format. The sender
+    /// intentionally knows nothing about outbox claims or Worker processing.
+    /// </summary>
     public async Task SendAsync(MessageEnvelope message, string? queueName = null, CancellationToken ct = default)
     {
         Guard.Against.Null(message);
@@ -19,10 +24,7 @@ public class AzureQueueSender(QueueServiceClient queueServiceClient, ILogger<Azu
             var client = queueServiceClient.GetQueueClient(queueName);
             await client.CreateIfNotExistsAsync(cancellationToken: ct);
 
-            var json = JsonSerializer.Serialize(message);
-            var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
-
-            await client.SendMessageAsync(base64, cancellationToken: ct);
+            await client.SendMessageAsync(envelopeSerializer.Serialize(message), cancellationToken: ct);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {

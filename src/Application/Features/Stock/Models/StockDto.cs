@@ -18,7 +18,7 @@ public record StockItemDto
     public CategoryIconDto? CategoryIcon { get; init; }
     public Guid LocationId { get; init; }
     public string LocationName { get; init; } = string.Empty;
-    public DateTime? LastUpdatedAt { get; init; }
+    public DateTimeOffset? LastUpdatedAt { get; init; }
     public string Unit { get; init; } = string.Empty;
     public bool IsPerishable { get; init; }
     public bool IsExpired { get; init; }

@@ -6,6 +6,7 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { StockCategoryItemsTable } from './stock-category-items-table';
+import {NzTooltipDirective} from 'ng-zorro-antd/tooltip';
 
 @Component({
   imports: [
@@ -14,7 +15,8 @@ import { StockCategoryItemsTable } from './stock-category-items-table';
     NzIconDirective,
     NzTagComponent,
     NzTypographyComponent,
-    StockCategoryItemsTable
+    StockCategoryItemsTable,
+    NzTooltipDirective
   ],
   selector: 'ske-stock-category-card',
   templateUrl: './stock-category-card.html'

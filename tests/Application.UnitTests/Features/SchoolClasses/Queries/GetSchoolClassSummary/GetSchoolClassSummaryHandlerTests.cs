@@ -190,7 +190,7 @@ public class GetSchoolClassSummaryHandlerTests
 
     private static GoodsReceipt CreateReceipt(
         SchoolClass schoolClass,
-        DateTime receivedAt,
+        DateTimeOffset receivedAt,
         decimal totalAmount) => new()
     {
         ClassId = schoolClass.Id,
@@ -241,9 +241,18 @@ public class GetSchoolClassSummaryHandlerTests
         var otherClass = CreateSchoolClass();
         context.SchoolClasses.AddRange(schoolClass, otherClass);
 
-        var laterReceipt = CreateReceipt(schoolClass, new DateTime(2026, 10, 1), 250m);
-        var earlierReceipt = CreateReceipt(schoolClass, new DateTime(2026, 9, 1), 100m);
-        var otherClassReceipt = CreateReceipt(otherClass, new DateTime(2026, 9, 15), 999m);
+        var laterReceipt = CreateReceipt(
+            schoolClass,
+            new DateTimeOffset(2026, 10, 1, 0, 0, 0, TimeSpan.Zero),
+            250m);
+        var earlierReceipt = CreateReceipt(
+            schoolClass,
+            new DateTimeOffset(2026, 9, 1, 0, 0, 0, TimeSpan.Zero),
+            100m);
+        var otherClassReceipt = CreateReceipt(
+            otherClass,
+            new DateTimeOffset(2026, 9, 15, 0, 0, 0, TimeSpan.Zero),
+            999m);
         context.GoodsReceipts.AddRange(laterReceipt, earlierReceipt, otherClassReceipt);
         await context.SaveChangesAsync(CancellationToken.None);
 

@@ -56,7 +56,7 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
         var receivedDate = ResolveReceivedDate(import.ExtractedDataJson);
         var receipt = new GoodsReceipt
         {
-            ReceivedAt = receivedDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc),
+            ReceivedAt = new DateTimeOffset(receivedDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero),
             ClassId = import.ClassId,
             Class = null!,
             SupplierReference = string.IsNullOrWhiteSpace(request.SupplierReference) ? null : request.SupplierReference.Trim(),
@@ -213,7 +213,7 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
                 return extractedDate;
         }
 
-        return DateOnly.FromDateTime(DateTime.UtcNow);
+        return DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime);
     }
 
     private async Task<Result<GoodsReceiptDto>> ProjectReceiptAsync(Guid receiptId, CancellationToken cancellationToken)

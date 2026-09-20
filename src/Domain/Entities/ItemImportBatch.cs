@@ -22,8 +22,8 @@ public class ItemImportBatch : BaseAuditableEntity, IKeysetEntity
     /// </summary>
     public Guid? ClientRequestId { get; set; }
 
-    public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? ProcessedAt { get; set; }
+    public DateTimeOffset UploadedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? ProcessedAt { get; set; }
 
     /// <summary>Number of times processing has been attempted; incremented on every Process run.</summary>
     public int AttemptCount { get; private set; }
@@ -70,16 +70,16 @@ public class ItemImportBatch : BaseAuditableEntity, IKeysetEntity
         return batch;
     }
 
-    public void RecordAttempt(DateTime processingLeaseUntilUtc)
+    public void RecordAttempt(DateTimeOffset processingLeaseUntilUtc)
     {
         AttemptCount++;
         ProcessingLeaseUntilUtc = processingLeaseUntilUtc;
         ConcurrencyStamp = Guid.NewGuid();
     }
 
-    public DateTime? ProcessingLeaseUntilUtc { get; private set; }
+    public DateTimeOffset? ProcessingLeaseUntilUtc { get; private set; }
 
-    public bool HasActiveProcessingLease(DateTime utcNow) =>
+    public bool HasActiveProcessingLease(DateTimeOffset utcNow) =>
         Status == ItemImportBatchStatus.Processing &&
         ProcessingLeaseUntilUtc is { } leaseUntilUtc &&
         leaseUntilUtc > utcNow;
@@ -95,7 +95,7 @@ public class ItemImportBatch : BaseAuditableEntity, IKeysetEntity
     {
         ExtractedDataJson = extractedDataJson;
         Status = ItemImportBatchStatus.PendingReview;
-        ProcessedAt = DateTime.UtcNow;
+        ProcessedAt = DateTimeOffset.UtcNow;
         ProcessingLeaseUntilUtc = null;
         ConcurrencyStamp = Guid.NewGuid();
 
@@ -116,7 +116,7 @@ public class ItemImportBatch : BaseAuditableEntity, IKeysetEntity
     {
         Status = ItemImportBatchStatus.Confirmed;
         ConfirmationResultJson = confirmationResultJson;
-        ProcessedAt ??= DateTime.UtcNow;
+        ProcessedAt ??= DateTimeOffset.UtcNow;
         ProcessingLeaseUntilUtc = null;
         ConcurrencyStamp = Guid.NewGuid();
 

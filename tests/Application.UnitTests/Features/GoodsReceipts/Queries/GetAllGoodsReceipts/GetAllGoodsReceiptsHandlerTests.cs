@@ -75,7 +75,7 @@ public class GetAllGoodsReceiptsHandlerTests
             ClassId = schoolClass.Id,
             Class = schoolClass,
             Note = "Imported receipt",
-            ReceivedAt = new DateTime(2026, 9, 15),
+            ReceivedAt = new DateTimeOffset(2026, 9, 15, 0, 0, 0, TimeSpan.Zero),
             CreatedDate = new DateTimeOffset(2026, 9, 15, 0, 0, 0, TimeSpan.Zero),
             LastModifiedDate = new DateTimeOffset(2026, 9, 15, 0, 0, 0, TimeSpan.Zero)
         };

@@ -127,7 +127,7 @@ public class ApplicationDbContextInitialiser
     [
         ("Frigider", "Bucatarie", false),
         ("Congelator", "Bucatarie", false),
-        ("Dulap servire", "Sala de mese", false),
+        ("Dulapuri", "Sala de mese", false),
         ("Rafturi", "Bucatarie", false),
         ("Camara", "Bucatarie", true),
         ("Depozit", "Depozit", false)
@@ -523,8 +523,8 @@ public class ApplicationDbContextInitialiser
 
         for (var receiptIndex = alreadySeededCount; receiptIndex < DefaultGoodsReceiptCount; receiptIndex++)
         {
-            var receivedAt = DateTime.UtcNow.AddDays(-3 * (DefaultGoodsReceiptCount - receiptIndex));
-            var receivedDate = DateOnly.FromDateTime(receivedAt);
+            var receivedAt = DateTimeOffset.UtcNow.AddDays(-3 * (DefaultGoodsReceiptCount - receiptIndex));
+            var receivedDate = DateOnly.FromDateTime(receivedAt.UtcDateTime);
 
             var goodsReceipt = new GoodsReceipt
             {

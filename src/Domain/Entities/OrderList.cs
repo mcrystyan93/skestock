@@ -15,7 +15,7 @@ public class OrderList : BaseAuditableEntity, IKeysetEntity
     public OrderListStatus Status { get; private set; } = OrderListStatus.Draft;
 
     // Set once the list moves out of Draft via Submit().
-    public DateTime? SubmittedAt { get; private set; }
+    public DateTimeOffset? SubmittedAt { get; private set; }
 
     public ICollection<OrderListLine> Lines { get; set; } = new List<OrderListLine>();
 
@@ -41,7 +41,7 @@ public class OrderList : BaseAuditableEntity, IKeysetEntity
     public void Submit()
     {
         Status = OrderListStatus.Submitted;
-        SubmittedAt = DateTime.UtcNow;
+        SubmittedAt = DateTimeOffset.UtcNow;
 
         AddDomainEvent(new OrderListSubmittedEvent(Id));
     }
