@@ -1,5 +1,5 @@
-import {BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition} from './pagination';
-import type {IconPickerValue} from '@ske/shared/icons';
+import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
+import type { IconPickerValue } from '@ske/shared/icons';
 
 /** Mirrors src/Application/Features/Categories/Models/CategoryDto.cs. */
 export type CategoryDto = {
@@ -57,7 +57,8 @@ export type CategoryTableColumn =
   | 'createdDate'
   | 'lastModifiedDate'
   | 'createdByName'
-  | 'lastModifiedByName';
+  | 'lastModifiedByName'
+  | 'actions';
 
 export const CATEGORY_TABLE_COLUMNS: TableColumnDefinition<CategoryTableColumn> = {
   name: {
@@ -66,7 +67,7 @@ export const CATEGORY_TABLE_COLUMNS: TableColumnDefinition<CategoryTableColumn> 
     fieldType: 'string'
   },
   itemCount: {
-    label: 'Nr. articole',
+    label: 'Articole',
     value: 'itemCount',
     fieldType: 'number'
   },
@@ -76,7 +77,7 @@ export const CATEGORY_TABLE_COLUMNS: TableColumnDefinition<CategoryTableColumn> 
     fieldType: 'date'
   },
   lastModifiedDate: {
-    label: 'Data modificare',
+    label: 'Ultima modificare',
     value: 'lastModifiedDate',
     fieldType: 'date'
   },
@@ -88,6 +89,11 @@ export const CATEGORY_TABLE_COLUMNS: TableColumnDefinition<CategoryTableColumn> 
   lastModifiedByName: {
     label: 'Modificat de',
     value: 'lastModifiedByName',
+    fieldType: 'string'
+  },
+  actions: {
+    label: 'Actiuni',
+    value: 'actions',
     fieldType: 'string'
   }
 };

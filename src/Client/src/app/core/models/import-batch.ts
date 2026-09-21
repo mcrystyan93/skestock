@@ -1,6 +1,6 @@
 import type { FileStatus } from './storage';
 
-export type ImportBatchStatus = 'processing' | 'pendingReview' | 'confirmed' | 'failed';
+export type ImportBatchStatus = 'processing' | 'pendingReview' | 'confirmed' | 'failed' | 'all';
 
 export type ImportBatchHistoryStatus = 'created' | 'processing' | 'completed' | 'failed' | 'confirmed';
 

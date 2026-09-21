@@ -1,6 +1,6 @@
 import { Component, effect, input, linkedSignal, output, untracked } from '@angular/core';
 import {
-  buildEqualsFilter,
+  buildEqualsFilterForDropdown,
   CategoryDropdownValue,
   ColumnFilter,
   GetClassLocationStockRequest,
@@ -75,7 +75,7 @@ export class FilterForm {
   });
 
   private readonly _formEffectChange = effect(() => {
-    const formValue = this.stockListFilterForm().value();
+    this.stockListFilterForm().value();
 
     if (!this._initialFormChangeHandled) {
       this._initialFormChangeHandled = true;
@@ -100,8 +100,8 @@ export class FilterForm {
       filters: [
         ...this.filter().filters.filter(filter => !STOCK_FILTER_FIELDS.has(filter.field)),
         ...[
-          buildEqualsFilter('locationId', criteria.location),
-          buildEqualsFilter('categoryId', criteria.category)
+          buildEqualsFilterForDropdown('locationId', criteria.location),
+          buildEqualsFilterForDropdown('categoryId', criteria.category)
         ].filter((filter): filter is ColumnFilter => filter !== null)
       ],
       includeHidden: criteria.booleanSegmentValue === StockBooleanField.IncludeHidden,

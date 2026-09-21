@@ -1,0 +1,126 @@
+@let dimensions = tableDimensions();
+
+<nz-table #table
+          nzTableLayout="fixed"
+          [nzData]="itemsVirtualData()"
+          [nzVirtualItemSize]="virtualItemSize()"
+          [nzVirtualMinBufferPx]="virtualMinBufferPx()"
+          [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
+          [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          [nzLoading]="loading()"
+          nzSize="small"
+          [nzScroll]="{x: dimensions.width, y: dimensions.height}">
+  <thead>
+  <tr>
+    <th nzWidth="240px">
+      {{ columns.name.label }}
+    </th>
+    <th nzWidth="110px"
+        class="text-right!">
+      {{ columns.lineCount.label }}
+    </th>
+    <th nzWidth="170px">
+      {{ columns.status.label }}
+    </th>
+    <th nzWidth="150px">
+      {{ columns.createdDate.label }}
+    </th>
+    <th nzWidth="180px">
+      {{ columns.createdByName.label }}
+    </th>
+    <th nzWidth="150px">
+      {{ columns.submittedAt.label }}
+    </th>
+    <th nzWidth="150px">
+      {{ columns.actions.label }}
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <ng-template nz-virtual-scroll
+               let-orderList>
+    <tr (click)="onView.emit(orderList)"
+        skeStopClick
+        tabindex="0"
+        class="cursor-pointer"
+        [attr.aria-label]="'Deschide comanda ' + (orderList.name || '')">
+      <td>
+        <span class="truncate"
+              [attr.title]="orderList.name ?? ''">
+          {{ orderList.name || '-' }}
+        </span>
+      </td>
+      <td class="text-right pr-3!">
+        {{ orderList.lineCount }}
+      </td>
+      <td>
+        <nz-tag [nzColor]="statusColor(orderList.status)"
+                nz-dropdown
+                nzTrigger="hover"
+                nzPlacement="bottomLeft"
+                [nzDropdownMenu]="statusMenu"
+                [nzDisabled]="loading() || statusChangingId() !== null"
+                skeStopClick
+                [attr.aria-label]="'Schimbă statusul comenzii ' + (orderList.name || '')">
+          {{ statusLabel(orderList.status) }}
+          <nz-icon nzType="icons:chevron-down"></nz-icon>
+        </nz-tag>
+<!--        <button type="button"-->
+<!--                nz-button-->
+<!--                nz-dropdown-->
+<!--                nzSize="small"-->
+<!--                nzType="link"-->
+<!--                nzTrigger="hover"-->
+<!--                nzPlacement="bottomLeft"-->
+<!--                [nzDropdownMenu]="statusMenu"-->
+<!--                [nzLoading]="statusChangingId() === orderList.id"-->
+<!--                [disabled]="loading() || statusChangingId() !== null"-->
+<!--                skeStopClick-->
+<!--                [attr.aria-label]="'Schimbă statusul comenzii ' + (orderList.name || '')">-->
+<!--          {{ statusLabel(orderList.status) }}-->
+<!--          <nz-icon nzType="icons:chevron-down"></nz-icon>-->
+<!--        </button>-->
+        <nz-dropdown-menu #statusMenu="nzDropdownMenu">
+          <ul nz-menu>
+            @for (action of availableActions(orderList.status); track action) {
+              <li nz-menu-item
+                  [nzDisabled]="loading() || statusChangingId() !== null"
+                  (click)="onStatusChange.emit({id: orderList.id, action})">
+                {{ actionLabel(action) }}
+              </li>
+            }
+          </ul>
+        </nz-dropdown-menu>
+      </td>
+      <td>
+        {{ orderList.createdDate | date }}
+      </td>
+      <td>
+        {{ orderList.createdByName || '-' }}
+      </td>
+      <td>
+        {{ (orderList.submittedAt | date) || '-' }}
+      </td>
+      <td>
+        @if (orderList.status === 'Submitted') {
+          <button type="button"
+                  nz-button
+                  nzSize="small"
+                  nzType="default"
+                  class="mr-2"
+                  [nzLoading]="isDownloading(orderList.id)"
+                  [disabled]="isDownloading(orderList.id)"
+                  skeStopClick
+                  (click)="onDownload.emit(orderList)"
+                  [attr.aria-label]="'Descarcă Excel pentru comanda ' + (orderList.name || '')">
+            <nz-icon nzType="icons:file-arrow-down"></nz-icon>
+            Descarca excel
+          </button>
+        }
+      </td>
+    </tr>
+  </ng-template>
+  </tbody>
+</nz-table>

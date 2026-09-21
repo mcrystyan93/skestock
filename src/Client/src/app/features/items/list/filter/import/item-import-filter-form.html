@@ -14,32 +14,28 @@
                    nz-input
                    id="itemImportSearchTerm"
                    placeholder="Cautați..."
-                   nzVariant="borderless"
                    [formField]="filterForm.searchTerm" />
           </nz-input-wrapper>
         </nz-form-control>
       </nz-form-item>
     </nz-col>
+    <nz-col>
+      <nz-segmented [formField]="filterForm.status">
+        @for (segmentOption of statusSegmentOptions; track segmentOption.value) {
+          <label nz-segmented-item
+                 [nzValue]="segmentOption.value">
+            {{ segmentOption.label }}
+          </label>
+        }
+      </nz-segmented>
+    </nz-col>
     <nz-col nzFlex="none">
-      <nz-space class="ml-3">
-        <button type="submit"
-                *nzSpaceItem
-                nz-button nzSize="small"
-                nzType="primary"
-                [nzLoading]="loading()">
-          <nz-icon nzType="icons:magnifying-glass"></nz-icon>
-          Cauta
-        </button>
-        <button *nzSpaceItem
-                nz-button nzSize="small"
-                type="button"
-                nzType="default"
-                [nzLoading]="loading()"
-                (click)="clear()">
-          <nz-icon nzType="icons:xmark"></nz-icon>
-          Reseteaza
-        </button>
-      </nz-space>
+      <button nz-button
+              type="button"
+              nzType="default"
+              (click)="clear()">
+        Reseteaza
+      </button>
     </nz-col>
   </nz-row>
 </form>

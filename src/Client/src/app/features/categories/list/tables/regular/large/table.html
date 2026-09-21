@@ -17,20 +17,15 @@
     <th [nzWidth]="columnLayout.name.width">
       {{ columns.name.label }}
     </th>
-    <th [nzWidth]="columnLayout.itemCount.width">
+    <th [nzWidth]="columnLayout.itemCount.width"
+        class="text-right!">
       {{ columns.itemCount.label }}
-    </th>
-    <th [nzWidth]="columnLayout.createdDate.width">
-      {{ columns.createdDate.label }}
-    </th>
-    <th [nzWidth]="columnLayout.createdByName.width">
-      {{ columns.createdByName.label }}
     </th>
     <th [nzWidth]="columnLayout.lastModifiedDate.width">
       {{ columns.lastModifiedDate.label }}
     </th>
-    <th [nzWidth]="columnLayout.lastModifiedByName.width">
-      {{ columns.lastModifiedByName.label }}
+    <th [nzWidth]="columnLayout.actions.width">
+      {{ columns.actions.label }}
     </th>
   </tr>
   </thead>
@@ -49,20 +44,32 @@
           </span>
         </div>
       </td>
-      <td>
-        {{ category.itemCount }}
+      <td class="text-right">
+        <nz-tag>
+          {{ category.itemCount }}
+        </nz-tag>
       </td>
       <td>
-        {{ category.createdDate | date }}
+        <div>
+          {{ category.lastModifiedDate | timeAgo }}
+        </div>
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0!">
+          {{ category.lastModifiedByName }}
+        </div>
       </td>
       <td>
-        {{ category.createdByName }}
-      </td>
-      <td>
-        {{ category.lastModifiedDate | date }}
-      </td>
-      <td>
-        {{ category.lastModifiedByName }}
+        <button nz-button
+                nzType="text">
+          <nz-icon nzType="icons:pen-to-square"
+                   skeStopClick></nz-icon>
+        </button>
+        <button nz-button
+                nzType="text">
+          <nz-icon nzType="icons:trash-can"
+                   skeStopClick></nz-icon>
+        </button>
       </td>
     </tr>
   </ng-template>

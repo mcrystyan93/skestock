@@ -3,20 +3,28 @@
     Loading...
   } @else {
     @if (store.item()?.id) {
-      {{ store.item()?.name ?? 'Modifica produsul' }}
+      Editeaza articol
+      <div nz-typography
+           nzType="secondary"
+           class="mb-0!">
+        {{ store.item()?.name ?? 'Modifica articolul' }}
+        ·
+        Cod
+        {{ store.item()?.sku ?? '' }}
+      </div>
     } @else {
-      Creaza un nou produs
+      Creaza un nou articol
     }
   }
 </div>
 <ske-error-display [problemDetail]="store.itemProblemDetail()"
-                 [validationErrors]="store.itemValidationErrors()" />
+                   [validationErrors]="store.itemValidationErrors()" />
 <ske-item-form [loading]="store.itemLoading()"
                [item]="store.item()" />
 
 <div *nzModalFooter>
   <nz-space>
-    <button nz-button nzSize="small"
+    <button nz-button
             *nzSpaceItem
             nzType="default"
             type="button"
@@ -25,15 +33,15 @@
       Inchide
     </button>
 
-    <nz-space-compact *nzSpaceItem nzSize="small">
-      <button nz-button nzSize="small"
+    <nz-space-compact *nzSpaceItem>
+      <button nz-button
               nzType="primary"
               type="button"
               (click)="save()"
               [nzLoading]="store.itemLoading()">
         Salveaza si inchide
       </button>
-      <button nz-button nzSize="small"
+      <button nz-button
               nzType="primary"
               type="button"
               nz-dropdown

@@ -24,6 +24,13 @@ export class OrderListsHttp {
     return this._httpClient.get<OrderListDto>(`/api/OrderLists/${id}`);
   }
 
+  public export(id: string) {
+    return this._httpClient.get(`/api/OrderLists/${id}/export`, {
+      responseType: 'blob',
+      observe: 'response'
+    });
+  }
+
   public create(request: CreateOrderListRequest) {
     return this._httpClient.post<OrderListDto>('/api/OrderLists', request);
   }

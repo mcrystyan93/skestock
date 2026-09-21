@@ -1,23 +1,31 @@
-<nz-page-header nzTitle="Articole">
+<nz-page-header nzTitle="Articole"
+                [nzGhost]="false">
+  <nz-breadcrumb nz-page-header-breadcrumb
+                 nzSeparator=">">
+    <nz-breadcrumb-item>Acasa</nz-breadcrumb-item>
+    <nz-breadcrumb-item>Articole</nz-breadcrumb-item>
+  </nz-breadcrumb>
   <nz-page-header-extra>
-    <nz-space>
-      <button nz-button nzSize="small"
-              *nzSpaceItem
-              nzType="default"
-              type="button"
-              (click)="onImport.emit()">
-        <nz-icon nzType="icons:upload"></nz-icon>
-        Importa
-      </button>
-      <button nz-button nzSize="small"
-              *nzSpaceItem
-              nzType="primary"
-              type="button"
-              (click)="onAdd.emit()">
-        <nz-icon nzType="icons:plus"></nz-icon>
-        Adaugă
-      </button>
-    </nz-space>
+    @switch (selectedTabIndex()) {
+      @case (0) {
+        <button nz-button
+                nzType="primary"
+                type="button"
+                (click)="onAdd.emit()">
+          <nz-icon nzType="icons:plus"></nz-icon>
+          Adaugă
+        </button>
+      }
+      @case (1) {
+        <button nz-button
+                nzType="primary"
+                type="button"
+                (click)="onImport.emit()">
+          <nz-icon nzType="icons:upload"></nz-icon>
+          Importa
+        </button>
+      }
+    }
   </nz-page-header-extra>
   <nz-page-header-footer>
     <nz-tabs [(nzSelectedIndex)]="selectedTabIndex">
@@ -26,3 +34,5 @@
     </nz-tabs>
   </nz-page-header-footer>
 </nz-page-header>
+
+<ske-theme-switcher class="absolute top-1.5 right-4" />

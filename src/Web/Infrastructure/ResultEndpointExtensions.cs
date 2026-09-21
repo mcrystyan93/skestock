@@ -1,5 +1,6 @@
 using FluentResults;
 using Microsoft.AspNetCore.Http.HttpResults;
+using skestock.Application.Common.Models;
 
 namespace skestock.Web.Infrastructure;
 
@@ -38,4 +39,9 @@ public static class ResultEndpointExtensions
         => result.IsFailed
             ? result.ToProblemHttpResult()
             : TypedResults.Created(location(result.Value), result.Value);
+
+    public static Results<FileContentHttpResult, ProblemHttpResult> ToFile(this Result<FileExportResult> result)
+        => result.IsFailed
+            ? result.ToProblemHttpResult()
+            : TypedResults.File(result.Value.Content, result.Value.ContentType, result.Value.FileName);
 }

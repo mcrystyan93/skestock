@@ -102,7 +102,8 @@ export class ItemsPage implements OnInit, OnDestroy {
         item
       },
       nzCentered: true,
-      nzMaskClosable: false
+      nzMaskClosable: false,
+      nzWrapClassName: 'modal-w-50'
     });
 
     modalRef.afterClose.pipe(

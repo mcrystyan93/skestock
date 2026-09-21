@@ -13,15 +13,31 @@ html, body {
 
 .ant-table-tbody > tr > td {
   height: 49px;
-  padding: 0 !important;
-  //padding-top: 0 !important;
-  //padding-bottom: 0 !important;
   box-sizing: border-box;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  &:first-child{
-    padding-left: 8px !important;
+
+  &:first-child {
+    padding-left: 12px !important;
+  }
+
+  &:last-child {
+    padding-right: 12px !important;
+  }
+}
+
+.ant-table-thead > tr > th {
+  &:first-child {
+    padding-left: 12px !important;
+  }
+
+  &:last-child {
+    padding-right: 12px !important;
+  }
+
+  &:before {
+    display: none;
   }
 }
 
@@ -33,15 +49,14 @@ html, body {
   }
 }
 
-.page-footer{
-  @apply flex! flex-row justify-end;
+.page-footer {
+@apply flex! flex-row justify-end;
 }
 
-.ant-menu-title-content{
+.ant-menu-title-content {
   display: flex;
   align-items: center;
 }
-
 
 
 .stock-form-compact {
@@ -59,4 +74,8 @@ html, body {
       border-left-width: 0 !important;
     }
   }
+}
+
+.selected-icon-fix > nz-select-top-control > .ant-select-selection-wrap > .ant-select-selection-item::after {
+  display: none !important;
 }

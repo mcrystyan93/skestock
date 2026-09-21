@@ -1,46 +1,33 @@
 @let dimensions = tableDimensions();
 
-<nz-table
-  #table
-  nzTableLayout="fixed"
-  [nzData]="itemsVirtualData()"
-  [nzVirtualItemSize]="virtualItemSize()"
-  [nzVirtualMinBufferPx]="virtualMinBufferPx()"
-  [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
-  [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
-  [nzFrontPagination]="false"
-  [nzShowPagination]="false"
-  [nzLoading]="loading()"
-  nzSize="small"
-  [nzScroll]="{ x: dimensions.width, y: dimensions.height }"
+<nz-table #table
+          nzTableLayout="fixed"
+          [nzData]="itemsVirtualData()"
+          [nzVirtualItemSize]="virtualItemSize()"
+          [nzVirtualMinBufferPx]="virtualMinBufferPx()"
+          [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
+          [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          [nzLoading]="loading()"
+          nzSize="small"
+          [nzScroll]="{ x: dimensions.width, y: dimensions.height }"
 >
   <thead>
   <tr>
-    <th nzWidth="150px">
-      {{ columns.sku.label }}
-    </th>
-    <th >
+    <th>
       {{ columns.name.label }}
     </th>
-    <th nzWidth="200px">
+    <th nzWidth="300px">
       {{ columns.categoryName.label }}
-    </th>
-    <th nzWidth="100px">
-      {{ columns.unit.label }}
     </th>
     <th nzWidth="100px">
       {{ columns.minThreshold.label }}
     </th>
-    <th nzWidth="100px">
-      {{ columns.isPerishable.label }}
-    </th>
     <th nzWidth="130px">
       {{ columns.shelfLifeDays.label }}
     </th>
-<!--    <th nzWidth="100px">-->
-<!--      {{ columns.isActive.label }}-->
-<!--    </th>-->
-    <th nzWidth="150px">
+    <th nzWidth="250px">
       {{ columns.lastModifiedDate.label }}
     </th>
   </tr>
@@ -50,40 +37,42 @@
                let-item>
     <tr (click)="onEdit.emit(item)"
         class="cursor-pointer">
+
       <td>
-        {{ item.sku }}
+        <strong nz-typography>
+          {{ item.name }}
+        </strong>
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0!">{{ item.sku }}
+        </div>
       </td>
       <td>
-        {{ item.name }}
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0!">
+          {{ item.categoryName }}
+        </div>
       </td>
       <td>
-        {{ item.categoryName }}
+        {{ item.minThreshold }} <span nz-typography
+                                      nzType="secondary">{{ item.unit }}</span>
       </td>
       <td>
-        {{ item.unit }}
-      </td>
-      <td>
-        {{ item.minThreshold }}
-      </td>
-      <td>
-        @if (item.isPerishable) {
-          <nz-tag nzColor="orange">Da</nz-tag>
-        } @else {
-          <nz-tag nzColor="green">Nu</nz-tag>
+        @if (item.isPerishable && !!item.shelfLifeDays) {
+          <span nz-typography
+                nzType="secondary"><nz-icon nzType="icons:clock"></nz-icon></span>
+          {{ item.shelfLifeDays ?? '-' }} zile
         }
       </td>
       <td>
-        {{ item.shelfLifeDays ?? '-' }}
-      </td>
-<!--      <td>-->
-<!--        @if (item.isActive) {-->
-<!--          <nz-tag nzColor="green">Activ</nz-tag>-->
-<!--        } @else {-->
-<!--          <nz-tag nzColor="red">Inactiv</nz-tag>-->
-<!--        }-->
-<!--      </td>-->
-      <td>
-        {{ item.lastModifiedDate | date }}
+        <div>
+          {{ item.lastModifiedDate | timeAgo }}
+        </div>
+        <div nz-typography
+             nzType="secondary">
+          {{ item.lastModifiedByName }}
+        </div>
       </td>
     </tr>
   </ng-template>

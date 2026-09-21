@@ -1,23 +1,36 @@
-<nz-page-header nzTitle="Categorii">
+<nz-page-header nzTitle="Categorii"
+                [nzGhost]="false">
+  <nz-breadcrumb nz-page-header-breadcrumb
+                 nzSeparator=">">
+    <nz-breadcrumb-item>Acasa</nz-breadcrumb-item>
+    <nz-breadcrumb-item>Categorii</nz-breadcrumb-item>
+  </nz-breadcrumb>
+  <nz-page-header-content class="pt-0!">
+    <div nz-typography
+         nzType="secondary">Organizează produsele pe categorii și urmărește câte articole conține fiecare.
+    </div>
+  </nz-page-header-content>
   <nz-page-header-extra>
-    <nz-space>
-      <button nz-button nzSize="small"
-              *nzSpaceItem
-              nzType="primary"
-              type="button"
-              (click)="onAdd.emit()">
-        <nz-icon nzType="icons:plus"></nz-icon>
-        Adaugă
-      </button>
-      <button nz-button nzSize="small"
-              *nzSpaceItem
-              nzType="default"
-              type="button"
-              (click)="onImport.emit()">
-        <nz-icon nzType="icons:file-import"></nz-icon>
-        Importă
-      </button>
-    </nz-space>
+    @switch (selectedTabIndex()) {
+      @case (0) {
+        <button nz-button
+                nzType="primary"
+                type="button"
+                (click)="onAdd.emit()">
+          <nz-icon nzType="icons:plus"></nz-icon>
+          Adaugă
+        </button>
+      }
+      @case (1) {
+        <button nz-button
+                nzType="primary"
+                type="button"
+                (click)="onImport.emit()">
+          <nz-icon nzType="icons:file-import"></nz-icon>
+          Importă
+        </button>
+      }
+    }
   </nz-page-header-extra>
 
   <nz-page-header-footer>
@@ -27,3 +40,5 @@
     </nz-tabs>
   </nz-page-header-footer>
 </nz-page-header>
+
+<ske-theme-switcher class="absolute top-1.5 right-4" />

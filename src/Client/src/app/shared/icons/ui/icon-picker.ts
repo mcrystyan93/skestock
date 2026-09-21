@@ -1,9 +1,8 @@
-import {NgOptimizedImage} from '@angular/common';
-import {Component, computed, effect, input, linkedSignal, model, signal, untracked} from '@angular/core';
-import {form, FormField, type FormValueControl} from '@angular/forms/signals';
-import {NzFilterOptionType, NzOptionComponent, NzSelectComponent, NzSelectItemInterface} from 'ng-zorro-antd/select';
-import {ICON_CATALOG, type IconPickerValue} from '../icon-catalog';
-import {NzIconDirective} from 'ng-zorro-antd/icon';
+import { Component, computed, effect, input, linkedSignal, model, signal, untracked } from '@angular/core';
+import { form, FormField, type FormValueControl } from '@angular/forms/signals';
+import { NzFilterOptionType, NzOptionComponent, NzSelectComponent, NzSelectItemInterface } from 'ng-zorro-antd/select';
+import { ICON_CATALOG, type IconPickerValue } from '../icon-catalog';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
 
 @Component({
   selector: 'ske-icon-picker',
@@ -26,7 +25,7 @@ import {NzIconDirective} from 'ng-zorro-antd/icon';
                [attr.aria-label]="ariaLabel()"
                [nzCustomTemplate]="customSelectTemplate"
                [compareWith]="(a, b) => a && b ? a.fileName === b.fileName : a === b"
-               class="w-full">
+               class="w-full selected-icon-fix">
       @for (icon of visibleIcons(); track icon.path) {
         <nz-option [nzLabel]="icon.name"
                    [nzValue]="icon"

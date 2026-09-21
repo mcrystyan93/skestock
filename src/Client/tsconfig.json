@@ -42,6 +42,7 @@
       "@ske/shared/icons": ["./src/app/shared/icons"],
       "@ske/shared/storage": ["./src/app/shared/storage"],
       "@ske/shared/directives": ["./src/app/shared/ui/directives"],
+      "@ske/shared/pipes": ["./src/app/shared/ui/pipes"],
       "@ske/shared/virtual-scroll": ["./src/app/shared/ui/virtual-scroll"]
     }
   },

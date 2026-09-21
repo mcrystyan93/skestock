@@ -16,13 +16,15 @@ import { CategoryListSmall } from '../tables/regular/small/category-list-small';
   ],
   selector: 'ske-category-list-tab',
   host: {
-    class: 'flex grow flex-col gap-2 absolute inset-0'
+    class: 'flex grow flex-col gap-4 absolute inset-0'
   },
   template: `
     <ske-category-filter-container />
 
-    <ske-error-display [problemDetail]="problemDetail()"
-                     [validationErrors]="validationErrors()" />
+    @if (problemDetail() || validationErrors()) {
+      <ske-error-display [problemDetail]="problemDetail()"
+                         [validationErrors]="validationErrors()" />
+    }
 
     <div class="grow relative">
       <ng-container *skeLayoutBreakpoint="'xl';else:smallScreenListTemplate">

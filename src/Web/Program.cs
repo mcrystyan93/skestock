@@ -54,6 +54,7 @@ app.UseCors(policy => policy
     .WithOrigins(corsAllowedOrigins ?? [])
     .AllowAnyMethod()
     .AllowAnyHeader()
+    .WithExposedHeaders("Content-Disposition")
     .AllowCredentials());
 
 app.UseAuthentication();

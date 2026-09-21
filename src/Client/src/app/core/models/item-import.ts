@@ -1,11 +1,7 @@
 import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
 import type { CategoryDropdownValue } from './category';
 import type { ItemDropdownValue } from './item';
-import type {
-  ImportBatchFileDto,
-  ImportBatchHistoryDto,
-  ImportBatchStatus
-} from './import-batch';
+import type { ImportBatchFileDto, ImportBatchHistoryDto, ImportBatchStatus } from './import-batch';
 
 export type CreateItemImportBatchRequest = {
   fileMetadataIds: string[];
@@ -68,13 +64,14 @@ export const ITEM_IMPORT_BATCH_TABLE_COLUMNS: TableColumnDefinition<ItemImportBa
   files: { label: 'Fisiere', value: 'files', fieldType: 'string' },
   status: { label: 'Stare', value: 'status', fieldType: 'string' },
   uploadedByName: { label: 'Incarcat de', value: 'uploadedByName', fieldType: 'string' },
-  uploadedAt: { label: 'Data incarcare', value: 'uploadedAt', fieldType: 'date' },
+  uploadedAt: { label: 'Incarcat', value: 'uploadedAt', fieldType: 'date' },
   processedAt: { label: 'Data procesare', value: 'processedAt', fieldType: 'date' },
   errorMessage: { label: 'Eroare', value: 'errorMessage', fieldType: 'string' },
   createdDate: { label: 'Data creare', value: 'createdDate', fieldType: 'date' }
 };
 
 export const ITEM_IMPORT_BATCH_STATUS_LABELS: Record<ItemImportBatchStatus, string> = {
+  all: 'Toate',
   processing: 'Se proceseaza',
   pendingReview: 'In asteptare',
   confirmed: 'Confirmat',
@@ -82,6 +79,7 @@ export const ITEM_IMPORT_BATCH_STATUS_LABELS: Record<ItemImportBatchStatus, stri
 };
 
 export const ITEM_IMPORT_BATCH_STATUS_COLORS: Record<ItemImportBatchStatus, string> = {
+  all: 'default',
   processing: 'processing',
   pendingReview: 'orange',
   confirmed: 'success',

@@ -2622,9 +2622,9 @@
     "semantic_hash": "ea2394520137242b4cf03d6209658750"
   },
   "src/Infrastructure/DependencyInjection.cs": {
-    "mtime": 1789889236.7452,
-    "seen": 1789889254.7436452,
-    "ast_hash": "e2f8186a2039862eb46128ddb8e30927",
+    "mtime": 1789993174.7584178,
+    "seen": 1789993728.856741,
+    "ast_hash": "ebf530e7122208590526f4b9a89411b3",
     "semantic_hash": ""
   },
   "src/Infrastructure/GlobalUsings.cs": {
@@ -2652,9 +2652,9 @@
     "semantic_hash": "88400be6abd8e8efbf78bc1deb1ef22e"
   },
   "src/Infrastructure/Infrastructure.csproj": {
-    "mtime": 1789326655.701193,
-    "seen": 1789326734.8759246,
-    "ast_hash": "556f867aa838b00124712185fa744ea4",
+    "mtime": 1789993027.4595726,
+    "seen": 1789993728.8567443,
+    "ast_hash": "fde4b06caf93f778601cbbeaa157e093",
     "semantic_hash": ""
   },
   "src/Infrastructure/Queues/AzureQueueSender.cs": {
@@ -2874,9 +2874,9 @@
     "semantic_hash": ""
   },
   "src/Web/Program.cs": {
-    "mtime": 1789649113.4286616,
-    "seen": 1789649172.5078433,
-    "ast_hash": "fd340a9343ecb283511b7f6b04bb3086",
+    "mtime": 1789993222.5616922,
+    "seen": 1789993728.8567748,
+    "ast_hash": "5e73b60166b013004feeca8b6914d8eb",
     "semantic_hash": ""
   },
   "src/Web/Properties/launchSettings.json": {
@@ -3756,8 +3756,8 @@
     "semantic_hash": "5b973a02eace6b2c3e55adf6fb0701e2"
   },
   "src/Client/src/app/shared/icons/icon-catalog.generated.ts": {
-    "mtime": 1789989710.039688,
-    "seen": 1789989734.8171737,
+    "mtime": 1789993382.4106097,
+    "seen": 1789993728.8565538,
     "ast_hash": "9f18a0461fd8e197b5b5f0e2f49f1049",
     "semantic_hash": "9f18a0461fd8e197b5b5f0e2f49f1049"
   },
@@ -26508,9 +26508,9 @@
     "semantic_hash": ""
   },
   "src/Application/Common/Errors/OrderListErrors.cs": {
-    "mtime": 1789989446.8101897,
-    "seen": 1789989477.213516,
-    "ast_hash": "ab232981de2a143ef98528edafef906b",
+    "mtime": 1789993066.8737988,
+    "seen": 1789993728.8561466,
+    "ast_hash": "f11ffe5b26bd02ab120f187d01002ff4",
     "semantic_hash": ""
   },
   "src/Application/Features/OrderLists/CacheConstants.cs": {
@@ -26784,9 +26784,9 @@
     "semantic_hash": ""
   },
   "src/Web/Endpoints/OrderLists.cs": {
-    "mtime": 1789989315.6894433,
-    "seen": 1789989477.214128,
-    "ast_hash": "02518b1d2dc48f36883fa49f7ffdbfea",
+    "mtime": 1789993214.7766476,
+    "seen": 1789993728.8567607,
+    "ast_hash": "d38b19fb0eae7c3b2c67e1c361acbd27",
     "semantic_hash": ""
   },
   "tests/Application.FunctionalTests/Features/OrderLists/Commands/OrderListLifecycleTests.cs": {
@@ -26826,9 +26826,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/overview/tabs/order-lists/order-lists-tab.ts": {
-    "mtime": 1789991373.873,
-    "seen": 1789992162.54448,
-    "ast_hash": "b9013bc82fff04b126a431c713d03457",
+    "mtime": 1789993349.4884207,
+    "seen": 1789993728.8565178,
+    "ast_hash": "240115b0d515988de1cf19eb149c389a",
     "semantic_hash": ""
   },
   "src/Client/src/app/core/models/order-list.ts": {
@@ -26838,9 +26838,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/index.ts": {
-    "mtime": 1789988825.1196508,
-    "seen": 1789989477.2139444,
-    "ast_hash": "32bb6e407b3ca6ce24385066f8b9d272",
+    "mtime": 1789993310.7681985,
+    "seen": 1789993728.8565822,
+    "ast_hash": "86f404df355f1c7a439a2f32cc891a12",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/services/order-list-collection.feature.ts": {
@@ -26856,9 +26856,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/services/order-lists.http.ts": {
-    "mtime": 1789988779.26639,
-    "seen": 1789989477.21395,
-    "ast_hash": "a855c49aadf2c1e0b11f4ceb38381633",
+    "mtime": 1789993296.1441145,
+    "seen": 1789993728.8565884,
+    "ast_hash": "4d25342fdaee151880b0bd5bab74772b",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/services/order-list-detail.store.ts": {
@@ -26952,9 +26952,9 @@
     "semantic_hash": ""
   },
   "src/Web/Infrastructure/ResultEndpointExtensions.cs": {
-    "mtime": 1789831859.6348221,
-    "seen": 1789831882.156669,
-    "ast_hash": "9386fd40f4597d18a12c6bec53365814",
+    "mtime": 1789993197.409548,
+    "seen": 1789993728.8567734,
+    "ast_hash": "39d6ba2918eb2ce18a7d82632cf69e91",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/stock/ui/modals/stock-move-form.html": {
@@ -27144,9 +27144,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/modals/detail/order-list-detail-modal.ts": {
-    "mtime": 1789992142.7704449,
-    "seen": 1789992162.5445957,
-    "ast_hash": "088d907a9126db8582946333bc088018",
+    "mtime": 1789993369.7105367,
+    "seen": 1789993728.856594,
+    "ast_hash": "c62b93a48a433e26622874491101519d",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/modals/detail/form/order-list-detail-form.html": {
@@ -27156,9 +27156,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/modals/detail/order-list-detail-modal.html": {
-    "mtime": 1789988873.8739283,
-    "seen": 1789989477.214417,
-    "ast_hash": "73b82278a735b274f93e9e1b45ab17cb",
+    "mtime": 1789993369.7125368,
+    "seen": 1789993728.8570657,
+    "ast_hash": "6fe986600b0d7d2565fd86dbc4271215",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/modals/detail/form/lines/order-list-lines-container.ts": {
@@ -27234,9 +27234,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/table/table.ts": {
-    "mtime": 1789991858.953,
-    "seen": 1789992162.544598,
-    "ast_hash": "bddc2a2717633fde3c3b737e14953905",
+    "mtime": 1789993324.785279,
+    "seen": 1789993728.8565953,
+    "ast_hash": "4de5330210a292a7172ad197be29d070",
     "semantic_hash": ""
   },
   "src/Domain/Events/OrderList/OrderListReopenedEvent.cs": {
@@ -27252,9 +27252,75 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/table/table.html": {
-    "mtime": 1789991875.982,
-    "seen": 1789992162.5452733,
-    "ast_hash": "e008b702a060153a65bcd007b1402637",
+    "mtime": 1789999118.223,
+    "seen": 1789999255.6598222,
+    "ast_hash": "20ff60b6ee12cacb9088c927b020d106",
+    "semantic_hash": ""
+  },
+  "src/Application/Common/Interfaces/IOrderListExcelExporter.cs": {
+    "mtime": 1789993075.443848,
+    "seen": 1789993728.8561647,
+    "ast_hash": "6ae0045ae00a8dffb62edbf87bda6a15",
+    "semantic_hash": ""
+  },
+  "src/Application/Common/Models/FileExportResult.cs": {
+    "mtime": 1789993066.8737988,
+    "seen": 1789993728.856173,
+    "ast_hash": "28f4578fdf9aaf21c99d29c82cebe778",
+    "semantic_hash": ""
+  },
+  "src/Application/Features/OrderLists/Models/OrderListExportModel.cs": {
+    "mtime": 1789993075.443848,
+    "seen": 1789993728.8563373,
+    "ast_hash": "9f250d7e69456f5e9fd3d44fbd08b01d",
+    "semantic_hash": ""
+  },
+  "src/Application/Features/OrderLists/Queries/ExportOrderList/ExportOrderListHandler.cs": {
+    "mtime": 1789993118.2230935,
+    "seen": 1789993728.8563468,
+    "ast_hash": "f7a5e8d661fd514db90312cc34a79be9",
+    "semantic_hash": ""
+  },
+  "src/Application/Features/OrderLists/Queries/ExportOrderList/ExportOrderListQuery.cs": {
+    "mtime": 1789993092.8959482,
+    "seen": 1789993728.8563473,
+    "ast_hash": "16c3f5ee53ad0216922ace4e8086ac5a",
+    "semantic_hash": ""
+  },
+  "src/Application/Features/OrderLists/Queries/ExportOrderList/ExportOrderListQueryValidator.cs": {
+    "mtime": 1789993092.896948,
+    "seen": 1789993728.8563483,
+    "ast_hash": "31564afab0f29199ba8605780f8d865f",
+    "semantic_hash": ""
+  },
+  "src/Client/src/app/shared/order-lists/services/order-list-export.service.ts": {
+    "mtime": 1789993310.7651985,
+    "seen": 1789993728.8565855,
+    "ast_hash": "f6f4e25ee711d015eb576ee4ccf06d37",
+    "semantic_hash": ""
+  },
+  "src/Infrastructure/Export/OrderListExcelExporter.cs": {
+    "mtime": 1789999233.542004,
+    "seen": 1789999255.6594965,
+    "ast_hash": "5ebe5ae735a9fc66a5693640781eb98e",
+    "semantic_hash": ""
+  },
+  "tests/Application.FunctionalTests/Features/OrderLists/Queries/ExportOrderListQueryTests.cs": {
+    "mtime": 1789993563.307648,
+    "seen": 1789993728.8568027,
+    "ast_hash": "c28723ccbc2c8c3445cc6b72c50d93e2",
+    "semantic_hash": ""
+  },
+  "tests/Application.UnitTests/Features/OrderLists/Queries/ExportOrderList/ExportOrderListHandlerTests.cs": {
+    "mtime": 1789993478.5771616,
+    "seen": 1789993728.8568652,
+    "ast_hash": "a5bbcc20dae5451eb8148dbeda575503",
+    "semantic_hash": ""
+  },
+  "tests/Infrastructure.IntegrationTests/OrderListExcelExporterTests.cs": {
+    "mtime": 1789999233.5470042,
+    "seen": 1789999255.6596518,
+    "ast_hash": "fe02e6dbc0c18e23601c476e80ad8b5f",
     "semantic_hash": ""
   }
 }
