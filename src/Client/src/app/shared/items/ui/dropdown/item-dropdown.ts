@@ -1,24 +1,24 @@
-import {Component, computed, DestroyRef, effect, inject, input, linkedSignal, model, untracked} from '@angular/core';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {form, FormField, type FormValueControl} from '@angular/forms/signals';
+import { Component, computed, DestroyRef, effect, inject, input, linkedSignal, model, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { form, FormField, type FormValueControl } from '@angular/forms/signals';
 import {
+  ColumnFilter,
+  GetAllItemsRequest,
   type ItemDropdownOption,
   type ItemDropdownValue,
   type ItemDto,
-  GetAllItemsRequest,
-  PAGINATION_PAGE_SIZE,
-  ColumnFilter
+  PAGINATION_PAGE_SIZE
 } from '@ske/models';
-import {debounceTime, distinctUntilChanged, Subject} from 'rxjs';
-import {ItemDropdownStore} from '../../services/item-dropdown.store';
-import {NzOptionComponent, NzSelectComponent} from 'ng-zorro-antd/select';
-import {NzSpinComponent} from 'ng-zorro-antd/spin';
-import {NzSpaceCompactComponent} from 'ng-zorro-antd/space';
-import {NzButtonComponent} from 'ng-zorro-antd/button';
-import {NzIconDirective} from 'ng-zorro-antd/icon';
-import {isNil} from 'lodash-es';
-import {ItemDetailModal} from '../modals/detail/item-detail-modal';
-import {NzModalService} from 'ng-zorro-antd/modal';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { ItemDropdownStore } from '../../services/item-dropdown.store';
+import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
+import { NzSpinComponent } from 'ng-zorro-antd/spin';
+import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
+import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
+import { isNil } from 'lodash-es';
+import { ItemDetailModal } from '../modals/detail/item-detail-modal';
+import { NzModalService } from 'ng-zorro-antd/modal';
 
 @Component({
   selector: 'ske-item-dropdown',
@@ -55,12 +55,13 @@ import {NzModalService} from 'ng-zorro-antd/modal';
 
         @for (item of store.items(); track item.id) {
           <nz-option [nzValue]="item"
-                     [nzLabel]="item.name"/>
+                     [nzLabel]="item.name" />
         }
       </nz-select>
 
       @if (allowEdit()) {
-        <button nz-button nzSize="small"
+        <button nz-button
+                nzSize="small"
                 nzType="primary"
                 type="button"
                 (click)="onEdit(value())"
@@ -69,7 +70,8 @@ import {NzModalService} from 'ng-zorro-antd/modal';
         </button>
       }
       @if (allowCreate()) {
-        <button nz-button nzSize="small"
+        <button nz-button
+                nzSize="small"
                 nzType="primary"
                 type="button"
                 (click)="onAdd()">
@@ -105,7 +107,7 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
 
   private readonly _formModel = linkedSignal({
     source: () => this.value(),
-    computation: (value) => (<ItemDropdownFormModel>{item: value})
+    computation: (value) => (<ItemDropdownFormModel>{ item: value })
   });
 
   public readonly itemForm = form(this._formModel);
@@ -123,7 +125,7 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
       takeUntilDestroyed()
     )
     .subscribe((searchTerm) => {
-      this.store.load(this.buildFilter({searchTerm}));
+      this.store.load(this.buildFilter({ searchTerm }));
     });
 
   private readonly _categoryChangeEffectRef = effect(() => {
@@ -209,7 +211,8 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
         prefill: item ? null : this.buildCreatePrefill()
       },
       nzCentered: true,
-      nzMaskClosable: false
+      nzMaskClosable: false,
+      nzWrapClassName: 'modal-w-50'
     });
 
     modalRef.afterClose.pipe(
@@ -240,7 +243,7 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
     const categoryId = this.categoryId();
 
     return {
-      ...(isNil(categoryId) ? {} : {categoryId}),
+      ...(isNil(categoryId) ? {} : { categoryId }),
       ...this.createPrefill()
     };
   }

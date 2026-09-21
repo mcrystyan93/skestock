@@ -81,6 +81,25 @@ public static class OrderListErrors
         }
     }
 
+    // Only submitted order lists can be exported to Excel.
+    public sealed class OrderListNotExportable : Error
+    {
+        public const string ErrorCode = "order_lists.not_exportable";
+
+        public OrderListNotExportable(Guid orderListId, string status) : base(
+            $"Order list '{orderListId}' cannot be exported while in status '{status}'. Only submitted order lists can be exported.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
+            Metadata.Add(ErrorMetadataKeys.Title, "Order list not exportable");
+            Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
+            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object>
+            {
+                ["orderListId"] = orderListId,
+                ["status"] = status
+            });
+        }
+    }
+
     public sealed class OrderListNotReopenable : Error
     {
         public const string ErrorCode = "order_lists.not_reopenable";

@@ -1,5 +1,5 @@
-import {BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition} from './pagination';
-import {PAGINATION_PAGE_SIZE} from './category';
+import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
+import { PAGINATION_PAGE_SIZE } from './category';
 
 /** Mirrors src/Application/Features/OrderLists/Models/OrderListLineDto.cs. */
 export type OrderListLineDto = {
@@ -100,7 +100,8 @@ export type OrderListTableColumn =
   | 'submittedAt'
   | 'createdByName'
   | 'createdDate'
-  | 'lastModifiedDate';
+  | 'lastModifiedDate'
+  | 'actions';
 
 export const ORDER_LIST_TABLE_COLUMNS: TableColumnDefinition<OrderListTableColumn> = {
   className: {
@@ -142,6 +143,11 @@ export const ORDER_LIST_TABLE_COLUMNS: TableColumnDefinition<OrderListTableColum
     label: 'Data modificare',
     value: 'lastModifiedDate',
     fieldType: 'date'
+  },
+  actions: {
+    label: 'Acțiuni',
+    value: 'actions',
+    fieldType: 'string'
   }
 };
 

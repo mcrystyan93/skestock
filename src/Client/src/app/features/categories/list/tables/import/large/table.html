@@ -14,13 +14,9 @@
           [nzScroll]="{x: dimensions.width, y: dimensions.height}">
   <thead>
   <tr>
-    <th nzWidth="250px">{{ columns.files.label }}</th>
+    <th>{{ columns.files.label }}</th>
     <th nzWidth="170px">{{ columns.status.label }}</th>
-    <th nzWidth="200px">{{ columns.uploadedByName.label }}</th>
     <th nzWidth="170px">{{ columns.uploadedAt.label }}</th>
-    <th nzWidth="170px">{{ columns.processedAt.label }}</th>
-    <th nzWidth="240px">{{ columns.errorMessage.label }}</th>
-    <th nzWidth="170px">{{ columns.createdDate.label }}</th>
     <th nzRight
         nzWidth="280px">
       Actiuni
@@ -32,30 +28,49 @@
                let-categoryImport>
     <tr (click)="review.emit(categoryImport)"
         class="cursor-pointer">
-      <td>{{ fileNames(categoryImport) }}</td>
       <td>
-        <nz-tag [nzColor]="statusColor(categoryImport.status)">
-          {{ statusLabel(categoryImport.status) }}
-        </nz-tag>
+        <strong class="flex gap-1 items-center">
+          <nz-icon nzType="icons:file-pdf"
+                   class="text-2xl text-red-400!"></nz-icon>
+          {{ fileNames(categoryImport) }}
+        </strong>
       </td>
-      <td>{{ categoryImport.uploadedByName || '-' }}</td>
-      <td>{{ categoryImport.uploadedAt | date:'medium' }}</td>
-      <td>{{ categoryImport.processedAt | date:'medium' }}</td>
-      <td>{{ categoryImport.errorMessage || '-' }}</td>
-      <td>{{ categoryImport.createdDate | date:'medium' }}</td>
+      <td>
+        <nz-badge [nzStatus]="statusColor(categoryImport.status)"
+                  [nzText]="statusLabel(categoryImport.status)" />
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0!">{{ categoryImport.processedAt | timeAgo }}
+        </div>
+      </td>
+      <td>
+        <div>{{ categoryImport.uploadedAt | timeAgo }}</div>
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0!">{{ categoryImport.uploadedByName || '-' }}
+        </div>
+      </td>
       <td nzRight>
-        <button type="button"
-                skeStopClick
-                nz-button
-                nzSize="small"
-                nzType="link"
-                nz-dropdown
-                [nzDropdownMenu]="menu"
-                title="Descarca fisierele"
-                [attr.aria-label]="'Actiuni pentru importul ' + categoryImport.id">
-          <nz-icon nzType="icons:file-arrow-down" />
-          Descarca
-        </button>
+        <div class="flex items-center gap-2">
+          <button type="button"
+                  nz-button
+                  nzType="primary"
+                  (click)="review.emit(categoryImport)"
+                  skeStopClick>
+            Revizuieste
+          </button>
+          <button type="button"
+                  skeStopClick
+                  nz-button
+                  nzType="text"
+                  nz-dropdown
+                  [nzDropdownMenu]="menu"
+                  title="Descarca fisierele"
+                  [attr.aria-label]="'Actiuni pentru importul ' + categoryImport.id">
+            <nz-icon nzType="icons:download"
+                     class="text-lg!" />
+          </button>
+        </div>
         <nz-dropdown-menu #menu="nzDropdownMenu">
           <ul nz-menu>
             @for (file of categoryImport.files; track file.fileMetadataId) {

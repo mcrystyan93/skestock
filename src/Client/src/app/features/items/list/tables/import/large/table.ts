@@ -15,15 +15,16 @@ import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/drop
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzTagComponent } from 'ng-zorro-antd/tag';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { StopClick } from '@ske/shared/directives';
+import { NzBadgeComponent } from 'ng-zorro-antd/badge';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+import { TimeAgoPipe } from '@ske/shared/pipes';
 
 @Component({
   imports: [
     NzTableModule,
     DatePipe,
-    NzTagComponent,
     NzButtonComponent,
     NzDropdownDirective,
     NzDropdownMenuComponent,
@@ -32,7 +33,10 @@ import { StopClick } from '@ske/shared/directives';
     NzMenuItemComponent,
     NzSpaceComponent,
     NzSpaceItemDirective,
-    StopClick
+    StopClick,
+    NzBadgeComponent,
+    NzTypographyComponent,
+    TimeAgoPipe
   ],
   selector: 'ske-item-import-table',
   templateUrl: './table.html',

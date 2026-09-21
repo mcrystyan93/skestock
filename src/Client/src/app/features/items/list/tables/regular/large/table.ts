@@ -2,13 +2,12 @@ import { Component, input, output } from '@angular/core';
 import { BaseTableWithFilter } from '@ske/shared/tables';
 import { GetAllItemsRequest, ITEM_TABLE_COLUMNS, ItemDto } from '@ske/models';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { DatePipe } from '@angular/common';
-import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { NzTagComponent } from 'ng-zorro-antd/tag';
+import { TimeAgoPipe } from '@ske/shared/pipes';
 
 @Component({
-  imports: [DatePipe, NzButtonComponent, NzIconDirective, NzTagComponent, NzTableModule],
+  imports: [NzTableModule, NzTypographyComponent, NzIconDirective, TimeAgoPipe],
   selector: 'ske-item-table',
   styles: ``,
   templateUrl: './table.html',

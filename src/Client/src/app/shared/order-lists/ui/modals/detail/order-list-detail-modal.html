@@ -19,8 +19,20 @@
 
 <div *nzModalFooter>
   <nz-space>
+
+    @if (canExport()) {
+      <button nz-button
+              *nzSpaceItem
+              nzType="default"
+              type="button"
+              (click)="download()"
+              [nzLoading]="downloading()"
+              [disabled]="downloading()">
+        <nz-icon nzType="icons:file-arrow-down"></nz-icon>
+        Descarcă Excel
+      </button>
+    }
     <button nz-button
-            nzSize="small"
             *nzSpaceItem
             nzType="default"
             type="button"
@@ -31,10 +43,8 @@
     </button>
 
     @if (editable()) {
-      <nz-space-compact *nzSpaceItem
-                        nzSize="small">
+      <nz-space-compact *nzSpaceItem>
         <button nz-button
-                nzSize="small"
                 nzType="primary"
                 type="button"
                 (click)="save()"
@@ -43,7 +53,6 @@
           Salveaza si inchide
         </button>
         <button nz-button
-                nzSize="small"
                 nzType="primary"
                 type="button"
                 nz-dropdown

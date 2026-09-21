@@ -2,18 +2,24 @@ import { Component, input, output } from '@angular/core';
 import { BaseTableWithFilter } from '@ske/shared/tables';
 import { CATEGORY_TABLE_COLUMNS, CategoryDto, GetAllCategoriesRequest } from '@ske/models';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { DatePipe } from '@angular/common';
+import { NzAvatarComponent } from 'ng-zorro-antd/avatar';
+import { NzTagComponent } from 'ng-zorro-antd/tag';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { NzAvatarComponent } from 'ng-zorro-antd/avatar';
+import { StopClick } from '@ske/shared/directives';
+import { TimeAgoPipe } from '@ske/shared/pipes';
 
 @Component({
   imports: [
     NzTableModule,
-    DatePipe,
+    NzAvatarComponent,
+    NzTagComponent,
+    NzTypographyComponent,
     NzButtonComponent,
     NzIconDirective,
-    NzAvatarComponent
+    StopClick,
+    TimeAgoPipe
   ],
   selector: 'ske-category-table',
   styles: ``,
@@ -36,7 +42,7 @@ export class Table extends BaseTableWithFilter<CategoryDto, GetAllCategoriesRequ
     createdByName: { width: '180px' },
     lastModifiedDate: { width: '160px' },
     lastModifiedByName: { width: '180px' },
-    actions: { width: '130px' }
+    actions: { width: '70px' }
   } as const;
 
   constructor() {

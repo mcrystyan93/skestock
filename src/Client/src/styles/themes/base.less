@@ -4,6 +4,8 @@
 @border-radius-lg: 4px;
 //
 @card-padding-base: 12px;
+@table-border-radius-base: 0;
+@table-header-bg: @layout-body-background;
 
 @modal-widths: {
   10: 10%;
@@ -39,8 +41,12 @@ each(@modal-widths, {
       }
     }
   }
-});
 
+  .modal-w-@{key} .@{ant-prefix}-modal {
+    width: @value !important;
+    max-width: @value !important;
+  }
+});
 
 
 nz-tabs {
@@ -57,4 +63,17 @@ nz-tabs {
   .ant-drawer-content {
     background-color: @layout-sider-background;
   }
+}
+
+
+.ant-layout-sider {
+  border-right: 1px solid @border-color-split;
+
+  .ant-menu {
+    border-right-color: transparent !important;
+  }
+}
+
+.ant-page-header{
+  border-bottom: 1px solid @border-color-split;
 }

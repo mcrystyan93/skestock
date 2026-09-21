@@ -70,7 +70,7 @@ export const ITEM_TABLE_COLUMNS: TableColumnDefinition<ItemTableColumn> = {
     fieldType: 'string'
   },
   name: {
-    label: 'Nume',
+    label: 'Articol',
     value: 'name',
     fieldType: 'string'
   },
@@ -90,7 +90,7 @@ export const ITEM_TABLE_COLUMNS: TableColumnDefinition<ItemTableColumn> = {
     fieldType: 'boolean'
   },
   shelfLifeDays: {
-    label: 'Valabilitate (zile)',
+    label: 'Valabilitate',
     value: 'shelfLifeDays',
     fieldType: 'number'
   },

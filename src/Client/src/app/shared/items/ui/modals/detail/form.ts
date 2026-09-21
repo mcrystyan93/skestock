@@ -1,11 +1,15 @@
 import { Component, input, linkedSignal } from '@angular/core';
 import { CategoryDropdownValue, ItemDto } from '@ske/models';
-import { form, FormField, applyWhen, hidden, maxLength, min, required, submit } from '@angular/forms/signals';
+import { applyWhen, form, FormField, hidden, maxLength, min, required, submit } from '@angular/forms/signals';
 import { NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
 import { SkeletonInputLoaderDirective } from '@ske/shared/loader';
-import { NzInputDirective, NzInputWrapperComponent, NzTextareaCountComponent } from 'ng-zorro-antd/input';
+import {
+  NzInputAddonAfterDirective,
+  NzInputDirective,
+  NzInputWrapperComponent,
+  NzTextareaCountComponent
+} from 'ng-zorro-antd/input';
 import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
-import { NzCheckboxComponent } from 'ng-zorro-antd/checkbox';
 import { CategoryDropdown } from '@ske/shared/categories';
 import { NzSwitchComponent } from 'ng-zorro-antd/switch';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
@@ -25,7 +29,8 @@ import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
     NzSwitchComponent,
     NzColDirective,
     NzRowDirective,
-    NzTextareaCountComponent
+    NzTextareaCountComponent,
+    NzInputAddonAfterDirective
   ],
   selector: 'ske-item-form',
   styles: ``,

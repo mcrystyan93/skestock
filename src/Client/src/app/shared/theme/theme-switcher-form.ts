@@ -9,17 +9,14 @@ import { Theme } from '@ske/models';
   selector: 'app-theme-switcher-form',
   imports: [NzSwitchComponent, FormField, NzIconDirective],
   template: `
-    <nz-switch
-      [formField]="themeForm.darkMode"
-      [nzCheckedChildren]="darkMode"
-      [nzUnCheckedChildren]="lightMode" />
-    <ng-template #darkMode>
-      <nz-icon nzType="icons:moon"></nz-icon>
-    </ng-template>
-    <ng-template #lightMode>
-      <nz-icon nzType="icons:sun-bright"></nz-icon>
-    </ng-template>
-  `
+    <nz-icon nzType="icons:sun-bright"></nz-icon>
+    <nz-switch [formField]="themeForm.darkMode"
+               nzSize="small" />
+    <nz-icon nzType="icons:moon"></nz-icon>
+  `,
+  host:{
+    class: 'flex gap-1'
+  }
 })
 export class ThemeSwitcherFormComponent {
   public readonly currentTheme = input.required<Theme>();
@@ -36,7 +33,7 @@ export class ThemeSwitcherFormComponent {
     effect(() => {
       const isDarkMode = this.themeForm.darkMode().value();
 
-      untracked(() => this.onThemeChange.emit(isDarkMode ? Theme.dark : Theme.compact));
+      untracked(() => this.onThemeChange.emit(isDarkMode ? Theme.dark : Theme.default));
     });
   }
 }

@@ -1,32 +1,22 @@
-import {
-  Component,
-  computed,
-  DestroyRef,
-  effect,
-  inject,
-  input,
-  linkedSignal,
-  model,
-  untracked,
-} from '@angular/core';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {disabled, form, FormField, type FormValueControl} from '@angular/forms/signals';
+import { Component, computed, DestroyRef, effect, inject, input, linkedSignal, model, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { disabled, form, FormField, type FormValueControl } from '@angular/forms/signals';
 import {
   type CategoryDropdownValue,
   type CategoryDto,
   GetAllCategoriesRequest,
-  PAGINATION_PAGE_SIZE,
+  PAGINATION_PAGE_SIZE
 } from '@ske/models';
-import {debounceTime, distinctUntilChanged, Subject} from 'rxjs';
-import {CategoryDropdownStore} from '../../services/category-dropdown.store';
-import {NzOptionComponent, NzSelectComponent} from 'ng-zorro-antd/select';
-import {NzSpinComponent} from 'ng-zorro-antd/spin';
-import {NzSpaceCompactComponent} from 'ng-zorro-antd/space';
-import {NzButtonComponent} from 'ng-zorro-antd/button';
-import {NzIconDirective} from 'ng-zorro-antd/icon';
-import {isNil} from 'lodash-es';
-import {CategoryDetailModal} from '../modals/detail/category-detail-modal';
-import {NzModalService} from 'ng-zorro-antd/modal';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { CategoryDropdownStore } from '../../services/category-dropdown.store';
+import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
+import { NzSpinComponent } from 'ng-zorro-antd/spin';
+import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
+import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
+import { isNil } from 'lodash-es';
+import { CategoryDetailModal } from '../modals/detail/category-detail-modal';
+import { NzModalService } from 'ng-zorro-antd/modal';
 
 @Component({
   selector: 'ske-category-dropdown',
@@ -69,8 +59,7 @@ import {NzModalService} from 'ng-zorro-antd/modal';
       </nz-select>
       @if (allowEdit() && value()?.id && !categoryForm().disabled()) {
         <button nz-button
-                nzSize="small"
-                nzType="primary"
+                nzType="default"
                 type="button"
                 (click)="onEdit(value())">
           <nz-icon nzType="icons:pencil"></nz-icon>
@@ -78,8 +67,7 @@ import {NzModalService} from 'ng-zorro-antd/modal';
       }
       @if (allowCreate() && !categoryForm().disabled()) {
         <button nz-button
-                nzSize="small"
-                nzType="primary"
+                nzType="default"
                 type="button"
                 (click)="onAdd()">
           <nz-icon nzType="icons:plus"></nz-icon>

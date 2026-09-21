@@ -1,6 +1,6 @@
 import { Component, DestroyRef, effect, inject, input, untracked } from '@angular/core';
 import { ColumnFilter, OrderListListItemDto, OrderListStatusChange } from '@ske/models';
-import { OrderListDetailModal, OrderListListStore, Table } from '@ske/shared/order-lists';
+import { OrderListDetailModal, OrderListExportService, OrderListListStore, Table } from '@ske/shared/order-lists';
 import { ErrorAlert } from '@ske/shared/errors';
 import { isNil } from 'lodash-es';
 import { FilterContainer } from './filter/filter-container';
@@ -28,10 +28,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
                             [hasNextPage]="store.hasNextPage()"
                             [isLoadingMore]="store.isLoadingMore()"
                             [statusChangingId]="store.statusChangingId()"
+                            [downloadingIds]="exportService.downloadingIds()"
                             (onFilterChange)="store.load($event)"
                             (onLoadMore)="store.loadMore()"
                             (onView)="openOrderList($event)"
-                            (onStatusChange)="changeStatus($event)" />
+                            (onStatusChange)="changeStatus($event)"
+                            (onDownload)="downloadExcel($event)" />
     </div>
   `,
   host: {
@@ -42,6 +44,7 @@ export class OrderListsTab {
   public readonly classId = input.required<string | null>();
 
   public readonly store = inject(OrderListListStore);
+  public readonly exportService = inject(OrderListExportService);
 
   private readonly _nzModalService = inject(NzModalService);
   private readonly _nzMessageService = inject(NzMessageService);
@@ -82,8 +85,7 @@ export class OrderListsTab {
       .subscribe(() => this.store.reload());
   }
 
-  public openOrderList(orderList: OrderListListItemDto) {
-    const modalRef = this._nzModalService.create({
+  public openOrderList(orderList: OrderListListItemDto) {    const modalRef = this._nzModalService.create({
       nzContent: OrderListDetailModal,
       nzData: {
         id: orderList.id,
@@ -119,6 +121,11 @@ export class OrderListsTab {
       nzCancelText: 'Renunță',
       nzOnOk: () => this.store.changeStatus(statusChange)
     });
+  }
+
+
+  public downloadExcel(orderList: OrderListListItemDto) {
+    this.exportService.download(orderList.id);
   }
 
 

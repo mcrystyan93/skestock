@@ -14,7 +14,6 @@
                    nz-input
                    id="searchTerm"
                    placeholder="Cautați..."
-                   nzVariant="borderless"
                    [formField]="itemListFilterForm.searchTerm" />
           </nz-input-wrapper>
         </nz-form-control>
@@ -31,25 +30,13 @@
       </nz-form-item>
     </nz-col>
     <nz-col nzFlex="none">
-      <nz-space class="ml-3">
-        <button type="submit"
-                *nzSpaceItem
-                nz-button nzSize="small"
-                nzType="primary"
-                [nzLoading]="loading()">
-          <nz-icon nzType="icons:magnifying-glass"></nz-icon>
-          Cauta
-        </button>
-        <button *nzSpaceItem
-                nz-button nzSize="small"
-                type="button"
-                nzType="default"
-                [nzLoading]="loading()"
-                (click)="clear()">
-          <nz-icon nzType="icons:xmark"></nz-icon>
-          Reseteaza
-        </button>
-      </nz-space>
+      <button nz-button
+              type="button"
+              nzType="default"
+              [nzLoading]="loading()"
+              (click)="clear()">
+        Reseteaza
+      </button>
     </nz-col>
   </nz-row>
 

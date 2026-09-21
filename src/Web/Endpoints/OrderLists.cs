@@ -7,6 +7,7 @@ using skestock.Application.Features.OrderLists.Commands.ReopenOrderList;
 using skestock.Application.Features.OrderLists.Commands.SubmitOrderList;
 using skestock.Application.Features.OrderLists.Commands.UpdateOrderList;
 using skestock.Application.Features.OrderLists.Models;
+using skestock.Application.Features.OrderLists.Queries.ExportOrderList;
 using skestock.Application.Features.OrderLists.Queries.GetAllOrderLists;
 using skestock.Application.Features.OrderLists.Queries.GetOrderListById;
 
@@ -18,6 +19,7 @@ public class OrderLists : IEndpointGroup
     {
         groupBuilder.MapPost(GetAllOrderLists, "get-all");
         groupBuilder.MapGet(GetOrderListById, "{id}");
+        groupBuilder.MapGet(ExportOrderList, "{id}/export");
         groupBuilder.MapPost(CreateOrderList, "");
         groupBuilder.MapPut(UpdateOrderList, "{id}");
         groupBuilder.MapPost(SubmitOrderList, "{id}/submit");
@@ -53,6 +55,16 @@ public class OrderLists : IEndpointGroup
         var result = await sender.Send(new GetOrderListByIdQuery { Id = id }, cancellationToken);
 
         return result.ToOk();
+    }
+
+    [EndpointSummary("Export an order list to Excel")]
+    [EndpointDescription("Generates an .xlsx export of a submitted order list, grouped by category.")]
+    public static async Task<Results<FileContentHttpResult, ProblemHttpResult>> ExportOrderList(
+        ISender sender, Guid id, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new ExportOrderListQuery { Id = id }, cancellationToken);
+
+        return result.ToFile();
     }
 
     [EndpointSummary("Create a new order list")]

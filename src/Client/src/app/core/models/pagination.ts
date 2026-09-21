@@ -60,28 +60,28 @@ export type OperatorItem = {
 };
 export const OPERATORS_BY_TYPE: Record<FieldType, OperatorItem[]> = {
   string: [
-    {label: 'equals', value: 'equals'},
-    {label: 'notEquals', value: 'notEquals'},
-    {label: 'contains', value: 'contains'},
+    { label: 'equals', value: 'equals' },
+    { label: 'notEquals', value: 'notEquals' },
+    { label: 'contains', value: 'contains' }
   ],
   number: [
-    {label: 'equals', value: 'equals'},
-    {label: 'greaterThan', value: 'greaterThan'},
-    {label: 'lessThan', value: 'lessThan'},
-    {label: 'between', value: 'between'},
+    { label: 'equals', value: 'equals' },
+    { label: 'greaterThan', value: 'greaterThan' },
+    { label: 'lessThan', value: 'lessThan' },
+    { label: 'between', value: 'between' }
   ],
   date: [
-    {label: 'equals', value: 'equals'},
-    {label: 'before', value: 'lessThan'},
-    {label: 'after', value: 'greaterThan'},
-    {label: 'between', value: 'between'},
+    { label: 'equals', value: 'equals' },
+    { label: 'before', value: 'lessThan' },
+    { label: 'after', value: 'greaterThan' },
+    { label: 'between', value: 'between' }
   ],
   select: [
-    {label: 'equals', value: 'equals'},
-    {label: 'notEquals', value: 'notEquals'},
+    { label: 'equals', value: 'equals' },
+    { label: 'notEquals', value: 'notEquals' }
   ],
   boolean: [
-    {label: 'equals', value: 'equals'}
+    { label: 'equals', value: 'equals' }
   ]
 };
 
@@ -113,7 +113,7 @@ export type PaginatedResponse<T> = PaginatedResponseData & {
 
 export const prioritizeSort = (
   currentSort: Array<PaginationSort>,
-  newSort: Array<PaginationSort>,
+  newSort: Array<PaginationSort>
 ) => {
   for (const item of currentSort) {
     const existing = find(newSort, (i) => i.key === item.key);
@@ -147,9 +147,19 @@ export function getDropdownFilterValue(
     id: String(selectedFilter.value),
     name: selectedFilter.displayValue ?? ''
   };
+};
+
+export function getFilterValue<T>(filters: ColumnFilter[], field: string): T | null {
+  const selectedFilter = filters.find(filter =>
+    filter.field === field && filter.operator === 'equals');
+
+  if (isNil(selectedFilter?.value))
+    return null;
+
+  return selectedFilter.value as T;
 }
 
-export function buildEqualsFilter(
+export function buildEqualsFilterForDropdown(
   field: string,
   value: { id?: string; name?: string } | null
 ): ColumnFilter | null {
@@ -162,5 +172,21 @@ export function buildEqualsFilter(
     value: value.id,
     fieldType: 'select',
     displayValue: value.name
+  };
+}
+
+export function buildEqualsFilterForValue(
+  field: string,
+  value: any
+): ColumnFilter | null {
+  if (isNil(value))
+    return null;
+
+  return {
+    field,
+    operator: 'equals',
+    value,
+    fieldType: 'string',
+    displayValue: String(value)
   };
 }

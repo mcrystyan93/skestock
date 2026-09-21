@@ -5,6 +5,7 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
 import { NzSpaceCompactComponent, NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { orderListApiEvents, OrderListDetailState } from '../../../services/order-list-detail.store';
+import { OrderListExportService } from '../../../services/order-list-export.service';
 import {
   CreateOrderListRequest,
   ORDER_LIST_STATUS_LABELS,
@@ -52,6 +53,7 @@ export class OrderListDetailModal {
   public readonly modalData = signal<OrderListDetailModalData>(inject(NZ_MODAL_DATA));
 
   public readonly store = inject(OrderListDetailState);
+  public readonly exportService = inject(OrderListExportService);
 
   private readonly _nzModalRef = inject(NzModalRef);
   private readonly _formComponent = viewChild(OrderListDetailForm);
@@ -74,6 +76,15 @@ export class OrderListDetailModal {
   public readonly statusLabel = computed(() =>
     ORDER_LIST_STATUS_LABELS[this.store.orderList().status ?? 'Draft']
   );
+
+  public readonly canExport = computed(() =>
+    this.store.orderList().status === 'Submitted' && !isNil(this.store.orderList().id)
+  );
+
+  public readonly downloading = computed(() => {
+    const id = this.store.orderList().id;
+    return !isNil(id) && this.exportService.isDownloading(id);
+  });
 
   private initialLoad = false;
 
@@ -121,6 +132,13 @@ export class OrderListDetailModal {
     }
 
     this._nzModalRef.close();
+  }
+
+  public download() {
+    const id = this.store.orderList().id;
+
+    if (!isNil(id))
+      this.exportService.download(id);
   }
 
   public async save(shouldClose: boolean = true) {

@@ -1,28 +1,23 @@
 @let dimensions = tableDimensions();
 
-<nz-table
-  #table
-  nzTableLayout="fixed"
-  [nzData]="itemsVirtualData()"
-  [nzVirtualItemSize]="virtualItemSize()"
-  [nzVirtualMinBufferPx]="virtualMinBufferPx()"
-  [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
-  [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
-  [nzFrontPagination]="false"
-  [nzShowPagination]="false"
-  [nzLoading]="loading()"
-  nzSize="small"
-  [nzScroll]="{ x: dimensions.width, y: dimensions.height }"
+<nz-table #table
+          nzTableLayout="fixed"
+          [nzData]="itemsVirtualData()"
+          [nzVirtualItemSize]="virtualItemSize()"
+          [nzVirtualMinBufferPx]="virtualMinBufferPx()"
+          [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
+          [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          [nzLoading]="loading()"
+          nzSize="small"
+          [nzScroll]="{ x: dimensions.width, y: dimensions.height }"
 >
   <thead>
   <tr>
-    <th nzWidth="250px">{{ columns.files.label }}</th>
+    <th>{{ columns.files.label }}</th>
     <th nzWidth="170px">{{ columns.status.label }}</th>
-    <th nzWidth="200px">{{ columns.uploadedByName.label }}</th>
-    <th nzWidth="170px">{{ columns.uploadedAt.label }}</th>
-    <th nzWidth="170px">{{ columns.processedAt.label }}</th>
-    <th nzWidth="240px">{{ columns.errorMessage.label }}</th>
-    <th nzWidth="170px">{{ columns.createdDate.label }}</th>
+    <th nzWidth="200px">{{ columns.uploadedAt.label }}</th>
     <th nzRight
         nzWidth="280px">Actiuni
     </th>
@@ -33,30 +28,46 @@
                let-itemImport>
     <tr (click)="review.emit(itemImport)"
         class="cursor-pointer">
-      <td>{{ fileNames(itemImport) }}</td>
       <td>
-        <nz-tag [nzColor]="statusColor(itemImport.status)">{{
-            statusLabel(itemImport.status)
-          }}
-        </nz-tag>
+        <strong class="flex gap-1 items-center">
+          <nz-icon nzType="icons:file-pdf"
+                   class="text-2xl text-red-400!"></nz-icon>
+          {{ fileNames(itemImport) }}
+        </strong>
       </td>
-      <td>{{ itemImport.uploadedByName || '-' }}</td>
-      <td>{{ itemImport.uploadedAt | date: 'medium' }}</td>
-      <td>{{ itemImport.processedAt | date: 'medium' }}</td>
-      <td>{{ itemImport.errorMessage || '-' }}</td>
-      <td>{{ itemImport.createdDate | date: 'medium' }}</td>
+      <td>
+        <nz-badge [nzStatus]="statusColor(itemImport.status)"
+                  [nzText]="statusLabel(itemImport.status)" />
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0!">{{ itemImport.processedAt | timeAgo }}
+        </div>
+      </td>
+      <td>
+        <div>{{ itemImport.uploadedAt | timeAgo }}</div>
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0!">{{ itemImport.uploadedByName || '-' }}
+        </div>
+      </td>
       <td nzRight>
+        <button type="button"
+                nz-button
+                nzType="primary"
+                (click)="review.emit(itemImport)"
+                skeStopClick>
+          Revizuieste
+        </button>
         <button skeStopClick
                 type="button"
                 nz-button
-                nzSize="small"
-                nzType="link"
+                nzType="text"
                 nz-dropdown
                 [nzDropdownMenu]="menu"
                 title="Descarca fisierele"
                 [attr.aria-label]="'Actiuni pentru importul ' + itemImport.id">
-          <nz-icon nzType="icons:file-arrow-down"></nz-icon>
-          Descarca
+          <nz-icon nzType="icons:download"
+                   class="text-lg!" />
         </button>
         <nz-dropdown-menu #menu="nzDropdownMenu">
           <ul nz-menu>

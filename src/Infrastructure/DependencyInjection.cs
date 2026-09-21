@@ -19,6 +19,7 @@ using skestock.Infrastructure.AI;
 using skestock.Infrastructure.AI.Schemas;
 using skestock.Infrastructure.Data;
 using skestock.Infrastructure.Data.Interceptors;
+using skestock.Infrastructure.Export;
 using skestock.Infrastructure.Identity;
 using skestock.Infrastructure.Queues;
 using skestock.Infrastructure.Storage;
@@ -110,6 +111,8 @@ public static class DependencyInjection
                 options.Configuration.ChannelPrefix = RedisChannel.Literal("skestock:signalr:");
             });
         builder.Services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
+
+        builder.Services.AddSingleton<IOrderListExcelExporter, OrderListExcelExporter>();
     }
 
     private static void AddOpenAiExtraction(IHostApplicationBuilder builder)

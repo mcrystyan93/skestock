@@ -8,6 +8,8 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
+import { NzBreadCrumbComponent, NzBreadCrumbItemComponent } from 'ng-zorro-antd/breadcrumb';
+import { ThemeSwitcher } from '@ske/shared/theme';
 
 @Component({
   imports: [
@@ -19,7 +21,10 @@ import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
     NzTabsComponent,
     NzTabComponent,
     NzSpaceItemDirective,
-    NzSpaceComponent
+    NzSpaceComponent,
+    NzBreadCrumbComponent,
+    NzBreadCrumbItemComponent,
+    ThemeSwitcher
   ],
   selector: 'ske-item-header',
   styles: ``,

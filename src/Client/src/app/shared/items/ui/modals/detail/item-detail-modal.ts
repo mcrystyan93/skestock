@@ -14,6 +14,7 @@ import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/drop
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { ErrorAlert } from '@ske/shared/errors';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 
 @Component({
   imports: [
@@ -29,7 +30,8 @@ import { ErrorAlert } from '@ske/shared/errors';
     NzMenuItemComponent,
     NzIconDirective,
     NzDropdownDirective,
-    ErrorAlert
+    ErrorAlert,
+    NzTypographyComponent
   ],
   selector: 'ske-item-detail-modal',
   styles: ``,

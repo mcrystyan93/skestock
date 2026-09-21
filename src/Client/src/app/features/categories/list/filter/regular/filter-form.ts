@@ -1,15 +1,13 @@
-import { Component, effect, input, linkedSignal, output } from '@angular/core';
+import { Component, effect, input, linkedSignal, output, untracked } from '@angular/core';
 import { GetAllCategoriesRequest } from '@ske/models';
-import { form, FormField, submit } from '@angular/forms/signals';
-import { isNil } from 'lodash-es';
+import { debounce, form, FormField, submit } from '@angular/forms/signals';
+import { isEqual, isNil } from 'lodash-es';
 import { FormsModule } from '@angular/forms';
 import { NzFormDirective } from 'ng-zorro-antd/form';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
-import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
+import { NzInputDirective, NzInputPrefixDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { CategoryDropdown } from '@ske/shared/categories';
 
 @Component({
   imports: [
@@ -21,10 +19,8 @@ import { CategoryDropdown } from '@ske/shared/categories';
     NzIconDirective,
     NzInputDirective,
     FormField,
-    NzSpaceComponent,
-    NzSpaceItemDirective,
     NzButtonComponent,
-    CategoryDropdown
+    NzInputPrefixDirective
   ],
   selector: 'ske-category-filter-form',
   styles: ``,
@@ -36,6 +32,7 @@ export class FilterForm {
 
   public readonly onFilterChange = output<GetAllCategoriesRequest>();
   private initialFilterEmitted = false;
+  private _initialFormChangeHandled = false;
 
   private readonly _formModel = linkedSignal({
     source: () => this.filter(),
@@ -44,7 +41,9 @@ export class FilterForm {
     })
   });
 
-  public readonly categoryListFilterForm = form(this._formModel);
+  public readonly categoryListFilterForm = form(this._formModel, (schemaPath) => {
+    debounce(schemaPath.searchTerm, 300);
+  });
 
   private readonly _initialFilterEffectRef = effect(() => {
     if (this.initialFilterEmitted)
@@ -55,6 +54,23 @@ export class FilterForm {
     this.onFilterChange.emit(this.buildFilterCriteria());
 
     this.initialFilterEmitted = true;
+  });
+
+  private readonly _formEffectChange = effect(() => {
+    this.categoryListFilterForm().value();
+
+    if (!this._initialFormChangeHandled) {
+      this._initialFormChangeHandled = true;
+      return;
+    }
+
+    const currentFilter = untracked(() => this.filter());
+    const nextFilter = untracked(() => this.buildFilterCriteria());
+
+    if (isEqual(currentFilter, nextFilter))
+      return;
+
+    untracked(() => this.onSubmit());
   });
 
   private buildFilterCriteria(): GetAllCategoriesRequest {
