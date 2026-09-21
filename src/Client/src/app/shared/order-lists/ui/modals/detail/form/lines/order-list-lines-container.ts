@@ -1,8 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { FieldTree } from '@angular/forms/signals';
-import { OrderListLineDto } from '@ske/models';
 import { NzListComponent, NzListEmptyComponent } from 'ng-zorro-antd/list';
-import { OrderListLine } from './order-list-line';
+import { OrderListLine, type OrderListLineFormModel } from './order-list-line';
 
 @Component({
   imports: [
@@ -17,14 +16,16 @@ import { OrderListLine } from './order-list-line';
       @if (lines().length === 0) {
         <nz-list-empty />
       }
-      @for (line of lines(); track $index) {
+      @for (line of lines(); track line().value().clientKey; let index = $index) {
         <ske-order-list-line [line]="line"
-                             (remove)="remove.emit({item:$event, index:$index})" />
+                             [disabled]="disabled()"
+                             (remove)="remove.emit(index)" />
       }
     </nz-list>
   `
 })
 export class OrderListLinesContainer {
-  public readonly lines = input.required<FieldTree<OrderListLineDto[]>>();
-  public readonly remove = output<{ item: OrderListLineDto, index: number }>();
+  public readonly lines = input.required<FieldTree<OrderListLineFormModel[]>>();
+  public readonly disabled = input(false);
+  public readonly remove = output<number>();
 }

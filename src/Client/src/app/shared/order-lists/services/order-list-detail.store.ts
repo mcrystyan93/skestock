@@ -19,11 +19,13 @@ import { OrderListsHttp } from './order-lists.http';
 type OrderListDetailState = {
   orderList: Partial<OrderListDto>;
   lowStockItemsByLocation: Map<string, LowStockItemDto[]>;
+  lowStockItemsLoaded: boolean;
 };
 
 const initialState: OrderListDetailState = {
   orderList: {},
-  lowStockItemsByLocation: new Map()
+  lowStockItemsByLocation: new Map(),
+  lowStockItemsLoaded: false
 };
 
 export const NEW_ORDER_LIST_ROUTE_ID = 'new';
@@ -31,7 +33,8 @@ export const NEW_ORDER_LIST_ROUTE_ID = 'new';
 export const orderListApiEvents = eventGroup({
   source: 'Order List API',
   events: {
-    saveSuccess: type<void>()
+    saveSuccess: type<{ operationId: string }>(),
+    saveFailure: type<{ operationId: string }>()
   }
 });
 
@@ -47,12 +50,16 @@ export const OrderListDetailState = signalStore(
     dispatcher: injectDispatch(orderListApiEvents)
   })),
   withMethods((store) => {
-    const getCurrentOrderListId = () => {
+    const hasValidId = (id: string | null | undefined): id is string =>
+      typeof id === 'string' && id.trim().length > 0;
+
+    const getCurrentOrderListId = (operationId: string) => {
       const id = store.orderList().id;
 
-      if (isNil(id)) {
+      if (!hasValidId(id)) {
         store.handleOrderListError({ title: 'Order list ID missing', status: 400 });
         store.setOrderListLoaded();
+        store.dispatcher.saveFailure({ operationId });
         return null;
       }
 
@@ -65,11 +72,19 @@ export const OrderListDetailState = signalStore(
           store.setLowStockItemsLoading();
           store.clearLowStockItemsErrors();
           patchState(store, {
-            lowStockItemsByLocation: new Map()
+            lowStockItemsByLocation: new Map(),
+            lowStockItemsLoaded: false
           });
         }),
-        switchMap((classId) =>
-          store.stockHttp.getLowStockItems(classId).pipe(
+        switchMap((classId) => {
+          if (!hasValidId(classId)) {
+            store.handleLowStockItemsError({ title: 'Class ID missing', status: 400 });
+            patchState(store, { lowStockItemsLoaded: true });
+            store.setLowStockItemsLoaded();
+            return of(null);
+          }
+
+          return store.stockHttp.getLowStockItems(classId).pipe(
             mapResponse({
               next: (lowStockItems) => {
                 const lowStockItemsByLocation = new Map<string, LowStockItemDto[]>();
@@ -91,17 +106,19 @@ export const OrderListDetailState = signalStore(
                 );
 
                 patchState(store, {
-                  lowStockItemsByLocation: sortedLowStockItemsByLocation
+                  lowStockItemsByLocation: sortedLowStockItemsByLocation,
+                  lowStockItemsLoaded: true
                 });
                 store.setLowStockItemsLoaded();
               },
               error: (error) => {
                 store.handleLowStockItemsError(error);
+                patchState(store, { lowStockItemsLoaded: true });
                 store.setLowStockItemsLoaded();
               }
             })
-          )
-        )
+          );
+        })
       )
     );
 
@@ -120,7 +137,7 @@ export const OrderListDetailState = signalStore(
             return of(null);
           }
 
-          if (isNil(id) || id === '') {
+          if (!hasValidId(id)) {
             store.handleOrderListError({ title: 'Order list ID missing', status: 400 });
             store.setOrderListLoaded();
             return of(null);
@@ -142,22 +159,23 @@ export const OrderListDetailState = signalStore(
       )
     );
 
-    const createOrderList = rxMethod<CreateOrderListRequest>(
+    const createOrderList = rxMethod<SaveOrderListOperation<CreateOrderListRequest>>(
       pipe(
         tap(() => {
           store.setOrderListLoading();
           store.clearOrderListErrors();
         }),
-        switchMap((request) =>
+        switchMap(({ request, operationId }) =>
           store.orderListHttp.create(request).pipe(
             mapResponse({
               next: (orderList) => {
                 patchState(store, { orderList });
-                store.dispatcher.saveSuccess();
+                store.dispatcher.saveSuccess({ operationId });
                 store.setOrderListLoaded();
               },
               error: (error) => {
                 store.handleOrderListError(error);
+                store.dispatcher.saveFailure({ operationId });
                 store.setOrderListLoaded();
               }
             })
@@ -166,14 +184,14 @@ export const OrderListDetailState = signalStore(
       )
     );
 
-    const updateOrderList = rxMethod<UpdateOrderListRequest>(
+    const updateOrderList = rxMethod<SaveOrderListOperation<UpdateOrderListRequest>>(
       pipe(
         tap(() => {
           store.setOrderListLoading();
           store.clearOrderListErrors();
         }),
-        switchMap((request) => {
-          const id = getCurrentOrderListId();
+        switchMap(({ request, operationId }) => {
+          const id = getCurrentOrderListId(operationId);
 
           if (isNil(id)) {
             return EMPTY;
@@ -183,11 +201,12 @@ export const OrderListDetailState = signalStore(
             mapResponse({
               next: (orderList) => {
                 patchState(store, { orderList });
-                store.dispatcher.saveSuccess();
+                store.dispatcher.saveSuccess({ operationId });
                 store.setOrderListLoaded();
               },
               error: (error) => {
                 store.handleOrderListError(error);
+                store.dispatcher.saveFailure({ operationId });
                 store.setOrderListLoaded();
               }
             })
@@ -196,27 +215,39 @@ export const OrderListDetailState = signalStore(
       )
     );
 
-    const saveOrderList = (request: CreateOrderListRequest | UpdateOrderListRequest) => {
-      if (store.orderList().id) {
+    const saveOrderList = (
+      request: CreateOrderListRequest | UpdateOrderListRequest,
+      operationId: string
+    ): boolean => {
+      if (!isNil(store.orderList().id)) {
         updateOrderList({
-          name: request.name,
-          note: request.note,
-          lines: request.lines
+          request: {
+            name: request.name,
+            note: request.note,
+            lines: request.lines
+          },
+          operationId
         });
-        return;
+        return true;
       }
 
-      if (!('classId' in request)) {
+      if (!('classId' in request) || !hasValidId(request.classId)) {
         store.handleOrderListError({ title: 'Class ID missing', status: 400 });
-        return;
+        return false;
       }
 
-      createOrderList(request);
+      createOrderList({ request, operationId });
+      return true;
     };
 
     return { loadOrderList, loadLowStockItems, saveOrderList };
   })
 );
+
+type SaveOrderListOperation<TRequest> = {
+  request: TRequest;
+  operationId: string;
+};
 
 export type LoadOrderListRequest = {
   id: string;

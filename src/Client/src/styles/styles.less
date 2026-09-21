@@ -1,6 +1,14 @@
 ﻿/* You can add global styles to this file, and also import other style files */
 
+:root {
+  --font-sans: 'Inter Variable', -apple-system, BlinkMacSystemFont,
+  'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
 
+html, body {
+  font-family: var(--font-sans) !important;
+  font-feature-settings: 'cv11', 'ss01' !important; /* optional Inter stylistic tweaks */
+}
 
 
 .ant-table-tbody > tr > td {

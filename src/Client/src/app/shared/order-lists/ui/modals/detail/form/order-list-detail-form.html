@@ -1,76 +1,68 @@
-<ng-template #errorTemplate
-             let-control>
-  @let formControl = control.control;
-  @if (formControl.errors?.required; as requiredError) {
-    <nz-icon nzType="icons:circle-info"
-             class="mr-1"></nz-icon>
-    {{ requiredError.message }}
-  }
-  @if (formControl.errors?.maxLength; as maxLengthError) {
-    <nz-icon nzType="icons:circle-info"
-             class="mr-1"></nz-icon>
-    {{ maxLengthError.message }}
-  }
-</ng-template>
 <form nz-form
       nzNoColon
       nzLayout="vertical">
-  <nz-row [nzGutter]="[16, 16]">
+  <nz-row [nzGutter]="[16, 4]">
     <nz-col [nzXl]="12">
-      <nz-form-item nzLayout="vertical">
+      <nz-form-item nzLayout="vertical"
+                    *skeletonInputLoader="loading()">
         <nz-form-label nzRequired
                        nzSpan="24">Nume
         </nz-form-label>
-        <nz-form-control [nzErrorTip]="errorTemplate"
+        <nz-form-control [nzErrorTip]="nameErrorTemplate"
                          nzSpan="24">
           <nz-input-wrapper nzShowCount
-                            [nzCount]="{ max: orderListForm.name()?.maxLength() ?? 50 }">
+                            [nzCount]="{ max: orderListForm.name()?.maxLength() ?? 200 }">
             <input type="text"
                    [formField]="orderListForm.name"
+                   placeholder="Numele comenzii"
                    nz-input>
           </nz-input-wrapper>
         </nz-form-control>
-      </nz-form-item>
-      <nz-form-item>
-        <nz-form-label nzRequired>Status</nz-form-label>
-        <nz-form-control [nzErrorTip]="errorTemplate">
-          <nz-select [formField]="orderListForm.status"
-                     nzShowArrow
-                     nzPlaceHolder="Alege un status"
-                     [nzDropdownMatchSelectWidth]="false">
-            <nz-option nzValue="Draft"
-                       nzLabel="Ciorna" />
-            <nz-option nzValue="Submitted"
-                       nzLabel="Finalizata" />
-            <nz-option nzValue="Cancelled"
-                       nzLabel="Anulata" />
-          </nz-select>
-        </nz-form-control>
+        <ng-template #nameErrorTemplate>
+          @if (orderListForm.name().errors(); as errors) {
+            @for (error of errors; track error.kind) {
+              <div class="ant-form-item-explain-error">
+                {{ error.message }}
+              </div>
+            }
+          }
+        </ng-template>
       </nz-form-item>
     </nz-col>
     <nz-col [nzXl]="12">
-      <nz-form-item>
+      <nz-form-item *skeletonInputLoader="loading()">
         <nz-form-label nzSpan="24">Nota</nz-form-label>
-        <nz-form-control [nzErrorTip]="errorTemplate">
+        <nz-form-control [nzErrorTip]="noteErrorTemplate">
           <nz-textarea-count [nzMaxCharacterCount]="orderListForm.note()?.maxLength() ?? 1000">
-      <textarea nz-input
-                [formField]="orderListForm.note"
-                rows="4"></textarea>
+            <textarea nz-input
+                      [formField]="orderListForm.note"
+                      placeholder="Notite despre comanda"
+                      rows="4"></textarea>
           </nz-textarea-count>
         </nz-form-control>
+        <ng-template #noteErrorTemplate>
+          @if (orderListForm.note().errors(); as errors) {
+            @for (error of errors; track error.kind) {
+              <div class="ant-form-item-explain-error">
+                {{ error.message }}
+              </div>
+            }
+          }
+        </ng-template>
       </nz-form-item>
     </nz-col>
     <nz-col nzSpan="24">
-      <nz-form-item>
-        <nz-form-label>Adauga articol</nz-form-label>
+      <nz-form-item *skeletonInputLoader="loading()">
         <nz-form-control>
           <ske-item-autocomplete [formField]="orderListForm.lineItem"
-                                 placeholder="Cauta un articol" />
+                                 placeholder="Cauta si adauga un articol" />
         </nz-form-control>
       </nz-form-item>
     </nz-col>
   </nz-row>
   <ske-order-list-low-stock-items (addProducts)="addLowStockItems($event)"
+                                  [classId]="classId()"
+                                  [disabled]="loading() || !editable()"
                                   [orderListLines]="orderListForm.lines().value()" />
   <nz-divider />
   @if (orderListForm.lines().touched()) {
@@ -83,5 +75,6 @@
     }
   }
   <ske-order-list-lines-container [lines]="orderListForm.lines"
+                                  [disabled]="loading() || !editable()"
                                   (remove)="removeLine($event)" />
 </form>

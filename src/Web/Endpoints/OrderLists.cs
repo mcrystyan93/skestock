@@ -3,6 +3,7 @@ using skestock.Application.Common.Models;
 using skestock.Application.Features.OrderLists.Commands.CancelOrderList;
 using skestock.Application.Features.OrderLists.Commands.CreateOrderList;
 using skestock.Application.Features.OrderLists.Commands.DeleteOrderList;
+using skestock.Application.Features.OrderLists.Commands.ReopenOrderList;
 using skestock.Application.Features.OrderLists.Commands.SubmitOrderList;
 using skestock.Application.Features.OrderLists.Commands.UpdateOrderList;
 using skestock.Application.Features.OrderLists.Models;
@@ -21,6 +22,7 @@ public class OrderLists : IEndpointGroup
         groupBuilder.MapPut(UpdateOrderList, "{id}");
         groupBuilder.MapPost(SubmitOrderList, "{id}/submit");
         groupBuilder.MapPost(CancelOrderList, "{id}/cancel");
+        groupBuilder.MapPost(ReopenOrderList, "{id}/reopen");
         groupBuilder.MapDelete(DeleteOrderList, "{id}");
     }
 
@@ -105,6 +107,16 @@ public class OrderLists : IEndpointGroup
         ISender sender, Guid id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new CancelOrderListCommand { Id = id }, cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Reopen an order list")]
+    [EndpointDescription("Returns a cancelled order list to the editable draft state.")]
+    public static async Task<Results<Ok<OrderListDto>, ProblemHttpResult>> ReopenOrderList(
+        ISender sender, Guid id, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new ReopenOrderListCommand { Id = id }, cancellationToken);
 
         return result.ToOk();
     }

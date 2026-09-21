@@ -48,4 +48,22 @@ public class OrderListTests
         orderList.IsEditable.ShouldBeFalse();
         orderList.DomainEvents.OfType<OrderListCancelledEvent>().ShouldHaveSingleItem();
     }
+
+    [Test]
+    public void Reopen_ShouldTransitionCancelledToDraftClearTimestampAndRaiseEvent()
+    {
+        var orderList = OrderList.Create(Guid.NewGuid(), null, null);
+        orderList.Submit();
+        orderList.Cancel();
+
+        orderList.SubmittedAt.ShouldNotBeNull();
+
+        orderList.Reopen();
+
+        orderList.Status.ShouldBe(OrderListStatus.Draft);
+        orderList.SubmittedAt.ShouldBeNull();
+        orderList.IsEditable.ShouldBeTrue();
+        orderList.IsReopenable.ShouldBeFalse();
+        orderList.DomainEvents.OfType<OrderListReopenedEvent>().ShouldHaveSingleItem();
+    }
 }

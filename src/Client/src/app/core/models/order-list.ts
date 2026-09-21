@@ -14,6 +14,13 @@ export type OrderListLineDto = {
 /** Mirrors src/Domain/Enums/OrderListStatus.cs. */
 export type OrderListStatus = 'Draft' | 'Submitted' | 'Cancelled';
 
+export type OrderListStatusAction = 'submit' | 'cancel' | 'reopen';
+
+export type OrderListStatusChange = {
+  id: string;
+  action: OrderListStatusAction;
+};
+
 /** Mirrors src/Application/Features/OrderLists/Models/OrderListDto.cs. */
 export type OrderListDto = {
   id: string;
@@ -42,6 +49,18 @@ export type OrderListListItemDto = {
   createdByName?: string | null;
   createdDate: string;
   lastModifiedDate: string;
+};
+
+export const ORDER_LIST_STATUS_LABELS: Record<OrderListStatus, string> = {
+  Draft: 'Ciornă',
+  Submitted: 'Finalizată',
+  Cancelled: 'Anulată'
+};
+
+export const ORDER_LIST_STATUS_COLORS: Record<OrderListStatus, string> = {
+  Draft: 'blue',
+  Submitted: 'green',
+  Cancelled: 'red'
 };
 
 /** Mirrors src/Application/Features/OrderLists/Models/OrderListRequests.cs. */
@@ -105,7 +124,7 @@ export const ORDER_LIST_TABLE_COLUMNS: TableColumnDefinition<OrderListTableColum
     fieldType: 'number'
   },
   submittedAt: {
-    label: 'Data trimiterii',
+    label: 'Data finalizării',
     value: 'submittedAt',
     fieldType: 'date'
   },

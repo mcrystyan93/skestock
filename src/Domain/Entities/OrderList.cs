@@ -14,7 +14,7 @@ public class OrderList : BaseAuditableEntity, IKeysetEntity
 
     public OrderListStatus Status { get; private set; } = OrderListStatus.Draft;
 
-    // Set once the list moves out of Draft via Submit().
+    // Set when the list is submitted; cleared when a cancelled list is reopened.
     public DateTimeOffset? SubmittedAt { get; private set; }
 
     public ICollection<OrderListLine> Lines { get; set; } = new List<OrderListLine>();
@@ -38,6 +38,9 @@ public class OrderList : BaseAuditableEntity, IKeysetEntity
     // True only while the list may still have its metadata/lines edited.
     public bool IsEditable => Status == OrderListStatus.Draft;
 
+    // Only cancelled lists can be returned to the editable draft state.
+    public bool IsReopenable => Status == OrderListStatus.Cancelled;
+
     public void Submit()
     {
         Status = OrderListStatus.Submitted;
@@ -51,5 +54,14 @@ public class OrderList : BaseAuditableEntity, IKeysetEntity
         Status = OrderListStatus.Cancelled;
 
         AddDomainEvent(new OrderListCancelledEvent(Id));
+    }
+
+    // Returns a cancelled list to the editable draft state so it can be approved again.
+    public void Reopen()
+    {
+        Status = OrderListStatus.Draft;
+        SubmittedAt = null;
+
+        AddDomainEvent(new OrderListReopenedEvent(Id));
     }
 }
