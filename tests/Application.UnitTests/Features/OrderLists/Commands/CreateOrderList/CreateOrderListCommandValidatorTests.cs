@@ -51,8 +51,8 @@ public class CreateOrderListCommandValidatorTests
             Name = "Weekly order",
             Lines =
             [
-                new OrderListLineInput { ItemId = activeItem.Id, Quantity = 3 },
-                new OrderListLineInput { ProductName = "Napkins", Quantity = 2, Notes = "any brand" }
+                new OrderListLineInput { ItemId = activeItem.Id, Quantity = 3, Unit = "kg" },
+                new OrderListLineInput { ProductName = "Napkins", Quantity = 2, Unit = "buc", Notes = "any brand" }
             ]
         };
 
@@ -95,6 +95,24 @@ public class CreateOrderListCommandValidatorTests
         var result = await validator.ValidateAsync(command);
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.GreaterThan);
+    }
+
+    [Test]
+    public async Task ShouldHaveErrorWhenUnitMissing()
+    {
+        var (context, activeItem, _, schoolClass) = await CreateContextAsync();
+        await using var _ = context;
+        var validator = new CreateOrderListCommandValidator(context);
+
+        var command = new CreateOrderListCommand
+        {
+            ClassId = schoolClass.Id,
+            Lines = [new OrderListLineInput { ItemId = activeItem.Id, Quantity = 1 }]
+        };
+
+        var result = await validator.ValidateAsync(command);
+
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.Required);
     }
 
     [Test]

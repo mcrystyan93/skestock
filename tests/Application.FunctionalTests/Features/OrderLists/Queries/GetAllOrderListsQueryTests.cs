@@ -45,7 +45,7 @@ public class GetAllOrderListsQueryTests : TestBase
         {
             ClassId = _schoolClass.Id,
             Name = $"{_prefix}-{name}",
-            Lines = [new OrderListLineInput { ItemId = _item.Id, Quantity = 1 }]
+            Lines = [new OrderListLineInput { ItemId = _item.Id, Quantity = 1, Unit = "kg" }]
         });
 
         if (submit)

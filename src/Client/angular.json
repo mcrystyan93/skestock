@@ -44,8 +44,7 @@
               }
             ],
             "styles": [
-              "src/styles/styles.less",
-              "src/styles/tailwind.css",
+              "node_modules/@fontsource-variable/inter/index.css",
               {
                 "input": "src/styles/compact.less",
                 "bundleName": "compact",
@@ -60,7 +59,9 @@
                 "input": "src/styles/dark.less",
                 "bundleName": "dark",
                 "inject": false
-              }
+              },
+              "src/styles/styles.less",
+              "src/styles/tailwind.css"
             ]
           },
           "configurations": {

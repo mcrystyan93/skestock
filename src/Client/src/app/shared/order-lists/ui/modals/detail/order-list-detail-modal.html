@@ -1,7 +1,20 @@
+<div *nzModalTitle>
+  @let name = store.orderList().name;
+  @if (name) {
+    Comanda: '{{ name }}'
+  } @else {
+    Comanda noua
+  }
+  <nz-tag nzColor="geekblue">
+    {{ statusLabel() }}
+  </nz-tag>
+</div>
+
 <ske-error-display [problemDetail]="store.orderListProblemDetail()"
                    [validationErrors]="store.orderListValidationErrors()" />
 
-<ske-order-list-detail-form [loading]="store.orderListLoading()"
+<ske-order-list-detail-form [loading]="busy()"
+                            [classId]="modalData().classId"
                             [orderList]="store.orderList()" />
 
 <div *nzModalFooter>
@@ -12,37 +25,45 @@
             nzType="default"
             type="button"
             (click)="close()"
-            [nzLoading]="store.orderListLoading()">
+            [nzLoading]="busy()"
+            [disabled]="busy()">
       Inchide
     </button>
 
-    <nz-space-compact *nzSpaceItem
-                      nzSize="small">
-      <button nz-button
-              nzSize="small"
-              nzType="primary"
-              type="button"
-              (click)="save()"
-              [nzLoading]="store.orderListLoading()">
-        Salveaza si inchide
-      </button>
-      <button nz-button
-              nzSize="small"
-              nzType="primary"
-              type="button"
-              nz-dropdown
-              [nzDropdownMenu]="menu">
-        <nz-icon nzType="icons:chevron-down"></nz-icon>
-      </button>
+    @if (editable()) {
+      <nz-space-compact *nzSpaceItem
+                        nzSize="small">
+        <button nz-button
+                nzSize="small"
+                nzType="primary"
+                type="button"
+                (click)="save()"
+                [nzLoading]="busy()"
+                [disabled]="busy()">
+          Salveaza si inchide
+        </button>
+        <button nz-button
+                nzSize="small"
+                nzType="primary"
+                type="button"
+                nz-dropdown
+                [nzDropdownMenu]="menu"
+                [nzLoading]="busy()"
+                [disabled]="busy()"
+                aria-label="Opțiuni de salvare">
+          <nz-icon nzType="icons:chevron-down"></nz-icon>
+        </button>
 
-      <nz-dropdown-menu #menu="nzDropdownMenu">
-        <ul nz-menu>
-          <li nz-menu-item
-              (click)="save(false)">
-            Salveaza
-          </li>
-        </ul>
-      </nz-dropdown-menu>
-    </nz-space-compact>
+        <nz-dropdown-menu #menu="nzDropdownMenu">
+          <ul nz-menu>
+            <li nz-menu-item
+                [nzDisabled]="busy()"
+                (click)="save(false)">
+              Salveaza
+            </li>
+          </ul>
+        </nz-dropdown-menu>
+      </nz-space-compact>
+    }
   </nz-space>
 </div>

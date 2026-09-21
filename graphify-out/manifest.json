@@ -1404,9 +1404,9 @@
     "semantic_hash": "903821282d5c5b46a4673a263eeb9dee"
   },
   "src/Client/angular.json": {
-    "mtime": 1789639697.512,
-    "seen": 1789641737.2412066,
-    "ast_hash": "d5b288a8e357f4f37fd563831bc40d02",
+    "mtime": 1789991703.338,
+    "seen": 1789992162.5443242,
+    "ast_hash": "9cc492067d769837e3f9709284165a08",
     "semantic_hash": ""
   },
   "src/Client/aspnetcore-https.js": {
@@ -1416,9 +1416,9 @@
     "semantic_hash": "2129374e20f484213f4aec10cfd6f03c"
   },
   "src/Client/package.json": {
-    "mtime": 1789648579.439,
-    "seen": 1789649172.5075445,
-    "ast_hash": "9180f42ea9b4ccb22a6e537c90d39e11",
+    "mtime": 1789991567.106106,
+    "seen": 1789992162.544327,
+    "ast_hash": "652bebee8bc36ffcff87e544cc8937df",
     "semantic_hash": ""
   },
   "src/Client/src/app/app.config.ts": {
@@ -3756,8 +3756,8 @@
     "semantic_hash": "5b973a02eace6b2c3e55adf6fb0701e2"
   },
   "src/Client/src/app/shared/icons/icon-catalog.generated.ts": {
-    "mtime": 1789979451.5209508,
-    "seen": 1789979475.3390532,
+    "mtime": 1789989710.039688,
+    "seen": 1789989734.8171737,
     "ast_hash": "9f18a0461fd8e197b5b5f0e2f49f1049",
     "semantic_hash": "9f18a0461fd8e197b5b5f0e2f49f1049"
   },
@@ -26508,9 +26508,9 @@
     "semantic_hash": ""
   },
   "src/Application/Common/Errors/OrderListErrors.cs": {
-    "mtime": 1789732541.544313,
-    "seen": 1789733652.181798,
-    "ast_hash": "3999cfc52907a7ef00b0294199a80139",
+    "mtime": 1789989446.8101897,
+    "seen": 1789989477.213516,
+    "ast_hash": "ab232981de2a143ef98528edafef906b",
     "semantic_hash": ""
   },
   "src/Application/Features/OrderLists/CacheConstants.cs": {
@@ -26670,9 +26670,9 @@
     "semantic_hash": ""
   },
   "src/Application/Features/OrderLists/OrderListLineValidationExtensions.cs": {
-    "mtime": 1789732701.5448523,
-    "seen": 1789733652.1819863,
-    "ast_hash": "792a4ba358c0c9ff749c9761ebc404e3",
+    "mtime": 1789985854.0946848,
+    "seen": 1789986335.7136767,
+    "ast_hash": "2b49ec206b457ebe53114020b2e0682d",
     "semantic_hash": ""
   },
   "src/Application/Features/OrderLists/OrderListProjection.cs": {
@@ -26724,9 +26724,9 @@
     "semantic_hash": ""
   },
   "src/Domain/Entities/OrderList.cs": {
-    "mtime": 1789890934.4016004,
-    "seen": 1789891236.9571316,
-    "ast_hash": "9cd5851359135e13379c98433b893bdb",
+    "mtime": 1789989548.8787706,
+    "seen": 1789989661.6555183,
+    "ast_hash": "c8463db2e5ab8e24ff795d31c9bd829e",
     "semantic_hash": ""
   },
   "src/Domain/Entities/OrderListLine.cs": {
@@ -26784,27 +26784,27 @@
     "semantic_hash": ""
   },
   "src/Web/Endpoints/OrderLists.cs": {
-    "mtime": 1789831859.6283224,
-    "seen": 1789831882.1566586,
-    "ast_hash": "e014f52357d70c4fac859b87e9f24197",
+    "mtime": 1789989315.6894433,
+    "seen": 1789989477.214128,
+    "ast_hash": "02518b1d2dc48f36883fa49f7ffdbfea",
     "semantic_hash": ""
   },
   "tests/Application.FunctionalTests/Features/OrderLists/Commands/OrderListLifecycleTests.cs": {
-    "mtime": 1789733568.679544,
-    "seen": 1789733652.1823857,
-    "ast_hash": "1064eacc478685dbddd9b59972fca835",
+    "mtime": 1789989315.7144434,
+    "seen": 1789989477.214169,
+    "ast_hash": "5868fe221ebba7148c8f93a7dc4b430f",
     "semantic_hash": ""
   },
   "tests/Application.FunctionalTests/Features/OrderLists/Queries/GetAllOrderListsQueryTests.cs": {
-    "mtime": 1789733401.360353,
-    "seen": 1789733652.1823862,
-    "ast_hash": "fc539381247db619ba934d2c97cd6e62",
+    "mtime": 1789986294.212209,
+    "seen": 1789986335.7141197,
+    "ast_hash": "5354338f247c268ec1ddec8ab48b6a71",
     "semantic_hash": ""
   },
   "tests/Application.UnitTests/Features/OrderLists/Commands/CreateOrderList/CreateOrderListCommandValidatorTests.cs": {
-    "mtime": 1789732972.597836,
-    "seen": 1789733652.1824405,
-    "ast_hash": "68e6b4115bbc2579f1a22f3f4353e87a",
+    "mtime": 1789986269.5630674,
+    "seen": 1789986335.7141745,
+    "ast_hash": "b64bc6d96f70fa79a1aeb35ca991f83e",
     "semantic_hash": ""
   },
   "tests/Application.UnitTests/Features/OrderLists/Commands/SubmitOrderList/SubmitOrderListCommandHandlerTests.cs": {
@@ -26820,33 +26820,33 @@
     "semantic_hash": ""
   },
   "tests/Domain.UnitTests/Entities/OrderListTests.cs": {
-    "mtime": 1789732918.3977702,
-    "seen": 1789733652.1824632,
-    "ast_hash": "ff6601ae752d070ff225dc4110831cb4",
+    "mtime": 1789989315.6964433,
+    "seen": 1789989477.2142515,
+    "ast_hash": "fc1606bc9648c0fc2719a7f8908e4c6c",
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/overview/tabs/order-lists/order-lists-tab.ts": {
-    "mtime": 1789922379.556,
-    "seen": 1789926015.8224845,
-    "ast_hash": "8e4315adb35b68413ffd4236dc3d1941",
+    "mtime": 1789991373.873,
+    "seen": 1789992162.54448,
+    "ast_hash": "b9013bc82fff04b126a431c713d03457",
     "semantic_hash": ""
   },
   "src/Client/src/app/core/models/order-list.ts": {
-    "mtime": 1789930328.072,
-    "seen": 1789978007.4327433,
-    "ast_hash": "7aadbc8d5f9f90e245054ce41e9ac22e",
+    "mtime": 1789988825.1056507,
+    "seen": 1789989477.213806,
+    "ast_hash": "e4cd6e564f4361f9c26b37c53c74d9fe",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/index.ts": {
-    "mtime": 1789922340.097,
-    "seen": 1789926015.8225465,
-    "ast_hash": "5984d2a4067b219a94866acc5c4b57f3",
+    "mtime": 1789988825.1196508,
+    "seen": 1789989477.2139444,
+    "ast_hash": "32bb6e407b3ca6ce24385066f8b9d272",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/services/order-list-collection.feature.ts": {
-    "mtime": 1789741156.2392757,
-    "seen": 1789741249.8160617,
-    "ast_hash": "a0b686a681f36c8834191c0c6a220800",
+    "mtime": 1789989127.673373,
+    "seen": 1789989477.2139454,
+    "ast_hash": "d740fe11ff5230894e0401db6e599695",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/services/order-list-list.store.ts": {
@@ -26856,15 +26856,15 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/services/order-lists.http.ts": {
-    "mtime": 1789741156.2332757,
-    "seen": 1789741249.8160634,
-    "ast_hash": "58a97e525cf584e779cb78fdca4f58d4",
+    "mtime": 1789988779.26639,
+    "seen": 1789989477.21395,
+    "ast_hash": "a855c49aadf2c1e0b11f4ceb38381633",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/services/order-list-detail.store.ts": {
-    "mtime": 1789978285.8132265,
-    "seen": 1789978289.1675968,
-    "ast_hash": "10b8b5455604ea5e29ccf57bc1972d61",
+    "mtime": 1789985825.514521,
+    "seen": 1789986335.7139132,
+    "ast_hash": "b6523b629ab5b9b2ba794be8379b189c",
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/overview/tabs/order-lists/filter/filter-container.ts": {
@@ -27138,39 +27138,39 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/modals/detail/form/order-list-detail-form.ts": {
-    "mtime": 1789979436.827,
-    "seen": 1789979475.3390882,
-    "ast_hash": "fa9fea0295e5b3d2d52ce24a24805531",
+    "mtime": 1789988951.4043696,
+    "seen": 1789989477.2139535,
+    "ast_hash": "f7304148cac3b9cac8bebe6762460aad",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/modals/detail/order-list-detail-modal.ts": {
-    "mtime": 1789978825.715,
-    "seen": 1789979475.3390896,
-    "ast_hash": "5a4b25fcd41e1bbb1081fc97b0f04da6",
+    "mtime": 1789992142.7704449,
+    "seen": 1789992162.5445957,
+    "ast_hash": "088d907a9126db8582946333bc088018",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/modals/detail/form/order-list-detail-form.html": {
-    "mtime": 1789979409.254,
-    "seen": 1789979475.3395216,
-    "ast_hash": "677f3bdbaf4dd0920d426541347999f4",
+    "mtime": 1789988873.8655832,
+    "seen": 1789989477.214416,
+    "ast_hash": "22a072c19e08a40a076e8de9b1d01f7a",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/modals/detail/order-list-detail-modal.html": {
-    "mtime": 1789923837.69,
-    "seen": 1789926015.8229723,
-    "ast_hash": "8ac2d70f678e6e09bf926d86cae2a470",
+    "mtime": 1789988873.8739283,
+    "seen": 1789989477.214417,
+    "ast_hash": "73b82278a735b274f93e9e1b45ab17cb",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/modals/detail/form/lines/order-list-lines-container.ts": {
-    "mtime": 1789978266.706122,
-    "seen": 1789978289.1676009,
-    "ast_hash": "f1fa39ca74db9c8ef759f976fd5cf3ce",
+    "mtime": 1789985789.267313,
+    "seen": 1789986335.713917,
+    "ast_hash": "5ea983c57fe1e725e64a324a5fa4e0de",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/modals/detail/form/order-list-detail-form.spec.ts": {
-    "mtime": 1789929304.4517667,
-    "seen": 1789929392.6341586,
-    "ast_hash": "0984ce2d9d34746a9181673b3d2ed675",
+    "mtime": 1789989065.3800185,
+    "seen": 1789989477.2139528,
+    "ast_hash": "b60f8e7f9aff5ca7dd74412e477a694f",
     "semantic_hash": ""
   },
   ".claude/skills/frontend-design/LICENSE.txt": {
@@ -27186,15 +27186,75 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/modals/detail/form/lines/order-list-line.ts": {
-    "mtime": 1789978214.012834,
-    "seen": 1789978248.2329235,
-    "ast_hash": "14131befac1573febf5858fef6fe065c",
+    "mtime": 1789987901.248,
+    "seen": 1789989477.2139506,
+    "ast_hash": "c353c9551793c78eaf1971e663af2754",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/modals/detail/form/order-list-low-stock-items.ts": {
-    "mtime": 1789979327.067,
-    "seen": 1789979475.339089,
-    "ast_hash": "3e6e3f67cd16c81ff139fa7916eaf65b",
+    "mtime": 1789987616.855,
+    "seen": 1789989477.213954,
+    "ast_hash": "1f7301f443b18e98e8cf5872c8b88e3e",
+    "semantic_hash": ""
+  },
+  "src/Client/src/app/shared/order-lists/services/order-list-detail.store.spec.ts": {
+    "mtime": 1789986198.8936622,
+    "seen": 1789986335.7139118,
+    "ast_hash": "ec9ef172f73e70583fa7fd23d47714d4",
+    "semantic_hash": ""
+  },
+  "src/Application/Features/OrderLists/Commands/ReopenOrderList/ReopenOrderListCommand.cs": {
+    "mtime": 1789989315.6584432,
+    "seen": 1789989477.2136981,
+    "ast_hash": "5ea8495942c9accf1abeece0bae1b170",
+    "semantic_hash": ""
+  },
+  "src/Application/Features/OrderLists/Commands/ReopenOrderList/ReopenOrderListCommandHandler.cs": {
+    "mtime": 1789989315.6684432,
+    "seen": 1789989477.2136996,
+    "ast_hash": "43705cd445c84c8cf265632097c20fd4",
+    "semantic_hash": ""
+  },
+  "src/Application/Features/OrderLists/Commands/ReopenOrderList/ReopenOrderListCommandValidator.cs": {
+    "mtime": 1789989315.6754432,
+    "seen": 1789989477.2137,
+    "ast_hash": "98d2f0087cd6e6bde6d6e7c0c4f0f63b",
+    "semantic_hash": ""
+  },
+  "src/Application/Features/OrderLists/EventHandlers/OrderListReopenedEventHandler.cs": {
+    "mtime": 1789989315.6804433,
+    "seen": 1789989477.2137072,
+    "ast_hash": "3570937592268a3bf1f1684a72837453",
+    "semantic_hash": ""
+  },
+  "src/Client/src/app/shared/order-lists/services/order-list-list.store.spec.ts": {
+    "mtime": 1789988942.160317,
+    "seen": 1789989477.2139485,
+    "ast_hash": "07042aa340103682856ca768213555f3",
+    "semantic_hash": ""
+  },
+  "src/Client/src/app/shared/order-lists/ui/table/table.ts": {
+    "mtime": 1789991858.953,
+    "seen": 1789992162.544598,
+    "ast_hash": "bddc2a2717633fde3c3b737e14953905",
+    "semantic_hash": ""
+  },
+  "src/Domain/Events/OrderList/OrderListReopenedEvent.cs": {
+    "mtime": 1789989315.642443,
+    "seen": 1789989477.2140539,
+    "ast_hash": "5823f78a732c5bb9202d521c8c1d3664",
+    "semantic_hash": ""
+  },
+  "tests/Application.UnitTests/Features/OrderLists/Commands/ReopenOrderList/ReopenOrderListCommandHandlerTests.cs": {
+    "mtime": 1789989315.7044435,
+    "seen": 1789989477.2142272,
+    "ast_hash": "2842a58d29648bf16a18c2c5e6cf5ce7",
+    "semantic_hash": ""
+  },
+  "src/Client/src/app/shared/order-lists/ui/table/table.html": {
+    "mtime": 1789991875.982,
+    "seen": 1789992162.5452733,
+    "ast_hash": "e008b702a060153a65bcd007b1402637",
     "semantic_hash": ""
   }
 }

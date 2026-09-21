@@ -2,6 +2,7 @@ using skestock.Application.Common.Errors;
 using skestock.Application.Features.OrderLists.Commands.CancelOrderList;
 using skestock.Application.Features.OrderLists.Commands.CreateOrderList;
 using skestock.Application.Features.OrderLists.Commands.DeleteOrderList;
+using skestock.Application.Features.OrderLists.Commands.ReopenOrderList;
 using skestock.Application.Features.OrderLists.Commands.SubmitOrderList;
 using skestock.Application.Features.OrderLists.Commands.UpdateOrderList;
 using skestock.Application.Features.OrderLists.Models;
@@ -59,8 +60,8 @@ public class OrderListLifecycleTests : TestBase
             Note = "First order",
             Lines =
             [
-                new OrderListLineInput { ItemId = item.Id, Quantity = 5 },
-                new OrderListLineInput { ProductName = "Handmade widget", Quantity = 3, Notes = "not in catalog" }
+                new OrderListLineInput { ItemId = item.Id, Quantity = 5, Unit = "kg" },
+                new OrderListLineInput { ProductName = "Handmade widget", Quantity = 3, Unit = "buc", Notes = "not in catalog" }
             ]
         });
 
@@ -78,7 +79,7 @@ public class OrderListLifecycleTests : TestBase
             Id = id,
             Name = $"{_prefix}-Renamed",
             Note = "Revised",
-            Lines = [new OrderListLineInput { ItemId = item.Id, Quantity = 10 }]
+            Lines = [new OrderListLineInput { ItemId = item.Id, Quantity = 10, Unit = "kg" }]
         });
 
         updated.IsSuccess.ShouldBeTrue();
@@ -107,14 +108,14 @@ public class OrderListLifecycleTests : TestBase
         {
             ClassId = schoolClass.Id,
             Name = $"{_prefix}-List",
-            Lines = [new OrderListLineInput { ItemId = item.Id, Quantity = 1 }]
+            Lines = [new OrderListLineInput { ItemId = item.Id, Quantity = 1, Unit = "kg" }]
         });
         await TestApp.SendAsync(new SubmitOrderListCommand { Id = created.Value.Id });
 
         var result = await TestApp.SendAsync(new UpdateOrderListCommand
         {
             Id = created.Value.Id,
-            Lines = [new OrderListLineInput { ItemId = item.Id, Quantity = 2 }]
+            Lines = [new OrderListLineInput { ItemId = item.Id, Quantity = 2, Unit = "kg" }]
         });
 
         result.IsFailed.ShouldBeTrue();
@@ -149,7 +150,7 @@ public class OrderListLifecycleTests : TestBase
         {
             ClassId = schoolClass.Id,
             Name = $"{_prefix}-Cancelable",
-            Lines = [new OrderListLineInput { ItemId = item.Id, Quantity = 1 }]
+            Lines = [new OrderListLineInput { ItemId = item.Id, Quantity = 1, Unit = "kg" }]
         });
         await TestApp.SendAsync(new SubmitOrderListCommand { Id = created.Value.Id });
 
@@ -165,6 +166,59 @@ public class OrderListLifecycleTests : TestBase
     }
 
     [Test]
+    public async Task Cancel_Reopen_ClearsSubmittedAtAndAllowsEditing()
+    {
+        var (schoolClass, item) = await SeedPrerequisitesAsync();
+        await RunAsUserWithProfileAsync();
+
+        var created = await TestApp.SendAsync(new CreateOrderListCommand
+        {
+            ClassId = schoolClass.Id,
+            Name = $"{_prefix}-Reopenable",
+            Lines = [new OrderListLineInput { ItemId = item.Id, Quantity = 1, Unit = "kg" }]
+        });
+        await TestApp.SendAsync(new SubmitOrderListCommand { Id = created.Value.Id });
+        await TestApp.SendAsync(new CancelOrderListCommand { Id = created.Value.Id });
+
+        var reopened = await TestApp.SendAsync(new ReopenOrderListCommand { Id = created.Value.Id });
+
+        reopened.IsSuccess.ShouldBeTrue();
+        reopened.Value.Status.ShouldBe(OrderListStatus.Draft.ToString());
+        reopened.Value.SubmittedAt.ShouldBeNull();
+
+        var updated = await TestApp.SendAsync(new UpdateOrderListCommand
+        {
+            Id = created.Value.Id,
+            Name = $"{_prefix}-Reopened",
+            Lines = [new OrderListLineInput { ItemId = item.Id, Quantity = 2, Unit = "kg" }]
+        });
+
+        updated.IsSuccess.ShouldBeTrue();
+        updated.Value.Status.ShouldBe(OrderListStatus.Draft.ToString());
+        updated.Value.Name.ShouldBe($"{_prefix}-Reopened");
+    }
+
+    [Test]
+    public async Task Reopen_WhileSubmitted_FailsBecauseOnlyCancelledListsCanReopen()
+    {
+        var (schoolClass, item) = await SeedPrerequisitesAsync();
+        await RunAsUserWithProfileAsync();
+
+        var created = await TestApp.SendAsync(new CreateOrderListCommand
+        {
+            ClassId = schoolClass.Id,
+            Name = $"{_prefix}-Submitted",
+            Lines = [new OrderListLineInput { ItemId = item.Id, Quantity = 1, Unit = "kg" }]
+        });
+        await TestApp.SendAsync(new SubmitOrderListCommand { Id = created.Value.Id });
+
+        var result = await TestApp.SendAsync(new ReopenOrderListCommand { Id = created.Value.Id });
+
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(e => e is OrderListErrors.OrderListNotReopenable);
+    }
+
+    [Test]
     public async Task Delete_WhileSubmitted_Fails()
     {
         var (schoolClass, item) = await SeedPrerequisitesAsync();
@@ -174,7 +228,7 @@ public class OrderListLifecycleTests : TestBase
         {
             ClassId = schoolClass.Id,
             Name = $"{_prefix}-Locked",
-            Lines = [new OrderListLineInput { ItemId = item.Id, Quantity = 1 }]
+            Lines = [new OrderListLineInput { ItemId = item.Id, Quantity = 1, Unit = "kg" }]
         });
         await TestApp.SendAsync(new SubmitOrderListCommand { Id = created.Value.Id });
 

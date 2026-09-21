@@ -40,6 +40,10 @@ export class OrderListsHttp {
     return this._httpClient.post<OrderListDto>(`/api/OrderLists/${id}/cancel`, {});
   }
 
+  public reopen(id: string) {
+    return this._httpClient.post<OrderListDto>(`/api/OrderLists/${id}/reopen`, {});
+  }
+
   public delete(id: string) {
     return this._httpClient.delete<void>(`/api/OrderLists/${id}`);
   }

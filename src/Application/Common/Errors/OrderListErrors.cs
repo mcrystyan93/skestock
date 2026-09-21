@@ -80,4 +80,22 @@ public static class OrderListErrors
             Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object> { ["orderListId"] = orderListId });
         }
     }
+
+    public sealed class OrderListNotReopenable : Error
+    {
+        public const string ErrorCode = "order_lists.not_reopenable";
+
+        public OrderListNotReopenable(Guid orderListId, string status) : base(
+            $"Order list '{orderListId}' cannot be reopened while in status '{status}'. Only cancelled order lists can be reopened.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
+            Metadata.Add(ErrorMetadataKeys.Title, "Order list not reopenable");
+            Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
+            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object>
+            {
+                ["orderListId"] = orderListId,
+                ["status"] = status
+            });
+        }
+    }
 }

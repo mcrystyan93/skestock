@@ -36,6 +36,9 @@ internal static class OrderListLineValidationExtensions
                     .WithErrorCode(ValidationErrorCodes.MaxLength);
 
                 line.RuleFor(l => l.Unit)
+                    .Must(unit => !string.IsNullOrWhiteSpace(unit))
+                    .WithMessage("A unit is required")
+                    .WithErrorCode(ValidationErrorCodes.Required)
                     .MaximumLength(UnitMaxLength)
                     .WithErrorCode(ValidationErrorCodes.MaxLength);
 

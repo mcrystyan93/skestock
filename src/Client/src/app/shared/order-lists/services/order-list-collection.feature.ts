@@ -6,11 +6,14 @@ import {
   buildOrderListFilter,
   GetAllOrderListsRequest,
   OrderListListItemDto,
+  OrderListStatusAction,
+  OrderListStatusChange,
   PAGINATION_PAGE_SIZE,
   PaginatedResponseData
 } from '@ske/models';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { withLoadingFeature } from '@ske/shared/loader';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import { OrderListsHttp } from './order-lists.http';
 
@@ -19,6 +22,7 @@ type OrderListCollectionState = {
   paginationData: PaginatedResponseData | null;
   filter: GetAllOrderListsRequest;
   isLoadingMore: boolean;
+  statusChangingId: string | null;
 };
 
 const initialState: OrderListCollectionState = {
@@ -31,7 +35,8 @@ const initialState: OrderListCollectionState = {
     pageSize: PAGINATION_PAGE_SIZE,
     searchTerm: null
   },
-  isLoadingMore: false
+  isLoadingMore: false,
+  statusChangingId: null
 };
 
 export function withOrderListCollection() {
@@ -44,7 +49,8 @@ export function withOrderListCollection() {
       nextCursor: () => store.paginationData()?.nextCursor ?? null
     })),
     withProps(() => ({
-      orderListsHttp: inject(OrderListsHttp)
+      orderListsHttp: inject(OrderListsHttp),
+      nzMessageService: inject(NzMessageService)
     })),
     withMethods((store) => {
       const load = rxMethod<GetAllOrderListsRequest>(
@@ -116,7 +122,44 @@ export function withOrderListCollection() {
         )
       );
 
-      return { load, loadMore };
+      const changeStatus = rxMethod<OrderListStatusChange>(
+        pipe(
+          filter(() => store.statusChangingId() === null),
+          tap(({ id }) => {
+            store.clearOrderListsErrors();
+            patchState(store, { statusChangingId: id });
+          }),
+          switchMap(({ id, action }) => {
+            const request = action === 'submit'
+              ? store.orderListsHttp.submit(id)
+              : action === 'cancel'
+                ? store.orderListsHttp.cancel(id)
+                : store.orderListsHttp.reopen(id);
+
+            return request.pipe(
+              mapResponse({
+                next: () => {
+                  patchState(store, { statusChangingId: null });
+                  store.nzMessageService.success(STATUS_CHANGE_MESSAGES[action]);
+                  load(store.filter());
+                },
+                error: (error) => {
+                  store.handleOrderListsError(error);
+                  patchState(store, { statusChangingId: null });
+                }
+              })
+            );
+          })
+        )
+      );
+
+      return { load, loadMore, changeStatus };
     })
   );
 }
+
+const STATUS_CHANGE_MESSAGES: Record<OrderListStatusAction, string> = {
+  submit: 'Comanda a fost aprobată.',
+  cancel: 'Comanda a fost anulată.',
+  reopen: 'Comanda a fost redeschisă ca ciornă.'
+};
