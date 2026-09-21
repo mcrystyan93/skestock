@@ -5,21 +5,25 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { eventGroup, injectDispatch } from '@ngrx/signals/events';
 import {
   CreateOrderListRequest,
+  LowStockItemDto,
   OrderListDto,
   UpdateOrderListRequest
 } from '@ske/models';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { withLoadingFeature } from '@ske/shared/loader';
+import { StockHttp } from '@ske/shared/stock';
 import { isNil } from 'lodash-es';
 import { EMPTY, of, pipe, switchMap, tap } from 'rxjs';
 import { OrderListsHttp } from './order-lists.http';
 
 type OrderListDetailState = {
   orderList: Partial<OrderListDto>;
+  lowStockItemsByLocation: Map<string, LowStockItemDto[]>;
 };
 
 const initialState: OrderListDetailState = {
-  orderList: {}
+  orderList: {},
+  lowStockItemsByLocation: new Map()
 };
 
 export const NEW_ORDER_LIST_ROUTE_ID = 'new';
@@ -35,8 +39,11 @@ export const OrderListDetailState = signalStore(
   withState(initialState),
   withLoadingFeature('orderList'),
   withProblemDetailsFeature('orderList'),
+  withLoadingFeature('lowStockItems'),
+  withProblemDetailsFeature('lowStockItems'),
   withProps(() => ({
     orderListHttp: inject(OrderListsHttp),
+    stockHttp: inject(StockHttp),
     dispatcher: injectDispatch(orderListApiEvents)
   })),
   withMethods((store) => {
@@ -51,6 +58,52 @@ export const OrderListDetailState = signalStore(
 
       return id;
     };
+
+    const loadLowStockItems = rxMethod<string>(
+      pipe(
+        tap(() => {
+          store.setLowStockItemsLoading();
+          store.clearLowStockItemsErrors();
+          patchState(store, {
+            lowStockItemsByLocation: new Map()
+          });
+        }),
+        switchMap((classId) =>
+          store.stockHttp.getLowStockItems(classId).pipe(
+            mapResponse({
+              next: (lowStockItems) => {
+                const lowStockItemsByLocation = new Map<string, LowStockItemDto[]>();
+
+                for (const lowStockItem of lowStockItems) {
+                  const itemsAtLocation = lowStockItemsByLocation.get(lowStockItem.locationName);
+
+                  if (itemsAtLocation) {
+                    itemsAtLocation.push(lowStockItem);
+                  } else {
+                    lowStockItemsByLocation.set(lowStockItem.locationName, [lowStockItem]);
+                  }
+                }
+
+                const sortedLowStockItemsByLocation = new Map(
+                  Array.from(lowStockItemsByLocation.entries())
+                    .sort(([firstLocation], [secondLocation]) =>
+                      firstLocation.localeCompare(secondLocation))
+                );
+
+                patchState(store, {
+                  lowStockItemsByLocation: sortedLowStockItemsByLocation
+                });
+                store.setLowStockItemsLoaded();
+              },
+              error: (error) => {
+                store.handleLowStockItemsError(error);
+                store.setLowStockItemsLoaded();
+              }
+            })
+          )
+        )
+      )
+    );
 
     const loadOrderList = rxMethod<LoadOrderListRequest>(
       pipe(
@@ -161,7 +214,7 @@ export const OrderListDetailState = signalStore(
       createOrderList(request);
     };
 
-    return { loadOrderList, saveOrderList };
+    return { loadOrderList, loadLowStockItems, saveOrderList };
   })
 );
 

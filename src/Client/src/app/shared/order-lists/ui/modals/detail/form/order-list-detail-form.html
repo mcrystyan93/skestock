@@ -60,5 +60,28 @@
         </nz-form-control>
       </nz-form-item>
     </nz-col>
+    <nz-col nzSpan="24">
+      <nz-form-item>
+        <nz-form-label>Adauga articol</nz-form-label>
+        <nz-form-control>
+          <ske-item-autocomplete [formField]="orderListForm.lineItem"
+                                 placeholder="Cauta un articol" />
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
   </nz-row>
+  <ske-order-list-low-stock-items (addProducts)="addLowStockItems($event)"
+                                  [orderListLines]="orderListForm.lines().value()" />
+  <nz-divider />
+  @if (orderListForm.lines().touched()) {
+    @for (error of orderListForm.lines().errors(); track $index) {
+      <p nz-typography
+         nzType="danger">
+        <nz-icon nzType="icons:circle-exclamation"></nz-icon>
+        {{ error.message }}
+      </p>
+    }
+  }
+  <ske-order-list-lines-container [lines]="orderListForm.lines"
+                                  (remove)="removeLine($event)" />
 </form>

@@ -53,9 +53,9 @@ export function withItemCollection() {
           map(data => buildItemListFilter(store.filter(), data)),
           tap((filter) => {
             store.clearItemsErrors();
-            store.itemsLoading();
+            store.setItemsLoading();
 
-            patchState(store, { filter, isLoadingMore: false });
+            patchState(store, { filter, isLoadingMore: false, items: [], paginationData: null });
           }),
           switchMap(filter =>
             store.itemHttp.getAll(filter)

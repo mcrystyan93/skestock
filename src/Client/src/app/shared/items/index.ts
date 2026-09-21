@@ -8,3 +8,4 @@ export * from './ui/modals/detail/item-detail-modal';
 export * from './ui/modals/import/item-import-modal';
 export * from './ui/modals/review/item-import-review-modal';
 export * from './ui/dropdown/item-dropdown';
+export * from './ui/autocomplete/item-autocomplete';

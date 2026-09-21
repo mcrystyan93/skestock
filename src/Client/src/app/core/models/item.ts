@@ -130,6 +130,10 @@ export type ItemDropdownOption = Partial<ItemDto> & Pick<ItemDto, 'id'>;
 
 export type ItemDropdownValue = ItemDto | ItemDropdownOption | null;
 
+export type ItemDraft = Pick<ItemDto, 'name'>;
+
+export type ItemAutocompleteValue = ItemDto | ItemDropdownOption | ItemDraft | null;
+
 export function buildItemListFilter(
   currentFilter: GetAllItemsRequest,
   partialFilter: Partial<GetAllItemsRequest>

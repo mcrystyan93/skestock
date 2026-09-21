@@ -1,6 +1,6 @@
 // noinspection ES6PreferShortImport
 
-import {type ItemDropdownOption, type ItemDropdownValue} from '@ske/models';
+import {type ItemAutocompleteValue, type ItemDropdownOption} from '@ske/models';
 import {patchState, signalStore, withComputed, withMethods, withState} from '@ngrx/signals';
 import {withItemCollection} from './item-collection.feature';
 import {rxMethod} from '@ngrx/signals/rxjs-interop';
@@ -69,7 +69,7 @@ export const ItemDropdownStore = signalStore(
                   selectedItemUnavailable: true
                 });
                 store.setSelectedItemLoaded();
-                store.handleItemsError(error);
+                store.handleSelectedItemError(error);
               }
             })
           );
@@ -77,15 +77,15 @@ export const ItemDropdownStore = signalStore(
       )
     );
 
-    const resolveSelectedItem = (value: ItemDropdownValue) => {
-      const id = value?.id;
+    const resolveSelectedItem = (value: ItemAutocompleteValue) => {
+      const id = value && 'id' in value ? value.id : null;
 
       if (!id) {
         loadSelectedItem(null);
         return;
       }
 
-      if (value.name) {
+      if (value?.name) {
         loadSelectedItem(null);
         return;
       }
