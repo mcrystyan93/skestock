@@ -285,7 +285,12 @@ public class GetClassLocationStockHandlerTests
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Items.Count.ShouldBe(1);
-        result.Value.Items.Single().ItemId.ShouldBe(lowStockItem.Id);
+        var lowStockRow = result.Value.Items.Single();
+        lowStockRow.ItemId.ShouldBe(lowStockItem.Id);
+        lowStockRow.ItemName.ShouldBe(lowStockItem.Name);
+        lowStockRow.Sku.ShouldBe(lowStockItem.Sku);
+        lowStockRow.Unit.ShouldBe(lowStockItem.Unit);
+        lowStockRow.LocationName.ShouldBe(location.Name);
     }
 
     [Test]

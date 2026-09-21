@@ -14,6 +14,7 @@ public class Stock : IEndpointGroup
     public static void Map(RouteGroupBuilder groupBuilder)
     {
         groupBuilder.MapPost(GetClassLocationStock, "class/{classId}");
+        groupBuilder.MapGet(GetLowStockItems, "class/{classId}/low-stock");
         groupBuilder.MapPost(AdjustStock, "adjust");
         groupBuilder.MapPost(RemoveExpiredStock, "remove-expired");
         groupBuilder.MapPost(MoveStock, "move");
@@ -48,6 +49,33 @@ public class Stock : IEndpointGroup
         var result = await sender.Send(query, cancellationToken);
 
         return result.ToOk();
+    }
+
+    [EndpointSummary("Get low-stock items for a class")]
+    [EndpointDescription("Retrieves items whose current quantity is below their configured " +
+                          "minimum threshold, including the item name, SKU, unit and storage " +
+                          "location.")]
+    public static async Task<Results<Ok<List<LowStockItemDto>>, ProblemHttpResult>> GetLowStockItems(
+        ISender sender, Guid classId, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new GetClassLocationStockQuery
+            {
+                ClassId = classId,
+                LowStockOnly = true
+            },
+            cancellationToken);
+
+        return result.ToOk(report => report.Items
+            .Select(item => new LowStockItemDto
+            {
+                ItemId = item.ItemId,
+                ItemName = item.ItemName,
+                Sku = item.Sku,
+                Unit = item.Unit,
+                LocationName = item.LocationName
+            })
+            .ToList());
     }
 
     [EndpointSummary("Adjust stock for an item at a location after a physical recount")]

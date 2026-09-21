@@ -3,12 +3,12 @@ import {PAGINATION_PAGE_SIZE} from './category';
 
 /** Mirrors src/Application/Features/OrderLists/Models/OrderListLineDto.cs. */
 export type OrderListLineDto = {
-  id: string;
+  id: string | null;
   itemId?: string | null;
   productName: string;
   quantity: number;
-  unit: string|null;
-  notes: string|null;
+  unit: string;
+  notes: string;
 };
 
 /** Mirrors src/Domain/Enums/OrderListStatus.cs. */

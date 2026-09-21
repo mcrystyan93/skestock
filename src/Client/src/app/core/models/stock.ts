@@ -27,6 +27,15 @@ export type StockReportDto = {
   hasExpiredItems: boolean;
 };
 
+/** Mirrors src/Application/Features/Stock/Models/StockDto.cs (LowStockItemDto). */
+export type LowStockItemDto = {
+  itemId: string;
+  itemName: string;
+  sku?: string | null;
+  unit: string;
+  locationName: string;
+};
+
 export type StockItemCategoryGroup = {
   categoryId: string;
   categoryName: string;

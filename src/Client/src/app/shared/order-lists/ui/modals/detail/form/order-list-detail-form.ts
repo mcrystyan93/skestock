@@ -1,11 +1,17 @@
-import { Component, input, linkedSignal } from '@angular/core';
-import { OrderListDto, OrderListLineDto, OrderListStatus } from '@ske/models';
-import { applyEach, form, FormField, maxLength, required, schema } from '@angular/forms/signals';
+import { Component, effect, input, linkedSignal, untracked } from '@angular/core';
+import { ItemAutocompleteValue, LowStockItemDto, OrderListDto, OrderListLineDto, OrderListStatus } from '@ske/models';
+import { applyEach, form, FormField, maxLength, required, schema, submit, validate } from '@angular/forms/signals';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 import { NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
 import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
 import { NzInputDirective, NzInputWrapperComponent, NzTextareaCountComponent } from 'ng-zorro-antd/input';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
+import { ItemAutocomplete } from '@ske/shared/items';
+import { NzDividerComponent } from 'ng-zorro-antd/divider';
+import { OrderListLinesContainer } from './lines/order-list-lines-container';
+import { isNil } from 'lodash-es';
+import { OrderListLowStockItems } from './order-list-low-stock-items';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 
 @Component({
   imports: [
@@ -21,7 +27,12 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
     NzIconDirective,
     NzFormDirective,
     NzFormItemComponent,
-    NzTextareaCountComponent
+    NzTextareaCountComponent,
+    ItemAutocomplete,
+    NzDividerComponent,
+    OrderListLinesContainer,
+    OrderListLowStockItems,
+    NzTypographyComponent
   ],
   selector: 'ske-order-list-detail-form',
   styles: ``,
@@ -38,7 +49,8 @@ export class OrderListDetailForm {
       name: orderList.name ?? '',
       note: orderList.note ?? '',
       status: orderList.status ?? 'Draft',
-      lines: orderList.lines ?? []
+      lines: orderList.lines ?? [],
+      lineItem: null
     })
   });
 
@@ -68,7 +80,85 @@ export class OrderListDetailForm {
       message: 'Statusul listei de comenzi este obligatoriu.'
     });
     applyEach(schemaPath.lines, this.lineSchemaPath);
+
+    // at least one line is needed
+    validate(schemaPath.lines, ({ valueOf }) => {
+      if (valueOf(schemaPath.lines).length === 0) {
+        return {
+          kind: 'atLeastOneLine',
+          message: 'Trebuie să adăugați cel puțin un articol în listă.'
+        };
+      }
+      return null;
+    });
   });
+
+  private readonly lineItemChangeRef = effect(() => {
+    const lineItem = this.orderListForm.lineItem().value();
+
+    if (isNil(lineItem))
+      return;
+
+    const line = 'id' in lineItem
+      ? {
+        itemId: lineItem.id,
+        productName: lineItem.sku ? `(${lineItem.sku}) ${lineItem.name ?? ''}` : lineItem.name ?? '',
+        unit: lineItem.unit ?? 'buc'
+      }
+      : {
+        itemId: null,
+        productName: lineItem.name,
+        unit: 'buc'
+      };
+
+    untracked(() => {
+      // add line item to lines
+      this.orderListForm.lines().value.update(lines => [{
+        id: null,
+        ...line,
+        quantity: 1,
+        notes: ''
+      }, ...lines]);
+
+      // reset line item
+      this.orderListForm.lineItem().reset(null);
+    });
+  });
+
+  public addLowStockItems(items: LowStockItemDto[]) {
+    const lines = items.map(item => ({
+      id: null,
+      itemId: item.itemId,
+      productName: item.sku ? `(${item.sku}) ${item.itemName}` : item.itemName,
+      quantity: 1,
+      unit: item.unit ?? 'buc',
+      notes: ''
+    }));
+
+// add lines to the form. If an item already exists in the lines, we should not add it again
+    this.orderListForm.lines().value.update(existingLines => {
+      const existingItemIds = new Set(existingLines.map(line => line.itemId));
+      const newLines = lines.filter(line => !existingItemIds.has(line.itemId));
+      return [...newLines, ...existingLines];
+    });
+  }
+
+  protected removeLine($event: { item: OrderListLineDto; index: number }) {
+    this.orderListForm.lines().value.update(lines => {
+      lines.splice($event.index, 1);
+      return [...lines];
+    });
+  }
+
+  public async submit(): Promise<OrderListDetailFormSubmit> {
+    let formData: OrderListDetailFormModel | null = null;
+
+    const isValid = await submit(this.orderListForm, async (_) => {
+      formData = this.orderListForm().value();
+    });
+
+    return { isValid, formData };
+  }
 }
 
 export type OrderListDetailFormModel = {
@@ -77,4 +167,9 @@ export type OrderListDetailFormModel = {
   note: string;
   status: OrderListStatus;
   lines: OrderListLineDto[];
+  lineItem: ItemAutocompleteValue;
 }
+export type OrderListDetailFormSubmit = {
+  isValid: boolean;
+  formData: OrderListDetailFormModel | null;
+};
