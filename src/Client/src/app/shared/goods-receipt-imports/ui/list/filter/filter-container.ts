@@ -11,7 +11,10 @@ import { FilterForm } from './filter-form';
   ],
   selector: 'ske-goods-receipt-imports-filter-container',
   styles: ``,
-  templateUrl: './filter-container.html'
+  templateUrl: './filter-container.html',
+  host:{
+    class: 'px-4'
+  }
 })
 export class FilterContainer {
   public readonly store = inject(GoodsReceiptImportListStore);

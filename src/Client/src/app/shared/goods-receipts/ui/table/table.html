@@ -17,31 +17,24 @@
     <th nzWidth="50px">
     </th>
     <th nzWidth="150px">
-      {{ columns.receivedAt.label }}
+      Data
     </th>
-    <th nzWidth="180px">
-      {{ columns.note.label }}
+    <th>
+      Detalii
     </th>
     <th nzWidth="110px"
         class="text-right!">
-      {{ columns.lineCount.label }}
+      Articole
     </th>
     <th nzWidth="130px"
         class="text-right!">
-      {{ columns.totalQuantity.label }}
+      Cantitate
     </th>
-    <th nzWidth="150px"
+    <th nzWidth="200px"
         class="text-right!">
-      {{ columns.totalAmount.label }}
+      Valoare
     </th>
-    <th nzWidth="180px">
-      {{ columns.createdByName.label }}
-    </th>
-    <th nzWidth="150px">
-      {{ columns.createdDate.label }}
-    </th>
-    <th nzRight
-        nzWidth="100px">
+    <th nzWidth="100px">
       Actiuni
     </th>
   </tr>
@@ -58,31 +51,29 @@
         {{ goodsReceipt.receivedAt | date }}
       </td>
       <td>
-        {{ goodsReceipt.note }}
+        <strong>{{ goodsReceipt.note }}</strong>
+        <div nz-typography
+             nzType="secondary">
+          {{ goodsReceipt.createdDate | timeAgo }} - {{ goodsReceipt.createdByName }}
+        </div>
       </td>
-      <td class="text-right pr-3!">
-        {{ goodsReceipt.lineCount }}
+      <td class="text-right">
+        <nz-tag>{{ goodsReceipt.lineCount }}</nz-tag>
       </td>
-      <td class="text-right pr-3!">
-        {{ goodsReceipt.totalQuantity | number:'1.0-0' }}
+      <td class="text-right">
+        <nz-tag>{{ goodsReceipt.totalQuantity | number:'1.0-0' }} buc</nz-tag>
       </td>
-      <td class="text-right pr-3!">
+      <td class="text-right">
         {{ goodsReceipt.totalAmount | currency:'RON' }}
       </td>
-      <td>
-        {{ goodsReceipt.createdByName }}
-      </td>
-      <td>
-        {{ goodsReceipt.createdDate | date }}
-      </td>
-      <td nzRight>
+      <td nzWidth="100px">
         <button type="button"
                 nz-button
-                nzSize="small"
-                nzType="link"
+                nzType="text"
                 [disabled]="!goodsReceipt.fileMetadataId"
-                title="Descarca fisierul"
-                [attr.aria-label]="'Descarca fisierul folosit pentru receptia ' + goodsReceipt.id"
+                nz-tooltip
+                [nzTooltipTitle]="'Descarca fisierul'"
+                [attr.aria-label]="'Descarca fisierul'"
                 (click)="downloadFile.emit(goodsReceipt)">
           <nz-icon nzType="icons:download"></nz-icon>
         </button>

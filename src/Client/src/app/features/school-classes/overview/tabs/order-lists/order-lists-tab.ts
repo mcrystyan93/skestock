@@ -44,7 +44,7 @@ import { tap } from 'rxjs';
     </div>
   `,
   host: {
-    class: 'flex flex-col grow absolute inset-0'
+    class: 'flex flex-col grow absolute inset-0 gap-2 mt-4'
   }
 })
 export class OrderListsTab {

@@ -1,6 +1,6 @@
 <nz-row [nzGutter]="[16, 16]"
         nzAlign="middle">
-  <nz-col>
+  <nz-col nzFlex="auto">
     <nz-form-item>
       <nz-form-control nzSpan="24">
         <nz-input-wrapper>
@@ -41,25 +41,14 @@
       }
     </nz-segmented>
   </nz-col>
-  <nz-col nzFlex="auto"></nz-col>
   <nz-col>
     <button nz-button
-            nzSize="small"
             type="button"
             nzType="default"
             [nzLoading]="loading()"
             (click)="clear()">
-      <nz-icon nzType="icons:xmark"></nz-icon>
       Reseteaza
     </button>
-    <nz-divider nzType="vertical"></nz-divider>
-    <button nz-button
-            nzSize="small"
-            nzType="primary"
-            type="button"
-            (click)="addStockBatch()">
-      <nz-icon nzType="icons:plus"></nz-icon>
-      Adauga produs
-    </button>
+
   </nz-col>
 </nz-row>

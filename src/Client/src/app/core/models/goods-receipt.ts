@@ -68,7 +68,7 @@ export type CreateGoodsReceiptRequest = {
   lines: CreateGoodsReceiptLineRequest[];
 };
 /** Mirrors src/Domain/Enums/GoodsReceiptImportStatus.cs. */
-export type GoodsReceiptImportStatus = 'processing' | 'pendingReview' | 'confirmed' | 'failed';
+export type GoodsReceiptImportStatus = 'all' | 'processing' | 'pendingReview' | 'confirmed' | 'failed';
 
 /** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptImportDto.cs. */
 export type GoodsReceiptImportDto = {
@@ -223,6 +223,7 @@ export const GOODS_RECEIPT_TABLE_COLUMNS: TableColumnDefinition<GoodsReceiptTabl
 };
 
 export const GOODS_RECEIPT_IMPORT_STATUS_LABELS: Record<GoodsReceiptImportStatus, string> = {
+  all: 'Toate',
   processing: 'In procesare',
   pendingReview: 'In asteptare',
   confirmed: 'Confirmat',
@@ -230,6 +231,7 @@ export const GOODS_RECEIPT_IMPORT_STATUS_LABELS: Record<GoodsReceiptImportStatus
 };
 
 export const GOODS_RECEIPT_IMPORT_STATUS_COLORS: Record<GoodsReceiptImportStatus, string> = {
+  all: 'default',
   processing: 'blue',
   pendingReview: 'orange',
   confirmed: 'green',

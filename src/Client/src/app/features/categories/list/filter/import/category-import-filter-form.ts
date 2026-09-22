@@ -14,7 +14,6 @@ import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 import { NzFormDirective } from 'ng-zorro-antd/form';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
-import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { NzSegmentedComponent, NzSegmentedItemComponent } from 'ng-zorro-antd/segmented';
 
 @Component({
@@ -27,8 +26,6 @@ import { NzSegmentedComponent, NzSegmentedItemComponent } from 'ng-zorro-antd/se
     NzIconDirective,
     NzInputDirective,
     FormField,
-    NzSpaceComponent,
-    NzSpaceItemDirective,
     NzButtonComponent,
     NzSegmentedComponent,
     NzSegmentedItemComponent

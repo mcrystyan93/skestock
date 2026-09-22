@@ -1,6 +1,3 @@
-<nz-card>
-  <ske-stock-filter-form [loading]="store.stockItemsLoading()"
-                         [filter]="store.filter()"
-                         (onFilterChange)="onFilterChange($event)"
-                         (onAdd)="onAdd($event)" />
-</nz-card>
+<ske-stock-filter-form [loading]="store.stockItemsLoading()"
+                       [filter]="store.filter()"
+                       (onFilterChange)="onFilterChange($event)" />

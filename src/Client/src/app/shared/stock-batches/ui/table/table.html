@@ -14,7 +14,7 @@
           [nzScroll]="{x:dimensions.width, y:dimensions.height}">
   <thead>
   <tr>
-    <th nzWidth="200px">
+    <th nzWidth="300px">
       {{ columns.itemName.label }}
     </th>
     <th nzWidth="150px">
@@ -32,15 +32,6 @@
         class="text-right!">
       {{ columns.lineTotal.label }}
     </th>
-    <th nzWidth="120px">
-      {{ columns.expiryDate.label }}
-    </th>
-    <th nzWidth="120px">
-      {{ columns.receivedDate.label }}
-    </th>
-    <th nzWidth="120px">
-      {{ columns.createdDate.label }}
-    </th>
   </tr>
   </thead>
   <tbody>
@@ -51,27 +42,16 @@
         {{ stockBatch.itemName }}
       </td>
       <td>
-        <nz-tag>
-          {{ stockBatch.locationName }}
-        </nz-tag>
+        {{ stockBatch.locationName }}
       </td>
-      <td class="text-right pr-2!">
-        {{ stockBatch.quantity }}
+      <td class="text-right">
+        <nz-tag>{{ stockBatch.quantity }} buc</nz-tag>
       </td>
-      <td class="text-right pr-2!">
-        {{ stockBatch.unitPrice }} RON
+      <td class="text-right">
+        {{ stockBatch.unitPrice | currency:'RON' }}
       </td>
-      <td class="text-right pr-2!">
-        {{ stockBatch.lineTotal }} RON
-      </td>
-      <td>
-        {{ (stockBatch.expiryDate | date) ?? '-' }}
-      </td>
-      <td>
-        {{ stockBatch.receivedDate | date }}
-      </td>
-      <td>
-        {{ stockBatch.createdDate | date }}
+      <td class="text-right">
+        {{ stockBatch.lineTotal | currency:'RON' }}
       </td>
     </tr>
   </ng-template>

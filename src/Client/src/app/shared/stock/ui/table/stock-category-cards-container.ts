@@ -1,13 +1,13 @@
-import {Component, DestroyRef, inject} from '@angular/core';
-import {StockCategoryCards} from './stock-category-cards';
-import {StockStore} from '../../services/stock.store';
-import {CategoryDto, getDropdownFilterValue, StockItemDto} from '@ske/models';
-import {NzModalService} from 'ng-zorro-antd/modal';
-import {StockAdjustmentModal, StockAdjustmentModalData} from '../modals/adjust/stock-adjustment-modal';
-import {StockMoveModal, StockMoveModalData} from '../modals/move/stock-move-modal';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {AddStockBatchModal} from '@ske/shared/stock-batches';
-import {NzEmptyComponent} from 'ng-zorro-antd/empty';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { StockCategoryCards } from './stock-category-cards';
+import { StockStore } from '../../services/stock.store';
+import { CategoryDto, getDropdownFilterValue, StockItemDto } from '@ske/models';
+import { NzModalService } from 'ng-zorro-antd/modal';
+import { StockAdjustmentModal, StockAdjustmentModalData } from '../modals/adjust/stock-adjustment-modal';
+import { StockMoveModal, StockMoveModalData } from '../modals/move/stock-move-modal';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AddStockBatchModal } from '@ske/shared/stock-batches';
+import { NzEmptyComponent } from 'ng-zorro-antd/empty';
 
 @Component({
   imports: [

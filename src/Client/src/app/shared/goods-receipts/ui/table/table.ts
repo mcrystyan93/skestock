@@ -6,6 +6,10 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { TableContainer as StockBatchesTableContainer } from '@ske/shared/stock-batches';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+import { TimeAgoPipe } from '@ske/shared/pipes';
+import { NzTagComponent } from 'ng-zorro-antd/tag';
+import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
 
 @Component({
   imports: [
@@ -15,7 +19,11 @@ import { TableContainer as StockBatchesTableContainer } from '@ske/shared/stock-
     DatePipe,
     StockBatchesTableContainer,
     CurrencyPipe,
-    DecimalPipe
+    DecimalPipe,
+    NzTypographyComponent,
+    TimeAgoPipe,
+    NzTagComponent,
+    NzTooltipDirective
   ],
   selector: 'ske-goods-receipts-table',
   styles: ``,

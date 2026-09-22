@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { isNil } from 'lodash-es';
 import { OrderListDetailModal } from '@ske/shared/order-lists';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { AddStockBatchModal } from '@ske/shared/stock-batches';
 
 @Component({
   imports: [
@@ -39,10 +40,24 @@ export class HeaderContainer {
     });
   }
 
+  public onAddArticle() {
+    const classId = this.classId();
+
+    if (isNil(classId))
+      return;
+
+    const modalRef = this._nzModalService.create({
+      nzContent: AddStockBatchModal,
+      nzData: { schoolClassId: classId },
+      nzCentered: true,
+      nzMaskClosable: false
+    });
+  }
+
   private openGoodsReceiptImportReview(importId: string) {
     this._nzModalService.create({
       nzContent: ReviewModal,
-      nzData: <ReviewModalData>{importId},
+      nzData: <ReviewModalData>{ importId },
       nzWidth: '90vw',
       nzCentered: true,
       nzMaskClosable: false
@@ -59,7 +74,7 @@ export class HeaderContainer {
 
     const modalRef = this._nzModalService.create({
       nzContent: OrderListDetailModal,
-      nzData: {classId},
+      nzData: { classId },
       nzWrapClassName: 'modal-90',
       nzCentered: true,
       nzMaskClosable: false
