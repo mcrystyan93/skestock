@@ -17,23 +17,11 @@
     <!--    <th nzWidth="150px">-->
     <!--      {{ columns.className.label }}-->
     <!--    </th>-->
-    <th nzWidth="150px">
-      {{ columns.status.label }}
+    <th>
+      Stare
     </th>
-    <th nzWidth="150px">
-      {{ columns.uploadedByName.label }}
-    </th>
-    <th nzWidth="150px">
-      {{ columns.uploadedAt.label }}
-    </th>
-    <th nzWidth="150px">
-      {{ columns.processedAt.label }}
-    </th>
-    <th nzWidth="200px">
-      {{ columns.errorMessage.label }}
-    </th>
-    <th nzWidth="150px">
-      {{ columns.createdDate.label }}
+    <th nzWidth="280px">
+      Incarcat
     </th>
     <th nzRight
         nzWidth="250px">
@@ -44,51 +32,47 @@
   <tbody>
   <ng-template nz-virtual-scroll
                let-goodsReceiptImport>
-    <tr>
-      <!--      <td>-->
-      <!--        {{ goodsReceiptImport.className }}-->
-      <!--      </td>-->
+    <tr (click)="goodsReceiptImport.status === 'pendingReview' ? review.emit(goodsReceiptImport) : null"
+        class="cursor-pointer">
       <td>
-        <nz-tag [nzColor]="statusColor(goodsReceiptImport.status)">{{ statusLabel(goodsReceiptImport.status) }}</nz-tag>
+        <nz-badge [nzStatus]="statusColor(goodsReceiptImport.status)"
+                  [nzText]="statusLabel(goodsReceiptImport.status)" />
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0!">{{ goodsReceiptImport.processedAt | timeAgo }}
+        </div>
       </td>
       <td>
-        {{ goodsReceiptImport.uploadedByName }}
-      </td>
-      <td>
-        {{ goodsReceiptImport.uploadedAt | date:'medium' }}
-      </td>
-      <td>
-        {{ goodsReceiptImport.processedAt | date:'medium' }}
-      </td>
-      <td>
-        {{ goodsReceiptImport.errorMessage }}
-      </td>
-      <td>
-        {{ goodsReceiptImport.createdDate | date:'medium' }}
+        <div>{{ goodsReceiptImport.uploadedAt | timeAgo }}</div>
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0!">{{ goodsReceiptImport.uploadedByName || '-' }}
+        </div>
       </td>
       <td nzRight>
+        @if (goodsReceiptImport.status === 'pendingReview') {
+          <button type="button"
+                  nz-button
+                  nzType="primary"
+                  nz-tooltip
+                  skeStopClick
+                  [nzTooltipTitle]="'Revizuieste importul'"
+                  [attr.aria-label]="'Revizuieste importul'"
+                  (click)="review.emit(goodsReceiptImport)">
+            Revizuieste
+          </button>
+        }
         <button type="button"
-                nz-button nzSize="small"
-                nzType="link"
+                nz-button
+                nzType="text"
                 nz-tooltip
+                skeStopClick
                 [nzTooltipTitle]="'Descarca fisierele'"
                 [attr.aria-label]="'Descarca fisierele'"
                 (click)="downloadFile.emit(goodsReceiptImport)">
           <nz-icon nzType="icons:download"></nz-icon>
           <!--          Descarca-->
         </button>
-        @if (goodsReceiptImport.status === 'pendingReview') {
-          <button type="button"
-                  nz-button nzSize="small"
-                  nzType="link"
-                  nz-tooltip
-                  [nzTooltipTitle]="'Revizuieste importul'"
-                  [attr.aria-label]="'Revizuieste importul'"
-                  (click)="review.emit(goodsReceiptImport)">
-            <nz-icon nzType="icons:eye"></nz-icon>
-            <!--            Revizuieste-->
-          </button>
-        }
       </td>
     </tr>
   </ng-template>

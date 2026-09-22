@@ -54,6 +54,7 @@ export class Header {
 
   public onAddGoodsReceipt = output<void>();
   public onOrderCreate = output<void>();
+  public onAddStock = output<void>();
   public onAnalytics = output<void>();
   public onClose = output<void>();
 }

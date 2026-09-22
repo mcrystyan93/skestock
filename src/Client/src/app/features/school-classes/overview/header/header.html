@@ -76,6 +76,14 @@
 
       @switch (selectedTabIndex()) {
         @case (0) {
+          <button nz-button
+                  *nzSpaceItem
+                  nzType="primary"
+                  type="button"
+                  (click)="onAddStock.emit()">
+            <nz-icon nzType="icons:plus"></nz-icon>
+            Adauga articol
+          </button>
         }
         @case (1) {
           <button nz-button
@@ -88,18 +96,18 @@
           </button>
         }
         @case (3) {
+          <button nz-button
+                  *nzSpaceItem
+                  nzType="primary"
+                  type="button"
+                  (click)="onAddGoodsReceipt.emit()">
+            <nz-icon nzType="icons:file-import"></nz-icon>
+            Import aviz comanda
+          </button>
         }
 
       }
-      <!--      <button nz-button-->
-      <!--              nzSize="small"-->
-      <!--              *nzSpaceItem-->
-      <!--              nzType="primary"-->
-      <!--              type="button"-->
-      <!--              (click)="onAddGoodsReceipt.emit()">-->
-      <!--        <nz-icon nzType="icons:file-import"></nz-icon>-->
-      <!--        Adauga comanda-->
-      <!--      </button>-->
+
 
     </nz-space>
   </nz-page-header-extra>

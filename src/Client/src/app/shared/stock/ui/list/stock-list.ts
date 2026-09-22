@@ -17,7 +17,7 @@ import { StockPreferencesService } from '../../services/stock-preferences.servic
   templateUrl: './stock-list.html',
   providers: [StockStore],
   host: {
-    class: 'flex flex-col grow absolute inset-0'
+    class: 'flex flex-col grow gap-2 absolute inset-0'
   }
 })
 export class StockList {

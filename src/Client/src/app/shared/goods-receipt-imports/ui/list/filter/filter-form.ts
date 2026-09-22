@@ -1,14 +1,20 @@
-import { Component, input, linkedSignal, output } from '@angular/core';
-import { GetAllGoodsReceiptImportsRequest } from '@ske/models';
-import { form, FormField, submit } from '@angular/forms/signals';
-import { isNil } from 'lodash-es';
+import { Component, effect, input, linkedSignal, output, untracked } from '@angular/core';
+import {
+  buildEqualsFilterForValue,
+  ColumnFilter,
+  GetAllGoodsReceiptImportsRequest,
+  getFilterValue,
+  GoodsReceiptImportStatus
+} from '@ske/models';
+import { debounce, form, FormField, submit } from '@angular/forms/signals';
+import { isEqual, isNil } from 'lodash-es';
 import { FormsModule } from '@angular/forms';
 import { NzFormDirective } from 'ng-zorro-antd/form';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { NzSegmentedComponent, NzSegmentedItemComponent } from 'ng-zorro-antd/segmented';
 
 @Component({
   imports: [
@@ -20,9 +26,9 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
     NzIconDirective,
     NzInputDirective,
     FormField,
-    NzSpaceComponent,
-    NzSpaceItemDirective,
-    NzButtonComponent
+    NzButtonComponent,
+    NzSegmentedComponent,
+    NzSegmentedItemComponent
   ],
   selector: 'ske-goods-receipt-imports-filter-form',
   styles: ``,
@@ -34,23 +40,44 @@ export class FilterForm {
 
   public readonly onFilterChange = output<GetAllGoodsReceiptImportsRequest>();
 
+  private _initialFormChangeHandled = false;
+
   private readonly _formModel = linkedSignal({
     source: () => this.filter(),
     computation: (filter) => (<GoodsReceiptImportListFilterModel>{
-      searchTerm: filter.searchTerm ?? ''
+      searchTerm: filter.searchTerm ?? '',
+      status: getFilterValue<string>(filter.filters, 'status') ?? 'all'
     })
   });
 
-  public readonly goodsReceiptImportsFilterForm = form(this._formModel);
+  public readonly statusSegmentOptions: { label: string, value: GoodsReceiptImportStatus }[] = [
+    { label: 'Toate', value: 'all' },
+    { label: 'Procesare', value: 'processing' },
+    { label: 'Asteptare', value: 'pendingReview' },
+    { label: 'Confirmate', value: 'confirmed' },
+    { label: 'Esuate', value: 'failed' }
+  ];
 
-  private buildFilterCriteria(): GetAllGoodsReceiptImportsRequest {
-    const criteria = this.goodsReceiptImportsFilterForm().value();
+  public readonly goodsReceiptImportsFilterForm = form(this._formModel, (schemaPath) => {
+    debounce(schemaPath.searchTerm, 300);
+  });
 
-    return {
-      ...this.filter(),
-      searchTerm: criteria.searchTerm
-    };
-  }
+  private readonly _formEffectChange = effect(() => {
+    this.goodsReceiptImportsFilterForm().value();
+
+    if (!this._initialFormChangeHandled) {
+      this._initialFormChangeHandled = true;
+      return;
+    }
+
+    const currentFilter = untracked(() => this.filter());
+    const nextFilter = untracked(() => this.buildFilterCriteria());
+
+    if (isEqual(currentFilter, nextFilter))
+      return;
+
+    untracked(() => this.onSubmit());
+  });
 
   public async onSubmit() {
     let data: GoodsReceiptImportListFilterModel | null = null;
@@ -69,13 +96,30 @@ export class FilterForm {
 
   public clear() {
     this.goodsReceiptImportsFilterForm().reset({
-      searchTerm: ''
+      searchTerm: '',
+      status: 'all'
     });
 
     this.onSubmit();
+  }
+
+  private buildFilterCriteria(): GetAllGoodsReceiptImportsRequest {
+    const criteria = this.goodsReceiptImportsFilterForm().value();
+    const statusFilter = criteria.status && criteria.status !== 'all' ? criteria.status : null;
+    return {
+      ...this.filter(),
+      searchTerm: criteria.searchTerm,
+      filters: [
+        ...this.filter().filters.filter(f => f.field !== 'status'),
+        ...[
+          buildEqualsFilterForValue('status', statusFilter)
+        ].filter((filter): filter is ColumnFilter => filter !== null)
+      ]
+    };
   }
 }
 
 type GoodsReceiptImportListFilterModel = {
   searchTerm: string;
+  status: GoodsReceiptImportStatus;
 }

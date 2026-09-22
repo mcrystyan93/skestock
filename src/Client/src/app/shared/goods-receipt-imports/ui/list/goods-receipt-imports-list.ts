@@ -17,7 +17,7 @@ import { ErrorAlert } from '@ske/shared/errors';
   templateUrl: './goods-receipt-imports-list.html',
   providers: [GoodsReceiptImportListStore],
   host: {
-    class: 'flex flex-col grow absolute inset-0'
+    class: 'flex flex-col grow absolute inset-0 gap-2 mt-4'
   }
 })
 export class GoodsReceiptImportsList {

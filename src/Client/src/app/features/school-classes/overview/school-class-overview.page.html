@@ -1,13 +1,12 @@
 <ske-school-class-overview-header-container [classId]="store.schoolClass()?.id ?? null"
-                                             class="min-w-0" />
+                                            class="min-w-0" />
 
 <ske-error-display [problemDetail]="store.schoolClassProblemDetail()"
-                 [validationErrors]="store.schoolClassValidationErrors()"
-                 class="mx-4" />
+                   [validationErrors]="store.schoolClassValidationErrors()" />
 
 <nz-tabs [nzSelectedIndex]="store.selectedTabIndex()"
          [nzTabBarStyle]="{display:'none'}"
-         class="inner-scroll grow m-4!">
+         class="inner-scroll grow ">
   <nz-tab>
     <ske-stock-list [classId]="store.schoolClass()?.id ?? null" />
   </nz-tab>
@@ -17,8 +16,7 @@
   <nz-tab>
 
     <ske-error-display [problemDetail]="store.goodsReceiptsProblemDetail()"
-                     [validationErrors]="store.goodsReceiptsValidationErrors()"
-                     class="mx-4" />
+                       [validationErrors]="store.goodsReceiptsValidationErrors()" />
 
     <ske-school-class-overview-goods-receipts-tab [classId]="store.schoolClass()?.id ?? null"
                                                   [receiptId]="store.receiptIdQueryParam()" />

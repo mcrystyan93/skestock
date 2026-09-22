@@ -9,20 +9,24 @@ import {
   GoodsReceiptImportStatus
 } from '@ske/models';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { DatePipe } from '@angular/common';
-import { NzTagComponent } from 'ng-zorro-antd/tag';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
+import { NzBadgeComponent } from 'ng-zorro-antd/badge';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+import { TimeAgoPipe } from '@ske/shared/pipes';
+import { StopClick } from '@ske/shared/directives';
 
 @Component({
   imports: [
     NzTableModule,
-    DatePipe,
-    NzTagComponent,
     NzButtonComponent,
     NzIconDirective,
-    NzTooltipDirective
+    NzTooltipDirective,
+    NzBadgeComponent,
+    NzTypographyComponent,
+    TimeAgoPipe,
+    StopClick
   ],
   selector: 'ske-goods-receipt-imports-table',
   styles: ``,

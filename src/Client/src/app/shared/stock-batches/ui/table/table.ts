@@ -2,13 +2,14 @@ import { Component, input } from '@angular/core';
 import { BaseTableWithFilter } from '@ske/shared/tables';
 import { GetAllStockBatchesRequest, STOCK_BATCH_TABLE_COLUMNS, StockBatchListItemDto } from '@ske/models';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
 
 @Component({
   imports: [
     NzTableModule,
     DatePipe,
+    CurrencyPipe,
     NzTagComponent
   ],
   selector: 'ske-stock-batches-table',

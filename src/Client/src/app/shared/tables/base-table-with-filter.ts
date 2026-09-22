@@ -6,6 +6,7 @@ import {
   effect,
   ElementRef,
   inject,
+  input,
   signal,
   viewChild
 } from '@angular/core';
@@ -22,6 +23,7 @@ import { TableDimensions } from './table-dimensions';
   template: ''
 })
 export class BaseTableWithFilter<T, K extends BasePaginationFilter> extends BaseList<T, K> implements AfterViewInit {
+  public readonly reduceWidth = input<number>(0);
   public readonly itemsVirtualData = computed<Array<VirtualData<T>>>(() =>
     this.items().map((item, index) => ({ ...item, index }))
   );
@@ -132,9 +134,10 @@ export class BaseTableWithFilter<T, K extends BasePaginationFilter> extends Base
       const tableHeaderContainer = element.querySelector('.ant-table-header') as HTMLElement | null;
       const headerHeight = Math.round(tableHeaderContainer?.getBoundingClientRect().height ?? 0);
       const availableHeight = Math.max(element.clientHeight - headerHeight, 0);
+      const widthToReduce = this.reduceWidth() ?? 0;
 
       this.tableDimensions.set({
-        width: `${element.clientWidth - 20}px`,
+        width: `${element.clientWidth - 20 - widthToReduce}px`,
         height: `${availableHeight}px`,
         isLoaded: true
       });
