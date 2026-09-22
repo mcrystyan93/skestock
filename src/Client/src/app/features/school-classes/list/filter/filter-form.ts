@@ -1,14 +1,20 @@
-import { Component, effect, input, linkedSignal, output } from '@angular/core';
-import { ColumnFilter, GetAllSchoolClassesRequest } from '@ske/models';
-import { form, FormField, submit } from '@angular/forms/signals';
-import { isNil } from 'lodash-es';
+import { Component, effect, input, linkedSignal, output, untracked } from '@angular/core';
+import {
+  buildEqualsFilterForValue,
+  ClassStatus,
+  ColumnFilter,
+  GetAllSchoolClassesRequest,
+  getFilterValue
+} from '@ske/models';
+import { debounce, form, FormField, submit } from '@angular/forms/signals';
+import { isEqual, isNil } from 'lodash-es';
 import { FormsModule } from '@angular/forms';
 import { NzFormDirective } from 'ng-zorro-antd/form';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { NzSegmentedComponent, NzSegmentedItemComponent } from 'ng-zorro-antd/segmented';
 
 @Component({
   imports: [
@@ -20,9 +26,9 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
     NzIconDirective,
     NzInputDirective,
     FormField,
-    NzSpaceComponent,
-    NzSpaceItemDirective,
-    NzButtonComponent
+    NzButtonComponent,
+    NzSegmentedComponent,
+    NzSegmentedItemComponent
   ],
   selector: 'ske-school-class-filter-form',
   styles: ``,
@@ -33,49 +39,56 @@ export class FilterForm {
   public readonly filter = input.required<GetAllSchoolClassesRequest>();
 
   public readonly onFilterChange = output<GetAllSchoolClassesRequest>();
-  private initialFilterEmitted = false;
+  private _initialFilterEmitted = false;
+  private _initialFormChangeHandled = false;
 
   private readonly _formModel = linkedSignal({
     source: () => this.filter(),
     computation: (filter) => (<SchoolClassListFilterModel>{
       searchTerm: filter.searchTerm ?? '',
-      filters: filter.filters ?? []
+      status: getFilterValue<ClassStatus>(filter.filters, 'status') ?? ClassStatus.All
     })
   });
 
-  public readonly schoolClassListFilterForm = form(this._formModel);
+  public readonly statusSegmentOptions: { label: string, value: ClassStatus }[] = [
+    { label: 'Toate', value: ClassStatus.All },
+    { label: 'Activa', value: ClassStatus.Active },
+    { label: 'Viitoare', value: ClassStatus.Upcoming },
+    { label: 'Finalizata', value: ClassStatus.Closed },
+    { label: 'Intrerupta', value: ClassStatus.Paused }
+  ];
+
+  public readonly schoolClassListFilterForm = form(this._formModel, (schemaPath) => {
+    debounce(schemaPath.searchTerm, 300);
+  });
 
   private readonly _initialFilterEffectRef = effect(() => {
-    if (this.initialFilterEmitted)
+    if (this._initialFilterEmitted)
       return;
     // Wait until required inputs are initialized, then trigger the first list load.
     this.filter();
 
     this.onFilterChange.emit(this.buildFilterCriteria());
 
-    this.initialFilterEmitted = true;
+    this._initialFilterEmitted = true;
   });
 
-  private buildFilterCriteria(): GetAllSchoolClassesRequest {
-    const criteria = this.schoolClassListFilterForm().value();
+  private readonly _formEffectChange = effect(() => {
+    this.schoolClassListFilterForm().value();
 
-    return {
-      ...this.filter(),
-      searchTerm: criteria.searchTerm,
-      filters: (criteria.filters ?? [])
-        .filter(
-          (f) => !isNil(f.value) && !isNil(f.fieldType) && !isNil(f.operator) && !isNil(f.field)
-        )
-        .map((f) => ({
-          value: f.value,
-          fieldType: f.fieldType,
-          operator: f.operator,
-          field: f.field,
-          displayValue: f.displayValue,
-          booleanDisplaySelector: f.booleanDisplaySelector
-        }))
-    };
-  }
+    if (!this._initialFormChangeHandled) {
+      this._initialFormChangeHandled = true;
+      return;
+    }
+
+    const currentFilter = untracked(() => this.filter());
+    const nextFilter = untracked(() => this.buildFilterCriteria());
+
+    if (isEqual(currentFilter, nextFilter))
+      return;
+
+    untracked(() => this.onSubmit());
+  });
 
   public async onSubmit() {
     let data: SchoolClassListFilterModel | null = null;
@@ -83,10 +96,7 @@ export class FilterForm {
       data = this.schoolClassListFilterForm().value();
     });
 
-    if (!isValid)
-      return;
-
-    if (isNil(data))
+    if (!isValid || isNil(data))
       return;
 
     this.onFilterChange.emit(this.buildFilterCriteria());
@@ -95,14 +105,29 @@ export class FilterForm {
   public clear() {
     this.schoolClassListFilterForm().reset({
       searchTerm: '',
-      filters: []
+      status: ClassStatus.All
     });
 
     this.onSubmit();
+  }
+
+  private buildFilterCriteria(): GetAllSchoolClassesRequest {
+    const criteria = this.schoolClassListFilterForm().value();
+    const statusFilter = criteria.status && criteria.status !== ClassStatus.All ? criteria.status : null;
+    return {
+      ...this.filter(),
+      searchTerm: criteria.searchTerm,
+      filters: [
+        ...this.filter().filters.filter(f => f.field !== 'status'),
+        ...[
+          buildEqualsFilterForValue('status', statusFilter)
+        ].filter((filter): filter is ColumnFilter => filter !== null)
+      ]
+    };
   }
 }
 
 type SchoolClassListFilterModel = {
   searchTerm: string;
-  filters: Array<ColumnFilter>;
+  status: ClassStatus;
 }

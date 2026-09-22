@@ -1,6 +1,12 @@
 import { Component, effect, input, linkedSignal, output, untracked } from '@angular/core';
 import { debounce, form, FormField, submit } from '@angular/forms/signals';
-import { GetAllOrderListsRequest } from '@ske/models';
+import {
+  buildEqualsFilterForValue,
+  ColumnFilter,
+  GetAllOrderListsRequest,
+  getFilterValue,
+  OrderListStatus
+} from '@ske/models';
 import { FormsModule } from '@angular/forms';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 import { NzInputDirective, NzInputPrefixDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
@@ -8,6 +14,8 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzDividerComponent } from 'ng-zorro-antd/divider';
 import { isEqual, isNil } from 'lodash-es';
+import { NzFormDirective } from 'ng-zorro-antd/form';
+import { NzSegmentedComponent, NzSegmentedItemComponent } from 'ng-zorro-antd/segmented';
 
 @Component({
   imports: [
@@ -20,7 +28,10 @@ import { isEqual, isNil } from 'lodash-es';
     NzInputPrefixDirective,
     NzInputDirective,
     NzButtonComponent,
-    NzDividerComponent
+    NzDividerComponent,
+    NzFormDirective,
+    NzSegmentedComponent,
+    NzSegmentedItemComponent
   ],
   selector: 'ske-order-list-filter-form',
   styles: ``,
@@ -31,16 +42,23 @@ export class FilterForm {
   public readonly filter = input.required<GetAllOrderListsRequest>();
 
   public readonly onFilterChange = output<GetAllOrderListsRequest>();
-  public readonly onCreate = output<void>();
 
   private _initialFormChangeHandled = false;
 
   private readonly _formModel = linkedSignal({
     source: () => this.filter(),
     computation: (filter): OrderListFilterModel => ({
-      searchTerm: filter.searchTerm ?? ''
+      searchTerm: filter.searchTerm ?? '',
+      status: getFilterValue<OrderListStatus>(filter.filters, 'status') ?? 'All'
     })
   });
+
+  public readonly statusSegmentOptions: { label: string, value: OrderListStatus }[] = [
+    { label: 'Toate', value: 'All' },
+    { label: 'Ciorne', value: 'Draft' },
+    { label: 'Finalizate', value: 'Submitted' },
+    { label: 'Anulate', value: 'Cancelled' }
+  ];
 
   public readonly orderListFilterForm = form(this._formModel, (schemaPath) => {
     debounce(schemaPath.searchTerm, 300);
@@ -65,10 +83,16 @@ export class FilterForm {
 
   private buildFilterCriteria(): GetAllOrderListsRequest {
     const criteria = this.orderListFilterForm().value();
-
+    const statusFilter = criteria.status && criteria.status !== 'All' ? criteria.status : null;
     return {
       ...this.filter(),
-      searchTerm: criteria.searchTerm
+      searchTerm: criteria.searchTerm,
+      filters: [
+        ...this.filter().filters.filter(f => f.field !== 'status'),
+        ...[
+          buildEqualsFilterForValue('status', statusFilter)
+        ].filter((filter): filter is ColumnFilter => filter !== null)
+      ]
     };
   }
 
@@ -86,7 +110,8 @@ export class FilterForm {
 
   public clear() {
     this.orderListFilterForm().reset({
-      searchTerm: ''
+      searchTerm: '',
+      status: 'All'
     });
 
     this.onSubmit();
@@ -95,4 +120,5 @@ export class FilterForm {
 
 type OrderListFilterModel = {
   searchTerm: string;
+  status: OrderListStatus;
 };

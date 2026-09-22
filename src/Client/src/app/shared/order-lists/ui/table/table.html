@@ -24,10 +24,7 @@
     <th nzWidth="170px">
       {{ columns.status.label }}
     </th>
-    <th nzWidth="150px">
-      {{ columns.createdDate.label }}
-    </th>
-    <th nzWidth="180px">
+    <th nzWidth="250px">
       {{ columns.createdByName.label }}
     </th>
     <th nzWidth="150px">
@@ -52,8 +49,10 @@
           {{ orderList.name || '-' }}
         </span>
       </td>
-      <td class="text-right pr-3!">
-        {{ orderList.lineCount }}
+      <td class="text-right">
+        <nz-tag>
+          {{ orderList.lineCount }}
+        </nz-tag>
       </td>
       <td>
         <nz-tag [nzColor]="statusColor(orderList.status)"
@@ -67,25 +66,11 @@
           {{ statusLabel(orderList.status) }}
           <nz-icon nzType="icons:chevron-down"></nz-icon>
         </nz-tag>
-<!--        <button type="button"-->
-<!--                nz-button-->
-<!--                nz-dropdown-->
-<!--                nzSize="small"-->
-<!--                nzType="link"-->
-<!--                nzTrigger="hover"-->
-<!--                nzPlacement="bottomLeft"-->
-<!--                [nzDropdownMenu]="statusMenu"-->
-<!--                [nzLoading]="statusChangingId() === orderList.id"-->
-<!--                [disabled]="loading() || statusChangingId() !== null"-->
-<!--                skeStopClick-->
-<!--                [attr.aria-label]="'Schimbă statusul comenzii ' + (orderList.name || '')">-->
-<!--          {{ statusLabel(orderList.status) }}-->
-<!--          <nz-icon nzType="icons:chevron-down"></nz-icon>-->
-<!--        </button>-->
         <nz-dropdown-menu #statusMenu="nzDropdownMenu">
           <ul nz-menu>
             @for (action of availableActions(orderList.status); track action) {
               <li nz-menu-item
+                  [nzDanger]="action === 'cancel'"
                   [nzDisabled]="loading() || statusChangingId() !== null"
                   (click)="onStatusChange.emit({id: orderList.id, action})">
                 {{ actionLabel(action) }}
@@ -95,28 +80,27 @@
         </nz-dropdown-menu>
       </td>
       <td>
-        {{ orderList.createdDate | date }}
+        {{ orderList.createdDate | timeAgo }}
+        <div nz-typography
+             nzType="secondary">{{ orderList.createdByName || '-' }}
+        </div>
       </td>
       <td>
-        {{ orderList.createdByName || '-' }}
-      </td>
-      <td>
-        {{ (orderList.submittedAt | date) || '-' }}
+        {{ (orderList.submittedAt | timeAgo) || '-' }}
       </td>
       <td>
         @if (orderList.status === 'Submitted') {
           <button type="button"
                   nz-button
-                  nzSize="small"
-                  nzType="default"
-                  class="mr-2"
+                  nzType="text"
                   [nzLoading]="isDownloading(orderList.id)"
                   [disabled]="isDownloading(orderList.id)"
                   skeStopClick
                   (click)="onDownload.emit(orderList)"
+                  nz-tooltip
+                  [nzTooltipTitle]="'Descarcă Excel pentru comanda ' + (orderList.name || '')"
                   [attr.aria-label]="'Descarcă Excel pentru comanda ' + (orderList.name || '')">
-            <nz-icon nzType="icons:file-arrow-down"></nz-icon>
-            Descarca excel
+            <nz-icon nzType="icons:download"></nz-icon>
           </button>
         }
       </td>

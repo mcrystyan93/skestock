@@ -1,5 +1,11 @@
 <nz-page-header [nzGhost]="false"
                 class="block min-w-0 max-w-full overflow-hidden">
+  <nz-breadcrumb nz-page-header-breadcrumb
+                 nzSeparator=">">
+    <nz-breadcrumb-item>Acasa</nz-breadcrumb-item>
+    <nz-breadcrumb-item>Clase</nz-breadcrumb-item>
+    <nz-breadcrumb-item>{{ schoolClass().name }}</nz-breadcrumb-item>
+  </nz-breadcrumb>
   <nz-page-header-title>
     {{ schoolClass().name }}
   </nz-page-header-title>
@@ -12,7 +18,7 @@
       <div class="flex w-max min-w-full flex-nowrap gap-4">
         <nz-statistic class="flex-none"
                       nzTitle="Comenzi receptionate"
-                      [nzValue]="summary().noOfGoodsReceipt ?? 0"/>
+                      [nzValue]="summary().noOfGoodsReceipt ?? 0" />
         <nz-statistic class="flex-none"
                       nzTitle="Totalul comenzilor"
                       [nzValueTemplate]="totalAmountTemplate">
@@ -21,10 +27,10 @@
           </ng-template>
         </nz-statistic>
         <ske-goods-receipt-cost-statistic class="flex-none"
-                                          [receipts]="summary().goodsReceipts ?? []"/>
+                                          [receipts]="summary().goodsReceipts ?? []" />
         <nz-statistic class="flex-none"
                       nzTitle="Nr total de articole"
-                      [nzValue]="summary().distinctItemsCount ?? 0"/>
+                      [nzValue]="summary().distinctItemsCount ?? 0" />
         <nz-statistic class="flex-none"
                       nzTitle="Articole cu stoc redus"
                       [nzValueTemplate]="lowStockItemsCountTemplate">
@@ -38,10 +44,10 @@
         </nz-statistic>
         <nz-statistic class="flex-none"
                       nzTitle="Comenzi in procesare"
-                      [nzValue]="summary().processingImportsCount ?? 0"/>
+                      [nzValue]="summary().processingImportsCount ?? 0" />
         <nz-statistic class="flex-none"
                       nzTitle="Comenzi in asteptare"
-                      [nzValue]="summary().pendingReviewImportsCount ?? 0"/>
+                      [nzValue]="summary().pendingReviewImportsCount ?? 0" />
         <nz-statistic class="flex-none"
                       nzTitle="Comenzi esuate"
                       [nzValueTemplate]="failedImportsCountTemplate">
@@ -59,25 +65,42 @@
 
   <nz-page-header-extra>
     <nz-space>
-      <button nz-button
-              nzSize="small"
-              *nzSpaceItem
-              nzType="primary"
-              type="button"
-              (click)="onAddGoodsReceipt.emit()">
-        <nz-icon nzType="icons:file-import"></nz-icon>
-        Adauga comanda
-      </button>
-
       <button type="button"
               *nzSpaceItem
               nz-button
-              nzSize="small"
               nzType="default"
               (click)="onClose.emit()">
         <nz-icon nzType="icons:xmark"></nz-icon>
         Inchide
       </button>
+
+      @switch (selectedTabIndex()) {
+        @case (0) {
+        }
+        @case (1) {
+          <button nz-button
+                  *nzSpaceItem
+                  nzType="primary"
+                  type="button"
+                  (click)="onOrderCreate.emit()">
+            <nz-icon nzType="icons:plus"></nz-icon>
+            Creaza comanda
+          </button>
+        }
+        @case (3) {
+        }
+
+      }
+      <!--      <button nz-button-->
+      <!--              nzSize="small"-->
+      <!--              *nzSpaceItem-->
+      <!--              nzType="primary"-->
+      <!--              type="button"-->
+      <!--              (click)="onAddGoodsReceipt.emit()">-->
+      <!--        <nz-icon nzType="icons:file-import"></nz-icon>-->
+      <!--        Adauga comanda-->
+      <!--      </button>-->
+
     </nz-space>
   </nz-page-header-extra>
 
@@ -90,3 +113,5 @@
     </nz-tabs>
   </nz-page-header-footer>
 </nz-page-header>
+
+<ske-theme-switcher class="absolute top-1.5 right-4" />

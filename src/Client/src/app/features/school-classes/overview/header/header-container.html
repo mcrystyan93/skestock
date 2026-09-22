@@ -3,5 +3,6 @@
                                   [selectedTabIndex]="store.selectedTabIndex()"
                                   (selectedTabIndexChange)="store.selectTab($event)"
                                   (onAddGoodsReceipt)="addGoodsReceipt()"
+                                  (onOrderCreate)="createOrderList()"
                                   (onAnalytics)="openAnalytics()"
                                   (onClose)="close()" />

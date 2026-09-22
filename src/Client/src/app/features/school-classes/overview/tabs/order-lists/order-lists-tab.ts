@@ -1,12 +1,20 @@
 import { Component, DestroyRef, effect, inject, input, untracked } from '@angular/core';
 import { ColumnFilter, OrderListListItemDto, OrderListStatusChange } from '@ske/models';
-import { OrderListDetailModal, OrderListExportService, OrderListListStore, Table } from '@ske/shared/order-lists';
+import {
+  orderListApiEvents,
+  OrderListDetailModal,
+  OrderListExportService,
+  OrderListListStore,
+  Table
+} from '@ske/shared/order-lists';
 import { ErrorAlert } from '@ske/shared/errors';
 import { isNil } from 'lodash-es';
 import { FilterContainer } from './filter/filter-container';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Events } from '@ngrx/signals/events';
+import { tap } from 'rxjs';
 
 @Component({
   imports: [ErrorAlert, FilterContainer, Table],
@@ -14,8 +22,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   selector: 'ske-school-class-overview-order-lists-tab',
   styles: ``,
   template: `
-    <ske-order-list-filter-container class="block mb-4"
-                                     (onCreate)="createOrderList()"/>
+    <ske-order-list-filter-container class="block mb-4" />
 
     <ske-error-display [problemDetail]="store.orderListsProblemDetail()"
                        [validationErrors]="store.orderListsValidationErrors()"
@@ -48,6 +55,7 @@ export class OrderListsTab {
 
   private readonly _nzModalService = inject(NzModalService);
   private readonly _nzMessageService = inject(NzMessageService);
+  private readonly _storeEvents = inject(Events);
   private readonly _destroyRef = inject(DestroyRef);
 
   private readonly _classIdEffectRef = effect(() => {
@@ -63,29 +71,15 @@ export class OrderListsTab {
       });
     });
   });
+  private readonly _saveSuccessRef = this._storeEvents.on(orderListApiEvents.saveSuccess)
+    .pipe(
+      takeUntilDestroyed(this._destroyRef),
+      tap(() => this.store.reload())
+    )
+    .subscribe();
 
-  public createOrderList() {
-    const classId = this.classId();
-
-    if (isNil(classId) || classId.trim().length === 0) {
-      this._nzMessageService.error('Clasa nu este disponibilă pentru crearea comenzii.');
-      return;
-    }
-
+  public openOrderList(orderList: OrderListListItemDto) {
     const modalRef = this._nzModalService.create({
-      nzContent: OrderListDetailModal,
-      nzData: {classId},
-      nzWrapClassName: 'modal-90',
-      nzCentered: true,
-      nzMaskClosable: false
-    });
-
-    modalRef.afterClose
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe(() => this.store.reload());
-  }
-
-  public openOrderList(orderList: OrderListListItemDto) {    const modalRef = this._nzModalService.create({
       nzContent: OrderListDetailModal,
       nzData: {
         id: orderList.id,

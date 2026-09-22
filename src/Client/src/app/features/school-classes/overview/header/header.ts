@@ -1,6 +1,9 @@
 import { Component, input, model, output } from '@angular/core';
 import {
-  NzPageHeaderComponent, NzPageHeaderContentDirective, NzPageHeaderExtraDirective, NzPageHeaderFooterDirective,
+  NzPageHeaderComponent,
+  NzPageHeaderContentDirective,
+  NzPageHeaderExtraDirective,
+  NzPageHeaderFooterDirective,
   NzPageHeaderSubtitleDirective,
   NzPageHeaderTitleDirective
 } from 'ng-zorro-antd/page-header';
@@ -13,6 +16,8 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { GoodsReceiptCostStatistic } from './goods-receipt-cost-statistic';
+import { NzBreadCrumbComponent, NzBreadCrumbItemComponent } from 'ng-zorro-antd/breadcrumb';
+import { ThemeSwitcher } from '@ske/shared/theme';
 
 @Component({
   imports: [
@@ -32,7 +37,10 @@ import { GoodsReceiptCostStatistic } from './goods-receipt-cost-statistic';
     NzButtonComponent,
     NzIconDirective,
     NzSpaceComponent,
-    NzSpaceItemDirective
+    NzSpaceItemDirective,
+    NzBreadCrumbComponent,
+    NzBreadCrumbItemComponent,
+    ThemeSwitcher
   ],
   selector: 'ske-school-class-overview-header',
   styles: ``,
@@ -43,7 +51,9 @@ export class Header {
   public readonly summary = input.required<Partial<SchoolClassSummary>>();
 
   public selectedTabIndex = model<number>(0);
+
   public onAddGoodsReceipt = output<void>();
+  public onOrderCreate = output<void>();
   public onAnalytics = output<void>();
   public onClose = output<void>();
 }

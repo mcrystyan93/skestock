@@ -5,6 +5,9 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { AddGoodsReceiptModal } from '@ske/shared/goods-receipts';
 import { ReviewModal, ReviewModalData } from '@ske/shared/goods-receipt-imports';
 import { Router } from '@angular/router';
+import { isNil } from 'lodash-es';
+import { OrderListDetailModal } from '@ske/shared/order-lists';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 @Component({
   imports: [
@@ -22,6 +25,7 @@ export class HeaderContainer {
 
   private readonly _router = inject(Router);
   private readonly _nzModalService = inject(NzModalService);
+  private readonly _nzMessageService = inject(NzMessageService);
   private readonly _destroyRef = inject(DestroyRef);
 
   public addGoodsReceipt() {
@@ -40,6 +44,23 @@ export class HeaderContainer {
       nzContent: ReviewModal,
       nzData: <ReviewModalData>{importId},
       nzWidth: '90vw',
+      nzCentered: true,
+      nzMaskClosable: false
+    });
+  }
+
+  public createOrderList() {
+    const classId = this.classId();
+
+    if (isNil(classId) || classId.trim().length === 0) {
+      this._nzMessageService.error('Clasa nu este disponibilă pentru crearea comenzii.');
+      return;
+    }
+
+    const modalRef = this._nzModalService.create({
+      nzContent: OrderListDetailModal,
+      nzData: {classId},
+      nzWrapClassName: 'modal-90',
       nzCentered: true,
       nzMaskClosable: false
     });

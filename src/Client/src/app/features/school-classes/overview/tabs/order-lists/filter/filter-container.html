@@ -1,6 +1,3 @@
-<nz-card>
-  <ske-order-list-filter-form [loading]="store.orderListsLoading()"
-                              [filter]="store.filter()"
-                              (onFilterChange)="onFilterChange($event)"
-                              (onCreate)="onCreate.emit()" />
-</nz-card>
+<ske-order-list-filter-form [loading]="store.orderListsLoading()"
+                            [filter]="store.filter()"
+                            (onFilterChange)="onFilterChange($event)" />

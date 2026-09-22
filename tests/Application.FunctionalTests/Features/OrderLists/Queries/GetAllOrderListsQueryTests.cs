@@ -1,6 +1,7 @@
 using skestock.Application.Common.Exceptions;
 using skestock.Application.Common.Filtering;
 using skestock.Application.Common.Models;
+using skestock.Application.Features.OrderLists.Commands.CancelOrderList;
 using skestock.Application.Features.OrderLists.Commands.CreateOrderList;
 using skestock.Application.Features.OrderLists.Commands.SubmitOrderList;
 using skestock.Application.Features.OrderLists.Models;
@@ -106,6 +107,25 @@ public class GetAllOrderListsQueryTests : TestBase
         result.IsSuccess.ShouldBeTrue();
         result.Value.Data.Count().ShouldBe(1);
         result.Value.Data.Single().Status.ShouldBe(OrderListStatus.Submitted.ToString());
+    }
+
+    [Test]
+    public async Task Handle_WithStatusNameFilter_ReturnsOnlyMatchingLists()
+    {
+        await SeedOrderListAsync("Draft-One");
+        var cancelledId = await SeedOrderListAsync("Cancelled-One", submit: true);
+        var cancelled = await TestApp.SendAsync(new CancelOrderListCommand { Id = cancelledId });
+
+        cancelled.IsSuccess.ShouldBeTrue();
+
+        var result = await TestApp.SendAsync(Query(
+            _prefix,
+            filters: [new ColumnFilter("status", FilterOperator.Equals, OrderListStatus.Cancelled.ToString())]));
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Data.Count().ShouldBe(1);
+        result.Value.Data.Single().Id.ShouldBe(cancelledId);
+        result.Value.Data.Single().Status.ShouldBe(OrderListStatus.Cancelled.ToString());
     }
 
     [Test]
