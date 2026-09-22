@@ -1,5 +1,5 @@
 import { Component, DestroyRef, inject, signal, viewChild } from '@angular/core';
-import { StockAdjustmentState, stockApiEvents } from '../../../services/stock-adjustment.store';
+import { StockAdjustmentState } from '../../../services/stock-adjustment.store';
 import { AdjustStockRequest, StockItemDto } from '@ske/models';
 import { NZ_MODAL_DATA, NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zorro-antd/modal';
 import { NzSpaceCompactComponent, NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
@@ -17,6 +17,7 @@ import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/drop
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
 import { NzAvatarComponent } from 'ng-zorro-antd/avatar';
+import { StockEvents } from '../../../services/stock.events';
 
 @Component({
   imports: [
@@ -53,7 +54,7 @@ export class StockAdjustmentModal {
   private readonly _nzMessageService = inject(NzMessageService);
   private readonly _close$ = new BehaviorSubject(false);
 
-  private readonly _adjustSuccessRef = this._storeEvents.on(stockApiEvents.adjustSuccess)
+  private readonly _adjustSuccessRef = this._storeEvents.on(StockEvents.adjustSuccess)
     .pipe(
       takeUntilDestroyed(this._destroyRef),
       tap(() => {
@@ -82,7 +83,7 @@ export class StockAdjustmentModal {
 
     this.store.adjustStock(this.mapAdjustRequest(formData));
 
-    if(shouldClose)
+    if (shouldClose)
       this._close$.next(true);
   }
 

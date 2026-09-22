@@ -22,7 +22,7 @@ type StockCollectionState = {
   stockItems: StockItemDto[];
   hasExpiredItems: boolean;
   filter: GetClassLocationStockRequest;
-  groupedStockItems: Map<StockItemCategoryGroup, StockItemDto[]>;
+  groupedStockItems: StockItemCategoryGroup[];
 };
 
 const initialState: StockCollectionState = {
@@ -36,7 +36,7 @@ const initialState: StockCollectionState = {
     lowStockOnly: false,
     expiredOnly: false
   },
-  groupedStockItems: new Map()
+  groupedStockItems: []
 };
 
 /**
@@ -63,35 +63,42 @@ export function withStockCollection() {
             store.setStockItemsLoading();
             store.clearStockItemsErrors();
             store.stockPreferences.setShowHiddenProducts(request.includeHidden);
-            patchState(store, {filter: request});
+            patchState(store, { filter: request });
           }),
           switchMap((request) =>
             store.stockHttp.getClassLocationStock(request)
               .pipe(
                 mapResponse({
                   next: (result) => {
-                    const groupedStockItems = new Map<StockItemCategoryGroup, StockItemDto[]>();
-                    const groupsByCategoryId = new Map<string, StockItemCategoryGroup>();
-
+                    // create a list of StockItemCategoryGroup. If the category appears for the first time, it's a header, otherwise it's an item and we put the item there
+                    const groupedStockItems = new Map<string, StockItemCategoryGroup>();
                     for (const item of result.items) {
-                      let group = groupsByCategoryId.get(item.categoryId);
-                      if (!group) {
-                        group = {
+                      if (!groupedStockItems.has(item.categoryId)) {
+                        groupedStockItems.set(item.categoryId, {
                           categoryId: item.categoryId,
                           categoryName: item.categoryName,
-                          categoryIcon: item.categoryIcon ?? null
-                        };
-                        groupsByCategoryId.set(item.categoryId, group);
-                        groupedStockItems.set(group, []);
+                          categoryIcon: item.categoryIcon,
+                          // all items for this category
+                          items: result.items.filter(i => i.categoryId === item.categoryId),
+                          item: null,
+                          isHeader: true,
+                          trackKey: `${item.categoryId}_header`
+                        });
                       }
-                      groupedStockItems.get(group)!.push(item);
+                      groupedStockItems.set(`${item.categoryId}-${item.itemId}-${item.locationId}`, {
+                        categoryId: item.categoryId,
+                        categoryName: item.categoryName,
+                        categoryIcon: item.categoryIcon,
+                        items: [],
+                        item: item,
+                        isHeader: false,
+                        trackKey: `${item.categoryId}-${item.itemId}-${item.locationId}`
+                      });
                     }
 
                     // sort the groups by category name
-                    const sortedGroupedStockItems = new Map(
-                      Array.from(groupedStockItems.entries()).sort((a, b) =>
-                        a[0].categoryName.localeCompare(b[0].categoryName)
-                      )
+                    const sortedGroupedStockItems = Array.from(groupedStockItems.values()).sort((a, b) =>
+                      a.categoryName.localeCompare(b.categoryName)
                     );
 
                     patchState(store, {

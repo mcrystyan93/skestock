@@ -40,6 +40,10 @@ export type StockItemCategoryGroup = {
   categoryId: string;
   categoryName: string;
   categoryIcon?: IconPickerValue | null;
+  items: StockItemDto[];
+  item: StockItemDto | null;
+  isHeader:boolean;
+  trackKey:string
 };
 
 /**

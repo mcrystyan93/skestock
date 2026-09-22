@@ -1,0 +1,31 @@
+<td colspan="4">
+  <div class="flex items-center gap-2">
+    <nz-icon [nzType]="category().categoryIcon?.fileName
+              ? ('icons:' + category().categoryIcon?.fileName)
+              : 'icons:box'"
+             class="text-lg text-blue-500!"></nz-icon>
+    <strong>
+      {{ category().categoryName }}
+    </strong>
+    <div nz-typography
+         nzType="secondary"
+         class="mb-0!">{{ items().length ?? 0 }} articol(e)
+    </div>
+    @if (numberOfExpiredItems() > 0) {
+      <nz-tag nzColor="red">{{ numberOfExpiredItems() }} expirate</nz-tag>
+    }
+    @if (numberOfLowStockItems() > 0) {
+      <nz-tag nzColor="orange">{{ numberOfLowStockItems() }} stoc scazut</nz-tag>
+    }
+  </div>
+</td>
+<td>
+  <button nz-button
+          nzType="text"
+          type="button"
+          [attr.aria-label]="'Adauga stoc pentru ' + category().categoryName"
+          (click)="add.emit(category())">
+    <nz-icon nzType="icons:plus"></nz-icon>
+    Adauga
+  </button>
+</td>

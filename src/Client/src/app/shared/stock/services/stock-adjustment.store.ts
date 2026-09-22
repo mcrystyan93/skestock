@@ -1,5 +1,5 @@
 import { AdjustStockRequest, StockItemDto } from '@ske/models';
-import { patchState, signalStore, type, withMethods, withProps, withState } from '@ngrx/signals';
+import { patchState, signalStore, withMethods, withProps, withState } from '@ngrx/signals';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { inject } from '@angular/core';
@@ -7,17 +7,13 @@ import { StockHttp } from './stock.http';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
-import { eventGroup, injectDispatch } from '@ngrx/signals/events';
+import { injectDispatch } from '@ngrx/signals/events';
+import { StockEvents } from './stock.events';
 
 type StockAdjustmentState = { adjustedItem: StockItemDto | null };
 const initialState: StockAdjustmentState = { adjustedItem: null };
 
-export const stockApiEvents = eventGroup({
-  source: 'Stock API',
-  events: {
-    adjustSuccess: type<void>()
-  }
-});
+
 
 /**
  * Mutation-only counterpart to `withStockCollection` - reconciles a physical recount for a
@@ -29,7 +25,7 @@ export const StockAdjustmentState = signalStore(
   withProblemDetailsFeature('stockAdjustment'),
   withProps(() => ({
     stockHttp: inject(StockHttp),
-    dispatcher: injectDispatch(stockApiEvents)
+    dispatcher: injectDispatch(StockEvents)
   })),
   withMethods((store) => {
     const adjustStock = rxMethod<AdjustStockRequest>(

@@ -1,8 +1,6 @@
 import { Component, computed, input, output } from '@angular/core';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CategoryDto, StockItemCategoryGroup, StockItemDto } from '@ske/models';
-import { CdkDynamicSizeVirtualScroll, DynamicVirtualScrollItem } from '@ske/shared/virtual-scroll';
-import { StockCategoryCard } from './stock-category-card';
 
 interface StockCategoryGroupView {
   readonly category: StockItemCategoryGroup;
@@ -10,7 +8,7 @@ interface StockCategoryGroupView {
 }
 
 @Component({
-  imports: [ScrollingModule, CdkDynamicSizeVirtualScroll, DynamicVirtualScrollItem, StockCategoryCard],
+  imports: [ScrollingModule],
   selector: 'ske-stock-category-cards',
   styles: ``,
   templateUrl: './stock-category-cards.html',

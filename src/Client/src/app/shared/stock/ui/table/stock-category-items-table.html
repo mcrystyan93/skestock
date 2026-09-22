@@ -1,44 +1,59 @@
+@let dimensions = tableDimensions();
 <nz-table #table
           nzTableLayout="fixed"
           [nzTemplateMode]="true"
           [nzFrontPagination]="false"
           [nzShowPagination]="false"
           [nzLoading]="loading()"
+          [nzData]="itemsVirtualData()"
+          [nzVirtualItemSize]="virtualItemSize()"
+          [nzVirtualMinBufferPx]="virtualMinBufferPx()"
+          [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
+          [nzVirtualForTrackBy]="(index, item) => item.trackKey ?? item.index"
           nzSize="small"
-          class="block overflow-auto">
+          [nzScroll]="{x:dimensions.width, y:dimensions.height}">
   <thead>
   <tr>
     <th nzColumnKey="itemName">
-      <strong>{{ columns.itemName.label }}</strong>
+      <strong>Articol</strong>
     </th>
     <th nzColumnKey="quantity"
-        nzWidth="150px">
-      <strong>{{ columns.quantity.label }}</strong>
+        nzWidth="150px"
+        class="text-right!">
+      <strong>Cantitate</strong>
     </th>
     <th nzColumnKey="locationName"
         nzWidth="150px">
-      <strong>{{ columns.locationName.label }}</strong>
+      <strong>Locatie</strong>
     </th>
     <th nzColumnKey="isPerishable"
         nzWidth="150px">
-      <strong>{{ columns.isPerishable.label }}</strong>
+      <strong>Expira</strong>
     </th>
-    <th nzRight
-        nzWidth="200px">
+    <th nzWidth="200px">
       <strong>Actiuni</strong>
     </th>
   </tr>
   </thead>
   <tbody>
-    @for (item of items(); track item.itemId + ':' + item.locationId) {
+  <ng-template nz-virtual-scroll
+               let-category>
+    @if (category.isHeader) {
+      <tr ske-stock-category-item-header-row
+          [category]="category"
+          [items]="category.items ?? []"
+          (add)="addStock($event)">
+      </tr>
+    } @else {
       <tr ske-stock-category-item-row
           class="cursor-pointer"
-          [item]="item"
-          (click)="adjust.emit(item)"
+          [item]="category.item"
+          (click)="adjust.emit(category.item)"
           (move)="move.emit($event)"
           (removeExpired)="removeExpired.emit($event)"
           (visibilityChange)="visibilityChange.emit($event)">
       </tr>
     }
+  </ng-template>
   </tbody>
 </nz-table>

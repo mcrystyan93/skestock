@@ -8,7 +8,8 @@ import { Router } from '@angular/router';
 import { isNil } from 'lodash-es';
 import { OrderListDetailModal } from '@ske/shared/order-lists';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { AddStockBatchModal } from '@ske/shared/stock-batches';
+import { injectDispatch } from '@ngrx/signals/events';
+import { StockEvents } from '@ske/shared/stock';
 
 @Component({
   imports: [
@@ -23,6 +24,7 @@ export class HeaderContainer {
   public readonly selectedTabIndex = model<number>(0);
   public readonly classId = input.required<string | null>();
   public readonly store = inject(SchoolClassOverviewStore);
+  private readonly _stockDispatcher = injectDispatch(StockEvents);
 
   private readonly _router = inject(Router);
   private readonly _nzModalService = inject(NzModalService);
@@ -40,18 +42,8 @@ export class HeaderContainer {
     });
   }
 
-  public onAddArticle() {
-    const classId = this.classId();
-
-    if (isNil(classId))
-      return;
-
-    const modalRef = this._nzModalService.create({
-      nzContent: AddStockBatchModal,
-      nzData: { schoolClassId: classId },
-      nzCentered: true,
-      nzMaskClosable: false
-    });
+  public onAddProduct() {
+    this._stockDispatcher.addProduct();
   }
 
   private openGoodsReceiptImportReview(importId: string) {
