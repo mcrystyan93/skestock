@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 import { BaseTableWithFilter } from '@ske/shared/tables';
 import {
@@ -18,8 +17,12 @@ import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { StopClick } from '@ske/shared/directives';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+import { TimeAgoPipe } from '@ske/shared/pipes';
+import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
 
 const ACTIONS_BY_STATUS: Record<OrderListStatus, OrderListStatusAction[]> = {
+  All: [],
   Draft: ['submit', 'cancel'],
   Submitted: ['cancel'],
   Cancelled: ['reopen']
@@ -33,7 +36,6 @@ const ACTION_LABELS: Record<OrderListStatusAction, string> = {
 
 @Component({
   imports: [
-    DatePipe,
     NzButtonComponent,
     NzDropdownDirective,
     NzDropdownMenuComponent,
@@ -42,7 +44,10 @@ const ACTION_LABELS: Record<OrderListStatusAction, string> = {
     NzMenuItemComponent,
     NzTableModule,
     StopClick,
-    NzTagComponent
+    NzTagComponent,
+    NzTypographyComponent,
+    TimeAgoPipe,
+    NzTooltipDirective
   ],
   selector: 'ske-order-list-table',
   styles: ``,

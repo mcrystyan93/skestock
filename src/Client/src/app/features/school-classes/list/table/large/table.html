@@ -1,38 +1,30 @@
 @let dimensions = tableDimensions();
 
-<nz-table
-  #table
-  nzTableLayout="fixed"
-  [nzData]="itemsVirtualData()"
-  [nzVirtualItemSize]="virtualItemSize()"
-  [nzVirtualMinBufferPx]="virtualMinBufferPx()"
-  [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
-  [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
-  [nzFrontPagination]="false"
-  [nzShowPagination]="false"
-  [nzLoading]="loading()"
-  nzSize="small"
-  [nzScroll]="{ x: dimensions.width, y: dimensions.height }"
->
+<nz-table #table
+          nzTableLayout="fixed"
+          [nzData]="itemsVirtualData()"
+          [nzVirtualItemSize]="virtualItemSize()"
+          [nzVirtualMinBufferPx]="virtualMinBufferPx()"
+          [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
+          [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          [nzLoading]="loading()"
+          nzSize="small"
+          [nzScroll]="{ x: dimensions.width, y: dimensions.height }">
   <thead>
   <tr>
-    <th >
+    <th>
       {{ columns.name.label }}
     </th>
-    <th nzWidth="150px">
-      {{ columns.startDate.label }}
-    </th>
-    <th nzWidth="150px">
-      {{ columns.endDate.label }}
+    <th nzWidth="300px">
+      {{ columns.period.label }}
     </th>
     <th nzWidth="120px">
       {{ columns.status.label }}
     </th>
-    <th nzWidth="150px">
-      {{ columns.lastModifiedDate.label }}
-    </th>
     <th nzWidth="200px">
-      {{ columns.lastModifiedByName.label }}
+      {{ columns.lastModifiedDate.label }}
     </th>
     <th nzRight
         nzWidth="220px">Actiuni
@@ -42,38 +34,42 @@
   <tbody>
   <ng-template nz-virtual-scroll
                let-item>
+    @let progressPercent = progressMap().get(item.id);
     <tr (click)="onView.emit(item)"
         class="cursor-pointer">
       <td>
         {{ item.name }}
       </td>
       <td>
-        {{ item.startDate | date }}
+        <div class="flex flex-col">
+          <div class="flex justify-between">
+            <div>{{ item.startDate | date }}</div>
+            <div>{{ item.endDate | date }}</div>
+          </div>
+          <nz-progress [nzPercent]="progressPercent"
+                       [nzShowInfo]="false" />
+        </div>
       </td>
       <td>
-        {{ item.endDate | date }}
+        <nz-badge [nzStatus]="statusColor(item.status)"
+                  [nzText]="statusLabel(item.status)" />
       </td>
       <td>
-        <nz-tag [nzColor]="statusColor(item.status)">{{ statusLabel(item.status) }}</nz-tag>
-      </td>
-      <td>
-        {{ item.lastModifiedDate | date }}
-      </td>
-      <td>
-        {{ item.lastModifiedByName }}
+        <div>{{ item.lastModifiedDate | timeAgo }}</div>
+        <div nz-typography
+             nzType="secondary">{{ item.lastModifiedByName }}
+        </div>
       </td>
       <td nzRight>
         <div class="flex items-center">
           <button nz-button
                   skeStopClick
-                  nzSize="small"
-                  nzType="link"
+                  nzType="text"
                   type="button"
                   title="Editeaza"
                   [attr.aria-label]="'Editeaza'"
                   (click)="onEdit.emit(item)">
-            <nz-icon nzType="icons:pencil"></nz-icon>
-            Editeaza
+            <nz-icon nzType="icons:pen-to-square"></nz-icon>
           </button>
         </div>
       </td>

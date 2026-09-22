@@ -1,5 +1,3 @@
-<nz-card>
-  <ske-school-class-filter-form [loading]="store.schoolClassesLoading()"
-                   [filter]="store.filter()"
-                   (onFilterChange)="onFilterChange($event)" />
-</nz-card>
+<ske-school-class-filter-form [loading]="store.schoolClassesLoading()"
+                              [filter]="store.filter()"
+                              (onFilterChange)="onFilterChange($event)" />

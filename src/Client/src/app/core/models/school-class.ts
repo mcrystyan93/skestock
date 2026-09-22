@@ -7,6 +7,7 @@ import { PAGINATION_PAGE_SIZE } from './category';
  * in the same declaration order as the C# enum.
  */
 export enum ClassStatus {
+  All = 'all',
   Upcoming = 'upcoming',
   Active = 'active',
   Paused = 'paused',
@@ -70,7 +71,7 @@ export type UpdateSchoolClassRequest = {
 
 export type SchoolClassTableColumn =
   | 'name'
-  | 'startDate'
+  | 'period'
   | 'endDate'
   | 'status'
   | 'createdDate'
@@ -84,9 +85,9 @@ export const SCHOOL_CLASS_TABLE_COLUMNS: TableColumnDefinition<SchoolClassTableC
     value: 'name',
     fieldType: 'string'
   },
-  startDate: {
-    label: 'Data început',
-    value: 'startDate',
+  period: {
+    label: 'Perioadă',
+    value: 'period',
     fieldType: 'date'
   },
   endDate: {
@@ -105,7 +106,7 @@ export const SCHOOL_CLASS_TABLE_COLUMNS: TableColumnDefinition<SchoolClassTableC
     fieldType: 'date'
   },
   lastModifiedDate: {
-    label: 'Data modificare',
+    label: 'Modificat',
     value: 'lastModifiedDate',
     fieldType: 'date'
   },
@@ -129,6 +130,7 @@ export const CLASS_STATUS_OPTIONS: Array<{ label: string; value: ClassStatus }> 
 ];
 
 export const CLASS_STATUS_LABELS: Record<ClassStatus, string> = {
+  [ClassStatus.All]: 'Toate',
   [ClassStatus.Upcoming]: 'Viitoare',
   [ClassStatus.Active]: 'Activă',
   [ClassStatus.Paused]: 'Suspendată',
@@ -136,10 +138,11 @@ export const CLASS_STATUS_LABELS: Record<ClassStatus, string> = {
 };
 
 export const CLASS_STATUS_COLORS: Record<ClassStatus, string> = {
+  [ClassStatus.All]: 'default',
   [ClassStatus.Upcoming]: 'blue',
-  [ClassStatus.Active]: 'success',
-  [ClassStatus.Paused]: 'orange',
-  [ClassStatus.Closed]: 'red'
+  [ClassStatus.Active]: 'warning',
+  [ClassStatus.Paused]: 'error',
+  [ClassStatus.Closed]: 'green'
 };
 
 export function buildSchoolClassListFilter(

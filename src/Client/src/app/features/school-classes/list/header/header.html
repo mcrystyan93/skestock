@@ -1,6 +1,17 @@
-<nz-page-header nzTitle="Clase">
+<nz-page-header nzTitle="Clase"
+                [nzGhost]="false">
+  <nz-breadcrumb nz-page-header-breadcrumb
+                 nzSeparator=">">
+    <nz-breadcrumb-item>Acasa</nz-breadcrumb-item>
+    <nz-breadcrumb-item>Clase</nz-breadcrumb-item>
+  </nz-breadcrumb>
+  <nz-page-header-content class="pt-0!">
+    <div nz-typography
+         nzType="secondary">Urmareste clasele si gestioneaza datele asociate acestora.
+    </div>
+  </nz-page-header-content>
   <nz-page-header-extra>
-    <button nz-button nzSize="small"
+    <button nz-button
             nzType="primary"
             type="button"
             (click)="onAdd.emit()">
@@ -9,3 +20,5 @@
     </button>
   </nz-page-header-extra>
 </nz-page-header>
+
+<ske-theme-switcher class="absolute top-1.5 right-4" />

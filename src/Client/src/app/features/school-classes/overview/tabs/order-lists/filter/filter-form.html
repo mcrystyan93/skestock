@@ -1,39 +1,44 @@
-<nz-row [nzGutter]="[16, 16]"
-        nzAlign="middle">
-  <nz-col>
-    <nz-form-item>
-      <nz-form-control nzSpan="24">
-        <nz-input-wrapper>
-          <nz-icon nzInputPrefix
-                   nzType="icons:magnifying-glass"></nz-icon>
-          <input type="text"
-                 nz-input
-                 id="orderListSearchTerm"
-                 placeholder="Cautați..."
-                 [formField]="orderListFilterForm.searchTerm" />
-        </nz-input-wrapper>
-      </nz-form-control>
-    </nz-form-item>
-  </nz-col>
-  <nz-col nzFlex="auto"></nz-col>
-  <nz-col>
-    <button nz-button
-            nzSize="small"
-            type="button"
-            nzType="default"
-            [nzLoading]="loading()"
-            (click)="clear()">
-      <nz-icon nzType="icons:xmark"></nz-icon>
-      Reseteaza
-    </button>
-    <nz-divider nzType="vertical"></nz-divider>
-    <button nz-button
-            nzSize="small"
-            nzType="primary"
-            type="button"
-            (click)="onCreate.emit()">
-      <nz-icon nzType="icons:plus"></nz-icon>
-      Creaza comanda
-    </button>
-  </nz-col>
-</nz-row>
+<form (ngSubmit)="onSubmit()"
+      nz-form
+      nzNoColon
+      nzLayout="horizontal">
+  <nz-row [nzGutter]="[16, 16]"
+          nzAlign="middle"
+          class="grow">
+    <nz-col nzFlex="auto">
+      <nz-form-item>
+        <nz-form-control nzSpan="24">
+          <nz-input-wrapper>
+            <nz-icon nzInputPrefix
+                     nzType="icons:magnifying-glass"></nz-icon>
+            <input type="text"
+                   nz-input
+                   id="orderListSearchTerm"
+                   placeholder="Cautați..."
+                   [formField]="orderListFilterForm.searchTerm" />
+          </nz-input-wrapper>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col>
+      <nz-segmented [formField]="orderListFilterForm.status">
+        @for (segmentOption of statusSegmentOptions; track segmentOption.value) {
+          <label nz-segmented-item
+                 [nzValue]="segmentOption.value">
+            {{ segmentOption.label }}
+          </label>
+        }
+      </nz-segmented>
+    </nz-col>
+    <nz-col>
+      <button nz-button
+              type="button"
+              nzType="default"
+              [nzLoading]="loading()"
+              (click)="clear()">
+        Reseteaza
+      </button>
+      <nz-divider nzType="vertical"></nz-divider>
+    </nz-col>
+  </nz-row>
+</form>
