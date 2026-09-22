@@ -8,7 +8,7 @@
          [nzTabBarStyle]="{display:'none'}"
          class="inner-scroll grow ">
   <nz-tab>
-    <ske-stock-list [classId]="store.schoolClass()?.id ?? null" />
+    <ske-class-stock [classId]="store.schoolClass()?.id ?? null" />
   </nz-tab>
   <nz-tab>
     <ske-school-class-overview-order-lists-tab [classId]="store.schoolClass()?.id ?? null" />

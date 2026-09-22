@@ -1,5 +1,4 @@
 import { Component, DestroyRef, inject } from '@angular/core';
-import { StockCategoryCards } from './stock-category-cards';
 import { StockStore } from '../../services/stock.store';
 import { CategoryDto, getDropdownFilterValue, StockItemDto } from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
@@ -7,33 +6,42 @@ import { StockAdjustmentModal, StockAdjustmentModalData } from '../modals/adjust
 import { StockMoveModal, StockMoveModalData } from '../modals/move/stock-move-modal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AddStockBatchModal } from '@ske/shared/stock-batches';
-import { NzEmptyComponent } from 'ng-zorro-antd/empty';
+import { StockCategoryItemsTable } from './stock-category-items-table';
+import { Events } from '@ngrx/signals/events';
+import { StockEvents } from '../../services/stock.events';
 
 @Component({
   imports: [
-    StockCategoryCards,
-    NzEmptyComponent
+    StockCategoryItemsTable
   ],
   selector: 'ske-stock-category-cards-container',
   styles: ``,
-  templateUrl: './stock-category-cards-container.html',
+  templateUrl: './stock-list-container.html',
   providers: [NzModalService],
   host: {
     class: 'absolute block inset-0'
   }
 })
-export class StockCategoryCardsContainer {
+export class StockListContainer {
   public readonly store = inject(StockStore);
 
   private readonly _nzModalService = inject(NzModalService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _events = inject(Events);
+
+  private readonly _stockEvents = this._events.on(StockEvents.addProduct)
+    .pipe(takeUntilDestroyed(this._destroyRef))
+    .subscribe(() => {
+      const category = getDropdownFilterValue(this.store.filter().filters, 'categoryId');
+      this.addStock({ id: category?.id });
+    });
 
   public onAdjust(item: StockItemDto) {
     const classId = this.store.filter().classId;
 
     const modalRef = this._nzModalService.create<StockAdjustmentModal, StockAdjustmentModalData>({
       nzContent: StockAdjustmentModal,
-      nzData: {classId, item},
+      nzData: { classId, item },
       nzCentered: true,
       nzMaskClosable: false
     });
@@ -50,7 +58,7 @@ export class StockCategoryCardsContainer {
 
     const modalRef = this._nzModalService.create<StockMoveModal, StockMoveModalData>({
       nzContent: StockMoveModal,
-      nzData: {classId, item},
+      nzData: { classId, item },
       nzCentered: true,
       nzMaskClosable: false
     });
@@ -81,7 +89,7 @@ export class StockCategoryCardsContainer {
 
     const modalRef = this._nzModalService.create({
       nzContent: AddStockBatchModal,
-      nzData: {schoolClassId: classId, category, location},
+      nzData: { schoolClassId: classId, category, location },
       nzCentered: true,
       nzMaskClosable: false
     });
@@ -101,7 +109,7 @@ export class StockCategoryCardsContainer {
       classId,
       itemId: item.itemId,
       locationId: item.locationId,
-      request: {hideWhenZeroStock}
+      request: { hideWhenZeroStock }
     });
   }
 }

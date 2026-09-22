@@ -11,50 +11,21 @@
       <strong nz-typography
               nzType="secondary">
         <nz-icon nzType="icons:clock"></nz-icon>
-        {{ stockItem.lastUpdatedAt ? (stockItem.lastUpdatedAt | date:'medium') : '-' }}
+        {{ stockItem.lastUpdatedAt ? (stockItem.lastUpdatedAt | timeAgo) : '-' }}
       </strong>
     </div>
   </div>
 </td>
-<td>
-  <nz-space nzAlign="center">
-    <h5 nz-typography
-        class="mb-0!"
-        *nzSpaceItem>{{ stockItem.quantity }} {{ stockItem.unit }}</h5>
-    @if (stockItem.isLowStock) {
-      <nz-tag nzColor="red"
-              *nzSpaceItem>Stoc redus
-      </nz-tag>
-    } @else {
-      <nz-tag nzColor="green"
-              *nzSpaceItem>OK
-      </nz-tag>
-    }
-  </nz-space>
+<td class="text-right!">
+  <h5 nz-typography
+      class="mb-0!">{{ stockItem.quantity }} {{ stockItem.unit }}</h5>
+  @if (stockItem.isLowStock) {
+    <span nz-typography
+          nzType="warning">stoc redus</span>
+  }
 </td>
 <td>
-  <div class="flex items-center justify-between gap-2">
-    <div class="flex gap-1">
-      <nz-icon nzType="icons:location-dot"></nz-icon>
-      <span>{{ stockItem.locationName }}</span>
-    </div>
-    <button nz-button
-            nzSize="small"
-            nzType="link"
-            type="button"
-            nz-tooltip
-            skeStopClick
-            [nzTooltipTitle]="stockItem.quantity > 0
-              ? 'Mută stocul pentru ' + stockItem.itemName
-              : 'Mutarea nu este disponibilă pentru stoc 0 sau negativ'"
-            [attr.aria-label]="stockItem.quantity > 0
-              ? 'Mută stocul pentru ' + stockItem.itemName
-              : 'Mutarea nu este disponibilă pentru stoc 0 sau negativ'"
-            [disabled]="stockItem.quantity <= 0"
-            (click)="move.emit(stockItem)">
-      <nz-icon nzType="icons:arrow-right-arrow-left"></nz-icon>
-    </button>
-  </div>
+  <span>{{ stockItem.locationName }}</span>
 </td>
 <td>
   <div class="flex flex-wrap gap-1">
@@ -69,10 +40,24 @@
   </div>
 </td>
 <td>
+  <button nz-button
+          nzType="text"
+          type="button"
+          nz-tooltip
+          skeStopClick
+          [nzTooltipTitle]="stockItem.quantity > 0
+              ? 'Mută stocul pentru ' + stockItem.itemName
+              : 'Mutarea nu este disponibilă pentru stoc 0 sau negativ'"
+          [attr.aria-label]="stockItem.quantity > 0
+              ? 'Mută stocul pentru ' + stockItem.itemName
+              : 'Mutarea nu este disponibilă pentru stoc 0 sau negativ'"
+          [disabled]="stockItem.quantity <= 0"
+          (click)="move.emit(stockItem)">
+    <nz-icon nzType="icons:arrow-right-arrow-left"></nz-icon>
+  </button>
   @if (stockItem.expiredQuantity > 0) {
     <button nz-button
-            nzSize="small"
-            nzType="link"
+            nzType="text"
             type="button"
             nz-popconfirm
             skeStopClick
@@ -83,13 +68,11 @@
             [attr.aria-label]="'Elimini cele ' + stockItem.expiredQuantity + ' articole expirate pentru ' + stockItem.itemName"
             (nzOnConfirm)="removeExpired.emit(stockItem)">
       <nz-icon nzType="icons:trash"></nz-icon>
-      Elimină expirate
     </button>
   }
   <button nz-button
           skeStopClick
-          nzSize="small"
-          nzType="link"
+          nzType="text"
           type="button"
           nz-tooltip
           [nzTooltipTitle]="(stockItem.hideWhenZeroStock
@@ -100,6 +83,5 @@
             : 'Ascunde când stocul ajunge la 0 pentru ') + stockItem.itemName + ' la ' + stockItem.locationName"
           (click)="visibilityChange.emit(stockItem)">
     <nz-icon [nzType]="stockItem.hideWhenZeroStock ? 'icons:eye' : 'icons:eye-slash'"></nz-icon>
-    Ascunde
   </button>
 </td>

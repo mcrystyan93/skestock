@@ -1,6 +1,6 @@
 import { Component, effect, inject, input, untracked } from '@angular/core';
 import { StockStore } from '../../services/stock.store';
-import { StockCategoryCardsContainer } from '../table/stock-category-cards-container';
+import { StockListContainer } from '../table/stock-list-container';
 import { FilterContainer } from './filter/filter-container';
 import { isNil } from 'lodash-es';
 import { ErrorAlert } from '@ske/shared/errors';
@@ -8,19 +8,19 @@ import { StockPreferencesService } from '../../services/stock-preferences.servic
 
 @Component({
   imports: [
-    StockCategoryCardsContainer,
+    StockListContainer,
     FilterContainer,
     ErrorAlert
   ],
-  selector: 'ske-stock-list',
+  selector: 'ske-class-stock',
   styles: ``,
-  templateUrl: './stock-list.html',
+  templateUrl: './class-stock.html',
   providers: [StockStore],
   host: {
     class: 'flex flex-col grow gap-2 absolute inset-0'
   }
 })
-export class StockList {
+export class ClassStock {
   public readonly classId = input.required<string | null>();
   public readonly categoryId = input<string | null>(null);
   public readonly locationId = input<string | null>(null);

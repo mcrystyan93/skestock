@@ -1,0 +1,10 @@
+<ske-stock-category-items-table [items]="store.groupedStockItems()"
+                                [filter]="{}"
+                                [isLoadingMore]="false"
+                                [hasNextPage]="false"
+                                [loading]="store.stockItemsLoading()"
+                                (add)="addStock($event)"
+                                (adjust)="onAdjust($event)"
+                                (move)="onMove($event)"
+                                (removeExpired)="onRemoveExpired($event)"
+                                (visibilityChange)="onVisibilityChange($event)" />

@@ -1,5 +1,4 @@
 import { Component, computed, input, output } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzPopconfirmDirective } from 'ng-zorro-antd/popconfirm';
@@ -8,12 +7,11 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
 import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { StockItemDto } from '@ske/models';
-import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { StopClick } from '@ske/shared/directives';
+import { TimeAgoPipe } from '@ske/shared/pipes';
 
 @Component({
   imports: [
-    DatePipe,
     NzButtonComponent,
     NzIconDirective,
     NzPopconfirmDirective,
@@ -21,9 +19,8 @@ import { StopClick } from '@ske/shared/directives';
     NzTagComponent,
     NzTooltipDirective,
     NzTypographyComponent,
-    NzSpaceComponent,
-    NzSpaceItemDirective,
-    StopClick
+    StopClick,
+    TimeAgoPipe
   ],
   selector: 'tr[ske-stock-category-item-row]',
   templateUrl: './stock-category-item-row.html',
@@ -42,7 +39,7 @@ export class StockCategoryItemRow {
     const item = this.item();
 
     return item.isLowStock
-      ? '[&>td]:!bg-yellow-500/20'
+      ? '[&>td]:!bg-amber-500/10'
       : item.isExpired
         ? '[&>td]:!bg-red-500/15'
         : '';
