@@ -5,7 +5,8 @@ import { CategoryImportReviewEditableLine } from '../../../services/category-imp
 import { CategoryDto } from '@ske/models';
 import { NzFormControlComponent, NzFormItemComponent } from 'ng-zorro-antd/form';
 import { NzTableCellDirective } from 'ng-zorro-antd/table';
-import { NzTagComponent } from 'ng-zorro-antd/tag';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
 
 const CATEGORY_DROPDOWN_PLACEHOLDER = 'Alege o categorie';
 
@@ -16,10 +17,14 @@ const CATEGORY_DROPDOWN_PLACEHOLDER = 'Alege o categorie';
     NzFormControlComponent,
     NzFormItemComponent,
     NzTableCellDirective,
-    NzTagComponent
+    NzTypographyComponent,
+    NzIconDirective
   ],
   selector: 'tr[ske-category-import-review-line-row]',
-  templateUrl: './category-import-review-line-row.html'
+  templateUrl: './category-import-review-line-row.html',
+  host: {
+    '[class]': 'rowClass()'
+  }
 })
 export class CategoryImportReviewLineRow {
   public readonly lineForm = input.required<FieldTree<CategoryImportReviewEditableLine>>();
@@ -32,5 +37,12 @@ export class CategoryImportReviewLineRow {
     return <Partial<CategoryDto>>{
       name: line.name
     };
+  });
+
+  public readonly rowClass = computed(() => {
+    const lineForm = this.lineForm();
+    const itemValue = lineForm.category().value();
+
+    return !itemValue?.id ? '[&>td]:!bg-amber-500/10' : '';
   });
 }

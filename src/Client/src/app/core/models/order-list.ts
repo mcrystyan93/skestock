@@ -57,6 +57,12 @@ export const ORDER_LIST_STATUS_LABELS: Record<OrderListStatus, string> = {
   Submitted: 'Finalizată',
   Cancelled: 'Anulată'
 };
+export const ORDER_LIST_STATUS_ICONS: Record<OrderListStatus, string> = {
+  All: 'list',
+  Draft: 'file-pen',
+  Submitted: 'check-circle',
+  Cancelled: 'close-circle'
+}
 
 export const ORDER_LIST_STATUS_COLORS: Record<OrderListStatus, string> = {
   All: 'default',

@@ -14,33 +14,46 @@
 </div>
 
 <ske-error-display [problemDetail]="store.reviewProblemDetail()"
-                 [validationErrors]="store.reviewValidationErrors()" />
+                   [validationErrors]="store.reviewValidationErrors()" />
 <nz-tabs class="inner-scroll grow">
   <nz-tab nzTitle="Rezumat">
-    @if (store.review(); as review) {
-      @if (store.files().length > 0) {
-        <p nz-typography>Fisiere procesate</p>
-        <div class="flex gap-2 mb-2">
-          @for (file of store.files(); track file.fileMetadataId) {
-            <nz-tag [nzColor]="'geekblue'">
-              <nz-space class="p-1">
-                <nz-icon *nzSpaceItem
-                         nzType="icons:file"></nz-icon>
-                <strong *nzSpaceItem
-                        nz-typography>{{ file.originalName }}</strong>
-              </nz-space>
-            </nz-tag>
-          }
-        </div>
+    <div class="flex flex-col gap-2 absolute inset-0">
+      @if (store.review(); as review) {
+        @if (store.files().length > 0) {
+          <p nz-typography
+             class="mb-0!">Fisiere procesate</p>
+          <div class="flex gap-2">
+            @for (file of store.files(); track file.fileMetadataId) {
+              <nz-tag [nzColor]="'default'">
+                <nz-space class="p-1">
+                  <nz-icon *nzSpaceItem
+                           nzType="icons:file-pdf"
+                           class="text-red-400! text-lg"></nz-icon>
+                  <strong *nzSpaceItem
+                          nz-typography>{{ file.originalName }}</strong>
+                </nz-space>
+              </nz-tag>
+            }
+          </div>
+        }
+        @if (review.errorMessage; as errorMessage) {
+          <p nz-typography
+             nzType="danger">{{ errorMessage }}</p>
+        }
       }
-      @if (review.errorMessage; as errorMessage) {
-        <p nz-typography
-           nzType="danger">{{ errorMessage }}</p>
-      }
-    }
-
-    <ske-item-import-review-table [lines]="store.lines()"
-                                  [loading]="store.reviewLoading()" />
+      <div>
+        @if (alertMessage(); as message) {
+          <nz-alert [nzShowIcon]="true"
+                    [nzType]="message.type"
+                    [nzMessage]="message.text"></nz-alert>
+        }
+      </div>
+      <div class="grow relative">
+        <ske-item-import-review-table [lines]="store.lines()"
+                                      [loading]="store.reviewLoading()"
+                                      (formChanges)="formLines.set($event)" />
+      </div>
+    </div>
   </nz-tab>
   <nz-tab nzTitle="Istoric">
     @if (store.history().length > 0) {

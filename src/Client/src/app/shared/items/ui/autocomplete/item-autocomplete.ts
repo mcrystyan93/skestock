@@ -8,28 +8,28 @@ import {
   model,
   signal,
   untracked,
-  viewChild,
+  viewChild
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { type FormValueControl } from '@angular/forms/signals';
 import {
+  ColumnFilter,
   type GetAllItemsRequest,
   type ItemAutocompleteValue,
   type ItemDraft,
-  type ItemDto,
   type ItemDropdownOption,
-  ColumnFilter,
-  PAGINATION_PAGE_SIZE,
+  type ItemDto,
+  PAGINATION_PAGE_SIZE
 } from '@ske/models';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import {
   NzAutocompleteComponent,
   NzAutocompleteOptionComponent,
-  NzAutocompleteTriggerDirective,
+  NzAutocompleteTriggerDirective
 } from 'ng-zorro-antd/auto-complete';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { NzInputDirective } from 'ng-zorro-antd/input';
+import { NzInputDirective, NzInputPrefixDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzSpinComponent } from 'ng-zorro-antd/spin';
 import { ItemDropdownStore } from '../../services/item-dropdown.store';
 
@@ -51,26 +51,30 @@ const LOAD_MORE_OPTION = Symbol('item-autocomplete-load-more');
     NzIconDirective,
     NzInputDirective,
     NzSpinComponent,
+    NzInputWrapperComponent,
+    NzInputPrefixDirective
   ],
   template: `
     <div class="relative w-full">
-      <input
-        nz-input
-        class="w-full pr-8"
-        [value]="query()"
-        [disabled]="disabled()"
-        [placeholder]="placeholder()"
-        [nzAutocomplete]="auto"
-        [attr.aria-busy]="loading()"
-        [attr.aria-invalid]="hasSearchError()"
-        aria-autocomplete="list"
-        (focus)="onFocus()"
-        (input)="onInput($event)"
-        (blur)="onBlur()"
-        (keydown.enter)="onEnter($event)"
-        (keydown.escape)="onEscape($event)"
-      />
-
+      <nz-input-wrapper>
+        <nz-icon nzType="icons:magnifying-glass"
+                 nzInputPrefix></nz-icon>
+        <input nz-input
+               class="w-full pr-8"
+               [value]="query()"
+               [disabled]="disabled()"
+               [placeholder]="placeholder()"
+               [nzAutocomplete]="auto"
+               [attr.aria-busy]="loading()"
+               [attr.aria-invalid]="hasSearchError()"
+               aria-autocomplete="list"
+               (focus)="onFocus()"
+               (input)="onInput($event)"
+               (blur)="onBlur()"
+               (keydown.enter)="onEnter($event)"
+               (keydown.escape)="onEscape($event)"
+        />
+      </nz-input-wrapper>
       @if (loading()) {
         <nz-spin
           nzSize="small"
@@ -80,7 +84,6 @@ const LOAD_MORE_OPTION = Symbol('item-autocomplete-load-more');
         <button
           nz-button
           nzType="text"
-          nzSize="small"
           type="button"
           class="absolute right-1 top-1/2 -translate-y-1/2"
           aria-label="Șterge articolul"
@@ -88,13 +91,15 @@ const LOAD_MORE_OPTION = Symbol('item-autocomplete-load-more');
           (mousedown)="$event.preventDefault()"
           (click)="clear()"
         >
-          <nz-icon nzType="close-circle" nzTheme="fill"></nz-icon>
+          <nz-icon nzType="close-circle"
+                   nzTheme="fill"></nz-icon>
         </button>
       }
     </div>
 
     @if (hasSearchError()) {
-      <div class="text-error text-xs" role="alert">
+      <div class="text-error text-xs"
+           role="alert">
         Nu s-au putut căuta articolele. Poți crea articolul introdus folosind opțiunea „Creează
         oricum”.
       </div>
@@ -106,7 +111,8 @@ const LOAD_MORE_OPTION = Symbol('item-autocomplete-load-more');
       (selectionChange)="onOptionSelected($event)"
     >
       @for (item of searchResults(); track item.id) {
-        <nz-auto-option [nzValue]="item" [nzLabel]="item.name">
+        <nz-auto-option [nzValue]="item"
+                        [nzLabel]="item.name">
           <span>{{ item.name }}</span>
           @if (item.sku) {
             <span class="ml-2 text-gray-500">({{ item.sku }})</span>
@@ -115,7 +121,8 @@ const LOAD_MORE_OPTION = Symbol('item-autocomplete-load-more');
       }
 
       @if (showCreateOption()) {
-        <nz-auto-option [nzValue]="createOptionValue" [nzLabel]="trimmedQuery()">
+        <nz-auto-option [nzValue]="createOptionValue"
+                        [nzLabel]="trimmedQuery()">
           Creează „{{ trimmedQuery() }}”
           @if (hasSearchError()) {
             <span class="ml-1">(oricum)</span>
@@ -124,11 +131,13 @@ const LOAD_MORE_OPTION = Symbol('item-autocomplete-load-more');
       }
 
       @if (store.isLoadingMore()) {
-        <nz-auto-option nzDisabled [nzLabel]="trimmedQuery()">
+        <nz-auto-option nzDisabled
+                        [nzLabel]="trimmedQuery()">
           Se încarcă mai multe articole…
         </nz-auto-option>
       } @else if (showLoadMoreOption()) {
-        <nz-auto-option [nzValue]="loadMoreOptionValue" [nzLabel]="trimmedQuery()">
+        <nz-auto-option [nzValue]="loadMoreOptionValue"
+                        [nzLabel]="trimmedQuery()">
           Încarcă mai multe articole…
         </nz-auto-option>
       }

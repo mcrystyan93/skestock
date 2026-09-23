@@ -8,6 +8,7 @@ import { orderListApiEvents, OrderListDetailState } from '../../../services/orde
 import { OrderListExportService } from '../../../services/order-list-export.service';
 import {
   CreateOrderListRequest,
+  ORDER_LIST_STATUS_ICONS,
   ORDER_LIST_STATUS_LABELS,
   OrderListLineRequest,
   UpdateOrderListRequest
@@ -75,6 +76,10 @@ export class OrderListDetailModal {
 
   public readonly statusLabel = computed(() =>
     ORDER_LIST_STATUS_LABELS[this.store.orderList().status ?? 'Draft']
+  );
+
+  public readonly statusIcon = computed(() =>
+    ORDER_LIST_STATUS_ICONS[this.store.orderList().status ?? 'Draft']
   );
 
   public readonly canExport = computed(() =>

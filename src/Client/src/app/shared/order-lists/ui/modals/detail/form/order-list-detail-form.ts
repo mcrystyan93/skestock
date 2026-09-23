@@ -6,7 +6,17 @@ import {
   OrderListDto,
   OrderListLineDto
 } from '@ske/models';
-import { applyEach, disabled, form, FormField, maxLength, required, schema, submit, validate } from '@angular/forms/signals';
+import {
+  applyEach,
+  disabled,
+  form,
+  FormField,
+  maxLength,
+  required,
+  schema,
+  submit,
+  validate
+} from '@angular/forms/signals';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 import { NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
 import { NzInputDirective, NzInputWrapperComponent, NzTextareaCountComponent } from 'ng-zorro-antd/input';
@@ -210,10 +220,10 @@ export class OrderListDetailForm {
     });
   }
 
-  protected removeLine(index: number) {
-    this.orderListForm.lines().value.update(lines => {
-      return lines.filter((_, currentIndex) => currentIndex !== index);
-    });
+  protected removeLine(line: OrderListLineFormModel) {
+    const lines = this.orderListForm.lines().value();
+
+    this.orderListForm.lines().value.set(lines.filter((l) => l.clientKey !== line.clientKey));
   }
 
   public async submit(): Promise<OrderListDetailFormSubmit> {

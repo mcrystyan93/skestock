@@ -1,24 +1,36 @@
 @let lineFormSignal = lineForm();
+
 <td>
-  {{ lineFormSignal().value().name }}
-</td>
-<td>
-  @if (lineFormSignal().value().alreadyExists) {
-    <nz-tag nzColor="green">Categorie existenta</nz-tag>
-  } @else {
-    <nz-tag nzColor="blue">Noua</nz-tag>
-  }
-</td>
-<td>
-  <nz-form-item>
-    <nz-form-control [nzErrorTip]="errorTemplate">
-      <ske-category-dropdown [formField]="lineForm().category"
-                              [allowEdit]="false"
-                              [allowCreate]="true"
-                              [placeholder]="categoryPlaceholder"
-                              [createPrefill]="categoryPrefill()" />
-    </nz-form-control>
-  </nz-form-item>
+  <div class="flex items-center gap-2 w-full">
+    @let isCategorySelected = !!lineForm().category().value()?.id;
+    @if (isCategorySelected) {
+      <nz-icon nzType="icons:circle-check"
+               class="text-green-500!"></nz-icon>
+    } @else {
+      <nz-icon nzType="icons:circle-exclamation"
+               class="text-amber-500!"></nz-icon>
+    }
+    <div class="grow">
+      <nz-form-item>
+        <nz-form-control [nzErrorTip]="errorTemplate">
+          <ske-category-dropdown [formField]="lineForm().category"
+                                 [allowEdit]="false"
+                                 [allowCreate]="!lineForm().category().value()?.id"
+                                 [placeholder]="categoryPlaceholder"
+                                 [createPrefill]="categoryPrefill()"
+                                 [createButtonTemplate]="createTemplate" />
+          <ng-template #createTemplate>Creaza</ng-template>
+        </nz-form-control>
+      </nz-form-item>
+      @if (!lineForm().category().value()?.id) {
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0!">
+          Citit din document: {{ lineFormSignal().value().name }}
+        </div>
+      }
+    </div>
+  </div>
 </td>
 
 <ng-template #errorTemplate

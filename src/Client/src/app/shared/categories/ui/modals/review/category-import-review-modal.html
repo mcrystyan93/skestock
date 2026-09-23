@@ -2,9 +2,6 @@
   <nz-space>
     <span *nzSpaceItem>
       Revizuire import categorii
-      @if (store.review(); as review) {
-        <span> - {{ statusLabels[review.status] }}</span>
-      }
     </span>
     @if (store.review(); as review) {
       <nz-tag *nzSpaceItem
@@ -14,56 +11,60 @@
     }
   </nz-space>
 </div>
+<div class="-mt-6">
+  @if (store.reviewProblemDetail() || store.reviewValidationErrors()) {
+    <ske-error-display [problemDetail]="store.reviewProblemDetail()"
+                       [validationErrors]="store.reviewValidationErrors()" />
+  }
 
-<ske-error-display [problemDetail]="store.reviewProblemDetail()"
-                 [validationErrors]="store.reviewValidationErrors()" />
-
-<nz-tabs>
-  <nz-tab nzTitle="Rezumat">
-    @if (store.review(); as review) {
-      @if (store.files().length > 0) {
-        <p nz-typography>Fisiere procesate</p>
-        <div class="flex gap-2 mb-2">
-          @for (file of store.files(); track file.fileMetadataId) {
-            <nz-tag nzColor="geekblue">
-              <nz-space class="p-1">
-                <nz-icon *nzSpaceItem
-                         nzType="icons:file"></nz-icon>
-                <strong *nzSpaceItem
-                        nz-typography>{{ file.originalName }}</strong>
-              </nz-space>
-            </nz-tag>
-          }
-        </div>
-      }
-
-      @if (review.errorMessage; as errorMessage) {
-        <p nz-typography
-           nzType="danger">{{ errorMessage }}</p>
-      }
-    }
-
-
-    <ske-category-import-review-table [lines]="store.lines()"
-                                      [loading]="store.reviewLoading()" />
-  </nz-tab>
-  <nz-tab nzTitle="Istoric">
-    @if (store.history().length > 0) {
-      <nz-timeline nzReverse>
-        @for (entry of store.history(); track $index) {
-          <nz-timeline-item>
-            <p>{{ historyStatusLabels[entry.status] }} - incercarea {{ entry.attempt }}</p>
-            <p>{{ entry.createdAtUtc | date:'short' }}</p>
-            @if (entry.message) {
-              <p nz-typography
-                 nzType="secondary">{{ entry.message }}</p>
+  <nz-tabs>
+    <nz-tab nzTitle="Rezumat">
+      @if (store.review(); as review) {
+        @if (store.files().length > 0) {
+          <p nz-typography>Fisiere procesate</p>
+          <div class="flex gap-2 mb-2">
+            @for (file of store.files(); track file.fileMetadataId) {
+              <nz-tag nzColor="default">
+                <nz-space class="p-1">
+                  <nz-icon *nzSpaceItem
+                           nzType="icons:file-pdf"
+                           class="text-red-400! text-lg"></nz-icon>
+                  <strong *nzSpaceItem
+                          nz-typography>{{ file.originalName }}</strong>
+                </nz-space>
+              </nz-tag>
             }
-          </nz-timeline-item>
+          </div>
         }
-      </nz-timeline>
-    }
-  </nz-tab>
-</nz-tabs>
+
+        @if (review.errorMessage; as errorMessage) {
+          <p nz-typography
+             nzType="danger">{{ errorMessage }}</p>
+        }
+      }
+
+
+      <ske-category-import-review-table [lines]="store.lines()"
+                                        [loading]="store.reviewLoading()" />
+    </nz-tab>
+    <nz-tab nzTitle="Istoric">
+      @if (store.history().length > 0) {
+        <nz-timeline nzReverse>
+          @for (entry of store.history(); track $index) {
+            <nz-timeline-item>
+              <p>{{ historyStatusLabels[entry.status] }} - incercarea {{ entry.attempt }}</p>
+              <p>{{ entry.createdAtUtc | date:'short' }}</p>
+              @if (entry.message) {
+                <p nz-typography
+                   nzType="secondary">{{ entry.message }}</p>
+              }
+            </nz-timeline-item>
+          }
+        </nz-timeline>
+      }
+    </nz-tab>
+  </nz-tabs>
+</div>
 
 <div *nzModalFooter>
   <nz-space>

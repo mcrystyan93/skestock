@@ -1,9 +1,10 @@
 <form nz-form
       nzNoColon
       nzLayout="vertical">
-  <nz-row [nzGutter]="[16, 4]">
+  <nz-row [nzGutter]="[16, 0]">
     <nz-col [nzXl]="12">
       <nz-form-item nzLayout="vertical"
+                    class="mb-2!"
                     *skeletonInputLoader="loading()">
         <nz-form-label nzRequired
                        nzSpan="24">Nume
@@ -30,14 +31,15 @@
       </nz-form-item>
     </nz-col>
     <nz-col [nzXl]="12">
-      <nz-form-item *skeletonInputLoader="loading()">
+      <nz-form-item *skeletonInputLoader="loading()"
+                    class="mb-2!">
         <nz-form-label nzSpan="24">Nota</nz-form-label>
         <nz-form-control [nzErrorTip]="noteErrorTemplate">
           <nz-textarea-count [nzMaxCharacterCount]="orderListForm.note()?.maxLength() ?? 1000">
             <textarea nz-input
                       [formField]="orderListForm.note"
                       placeholder="Notite despre comanda"
-                      rows="4"></textarea>
+                      rows="1"></textarea>
           </nz-textarea-count>
         </nz-form-control>
         <ng-template #noteErrorTemplate>
@@ -52,7 +54,8 @@
       </nz-form-item>
     </nz-col>
     <nz-col nzSpan="24">
-      <nz-form-item *skeletonInputLoader="loading()">
+      <nz-form-item *skeletonInputLoader="loading()"
+                    class="mb-2!">
         <nz-form-control>
           <ske-item-autocomplete [formField]="orderListForm.lineItem"
                                  placeholder="Cauta si adauga un articol" />
@@ -60,11 +63,14 @@
       </nz-form-item>
     </nz-col>
   </nz-row>
+
   <ske-order-list-low-stock-items (addProducts)="addLowStockItems($event)"
                                   [classId]="classId()"
                                   [disabled]="loading() || !editable()"
                                   [orderListLines]="orderListForm.lines().value()" />
-  <nz-divider />
+
+  <nz-divider nzSize="small" />
+
   @if (orderListForm.lines().touched()) {
     @for (error of orderListForm.lines().errors(); track $index) {
       <p nz-typography

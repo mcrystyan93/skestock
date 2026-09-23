@@ -1,3 +1,9 @@
+@if (alertMessage(); as message) {
+  <nz-alert [nzShowIcon]="true"
+            [nzType]="message.type"
+            [nzMessage]="message.text"></nz-alert>
+}
+
 <nz-table #table
           nzTableLayout="fixed"
           [nzTemplateMode]="true"
@@ -8,15 +14,12 @@
           [nzScroll]="{x: '1300px'}">
   <thead>
   <tr>
-    <th nzWidth="280px">Text extras</th>
-    <th nzWidth="110px">Status</th>
     <th nzWidth="320px">Produs</th>
     <th nzWidth="150px">Locatie</th>
-    <th nzWidth="250px">Cantitate</th>
+    <th nzWidth="150px">Cantitate</th>
     <th nzWidth="170px">Data expirare</th>
     <th nzWidth="130px">Pret unitar</th>
-    <th nzRight
-        nzWidth="90px">
+    <th nzWidth="100px">
       Actiuni
     </th>
   </tr>
