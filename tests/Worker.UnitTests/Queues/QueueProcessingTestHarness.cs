@@ -252,6 +252,7 @@ internal sealed class WorkerTestDbContext(DbContextOptions<WorkerTestDbContext> 
     public DbSet<CategoryImportBatch> CategoryImportBatches => Set<CategoryImportBatch>();
     public DbSet<CategoryImportBatchFile> CategoryImportBatchFiles => Set<CategoryImportBatchFile>();
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
+    public DbSet<ClassItemStockVisibility> ClassItemStockVisibilities => Set<ClassItemStockVisibility>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();
@@ -280,6 +281,7 @@ internal sealed class WorkerTestDbContext(DbContextOptions<WorkerTestDbContext> 
         modelBuilder.Ignore<CategoryImportBatch>();
         modelBuilder.Ignore<CategoryImportBatchFile>();
         modelBuilder.Ignore<ClassBalance>();
+        modelBuilder.Ignore<ClassItemStockVisibility>();
         modelBuilder.Ignore<FileMetadata>();
         modelBuilder.Ignore<Item>();
         modelBuilder.Ignore<ItemImportBatch>();

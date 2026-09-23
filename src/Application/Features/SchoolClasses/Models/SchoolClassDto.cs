@@ -26,7 +26,9 @@ public record SchoolClassSummary(
     decimal TotalAmount,
     int DistinctItemsCount,
     int LowStockItemsCount,
+    int ExpiredItemsCount,
     int ProcessingImportsCount,
     int PendingReviewImportsCount,
+    int ConfirmedImportsCount,
     int FailedImportsCount,
     IReadOnlyList<GoodsReceiptSummary> GoodsReceipts);

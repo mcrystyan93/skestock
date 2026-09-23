@@ -14,51 +14,92 @@
   </nz-page-header-subtitle>
 
   <nz-page-header-content class="block w-full min-w-0 max-w-full">
-    <div class="w-full min-w-0 max-w-full overflow-x-auto">
+    <div class="w-full min-w-0 max-w-full overflow-x-auto overflow-y-hidden">
       <div class="flex w-max min-w-full flex-nowrap gap-4">
-        <nz-statistic class="flex-none"
-                      nzTitle="Comenzi receptionate"
-                      [nzValue]="summary().noOfGoodsReceipt ?? 0" />
-        <nz-statistic class="flex-none"
-                      nzTitle="Totalul comenzilor"
-                      [nzValueTemplate]="totalAmountTemplate">
-          <ng-template #totalAmountTemplate>
-            {{ summary().totalAmount ?? 0 | currency:'RON' }}
-          </ng-template>
-        </nz-statistic>
-        <ske-goods-receipt-cost-statistic class="flex-none"
-                                          [receipts]="summary().goodsReceipts ?? []" />
-        <nz-statistic class="flex-none"
-                      nzTitle="Nr total de articole"
-                      [nzValue]="summary().distinctItemsCount ?? 0" />
-        <nz-statistic class="flex-none"
-                      nzTitle="Articole cu stoc redus"
-                      [nzValueTemplate]="lowStockItemsCountTemplate">
-          <ng-template #lowStockItemsCountTemplate>
-            <div nz-typography
-                 nzType="warning"
-                 class="mb-0">
-              {{ summary().lowStockItemsCount ?? 0 }}
-            </div>
-          </ng-template>
-        </nz-statistic>
-        <nz-statistic class="flex-none"
-                      nzTitle="Comenzi in procesare"
-                      [nzValue]="summary().processingImportsCount ?? 0" />
-        <nz-statistic class="flex-none"
-                      nzTitle="Comenzi in asteptare"
-                      [nzValue]="summary().pendingReviewImportsCount ?? 0" />
-        <nz-statistic class="flex-none"
-                      nzTitle="Comenzi esuate"
-                      [nzValueTemplate]="failedImportsCountTemplate">
-          <ng-template #failedImportsCountTemplate>
-            <div nz-typography
-                 nzType="danger"
-                 class="mb-0">
-              {{ summary().failedImportsCount ?? 0 }}
-            </div>
-          </ng-template>
-        </nz-statistic>
+        @switch (selectedTabIndex()) {
+          @case (0) {
+            <nz-statistic class="flex-none"
+                          nzTitle="Nr total de articole"
+                          [nzValue]="summary().distinctItemsCount ?? 0" />
+            <nz-statistic class="flex-none"
+                          nzTitle="Articole cu stoc redus"
+                          [nzValueTemplate]="lowStockItemsCountTemplate">
+              <ng-template #lowStockItemsCountTemplate>
+                <div nz-typography
+                     nzType="warning"
+                     class="mb-0">
+                  {{ summary().lowStockItemsCount ?? 0 }}
+                </div>
+              </ng-template>
+            </nz-statistic>
+            <nz-statistic class="flex-none"
+                          nzTitle="Articole posibil expirate"
+                          [nzValueTemplate]="expiredStockItemsCountTemplate">
+              <ng-template #expiredStockItemsCountTemplate>
+                <div nz-typography
+                     nzType="danger"
+                     class="mb-0">
+                  {{ summary().expiredItemsCount ?? 0 }}
+                </div>
+              </ng-template>
+            </nz-statistic>
+          }
+          @case (2) {
+            <nz-statistic class="flex-none"
+                          nzTitle="Comenzi receptionate"
+                          [nzValue]="summary().noOfGoodsReceipt ?? 0" />
+            <nz-statistic class="flex-none"
+                          nzTitle="Totalul comenzilor"
+                          [nzValueTemplate]="totalAmountTemplate">
+              <ng-template #totalAmountTemplate>
+                {{ summary().totalAmount ?? 0 | currency:'RON' }}
+              </ng-template>
+            </nz-statistic>
+            <ske-goods-receipt-cost-statistic class="flex-none"
+                                              [receipts]="summary().goodsReceipts ?? []" />
+          }
+          @case (3) {
+            <nz-statistic class="flex-none"
+                          nzTitle="Comenzi in procesare"
+                          [nzValueTemplate]="processingImportsCountTemplate" />
+            <ng-template #processingImportsCountTemplate>
+              <div class="text-blue-500! mb-0">
+                {{ summary().processingImportsCount ?? 0 }}
+              </div>
+            </ng-template>
+            <nz-statistic class="flex-none"
+                          nzTitle="Comenzi in asteptare"
+                          [nzValueTemplate]="pendingReviewImportsCountTemplate" />
+            <ng-template #pendingReviewImportsCountTemplate>
+              <div nz-typography
+                   nzType="warning"
+                   class="mb-0">
+                {{ summary().pendingReviewImportsCount ?? 0 }}
+              </div>
+            </ng-template>
+            <nz-statistic class="flex-none"
+                          nzTitle="Comenzi confirmate"
+                          [nzValueTemplate]="confirmedImportsCountTemplate" />
+            <ng-template #confirmedImportsCountTemplate>
+              <div nz-typography
+                   nzType="success"
+                   class="mb-0">
+                {{ summary().confirmedImportsCount ?? 0 }}
+              </div>
+            </ng-template>
+            <nz-statistic class="flex-none"
+                          nzTitle="Comenzi esuate"
+                          [nzValueTemplate]="failedImportsCountTemplate">
+              <ng-template #failedImportsCountTemplate>
+                <div nz-typography
+                     nzType="danger"
+                     class="mb-0">
+                  {{ summary().failedImportsCount ?? 0 }}
+                </div>
+              </ng-template>
+            </nz-statistic>
+          }
+        }
       </div>
     </div>
   </nz-page-header-content>

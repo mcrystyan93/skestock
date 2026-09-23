@@ -21,6 +21,7 @@ public class CreateStockBatchTestDbContext(DbContextOptions<CreateStockBatchTest
     public DbSet<CategoryImportBatch> CategoryImportBatches => Set<CategoryImportBatch>();
     public DbSet<CategoryImportBatchFile> CategoryImportBatchFiles => Set<CategoryImportBatchFile>();
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
+    public DbSet<ClassItemStockVisibility> ClassItemStockVisibilities => Set<ClassItemStockVisibility>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();
     public DbSet<ItemImportBatchFile> ItemImportBatchFiles => Set<ItemImportBatchFile>();
