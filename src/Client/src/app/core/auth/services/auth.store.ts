@@ -44,7 +44,7 @@ export const AuthStore = signalStore(
                   void store.signalR.connect().catch((error: unknown) => {
                     console.error('[SignalR] connection after login failed', error);
                   });
-                  store.router.navigate(['./categories']);
+                  store.router.navigate(['./school-classes']);
                 },
                 error: (error) => {
                   store.handleLoginError(error);

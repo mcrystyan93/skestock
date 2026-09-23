@@ -2,32 +2,38 @@
       nz-form
       nzNoColon
       nzLayout="horizontal">
-  <nz-row [nzGutter]="[16, 0]"
-          class="grow">
+  <nz-row [nzGutter]="[16, 16]"
+          [nzWrap]="false">
     <nz-col nzFlex="auto">
-      <nz-form-item>
-        <nz-form-control nzSpan="24">
-          <nz-input-wrapper>
-            <nz-icon nzInputPrefix
-                     nzType="icons:magnifying-glass"></nz-icon>
-            <input type="text"
-                   nz-input
-                   id="searchTerm"
-                   placeholder="Cautați..."
-                   [formField]="schoolClassListFilterForm.searchTerm" />
-          </nz-input-wrapper>
-        </nz-form-control>
-      </nz-form-item>
-    </nz-col>
-    <nz-col>
-      <nz-segmented [formField]="schoolClassListFilterForm.status">
-        @for (segmentOption of statusSegmentOptions; track segmentOption.value) {
-          <label nz-segmented-item
-                 [nzValue]="segmentOption.value">
-            {{ segmentOption.label }}
-          </label>
-        }
-      </nz-segmented>
+      <nz-row [nzGutter]="[16, 16]"
+              [nzWrap]="true"
+              class="grow">
+        <nz-col nzFlex="auto">
+          <nz-form-item class="min-w-92!">
+            <nz-form-control nzSpan="24">
+              <nz-input-wrapper>
+                <nz-icon nzInputPrefix
+                         nzType="icons:magnifying-glass"></nz-icon>
+                <input type="text"
+                       nz-input
+                       id="searchTerm"
+                       placeholder="Cautați..."
+                       [formField]="schoolClassListFilterForm.searchTerm" />
+              </nz-input-wrapper>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-col>
+        <nz-col>
+          <nz-segmented [formField]="schoolClassListFilterForm.status">
+            @for (segmentOption of statusSegmentOptions; track segmentOption.value) {
+              <label nz-segmented-item
+                     [nzValue]="segmentOption.value">
+                {{ segmentOption.label }}
+              </label>
+            }
+          </nz-segmented>
+        </nz-col>
+      </nz-row>
     </nz-col>
     <nz-col nzFlex="none">
       <button nz-button

@@ -18,36 +18,104 @@ public class GetClassStockByCategoryHandler(IApplicationDbContext dbContext)
         if (!classExists)
             return Result.Fail(new SchoolClassErrors.SchoolClassNotFound(request.ClassId));
 
-        var batchesQuery = dbContext.StockBatches
+        var classBatchesQuery = dbContext.StockBatches
             .AsNoTracking()
-            .Where(b => b.ReceivedClassId == request.ClassId && b.Quantity > 0);
+            .Where(batch => batch.ReceivedClassId == request.ClassId);
 
         if (request.LocationId is { } locationId)
-            batchesQuery = batchesQuery.Where(b => b.LocationId == locationId);
+        {
+            var locationName = await dbContext.Locations
+                .AsNoTracking()
+                .Where(location => location.Id == locationId)
+                .Select(location => location.Name)
+                .FirstOrDefaultAsync(cancellationToken);
 
-        var categories = await batchesQuery
-            .GroupBy(b => new
+            if (locationName is null)
+                return Result.Fail(new LocationErrors.LocationNotFound(locationId));
+
+            var categories = await classBatchesQuery
+                .Select(batch => new { batch.Item.CategoryId, CategoryName = batch.Item.Category.Name })
+                .Distinct()
+                .OrderBy(category => category.CategoryName)
+                .ThenBy(category => category.CategoryId)
+                .ToListAsync(cancellationToken);
+
+            var quantitiesByCategory = await classBatchesQuery
+                .Where(batch => batch.LocationId == locationId)
+                .GroupBy(batch => new { batch.Item.CategoryId, CategoryName = batch.Item.Category.Name })
+                .Select(group => new { group.Key.CategoryId, Quantity = group.Sum(batch => batch.Quantity) })
+                .ToDictionaryAsync(
+                    category => category.CategoryId,
+                    category => category.Quantity,
+                    cancellationToken);
+
+            return Result.Ok(new ClassStockByCategoryDto
             {
-                b.Item.CategoryId,
-                CategoryName = b.Item.Category.Name
-            })
-            .Select(g => new CategoryStockSummaryDto
+                Labels = [locationName],
+                Series =
+                [
+                    .. categories.Select(category => new ClassStockByCategorySeriesDto
+                    {
+                        Name = category.CategoryName,
+                        Data = [quantitiesByCategory.GetValueOrDefault(category.CategoryId)]
+                    })
+                ]
+            });
+        }
+
+        var stockByCategoryAndLocation = await classBatchesQuery
+            .GroupBy(batch => new
             {
-                CategoryId = g.Key.CategoryId,
-                CategoryName = g.Key.CategoryName,
-                Quantity = g.Sum(b => b.Quantity),
-                ItemCount = g.Select(b => b.ItemId).Distinct().Count()
+                batch.Item.CategoryId,
+                CategoryName = batch.Item.Category.Name,
+                batch.LocationId,
+                LocationName = batch.Location.Name
             })
-            .OrderBy(c => c.CategoryName)
-            .ThenBy(c => c.CategoryId)
+            .Select(group => new
+            {
+                group.Key.CategoryId,
+                group.Key.CategoryName,
+                group.Key.LocationId,
+                group.Key.LocationName,
+                Quantity = group.Sum(batch => batch.Quantity)
+            })
             .ToListAsync(cancellationToken);
+
+        var allCategories = stockByCategoryAndLocation
+            .Select(stock => new { stock.CategoryId, stock.CategoryName })
+            .Distinct()
+            .OrderBy(category => category.CategoryName)
+            .ThenBy(category => category.CategoryId)
+            .ToList();
+
+        var locations = stockByCategoryAndLocation
+            .Select(stock => new { stock.LocationId, stock.LocationName })
+            .Distinct()
+            .OrderBy(location => location.LocationName)
+            .ThenBy(location => location.LocationId)
+            .ToList();
+
+        var quantitiesByCategoryAndLocation = stockByCategoryAndLocation
+            .ToDictionary(
+                stock => (stock.CategoryId, stock.LocationId),
+                stock => stock.Quantity);
 
         return Result.Ok(new ClassStockByCategoryDto
         {
-            Categories = categories,
-            TotalQuantity = categories.Sum(c => c.Quantity),
-            TotalItemCount = categories.Sum(c => c.ItemCount),
-            TotalCategoryCount = categories.Count
+            Labels = [.. locations.Select(location => location.LocationName)],
+            Series =
+            [
+                .. allCategories.Select(category => new ClassStockByCategorySeriesDto
+                {
+                    Name = category.CategoryName,
+                    Data =
+                    [
+                        .. locations.Select(location =>
+                            quantitiesByCategoryAndLocation.GetValueOrDefault(
+                                (category.CategoryId, location.LocationId)))
+                    ]
+                })
+            ]
         });
     }
 }

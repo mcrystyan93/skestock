@@ -25,6 +25,12 @@ public static class InitialiserExtensions
 
 public class ApplicationDbContextInitialiser
 {
+    private static readonly AdministratorSeed[] DefaultAdministrators =
+    [
+        new("administrator@localhost", "Administrator1!", "Administrator", "Administrator"),
+        new("cosmin@local", "Cosmin9!", "Cosmin", "Gherendi")
+    ];
+
     private readonly ILogger<ApplicationDbContextInitialiser> _logger;
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
@@ -77,51 +83,86 @@ public class ApplicationDbContextInitialiser
 
     public async Task TrySeedAsync()
     {
-        // Default roles
-        var administratorRole = new IdentityRole<Guid>(Roles.Administrator) { Id = Guid.CreateVersion7() };
-
-        if (_roleManager.Roles.All(r => r.Name != administratorRole.Name))
+        if (DefaultAdministrators.Length == 0)
         {
-            await _roleManager.CreateAsync(administratorRole);
+            throw new InvalidOperationException(
+                "At least one administrator must be listed in DefaultAdministrators.");
         }
 
-        // Default users
-        var administrator =
-            new ApplicationUser { UserName = "administrator@localhost", Email = "administrator@localhost" };
-
-        if (_userManager.Users.All(u => u.UserName != administrator.UserName))
+        if (!await _roleManager.RoleExistsAsync(Roles.Administrator))
         {
-            await _userManager.CreateAsync(administrator, "Administrator1!");
-            if (!string.IsNullOrWhiteSpace(administratorRole.Name))
-            {
-                await _userManager.AddToRolesAsync(administrator, new[] { administratorRole.Name });
-            }
+            var roleResult = await _roleManager.CreateAsync(
+                new IdentityRole<Guid>(Roles.Administrator) { Id = Guid.CreateVersion7() });
+            EnsureIdentityResultSucceeded(roleResult, $"create role '{Roles.Administrator}'");
         }
 
-        administrator = await _userManager.FindByNameAsync(administrator.UserName!);
+        var seedAdministrator = await EnsureAdministratorAsync(DefaultAdministrators[0]);
+        foreach (var administrator in DefaultAdministrators.Skip(1))
+        {
+            await EnsureAdministratorAsync(administrator);
+        }
 
-        // Ensure the administrator has a UserProfile - BaseAuditableEntity.CreatedBy/LastModifiedBy
-        // (and StockTransaction.User) are FK'd to UserProfile.IdentityId, so the Identity user id
-        // itself is what gets stored/passed below, not UserProfile.Id.
+        await SeedCategoriesAsync(seedAdministrator.Id);
+        await SeedLocationsAsync(seedAdministrator.Id);
+        // await SeedSchoolClassesAsync(seedAdministrator.Id);
+        // await SeedItemsAsync(seedAdministrator.Id);
+        // await SeedGoodsReceiptAsync(seedAdministrator.Id);
+    }
+
+    private async Task<ApplicationUser> EnsureAdministratorAsync(AdministratorSeed seed)
+    {
+        var administrator = await _userManager.FindByNameAsync(seed.UserName);
+        if (administrator is null)
+        {
+            var newAdministrator = new ApplicationUser { UserName = seed.UserName, Email = seed.UserName };
+
+            var createResult = await _userManager.CreateAsync(newAdministrator, seed.Password);
+            EnsureIdentityResultSucceeded(createResult, $"create administrator '{seed.UserName}'");
+
+            administrator = await _userManager.FindByNameAsync(seed.UserName)
+                            ?? throw new InvalidOperationException(
+                                $"Administrator '{seed.UserName}' could not be found after creation.");
+        }
+
+        if (!await _userManager.IsInRoleAsync(administrator, Roles.Administrator))
+        {
+            var roleResult = await _userManager.AddToRoleAsync(administrator, Roles.Administrator);
+            EnsureIdentityResultSucceeded(
+                roleResult, $"assign role '{Roles.Administrator}' to '{seed.UserName}'");
+        }
+
         var administratorProfile = await _context.Set<UserProfile>()
-            .FirstOrDefaultAsync(p => p.IdentityId == administrator!.Id);
+            .FirstOrDefaultAsync(p => p.IdentityId == administrator.Id);
 
         if (administratorProfile is null)
         {
             administratorProfile = new UserProfile
             {
-                IdentityId = administrator!.Id, FirstName = "Administrator", LastName = "Administrator"
+                IdentityId = administrator.Id, FirstName = seed.FirstName, LastName = seed.LastName
             };
             _context.Set<UserProfile>().Add(administratorProfile);
             await _context.SaveChangesAsync(CancellationToken.None);
         }
 
-        await SeedCategoriesAsync(administrator!.Id);
-        await SeedLocationsAsync(administrator!.Id);
-        // await SeedSchoolClassesAsync(administrator!.Id);
-        // await SeedItemsAsync(administrator!.Id);
-        // await SeedGoodsReceiptAsync(administrator!.Id);
+        return administrator;
     }
+
+    private static void EnsureIdentityResultSucceeded(IdentityResult result, string operation)
+    {
+        if (result.Succeeded)
+        {
+            return;
+        }
+
+        var errors = string.Join("; ", result.Errors.Select(error => $"{error.Code}: {error.Description}"));
+        throw new InvalidOperationException($"Failed to {operation}. Identity errors: {errors}");
+    }
+
+    private sealed record AdministratorSeed(
+        string UserName,
+        string Password,
+        string FirstName,
+        string LastName);
 
     private static readonly (string Name, string Type, bool IsDefault)[] DefaultLocations =
     [
@@ -352,5 +393,4 @@ public class ApplicationDbContextInitialiser
                 .SetProperty(c => c.CreatedById, administratorIdentityId)
                 .SetProperty(c => c.LastModifiedById, administratorIdentityId));
     }
-
 }

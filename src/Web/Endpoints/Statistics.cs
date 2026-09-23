@@ -12,23 +12,37 @@ public class Statistics : IEndpointGroup
     public static void Map(RouteGroupBuilder groupBuilder)
     {
         groupBuilder.MapGet(GetClassStockByCategory, "class/{classId}/stock-by-category");
+        groupBuilder.MapGet(
+            GetClassStockByCategoryForLocation,
+            "class/{classId}/location/{locationId}/stock-by-category");
         groupBuilder.MapGet(GetClassGoodsReceiptCosts, "class/{classId}/goods-receipt-costs");
     }
 
     [EndpointSummary("Get current stock grouped by category")]
-    [EndpointDescription("Returns positive on-hand stock for a class, grouped by category. " +
-                         "All locations are included unless a locationId query parameter is supplied.")]
+    [EndpointDescription("Returns current stock for a class, grouped into category series across " +
+                         "locations with stock batches. The response is suitable for a stacked bar chart.")]
     public static async Task<Results<Ok<ClassStockByCategoryDto>, ProblemHttpResult>> GetClassStockByCategory(
         ISender sender,
         Guid classId,
-        [AsParameters] StatisticsRequests.GetClassStockByCategoryRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetClassStockByCategoryQuery
-        {
-            ClassId = classId,
-            LocationId = request.LocationId
-        }, cancellationToken);
+        var result = await sender.Send(new GetClassStockByCategoryQuery { ClassId = classId }, cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Get current stock by category for a location")]
+    [EndpointDescription("Returns current stock for one location in a school class, with category " +
+                         "series zero-filled for categories stocked elsewhere in the class.")]
+    public static async Task<Results<Ok<ClassStockByCategoryDto>, ProblemHttpResult>>
+        GetClassStockByCategoryForLocation(
+            ISender sender,
+            Guid classId,
+            Guid locationId,
+            CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetClassStockByCategoryQuery { ClassId = classId, LocationId = locationId },
+            cancellationToken);
 
         return result.ToOk();
     }
