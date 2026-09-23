@@ -1,4 +1,15 @@
-import { Component, computed, DestroyRef, effect, inject, input, linkedSignal, model, untracked } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  linkedSignal,
+  model,
+  TemplateRef,
+  untracked
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { form, FormField, type FormValueControl } from '@angular/forms/signals';
 import {
@@ -19,6 +30,7 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { isNil } from 'lodash-es';
 import { ItemDetailModal } from '../modals/detail/item-detail-modal';
 import { NzModalService } from 'ng-zorro-antd/modal';
+import { NgTemplateOutlet } from '@angular/common';
 
 @Component({
   selector: 'ske-item-dropdown',
@@ -29,7 +41,8 @@ import { NzModalService } from 'ng-zorro-antd/modal';
     NzOptionComponent,
     NzSpaceCompactComponent,
     NzButtonComponent,
-    NzIconDirective
+    NzIconDirective,
+    NgTemplateOutlet
   ],
   template: `
     <nz-space-compact class="w-full">
@@ -61,21 +74,27 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 
       @if (allowEdit()) {
         <button nz-button
-                nzSize="small"
-                nzType="primary"
+                nzType="default"
                 type="button"
                 (click)="onEdit(value())"
                 [disabled]="!value()?.id">
-          <nz-icon nzType="icons:pencil"></nz-icon>
+          @if (editButtonTemplate(); as editTemplate) {
+            <ng-container *ngTemplateOutlet="editTemplate" />
+          } @else {
+            <nz-icon nzType="icons:pencil"></nz-icon>
+          }
         </button>
       }
       @if (allowCreate()) {
         <button nz-button
-                nzSize="small"
-                nzType="primary"
+                nzType="default"
                 type="button"
                 (click)="onAdd()">
-          <nz-icon nzType="icons:plus"></nz-icon>
+          @if (createButtonTemplate(); as createTemplate) {
+            <ng-container *ngTemplateOutlet="createTemplate" />
+          } @else {
+            <nz-icon nzType="icons:plus"></nz-icon>
+          }
         </button>
       }
     </nz-space-compact>
@@ -97,6 +116,8 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
   public readonly placeholder = input<string>('Selectați un articol');
   public readonly categoryId = input<string | null>(null);
   public readonly createPrefill = input<Partial<ItemDto> | null>(null);
+  public readonly createButtonTemplate = input<TemplateRef<unknown> | null>(null);
+  public readonly editButtonTemplate = input<TemplateRef<unknown> | null>(null);
 
   public readonly store = inject(ItemDropdownStore);
   private readonly _search$ = new Subject<string>();

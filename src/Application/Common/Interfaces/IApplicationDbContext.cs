@@ -11,8 +11,7 @@ public interface IApplicationDbContext
     DbSet<CategoryImportBatch> CategoryImportBatches { get; }
     DbSet<CategoryImportBatchFile> CategoryImportBatchFiles { get; }
     DbSet<ClassBalance> ClassBalances { get; }
-    DbSet<ClassItemStockVisibility> ClassItemStockVisibilities =>
-        throw new NotSupportedException("This test context does not expose class-item stock visibility.");
+    DbSet<ClassItemStockVisibility> ClassItemStockVisibilities { get; }
     DbSet<FileMetadata> FileMetadata { get; }
     DbSet<Item> Items { get; }
     DbSet<ItemImportBatch> ItemImportBatches { get; }

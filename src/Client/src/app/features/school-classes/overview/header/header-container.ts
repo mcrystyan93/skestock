@@ -3,7 +3,6 @@ import { SchoolClassOverviewStore } from '../../services/school-class-overview.s
 import { Header } from './header';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { AddGoodsReceiptModal } from '@ske/shared/goods-receipts';
-import { ReviewModal, ReviewModalData } from '@ske/shared/goods-receipt-imports';
 import { Router } from '@angular/router';
 import { isNil } from 'lodash-es';
 import { OrderListDetailModal } from '@ske/shared/order-lists';
@@ -44,16 +43,6 @@ export class HeaderContainer {
 
   public onAddProduct() {
     this._stockDispatcher.addProduct();
-  }
-
-  private openGoodsReceiptImportReview(importId: string) {
-    this._nzModalService.create({
-      nzContent: ReviewModal,
-      nzData: <ReviewModalData>{ importId },
-      nzWidth: '90vw',
-      nzCentered: true,
-      nzMaskClosable: false
-    });
   }
 
   public createOrderList() {

@@ -1,13 +1,18 @@
 <div *nzModalTitle>
   @let name = store.orderList().name;
-  @if (name) {
-    Comanda: '{{ name }}'
-  } @else {
-    Comanda noua
-  }
-  <nz-tag nzColor="geekblue">
-    {{ statusLabel() }}
-  </nz-tag>
+  <div class="flex gap-2">
+    <div>
+      @if (name) {
+        Comanda: {{ name }}
+      } @else {
+        Comanda noua
+      }
+    </div>
+    <nz-tag nzColor="default">
+      <nz-icon [nzType]="'icons:' + statusIcon()"></nz-icon>
+      {{ statusLabel() }}
+    </nz-tag>
+  </div>
 </div>
 
 <ske-error-display [problemDetail]="store.orderListProblemDetail()"

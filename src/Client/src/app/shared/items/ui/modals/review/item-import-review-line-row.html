@@ -1,27 +1,34 @@
 @let lineFormSignal = lineForm();
+@let isMatched = !!lineFormSignal.item().value()?.id;
 <td>
   {{ lineForm().sku().value() ?? '-' }}
 </td>
 <td>
-  {{ lineForm().name().value() ?? '-' }}
-</td>
-<td>
-  @if (lineFormSignal().value().itemAlreadyExists) {
-    <nz-tag nzColor="green">Articol existent</nz-tag>
-  } @else {
-    <nz-tag nzColor="blue">Nou</nz-tag>
-  }
-</td>
-<td>
-  <nz-form-item>
-    <nz-form-control [nzErrorTip]="errorTemplate">
-      <ske-item-dropdown [formField]="lineForm().item"
-                         [allowEdit]="false"
-                         [allowCreate]="true"
-                         [placeholder]="itemPlaceholder"
-                         [createPrefill]="itemPrefill()" />
-    </nz-form-control>
-  </nz-form-item>
+  <div class="flex items-center gap-2 w-full">
+    <nz-icon [nzType]="isMatched ? 'icons:circle-check' : 'icons:circle-exclamation'"
+             [class.text-green-500!]="isMatched"
+             [class.text-amber-500!]="!isMatched"></nz-icon>
+    <div class="grow">
+      <nz-form-item class="mb-0!">
+        <nz-form-control [nzErrorTip]="errorTemplate">
+          <ske-item-dropdown [formField]="lineForm().item"
+                             [allowEdit]="false"
+                             [allowCreate]="!isMatched"
+                             [placeholder]="itemPlaceholder"
+                             [createPrefill]="itemPrefill()"
+                             [createButtonTemplate]="createTemplate" />
+          <ng-template #createTemplate>Creaza</ng-template>
+        </nz-form-control>
+      </nz-form-item>
+      @if (!isMatched) {
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0!">
+          Citit din document: {{ lineForm().name().value() ?? '-' }}
+        </div>
+      }
+    </div>
+  </div>
 </td>
 <td>
   @let selectedItem = lineFormSignal().value().item;
@@ -40,18 +47,6 @@
 </td>
 <td>
   {{ lineForm().unit().value() ?? '-' }}
-</td>
-<td>
-  {{ lineForm().description().value() ?? '-' }}
-</td>
-<td>
-  <nz-tag [nzColor]="lineForm().isPerishable().value() ? 'warning' : 'blue'">
-    @if (lineForm().isPerishable().value()) {
-      Perisabil
-    } @else {
-      Neperisabil
-    }
-  </nz-tag>
 </td>
 
 

@@ -1,25 +1,26 @@
-<td nzRight>
-  {{ line().rawItemText ?? line().extractedName }}
-</td>
-<td>
-  @if (line().item?.id) {
-    <nz-tag nzColor="green">Gasit</nz-tag>
-  } @else {
-    <nz-tag nzColor="orange">Lipsa produs</nz-tag>
-  }
-</td>
 <td>
   <nz-form-item>
-    <nz-form-control [nzErrorTip]="errorTemplate">
+    <nz-form-control [nzErrorTip]="errorTemplate"
+                     nzSpan="24">
       <ske-item-dropdown [formField]="lineForm().item"
                          [allowClear]="true"
                          [allowEdit]="false"
                          [allowCreate]="!line().item?.id"
                          [placeholder]="itemPlaceholder"
-                         [createPrefill]="createPrefill(line())" />
+                         [createPrefill]="createPrefill(line())"
+                         [createButtonTemplate]="createItemTemplate" />
+      <ng-template #createItemTemplate>Creaza</ng-template>
     </nz-form-control>
   </nz-form-item>
+  @if (!line().item?.id) {
+    <div nz-typography
+         nzType="secondary"
+         class="mb-0! mt-1">
+      Din aviz: {{ line().rawItemText ?? line().extractedName }}
+    </div>
+  }
 </td>
+
 <td>
   <nz-form-item>
     <nz-form-control [nzErrorTip]="errorTemplate">
@@ -34,18 +35,15 @@
                      [nzValidateStatus]="quantityValidateStatus()"
                      nzWarningTip="Cantitatea introduse este mai mare decat cantitatea originala"
                      nzHasFeedback>
-      <!--              <nz-input-wrapper>-->
       <nz-input-number [formField]="lineForm().quantity"
-                       class="w-full!">
-                  <span nzInputAddonBefore>
-                  <nz-icon nzType="icons:circle-info"
-                           nz-tooltip
-                           nzTooltipTrigger="hover"
-                           [nzTooltipTitle]="'Cantitatea originala: ' + (line()?.originalQuantity ?? 0)"></nz-icon>
-                    </span>
+                       class="w-full!" [nzControls]="false">
+        <div nzInputAddonBefore>
+          <nz-icon nzType="icons:circle-info"
+                   nz-tooltip
+                   nzTooltipTrigger="hover"
+                   [nzTooltipTitle]="'Cantitatea originala: ' + (line()?.originalQuantity ?? 0)"></nz-icon>
+        </div>
       </nz-input-number>
-
-      <!--              </nz-input-wrapper>-->
     </nz-form-control>
   </nz-form-item>
 </td>
@@ -54,6 +52,7 @@
     <nz-form-item>
       <nz-form-control [nzErrorTip]="errorTemplate">
         <nz-date-picker [formField]="lineForm().expiryDate"
+                        nzFormat="dd.MM.yyyy"
                         class="w-full!" />
       </nz-form-control>
     </nz-form-item>
@@ -63,6 +62,8 @@
   <nz-form-item>
     <nz-form-control [nzErrorTip]="errorTemplate">
       <nz-input-number [formField]="lineForm().unitPrice"
+                       [nzFormatter]="unitPriceFormatter"
+                       [nzParser]="unitPriceParser"
                        [nzMin]="0"
                        class="w-full!">
         <span nzInputAddonAfter>RON</span>
@@ -71,19 +72,20 @@
   </nz-form-item>
 </td>
 <td>
-  <button nz-button nzSize="small"
-          nzType="link"
+  <button nz-button
+          nzType="text"
           type="button"
-          title="Imparte randul"
+          nz-tooltip
+          [nzTooltipTitle]="'Imparte randul'"
           (click)="splitLine.emit(line())">
     <nz-icon nzType="icons:split" />
   </button>
   @if (canRemove()) {
-    <button nz-button nzSize="small"
-            nzType="link"
-            nzDanger
+    <button nz-button
+            nzType="text"
             type="button"
-            title="Sterge randul"
+            nz-tooltip
+            [nzTooltipTitle]="'Sterge randul'"
             (click)="removeLine.emit(line())">
       <nz-icon nzType="icons:trash" />
     </button>

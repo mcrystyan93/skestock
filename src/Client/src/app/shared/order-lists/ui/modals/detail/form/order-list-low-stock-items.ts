@@ -1,24 +1,24 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { OrderListDetailState } from '@ske/shared/order-lists';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
-import { NzCardComponent } from 'ng-zorro-antd/card';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzSpinComponent } from 'ng-zorro-antd/spin';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { LowStockItemDto, OrderListLineDto } from '@ske/models';
 import { ErrorAlert } from '@ske/shared/errors';
+import { NzAlertComponent } from 'ng-zorro-antd/alert';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
 
 @Component({
   imports: [
     NzRowDirective,
     NzColDirective,
-    NzCardComponent,
     NzButtonComponent,
-    NzIconDirective,
     NzSpinComponent,
     NzTypographyComponent,
-    ErrorAlert
+    ErrorAlert,
+    NzAlertComponent,
+    NzIconDirective
   ],
   selector: 'ske-order-list-low-stock-items',
   styles: ``,
@@ -48,32 +48,48 @@ import { ErrorAlert } from '@ske/shared/errors';
           @let products = store.lowStockItemsByLocation().get(location) ?? [];
           @let allWereAdded = allItemsAdded().get(location) ?? false;
           <nz-col [nzSpan]="6">
-            <nz-card [nzTitle]="location"
-                     nzSize="small"
-                     [nzExtra]="extra">
-              <ng-template #extra>
-                @if (allWereAdded) {
-                  <nz-icon nzType="icons:circle-check"
-                           class="text-green-800! text-lg"
-                           aria-hidden="true"></nz-icon>
-                } @else {
-                  <button type="button"
-                          nz-button
-                          nzType="link"
-                          [disabled]="disabled()"
-                          (click)="addProducts.emit(products)">
-                    <nz-icon nzType="icons:plus"
-                             aria-hidden="true"></nz-icon>
-                    Adauga articolele
-                  </button>
-                }
-              </ng-template>
+            <nz-alert [nzType]="allWereAdded ? 'success' : 'warning'"
+                      [nzMessage]="location"
+                      [nzDescription]="allWereAdded ? 'Toate articolele au fost adăugate' : products.length + ' articole cu stoc scăzut'"
+                      [nzAction]="actionTemplate"></nz-alert>
+            <ng-template #actionTemplate>
               @if (!allWereAdded) {
-                {{ products.length }} articole cu stoc scăzut
-              } @else {
-                Toate articolele cu stoc scăzut au fost adăugate
+                <button type="button"
+                        nz-button
+                        nzType="text"
+                        [disabled]="disabled()"
+                        (click)="addProducts.emit(products)">
+                  <nz-icon nzType="icons:plus"
+                           aria-hidden="true"></nz-icon>
+                </button>
               }
-            </nz-card>
+            </ng-template>
+            <!--            <nz-card [nzTitle]="location"-->
+            <!--                     nzSize="small"-->
+            <!--                     [nzExtra]="extra">-->
+            <!--              <ng-template #extra>-->
+            <!--                @if (allWereAdded) {-->
+            <!--                  <nz-icon nzType="icons:circle-check"-->
+            <!--                           class="text-green-800! text-lg"-->
+            <!--                           aria-hidden="true"></nz-icon>-->
+            <!--                } @else {-->
+            <!--                  <button type="button"-->
+            <!--                          nz-button-->
+            <!--                          nzType="link"-->
+            <!--                          [disabled]="disabled()"-->
+            <!--                          (click)="addProducts.emit(products)">-->
+            <!--                    <nz-icon nzType="icons:plus"-->
+            <!--                             aria-hidden="true"></nz-icon>-->
+            <!--                    Adauga articolele-->
+            <!--                  </button>-->
+            <!--                }-->
+            <!--              </ng-template>-->
+            <!--              @if (!allWereAdded) {-->
+            <!--                {{ products.length }} articole cu stoc scăzut-->
+            <!--              } @else {-->
+            <!--                Toate articolele cu stoc scăzut au fost adăugate-->
+            <!--              }-->
+            <!--            </nz-card>-->
           </nz-col>
         }
       </nz-row>

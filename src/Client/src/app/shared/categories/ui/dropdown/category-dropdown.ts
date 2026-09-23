@@ -1,4 +1,15 @@
-import { Component, computed, DestroyRef, effect, inject, input, linkedSignal, model, untracked } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  linkedSignal,
+  model,
+  TemplateRef,
+  untracked
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { disabled, form, FormField, type FormValueControl } from '@angular/forms/signals';
 import {
@@ -17,6 +28,7 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { isNil } from 'lodash-es';
 import { CategoryDetailModal } from '../modals/detail/category-detail-modal';
 import { NzModalService } from 'ng-zorro-antd/modal';
+import { NgTemplateOutlet } from '@angular/common';
 
 @Component({
   selector: 'ske-category-dropdown',
@@ -28,24 +40,23 @@ import { NzModalService } from 'ng-zorro-antd/modal';
     NzSpaceCompactComponent,
     NzButtonComponent,
     NzIconDirective,
+    NgTemplateOutlet
   ],
   template: `
     <nz-space-compact class="w-full">
-      <nz-select
-        [formField]="categoryForm.category"
-        [nzPlaceHolder]="placeholder()"
-        nzShowSearch
-        nzShowArrow
-        [nzLoading]="store.loading()"
-        [nzAllowClear]="allowClear()"
-        nzServerSearch
-        class="w-full"
-        [compareWith]="(a, b) => (a && b ? a.id === b.id : a === b)"
-        (nzOnSearch)="onSearch($event)"
-        [nzDropdownMatchSelectWidth]="false"
-        [nzDropdownRender]="loadingMoreTemplate"
-        (nzScrollToBottom)="loadMore()"
-      >
+      <nz-select [formField]="categoryForm.category"
+                 [nzPlaceHolder]="placeholder()"
+                 nzShowSearch
+                 nzShowArrow
+                 [nzLoading]="store.loading()"
+                 [nzAllowClear]="allowClear()"
+                 nzServerSearch
+                 class="w-full"
+                 [compareWith]="(a, b) => (a && b ? a.id === b.id : a === b)"
+                 (nzOnSearch)="onSearch($event)"
+                 [nzDropdownMatchSelectWidth]="false"
+                 [nzDropdownRender]="loadingMoreTemplate"
+                 (nzScrollToBottom)="loadMore()">
         @if (value(); as category) {
           <nz-option [nzValue]="category"
                      nzHide
@@ -62,7 +73,11 @@ import { NzModalService } from 'ng-zorro-antd/modal';
                 nzType="default"
                 type="button"
                 (click)="onEdit(value())">
-          <nz-icon nzType="icons:pencil"></nz-icon>
+          @if (createButtonTemplate(); as createButtonTemplate) {
+            <ng-container *ngTemplateOutlet="createButtonTemplate"></ng-container>
+          } @else {
+            <nz-icon nzType="icons:pencil"></nz-icon>
+          }
         </button>
       }
       @if (allowCreate() && !categoryForm().disabled()) {
@@ -70,7 +85,11 @@ import { NzModalService } from 'ng-zorro-antd/modal';
                 nzType="default"
                 type="button"
                 (click)="onAdd()">
-          <nz-icon nzType="icons:plus"></nz-icon>
+          @if (createButtonTemplate(); as createButtonTemplate) {
+            <ng-container *ngTemplateOutlet="createButtonTemplate"></ng-container>
+          } @else {
+            <nz-icon nzType="icons:plus"></nz-icon>
+          }
         </button>
       }
     </nz-space-compact>
@@ -91,6 +110,8 @@ export class CategoryDropdown implements FormValueControl<CategoryDropdownValue>
   public readonly allowCreate = input<boolean>(true);
   public readonly placeholder = input<string>('Selectați o categorie');
   public readonly createPrefill = input<Partial<CategoryDto> | null>(null);
+  public readonly createButtonTemplate = input<TemplateRef<any> | null>(null);
+  public readonly editButtonTemplate = input<TemplateRef<any> | null>(null);
 
   public readonly store = inject(CategoryDropdownStore);
   private readonly _search$ = new Subject<string>();

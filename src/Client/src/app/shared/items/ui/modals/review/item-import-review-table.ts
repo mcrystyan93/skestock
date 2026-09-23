@@ -1,6 +1,6 @@
 // noinspection ES6PreferShortImport
 
-import { Component, input, linkedSignal } from '@angular/core';
+import { Component, effect, input, linkedSignal, output } from '@angular/core';
 import { ItemImportReviewEditableLine } from '../../../services/item-import-review.store';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { applyEach, form, required, schema, submit } from '@angular/forms/signals';
@@ -16,6 +16,22 @@ import { BaseTable } from '@ske/shared/tables';
 export class ItemImportReviewTable extends BaseTable {
   public readonly lines = input.required<ItemImportReviewEditableLine[]>();
   public readonly loading = input.required<boolean>();
+
+  public readonly formChanges = output<ItemImportReviewEditableLine[]>();
+
+  private _initialFormChange = true;
+
+  private readonly _formChangeEffect = effect(() => {
+    const linesForm = this.linesForm();
+    const lines = linesForm.value().lines;
+
+    if (this._initialFormChange) {
+      this._initialFormChange = false;
+      return;
+    }
+
+    this.formChanges.emit(lines);
+  });
 
   private readonly _linesModel = linkedSignal({
     source: () => this.lines(),

@@ -3,7 +3,7 @@ import { FieldTree, FormField } from '@angular/forms/signals';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzFormControlComponent, NzFormItemComponent } from 'ng-zorro-antd/form';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { NzInputDirective } from 'ng-zorro-antd/input';
+import { NzInputDirective, NzInputPrefixDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
 import {
   NzListItemActionComponent,
@@ -28,10 +28,12 @@ import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
     NzListItemMetaDescriptionComponent,
     NzListItemMetaTitleComponent,
     NzSpaceCompactComponent,
-    FormField
+    FormField,
+    NzInputWrapperComponent,
+    NzInputPrefixDirective
   ],
   host: {
-    class: 'ant-list-item'
+    class: 'ant-list-item py-1!'
   },
   selector: 'ske-order-list-line',
   styles: ``,
@@ -54,13 +56,17 @@ import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
       <nz-list-item-meta-description>
         <nz-form-item class="mb-0!">
           <nz-form-control [nzErrorTip]="notesErrorTemplate">
-            <input type="text"
-                   nz-input
-                   nzVariant="borderless"
-                   placeholder="Adaugă notițe"
-                   [formField]="lineForm.notes"
-                   class="w-75!"
-                   [attr.aria-label]="'Notițe pentru ' + productName" />
+            <nz-input-wrapper>
+              <nz-icon nzInputPrefix
+                       nzType="icons:pencil"></nz-icon>
+              <input type="text"
+                     nz-input
+                     nzVariant="borderless"
+                     placeholder="Adaugă notițe"
+                     [formField]="lineForm.notes"
+                     class="w-75!"
+                     [attr.aria-label]="'Notițe pentru ' + productName" />
+            </nz-input-wrapper>
           </nz-form-control>
         </nz-form-item>
       </nz-list-item-meta-description>
@@ -69,19 +75,32 @@ import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
     <nz-form-item class="mb-0!">
       <nz-form-control>
         <nz-space-compact>
+
+          <button nz-button
+                  nzType="default"
+                  type="button"
+                  (click)="decreaseQuantity()">
+            <nz-icon nzType="icons:minus"></nz-icon>
+          </button>
           <nz-input-number [formField]="lineForm.quantity"
                            class="w-20!"
-                           nzVariant="borderless"
                            nzPlaceHolder="Cantitate"
                            [nzMin]="0"
                            [nzStep]="0.01"
-                           [attr.aria-label]="'Cantitate pentru ' + productName" />
+                           [nzControls]="false"
+                           [attr.aria-label]="'Cantitate pentru ' + productName">
+          </nz-input-number>
+          <button nz-button
+                  nzType="default"
+                  type="button"
+                  (click)="increaseQuantity()">
+            <nz-icon nzType="icons:plus"></nz-icon>
+          </button>
           <input nz-input
                  type="text"
-                 nzVariant="borderless"
                  placeholder="Unitate de măsură"
                  [formField]="lineForm.unit"
-                 class="w-32!"
+                 class="w-30!"
                  aria-label="Unitate de măsură" />
         </nz-space-compact>
         @if (lineForm.quantity().touched() && lineForm.quantity().errors(); as errors) {
@@ -109,12 +128,10 @@ import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
       <nz-list-item-action>
         <button type="button"
                 nz-button
-                nzType="link"
-                nzDanger
+                nzType="text"
                 [disabled]="disabled()"
                 (click)="remove.emit()">
           <nz-icon nzType="icons:trash-can"></nz-icon>
-          Sterge
         </button>
       </nz-list-item-action>
     </ul>
@@ -135,6 +152,14 @@ export class OrderListLine {
   public readonly line = input.required<FieldTree<OrderListLineFormModel>>();
   public readonly disabled = input(false);
   public readonly remove = output<void>();
+
+  public increaseQuantity() {
+    this.line().quantity().value.update(qty => qty + 1);
+  }
+
+  public decreaseQuantity() {
+    this.line().quantity().value.update(qty => Math.max(0, qty - 1));
+  }
 }
 
 export type OrderListLineFormModel = {

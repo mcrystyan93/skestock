@@ -1,13 +1,15 @@
+@if (alertMessage(); as message) {
+  <nz-alert [nzShowIcon]="true"
+            [nzType]="message.type"
+            [nzMessage]="message.text"></nz-alert>
+}
 <nz-table nzSize="small"
           nzTableLayout="fixed"
           [nzTemplateMode]="true"
-          [nzScroll]="{ x: '720px', y: '450px' }"
           [nzFrontPagination]="false"
           [nzShowPagination]="false">
   <thead>
   <tr>
-    <th nzWidth="260px">Nume citit</th>
-    <th nzWidth="180px">Potrivire</th>
     <th nzWidth="280px">Categorie</th>
   </tr>
   </thead>

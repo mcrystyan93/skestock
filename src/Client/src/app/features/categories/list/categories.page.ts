@@ -71,7 +71,7 @@ export class CategoriesPage implements OnInit, OnDestroy {
     const modalRef = this._modalService.create({
       nzContent: CategoryImportReviewModal,
       nzData: importId,
-      nzWrapClassName: 'modal-90',
+      nzWrapClassName: 'modal-lg-100 modal-xl-75',
       nzCentered: true,
       nzMaskClosable: false
     });

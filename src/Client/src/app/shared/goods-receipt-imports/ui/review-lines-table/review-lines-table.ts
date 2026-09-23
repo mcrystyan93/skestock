@@ -3,12 +3,15 @@ import { applyEach, disabled, form, required, schema, submit, validate } from '@
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { LineMutationEvent, ReviewEditableLine } from '../../services/review.store';
 import { ReviewLine } from './review-line/review-line';
+import { isEmpty, isNil } from 'lodash-es';
+import { NzAlertComponent, NzAlertType } from 'ng-zorro-antd/alert';
 
 
 @Component({
   imports: [
     NzTableModule,
-    ReviewLine
+    ReviewLine,
+    NzAlertComponent
   ],
   selector: 'ske-goods-receipt-import-review-lines-table',
   styles: ``,
@@ -98,6 +101,23 @@ export class ReviewLinesTable {
     }
 
     return removeMap;
+  });
+
+  public readonly alertMessage = computed<{ text: string, type: NzAlertType }>(() => {
+    const lines = this.linesForm().value()?.lines;
+
+    if (isNil(lines) || isEmpty(lines))
+      return { text: 'Nu există linii de revizuit.', type: 'warning' };
+
+    const nrOfMatchedLines = lines.filter(l => !!l.item?.id).length;
+
+    if (nrOfMatchedLines === lines.length)
+      return { text: 'Toate articolele au fost potrivite', type: 'success' };
+
+    return {
+      text: `${nrOfMatchedLines} din ${lines.length} articole au fost potrivite. ${lines.length - nrOfMatchedLines} necesita atenție.`,
+      type: 'warning'
+    };
   });
 
   public async submit(): Promise<ReviewLinesSubmit> {
