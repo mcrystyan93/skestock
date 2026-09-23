@@ -1,19 +1,15 @@
 namespace skestock.Application.Features.Statistics.Models;
 
-public record CategoryStockSummaryDto
+public record ClassStockByCategorySeriesDto
 {
-    public Guid CategoryId { get; init; }
-    public string CategoryName { get; init; } = string.Empty;
-    public int Quantity { get; init; }
-    public int ItemCount { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public List<int> Data { get; init; } = [];
 }
 
 public record ClassStockByCategoryDto
 {
-    public List<CategoryStockSummaryDto> Categories { get; init; } = [];
-    public int TotalQuantity { get; init; }
-    public int TotalItemCount { get; init; }
-    public int TotalCategoryCount { get; init; }
+    public List<string> Labels { get; init; } = [];
+    public List<ClassStockByCategorySeriesDto> Series { get; init; } = [];
 }
 
 public record GoodsReceiptCostPointDto

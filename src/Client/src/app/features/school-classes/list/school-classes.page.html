@@ -1,11 +1,12 @@
 <ske-school-class-header (onAdd)="onAdd()" />
 
-<ske-school-class-filter-container class="mx-4" />
+<ske-school-class-filter-container />
+
 <ske-error-display [problemDetail]="store.schoolClassesProblemDetail()"
                    [validationErrors]="store.schoolClassesValidationErrors()"
-                   class="mx-4" />
+                   class="px-4" />
 <div class="grow relative">
-  <ng-container *skeLayoutBreakpoint="'xl'; else smallScreenListTemplate">
+  <ng-container *skeLayoutBreakpoint="'md'; else smallScreenListTemplate">
     <ske-school-class-table [items]="store.schoolClasses()"
                             [filter]="store.filter()"
                             [loading]="store.schoolClassesLoading()"

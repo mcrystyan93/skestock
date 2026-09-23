@@ -1,13 +1,17 @@
-<cdk-virtual-scroll-viewport itemSize="73" class="h-full w-full" (scroll)="onScroll($event)">
-  <nz-list>
+<cdk-virtual-scroll-viewport itemSize="73"
+                             class="h-full w-full"
+                             (scroll)="onScroll($event)">
+  <nz-list [nzLoading]="loading()">
     @if (items().length === 0) {
       <nz-list-empty />
     }
 
-    <nz-list-item *cdkVirtualFor="let schoolClass of items(); trackBy: (index, item) => item.id">
+    <nz-list-item *cdkVirtualFor="let schoolClass of items(); trackBy: (index, item) => item.id"
+                  class="px-4!">
       <nz-list-item-meta>
         <nz-list-item-meta-title>
-          <span class="block truncate" [attr.title]="schoolClass.name">
+          <span class="block truncate"
+                [attr.title]="schoolClass.name">
             {{ schoolClass.name }}
           </span>
         </nz-list-item-meta-title>
@@ -18,36 +22,33 @@
               {{ schoolClass.startDate | date }} - {{ schoolClass.endDate | date }}
             </span>
             <nz-divider nzType="vertical" />
-            <nz-tag [nzColor]="statusColor(schoolClass.status)">
-              {{ statusLabel(schoolClass.status) }}
-            </nz-tag>
+            <nz-badge [nzStatus]="statusColor(schoolClass.status)"
+                      [nzText]="statusLabel(schoolClass.status)">
+
+            </nz-badge>
           </div>
         </nz-list-item-meta-description>
       </nz-list-item-meta>
 
       <ul nz-list-item-actions>
         <nz-list-item-action>
-          <button
-            type="button"
-            nz-button
-            nzType="link"
-            title="Vizualizeaza"
-            aria-label="Vizualizeaza"
-            (click)="onView.emit(schoolClass)"
-          >
+          <button type="button"
+                  nz-button
+                  nzType="text"
+                  title="Vizualizeaza"
+                  aria-label="Vizualizeaza"
+                  (click)="onView.emit(schoolClass)">
             <nz-icon nzType="icons:eye" />
             Vizualizeaza
           </button>
         </nz-list-item-action>
         <nz-list-item-action>
-          <button
-            type="button"
-            nz-button
-            nzType="link"
-            title="Editeaza"
-            aria-label="Editeaza"
-            (click)="onEdit.emit(schoolClass)"
-          >
+          <button type="button"
+                  nz-button
+                  nzType="text"
+                  title="Editeaza"
+                  aria-label="Editeaza"
+                  (click)="onEdit.emit(schoolClass)">
             <nz-icon nzType="icons:pencil" />
             Modifica
           </button>

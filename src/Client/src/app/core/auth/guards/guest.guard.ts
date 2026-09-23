@@ -11,6 +11,6 @@ export const guestGuard: CanActivateFn = () => {
   return toObservable(authStore.authLoading).pipe(
     filter((isLoading) => !isLoading),
     take(1),
-    map(() => (authStore.isAuthenticated() ? router.createUrlTree(['/categories']) : true))
+    map(() => (authStore.isAuthenticated() ? router.createUrlTree(['/school-classes']) : true))
   );
 };

@@ -6,13 +6,9 @@ import {
   CLASS_STATUS_LABELS,
   ClassStatus,
   GetAllSchoolClassesRequest,
-  SchoolClassDto,
+  SchoolClassDto
 } from '@ske/models';
-import {
-  CdkFixedSizeVirtualScroll,
-  CdkVirtualForOf,
-  CdkVirtualScrollViewport,
-} from '@angular/cdk/scrolling';
+import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzDividerComponent } from 'ng-zorro-antd/divider';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
@@ -24,9 +20,9 @@ import {
   NzListItemComponent,
   NzListItemMetaComponent,
   NzListItemMetaDescriptionComponent,
-  NzListItemMetaTitleComponent,
+  NzListItemMetaTitleComponent
 } from 'ng-zorro-antd/list';
-import { NzTagComponent } from 'ng-zorro-antd/tag';
+import { NzBadgeComponent } from 'ng-zorro-antd/badge';
 
 @Component({
   imports: [
@@ -45,7 +41,7 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
     NzListItemMetaComponent,
     NzListItemMetaDescriptionComponent,
     NzListItemMetaTitleComponent,
-    NzTagComponent,
+    NzBadgeComponent
   ],
   selector: 'ske-school-class-list-small',
   templateUrl: './school-class-list-small.html',

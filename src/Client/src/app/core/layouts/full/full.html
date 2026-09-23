@@ -2,26 +2,26 @@
   <!--  <ske-header (drawerToggle)="drawerOpen.set(!drawerOpen())"-->
   <!--              class="min-w-0"></ske-header>-->
   <nz-layout class="min-w-0">
-    <ng-container *skeLayoutBreakpoint="'xl';else:drawerTemplate">
-      <nz-sider class="pt-8">
+<!--    <ng-container *skeLayoutBreakpoint="'lg';else:drawerTemplate">-->
+      <nz-sider class="pt-8" nzCollapsed>
         <ng-container *ngTemplateOutlet="menuTemplate"></ng-container>
       </nz-sider>
-    </ng-container>
-    <ng-template #drawerTemplate>
-      <nz-drawer [nzVisible]="drawerOpen()"
-                 [nzClosable]="false"
-                 nzPlacement="left"
-                 [nzMaskClosable]="true"
-                 [nzCloseOnNavigation]="true"
-                 (nzOnClose)="drawerOpen.set(false)"
-                 [nzBodyStyle]="{ padding: 0, 'padding-top': '64px' }"
-                 nzWrapClassName="menuDrawer"
-                 [nzWidth]="200">
-        <ng-container *nzDrawerContent>
-          <ng-container *ngTemplateOutlet="menuTemplate"></ng-container>
-        </ng-container>
-      </nz-drawer>
-    </ng-template>
+<!--    </ng-container>-->
+<!--    <ng-template #drawerTemplate>-->
+<!--      <nz-drawer [nzVisible]="drawerOpen()"-->
+<!--                 [nzClosable]="false"-->
+<!--                 nzPlacement="left"-->
+<!--                 [nzMaskClosable]="true"-->
+<!--                 [nzCloseOnNavigation]="true"-->
+<!--                 (nzOnClose)="drawerOpen.set(false)"-->
+<!--                 [nzBodyStyle]="{ padding: 0, 'padding-top': '64px' }"-->
+<!--                 nzWrapClassName="menuDrawer"-->
+<!--                 [nzWidth]="200">-->
+<!--        <ng-container *nzDrawerContent>-->
+<!--          <ng-container *ngTemplateOutlet="menuTemplate"></ng-container>-->
+<!--        </ng-container>-->
+<!--      </nz-drawer>-->
+<!--    </ng-template>-->
 
     <nz-content class="flex! min-w-0">
       <router-outlet></router-outlet>
@@ -31,14 +31,8 @@
 
 <ng-template #menuTemplate>
   <ul nz-menu
+      nzInlineCollapsed
       nzMode="inline">
-    <!--        <li nz-menu-item-->
-    <!--            nzMatchRouter-->
-    <!--            [routerLink]="['/home']">-->
-    <!--          <nz-icon nzType="icons:house"-->
-    <!--                   class="text-2xl!"></nz-icon>-->
-    <!--          <span>Acasa</span>-->
-    <!--        </li>-->
     <li nz-menu-item
         nzMatchRouter
         (click)="drawerOpen.set(false)"
