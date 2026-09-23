@@ -23,6 +23,7 @@ public class SchoolClassSummaryTestDbContext(DbContextOptions<SchoolClassSummary
     public DbSet<CategoryImportBatch> CategoryImportBatches => Set<CategoryImportBatch>();
     public DbSet<CategoryImportBatchFile> CategoryImportBatchFiles => Set<CategoryImportBatchFile>();
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
+    public DbSet<ClassItemStockVisibility> ClassItemStockVisibilities => Set<ClassItemStockVisibility>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();
     public DbSet<ItemImportBatchFile> ItemImportBatchFiles => Set<ItemImportBatchFile>();
@@ -157,21 +158,31 @@ public class GetSchoolClassSummaryHandlerTests
         Type = "StorageRoom"
     };
 
-    private static Item CreateItem(Category category, int minThreshold, string name = "Rice") => new()
+    private static Item CreateItem(
+        Category category,
+        int minThreshold,
+        string name = "Rice",
+        bool isPerishable = false) => new()
     {
         Name = name,
         Unit = "kg",
         MinThreshold = minThreshold,
-        IsPerishable = false,
+        IsPerishable = isPerishable,
         Category = category
     };
 
-    private static StockBatch CreateBatch(Item item, Location location, SchoolClass schoolClass, int quantity) => new()
+    private static StockBatch CreateBatch(
+        Item item,
+        Location location,
+        SchoolClass schoolClass,
+        int quantity,
+        DateOnly? expiryDate = null) => new()
     {
         Item = item,
         Location = location,
         ReceivedClass = schoolClass,
         Quantity = quantity,
+        ExpiryDate = expiryDate,
         ReceivedDate = new DateOnly(2026, 9, 1),
         UnitPrice = 1m
     };
@@ -227,8 +238,10 @@ public class GetSchoolClassSummaryHandlerTests
         result.Value.TotalAmount.ShouldBe(0m);
         result.Value.DistinctItemsCount.ShouldBe(0);
         result.Value.LowStockItemsCount.ShouldBe(0);
+        result.Value.ExpiredItemsCount.ShouldBe(0);
         result.Value.ProcessingImportsCount.ShouldBe(0);
         result.Value.PendingReviewImportsCount.ShouldBe(0);
+        result.Value.ConfirmedImportsCount.ShouldBe(0);
         result.Value.FailedImportsCount.ShouldBe(0);
         result.Value.GoodsReceipts.ShouldBeEmpty();
     }
@@ -320,6 +333,58 @@ public class GetSchoolClassSummaryHandlerTests
     }
 
     [Test]
+    public async Task Handle_CountsDistinctPerishableItemsWithExpiredStockForCurrentClass()
+    {
+        await using var context = CreateContext();
+        var schoolClass = CreateSchoolClass();
+        var otherClass = CreateSchoolClass();
+        var category = CreateCategory();
+        var locationA = CreateLocation("Kitchen");
+        var locationB = CreateLocation("Storage Room");
+        var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime);
+        var expiredItem = CreateItem(category, minThreshold: 1, name: "Expired item", isPerishable: true);
+        var secondExpiredItem = CreateItem(category, minThreshold: 1, name: "Second expired item", isPerishable: true);
+        var expiredInOtherClassItem =
+            CreateItem(category, minThreshold: 1, name: "Other class item", isPerishable: true);
+        var nonPerishableItem = CreateItem(category, minThreshold: 1, name: "Non-perishable item");
+        var zeroQuantityItem = CreateItem(category, minThreshold: 1, name: "Empty item", isPerishable: true);
+        var futureExpiryItem = CreateItem(category, minThreshold: 1, name: "Future expiry item", isPerishable: true);
+        var noExpiryItem = CreateItem(category, minThreshold: 1, name: "No expiry item", isPerishable: true);
+        context.AddRange(
+            schoolClass,
+            otherClass,
+            category,
+            locationA,
+            locationB,
+            expiredItem,
+            secondExpiredItem,
+            expiredInOtherClassItem,
+            nonPerishableItem,
+            zeroQuantityItem,
+            futureExpiryItem,
+            noExpiryItem);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        context.StockBatches.AddRange(
+            CreateBatch(expiredItem, locationA, schoolClass, quantity: 2, expiryDate: today),
+            CreateBatch(expiredItem, locationB, schoolClass, quantity: 3, expiryDate: today.AddDays(-1)),
+            CreateBatch(secondExpiredItem, locationA, schoolClass, quantity: 1, expiryDate: today.AddDays(-1)),
+            CreateBatch(expiredInOtherClassItem, locationA, otherClass, quantity: 1, expiryDate: today.AddDays(-1)),
+            CreateBatch(nonPerishableItem, locationA, schoolClass, quantity: 1, expiryDate: today.AddDays(-1)),
+            CreateBatch(zeroQuantityItem, locationA, schoolClass, quantity: 0, expiryDate: today.AddDays(-1)),
+            CreateBatch(futureExpiryItem, locationA, schoolClass, quantity: 1, expiryDate: today.AddDays(2)),
+            CreateBatch(noExpiryItem, locationA, schoolClass, quantity: 1));
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new GetSchoolClassSummaryHandler(context).Handle(
+            new GetSchoolClassSummaryQuery { Id = schoolClass.Id },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ExpiredItemsCount.ShouldBe(2);
+    }
+
+    [Test]
     public async Task Handle_CountsImportsPerStatusScopedToTheClass()
     {
         await using var context = CreateContext();
@@ -334,6 +399,7 @@ public class GetSchoolClassSummaryHandlerTests
             CreateImport(schoolClass, GoodsReceiptImportStatus.PendingReview),
             CreateImport(schoolClass, GoodsReceiptImportStatus.Failed),
             CreateImport(schoolClass, GoodsReceiptImportStatus.Confirmed),
+            CreateImport(otherClass, GoodsReceiptImportStatus.Confirmed),
             // Belongs to a different class - must not be counted.
             CreateImport(otherClass, GoodsReceiptImportStatus.Processing));
         await context.SaveChangesAsync(CancellationToken.None);
@@ -344,6 +410,7 @@ public class GetSchoolClassSummaryHandlerTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.ProcessingImportsCount.ShouldBe(2);
         result.Value.PendingReviewImportsCount.ShouldBe(1);
+        result.Value.ConfirmedImportsCount.ShouldBe(1);
         result.Value.FailedImportsCount.ShouldBe(1);
     }
 

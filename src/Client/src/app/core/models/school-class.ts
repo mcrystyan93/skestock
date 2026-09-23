@@ -42,8 +42,10 @@ export type SchoolClassSummary = {
   totalAmount: number;
   distinctItemsCount: number;
   lowStockItemsCount: number;
+  expiredItemsCount: number;
   processingImportsCount: number;
   pendingReviewImportsCount: number;
+  confirmedImportsCount: number;
   failedImportsCount: number;
   goodsReceipts: SchoolClassGoodsReceiptSummary[];
 };

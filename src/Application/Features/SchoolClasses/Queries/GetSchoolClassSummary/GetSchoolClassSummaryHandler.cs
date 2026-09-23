@@ -58,6 +58,21 @@ public class GetSchoolClassSummaryHandler(IApplicationDbContext dbContext)
             .Distinct()
             .CountAsync(cancellationToken);
 
+        var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime);
+        var expiredItemsCount = await dbContext.StockBatches
+            .AsNoTracking()
+            .Where(b => b.ReceivedClassId == request.Id
+                        && b.Quantity > 0
+                        && b.ExpiryDate.HasValue
+                        && b.ExpiryDate.Value <= today)
+            .Join(
+                dbContext.Items.AsNoTracking().Where(item => item.IsPerishable),
+                batch => batch.ItemId,
+                item => item.Id,
+                (batch, _) => batch.ItemId)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
         var importCountsByStatus = await dbContext.GoodsReceiptImports
             .AsNoTracking()
             .Where(i => i.ClassId == request.Id)
@@ -74,8 +89,10 @@ public class GetSchoolClassSummaryHandler(IApplicationDbContext dbContext)
             summary.TotalAmount,
             distinctItemsCount,
             lowStockItemsCount,
+            expiredItemsCount,
             CountFor(GoodsReceiptImportStatus.Processing),
             CountFor(GoodsReceiptImportStatus.PendingReview),
+            CountFor(GoodsReceiptImportStatus.Confirmed),
             CountFor(GoodsReceiptImportStatus.Failed),
             goodsReceipts));
     }

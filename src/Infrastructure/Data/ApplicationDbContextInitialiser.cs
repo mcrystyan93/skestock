@@ -198,9 +198,6 @@ public class ApplicationDbContextInitialiser
         "Cafea boabe/măcinată",
         "Cafea instant",
         "Ceai",
-        "Bere",
-        "Vin",
-        "Băuturi spirtoase",
 
         // Băcănie/produse de bază
         "Paste făinoase",
@@ -223,26 +220,16 @@ public class ApplicationDbContextInitialiser
         "Chipsuri",
         "Nuci și semințe",
         "Ciocolată",
-        "Bomboane",
-        "Gumă de mestecat",
-        "Popcorn",
-
-        // Produse pentru copii
-        "Lapte praf/formule",
-        "Alimente pentru bebeluși",
-        "Scutece",
-        "Șervețele umede pentru copii",
 
         // Îngrijire personală
         "Șampon",
         "Balsam de păr",
         "Gel de duș",
         "Săpun solid",
+        "Săpun lichid",
         "Pastă de dinți",
         "Periuțe de dinți",
         "Deodorant",
-        "Produse de igienă feminină",
-        "Aparate/lame de ras",
         "Produse cosmetice de bază (creme, loțiuni)",
 
         // Curățenie casă
@@ -366,245 +353,4 @@ public class ApplicationDbContextInitialiser
                 .SetProperty(c => c.LastModifiedById, administratorIdentityId));
     }
 
-    private static readonly (string Sku, string Name, string Description, string Unit, bool IsPerishable, string
-        Category, decimal UnitPrice, int ShelfLifeDays)[] DefaultItems =
-        [
-            ("301195", "200G PRESIDENT UNT 82%", "200G PRESIDENT UNT 82%", "BU", true, "Lactate și Ouă", 8.49m, 60),
-            ("110285", "1L DORNA LAPTE UHT 3.5%", "1L DORNA LAPTE UHT 3.5%", "BU", true, "Lactate și Ouă", 6.99m, 90),
-            ("375946", "320G DANONE SANA", "320G DANONE SANA", "BU", true, "Lactate și Ouă", 5.49m, 21),
-            ("396048", "330G IAURT BAUT IN TIHNA 1.5%", "330G IAURT BAUT IN TIHNA 1.5%", "BU", true, "Lactate și Ouă",
-                4.99m, 21),
-            ("292392", "4X10G PAKMAYA DROJDIE USCATA", "4X10G PAKMAYA DROJDIE USCATA", "IM", false,
-                "Ingrediente Patiserie", 3.29m, 365),
-            ("294576", "1X30 OUA L TONELI", "1X30 OUA L TONELI", "CA", true, "Lactate și Ouă", 24.99m, 28),
-            ("212144", "180G HOCHLAND MARGELE BRANZA", "180G HOCHLAND MARGELE BRANZA", "BU", true, "Brânzeturi", 9.99m,
-                30),
-            ("110049", "150G HOCHLAND CASCAV FELII CL", "150G HOCHLAND CASCAV FELII CL", "BU", true, "Brânzeturi",
-                10.49m, 45),
-            ("307600", "350G HOCHLAND TELEMEA NATUR", "350G HOCHLAND TELEMEA NATUR", "BU", true, "Brânzeturi", 12.99m,
-                60),
-            ("02929310000006", "LAMAI", "LAMAI", "KG", true, "Fructe Proaspete", 7.99m, 21),
-            ("103483", "MORCOVI 1KG", "MORCOVI 1KG", "BU", true, "Legume Proaspete", 3.49m, 30),
-            ("02917900000000", "ROSII CHERRY", "ROSII CHERRY", "KG", true, "Legume Proaspete", 14.99m, 10),
-            ("02922510000005", "CARTOFI DULCI", "CARTOFI DULCI", "KG", true, "Legume Proaspete", 6.49m, 30),
-            ("02807430000000", "DOVLECEI", "DOVLECEI", "KG", true, "Legume Proaspete", 5.99m, 10),
-            ("404381", "MC SALATA CROCANTA 500G", "MC SALATA CROCANTA 500G", "CE", true, "Legume Proaspete", 8.99m, 5),
-            ("407310", "MC SALATA MOZAIC 200G", "MC SALATA MOZAIC 200G", "CE", true, "Legume Proaspete", 6.99m, 5),
-            ("411680", "2KG CEAPA GALBENA", "2KG CEAPA GALBENA", "SC", true, "Legume Proaspete", 5.49m, 60),
-            ("096968", "400G CIRIO PULPA DE ROSII BAX", "400G CIRIO PULPA DE ROSII BAX", "IM", false, "Conserve", 4.79m,
-                730),
-            ("339290", "340G BONDUELLE PORUMB GOLD", "340G BONDUELLE PORUMB GOLD", "CV", false, "Conserve", 5.29m, 730),
-            ("353143", "425ML GIANA FASOLE ROSIE", "425ML GIANA FASOLE ROSIE", "BU", false, "Conserve", 3.99m, 730),
-            ("116094", "300G AROVIT ZACUSCA CU VINETE", "300G AROVIT ZACUSCA CU VINETE", "BO", false,
-                "Semipreparate și Tartinabile", 7.49m, 365),
-            ("400142", "0.5L FINE LIFE ULEI MASLIN EXV", "0.5L FINE LIFE ULEI MASLIN EXV", "BU", false, "Ulei și Oțet",
-                19.99m, 540),
-            ("031645", "1KG BARILLA PENNE RIGATE NR. 73", "1KG BARILLA PENNE RIGATE NR. 73", "BU", false,
-                "Paste și Orez", 8.99m, 730),
-            ("447356", "500G BARILLA FUSILLI NR.98", "500G BARILLA FUSILLI NR.98", "BU", false, "Paste și Orez", 5.99m,
-                730),
-            ("093092", "340G MAXIM'S CREMA DE ARAHIDE", "340G MAXIM'S CREMA DE ARAHIDE", "BO", false,
-                "Semipreparate și Tartinabile", 11.99m, 365),
-            ("242535", "370G FL DULCEATA VISINE", "370G FL DULCEATA VISINE", "BO", false,
-                "Semipreparate și Tartinabile", 9.49m, 540),
-            ("273444", "200G NUTELLA CREMA ALUNE&CACAO", "200G NUTELLA CREMA ALUNE&CACAO", "CA", false,
-                "Semipreparate și Tartinabile", 13.99m, 365),
-            ("408197", "500G PIRIFAN FULGI OVAZ", "500G PIRIFAN FULGI OVAZ", "BU", false, "Cereale și Mic Dejun", 6.79m,
-                365),
-            ("229937", "BG DR OETKER ZAHAR VANILINAT", "BG DR OETKER ZAHAR VANILINAT", "PI", false,
-                "Ingrediente Patiserie", 1.99m, 730),
-            ("281529", "1KG METRO CHEF CAJU CRUD", "1KG METRO CHEF CAJU CRUD", "IM", false, "Nuci și Fructe Uscate",
-                44.99m, 180),
-            ("281535", "1KG METRO CHEF MIGDALE CRUDE", "1KG METRO CHEF MIGDALE CRUDE", "PG", false,
-                "Nuci și Fructe Uscate", 39.99m, 365),
-            ("226170", "FINO 30 COLI HAR COPT 42X38CM", "FINO 30 COLI HAR COPT 42X38CM", "BU", false,
-                "Consumabile Menaj", 15.99m, 1095)
-        ];
-
-    private async Task SeedItemsAsync(Guid administratorIdentityId)
-    {
-        var existingSkus = await _context.Items
-            .Select(i => i.Sku)
-            .ToListAsync();
-
-        var itemsToSeed = DefaultItems
-            .Where(i => !existingSkus.Contains(i.Sku))
-            .ToList();
-
-        if (itemsToSeed.Count == 0)
-        {
-            return;
-        }
-
-        var categoryIdsByName = await _context.Categories
-            .ToDictionaryAsync(c => c.Name, c => c.Id);
-
-        var newItems = new List<Item>();
-        foreach (var i in itemsToSeed)
-        {
-            if (!categoryIdsByName.TryGetValue(i.Category, out var categoryId))
-            {
-                _logger.LogWarning("Skipping item {Sku} - category {Category} not found.", i.Sku, i.Category);
-                continue;
-            }
-
-            newItems.Add(new Item
-            {
-                Sku = i.Sku,
-                Name = i.Name,
-                Description = i.Description,
-                Unit = i.Unit,
-                IsPerishable = i.IsPerishable,
-                ShelfLifeDays = i.ShelfLifeDays,
-                MinThreshold = Random.Shared.Next(1, 51),
-                CategoryId = categoryId
-            });
-        }
-
-        if (newItems.Count == 0)
-        {
-            return;
-        }
-
-        _context.Items.AddRange(newItems);
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        // See SeedCategoriesAsync: bypass the AuditableEntityInterceptor (which would otherwise
-        // null out CreatedById/LastModifiedById since there's no HTTP user during seeding).
-        var newItemIds = newItems.Select(i => i.Id).ToList();
-        await _context.Items
-            .Where(i => newItemIds.Contains(i.Id))
-            .ExecuteUpdateAsync(s => s
-                .SetProperty(i => i.CreatedById, administratorIdentityId)
-                .SetProperty(i => i.LastModifiedById, administratorIdentityId));
-    }
-
-    private const string DefaultGoodsReceiptNotePrefix = "Comanda metro 26.08.2026";
-    private const int DefaultGoodsReceiptCount = 10;
-    private const int MinStockBatchesPerGoodsReceipt = 25;
-    private const int MaxStockBatchesPerGoodsReceipt = 50;
-    private const int MinBatchQuantity = 1;
-    private const int MaxBatchQuantity = 30;
-    private const int DefaultPerishableShelfLifeDays = 14;
-
-    private async Task SeedGoodsReceiptAsync(Guid administratorIdentityId)
-    {
-        var alreadySeededCount = await _context.Set<GoodsReceipt>()
-            .CountAsync(r => r.Note.StartsWith(DefaultGoodsReceiptNotePrefix));
-
-        if (alreadySeededCount >= DefaultGoodsReceiptCount)
-        {
-            return;
-        }
-
-        var schoolClass = await _context.SchoolClasses
-            .FirstOrDefaultAsync(c => c.Name == "SKE 29");
-
-        var location = await _context.Locations
-            .FirstOrDefaultAsync(l => l.Name == "Rafturi");
-
-        if (schoolClass is null || location is null)
-        {
-            _logger.LogWarning(
-                "Skipping goods receipt seeding - required SchoolClass 'SKE 29' or Location 'Rafturi' not found.");
-            return;
-        }
-
-        var items = await _context.Items
-            .Where(i => DefaultItems.Select(d => d.Sku).Contains(i.Sku))
-            .ToListAsync();
-
-        if (items.Count == 0)
-        {
-            return;
-        }
-
-        var unitPricesBySku = DefaultItems.ToDictionary(i => i.Sku, i => i.UnitPrice);
-
-        for (var receiptIndex = alreadySeededCount; receiptIndex < DefaultGoodsReceiptCount; receiptIndex++)
-        {
-            var receivedAt = DateTimeOffset.UtcNow.AddDays(-3 * (DefaultGoodsReceiptCount - receiptIndex));
-            var receivedDate = DateOnly.FromDateTime(receivedAt.UtcDateTime);
-
-            var goodsReceipt = new GoodsReceipt
-            {
-                ReceivedAt = receivedAt,
-                ClassId = schoolClass.Id,
-                Class = schoolClass,
-                SupplierReference = "Metro",
-                Note = $"{DefaultGoodsReceiptNotePrefix} #{receiptIndex + 1}"
-            };
-            _context.Set<GoodsReceipt>().Add(goodsReceipt);
-            await _context.SaveChangesAsync(CancellationToken.None);
-
-            // Sample with replacement so the batch count (25-50) can exceed the number of
-            // distinct seeded items (33) - a single item can legitimately appear as multiple
-            // batches on the same goods receipt.
-            var batchCount = Random.Shared.Next(MinStockBatchesPerGoodsReceipt, MaxStockBatchesPerGoodsReceipt + 1);
-            var newBatches = Enumerable.Range(0, batchCount)
-                .Select(_ => items[Random.Shared.Next(items.Count)])
-                .Select(item => new StockBatch
-                {
-                    ItemId = item.Id,
-                    LocationId = location.Id,
-                    ReceivedClassId = schoolClass.Id,
-                    Quantity = Random.Shared.Next(MinBatchQuantity, MaxBatchQuantity + 1),
-                    ExpiryDate = item.IsPerishable ? receivedDate.AddDays(DefaultPerishableShelfLifeDays) : null,
-                    ReceivedDate = receivedDate,
-                    UnitPrice = item.Sku is not null && unitPricesBySku.TryGetValue(item.Sku, out var unitPrice)
-                        ? unitPrice
-                        : 0m,
-                    GoodsReceiptId = goodsReceipt.Id
-                })
-                .ToList();
-
-            _context.StockBatches.AddRange(newBatches);
-            await _context.SaveChangesAsync(CancellationToken.None);
-
-            goodsReceipt.TotalAmount = newBatches.Sum(b => b.LineTotal);
-            await _context.SaveChangesAsync(CancellationToken.None);
-
-            var newTransactions = newBatches
-                .Select(batch => new StockTransaction
-                {
-                    ItemId = batch.ItemId,
-                    LocationId = batch.LocationId,
-                    BatchId = batch.Id,
-                    ClassId = schoolClass.Id,
-                    UserId = administratorIdentityId,
-                    Type = StockTransactionType.Order,
-                    QuantityChange = batch.Quantity,
-                    Reason = "Goods receipt",
-                    CreatedAt = goodsReceipt.ReceivedAt,
-                    GoodsReceiptId = goodsReceipt.Id
-                })
-                .ToList();
-
-            _context.StockTransactions.AddRange(newTransactions);
-            await _context.SaveChangesAsync(CancellationToken.None);
-
-            // See SeedCategoriesAsync: bypass the AuditableEntityInterceptor (which would
-            // otherwise null out CreatedById/LastModifiedById since there's no HTTP user during
-            // seeding).
-            await _context.Set<GoodsReceipt>()
-                .Where(r => r.Id == goodsReceipt.Id)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(r => r.CreatedById, administratorIdentityId)
-                    .SetProperty(r => r.LastModifiedById, administratorIdentityId));
-
-            var newBatchIds = newBatches.Select(b => b.Id).ToList();
-            await _context.StockBatches
-                .Where(b => newBatchIds.Contains(b.Id))
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(b => b.CreatedById, administratorIdentityId)
-                    .SetProperty(b => b.LastModifiedById, administratorIdentityId));
-
-            var newTransactionIds = newTransactions.Select(t => t.Id).ToList();
-            await _context.StockTransactions
-                .Where(t => newTransactionIds.Contains(t.Id))
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(t => t.CreatedById, administratorIdentityId)
-                    .SetProperty(t => t.LastModifiedById, administratorIdentityId));
-        }
-    }
 }
