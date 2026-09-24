@@ -8,10 +8,10 @@
          [nzTabBarStyle]="{display:'none'}"
          class="inner-scroll grow ">
   <nz-tab>
-    <ske-class-stock [classId]="store.schoolClass()?.id ?? null" />
+           <ske-class-stock [classId]="store.schoolClass()?.id ?? null" />
   </nz-tab>
   <nz-tab>
-    <ske-school-class-overview-order-lists-tab [classId]="store.schoolClass()?.id ?? null" />
+           <ske-school-class-overview-order-lists-tab [classId]="store.schoolClass()?.id ?? null" />
   </nz-tab>
   <nz-tab>
 
@@ -23,5 +23,9 @@
   </nz-tab>
   <nz-tab>
     <ske-school-class-overview-goods-receipt-imports-tab [classId]="store.schoolClass()?.id ?? null" />
+  </nz-tab>
+  <nz-tab>
+    <ske-school-class-overview-statistics-tab [classId]="store.schoolClass()?.id ?? null"
+                                              [active]="store.selectedTabIndex() === 4" />
   </nz-tab>
 </nz-tabs>

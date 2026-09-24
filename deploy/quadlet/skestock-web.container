@@ -8,6 +8,7 @@ ContainerName=skestock-webapi
 Image=localhost/skestock-web:current
 Network=skestock.network
 EnvironmentFile=%h/.config/skestock/production.env
+Volume=skestock-data-protection-keys.volume:/var/lib/skestock/data-protection-keys:Z
 PublishPort=7001:8080
 
 [Service]

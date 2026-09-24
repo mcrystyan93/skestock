@@ -48,7 +48,7 @@ export class LoaderDirective {
           class="text-2xl"></span> `,
   imports: [NzIconDirective],
   host: {
-    class: 'flex w-full h-full justify-center items-center'
+    class: 'flex grow justify-center items-center'
   }
 })
 export class Loader {

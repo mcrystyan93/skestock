@@ -37,6 +37,10 @@ public static class Services
     public const string Cache = "skestock-cache";
     public const string CacheCommander = "redis-commander";
     public const string CacheVolumes = "skestock-cache-data";    
+    public const string DataProtection = "DataProtection";
+    public const string DataProtectionKeysDirectory = "KeysDirectory";
+    public const string DataProtectionKeysVolume = "skestock-data-protection-keys";
+    public const string DataProtectionKeysPath = "/var/lib/skestock/data-protection-keys";
     
     /// <summary>
     /// The name of the Storage service.

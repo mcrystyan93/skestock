@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using skestock.Application.Features.Statistics.Models;
 using skestock.Application.Features.Statistics.Queries.GetClassGoodsReceiptCosts;
+using skestock.Application.Features.Statistics.Queries.GetClassItemStockEvolution;
 using skestock.Application.Features.Statistics.Queries.GetClassStockByCategory;
 
 namespace skestock.Web.Endpoints;
@@ -16,6 +17,9 @@ public class Statistics : IEndpointGroup
             GetClassStockByCategoryForLocation,
             "class/{classId}/location/{locationId}/stock-by-category");
         groupBuilder.MapGet(GetClassGoodsReceiptCosts, "class/{classId}/goods-receipt-costs");
+        groupBuilder.MapGet(
+            GetClassItemStockEvolution,
+            "class/{classId}/item/{itemId}/stock-evolution");
     }
 
     [EndpointSummary("Get current stock grouped by category")]
@@ -62,6 +66,23 @@ public class Statistics : IEndpointGroup
             StartDate = request.StartDate,
             EndDate = request.EndDate
         }, cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Get an item's stock evolution for a class")]
+    [EndpointDescription("Returns the cumulative, class-wide stock level for an item, starting with its first " +
+                         "transaction in the class and grouping changes by UTC calendar day.")]
+    public static async Task<Results<Ok<ClassItemStockEvolutionDto>, ProblemHttpResult>>
+        GetClassItemStockEvolution(
+            ISender sender,
+            Guid classId,
+            Guid itemId,
+            CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new GetClassItemStockEvolutionQuery { ClassId = classId, ItemId = itemId },
+            cancellationToken);
 
         return result.ToOk();
     }

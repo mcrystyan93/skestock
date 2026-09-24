@@ -23,6 +23,15 @@ var compose = builder.AddDockerComposeEnvironment("env")
         dashboard.WithHostPort(18080)
             .WithForwardedHeaders(enabled: true);
     });
+compose.ConfigureComposeFile(file =>
+{
+    file.Volumes[Services.DataProtectionKeysVolume] =
+        new Aspire.Hosting.Docker.Resources.ServiceNodes.Volume
+        {
+            Name = Services.DataProtectionKeysVolume,
+            Driver = "local"
+        };
+});
 
 // builder.AddAzureContainerAppEnvironment("aca-env");
 var sqlPassword = builder.AddParameter("sql-password", secret: true);
@@ -70,6 +79,13 @@ var web = builder.AddProject<Projects.Web>(Services.WebApi)
             Dockerfile = "src/Web/Dockerfile",
             Target = "final"
         };
+        service.AddVolume(new Aspire.Hosting.Docker.Resources.ServiceNodes.Volume
+        {
+            Name = Services.DataProtectionKeysVolume,
+            Source = Services.DataProtectionKeysVolume,
+            Target = Services.DataProtectionKeysPath,
+            Type = "volume"
+        });
     })
     .WithEnvironment($"{Services.OpenApiSettings}__{Services.OpenApiKey}", openAiApiKey)
     .WithEnvironment($"{Services.OpenApiSettings}__{Services.OpenApiModel}", openAiModel)
@@ -110,6 +126,10 @@ var worker = builder.AddProject<Projects.Worker>(Services.Worker)
 if (builder.ExecutionContext.IsPublishMode)
 {
     web.WithEndpoint(targetPort: 8080, port: 7001, name: "http", isExternal: true);
+    web
+        .WithEnvironment(
+            $"{Services.DataProtection}__{Services.DataProtectionKeysDirectory}",
+            Services.DataProtectionKeysPath);
 
     var azurite = builder
         .AddContainer(Services.Storage, "mcr.microsoft.com/azure-storage/azurite:3.35.0")

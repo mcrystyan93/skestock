@@ -15,5 +15,6 @@ export * from './stock-batch';
 export * from './stock';
 export * from './storage';
 export * from './class-analytics';
+export * from './class-statistics';
 export * from './base';
 export * from './order-list';

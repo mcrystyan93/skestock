@@ -93,6 +93,12 @@ export const ItemDropdownStore = signalStore(
       loadSelectedItem(id);
     };
 
-    return {loadSelectedItem, resolveSelectedItem};
+    const clearItems = () => {
+      store.clearItemsErrors();
+      store.setItemsLoaded();
+      patchState(store, { items: [], paginationData: null, isLoadingMore: false });
+    };
+
+    return {loadSelectedItem, resolveSelectedItem, clearItems};
   })
 );
