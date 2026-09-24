@@ -1,0 +1,19 @@
+<nz-row [nzGutter]="[16, 16]"
+        nzAlign="stretch">
+  <nz-col [nzXs]="24"
+          [nzXl]="12">
+    <ske-all-locations-stock-card />
+  </nz-col>
+
+  <nz-col [nzXs]="24"
+          [nzXl]="12">
+    <ske-selected-location-stock-card [classId]="classId()"
+                                      [active]="active()" />
+  </nz-col>
+
+  <nz-col [nzXs]="24"
+          nzXl="12">
+    <ske-item-stock-evolution-card [classId]="classId()"
+                                   [active]="active()" />
+  </nz-col>
+</nz-row>

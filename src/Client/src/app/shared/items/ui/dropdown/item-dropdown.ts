@@ -52,6 +52,7 @@ import { NgTemplateOutlet } from '@angular/common';
                  [nzPlaceHolder]="placeholder()"
                  [nzLoading]="store.loading()"
                  [nzAllowClear]="allowClear()"
+                 [nzDisabled]="disabled()"
                  [attr.aria-busy]="store.loading()"
                  nzServerSearch
                  class="w-full"
@@ -115,6 +116,7 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
   public readonly allowCreate = input<boolean>(true);
   public readonly placeholder = input<string>('Selectați un articol');
   public readonly categoryId = input<string | null>(null);
+  public readonly itemIds = input<readonly string[] | null>(null);
   public readonly createPrefill = input<Partial<ItemDto> | null>(null);
   public readonly createButtonTemplate = input<TemplateRef<unknown> | null>(null);
   public readonly editButtonTemplate = input<TemplateRef<unknown> | null>(null);
@@ -146,7 +148,7 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
       takeUntilDestroyed()
     )
     .subscribe((searchTerm) => {
-      this.store.load(this.buildFilter({ searchTerm }));
+      this.loadItems({ searchTerm });
     });
 
   private readonly _categoryChangeEffectRef = effect(() => {
@@ -157,7 +159,28 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
       return;
     }
 
-    untracked(() => this.store.load(this.buildFilter({})));
+    untracked(() => this.loadItems({}));
+  });
+
+  private _firstItemIdsLoad = true;
+
+  private readonly _itemIdsChangeEffectRef = effect(() => {
+    const itemIds = this.itemIds();
+
+    if (this._firstItemIdsLoad && itemIds === null) {
+      this._firstItemIdsLoad = false;
+      return;
+    }
+
+    this._firstItemIdsLoad = false;
+    untracked(() => {
+      const selectedItemId = this.value()?.id;
+      if (itemIds !== null && selectedItemId && !itemIds.includes(selectedItemId)) {
+        this.value.set(null);
+      }
+
+      this.loadItems({});
+    });
   });
 
   private readonly _selectedValueEffectRef = effect(() => {
@@ -202,6 +225,9 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
   });
 
   public loadMore() {
+    if (this.itemIds()?.length === 0)
+      return;
+
     this.store.loadMore();
   }
 
@@ -242,7 +268,7 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
       if (savedItem?.id)
         this.value.set(savedItem);
 
-      this.store.load(this.store.filter());
+      this.loadItems(this.store.filter());
     });
   }
 
@@ -252,7 +278,9 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
     return {
       ...partialFilter,
       pageSize: partialFilter.pageSize ?? PAGINATION_PAGE_SIZE,
-      filters: this.buildFilterWithCategory(partialFilter.filters ?? untracked(() => this.store.filter().filters)),
+      filters: this.buildFilterWithConstraints(
+        partialFilter.filters ?? untracked(() => this.store.filter().filters)
+      ),
       sort: [{
         value: 'ascend',
         key: 'name'
@@ -269,21 +297,40 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
     };
   }
 
-  private buildFilterWithCategory(filters: Array<ColumnFilter> = []): Array<ColumnFilter> {
+  private loadItems(partialFilter: Partial<GetAllItemsRequest>) {
+    if (this.itemIds()?.length === 0) {
+      this.store.clearItems();
+      return;
+    }
+
+    this.store.load(this.buildFilter(partialFilter));
+  }
+
+  private buildFilterWithConstraints(filters: Array<ColumnFilter> = []): Array<ColumnFilter> {
     const categoryId = untracked(() => this.categoryId());
+    const itemIds = untracked(() => this.itemIds());
 
-    // remove any categoryId filter
-    filters = filters.filter((filter) => filter.field !== 'categoryId');
+    filters = filters.filter((filter) => filter.field !== 'categoryId' && filter.field !== 'id');
 
-    if (isNil(categoryId))
-      return filters;
+    if (!isNil(categoryId)) {
+      filters = [...filters, {
+        field: 'categoryId',
+        value: categoryId,
+        operator: 'equals',
+        fieldType: 'number'
+      }];
+    }
 
-    return [...filters, {
-      field: 'categoryId',
-      value: categoryId,
-      operator: 'equals',
-      fieldType: 'number'
-    }];
+    if (itemIds !== null && itemIds.length > 0) {
+      filters = [...filters, {
+        field: 'id',
+        value: [...itemIds],
+        operator: 'in',
+        fieldType: 'string'
+      }];
+    }
+
+    return filters;
   }
 
 }

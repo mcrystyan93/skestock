@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -171,6 +172,23 @@ public static class DependencyInjection
     /// </summary>
     public static void AddWebAuthenticationServices(this IHostApplicationBuilder builder)
     {
+        var dataProtectionKeysDirectory = builder.Configuration[
+            $"{Services.DataProtection}:{Services.DataProtectionKeysDirectory}"];
+        if (builder.Environment.IsProduction() && string.IsNullOrWhiteSpace(dataProtectionKeysDirectory))
+        {
+            throw new InvalidOperationException(
+                $"Configuration value '{Services.DataProtection}:{Services.DataProtectionKeysDirectory}' " +
+                "is required in Production.");
+        }
+
+        var dataProtectionBuilder = builder.Services.AddDataProtection()
+            .SetApplicationName("skestock.Web");
+
+        if (!string.IsNullOrWhiteSpace(dataProtectionKeysDirectory))
+        {
+            dataProtectionBuilder.PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysDirectory));
+        }
+
         // The web client uses the Identity application cookie (`useCookies=true`),
         // and authorization needs a default scheme when it challenges an anonymous
         // request (for example, POST /api/Users/logout).

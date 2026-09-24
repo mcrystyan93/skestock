@@ -118,3 +118,28 @@ nz-tabs {
 .ant-page-header {
   border-bottom: 1px solid @border-color-split;
 }
+
+
+nz-card {
+  &.flex-body {
+    display: flex;
+    flex-direction: column;
+
+    .ant-card-body {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+  }
+
+  &.has-chart{
+    .ant-card-body{
+      padding: 0;
+      padding-top: 1px
+    }
+  }
+}
+
+.apexcharts-theme-dark > .apexcharts-svg{
+  background-color: @component-background !important;
+}

@@ -49,7 +49,6 @@ services:
       context: ".."
       dockerfile: "src/Web/Dockerfile"
       target: "final"
-      no_cache: true
     environment:
       OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
       ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
@@ -70,6 +69,7 @@ services:
       SKESTOCK_CACHE_PASSWORD: "${REDIS_PASSWORD}"
       SKESTOCK_CACHE_URI: "redis://:${REDIS_PASSWORD}@skestock-cache:6379"
       ASPNETCORE_ENVIRONMENT: "Production"
+      DataProtection__KeysDirectory: "/var/lib/skestock/data-protection-keys"
       ConnectionStrings__blobservice: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://storage:10000/devstoreaccount1"
       ConnectionStrings__queues: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://storage:10001/devstoreaccount1"
       Storage__PublicBlobEndpoint: "https://blob.cristian-cloud.com"
@@ -81,6 +81,10 @@ services:
       - "7001:8080"
     expose:
       - "8080"
+    volumes:
+      - type: "volume"
+        target: "/var/lib/skestock/data-protection-keys"
+        source: "skestock-data-protection-keys"
     depends_on:
       dbserver:
         condition: "service_started"
@@ -172,4 +176,6 @@ volumes:
   skestock-cache-data:
     driver: "local"
   storage-data:
+    driver: "local"
+  skestock-data-protection-keys:
     driver: "local"

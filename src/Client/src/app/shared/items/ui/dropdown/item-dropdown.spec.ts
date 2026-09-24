@@ -92,4 +92,45 @@ describe('ItemDropdown', () => {
     expect(http.getByIdCached).not.toHaveBeenCalled();
     fixture.destroy();
   });
+
+  it('filters available items by the supplied ids with the in operator', async () => {
+    http.getAll.mockReturnValue(of({
+      data: [],
+      hasNextPage: false,
+      nextCursor: null,
+      sort: []
+    }));
+
+    const fixture = TestBed.createComponent(ItemDropdown);
+    fixture.componentRef.setInput('allowEdit', false);
+    fixture.componentRef.setInput('allowCreate', false);
+    fixture.detectChanges();
+    fixture.componentRef.setInput('itemIds', [item.id, 'item-2']);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(http.getAll).toHaveBeenCalledWith(expect.objectContaining({
+      filters: expect.arrayContaining([
+        expect.objectContaining({
+          field: 'id',
+          operator: 'in',
+          value: [item.id, 'item-2']
+        })
+      ])
+    }));
+    fixture.destroy();
+  });
+
+  it('does not request an unfiltered list when the allowed ids are empty', async () => {
+    const fixture = TestBed.createComponent(ItemDropdown);
+    fixture.componentRef.setInput('allowEdit', false);
+    fixture.componentRef.setInput('allowCreate', false);
+    fixture.detectChanges();
+    fixture.componentRef.setInput('itemIds', []);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(http.getAll).not.toHaveBeenCalled();
+    fixture.destroy();
+  });
 });

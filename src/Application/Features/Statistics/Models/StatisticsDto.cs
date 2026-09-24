@@ -27,3 +27,18 @@ public record ClassGoodsReceiptCostsDto
     public decimal TotalAmount { get; init; }
     public decimal AverageAmount { get; init; }
 }
+
+public record ClassItemStockEvolutionPointDto
+{
+    public DateOnly Date { get; init; }
+    public int CumulativeQuantity { get; init; }
+}
+
+public record ClassItemStockEvolutionDto
+{
+    public Guid ItemId { get; init; }
+    public string ItemName { get; init; } = string.Empty;
+    public string? Sku { get; init; }
+    public string Unit { get; init; } = string.Empty;
+    public List<ClassItemStockEvolutionPointDto> Points { get; init; } = [];
+}

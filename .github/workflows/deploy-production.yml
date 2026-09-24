@@ -202,6 +202,7 @@ jobs:
             printf 'ASPNETCORE_ENVIRONMENT=Production\n'
             printf 'ASPNETCORE_HTTP_PORTS=8080\n'
             printf 'ASPNETCORE_FORWARDEDHEADERS_ENABLED=true\n'
+            printf 'DataProtection__KeysDirectory=/var/lib/skestock/data-protection-keys\n'
             printf 'ConnectionStrings__skestockDb=%s\n' "Server=dbserver,1433;User ID=sa;Password=${SQL_PASSWORD};TrustServerCertificate=true;Initial Catalog=skestockDb"
             printf 'ConnectionStrings__skestock-cache=%s\n' "skestock-cache:6379,password=${REDIS_PASSWORD}"
             printf 'ConnectionStrings__blobservice=%s\n' "$blob_connection_string"
