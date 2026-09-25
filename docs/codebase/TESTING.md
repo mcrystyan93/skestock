@@ -1,63 +1,64 @@
 # Testing Patterns
 
-## Core Sections (Required)
+## Core Sections
 
 ### 1) Test Stack and Commands
 
-- Primary .NET test framework: **NUnit 4.6.1** (`NUnit3TestAdapter` 6.3.0, `NUnit.Analyzers`) — not xUnit, across `Application.UnitTests`, `Application.FunctionalTests`, `Domain.UnitTests`, `Infrastructure.IntegrationTests`, and `Worker.UnitTests`; `TestAppHost` is a supporting Aspire host project, not a test project.
-- Assertion/mocking tools: **Shouldly 4.3.0**, **Moq 4.20.72**, **Respawn 7.0.0** (DB reset for functional tests), `coverlet.collector` 10.0.1 (no enforced threshold found).
-- Client test framework: **Vitest 4** (`src/Client`), run via `npm test`.
-- Commands:
+- .NET framework: NUnit `4.6.1`, NUnit3 adapter/analyzers, Shouldly `4.3.0`, Moq `4.20.72`, Respawn `7.0.0`, coverlet collector.
+- Client framework: Vitest `4.0.8` through Angular CLI.
 
 ```bash
-dotnet test                                          # run all .NET test projects (needs Docker or Podman for functional/integration tests)
-dotnet test tests/Application.UnitTests               # unit tests only — no external deps required
-dotnet test tests/Application.FunctionalTests         # full HTTP-level tests — requires Aspire-orchestrated SQL Server + Redis
-dotnet test tests/Infrastructure.IntegrationTests     # EF Core / ApplicationDbContext-level tests
-./run-functional-tests.sh                             # functional tests via Podman socket activation
-dotnet test --settings functional-tests.runsettings   # alternative: force Podman env vars via runsettings file
-cd src/Client && npm test                             # Angular client Vitest suite
+dotnet test
+dotnet test tests/Application.UnitTests
+dotnet test tests/Worker.UnitTests
+dotnet test tests/Infrastructure.IntegrationTests
+dotnet test tests/Application.FunctionalTests
+./run-functional-tests.sh
+dotnet test --settings functional-tests.runsettings
+cd src/Client && npm ci && npm test
 ```
 
 ### 2) Test Layout
 
-- Placement pattern: **mirrors the source tree feature-for-feature**, not co-located with source files. `tests/Application.UnitTests/` and `tests/Application.FunctionalTests/` replicate `src/Application/`'s folders 1:1, now covering `Common/{Behaviours,Caching,Filtering,Keyset}` and `Features/{Categories,GoodsReceipts,Items,Locations,OrderLists,SchoolClasses,Statistics,Stock,StockBatches,Storage}`. `tests/Worker.UnitTests/Queues/` mirrors `src/Worker/Queues/`.
-- Naming convention: `<UseCase><Role>Tests.cs`, e.g. `GetAllCategoriesHandlerTests.cs` (unit), `GetAllCategoriesQueryTests.cs` (functional). Import-batch flows follow the same pattern (e.g. `ConfirmCategoryImportBatchCommandHandlerTests.cs`), with per-use-case `*TestDbContext.cs` fixtures (e.g. `CategoryImportBatchTestDbContext`, `ProcessGoodsReceiptImportTestDbContext`).
-- Setup files: `tests/Application.FunctionalTests/FunctionalTestSetup.cs` is an NUnit `[SetUpFixture]` — boots `TestAppHost` via `DistributedApplicationTestingBuilder`, waits (90s timeout) for `Services.Database`/`Services.Cache` health, builds a `WebApiFactory`, creates a `DatabaseResetter`. `tests/Application.FunctionalTests/Infrastructure/{TestApp,TestBase,WebApiFactory,DatabaseResetter}.cs` provide shared scaffolding.
+- `Application.UnitTests` mirrors Application features/common helpers and uses focused test contexts.
+- `Application.FunctionalTests` contains HTTP-level feature tests and shared setup under `Infrastructure`.
+- `Infrastructure.IntegrationTests` starts the test Aspire host and tests EF/Infrastructure behavior against SQL Server.
+- `Worker.UnitTests` covers queue processing and daily schedule/worker behavior.
+- `Domain.UnitTests` is a project shell with no test files currently.
+- Client specs are colocated under `src/Client/src/**/*.spec.ts`.
 
 ### 3) Test Scope Matrix
 
-| Scope | Covered? | Typical target | Notes |
-|-------|----------|------------------|-------|
-| Unit | Yes | `Application` layer — handlers, validators, filtering/keyset/caching helpers, all 8 feature slices including import-batch commands | Moq-based `IApplicationDbContext`/`IRealtimeNotifier`/queue-sender substitution; mocking mechanics not independently re-verified per test file this pass |
-| Integration | Yes | `tests/Infrastructure.IntegrationTests` — exercises `ApplicationDbContext`/EF Core directly against a real database | Requires Docker/Podman |
-| Functional (HTTP end-to-end) | Yes | `tests/Application.FunctionalTests` — full HTTP pipeline via `WebApiFactory`, driven by a live Aspire-hosted SQL Server + Redis (`TestAppHost`) | `TestAppHost` provides only SQL Server + Redis, so functional tests do **not** exercise Azurite/queues/Worker/SignalR/browser UI |
-| Domain unit tests | **No** | `tests/Domain.UnitTests` project exists but **still contains zero test files** (confirmed again this pass — only the `.csproj` present) | Domain now has richer entities (`ClassItemStockVisibility`, `CategoryImportBatch`, etc.) but none are independently unit-tested at the Domain layer |
-| Worker/queue processing | Yes (unit) | `tests/Worker.UnitTests/Queues/QueueProcessingServiceTests.cs` with `QueueProcessingTestHarness.cs` | Processor logic (dedup, retry, poison-queue classification) is unit-tested in isolation; the real publisher→Azure Queue→consumer wiring is still **not** covered end-to-end (no Azurite/Worker in `TestAppHost`) |
-| Client unit/component tests | Yes | Vitest (`src/Client`, `npm test`) | No dedicated browser/E2E runner declared |
-| E2E (browser/UI) | No dedicated suite declared | — | — |
+| Scope | Status | Target | Notes |
+|-------|--------|--------|-------|
+| Unit | Present | Application handlers, validators, filters, keyset, cache, queue processor, daily schedule | No external resources |
+| Functional HTTP | Present | Web API through `WebApiFactory` and test Aspire resources | `FunctionalTestSetup` waits up to 90 seconds for database/cache/queues |
+| Infrastructure integration | Present | `ApplicationDbContext`, outbox claims, exporters, data protection | Requires containerized dependencies |
+| Worker integration | Partial | Worker processor unit tests and functional host includes Worker/Azurite | Inspect individual tests before assuming every queue path is covered |
+| Domain unit | Missing | `tests/Domain.UnitTests` | Add when domain invariants/behavior grow |
+| Browser E2E | Not configured | — | No dedicated Playwright/Cypress project found |
 
-### 4) Mocking and Isolation Strategy
+### 4) Mocking and Isolation
 
-- Main mocking approach: **Application.UnitTests** use Moq to substitute `IApplicationDbContext` and other Application-layer interfaces (including newer interfaces like `IRealtimeNotifier` and queue/storage abstractions for import-batch flows), keeping unit tests free of real DB/network/queue dependencies. **Application.FunctionalTests** deliberately use **zero mocks** for DB/cache — they exercise the real `ApplicationDbContext` against a containerized SQL Server and Redis via `TestAppHost`.
-- Isolation guarantees: `DatabaseResetter` (Respawn-based) resets DB state between functional test runs — a clean DB is **not** assumed automatically outside that helper.
-- Common failure mode: functional/integration tests require Docker or Podman reachable — `run-functional-tests.sh` exists specifically to work around Podman-socket activation quirks.
+- Unit tests mock Application abstractions with Moq or use lightweight EF in-memory/SQLite contexts.
+- Functional tests use the real Web service and test Aspire host; `WebApiFactory` replaces `IUser` and blob storage with test doubles where needed.
+- `TestBase.SetUp()` calls `TestApp.ResetState()`, which uses Respawn through `DatabaseResetter`; do not assume clean state outside that base.
+- `tests/TestAppHost/Program.cs` currently provisions SQL Server, Redis, Azurite Blob/Queue resources, and a Worker. It does not start the Angular browser UI.
 
 ### 5) Coverage and Quality Signals
 
-- Coverage tool + threshold: `coverlet.collector` is pinned, but **no coverage threshold/gate** was found in any `.csproj`/`.runsettings`, and the one GitHub Actions workflow (`deploy-production.yml`) is `workflow_dispatch`-only (production deploy), not a build/test gate on push/PR — there is currently no CI enforcement of `dotnet test` or `npm test` passing before merge.
-- Current reported coverage: `[TODO]` — not measured in this pass.
-- Known gaps/flaky areas: `Domain.UnitTests` remains zero-coverage; Worker/queue processing now has unit coverage (`Worker.UnitTests`) but no end-to-end publisher→queue→worker integration test; functional/integration tests depend on Docker/Podman availability and are the most environment-sensitive tier.
+- Coverlet is available, but no coverage threshold/gate was found.
+- The only GitHub Actions workflow is manually triggered production deployment; it validates build/unit/client tests during deployment but is not a push/PR gate.
+- Functional/integration tiers are environment-sensitive because they require Docker/Podman and Aspire resource health.
+- Domain behavior and browser-level behavior are the clearest coverage gaps.
 
 ### 6) Evidence
 
-- `Directory.Packages.props` (NUnit/Shouldly/Moq/Respawn/coverlet versions), `src/Client/package.json` (Vitest)
-- `tests/Application.FunctionalTests/FunctionalTestSetup.cs`, `tests/Application.FunctionalTests/Infrastructure/*.cs`
+- `tests/Application.FunctionalTests/FunctionalTestSetup.cs`
+- `tests/Application.FunctionalTests/Infrastructure/{TestApp,TestBase,WebApiFactory,DatabaseResetter}.cs`
 - `tests/TestAppHost/Program.cs`
+- `tests/Infrastructure.IntegrationTests/IntegrationTestSetup.cs`
+- `tests/Worker.UnitTests`
+- `tests/Domain.UnitTests/Domain.UnitTests.csproj`
+- `src/Client/package.json`
 - `run-functional-tests.sh`, `functional-tests.runsettings`
-- Directory listings of `tests/Application.UnitTests/Features/*` (10 feature slices incl. OrderLists), `tests/Worker.UnitTests/Queues/*`, and `tests/Domain.UnitTests/` (confirmed still empty)
-- `.github/workflows/deploy-production.yml` (confirmed `workflow_dispatch`-only, no build/test gate)
-
-## Extended Sections (Optional)
-
-Not added — no framework-specific suite patterns beyond NUnit/Vitest conventions already covered.

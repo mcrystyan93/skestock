@@ -997,6 +997,36 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("OrderListLines");
                 });
 
+            modelBuilder.Entity("skestock.Domain.Entities.ScheduledJobRun", b =>
+                {
+                    b.Property<string>("JobName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("LastAttemptAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTimeOffset?>("LastSucceededAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("NextRetryAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("JobName");
+
+                    b.ToTable("ScheduledJobRuns");
+                });
+
             modelBuilder.Entity("skestock.Domain.Entities.SchoolClass", b =>
                 {
                     b.Property<Guid>("Id")
