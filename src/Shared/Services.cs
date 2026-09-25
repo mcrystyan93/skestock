@@ -60,4 +60,8 @@ public static class Services
     public const string OpenApiModel = "Model";
 
     public const string ImportBatchSettings = "ImportBatch";
+
+    public const string DailyStatisticsSettings = "DailyStatistics";
+    public const string DailyStatisticsJobName = "daily-statistics";
+    public const string DailyStatisticsLockKey = "skestock:jobs:daily-statistics";
 }

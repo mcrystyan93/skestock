@@ -20,6 +20,7 @@ using skestock.Infrastructure.AI;
 using skestock.Infrastructure.AI.Schemas;
 using skestock.Infrastructure.Data;
 using skestock.Infrastructure.Data.Interceptors;
+using skestock.Infrastructure.Distributed;
 using skestock.Infrastructure.Export;
 using skestock.Infrastructure.Identity;
 using skestock.Infrastructure.Queues;
@@ -55,6 +56,9 @@ public static class DependencyInjection
         builder.Services.AddScoped<IApplicationDbContext>(provider =>
             provider.GetRequiredService<ApplicationDbContext>());
 
+        builder.Services.AddScoped<IScheduledJobRunDbContext>(provider =>
+            provider.GetRequiredService<ApplicationDbContext>());
+
         builder.Services.AddScoped<ApplicationDbContextInitialiser>();
 
         // Core authorization services (IAuthorizationService / policy provider) with no
@@ -70,6 +74,19 @@ public static class DependencyInjection
 
         builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddTransient<IIdentityService, IdentityService>();
+
+        var redisConnectionString = builder.Configuration.GetConnectionString(Services.Cache);
+        Guard.Against.NullOrWhiteSpace(
+            redisConnectionString,
+            message: $"Connection string '{Services.Cache}' not found.");
+
+        builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
+        {
+            var configuration = ConfigurationOptions.Parse(redisConnectionString);
+            configuration.AbortOnConnectFail = false;
+            return ConnectionMultiplexer.Connect(configuration);
+        });
+        builder.Services.AddSingleton<IDistributedLock, RedisDistributedLock>();
 
         builder.AddRedisDistributedCache(Services.Cache);
         builder.Services.AddFusionCache()
@@ -100,7 +117,6 @@ public static class DependencyInjection
 
         AddOpenAiExtraction(builder);
 
-        var redisConnectionString = builder.Configuration.GetConnectionString(skestock.Shared.Services.Cache);
         builder.Services.AddSignalR(options =>
             {
                 options.KeepAliveInterval = TimeSpan.FromSeconds(15); // server pings the client

@@ -1,271 +1,463 @@
 # skestock Copilot Instructions
 
-Read `AGENTS.md` first. It is the canonical quick reference for layer boundaries, DI, Mediator
-ordering, endpoint discovery, caching, and scaffolding. This file supplements it with the current
-project layout and the storage, queue, worker, realtime, and Angular conventions. Also follow
-`.github/agents/*`, `.github/skills/*`, and `.github/instructions/*`. The Angular instruction globs
-still mention `src/Web/ClientApp`; apply their rules to the real client at `src/Client`.
+Read `AGENTS.md` before changing code. It is the canonical quick reference for dependency
+direction, DI ownership, Mediator behavior order, endpoint discovery, caching, and scaffolding.
+This file complements it with the current project map, operational details, and file-level
+conventions. If this file and `AGENTS.md` disagree, follow `AGENTS.md` and verify the source.
+
+## Instruction files and current repository reality
+
+- Root `.github/instructions/angular-guidelines.instructions.md` and
+  `ng-zorro-guidelines.instructions.md` still have `applyTo: 'src/Web/ClientApp/**'`, but the
+  real frontend is `src/Client`. Apply those rules to `src/Client`.
+- `src/Client/.github/copilot-instructions.md` contains older “frontend planned/not scaffolded”
+  wording. The current solution **does contain** `src/Client`, `Client.esproj`, `package.json`,
+  Angular source, and an Aspire `AddViteApp` resource. Trust the current source/configuration.
+- `.github/agents/CSharpExpert.agent.md` and `csharp-dotnet-janitor.agent.md` are available for
+  specialized C# work. `.github/skills/angular-developer`, `ngrx-signalstore`, and `aspire`
+  contain deeper task-specific guidance.
+- `CLAUDE.md` requires running `graphify query "<question>"` before broad codebase searches and
+  `graphify update .` after code changes. Exclude `graphify-out/`, `bin/`, `obj/`, `.angular/`,
+  and `dist/` from source investigations.
 
 ## Overview
 
-`skestock` is a school inventory system based on Jason Taylor's Clean Architecture template 10.8.0.
-It targets .NET 10 (`global.json`: SDK `10.0.110`, `rollForward: latestFeature`) and is orchestrated
-with .NET Aspire 13.5.x. `Directory.Build.props` applies `net10.0`, nullable reference types,
-implicit usings, and `TreatWarningsAsErrors=true` to the solution. The solution is the XML
-`skestock.slnx`, not a classic `.sln`.
+`skestock` is a school inventory/stock system based on Jason Taylor's Clean Architecture
+template `10.8.0`. It targets .NET 10 (`global.json` pins SDK `10.0.110`) and is orchestrated
+with .NET Aspire `13.5.2`.
 
-The current stack includes SQL Server, Redis, Azure Storage/Azurite blobs and queues, ASP.NET Core
-Identity, SignalR, OpenTelemetry, OpenAI document extraction,
-and an Angular 22 SPA. The backend uses Mediator source generation, not MediatR.
+The backend includes SQL Server, Redis, Azure Blob/Queue clients with Azurite for local
+development, ASP.NET Core Identity, SignalR, OpenTelemetry, OpenAI document extraction, a
+transactional outbox, Azure Storage Queue workers, and a daily Worker schedule. The frontend is
+an Angular 22 SPA under `src/Client`, served by Aspire/Vite in development and copied into the
+Web image's `wwwroot` during the production Docker build.
+
+The solution is `skestock.slnx`, not a classic `.sln`. `Directory.Build.props` applies
+`net10.0`, nullable reference types, implicit usings, and `TreatWarningsAsErrors=true`.
+All NuGet versions belong in `Directory.Packages.props`.
 
 ## Architecture & Layer Responsibilities
 
-Dependencies point inward: `Domain <- Application <- Infrastructure` and
-`Domain <- Application <- Web`; `Web` is the composition root. `Shared` contains only
-cross-project service/resource constants. `Client` is an independent npm/Angular project and
-references no .NET project.
+Dependencies point inward:
 
-- `src/Domain`: entities, enums, value objects, domain events, audit bases, and queue contracts
-  (`MessageEnvelope`, `OutboxMessage`, `ProcessedMessage`). It has no project references.
-- `src/Application`: feature-slice CQRS handlers, FluentValidation validators, Mediator behaviours,
-  `Result`/typed error contracts, filtering, keyset pagination, caching abstractions, storage
-  commands, queue interfaces, document-extraction interfaces, and `IApplicationDbContext`.
-  It may use EF Core abstractions through the application context interface, but must not depend on
-  an EF provider or concrete infrastructure.
-- `src/Infrastructure`: `ApplicationDbContext`, EF configurations and save-change interceptors,
-  Identity (`ApplicationUser`, `IdentityService`), Redis/FusionCache-backed caching, Azure Blob and
-  Queue adapters, SignalR notifier, and document extraction implementations.
-- `src/Web`: ASP.NET Core host, minimal API endpoint groups, OpenAPI/Scalar, error mapping,
-  `CurrentUser`, SignalR hub, CORS/authentication wiring, and `OutboxPublisherService`.
-- `src/Worker`: non-HTTP worker. `Program.cs` composes Application, Infrastructure, ServiceDefaults,
-  and an ambient per-message user; `Queues/GoodsReceiptImportQueueProcessingService.cs` consumes
-  Azure Storage Queue messages. `Worker.cs` is a leftover sample loop; do not add new processing
-  there.
-- `src/ServiceDefaults`: service discovery, standard HTTP resilience, health checks, and
-  OpenTelemetry (`AddServiceDefaults`).
-- `src/Shared`: `skestock.Shared.Services`; use these constants for every Aspire resource, queue,
-  database, cache, volume, and configuration section name. Do not duplicate string literals.
-- `src/AppHost`: Aspire resource graph only; it is not the HTTP application.
+```text
+Domain <- Application <- Infrastructure
+Domain <- Application <- Web
+Application + Infrastructure + ServiceDefaults <- Worker
+Shared <- AppHost/Web/Worker/Application/Infrastructure/Client orchestration
+Client is an independent npm/Angular project
+```
 
-The domain model includes `Category`, `Item`, `Location`, `SchoolClass`, `ClassBalance`,
-`GoodsReceipt`, `GoodsReceiptImport`, `GoodsReceiptImportLine`, `StockBatch`, `StockTransaction`,
-`FileMetadata`, `OutboxMessage`, `ProcessedMessage`, and `UserProfile`. Feature slices currently
-live under `src/Application/Features/{Categories,Items,Locations,SchoolClasses,GoodsReceipts,Stock,StockBatches}`.
-Storage and queues are separate application areas.
+| Project | Owns | Must not own |
+|---|---|---|
+| `src/Domain` | Entities, enums, value objects, domain events, audit bases, queue contracts | Project references, EF provider/configuration, HTTP, external adapters |
+| `src/Application` | Feature-slice CQRS, validators, Mediator behaviors, typed errors/results, filtering/keyset/caching, storage/queue/document interfaces, `IApplicationDbContext` | Concrete EF provider, Identity, Azure SDK adapters, endpoint routing |
+| `src/Infrastructure` | `ApplicationDbContext`, EF configurations/migrations/interceptors, Identity, Redis/HybridCache, distributed lock, Blob/Queue adapters, SignalR, OpenAI extraction | HTTP endpoint groups and business use cases |
+| `src/Web` | Composition root, endpoint groups, OpenAPI/Scalar, auth/CORS, error mapping, static files, outbox publisher | Direct EF queries and feature business logic |
+| `src/Worker` | Queue polling/acknowledgement/poison handling, scoped Mediator dispatch, daily scheduled service | HTTP endpoints or direct feature logic outside Mediator |
+| `src/AppHost` | Aspire resource graph and publish/run wiring | Application/business logic |
+| `src/ServiceDefaults` | Health checks, service discovery, HTTP resilience, OpenTelemetry | Feature-specific behavior |
+| `src/Shared` | `skestock.Shared.Services` resource/config names plus small cross-project helpers/converters | Business logic or infrastructure |
+| `src/Client` | Angular routes, pages, shared HTTP services, SignalStore state, SignalR bridge, UI | .NET project references |
+
+### Domain model
+
+Domain entities include `Category`, `CategoryIcon`, `Item`, `Location`, `SchoolClass`,
+`ClassBalance`, `ClassItemStockVisibility`, `GoodsReceipt`, `GoodsReceiptImport`,
+`GoodsReceiptImportLine`, `CategoryImportBatch`/`File`, `ItemImportBatch`/`File`,
+`ImportBatchHistory`, `OrderList`/`Line`, `StockBatch`, `StockTransaction`, `FileMetadata`,
+`UserProfile`, and `ScheduledJobRun`. Queue contracts are under `src/Domain/Queues`:
+`MessageEnvelope`, `OutboxMessage`, and `ProcessedMessage`.
+
+`BaseEntity` uses Guid v7 IDs. Persisted instants use UTC `DateTimeOffset`; business calendar
+values use `DateOnly`. See `docs/adr/0001-utc-datetimeoffset-for-persisted-instants.md`.
 
 ## Solution / Project Layout
 
-```
+### Backend source
+
+```text
 src/
-  AppHost/            Aspire graph: SQL Server, Redis, Azurite, Web, Worker, Vite frontend
-  Application/        CQRS/features, behaviours, errors, caching, filtering, keyset, storage, queues
-  Domain/             Entities, enums, events, value objects, message contracts
-  Infrastructure/     EF Core, Identity, Redis, Blob/Queue, SignalR, extraction providers
-  ServiceDefaults/    Aspire defaults: OTEL, health, discovery, resilience
-  Shared/             Services.cs constants
-  Web/                Minimal API, auth, error handling, SignalR, outbox publisher
-  Worker/             Queue consumer host
-  Client/             Angular 22 `Client.esproj`; real frontend (not `src/Web/ClientApp`)
-
-tests/
-  Application.UnitTests/          NUnit unit tests, Moq/Shouldly; mirrors Application
-  Application.FunctionalTests/    HTTP tests through WebApiFactory and TestAppHost
-  Domain.UnitTests/               NUnit project currently without test files
-  Infrastructure.IntegrationTests/EF/infrastructure test project
-  TestAppHost/                    slim Aspire host exposing SQL Server and Redis
+  AppHost/          Aspire graph: SQL Server, Redis, Azurite, Web, Worker, Vite frontend
+  Domain/           pure domain types and queue contracts
+  Application/      CQRS/features, common behaviors, storage, queues, documents
+  Infrastructure/   EF/Identity/Redis/Azure/SignalR/OpenAI implementations
+  ServiceDefaults/  health, discovery, resilience, OpenTelemetry
+  Shared/           resource names and cross-project helpers
+  Web/              HTTP host, endpoints, auth, errors, outbox publisher
+  Worker/           queue consumers and daily scheduled service
+  Client/           Angular 22 application
 ```
 
-Feature use cases normally follow
-`Features/<Feature>/Commands|Queries/<UseCase>/<UseCase>Command|Query.cs`,
-`Handler.cs`, and `Validator.cs`. Paginated list features also have `CacheConstants.cs`,
-`<Feature>FilterConfiguration.cs`, and `<Feature>SortConfiguration.cs`. Check the slice before
-copying it: `Items` has Create/Edit/Disable/Enable; `Locations` and `SchoolClasses` use Update;
-`GoodsReceipts` includes the receipt/import flow; `Stock` has non-paginated stock queries and
-adjustment logic; `StockBatches` is read-only and paginated.
+Application feature folders currently include:
 
-## Critical Workflows (build / run / test)
+```text
+Features/
+  Categories/
+  GoodsReceipts/
+  Items/
+  Locations/
+  OrderLists/
+  ScheduledJobs/
+  SchoolClasses/
+  Statistics/
+  Stock/
+  StockBatches/
+```
+
+`Storage/` and `Queues/` are separate Application areas. Paginated slices normally include
+`CacheConstants.cs`, `<Feature>FilterConfiguration.cs`, and
+`<Feature>SortConfiguration.cs`. Check the closest slice before copying because command verbs
+vary: `Items` uses `Edit/Disable/Enable`, Locations/SchoolClasses/Categories use `Update`,
+OrderLists use lifecycle verbs, and imports use `Create/Confirm/Process`.
+
+`src/Web/Endpoints` currently contains endpoint groups for Categories, CategoryImportBatches,
+GoodsReceipts, Items, ItemImportBatches, Locations, OrderLists, SchoolClasses, Statistics,
+Stock, StockBatches, Storage, and Users. `Antiforgery.cs` exists but is entirely commented out.
+
+`src/Infrastructure/Data/Migrations` contains generated EF migrations and
+`ApplicationDbContextModelSnapshot.cs`. Do not hand-edit generated migration designer/snapshot
+files; change the model/configuration and regenerate with `dotnet ef`.
+
+### Test projects
+
+- `tests/Application.UnitTests`: NUnit/Shouldly/Moq unit tests mirroring Application folders.
+- `tests/Application.FunctionalTests`: HTTP-level tests using `WebApiFactory`, `TestApp`, `TestBase`,
+  and Respawn `DatabaseResetter`.
+- `tests/Infrastructure.IntegrationTests`: real EF/Infrastructure tests; its setup starts
+  `TestAppHost`, waits for resources, and migrates SQL Server.
+- `tests/Worker.UnitTests`: queue processor and daily scheduling tests.
+- `tests/Domain.UnitTests`: project exists but has no test files currently.
+- `tests/TestAppHost`: test Aspire host. **Current source provisions SQL Server, Redis, Azurite
+  Blob/Queue resources, and Worker**, even though older summaries may describe only SQL/Redis.
+
+## Critical Workflows (build/run/test)
+
+### Restore/build
 
 ```bash
+dotnet restore skestock.slnx
 dotnet build
-dotnet run --project src/AppHost
-dotnet test
-dotnet test tests/Application.UnitTests
-dotnet test tests/Application.FunctionalTests
-dotnet test tests/Infrastructure.IntegrationTests
-./run-functional-tests.sh
-dotnet test --settings functional-tests.runsettings
-cd src/Client && npm install && npm run dev
-cd src/Client && npm run build
-cd src/Client && npm test
 ```
 
-`dotnet run --project src/AppHost` is the supported full-stack path. It requires Docker or a
-compatible container runtime and Node/npm. AppHost starts SQL Server, Redis, persistent Azurite
-(blob/queue/table ports 10000/10001/10002), Web, Worker, and the Vite frontend. The Aspire
-dashboard is forwarded to port 8080, the frontend to port 7001, and Web exposes Scalar at
-`/scalar` (`/` redirects there).
+Warnings are errors. Do not “fix” build failures by suppressing warnings globally.
 
-Functional tests start `TestAppHost` through `DistributedApplicationTestingBuilder`, wait up to
-90 seconds for `Services.Database` and `Services.Cache`, then use `WebApiFactory`. They reset
-database state with `DatabaseResetter`/Respawn; never assume a clean database outside that helper.
-`TestAppHost` intentionally provides only SQL Server and Redis, so functional tests do not exercise
-Azurite, queues, Worker, or browser UI. `run-functional-tests.sh` configures Podman socket support;
-the `.runsettings` file provides the same environment variables.
+### Full local run
+
+```bash
+dotnet run --project src/AppHost
+```
+
+This is the supported full-stack path and requires Docker or a compatible Podman runtime plus
+Node/npm. AppHost starts:
+
+- SQL Server database resource `Services.DatabaseServer` with database `Services.Database`
+  (`skestockDb`).
+- Redis resource `Services.Cache`.
+- Azurite/Azure Storage resource `Services.Storage`, Blob and Queue clients, and `app-files`
+  blob container. Run-mode emulator ports are Blob `10000`, Queue `10001`, Table `10002`.
+- Web API resource `Services.WebApi`.
+- Worker resource `Services.Worker`.
+- Vite frontend resource `Services.WebFrontend` on port `7001`.
+
+The Aspire dashboard is configured to host-forward to port `18080` in `src/AppHost/Program.cs`.
+The Web resource advertises Scalar at `/scalar`. Do not assume a fixed Web port; use Aspire
+resource URLs. Production publish mode uses explicit Web port `7001` and an external storage
+public endpoint.
+
+Running `dotnet run --project src/Web` directly is not supported: all required SQL, Redis,
+Blob/Queue, and OpenAI configuration must be supplied externally. Use `src/AppHost` for local
+development.
+
+### Client
+
+```bash
+cd src/Client
+npm ci
+npm run dev
+npm run build
+npm run build:prod
+npm test
+```
+
+`npm ci` is preferred because `package-lock.json` is committed. The production Web Dockerfile
+builds Angular first with Node 22 and copies `dist/ske/browser` into Web `wwwroot`.
+
+### .NET tests
+
+```bash
+dotnet test
+dotnet test tests/Application.UnitTests
+dotnet test tests/Worker.UnitTests
+dotnet test tests/Infrastructure.IntegrationTests
+dotnet test tests/Application.FunctionalTests
+```
+
+Functional/integration tests need container resources. `FunctionalTestSetup` uses a 90-second
+cancellation window, starts `TestAppHost` with `DistributedApplicationTestingBuilder`, waits for
+`Services.Database`, `Services.Cache`, and `Services.Queues`, then creates `WebApiFactory`.
+`TestBase` resets database state through Respawn; do not assume a clean database without it.
+
+For Podman:
+
+```bash
+./run-functional-tests.sh [extra dotnet test arguments]
+```
+
+The script starts the user Podman socket, validates its Unix socket, exports
+`DOCKER_HOST=unix://...` and `DOTNET_ASPIRE_CONTAINER_RUNTIME=podman`, and runs functional tests.
+`functional-tests.runsettings` supplies equivalent environment variables but assumes UID 1000;
+prefer the script when possible.
+
+### EF migrations
+
+Use the existing EF CLI and never hand-edit generated files:
+
+```bash
+dotnet ef migrations add <MigrationName> \
+  --project src/Infrastructure \
+  --startup-project src/Web \
+  --context ApplicationDbContext \
+  --output-dir Data/Migrations
+dotnet ef migrations has-pending-model-changes \
+  --project src/Infrastructure \
+  --startup-project src/Web \
+  --context ApplicationDbContext
+```
+
+### Production deployment
+
+`.github/workflows/deploy-production.yml` is `workflow_dispatch`-only. Its validation job
+restores/builds .NET, runs Application unit tests, installs Node dependencies, runs client tests,
+and builds the production client. It then builds/pushes Web and Worker images to GHCR and deploys
+to Fedora rootless Podman/systemd Quadlet through Cloudflare Access SSH. Deployment variables and
+secrets are documented in `deploy/README.md` and `deploy/production.env.example`.
 
 ## Conventions & Patterns
 
-### Packages, formatting, and usings
+### Packages, formatting, and global usings
 
-All NuGet versions belong in `Directory.Packages.props`; never add inline versions to project files.
-Important versions are EF Core/ASP.NET Core/Identity 10.0.11, Mediator 3.0.2, FluentValidation
-12.1.1, FluentResults 4.0.0, Aspire hosting 13.5.2, Azure Storage Aspire integrations 13.5.3,
-Scalar 2.17.1, HybridCache 10.9.0, OpenTelemetry 1.18.0, NUnit 4.6.1, Shouldly 4.3.0, Moq
-4.20.72, and Respawn 7.0.0. Keep the root `.editorconfig` clean; warnings fail the build.
+- Central package versions only in `Directory.Packages.props`.
+- Preserve project `GlobalUsings.cs` files and file-scoped namespace style.
+- Use `Guard.Against.*` for argument/configuration guards.
+- Keep the root `.editorconfig` clean; `TreatWarningsAsErrors` makes compiler/analyzer warnings
+  part of the build contract.
+- Do not add generated outputs, secrets, `bin/`, `obj/`, `.angular/`, or `dist/` to source edits.
 
-Each project owns a `GlobalUsings.cs`. Preserve existing imports and file-scoped namespaces.
-Use `Guard.Against.*` for argument/configuration guards, follow least exposure for new members,
-and do not edit generated files or add broad catch-and-ignore error handling.
+### DI registration and host composition
 
-### DI registration
+Layer registration belongs in:
 
-Layer registrations are extension methods in the layer's own namespace:
-`skestock.Application.DependencyInjection.AddApplicationServices`,
-`skestock.Infrastructure.DependencyInjection.AddInfrastructureServices`,
-`AddWebAuthenticationServices`, `skestock.Web.DependencyInjection.AddWebServices`, and
-`skestock.ServiceDefaults.Extensions.AddServiceDefaults`. `Web/Program.cs` composes them in this
-order: service defaults, optional Key Vault, Application, Infrastructure, web auth, Web services.
-Keep Worker-safe infrastructure registration separate from endpoint-bound web authentication.
+- `skestock.Application.DependencyInjection.AddApplicationServices`
+- `skestock.Infrastructure.DependencyInjection.AddInfrastructureServices`
+- `skestock.Infrastructure.DependencyInjection.AddWebAuthenticationServices`
+- `skestock.Web.DependencyInjection.AddWebServices`
+- `skestock.ServiceDefaults.Extensions.AddServiceDefaults`
+
+`src/Web/Program.cs` composes in this order:
+
+```text
+AddServiceDefaults
+-> AddKeyVaultIfConfigured
+-> AddApplicationServices
+-> AddInfrastructureServices
+-> AddWebAuthenticationServices
+-> AddWebServices
+```
+
+Worker composes ServiceDefaults, Application, Infrastructure, scoped `AmbientUser`/`IUser`,
+queue processor, three queue hosted services, and `DailyStatisticsService`. Keep endpoint-bound
+authentication wiring out of Worker-safe Infrastructure registration.
 
 ### Mediator pipeline
 
-`src/Application/DependencyInjection.cs` registers the scoped Mediator pipeline in this exact order:
-`LoggingBehaviour`, `UnhandledExceptionBehaviour`, `AuthorizationBehaviour`, `ValidationBehaviour`,
-`PerformanceBehaviour`, `CachingBehavior`, `CacheInvalidationBehavior`. Treat order as behavior,
-not style. Queries implement `ICacheableQuery`; commands implement `ICacheInvalidation`. Use
-HybridCache tag invalidation with sensible expirations and coarse plus entity-specific tags.
+`src/Application/DependencyInjection.cs` registers scoped Mediator in this exact order:
 
-### Endpoints and errors
+1. `LoggingBehaviour`
+2. `UnhandledExceptionBehaviour`
+3. `AuthorizationBehaviour`
+4. `ValidationBehaviour`
+5. `PerformanceBehaviour`
+6. `CachingBehavior`
+7. `CacheInvalidationBehavior`
 
-Endpoints are not controllers. Add an exported class under `src/Web/Endpoints` implementing
-`IEndpointGroup` with `static void Map(RouteGroupBuilder)`. `MapEndpoints` discovers groups by
-reflection and defaults to `/api/{ClassName}`. Map static named methods, not anonymous lambdas;
-inject `ISender`, pass `CancellationToken`, return typed `Results<...>`, and dispatch all business
-work through Application handlers. `result.IsFailed` must become
-`result.ToProblemHttpResult()`.
+Order is behavior, not style. New behaviors must be inserted deliberately. Queries that should
+cache implement `ICacheableQuery`; mutations that invalidate cache implement `ICacheInvalidation`.
 
-Expected business failures are `FluentResults` typed `Error` subclasses with metadata keys from
-`Application/Common/Errors/ErrorMetadataKeys.cs`; Web maps them to the frontend-facing
-`ApiErrorContract`. Use exceptions only where the existing exception handler expects them
-(validation/authorization/unhandled infrastructure cases). Do not replace typed domain failures
-with generic exceptions.
+### Feature slices, validation, and errors
 
-### Data, pagination, and persistence
+Use `Features/<Feature>/{Commands|Queries}/<UseCase>/` with command/query, handler, and validator.
+Register validators through assembly scanning; `ValidationBehaviour` aggregates failures and throws
+the repository's `ValidationException`.
 
-Handlers use `IApplicationDbContext`, EF LINQ, and `SaveChangesAsync`; concrete EF configuration
-belongs in Infrastructure. Audit fields and domain events are applied by
-`AuditableEntityInterceptor` and `DispatchDomainEventsInterceptor`. Reuse common filtering and
-keyset helpers. A standard paginated list fetches `pageSize + 1`, returns `hasNextPage` and
-`nextCursor`, and normally participates in cache tagging.
+For expected business failures, return `Result`/`Result<T>` with typed `Error` subclasses and
+metadata keys from `Application/Common/Errors/ErrorMetadataKeys.cs`. Web maps failed results with
+`ToProblemHttpResult()`, producing RFC ProblemDetails plus the frontend-facing `error` contract.
+Use thrown exceptions only for validation, authorization, and exceptional cases already handled by
+`ProblemDetailsExceptionHandler`.
 
-## Scaffolding / Codegen Tools
+### Endpoints
 
-From `src/Application`, prefer the Clean Architecture template:
+Endpoints are not controllers. Add a public class under `src/Web/Endpoints` implementing
+`IEndpointGroup` with:
+
+```csharp
+public static void Map(RouteGroupBuilder groupBuilder) { ... }
+```
+
+`MapEndpoints(typeof(Program).Assembly)` discovers groups by reflection and defaults to
+`/api/{ClassName}`. Use the custom `MapGet/MapPost/MapPut/MapPatch/MapDelete` overloads from
+`EndpointRouteBuilderExtensions`; handlers must be named static methods, not lambdas, because the
+method name becomes the OpenAPI operation ID. Use typed `Results<...>` and pass a
+`CancellationToken`.
+
+Complex list requests use `POST .../get-all` with a body containing pagination/filter/sort data.
+Map failed results through `result.ToProblemHttpResult()` (or the existing typed result helpers).
+Add `[EndpointSummary]` and `[EndpointDescription]`.
+
+### Filtering, keyset pagination, and caching
+
+- Do not accept arbitrary property names for filters or sort. Add explicit
+  `IFilterConfiguration<TEntity>` and `IKeysetSortConfiguration<TEntity>` allowlists.
+- Use `FilterQueryBuilder`, `DynamicSortBuilder`, `CursorCodec`, `KeysetPredicateBuilder`, and
+  `OrderByBuilder`.
+- Fetch `pageSize + 1`, remove the extra item, and return `HasNextPage`/`NextCursor`.
+- Use `BasePaginationFilter` and `PaginatedResponse<T>`.
+- Implement `ICacheableQuery` with normalized keys, feature tags, and randomized sliding expiration.
+- Commands implement `ICacheInvalidation` with collection/entity tags as appropriate. HybridCache
+  tag invalidation is logical/lazy; keep a sensible TTL.
+
+### Persistence, dates, and domain events
+
+Application handlers use `IApplicationDbContext` and `SaveChangesAsync`; EF configuration lives
+in `Infrastructure/Data/Configurations`. `ApplicationDbContext` applies configurations from its
+assembly and generates Guid v7 IDs for `BaseEntity`.
+
+`AuditableEntityInterceptor` stamps `BaseAuditableEntity` fields using `IUser` and
+`TimeProvider`. `DispatchDomainEventsInterceptor` dispatches domain events after successful save.
+Persist instants as UTC `DateTimeOffset`; use `DateOnly` for calendar-only business values.
+
+### Async messaging and scheduling
+
+Goods receipt/category/item imports use a transactional outbox:
+
+1. Handler/domain event writes `OutboxMessage` in the same DB unit of work.
+2. `OutboxPublisherService` claims bounded batches, sends `MessageEnvelope` to Azure Queue, and
+   records retry/error state.
+3. Worker queue services receive messages with visibility timeouts, restore the original Mediator
+   request, set `AmbientUser` from the envelope, and use `ProcessedMessages` for idempotency.
+4. Permanent or exhausted failures go to `<queue>-poison`.
+
+Delivery is at-least-once. New consumers must be idempotent and cancellation-aware.
+
+`DailyStatisticsService` is a separate Worker `BackgroundService`. It defaults to 21:00
+`Europe/Bucharest`, catches up one missed occurrence at startup, persists `ScheduledJobRun` state
+through Mediator, takes `Services.DailyStatisticsLockKey` through Redis, and retries failures
+after 1/5/15 minutes. Its current `ExecuteJobAsync` body only logs; future scheduled commands
+belong there, not in `Worker.cs`.
+
+## Scaffolding/Codegen tools
+
+From `src/Application`:
 
 ```bash
-dotnet new ca-usecase --name CreateTodoList --feature-name TodoLists --usecase-type command --return-type int
+dotnet new ca-usecase --name CreateTodoList \
+  --feature-name TodoLists --usecase-type command --return-type int
 dotnet new ca-usecase -n GetTodos -fn TodoLists -ut query -rt TodosVm
 ```
 
-If unavailable, install `Clean.Architecture.Solution.Template::10.8.0`. The template does not
-create every repository convention (pagination filter/sort/cache files or feature-specific tests);
-complete those manually by copying the closest existing slice.
+If unavailable:
 
-## Storage and asynchronous messaging
+```bash
+dotnet new install Clean.Architecture.Solution.Template::10.8.0
+```
 
-Blob uploads are client-direct SAS flows. `RequestUploadCommand` creates pending `FileMetadata` and
-returns an upload SAS; `ConfirmUploadCommand` verifies the blob and marks it completed. Files use
-the `app-files` container. Do not proxy file bytes through Web.
-
-Goods-receipt imports use a transactional outbox:
-
-1. Create the import and raise `GoodsReceiptImportCreatedEvent`.
-2. Domain-event dispatch adds an `OutboxMessage` in the same unit of work, with a small message
-   record's assembly-qualified type, JSON payload, originating user, and
-   `Services.GoodsReceiptImportQueue`.
-3. Web's `OutboxPublisherService` polls every 5 seconds, sends at most 50 messages, records
-   success or retry/error state, and stops after five retries.
-4. `AzureQueueSender` serializes/base64-encodes the envelope and creates the queue if needed.
-5. Worker receives up to 10 messages with a 30-second visibility timeout, performs idempotency
-   checks through `ProcessedMessages`, dispatches the deserialized Mediator request, and moves
-   permanent/exhausted failures to the `goods-receipt-import-poison` queue.
-
-Delivery is at-least-once: publisher rows are not claimed atomically and a successful send can be
-resent if state persistence fails. Consumers must remain idempotent and preserve cancellation.
+Complete generated slices manually with feature-specific filter/sort/cache files, endpoint
+mapping, typed errors, and mirrored tests. Do not assume the template creates repository-specific
+pagination or cache boilerplate.
 
 ## Auth
 
-Infrastructure registers `ApplicationUser` with `IdentityRole<Guid>`, EF stores, and core
-authorization. Web adds `IdentityConstants.ApplicationScheme` cookie authentication as the default,
-plus the bearer-token scheme for non-browser clients, and maps Identity API endpoints in
-`Web/Endpoints/Users.cs`. `CurrentUser` reads the `NameIdentifier` claim.
+Infrastructure registers `ApplicationUser` with `IdentityRole<Guid>` and EF stores. Web adds the
+Identity application cookie as the default scheme plus `IdentityConstants.BearerScheme`, then
+maps Identity API endpoints in `Web/Endpoints/Users.cs`. `CurrentUser` reads the
+`ClaimTypes.NameIdentifier` Guid and roles.
 
-AppHost injects explicit frontend origins into `Cors:AllowedOrigins`; Web uses
-`WithOrigins(...).AllowCredentials()` and a development localhost fallback. Do not change this to
-`AllowAnyOrigin()` when cookie credentials are required. Antiforgery configuration and middleware
-are currently scaffolded but commented out; the Angular XSRF names are configured in anticipation,
-not proof that server enforcement is active.
+Endpoint groups require authorization by default through `IEndpointGroup.RequiresAuthorization`.
+`Users` explicitly disables group authorization so login/register/manage endpoints can work; its
+logout endpoint calls `.RequireAuthorization()`. The Application `AuthorizationBehaviour` supports
+bare authentication, role-based, and policy-based `[Authorize]` attributes, but inspect current
+requests before assuming role restrictions exist.
+
+CORS must use explicit origins with `.AllowCredentials()`; never replace the allowlist with
+`AllowAnyOrigin()`. Antiforgery configuration and middleware are currently commented out, so
+do not claim CSRF protection is active.
 
 ## Testing strategy
 
-Use NUnit, Shouldly, and Moq for isolated unit tests. Mirror source feature/use-case folders under
-`tests/Application.UnitTests`; test validators, handlers, behaviours, filtering, keyset, caching,
-storage, and queue classification. Use real EF/Redis/Aspire resources only in functional or
-infrastructure integration tests. Keep functional tests HTTP-level and reset state through
-`TestBase`/`DatabaseResetter`. `Domain.UnitTests` is currently an empty project, so add domain
-coverage when domain behavior is introduced. Coverlet is available, but no coverage threshold is
-enforced in the repository.
+- Add unit tests under the mirrored Application/Worker path for validators, handlers, behaviors,
+  pagination/filter/keyset logic, caching, storage/queue classification, and scheduled services.
+- Use NUnit `[TestFixture]`/`[Test]`, Shouldly, and Moq; follow existing fixture names.
+- Use real SQL Server/Redis/Azurite/Aspire only for functional/integration boundaries.
+- Functional setup uses `TestAppHost`, `WebApiFactory`, and Respawn. Use `TestApp.ResetState()`
+  through `TestBase`; do not manually assume a blank database.
+- Worker unit tests can use SQLite/fakes and `FakeTimeProvider` (`Microsoft.Extensions.TimeProvider.Testing`).
+- Domain tests are currently absent; add them when domain behavior is introduced.
+- Client tests use Vitest through `npm test`; there is no configured browser E2E runner.
 
-## Frontend (`src/Client`)
+## Frontend
 
-The client is Angular `^22.1.0` with CLI/build `^22.1.6`, TypeScript `~6.0.2`, RxJS 7.8,
-ng-zorro-antd `^22.0.1`, Tailwind/PostCSS 4, NgRx Signals/Operators 22, SignalR 10.0.11, and
-Vitest 4. Its scripts are `dev`, `build`, `watch`, and `test`; Aspire uses `AddViteApp(...).WithNpm()`.
+The actual client is `src/Client`, an Angular 22 standalone-style application:
 
-Use standalone components (do not set `standalone: true`), signals, `computed`, `input()`/`output()`,
-`inject()`/`@Service()`, native `@if`/`@for`/`@switch`, and accessible WCAG AA markup. Do not use
-`ngClass`, `ngStyle`, `@HostBinding`, or `@HostListener`; use host bindings and `class`/`style`
-bindings. Prefer Signal Forms for new forms and Reactive Forms for existing complex forms.
+```text
+src/Client/src/app/
+  core/       auth, guards/interceptors, layouts, models, routes, theme, SignalR
+  features/   routed pages and page-level stores (categories, items, school classes, analytics, login, home)
+  shared/     reusable HTTP services, collection/detail stores, UI, loading/error features
+```
 
-`src/app/features/<name>` owns routed pages, lazy route files, headers, filters, tables, and page
-stores. `src/app/shared/<name>` owns HTTP services, reusable `signalStoreFeature` composables,
-collection/detail stores, and reusable UI. Core contains auth, layouts, models, theme, SignalR, and
-shared error/pagination contracts. Import across boundaries through the aliases in `tsconfig.json`
-(`@ske/...`), not deep relative paths.
+Use the aliases in `src/Client/tsconfig.json` (`@ske/models`, `@ske/auth`, `@ske/features/...`,
+`@ske/shared/...`) instead of deep relative imports.
 
-SignalStore rules are strict: use `patchState()` for every state update, `rxMethod()` plus RxJS
-operators for async work, `mapResponse({ next, error })` for success/error branches, named exports,
-and `withEntities()` for true entity collections. Reusable loading/error behavior belongs in
-features such as `withLoadingFeature` and `withProblemDetailsFeature`; clear errors before requests.
-Do not introduce classic NgRx actions/reducers/effects for new code.
+Angular rules:
 
-Routing has simple and full layout groups. Login is lazy-loaded under `simple` and guarded by
-`guestGuard`; authenticated features are lazy-loaded under `full` and guarded by `authGuard`.
-`app.config.ts` configures Romanian locale (`ro_RO`), `RON`, date-fns adapter, SignalR event maps,
-credentialed API requests, and XSRF names `XSRF-TOKEN`/`X-XSRF-TOKEN`.
+- Standalone components are the default; do not set `standalone: true`.
+- Use `inject()`, `@Service()`, signals, `computed`, `input()`/`output()`, and native
+  `@if`/`@for`/`@switch`.
+- Do not use `ngClass`, `ngStyle`, `@HostBinding`, or `@HostListener`; use class/style bindings
+  and the component/directive `host` object.
+- Prefer Signal Forms for new forms; use Reactive Forms for existing complex forms.
+- Use `patchState()` for every SignalStore state update.
+- Use `rxMethod()` plus RxJS operators for asynchronous store work and `mapResponse({ next, error })`
+  for success/error branches.
+- Use `withEntities()` for true entity collections; do not introduce classic NgRx
+  actions/reducers/effects for new code.
+- Reusable loading/error state belongs in `withLoadingFeature` and
+  `withProblemDetailsFeature`; clear errors before requests.
+- Stores use named exports only.
+- Configure accessible WCAG AA markup, keyboard/focus behavior, and ARIA.
 
-For ng-zorro APIs, use `.github/instructions/llms-full.txt` and official docs rather than guessing.
-Import only required component APIs/icons, keep overlay configuration typed, configure global defaults
-through providers, and preserve keyboard/focus/ARIA behavior.
+The client uses `provideNzI18n(ro_RO)`, `provideNzDateFnsAdapter()`, Romanian locale/currency
+(`ro`, `RON`), credentialed `/api` requests, and XSRF names `XSRF-TOKEN`/`X-XSRF-TOKEN` in
+`app.config.ts`. `authInterceptor` adds `withCredentials` to `/api` calls. `SignalRBridge`
+connects to `/hubs/app`, handles reconnects, de-duplicates event envelopes, and dispatches
+NgRx SignalStore events.
 
-## Template deviations to remember
+For ng-zorro, import only required components/icons, use typed overlay options, prefer global
+providers (`provideNzConfig`, `provideNzDateFnsAdapter`), and consult
+`.github/instructions/llms-full.txt`/official ng-zorro docs instead of guessing APIs.
 
-- Mediator source generator replaces MediatR.
-- FluentResults typed errors are the normal expected-failure path.
+## Template deviations and non-obvious gotchas
+
+- Mediator source generation replaces MediatR.
 - Scalar replaces Swagger UI.
-- Aspire owns SQL Server, Redis, Azurite, service discovery, and orchestration.
-- `Shared.Services` centralizes resource names.
-- `IEndpointGroup` reflection replaces a manual endpoint list.
-- Web uses cookie auth by default while retaining bearer tokens.
-- Transactional outbox, Azure Blob SAS uploads, Storage Queue processing, SignalR, and document
-  extraction are custom additions.
-- The real frontend is `src/Client`, not the stale `src/Web/ClientApp` location.
+- Aspire owns resource wiring; `AppHost` is not the HTTP app.
+- Shared resource-name constants must be used instead of duplicated strings.
+- Endpoint groups are reflection-discovered rather than manually registered.
+- Web uses cookie auth by default but retains bearer endpoints.
+- Outbox/queue processing is custom and at-least-once.
+- `src/Client` is real and current even though some older nested instruction text says it is planned.
+- Current `TestAppHost` provisions Worker/Azurite in addition to SQL Server/Redis; verify source if
+  older documentation claims otherwise.
+- Generated EF migrations, Angular `dist/.angular`, `bin/obj`, and graphify outputs are not
+  hand-edited source.

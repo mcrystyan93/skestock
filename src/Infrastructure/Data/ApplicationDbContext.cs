@@ -12,7 +12,9 @@ using skestock.Domain.Queues;
 namespace skestock.Infrastructure.Data;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options), IApplicationDbContext
+    : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options),
+        IApplicationDbContext,
+        IScheduledJobRunDbContext
 {
 
     public DbSet<Category> Categories => Set<Category>();
@@ -34,6 +36,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<OrderList> OrderLists => Set<OrderList>();
     public DbSet<OrderListLine> OrderListLines => Set<OrderListLine>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+    public DbSet<ScheduledJobRun> ScheduledJobRuns => Set<ScheduledJobRun>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
 
