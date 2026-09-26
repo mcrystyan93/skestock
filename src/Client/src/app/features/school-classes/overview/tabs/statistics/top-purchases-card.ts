@@ -61,7 +61,7 @@ const COMPUTED_AT_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'med
                              [validationErrors]="store.topPurchasesValidationErrors()" />
         } @else {
           <nz-tabs nzSize="small"
-                   class="px-4">
+                   class="px-4!">
             <nz-tab nzTitle="Cantitate">
               <ske-top-purchases-chart [items]="store.topPurchases()?.byQuantity ?? []"
                                        metric="quantity"

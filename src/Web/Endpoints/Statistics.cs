@@ -2,6 +2,7 @@
 using skestock.Application.Features.Statistics.Models;
 using skestock.Application.Features.Statistics.Queries.GetClassGoodsReceiptCosts;
 using skestock.Application.Features.Statistics.Queries.GetClassItemStockEvolution;
+using skestock.Application.Features.Statistics.Queries.GetClassLocationStockByItem;
 using skestock.Application.Features.Statistics.Queries.GetClassDailyConsumption;
 using skestock.Application.Features.Statistics.Queries.GetClassStockByCategory;
 using skestock.Application.Features.Statistics.Queries.GetDailyConsumptionAverages;
@@ -19,8 +20,8 @@ public class Statistics : IEndpointGroup
     {
         groupBuilder.MapGet(GetClassStockByCategory, "class/{classId}/stock-by-category");
         groupBuilder.MapGet(
-            GetClassStockByCategoryForLocation,
-            "class/{classId}/location/{locationId}/stock-by-category");
+            GetClassLocationStockByItem,
+            "class/{classId}/location/{locationId}/stock-by-item");
         groupBuilder.MapGet(GetClassGoodsReceiptCosts, "class/{classId}/goods-receipt-costs");
         groupBuilder.MapGet(
             GetClassItemStockEvolution,
@@ -33,7 +34,8 @@ public class Statistics : IEndpointGroup
 
     [EndpointSummary("Get current stock grouped by category")]
     [EndpointDescription("Returns current stock for a class, grouped into category series across " +
-                         "locations with stock batches. The response is suitable for a stacked bar chart.")]
+                         "locations with stock batches. Labels are location names and labelIds the matching " +
+                         "location ids. The response is suitable for a stacked bar chart.")]
     public static async Task<Results<Ok<ClassStockByCategoryDto>, ProblemHttpResult>> GetClassStockByCategory(
         ISender sender,
         Guid classId,
@@ -44,17 +46,20 @@ public class Statistics : IEndpointGroup
         return result.ToOk();
     }
 
-    [EndpointSummary("Get current stock by category for a location")]
-    [EndpointDescription("Returns current stock for one location in a school class, with category " +
-                         "series zero-filled for categories stocked elsewhere in the class.")]
+    [EndpointSummary("Get current stock by item for a location")]
+    [EndpointDescription("Returns current non-zero stock for each item a school class holds at one " +
+                         "location. Labels are item names and labelIds the matching item ids; each " +
+                         "item's quantity sits in its category series, so a stacked bar chart is " +
+                         "coloured by category.")]
     public static async Task<Results<Ok<ClassStockByCategoryDto>, ProblemHttpResult>>
-        GetClassStockByCategoryForLocation(
+        GetClassLocationStockByItem(
             ISender sender,
             Guid classId,
             Guid locationId,
             CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetClassStockByCategoryQuery { ClassId = classId, LocationId = locationId },
+        var result = await sender.Send(
+            new GetClassLocationStockByItemQuery { ClassId = classId, LocationId = locationId },
             cancellationToken);
 
         return result.ToOk();

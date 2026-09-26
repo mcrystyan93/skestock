@@ -1,4 +1,5 @@
 using Azure.Storage.Queues;
+using SharedServices = skestock.Shared.Services;
 
 namespace Worker.Queues;
 
@@ -10,5 +11,9 @@ public class CategoryImportBatchQueueProcessingService(
         queueServiceClient,
         logger,
         scopeFactory,
-        skestock.Shared.Services.CategoryImportQueue,
-        TimeSpan.FromSeconds(1200));
+        SharedServices.CategoryImportQueue,
+        VisibilityTimeout)
+{
+    // Batch imports extract every uploaded file, so one message can take several minutes.
+    private static readonly TimeSpan VisibilityTimeout = TimeSpan.FromMinutes(20);
+}

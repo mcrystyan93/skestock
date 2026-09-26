@@ -1,4 +1,4 @@
-﻿namespace Worker.Statistics;
+namespace Worker.Statistics;
 
 public static class ConsumptionRangeCalculator
 {
@@ -11,24 +11,14 @@ public static class ConsumptionRangeCalculator
         TimeZoneInfo timeZone,
         int maxDays)
     {
-        var today = ToLocalDate(utcNow, timeZone);
+        var today = LocalDates.ToLocalDate(utcNow, timeZone);
         var earliest = today.AddDays(-(maxDays - 1));
 
-        var from = lastSucceededAtUtc is { } lastSucceededAt
-            ? ToLocalDate(lastSucceededAt, timeZone).AddDays(-1)
+        var preferredFrom = lastSucceededAtUtc is { } lastSucceededAt
+            ? LocalDates.ToLocalDate(lastSucceededAt, timeZone).AddDays(-1)
             : earliest;
 
-        if (from < earliest)
-        {
-            from = earliest;
-        }
-
-        if (from > today)
-        {
-            from = today;
-        }
-
-        return (from, today);
+        return (Clamp(preferredFrom, earliest, today), today);
     }
 
     // Splits [from, to] into consecutive, non-overlapping windows of at most maxDays days, oldest first.
@@ -49,6 +39,14 @@ public static class ConsumptionRangeCalculator
         return windows;
     }
 
-    private static DateOnly ToLocalDate(DateTimeOffset instant, TimeZoneInfo timeZone) =>
-        DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(instant, timeZone).DateTime);
+    // Lower bound first, so a (misconfigured) earliest > today still yields today.
+    private static DateOnly Clamp(DateOnly value, DateOnly min, DateOnly max)
+    {
+        if (value < min)
+        {
+            value = min;
+        }
+
+        return value > max ? max : value;
+    }
 }

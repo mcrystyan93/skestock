@@ -2,6 +2,9 @@ using System.Globalization;
 
 namespace Worker.Statistics;
 
+/// <summary>
+/// Computes the UTC instants of a job that runs once per local day at a fixed local time.
+/// </summary>
 public sealed class DailyScheduleCalculator
 {
     private readonly TimeOnly _runAt;
@@ -9,7 +12,7 @@ public sealed class DailyScheduleCalculator
 
     public DailyScheduleCalculator(DailyStatisticsOptions options)
         : this(
-            TimeOnly.ParseExact(options.RunAt, "HH:mm", CultureInfo.InvariantCulture),
+            TimeOnly.ParseExact(options.RunAt, DailyStatisticsOptions.RunAtFormat, CultureInfo.InvariantCulture),
             TimeZoneInfo.FindSystemTimeZoneById(options.TimeZone))
     {
     }
@@ -20,33 +23,31 @@ public sealed class DailyScheduleCalculator
         _timeZone = timeZone;
     }
 
+    /// <summary>The first occurrence strictly after <paramref name="utcNow"/>.</summary>
     public DateTimeOffset GetNextOccurrence(DateTimeOffset utcNow)
     {
-        var now = utcNow.ToUniversalTime();
-        var localNow = TimeZoneInfo.ConvertTime(now, _timeZone);
-        var localDate = DateOnly.FromDateTime(localNow.DateTime);
-        var today = GetOccurrence(localDate);
+        var localDate = LocalDates.ToLocalDate(utcNow, _timeZone);
+        var todaysOccurrence = GetOccurrence(localDate);
 
-        return today > now
-            ? today
+        return todaysOccurrence > utcNow
+            ? todaysOccurrence
             : GetOccurrence(localDate.AddDays(1));
     }
 
+    /// <summary>The latest occurrence at or before <paramref name="utcNow"/>.</summary>
     public DateTimeOffset GetMostRecentDueOccurrence(DateTimeOffset utcNow)
     {
-        var now = utcNow.ToUniversalTime();
-        var localNow = TimeZoneInfo.ConvertTime(now, _timeZone);
-        var localDate = DateOnly.FromDateTime(localNow.DateTime);
-        var today = GetOccurrence(localDate);
+        var localDate = LocalDates.ToLocalDate(utcNow, _timeZone);
+        var todaysOccurrence = GetOccurrence(localDate);
 
-        return today <= now
-            ? today
+        return todaysOccurrence <= utcNow
+            ? todaysOccurrence
             : GetOccurrence(localDate.AddDays(-1));
     }
 
-    private DateTimeOffset GetOccurrence(DateOnly date)
+    private DateTimeOffset GetOccurrence(DateOnly localDate)
     {
-        var localDateTime = date.ToDateTime(_runAt, DateTimeKind.Unspecified);
+        var localDateTime = localDate.ToDateTime(_runAt, DateTimeKind.Unspecified);
 
         // If a caller configures a time in a DST gap, move forward until the local time
         // exists. Europe/Bucharest's default 21:00 schedule never enters this branch.

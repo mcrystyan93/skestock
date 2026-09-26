@@ -16,7 +16,7 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat('ro-RO', { style: 'currency', c
   imports: [ChartComponent, NzTypographyComponent],
   template: `
     @if (hasChartData()) {
-      <p class="mb-2 text-sm"
+      <p class="mb-2 text-sm px-4"
          nz-typography
          nzType="secondary">
         Medie zilnică: <strong>{{ averageQuantityLabel() }}</strong> buc. ·

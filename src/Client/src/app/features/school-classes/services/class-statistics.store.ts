@@ -24,9 +24,13 @@ import { withLoadingFeature } from '@ske/shared/loader';
 import { realtimeEvents } from '@ske/signalr';
 import { EMPTY, pipe, switchMap, tap } from 'rxjs';
 
+/** A location the user drilled into from the all-locations chart. */
+export type DrilledLocation = { id: string; name: string };
+
 type ClassStatisticsState = {
   classId: string | null;
-  locationId: string | null;
+  /** When set, the stock card shows the per-item chart of this location instead of all locations. */
+  drilledLocation: DrilledLocation | null;
   active: boolean;
   allLocationsChart: ClassStockByCategoryChartDto | null;
   locationChart: ClassStockByCategoryChartDto | null;
@@ -40,7 +44,7 @@ type ClassStatisticsState = {
 
 const initialState: ClassStatisticsState = {
   classId: null,
-  locationId: null,
+  drilledLocation: null,
   active: false,
   allLocationsChart: null,
   locationChart: null,
@@ -113,7 +117,8 @@ export const ClassStatisticsStore = signalStore(
           const classChanged = store.classId() !== classId;
           patchState(store, { classId, active: true, allLocationsChart: null });
           if (classChanged) {
-            patchState(store, { itemIds: [], itemEvolution: null });
+            // A drilled location belongs to the previous class, so return to the overview.
+            patchState(store, { itemIds: [], itemEvolution: null, drilledLocation: null, locationChart: null });
           }
           loadItemIds(classId);
         }),
@@ -168,36 +173,45 @@ export const ClassStatisticsStore = signalStore(
       )
     );
 
-    const loadLocation = rxMethod<{ classId: string; locationId: string | null }>(
+    const loadLocationChart = rxMethod<{ classId: string; locationId: string }>(
       pipe(
-        tap(({ classId, locationId }) => {
+        tap(() => {
           store.clearLocationErrors();
           store.setLocationLoading();
-          patchState(store, { classId, locationId, active: true, locationChart: null });
         }),
-        switchMap(({classId, locationId}) => {
-          if (!locationId) {
-            store.setLocationLoaded();
-            return EMPTY;
-          }
-
-          return store.classStatisticsHttp
-            .getStockByCategoryForLocation(classId, locationId)
-            .pipe(
-              mapResponse({
-                next: (chart) => {
-                  patchState(store, { locationChart: chart });
-                  store.setLocationLoaded();
-                },
-                error: (error) => {
-                  store.handleLocationError(error);
-                  store.setLocationLoaded();
-                }
-              })
-            );
-        })
+        switchMap(({ classId, locationId }) =>
+          store.classStatisticsHttp.getLocationStockByItem(classId, locationId).pipe(
+            mapResponse({
+              next: (chart) => {
+                patchState(store, { locationChart: chart });
+                store.setLocationLoaded();
+              },
+              error: (error) => {
+                store.handleLocationError(error);
+                store.setLocationLoaded();
+              }
+            })
+          )
+        )
       )
     );
+
+    /** Drills the stock card into one location of the current class. */
+    const openLocation = (location: DrilledLocation) => {
+      const classId = store.classId();
+      if (!classId) {
+        return;
+      }
+
+      patchState(store, { drilledLocation: location, locationChart: null });
+      loadLocationChart({ classId, locationId: location.id });
+    };
+
+    /** Returns the stock card to the all-locations chart. */
+    const closeLocation = () => {
+      store.clearLocationErrors();
+      patchState(store, { drilledLocation: null, locationChart: null });
+    };
 
     const loadDailyConsumption = rxMethod<{ classId: string; filter: ClassDailyConsumptionFilter }>(
       pipe(
@@ -258,7 +272,10 @@ export const ClassStatisticsStore = signalStore(
       }
 
       loadAllLocations(classId);
-      loadLocation({ classId, locationId: store.locationId() });
+      const drilledLocation = store.drilledLocation();
+      if (drilledLocation) {
+        loadLocationChart({ classId, locationId: drilledLocation.id });
+      }
       const dailyConsumptionFilter = store.dailyConsumptionFilter();
       if (dailyConsumptionFilter) {
         loadDailyConsumption({ classId, filter: dailyConsumptionFilter });
@@ -271,7 +288,8 @@ export const ClassStatisticsStore = signalStore(
 
     return {
       loadAllLocations,
-      loadLocation,
+      openLocation,
+      closeLocation,
       loadItemEvolution,
       loadDailyConsumption,
       loadTopPurchases,

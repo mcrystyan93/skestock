@@ -29,13 +29,14 @@ type ItemSelectionModel = {
              [nzExtra]="itemDropdownExtra"
              nzTitle="Evoluția stocului articolului selectat">
       <ng-template #itemDropdownExtra>
-        <ske-item-dropdown [formField]="itemForm.item"
-                           [itemIds]="store.itemIds()"
-                           [allowClear]="true"
-                           [allowEdit]="false"
-                           [allowCreate]="false"
-                           placeholder="Alegeți un articol"
-                           class="w-44 sm:w-56" />
+        <div class="w-44 sm:w-56">
+          <ske-item-dropdown [formField]="itemForm.item"
+                             [itemIds]="store.itemIds()"
+                             [allowClear]="true"
+                             [allowEdit]="false"
+                             [allowCreate]="false"
+                             placeholder="Alegeți un articol" />
+        </div>
       </ng-template>
 
       <ng-container *skeLoader="store.itemIdsLoading() || store.itemEvolutionLoading()">

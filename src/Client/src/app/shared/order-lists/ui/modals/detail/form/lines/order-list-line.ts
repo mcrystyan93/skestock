@@ -80,7 +80,7 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
           </nz-form-control>
         </nz-form-item>
         @if (historyHint(); as hint) {
-          <span class="block text-xs"
+          <span class="text-xs"
                 nz-typography
                 nzType="secondary"
                 tabindex="0"

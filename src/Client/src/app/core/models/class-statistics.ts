@@ -3,8 +3,11 @@ export type ClassStockByCategorySeriesDto = {
   data: number[];
 };
 
+/** Stacked-bar chart data: one bar per label, one stacked segment (series) per category. */
 export type ClassStockByCategoryChartDto = {
   labels: string[];
+  /** Ids of the entities in `labels`, index-aligned (location ids, or item ids in a location drill-down). */
+  labelIds: string[];
   series: ClassStockByCategorySeriesDto[];
 };
 

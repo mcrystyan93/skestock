@@ -28,7 +28,7 @@ builder.Services
     .Validate(
         options => TimeOnly.TryParseExact(
             options.RunAt,
-            "HH:mm",
+            DailyStatisticsOptions.RunAtFormat,
             CultureInfo.InvariantCulture,
             DateTimeStyles.None,
             out _),

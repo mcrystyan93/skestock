@@ -31,24 +31,27 @@ describe('ClassStatisticsHttp', () => {
     expect(request.request.method).toBe('GET');
     request.flush({
       labels: ['Bucătărie'],
+      labelIds: ['location-id'],
       series: [{ name: 'Alimente', data: [12] }]
     });
 
     expect(response).toEqual({
       labels: ['Bucătărie'],
+      labelIds: ['location-id'],
       series: [{ name: 'Alimente', data: [12] }]
     });
   });
 
-  it('requests the class chart for a selected location', () => {
-    service.getStockByCategoryForLocation('class-id', 'location-id').subscribe();
+  it('requests the per-item drill-down chart for a location', () => {
+    service.getLocationStockByItem('class-id', 'location-id').subscribe();
 
     const request = httpTestingController.expectOne(
-      '/api/statistics/class/class-id/location/location-id/stock-by-category'
+      '/api/statistics/class/class-id/location/location-id/stock-by-item'
     );
     expect(request.request.method).toBe('GET');
     request.flush({
-      labels: ['Bucătărie'],
+      labels: ['Orez'],
+      labelIds: ['item-id'],
       series: [{ name: 'Alimente', data: [12] }]
     });
   });
