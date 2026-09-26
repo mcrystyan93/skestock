@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using skestock.Application.Features.Statistics.Models;
 using skestock.Application.Features.Statistics.Queries.GetClassGoodsReceiptCosts;
 using skestock.Application.Features.Statistics.Queries.GetClassItemStockEvolution;
+using skestock.Application.Features.Statistics.Queries.GetClassDailyConsumption;
 using skestock.Application.Features.Statistics.Queries.GetClassStockByCategory;
+using skestock.Application.Features.Statistics.Queries.GetDailyConsumptionAverages;
 
 namespace skestock.Web.Endpoints;
 
@@ -20,6 +22,8 @@ public class Statistics : IEndpointGroup
         groupBuilder.MapGet(
             GetClassItemStockEvolution,
             "class/{classId}/item/{itemId}/stock-evolution");
+        groupBuilder.MapGet(GetDailyConsumptionAverages, "daily-consumption/averages");
+        groupBuilder.MapGet(GetClassDailyConsumption, "class/{classId}/daily-consumption");
     }
 
     [EndpointSummary("Get current stock grouped by category")]
@@ -82,6 +86,43 @@ public class Statistics : IEndpointGroup
     {
         var result = await sender.Send(
             new GetClassItemStockEvolutionQuery { ClassId = classId, ItemId = itemId },
+            cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Get average daily consumption")]
+    [EndpointDescription("Returns the average daily consumption (quantity and RON value) over the last 7 and " +
+                         "30 complete local days, optionally filtered by item, location and category.")]
+    public static async Task<Results<Ok<DailyConsumptionAveragesDto>, ProblemHttpResult>>
+        GetDailyConsumptionAverages(
+            ISender sender,
+            [AsParameters] StatisticsRequests.GetDailyConsumptionAveragesRequest request,
+            CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new GetDailyConsumptionAveragesQuery
+            {
+                ItemId = request.ItemId,
+                LocationId = request.LocationId,
+                CategoryId = request.CategoryId
+            },
+            cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Get a class's daily consumption series")]
+    [EndpointDescription("Returns zero-filled daily consumption points for a class, starting with the local date " +
+                         "of its first stock transaction, plus totals and the overall daily average.")]
+    public static async Task<Results<Ok<ClassDailyConsumptionDto>, ProblemHttpResult>>
+        GetClassDailyConsumption(
+            ISender sender,
+            Guid classId,
+            CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new GetClassDailyConsumptionQuery { ClassId = classId },
             cancellationToken);
 
         return result.ToOk();

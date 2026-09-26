@@ -64,4 +64,7 @@ public static class Services
     public const string DailyStatisticsSettings = "DailyStatistics";
     public const string DailyStatisticsJobName = "daily-statistics";
     public const string DailyStatisticsLockKey = "skestock:jobs:daily-statistics";
+
+    // Time zone that defines business calendar days (statistics day boundaries).
+    public const string BusinessTimeZoneId = "Europe/Bucharest";
 }

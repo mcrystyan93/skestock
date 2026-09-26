@@ -404,6 +404,54 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("ClassItemStockVisibilities");
                 });
 
+            modelBuilder.Entity("skestock.Domain.Entities.DailyItemConsumption", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClassId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("ComputedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("ClassId", "Date")
+                        .HasDatabaseName("IX_DailyItemConsumptions_ClassId_Date");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("ClassId", "Date"), new[] { "Quantity", "TotalValue" });
+
+                    b.HasIndex("ItemId", "Date")
+                        .HasDatabaseName("IX_DailyItemConsumptions_ItemId_Date");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("ItemId", "Date"), new[] { "Quantity", "TotalValue" });
+
+                    b.HasIndex("Date", "ItemId", "ClassId", "LocationId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_DailyItemConsumptions_Date_ItemId_ClassId_LocationId");
+
+                    b.ToTable("DailyItemConsumptions");
+                });
+
             modelBuilder.Entity("skestock.Domain.Entities.FileMetadata", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1662,6 +1710,33 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("CreatedBy");
 
                     b.Navigation("LastModifiedBy");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.DailyItemConsumption", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.SchoolClass", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("skestock.Domain.Entities.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("skestock.Domain.Entities.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("Item");
+
+                    b.Navigation("Location");
                 });
 
             modelBuilder.Entity("skestock.Domain.Entities.FileMetadata", b =>

@@ -22,6 +22,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<CategoryImportBatchFile> CategoryImportBatchFiles => Set<CategoryImportBatchFile>();
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
     public DbSet<ClassItemStockVisibility> ClassItemStockVisibilities => Set<ClassItemStockVisibility>();
+    public DbSet<DailyItemConsumption> DailyItemConsumptions => Set<DailyItemConsumption>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();

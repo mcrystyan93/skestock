@@ -11,6 +11,7 @@ using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.ScheduledJobs.Commands.RecordScheduledJobRun;
 using skestock.Application.Features.ScheduledJobs.Models;
 using skestock.Application.Features.ScheduledJobs.Queries.GetScheduledJobLastRun;
+using skestock.Application.Features.Statistics.Commands.MaterializeDailyConsumption;
 using skestock.Domain.Enums;
 using Worker.Services;
 using Worker.Statistics;
@@ -44,6 +45,36 @@ public sealed class DailyStatisticsServiceTests
                 It.IsAny<TimeSpan>(),
                 It.IsAny<CancellationToken>()),
             Times.Once);
+    }
+
+    [Test]
+    public async Task Job_materializes_daily_consumption_for_the_local_range()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var sender = CreateSender(cancellation, out var recordedRuns);
+        MaterializeDailyConsumptionCommand? sentCommand = null;
+        sender
+            .Setup(mediator => mediator.Send(
+                It.IsAny<MaterializeDailyConsumptionCommand>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<IRequest<Result<int>>, CancellationToken>(
+                (request, _) => sentCommand = (MaterializeDailyConsumptionCommand)request)
+            .Returns(new ValueTask<Result<int>>(Result.Ok(3)));
+        using var provider = CreateServiceProvider(sender);
+        var testService = CreateService(
+            provider,
+            CreateLockMock().Object,
+            new FakeTimeProvider(new DateTimeOffset(2026, 9, 25, 18, 0, 0, TimeSpan.Zero)),
+            out _);
+        testService.UseRealJob = true;
+
+        await testService.RunAsync(cancellation.Token);
+
+        sentCommand.ShouldNotBeNull();
+        sentCommand.TimeZoneId.ShouldBe("Europe/Bucharest");
+        sentCommand.ToDate.ShouldBe(new DateOnly(2026, 9, 25));
+        sentCommand.FromDate.ShouldBe(new DateOnly(2026, 8, 26));
+        recordedRuns.Count(run => run.SucceededAtUtc.HasValue).ShouldBe(1);
     }
 
     [Test]
@@ -300,6 +331,8 @@ public sealed class DailyStatisticsServiceTests
     {
         public int JobAttempts { get; private set; }
 
+        public bool UseRealJob { get; set; }
+
         public int FailuresBeforeSuccess { get; set; }
 
         public string FailureMessage { get; set; } = "Temporary test failure.";
@@ -321,8 +354,16 @@ public sealed class DailyStatisticsServiceTests
             return Task.CompletedTask;
         }
 
-        protected override Task ExecuteJobAsync(ISender sender, CancellationToken cancellationToken)
+        protected override Task ExecuteJobAsync(
+            ISender sender,
+            DailyStatisticsJobContext context,
+            CancellationToken cancellationToken)
         {
+            if (UseRealJob)
+            {
+                return base.ExecuteJobAsync(sender, context, cancellationToken);
+            }
+
             JobAttempts++;
             OnJobAttempt?.Invoke(JobAttempts);
             if (JobAttempts <= FailuresBeforeSuccess)

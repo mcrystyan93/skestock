@@ -23,6 +23,7 @@ public class SchoolClassTestDbContext(DbContextOptions<SchoolClassTestDbContext>
     public DbSet<CategoryImportBatchFile> CategoryImportBatchFiles => Set<CategoryImportBatchFile>();
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
     public DbSet<ClassItemStockVisibility> ClassItemStockVisibilities => Set<ClassItemStockVisibility>();
+    public DbSet<DailyItemConsumption> DailyItemConsumptions => Set<DailyItemConsumption>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();
     public DbSet<ItemImportBatchFile> ItemImportBatchFiles => Set<ItemImportBatchFile>();
@@ -44,6 +45,7 @@ public class SchoolClassTestDbContext(DbContextOptions<SchoolClassTestDbContext>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.Ignore<DailyItemConsumption>();
 
         builder.Ignore<OrderList>();
         builder.Ignore<OrderListLine>();
