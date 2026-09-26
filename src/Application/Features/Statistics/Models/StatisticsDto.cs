@@ -6,9 +6,19 @@ public record ClassStockByCategorySeriesDto
     public List<int> Data { get; init; } = [];
 }
 
+/// <summary>
+/// Stacked-bar chart data: one bar per label, one stacked segment (series) per category.
+/// </summary>
 public record ClassStockByCategoryDto
 {
     public List<string> Labels { get; init; } = [];
+
+    /// <summary>
+    /// Ids of the entities shown as <see cref="Labels"/>, index-aligned with them
+    /// (locations for the all-locations chart, items for a location drill-down).
+    /// </summary>
+    public List<Guid> LabelIds { get; init; } = [];
+
     public List<ClassStockByCategorySeriesDto> Series { get; init; } = [];
 }
 

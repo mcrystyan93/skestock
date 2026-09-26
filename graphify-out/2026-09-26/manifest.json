@@ -2502,9 +2502,9 @@
     "semantic_hash": ""
   },
   "src/Infrastructure/Data/ApplicationDbContextInitialiser.cs": {
-    "mtime": 1790435232.4175088,
-    "seen": 1790435254.5076578,
-    "ast_hash": "4ded77bd5efc8df708c2ebad6f8e60b2",
+    "mtime": 1790440060.229305,
+    "seen": 1790440106.9975617,
+    "ast_hash": "e5f066ceaf2fd40e2007e4afb66fd8c8",
     "semantic_hash": ""
   },
   "src/Infrastructure/Data/Configurations/CategoryConfiguration.cs": {
@@ -2898,9 +2898,9 @@
     "semantic_hash": ""
   },
   "src/Worker/Program.cs": {
-    "mtime": 1790432525.3455975,
-    "seen": 1790432737.786115,
-    "ast_hash": "6964d02ce6927cbe2ff4a065bd555d87",
+    "mtime": 1790442532.8915668,
+    "seen": 1790442585.9298732,
+    "ast_hash": "e3168e1edbbf26e6d3d2a44fe99dd070",
     "semantic_hash": ""
   },
   "src/Worker/Properties/launchSettings.json": {
@@ -27144,9 +27144,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/modals/detail/form/lines/order-list-line.ts": {
-    "mtime": 1790439322.4017339,
-    "seen": 1790439381.3264158,
-    "ast_hash": "ba03e2f1cc759d877806f3f8d3327f0e",
+    "mtime": 1790441498.232,
+    "seen": 1790442585.9296591,
+    "ast_hash": "0b6d9f46535af71970d9d42e27148e6d",
     "semantic_hash": ""
   },
   "src/Client/src/app/shared/order-lists/ui/modals/detail/form/order-list-low-stock-items.ts": {
@@ -27528,21 +27528,21 @@
     "semantic_hash": ""
   },
   "src/Worker/Statistics/DailyScheduleCalculator.cs": {
-    "mtime": 1790316750.021073,
-    "seen": 1790317762.4088323,
-    "ast_hash": "110a6e5713a254f723fa1ea93c61ca44",
+    "mtime": 1790442532.890725,
+    "seen": 1790442585.9298813,
+    "ast_hash": "094ac54b7da95ae728e0c74713f5e128",
     "semantic_hash": ""
   },
   "src/Worker/Statistics/DailyStatisticsOptions.cs": {
-    "mtime": 1790433400.9886434,
-    "seen": 1790433578.5194907,
-    "ast_hash": "9da305cdf04a91681ae6bda033f9c8e5",
+    "mtime": 1790442532.8896778,
+    "seen": 1790442585.9298844,
+    "ast_hash": "23637b74c8f84679af505651983b1657",
     "semantic_hash": ""
   },
   "src/Worker/Statistics/DailyStatisticsService.cs": {
-    "mtime": 1790439322.4022698,
-    "seen": 1790439381.3266134,
-    "ast_hash": "aaffcb0e22f59db1b68d9728b2a21472",
+    "mtime": 1790442532.887675,
+    "seen": 1790442585.9298873,
+    "ast_hash": "48452bac81f94ff514cd3cd4a87c2415",
     "semantic_hash": ""
   },
   "tests/Application.UnitTests/Features/ScheduledJobs/ScheduledJobHandlersTests.cs": {
@@ -27630,15 +27630,15 @@
     "semantic_hash": ""
   },
   "src/Worker/Statistics/ConsumptionRangeCalculator.cs": {
-    "mtime": 1790439322.4017339,
-    "seen": 1790439381.3266103,
-    "ast_hash": "3f12930a7a934dd336d9dabaffcebbc2",
+    "mtime": 1790442532.890368,
+    "seen": 1790442585.9298806,
+    "ast_hash": "cb21c30074a436fba3230ecaa9ba985f",
     "semantic_hash": ""
   },
   "src/Worker/Statistics/DailyStatisticsJobContext.cs": {
-    "mtime": 1790432525.3525367,
-    "seen": 1790432737.7861233,
-    "ast_hash": "840d57d33c8acfaaa679070ea9b93710",
+    "mtime": 1790442532.8895595,
+    "seen": 1790442585.9298832,
+    "ast_hash": "a30d7e50474ed255e32d844e95ebd5c6",
     "semantic_hash": ""
   },
   "tests/Application.UnitTests/Features/Statistics/Commands/MaterializeDailyConsumption/MaterializeDailyConsumptionCommandValidatorTests.cs": {
@@ -27885,6 +27885,60 @@
     "mtime": 1790439138.6186721,
     "seen": 1790439381.3267052,
     "ast_hash": "eb2cafca9fec90b20c69857a92c07240",
+    "semantic_hash": ""
+  },
+  "src/Worker/Statistics/DailyStatisticsJob.cs": {
+    "mtime": 1790442475.2326124,
+    "seen": 1790442585.9298823,
+    "ast_hash": "d1062382c205065fc388e0d17ca13db2",
+    "semantic_hash": ""
+  },
+  "src/Worker/Statistics/DailyStatisticsRetryPolicy.cs": {
+    "mtime": 1790442449.965357,
+    "seen": 1790442585.9298851,
+    "ast_hash": "07b2dcfc242cab805d7ee049a9882d06",
+    "semantic_hash": ""
+  },
+  "src/Worker/Statistics/DailyStatisticsRunPolicy.cs": {
+    "mtime": 1790442449.965357,
+    "seen": 1790442585.9298859,
+    "ast_hash": "d54fd0df2ce5ede6ef58fa379af38c3d",
+    "semantic_hash": ""
+  },
+  "src/Worker/Statistics/DailyStatisticsRunStore.cs": {
+    "mtime": 1790442475.2314548,
+    "seen": 1790442585.9298866,
+    "ast_hash": "b95a672fea4fb7c876a89292def91aa7",
+    "semantic_hash": ""
+  },
+  "src/Worker/Statistics/LocalDates.cs": {
+    "mtime": 1790442449.966357,
+    "seen": 1790442585.929888,
+    "ast_hash": "c242c4544da49134faf0c9e1a67bacab",
+    "semantic_hash": ""
+  },
+  "src/Worker/Statistics/ResultExtensions.cs": {
+    "mtime": 1790442449.966357,
+    "seen": 1790442585.9298887,
+    "ast_hash": "7bae782a3fd9d70f517c9727de34027a",
+    "semantic_hash": ""
+  },
+  "src/Worker/Statistics/ScheduledRunOutcome.cs": {
+    "mtime": 1790442449.966357,
+    "seen": 1790442585.9298894,
+    "ast_hash": "06a35997de61ca4168bb02916654d726",
+    "semantic_hash": ""
+  },
+  "tests/Worker.UnitTests/Statistics/DailyStatisticsRetryPolicyTests.cs": {
+    "mtime": 1790442554.1167598,
+    "seen": 1790442585.9300082,
+    "ast_hash": "bd07c84d62f70d4f1b7e4fd6a8aa9980",
+    "semantic_hash": ""
+  },
+  "tests/Worker.UnitTests/Statistics/DailyStatisticsRunPolicyTests.cs": {
+    "mtime": 1790442554.1167598,
+    "seen": 1790442585.9300086,
+    "ast_hash": "fbbd6bef7e78e55d1f241b4b9e35fc8d",
     "semantic_hash": ""
   }
 }

@@ -1,29 +1,36 @@
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
 using Microsoft.Extensions.DependencyInjection;
-using skestock.Domain.Queues;
 
 namespace Worker.Queues;
 
 /// <summary>
 /// Hosts the transport lifecycle for one Azure Queue: poll, delegate one message to the scoped
-/// processor, then acknowledge or poison it according to the returned decision. Business dispatch
-/// and database transactions live in <see cref="IQueueMessageProcessor"/>.
+/// processor, then acknowledge, retry or poison it according to
+/// <see cref="QueueMessageDispositionPolicy"/>. Business dispatch and database transactions live
+/// in <see cref="IQueueMessageProcessor"/>.
 /// </summary>
-public abstract class QueueProcessingService<TProcessor>(
+/// <remarks>
+/// Delivery is at-least-once: a message is only deleted after it was processed, so a crash
+/// between processing and deletion re-delivers it, and the processor's idempotency check
+/// turns the re-delivery into a <see cref="QueueMessageProcessingStatus.Duplicate"/>.
+/// </remarks>
+/// <typeparam name="TService">The concrete hosted service; used as the logger category.</typeparam>
+public abstract class QueueProcessingService<TService>(
     QueueServiceClient queueServiceClient,
-    ILogger<TProcessor> logger,
+    ILogger<TService> logger,
     IServiceScopeFactory scopeFactory,
     string queueName,
     TimeSpan visibilityTimeout)
     : BackgroundService
-    where TProcessor : class
+    where TService : class
 {
-    private readonly QueueClient _client = queueServiceClient.GetQueueClient(queueName);
-    private readonly TimeSpan _pollInterval = TimeSpan.FromSeconds(5);
-
     private const int BatchSize = 10;
-    private const int MaxDequeueCount = 5;
+    private const string PoisonQueueSuffix = "-poison";
+    private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
+
+    private readonly QueueClient _client = queueServiceClient.GetQueueClient(queueName);
+    private readonly string _poisonQueueName = queueName + PoisonQueueSuffix;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -33,66 +40,76 @@ public abstract class QueueProcessingService<TProcessor>(
         {
             try
             {
-                var response = await _client.ReceiveMessagesAsync(
-                    maxMessages: BatchSize,
-                    visibilityTimeout: visibilityTimeout,
-                    cancellationToken: stoppingToken);
-
-                if (response.Value.Length == 0)
+                var receivedCount = await ReceiveAndProcessBatchAsync(stoppingToken);
+                if (receivedCount == 0)
                 {
-                    await Task.Delay(_pollInterval, stoppingToken);
-                    continue;
+                    await Task.Delay(PollInterval, stoppingToken);
                 }
-
-                foreach (var message in response.Value)
-                    await ProcessMessageAsync(message, stoppingToken);
             }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
+                return;
+            }
+            catch (Exception ex)
+            {
+                // Messages that were not deleted become visible again after the visibility
+                // timeout, so a failed iteration never loses work.
                 logger.LogError(ex, "Queue polling loop failed for {QueueName}", queueName);
-                await Task.Delay(_pollInterval, stoppingToken);
+                await Task.Delay(PollInterval, stoppingToken);
             }
         }
     }
 
-    private async Task ProcessMessageAsync(
-        QueueMessage message,
-        CancellationToken cancellationToken)
+    /// <returns>The number of messages received.</returns>
+    private async Task<int> ReceiveAndProcessBatchAsync(CancellationToken cancellationToken)
     {
+        // The visibility timeout hides received messages from other Worker instances while this
+        // one processes them; it must exceed the slowest expected processing time.
+        var response = await _client.ReceiveMessagesAsync(
+            maxMessages: BatchSize,
+            visibilityTimeout: visibilityTimeout,
+            cancellationToken: cancellationToken);
+
+        foreach (var message in response.Value)
+        {
+            await ProcessMessageAsync(message, cancellationToken);
+        }
+
+        return response.Value.Length;
+    }
+
+    private async Task ProcessMessageAsync(QueueMessage message, CancellationToken cancellationToken)
+    {
+        // One scope per message: a fresh DbContext and AmbientUser for every message.
         using var scope = scopeFactory.CreateScope();
         var processor = scope.ServiceProvider.GetRequiredService<IQueueMessageProcessor>();
         var result = await processor.ProcessAsync(message, cancellationToken);
 
-        switch (result.Status)
+        var disposition = QueueMessageDispositionPolicy.Decide(result.Status, message.DequeueCount);
+        await ApplyDispositionAsync(message, result, disposition, cancellationToken);
+    }
+
+    private async Task ApplyDispositionAsync(
+        QueueMessage message,
+        QueueMessageProcessingResult result,
+        QueueMessageDisposition disposition,
+        CancellationToken cancellationToken)
+    {
+        switch (disposition)
         {
-            case QueueMessageProcessingStatus.Succeeded:
-            case QueueMessageProcessingStatus.Duplicate:
+            case QueueMessageDisposition.Delete:
                 await DeleteMessageAsync(message, cancellationToken);
                 break;
 
-            case QueueMessageProcessingStatus.PermanentFailure:
-                logger.LogError(
-                    "Message {Id} is permanent and will be moved to the poison queue {PoisonQueueName}.",
-                    message.MessageId,
-                    $"{queueName}-poison");
-                await MoveToPoisonQueueAsync(message, result.Envelope, cancellationToken);
+            case QueueMessageDisposition.MoveToPoison:
+                LogPoisonReason(message, result.Status);
+                // Send before deleting: if deleting fails, the message is re-delivered rather than lost.
+                await SendToPoisonQueueAsync(message, result, cancellationToken);
                 await DeleteMessageAsync(message, cancellationToken);
                 break;
 
-            case QueueMessageProcessingStatus.RetryableFailure when
-                message.DequeueCount >= MaxDequeueCount:
-                logger.LogWarning(
-                    "Message {Id} reached the retry limit for queue {QueueName}.",
-                    message.MessageId,
-                    queueName);
-                await MoveToPoisonQueueAsync(message, result.Envelope, cancellationToken);
-                await DeleteMessageAsync(message, cancellationToken);
-                break;
-
-            case QueueMessageProcessingStatus.RetryableFailure:
-                // Leaving the message undeleted lets Azure Queue make it visible again after the
-                // visibility timeout. No retry counter is stored in the database because Azure
-                // owns the delivery count for transport failures.
+            case QueueMessageDisposition.Retry:
+                // No retry counter is stored in the database: Azure owns the delivery count.
                 logger.LogWarning(
                     "Message {Id} will be retried from queue {QueueName}; dequeue count is {DequeueCount}.",
                     message.MessageId,
@@ -101,28 +118,44 @@ public abstract class QueueProcessingService<TProcessor>(
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(disposition), disposition, "Unknown disposition.");
         }
     }
 
-    private Task DeleteMessageAsync(
-        QueueMessage message,
-        CancellationToken cancellationToken) =>
+    private void LogPoisonReason(QueueMessage message, QueueMessageProcessingStatus status)
+    {
+        if (status == QueueMessageProcessingStatus.PermanentFailure)
+        {
+            logger.LogError(
+                "Message {Id} is permanent and will be moved to the poison queue {PoisonQueueName}.",
+                message.MessageId,
+                _poisonQueueName);
+            return;
+        }
+
+        logger.LogWarning(
+            "Message {Id} reached the retry limit for queue {QueueName}.",
+            message.MessageId,
+            queueName);
+    }
+
+    private Task DeleteMessageAsync(QueueMessage message, CancellationToken cancellationToken) =>
         _client.DeleteMessageAsync(message.MessageId, message.PopReceipt, cancellationToken);
 
-    private async Task MoveToPoisonQueueAsync(
+    // The raw message text is forwarded unchanged, so even undecodable messages can be inspected.
+    private async Task SendToPoisonQueueAsync(
         QueueMessage message,
-        MessageEnvelope? envelope,
+        QueueMessageProcessingResult result,
         CancellationToken cancellationToken)
     {
-        var poisonQueue = queueServiceClient.GetQueueClient($"{queueName}-poison");
+        var poisonQueue = queueServiceClient.GetQueueClient(_poisonQueueName);
         await poisonQueue.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
         await poisonQueue.SendMessageAsync(message.MessageText, cancellationToken: cancellationToken);
 
         logger.LogWarning(
             "Message {Id} moved to poison queue {PoisonQueueName}. Envelope decoded: {HasEnvelope}.",
-            envelope?.MessageId ?? Guid.Empty,
-            $"{queueName}-poison",
-            envelope is not null);
+            result.Envelope?.MessageId ?? Guid.Empty,
+            _poisonQueueName,
+            result.Envelope is not null);
     }
 }

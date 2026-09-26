@@ -197,6 +197,26 @@ public sealed class QueueProcessingServiceTests
     }
 
     [TestCase(QueueProcessorKind.Category)]
+    [TestCase(QueueProcessorKind.GoodsReceipt)]
+    [TestCase(QueueProcessorKind.Item)]
+    public async Task Non_mediator_message_type_is_poisoned_without_retry(QueueProcessorKind kind)
+    {
+        var envelope = new skestock.Domain.Queues.MessageEnvelope
+        {
+            MessageId = Guid.NewGuid(),
+            Type = typeof(string).AssemblyQualifiedName!,
+            Payload = "\"text\""
+        };
+        using var harness = CreateHarness(kind, QueueMessageFactory.CreateRaw(envelope));
+
+        await RunProcessorAsync(kind, harness);
+
+        harness.SentRequests.ShouldBeEmpty();
+        harness.PoisonMessages.ShouldHaveSingleItem();
+        harness.DeleteCount.ShouldBe(1);
+    }
+
+    [TestCase(QueueProcessorKind.Category)]
     [TestCase(QueueProcessorKind.Item)]
     public async Task Import_already_in_progress_is_acknowledged_without_poisoning(QueueProcessorKind kind)
     {

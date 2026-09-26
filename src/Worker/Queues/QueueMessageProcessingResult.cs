@@ -2,19 +2,14 @@ using skestock.Domain.Queues;
 
 namespace Worker.Queues;
 
-public enum QueueMessageProcessingStatus
-{
-    Succeeded,
-    Duplicate,
-    RetryableFailure,
-    PermanentFailure
-}
-
 /// <summary>
 /// Describes what the polling module should do after the business module handled a message.
 /// Keeping this result transport-neutral makes processing rules easy to test without Azure Queue
 /// clients.
 /// </summary>
+/// <param name="Envelope">
+/// The decoded envelope, or <see langword="null"/> when the raw message could not be decoded.
+/// </param>
 public sealed record QueueMessageProcessingResult(
     QueueMessageProcessingStatus Status,
     MessageEnvelope? Envelope = null)

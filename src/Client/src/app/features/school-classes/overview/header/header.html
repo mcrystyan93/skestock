@@ -27,7 +27,7 @@
               <ng-template #lowStockItemsCountTemplate>
                 <div nz-typography
                      nzType="warning"
-                     class="mb-0">
+                     class="mb-0!">
                   {{ summary().lowStockItemsCount ?? 0 }}
                 </div>
               </ng-template>
@@ -38,7 +38,7 @@
               <ng-template #expiredStockItemsCountTemplate>
                 <div nz-typography
                      nzType="danger"
-                     class="mb-0">
+                     class="mb-0!">
                   {{ summary().expiredItemsCount ?? 0 }}
                 </div>
               </ng-template>
@@ -73,7 +73,7 @@
             <ng-template #pendingReviewImportsCountTemplate>
               <div nz-typography
                    nzType="warning"
-                   class="mb-0">
+                   class="mb-0!">
                 {{ summary().pendingReviewImportsCount ?? 0 }}
               </div>
             </ng-template>
@@ -83,7 +83,7 @@
             <ng-template #confirmedImportsCountTemplate>
               <div nz-typography
                    nzType="success"
-                   class="mb-0">
+                   class="mb-0!">
                 {{ summary().confirmedImportsCount ?? 0 }}
               </div>
             </ng-template>
@@ -93,7 +93,7 @@
               <ng-template #failedImportsCountTemplate>
                 <div nz-typography
                      nzType="danger"
-                     class="mb-0">
+                     class="mb-0!">
                   {{ summary().failedImportsCount ?? 0 }}
                 </div>
               </ng-template>

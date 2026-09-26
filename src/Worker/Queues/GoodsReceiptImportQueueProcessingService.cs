@@ -1,4 +1,5 @@
 using Azure.Storage.Queues;
+using SharedServices = skestock.Shared.Services;
 
 namespace Worker.Queues;
 
@@ -10,5 +11,9 @@ public class GoodsReceiptImportQueueProcessingService(
         queueServiceClient,
         logger,
         scopeFactory,
-        skestock.Shared.Services.GoodsReceiptImportQueue,
-        TimeSpan.FromSeconds(30));
+        SharedServices.GoodsReceiptImportQueue,
+        VisibilityTimeout)
+{
+    // Must exceed the processing time of one message, or another instance may receive it concurrently.
+    private static readonly TimeSpan VisibilityTimeout = TimeSpan.FromSeconds(30);
+}

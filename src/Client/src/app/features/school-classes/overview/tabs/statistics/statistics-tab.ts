@@ -2,7 +2,6 @@ import { Component, effect, inject, input, untracked } from '@angular/core';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 import { ClassStatisticsStore } from '../../../services/class-statistics.store';
 import { AllLocationsStockCard } from './all-locations-stock-card';
-import { SelectedLocationStockCard } from './selected-location-stock-card';
 import { ItemStockEvolutionCard } from './item-stock-evolution-card';
 import { DailyConsumptionCard } from './daily-consumption-card';
 import { TopPurchasesCard } from './top-purchases-card';
@@ -12,7 +11,6 @@ import { TopPurchasesCard } from './top-purchases-card';
     NzColDirective,
     NzRowDirective,
     AllLocationsStockCard,
-    SelectedLocationStockCard,
     ItemStockEvolutionCard,
     DailyConsumptionCard,
     TopPurchasesCard

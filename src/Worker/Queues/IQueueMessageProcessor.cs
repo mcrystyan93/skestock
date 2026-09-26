@@ -4,7 +4,8 @@ namespace Worker.Queues;
 
 /// <summary>
 /// Processes one received message and returns a lifecycle decision to the queue host. It does not
-/// acknowledge or poison messages; those transport actions belong to the polling module.
+/// acknowledge or poison messages; those transport actions belong to the polling module
+/// (<see cref="QueueProcessingService{TService}"/>).
 /// </summary>
 public interface IQueueMessageProcessor
 {

@@ -25,9 +25,10 @@ export class ClassStatisticsHttp {
     );
   }
 
-  public getStockByCategoryForLocation(classId: string, locationId: string) {
+  /** Drill-down of the all-locations chart: one bar per item at the location, coloured by category. */
+  public getLocationStockByItem(classId: string, locationId: string) {
     return this._httpClient.get<ClassStockByCategoryChartDto>(
-      `/api/statistics/class/${classId}/location/${locationId}/stock-by-category`
+      `/api/statistics/class/${classId}/location/${locationId}/stock-by-item`
     );
   }
 

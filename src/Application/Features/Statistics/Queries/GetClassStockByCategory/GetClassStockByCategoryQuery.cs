@@ -5,11 +5,14 @@ using StockCacheConstants = skestock.Application.Features.Stock.CacheConstants;
 
 namespace skestock.Application.Features.Statistics.Queries.GetClassStockByCategory;
 
+/// <summary>
+/// Class stock per location, split by category. Drill into a single location with
+/// <see cref="GetClassLocationStockByItem.GetClassLocationStockByItemQuery"/>.
+/// </summary>
 [Authorize]
 public class GetClassStockByCategoryQuery : IRequest<Result<ClassStockByCategoryDto>>, ICacheableQuery
 {
     public Guid ClassId { get; init; }
-    public Guid? LocationId { get; init; }
 
     public IReadOnlyCollection<string> Tags =>
     [
@@ -23,6 +26,5 @@ public class GetClassStockByCategoryQuery : IRequest<Result<ClassStockByCategory
         SlidingExpirationHelper.GetRandomizedSlidingExpiration(TimeSpan.FromMinutes(5), 30);
 
     public string BuildCacheKey() =>
-        $"{CacheConstants.Statistics}:class:{ClassId}:stock-by-category:" +
-        $"location={LocationId?.ToString() ?? "all"}";
+        $"{CacheConstants.Statistics}:class:{ClassId}:stock-by-category";
 }

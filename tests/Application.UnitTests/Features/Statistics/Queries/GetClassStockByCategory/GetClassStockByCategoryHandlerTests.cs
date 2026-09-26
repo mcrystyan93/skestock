@@ -97,6 +97,7 @@ public class GetClassStockByCategoryHandlerTests
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Labels.ShouldBe(["Kitchen", "Storage"]);
+        result.Value.LabelIds.ShouldBe([kitchen.Id, storage.Id]);
         result.Value.Series.Select(series => series.Name)
             .ShouldBe(["Cleaning", "Dormant", "Pantry"]);
         result.Value.Series.Single(series => series.Name == "Cleaning")
@@ -105,64 +106,6 @@ public class GetClassStockByCategoryHandlerTests
             .Data.ShouldBe([0, 0]);
         result.Value.Series.Single(series => series.Name == "Pantry")
             .Data.ShouldBe([6, 3]);
-    }
-
-    [Test]
-    public async Task Handle_WithLocation_ReturnsFullClassCategorySetAndZeroFillsMissingStock()
-    {
-        await using var context = CreateContext();
-        var schoolClass = CreateClass();
-        var pantry = CreateCategory("Pantry");
-        var cleaning = CreateCategory("Cleaning");
-        var rice = CreateItem(pantry, "Rice");
-        var soap = CreateItem(cleaning, "Soap");
-        var selectedLocation = CreateLocation("Kitchen");
-        var otherLocation = CreateLocation("Storage");
-        context.AddRange(schoolClass, pantry, cleaning, rice, soap, selectedLocation, otherLocation);
-        await context.SaveChangesAsync(CancellationToken.None);
-
-        context.StockBatches.AddRange(
-            CreateBatch(rice, selectedLocation, schoolClass, 4),
-            CreateBatch(soap, otherLocation, schoolClass, 9));
-        await context.SaveChangesAsync(CancellationToken.None);
-
-        var result = await new GetClassStockByCategoryHandler(context).Handle(
-            new GetClassStockByCategoryQuery { ClassId = schoolClass.Id, LocationId = selectedLocation.Id },
-            CancellationToken.None);
-
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.Labels.ShouldBe(["Kitchen"]);
-        result.Value.Series.Select(series => series.Name)
-            .ShouldBe(["Cleaning", "Pantry"]);
-        result.Value.Series.Single(series => series.Name == "Cleaning")
-            .Data.ShouldBe([0]);
-        result.Value.Series.Single(series => series.Name == "Pantry")
-            .Data.ShouldBe([4]);
-    }
-
-    [Test]
-    public async Task Handle_WithExistingLocationWithoutClassBatches_ReturnsZeroForClassCategories()
-    {
-        await using var context = CreateContext();
-        var schoolClass = CreateClass();
-        var category = CreateCategory("Pantry");
-        var item = CreateItem(category, "Rice");
-        var stockedLocation = CreateLocation("Kitchen");
-        var emptyLocation = CreateLocation("Storage");
-        context.AddRange(schoolClass, category, item, stockedLocation, emptyLocation);
-        await context.SaveChangesAsync(CancellationToken.None);
-
-        context.StockBatches.Add(CreateBatch(item, stockedLocation, schoolClass, 7));
-        await context.SaveChangesAsync(CancellationToken.None);
-
-        var result = await new GetClassStockByCategoryHandler(context).Handle(
-            new GetClassStockByCategoryQuery { ClassId = schoolClass.Id, LocationId = emptyLocation.Id },
-            CancellationToken.None);
-
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.Labels.ShouldBe(["Storage"]);
-        result.Value.Series.Single().Name.ShouldBe("Pantry");
-        result.Value.Series.Single().Data.ShouldBe([0]);
     }
 
     [Test]
@@ -179,6 +122,7 @@ public class GetClassStockByCategoryHandlerTests
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Labels.ShouldBeEmpty();
+        result.Value.LabelIds.ShouldBeEmpty();
         result.Value.Series.ShouldBeEmpty();
     }
 
@@ -193,21 +137,5 @@ public class GetClassStockByCategoryHandlerTests
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.Single().Message.ShouldContain("School class");
-    }
-
-    [Test]
-    public async Task Handle_WithUnknownLocation_ReturnsLocationNotFoundFailure()
-    {
-        await using var context = CreateContext();
-        var schoolClass = CreateClass();
-        context.SchoolClasses.Add(schoolClass);
-        await context.SaveChangesAsync(CancellationToken.None);
-
-        var result = await new GetClassStockByCategoryHandler(context).Handle(
-            new GetClassStockByCategoryQuery { ClassId = schoolClass.Id, LocationId = Guid.NewGuid() },
-            CancellationToken.None);
-
-        result.IsFailed.ShouldBeTrue();
-        result.Errors.Single().Message.ShouldContain("Location");
     }
 }
