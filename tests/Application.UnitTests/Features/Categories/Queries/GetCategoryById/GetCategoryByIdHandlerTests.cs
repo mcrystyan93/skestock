@@ -1,4 +1,4 @@
-using FluentResults;
+﻿using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Categories.Models;
@@ -28,6 +28,7 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
     public DbSet<ClassItemStockVisibility> ClassItemStockVisibilities => Set<ClassItemStockVisibility>();
     public DbSet<DailyItemConsumption> DailyItemConsumptions => Set<DailyItemConsumption>();
+    public DbSet<ItemPurchaseStatistic> ItemPurchaseStatistics => Set<ItemPurchaseStatistic>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();
     public DbSet<ItemImportBatchFile> ItemImportBatchFiles => Set<ItemImportBatchFile>();

@@ -1,4 +1,4 @@
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Shouldly;
 using Worker.Statistics;
 
@@ -63,5 +63,27 @@ public sealed class ConsumptionRangeCalculatorTests
         var (_, to) = ConsumptionRangeCalculator.Calculate(now, null, Bucharest, 31);
 
         to.ShouldBe(new DateOnly(2026, 9, 27));
+    }
+
+    [Test]
+    public void SplitIntoWindows_returns_a_single_window_for_a_short_range()
+    {
+        var windows = ConsumptionRangeCalculator.SplitIntoWindows(
+            new DateOnly(2026, 9, 1), new DateOnly(2026, 9, 1), 31);
+
+        windows.ShouldBe([(new DateOnly(2026, 9, 1), new DateOnly(2026, 9, 1))]);
+    }
+
+    [Test]
+    public void SplitIntoWindows_splits_exact_multiples_and_remainders()
+    {
+        var windows = ConsumptionRangeCalculator.SplitIntoWindows(
+            new DateOnly(2026, 1, 1), new DateOnly(2026, 1, 7), 3);
+
+        windows.ShouldBe([
+            (new DateOnly(2026, 1, 1), new DateOnly(2026, 1, 3)),
+            (new DateOnly(2026, 1, 4), new DateOnly(2026, 1, 6)),
+            (new DateOnly(2026, 1, 7), new DateOnly(2026, 1, 7))
+        ]);
     }
 }

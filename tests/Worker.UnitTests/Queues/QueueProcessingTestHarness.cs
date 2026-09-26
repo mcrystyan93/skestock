@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Azure;
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
@@ -254,6 +254,7 @@ internal sealed class WorkerTestDbContext(DbContextOptions<WorkerTestDbContext> 
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
     public DbSet<ClassItemStockVisibility> ClassItemStockVisibilities => Set<ClassItemStockVisibility>();
     public DbSet<DailyItemConsumption> DailyItemConsumptions => Set<DailyItemConsumption>();
+    public DbSet<ItemPurchaseStatistic> ItemPurchaseStatistics => Set<ItemPurchaseStatistic>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();

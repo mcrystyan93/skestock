@@ -1,7 +1,9 @@
-﻿using skestock.Domain.Constants;
+﻿using skestock.Application.Features.Statistics.Commands.MaterializePurchaseStatistics;
+using skestock.Domain.Constants;
 using skestock.Domain.Entities;
 using skestock.Domain.Enums;
 using skestock.Infrastructure.Identity;
+using Mediator;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -41,15 +43,17 @@ public class ApplicationDbContextInitialiser
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+    private readonly ISender _sender;
 
     public ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger,
         ApplicationDbContext context, UserManager<ApplicationUser> userManager,
-        RoleManager<IdentityRole<Guid>> roleManager)
+        RoleManager<IdentityRole<Guid>> roleManager, ISender sender)
     {
         _logger = logger;
         _context = context;
         _userManager = userManager;
         _roleManager = roleManager;
+        _sender = sender;
     }
 
     public async Task InitialiseAsync()
@@ -424,6 +428,7 @@ public class ApplicationDbContextInitialiser
         if (existingClassId is { } classIdToBackfill)
         {
             await SeedDemoAnalyticsAsync(classIdToBackfill);
+            await SeedDemoGoodsReceiptsAsync(classIdToBackfill);
             return;
         }
 
@@ -563,6 +568,7 @@ public class ApplicationDbContextInitialiser
                 .SetProperty(t => t.LastModifiedById, profileId));
 
         await SeedDemoAnalyticsAsync(classId);
+        await SeedDemoGoodsReceiptsAsync(classId);
 
         _logger.LogInformation("Seeded demo class with {Batches} batches and {Transactions} transactions.",
             batches.Count, transactions.Count);
@@ -575,21 +581,34 @@ public class ApplicationDbContextInitialiser
     {
         var adminId = (await _userManager.FindByNameAsync(DefaultAdministrators[0].UserName))?.Id;
 
-        if (!await _context.ClassBalances.AnyAsync(b => b.ClassId == classId))
-        {
-            var pairs = await _context.StockTransactions
-                .Where(t => t.ClassId == classId)
-                .Select(t => new { t.ItemId, t.LocationId })
-                .Distinct()
-                .ToListAsync();
+        // Insert only the item/location pairs that don't have a balance row yet, so re-running this
+        // after seeding new demo items (e.g. the goods-receipt seed) backfills the missing pairs
+        // instead of skipping entirely because the class already has some balances.
+        var pairs = await _context.StockTransactions
+            .Where(t => t.ClassId == classId)
+            .Select(t => new { t.ItemId, t.LocationId })
+            .Distinct()
+            .ToListAsync();
 
-            _context.ClassBalances.AddRange(pairs.Select(p => new ClassBalance
+        var existingPairs = await _context.ClassBalances
+            .Where(b => b.ClassId == classId)
+            .Select(b => new { b.ItemId, b.LocationId })
+            .ToListAsync();
+        var existingPairSet = existingPairs.Select(p => (p.ItemId, p.LocationId)).ToHashSet();
+
+        var missingPairs = pairs.Where(p => !existingPairSet.Contains((p.ItemId, p.LocationId))).ToList();
+        if (missingPairs.Count > 0)
+        {
+            _context.ClassBalances.AddRange(missingPairs.Select(p => new ClassBalance
             {
                 ClassId = classId, ItemId = p.ItemId, LocationId = p.LocationId, OpeningQty = 0
             }));
             await _context.SaveChangesAsync(CancellationToken.None);
 
-            await _context.ClassBalances.Where(b => b.ClassId == classId)
+            var missingPairIds = missingPairs.Select(p => p.ItemId).ToList();
+            await _context.ClassBalances
+                .Where(b => b.ClassId == classId && missingPairIds.Contains(b.ItemId)
+                    && b.CreatedById == null)
                 .ExecuteUpdateAsync(s => s.SetProperty(b => b.CreatedById, adminId)
                     .SetProperty(b => b.LastModifiedById, adminId));
         }
@@ -638,5 +657,152 @@ public class ApplicationDbContextInitialiser
 
         _context.DailyItemConsumptions.AddRange(rows);
         await _context.SaveChangesAsync(CancellationToken.None);
+    }
+
+    // Seeds 20 weekly goods receipts (real GoodsReceipt aggregates, unlike the daily-usage seed
+    // above whose Order transactions are left unlinked) across 50 dedicated demo items, so the
+    // "Top achiziții" purchase statistics have realistic historic frequency/quantity/value data.
+    // Idempotent: skipped once any goods receipt already exists for the demo class.
+    private async Task SeedDemoGoodsReceiptsAsync(Guid classId)
+    {
+        if (await _context.GoodsReceipts.AnyAsync(gr => gr.ClassId == classId))
+        {
+            return;
+        }
+
+        var administrator = await _userManager.FindByNameAsync(DefaultAdministrators[0].UserName)
+                            ?? throw new InvalidOperationException("Seed administrator not found.");
+        var profileId = administrator.Id;
+
+        var schoolClass = await _context.SchoolClasses.FirstAsync(c => c.Id == classId);
+        var categoryIds = await _context.Categories.Select(c => c.Id).ToListAsync();
+        var locationIds = await _context.Locations.Select(l => l.Id).ToListAsync();
+        if (categoryIds.Count == 0 || locationIds.Count == 0)
+        {
+            return;
+        }
+
+        var random = new Random(20261107);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        string[] units = ["buc", "kg", "l", "cutie"];
+        var items = new List<(Item Item, Guid LocationId, decimal BasePrice)>();
+        for (var n = 1; n <= 50; n++)
+        {
+            var isPerishable = random.Next(2) == 0;
+            var item = new Item
+            {
+                Sku = $"PUR-{n:00}",
+                Name = $"Achiziție demo {n:00}",
+                Unit = units[random.Next(units.Length)],
+                MinThreshold = random.Next(5, 31),
+                IsPerishable = isPerishable,
+                ShelfLifeDays = isPerishable ? random.Next(7, 91) : null,
+                CategoryId = categoryIds[random.Next(categoryIds.Count)]
+            };
+            items.Add((item, locationIds[random.Next(locationIds.Count)],
+                Math.Round((decimal)(random.NextDouble() * 148 + 2), 2)));
+        }
+
+        _context.Items.AddRange(items.Select(i => i.Item));
+
+        var receipts = new List<GoodsReceipt>();
+        var batches = new List<StockBatch>();
+        var transactions = new List<StockTransaction>();
+
+        // 20 receipts, one per week, ending today.
+        for (var week = 0; week < 20; week++)
+        {
+            var receiptDay = today.AddDays(-7 * (19 - week));
+            var receivedAt = new DateTimeOffset(
+                receiptDay.ToDateTime(new TimeOnly(random.Next(7, 16), random.Next(60))), TimeSpan.Zero);
+
+            var lineCount = random.Next(5, 16);
+            var lineItems = items.OrderBy(_ => random.Next()).Take(lineCount).ToList();
+
+            var receipt = new GoodsReceipt
+            {
+                ClassId = classId,
+                Class = schoolClass,
+                ReceivedAt = receivedAt,
+                SupplierReference = $"PO-{week + 1:0000}",
+                Note = "Comandă săptămânală (demo)"
+            };
+
+            decimal totalAmount = 0;
+            foreach (var (item, locationId, basePrice) in lineItems)
+            {
+                var quantity = random.Next(5, 51);
+                var price = Math.Round(basePrice * (decimal)(0.85 + random.NextDouble() * 0.3), 2);
+                totalAmount += quantity * price;
+
+                var batch = new StockBatch
+                {
+                    Item = item,
+                    LocationId = locationId,
+                    ReceivedClass = schoolClass,
+                    Quantity = quantity,
+                    UnitPrice = price,
+                    ReceivedDate = receiptDay,
+                    ExpiryDate = item.ShelfLifeDays is { } shelfLife ? receiptDay.AddDays(shelfLife) : null,
+                    GoodsReceipt = receipt
+                };
+                batches.Add(batch);
+
+                transactions.Add(new StockTransaction
+                {
+                    Item = item,
+                    LocationId = locationId,
+                    Batch = batch,
+                    Class = schoolClass,
+                    UserId = profileId,
+                    Type = StockTransactionType.Order,
+                    QuantityChange = quantity,
+                    Reason = "goods-receipt",
+                    CreatedAt = receivedAt,
+                    GoodsReceipt = receipt
+                });
+            }
+
+            receipt.TotalAmount = Math.Round(totalAmount, 2);
+            receipts.Add(receipt);
+        }
+
+        _context.GoodsReceipts.AddRange(receipts);
+        _context.StockBatches.AddRange(batches);
+        _context.StockTransactions.AddRange(transactions);
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        // See SeedCategoriesAsync: stamp audit fields without the HTTP-user interceptor.
+        var itemIds = items.Select(i => i.Item.Id).ToList();
+        await _context.Items.Where(i => itemIds.Contains(i.Id))
+            .ExecuteUpdateAsync(s => s.SetProperty(i => i.CreatedById, profileId)
+                .SetProperty(i => i.LastModifiedById, profileId));
+        var receiptIds = receipts.Select(r => r.Id).ToList();
+        await _context.GoodsReceipts.Where(r => receiptIds.Contains(r.Id))
+            .ExecuteUpdateAsync(s => s.SetProperty(r => r.CreatedById, profileId)
+                .SetProperty(r => r.LastModifiedById, profileId));
+        await _context.StockBatches.Where(b => b.GoodsReceiptId != null && receiptIds.Contains(b.GoodsReceiptId!.Value))
+            .ExecuteUpdateAsync(s => s.SetProperty(b => b.CreatedById, profileId)
+                .SetProperty(b => b.LastModifiedById, profileId));
+        await _context.StockTransactions
+            .Where(t => t.GoodsReceiptId != null && receiptIds.Contains(t.GoodsReceiptId!.Value))
+            .ExecuteUpdateAsync(s => s.SetProperty(t => t.CreatedById, profileId)
+                .SetProperty(t => t.LastModifiedById, profileId));
+
+        // The new items introduce new item/location pairs for the demo class.
+        await SeedDemoAnalyticsAsync(classId);
+
+        // Recompute purchase statistics over the whole database (rolling windows + per-class
+        // history) so "Top achiziții" reflects this historic data immediately, without waiting
+        // for the nightly DailyStatisticsService job.
+        await _sender.Send(new MaterializePurchaseStatisticsCommand
+        {
+            TimeZoneId = skestock.Shared.Services.BusinessTimeZoneId
+        });
+
+        _logger.LogInformation(
+            "Seeded {Receipts} weekly demo goods receipts with {Batches} batches and {Transactions} transactions.",
+            receipts.Count, batches.Count, transactions.Count);
     }
 }

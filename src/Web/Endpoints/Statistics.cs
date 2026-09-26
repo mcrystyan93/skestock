@@ -1,10 +1,13 @@
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
 using skestock.Application.Features.Statistics.Models;
 using skestock.Application.Features.Statistics.Queries.GetClassGoodsReceiptCosts;
 using skestock.Application.Features.Statistics.Queries.GetClassItemStockEvolution;
 using skestock.Application.Features.Statistics.Queries.GetClassDailyConsumption;
 using skestock.Application.Features.Statistics.Queries.GetClassStockByCategory;
 using skestock.Application.Features.Statistics.Queries.GetDailyConsumptionAverages;
+using skestock.Application.Features.Statistics.Queries.GetItemsPurchaseHistory;
+using skestock.Application.Features.Statistics.Queries.GetTopPurchases;
+using skestock.Domain.Enums;
 
 namespace skestock.Web.Endpoints;
 
@@ -24,6 +27,8 @@ public class Statistics : IEndpointGroup
             "class/{classId}/item/{itemId}/stock-evolution");
         groupBuilder.MapGet(GetDailyConsumptionAverages, "daily-consumption/averages");
         groupBuilder.MapGet(GetClassDailyConsumption, "class/{classId}/daily-consumption");
+        groupBuilder.MapGet(GetTopPurchases, "purchases/top");
+        groupBuilder.MapPost(GetItemsPurchaseHistory, "purchases/items-history");
     }
 
     [EndpointSummary("Get current stock grouped by category")]
@@ -114,15 +119,62 @@ public class Statistics : IEndpointGroup
 
     [EndpointSummary("Get a class's daily consumption series")]
     [EndpointDescription("Returns zero-filled daily consumption points for a class, starting with the local date " +
-                         "of its first stock transaction, plus totals and the overall daily average.")]
+                         "of its first stock transaction, plus totals and the overall daily average. " +
+                         "Optionally filtered by item, location and category.")]
     public static async Task<Results<Ok<ClassDailyConsumptionDto>, ProblemHttpResult>>
         GetClassDailyConsumption(
             ISender sender,
             Guid classId,
+            [AsParameters] StatisticsRequests.GetClassDailyConsumptionRequest request,
             CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new GetClassDailyConsumptionQuery { ClassId = classId },
+            new GetClassDailyConsumptionQuery
+            {
+                ClassId = classId,
+                ItemId = request.ItemId,
+                LocationId = request.LocationId,
+                CategoryId = request.CategoryId
+            },
+            cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Get top purchased items")]
+    [EndpointDescription("Returns the items ranked by purchased quantity, purchase value and purchase frequency " +
+                         "for a scope (Last90Days, Last365Days, or Class with classId), optionally filtered by " +
+                         "category. Figures come from the daily purchase statistics job.")]
+    public static async Task<Results<Ok<TopPurchasesDto>, ProblemHttpResult>>
+        GetTopPurchases(
+            ISender sender,
+            [AsParameters] StatisticsRequests.GetTopPurchasesRequest request,
+            CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new GetTopPurchasesQuery
+            {
+                Scope = request.Scope ?? PurchaseStatisticsScope.Last365Days,
+                ClassId = request.ClassId,
+                CategoryId = request.CategoryId,
+                Top = request.Top ?? GetTopPurchasesQuery.DefaultTop
+            },
+            cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Get purchase history for items")]
+    [EndpointDescription("Returns the last-365-days purchase statistics (frequency, average quantity, last " +
+                         "purchase) for the requested items. Items without purchases are omitted.")]
+    public static async Task<Results<Ok<List<PurchaseStatisticDto>>, ProblemHttpResult>>
+        GetItemsPurchaseHistory(
+            ISender sender,
+            StatisticsRequests.GetItemsPurchaseHistoryRequest request,
+            CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new GetItemsPurchaseHistoryQuery { ItemIds = request.ItemIds },
             cancellationToken);
 
         return result.ToOk();

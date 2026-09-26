@@ -1,4 +1,4 @@
-using skestock.Application.Common.Caching;
+﻿using skestock.Application.Common.Caching;
 using skestock.Application.Common.Security;
 using skestock.Application.Features.Statistics.Models;
 
@@ -11,6 +11,12 @@ public class GetClassDailyConsumptionQuery : IRequest<Result<ClassDailyConsumpti
 {
     public Guid ClassId { get; init; }
 
+    public Guid? ItemId { get; init; }
+
+    public Guid? LocationId { get; init; }
+
+    public Guid? CategoryId { get; init; }
+
     public IReadOnlyCollection<string> Tags => [CacheConstants.DailyConsumptionTag];
 
     public bool BypassCache => false;
@@ -19,5 +25,5 @@ public class GetClassDailyConsumptionQuery : IRequest<Result<ClassDailyConsumpti
         SlidingExpirationHelper.GetRandomizedSlidingExpiration(TimeSpan.FromMinutes(10), 30);
 
     public string BuildCacheKey() =>
-        $"{CacheConstants.DailyConsumptionTag}:class:{ClassId}:{DailyConsumptionCalendar.CurrentDateKey()}";
+        $"{CacheConstants.DailyConsumptionTag}:class:{ClassId}:item:{ItemId}:location:{LocationId}:category:{CategoryId}:{DailyConsumptionCalendar.CurrentDateKey()}";
 }

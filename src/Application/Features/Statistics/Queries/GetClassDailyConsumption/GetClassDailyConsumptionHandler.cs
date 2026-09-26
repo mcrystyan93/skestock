@@ -1,4 +1,4 @@
-using skestock.Application.Common.Errors;
+﻿using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Statistics.Models;
 
@@ -30,7 +30,10 @@ public class GetClassDailyConsumptionHandler(IApplicationDbContext dbContext, Ti
 
         var totalsByDate = await dbContext.DailyItemConsumptions
             .AsNoTracking()
-            .Where(c => c.ClassId == request.ClassId)
+            .Where(c => c.ClassId == request.ClassId
+                && (request.ItemId == null || c.ItemId == request.ItemId)
+                && (request.LocationId == null || c.LocationId == request.LocationId)
+                && (request.CategoryId == null || c.Item.CategoryId == request.CategoryId))
             .GroupBy(c => c.Date)
             .Select(g => new
             {

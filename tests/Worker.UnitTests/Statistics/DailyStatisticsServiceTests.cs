@@ -1,4 +1,4 @@
-using FluentResults;
+﻿using FluentResults;
 using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -12,6 +12,8 @@ using skestock.Application.Features.ScheduledJobs.Commands.RecordScheduledJobRun
 using skestock.Application.Features.ScheduledJobs.Models;
 using skestock.Application.Features.ScheduledJobs.Queries.GetScheduledJobLastRun;
 using skestock.Application.Features.Statistics.Commands.MaterializeDailyConsumption;
+using skestock.Application.Features.Statistics.Commands.MaterializePurchaseStatistics;
+using skestock.Application.Features.Statistics.Queries.GetConsumptionBackfillStart;
 using skestock.Domain.Enums;
 using Worker.Services;
 using Worker.Statistics;
@@ -75,6 +77,113 @@ public sealed class DailyStatisticsServiceTests
         sentCommand.ToDate.ShouldBe(new DateOnly(2026, 9, 25));
         sentCommand.FromDate.ShouldBe(new DateOnly(2026, 8, 26));
         recordedRuns.Count(run => run.SucceededAtUtc.HasValue).ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Job_backfills_missing_history_in_windows_oldest_first()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var sender = CreateSender(cancellation, out _);
+        sender
+            .Setup(mediator => mediator.Send(
+                It.IsAny<GetConsumptionBackfillStartQuery>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(new ValueTask<Result<DateOnly?>>(Result.Ok<DateOnly?>(new DateOnly(2026, 6, 1))));
+        var sentCommands = new List<MaterializeDailyConsumptionCommand>();
+        sender
+            .Setup(mediator => mediator.Send(
+                It.IsAny<MaterializeDailyConsumptionCommand>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<IRequest<Result<int>>, CancellationToken>(
+                (request, _) => sentCommands.Add((MaterializeDailyConsumptionCommand)request))
+            .Returns(new ValueTask<Result<int>>(Result.Ok(1)));
+        using var provider = CreateServiceProvider(sender);
+        var testService = CreateService(
+            provider,
+            CreateLockMock().Object,
+            new FakeTimeProvider(new DateTimeOffset(2026, 9, 25, 18, 0, 0, TimeSpan.Zero)),
+            out _);
+        testService.UseRealJob = true;
+
+        await testService.RunAsync(cancellation.Token);
+
+        sentCommands.Count.ShouldBe(4);
+        sentCommands[0].FromDate.ShouldBe(new DateOnly(2026, 6, 1));
+        sentCommands[0].ToDate.ShouldBe(new DateOnly(2026, 7, 1));
+        sentCommands[^1].ToDate.ShouldBe(new DateOnly(2026, 9, 25));
+        for (var i = 1; i < sentCommands.Count; i++)
+        {
+            sentCommands[i].FromDate.ShouldBe(sentCommands[i - 1].ToDate.AddDays(1));
+        }
+    }
+
+    [Test]
+    public async Task Job_materializes_purchase_statistics_after_consumption()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var sender = CreateSender(cancellation, out var recordedRuns);
+        var sentRequests = new List<string>();
+        sender
+            .Setup(mediator => mediator.Send(
+                It.IsAny<MaterializeDailyConsumptionCommand>(),
+                It.IsAny<CancellationToken>()))
+            .Callback(() => sentRequests.Add("consumption"))
+            .Returns(new ValueTask<Result<int>>(Result.Ok(1)));
+        MaterializePurchaseStatisticsCommand? purchaseCommand = null;
+        sender
+            .Setup(mediator => mediator.Send(
+                It.IsAny<MaterializePurchaseStatisticsCommand>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<IRequest<Result<int>>, CancellationToken>((request, _) =>
+            {
+                sentRequests.Add("purchases");
+                purchaseCommand = (MaterializePurchaseStatisticsCommand)request;
+            })
+            .Returns(new ValueTask<Result<int>>(Result.Ok(5)));
+        using var provider = CreateServiceProvider(sender);
+        var testService = CreateService(
+            provider,
+            CreateLockMock().Object,
+            new FakeTimeProvider(new DateTimeOffset(2026, 9, 25, 18, 0, 0, TimeSpan.Zero)),
+            out _);
+        testService.UseRealJob = true;
+
+        await testService.RunAsync(cancellation.Token);
+
+        sentRequests[^1].ShouldBe("purchases");
+        sentRequests.ShouldContain("consumption");
+        purchaseCommand.ShouldNotBeNull();
+        purchaseCommand.TimeZoneId.ShouldBe("Europe/Bucharest");
+        recordedRuns.Count(run => run.SucceededAtUtc.HasValue).ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Purchase_statistics_failure_does_not_fail_the_job()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var sender = CreateSender(cancellation, out var recordedRuns);
+        sender
+            .Setup(mediator => mediator.Send(
+                It.IsAny<MaterializeDailyConsumptionCommand>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(new ValueTask<Result<int>>(Result.Ok(1)));
+        sender
+            .Setup(mediator => mediator.Send(
+                It.IsAny<MaterializePurchaseStatisticsCommand>(),
+                It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("boom"));
+        using var provider = CreateServiceProvider(sender);
+        var testService = CreateService(
+            provider,
+            CreateLockMock().Object,
+            new FakeTimeProvider(new DateTimeOffset(2026, 9, 25, 18, 0, 0, TimeSpan.Zero)),
+            out _);
+        testService.UseRealJob = true;
+
+        await testService.RunAsync(cancellation.Token);
+
+        recordedRuns.Count(run => run.SucceededAtUtc.HasValue).ShouldBe(1);
+        recordedRuns.ShouldAllBe(run => run.Status != ScheduledJobRunStatus.Failed);
     }
 
     [Test]
@@ -240,6 +349,18 @@ public sealed class DailyStatisticsServiceTests
         var runs = new List<RecordScheduledJobRunCommand>();
         recordedRuns = runs;
         var sender = new Mock<ISender>(MockBehavior.Strict);
+
+        sender
+            .Setup(mediator => mediator.Send(
+                It.IsAny<GetConsumptionBackfillStartQuery>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(new ValueTask<Result<DateOnly?>>(Result.Ok<DateOnly?>(null)));
+
+        sender
+            .Setup(mediator => mediator.Send(
+                It.IsAny<MaterializePurchaseStatisticsCommand>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(new ValueTask<Result<int>>(Result.Ok(0)));
 
         sender
             .Setup(mediator => mediator.Send(

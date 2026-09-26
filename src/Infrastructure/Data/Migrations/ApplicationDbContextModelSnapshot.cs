@@ -897,6 +897,58 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("ItemImportBatchFiles");
                 });
 
+            modelBuilder.Entity("skestock.Domain.Entities.ItemPurchaseStatistic", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("AverageQuantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("AverageUnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid?>("ClassId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("ComputedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("LastPurchasedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("PurchaseCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<int>("TotalQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassId");
+
+                    b.HasIndex("ItemId", "Scope")
+                        .HasDatabaseName("IX_ItemPurchaseStatistics_ItemId_Scope");
+
+                    b.HasIndex("Scope", "ClassId", "ItemId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ItemPurchaseStatistics_Scope_ClassId_ItemId");
+
+                    b.ToTable("ItemPurchaseStatistics");
+                });
+
             modelBuilder.Entity("skestock.Domain.Entities.Location", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2006,6 +2058,24 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("FileMetadata");
 
                     b.Navigation("LastModifiedBy");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.ItemPurchaseStatistic", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.SchoolClass", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("skestock.Domain.Entities.Location", b =>

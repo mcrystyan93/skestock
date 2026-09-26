@@ -4,6 +4,8 @@ import { ClassStatisticsStore } from '../../../services/class-statistics.store';
 import { AllLocationsStockCard } from './all-locations-stock-card';
 import { SelectedLocationStockCard } from './selected-location-stock-card';
 import { ItemStockEvolutionCard } from './item-stock-evolution-card';
+import { DailyConsumptionCard } from './daily-consumption-card';
+import { TopPurchasesCard } from './top-purchases-card';
 
 @Component({
   imports: [
@@ -11,7 +13,9 @@ import { ItemStockEvolutionCard } from './item-stock-evolution-card';
     NzRowDirective,
     AllLocationsStockCard,
     SelectedLocationStockCard,
-    ItemStockEvolutionCard
+    ItemStockEvolutionCard,
+    DailyConsumptionCard,
+    TopPurchasesCard
   ],
   selector: 'ske-school-class-overview-statistics-tab',
   templateUrl: './statistics-tab.html',

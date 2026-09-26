@@ -1,4 +1,4 @@
-using Mediator;
+﻿using Mediator;
 using FluentResults;
 using Microsoft.Extensions.Options;
 using skestock.Application.Common.Interfaces;
@@ -6,6 +6,8 @@ using skestock.Application.Features.ScheduledJobs.Commands.RecordScheduledJobRun
 using skestock.Application.Features.ScheduledJobs.Models;
 using skestock.Application.Features.ScheduledJobs.Queries.GetScheduledJobLastRun;
 using skestock.Application.Features.Statistics.Commands.MaterializeDailyConsumption;
+using skestock.Application.Features.Statistics.Commands.MaterializePurchaseStatistics;
+using skestock.Application.Features.Statistics.Queries.GetConsumptionBackfillStart;
 using skestock.Domain.Enums;
 using Worker.Services;
 using SharedServices = skestock.Shared.Services;
@@ -74,21 +76,68 @@ public class DailyStatisticsService(
             _timeZone,
             options.Value.MaxBackfillDays);
 
-        var result = await sender.Send(
-            new MaterializeDailyConsumptionCommand
-            {
-                FromDate = fromDate,
-                ToDate = toDate,
-                TimeZoneId = options.Value.TimeZone
-            },
+        // Existing history older than the regular range (e.g. on first publish) is backfilled once;
+        // an interrupted backfill leaves the gap in place, so the next run resumes it.
+        var backfillStart = await sender.Send(
+            new GetConsumptionBackfillStartQuery { TimeZoneId = options.Value.TimeZone },
             cancellationToken);
+        EnsureSuccess(backfillStart);
+        if (backfillStart.Value is { } historyStart && historyStart < fromDate)
+        {
+            logger.LogInformation(
+                "Backfilling daily consumption history from {FromDate}.",
+                historyStart);
+            fromDate = historyStart;
+        }
 
-        EnsureSuccess(result);
-        logger.LogInformation(
-            "Materialized {RowCount} daily consumption rows for {FromDate}..{ToDate}.",
-            result.Value,
-            fromDate,
-            toDate);
+        foreach (var (windowFrom, windowTo) in ConsumptionRangeCalculator.SplitIntoWindows(
+                     fromDate,
+                     toDate,
+                     MaterializeDailyConsumptionCommand.MaxDays))
+        {
+            var result = await sender.Send(
+                new MaterializeDailyConsumptionCommand
+                {
+                    FromDate = windowFrom,
+                    ToDate = windowTo,
+                    TimeZoneId = options.Value.TimeZone
+                },
+                cancellationToken);
+
+            EnsureSuccess(result);
+            logger.LogInformation(
+                "Materialized {RowCount} daily consumption rows for {FromDate}..{ToDate}.",
+                result.Value,
+                windowFrom,
+                windowTo);
+        }
+
+        await MaterializePurchaseStatisticsAsync(sender, cancellationToken);
+    }
+
+    // Purchase statistics are secondary: a failure is logged without failing the consumption job.
+    private async Task MaterializePurchaseStatisticsAsync(ISender sender, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await sender.Send(
+                new MaterializePurchaseStatisticsCommand { TimeZoneId = options.Value.TimeZone },
+                cancellationToken);
+
+            if (result.IsFailed)
+            {
+                logger.LogError(
+                    "Purchase statistics materialization failed: {Errors}",
+                    string.Join("; ", result.Errors.Select(error => error.Message)));
+                return;
+            }
+
+            logger.LogInformation("Materialized {RowCount} purchase statistics rows.", result.Value);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+        {
+            logger.LogError(ex, "Purchase statistics materialization failed.");
+        }
     }
 
     protected virtual Task DelayAsync(TimeSpan delay, CancellationToken cancellationToken) =>
