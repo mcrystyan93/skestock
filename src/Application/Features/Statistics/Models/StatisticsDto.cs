@@ -78,3 +78,26 @@ public record ClassDailyConsumptionDto
     public decimal AverageQuantity { get; init; }
     public decimal AverageValue { get; init; }
 }
+
+public record PurchaseStatisticDto
+{
+    public Guid ItemId { get; init; }
+    public string ItemName { get; init; } = string.Empty;
+    public string? Sku { get; init; }
+    public string Unit { get; init; } = string.Empty;
+    public string CategoryName { get; init; } = string.Empty;
+    public int TotalQuantity { get; init; }
+    public decimal TotalValue { get; init; }
+    public int PurchaseCount { get; init; }
+    public decimal AverageQuantity { get; init; }
+    public decimal AverageUnitPrice { get; init; }
+    public DateTimeOffset LastPurchasedAt { get; init; }
+}
+
+public record TopPurchasesDto
+{
+    public DateTimeOffset? ComputedAt { get; init; }
+    public List<PurchaseStatisticDto> ByQuantity { get; init; } = [];
+    public List<PurchaseStatisticDto> ByValue { get; init; } = [];
+    public List<PurchaseStatisticDto> ByFrequency { get; init; } = [];
+}

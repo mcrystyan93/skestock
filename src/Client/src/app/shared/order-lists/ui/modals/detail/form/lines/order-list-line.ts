@@ -1,4 +1,5 @@
-import { Component, input, output } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
+import { PurchaseStatisticDto } from '@ske/models';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzFormControlComponent, NzFormItemComponent } from 'ng-zorro-antd/form';
@@ -13,6 +14,13 @@ import {
   NzListItemMetaTitleComponent
 } from 'ng-zorro-antd/list';
 import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
+import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+
+const QUANTITY_FORMATTER = new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 2 });
+const CURRENCY_FORMATTER = new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' });
+const SHORT_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short' });
+const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long' });
 
 @Component({
   imports: [
@@ -30,7 +38,9 @@ import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
     NzSpaceCompactComponent,
     FormField,
     NzInputWrapperComponent,
-    NzInputPrefixDirective
+    NzInputPrefixDirective,
+    NzTooltipDirective,
+    NzTypographyComponent
   ],
   host: {
     class: 'ant-list-item py-1!'
@@ -69,6 +79,15 @@ import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
             </nz-input-wrapper>
           </nz-form-control>
         </nz-form-item>
+        @if (historyHint(); as hint) {
+          <span class="block text-xs"
+                nz-typography
+                nzType="secondary"
+                tabindex="0"
+                nz-tooltip
+                [nzTooltipTitle]="historyTooltip()"
+                [attr.aria-label]="historyTooltip()">{{ hint }}</span>
+        }
       </nz-list-item-meta-description>
     </nz-list-item-meta>
 
@@ -152,6 +171,32 @@ export class OrderListLine {
   public readonly line = input.required<FieldTree<OrderListLineFormModel>>();
   public readonly disabled = input(false);
   public readonly remove = output<void>();
+  // Last-365-days purchase history of the line's catalog item; null for free-text lines.
+  public readonly history = input<PurchaseStatisticDto | null>(null);
+
+  public readonly historyHint = computed(() => {
+    const history = this.history();
+    if (!history) {
+      return null;
+    }
+
+    return `Cumpărat de ${history.purchaseCount}× · medie ` +
+      `${QUANTITY_FORMATTER.format(history.averageQuantity)} ${history.unit} · ` +
+      `ultima: ${SHORT_DATE_FORMATTER.format(new Date(history.lastPurchasedAt))}`;
+  });
+
+  public readonly historyTooltip = computed(() => {
+    const history = this.history();
+    if (!history) {
+      return '';
+    }
+
+    return `În ultimele 365 de zile: ${history.purchaseCount} achiziții, ` +
+      `${QUANTITY_FORMATTER.format(history.totalQuantity)} ${history.unit} în total ` +
+      `(${CURRENCY_FORMATTER.format(history.totalValue)}), preț mediu ` +
+      `${CURRENCY_FORMATTER.format(history.averageUnitPrice)}/${history.unit}. ` +
+      `Ultima achiziție: ${LONG_DATE_FORMATTER.format(new Date(history.lastPurchasedAt))}.`;
+  });
 
   public increaseQuantity() {
     this.line().quantity().value.update(qty => qty + 1);

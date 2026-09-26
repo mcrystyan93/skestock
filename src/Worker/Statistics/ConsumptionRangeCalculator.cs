@@ -1,4 +1,4 @@
-namespace Worker.Statistics;
+﻿namespace Worker.Statistics;
 
 public static class ConsumptionRangeCalculator
 {
@@ -29,6 +29,24 @@ public static class ConsumptionRangeCalculator
         }
 
         return (from, today);
+    }
+
+    // Splits [from, to] into consecutive, non-overlapping windows of at most maxDays days, oldest first.
+    public static IReadOnlyList<(DateOnly FromDate, DateOnly ToDate)> SplitIntoWindows(
+        DateOnly from,
+        DateOnly to,
+        int maxDays)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(maxDays, 1);
+
+        var windows = new List<(DateOnly, DateOnly)>();
+        for (var start = from; start <= to; start = start.AddDays(maxDays))
+        {
+            var end = start.AddDays(maxDays - 1);
+            windows.Add((start, end < to ? end : to));
+        }
+
+        return windows;
     }
 
     private static DateOnly ToLocalDate(DateTimeOffset instant, TimeZoneInfo timeZone) =>

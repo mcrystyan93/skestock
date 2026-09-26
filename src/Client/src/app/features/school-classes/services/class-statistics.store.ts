@@ -1,9 +1,23 @@
 import { inject } from '@angular/core';
 import { Events, withEventHandlers } from '@ngrx/signals/events';
 import { mapResponse } from '@ngrx/operators';
-import { patchState, signalStore, withMethods, withProps, withState } from '@ngrx/signals';
+import {
+  patchState,
+  signalStore,
+  signalStoreFeature,
+  withMethods,
+  withProps,
+  withState
+} from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { ClassItemStockEvolutionDto, ClassStockByCategoryChartDto } from '@ske/models';
+import {
+  ClassDailyConsumptionDto,
+  ClassDailyConsumptionFilter,
+  ClassItemStockEvolutionDto,
+  ClassStockByCategoryChartDto,
+  TopPurchasesDto,
+  TopPurchasesFilter
+} from '@ske/models';
 import { ClassStatisticsHttp } from '@ske/shared/class-statistics';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { withLoadingFeature } from '@ske/shared/loader';
@@ -18,6 +32,10 @@ type ClassStatisticsState = {
   locationChart: ClassStockByCategoryChartDto | null;
   itemIds: string[];
   itemEvolution: ClassItemStockEvolutionDto | null;
+  dailyConsumptionFilter: ClassDailyConsumptionFilter | null;
+  dailyConsumption: ClassDailyConsumptionDto | null;
+  topPurchasesFilter: TopPurchasesFilter | null;
+  topPurchases: TopPurchasesDto | null;
 };
 
 const initialState: ClassStatisticsState = {
@@ -27,19 +45,38 @@ const initialState: ClassStatisticsState = {
   allLocationsChart: null,
   locationChart: null,
   itemIds: [],
-  itemEvolution: null
+  itemEvolution: null,
+  dailyConsumptionFilter: null,
+  dailyConsumption: null,
+  topPurchasesFilter: null,
+  topPurchases: null
 };
+
+// Grouped because signalStore() only types a limited number of features.
+const withChartRequestStatus = () =>
+  signalStoreFeature(
+    withLoadingFeature('allLocations'),
+    withProblemDetailsFeature('allLocations'),
+    withLoadingFeature('location'),
+    withProblemDetailsFeature('location'),
+    withLoadingFeature('itemIds'),
+    withProblemDetailsFeature('itemIds'),
+    withLoadingFeature('itemEvolution'),
+    withProblemDetailsFeature('itemEvolution')
+  );
+
+const withAnalyticsRequestStatus = () =>
+  signalStoreFeature(
+    withLoadingFeature('dailyConsumption'),
+    withProblemDetailsFeature('dailyConsumption'),
+    withLoadingFeature('topPurchases'),
+    withProblemDetailsFeature('topPurchases')
+  );
 
 export const ClassStatisticsStore = signalStore(
   withState(initialState),
-  withLoadingFeature('allLocations'),
-  withProblemDetailsFeature('allLocations'),
-  withLoadingFeature('location'),
-  withProblemDetailsFeature('location'),
-  withLoadingFeature('itemIds'),
-  withProblemDetailsFeature('itemIds'),
-  withLoadingFeature('itemEvolution'),
-  withProblemDetailsFeature('itemEvolution'),
+  withChartRequestStatus(),
+  withAnalyticsRequestStatus(),
   withProps(() => ({
     classStatisticsHttp: inject(ClassStatisticsHttp)
   })),
@@ -162,6 +199,56 @@ export const ClassStatisticsStore = signalStore(
       )
     );
 
+    const loadDailyConsumption = rxMethod<{ classId: string; filter: ClassDailyConsumptionFilter }>(
+      pipe(
+        tap(({ filter }) => {
+          store.clearDailyConsumptionErrors();
+          store.setDailyConsumptionLoading();
+          patchState(store, { dailyConsumptionFilter: filter });
+        }),
+        switchMap(({ classId, filter }) =>
+          store.classStatisticsHttp.getClassDailyConsumption(classId, filter).pipe(
+            mapResponse({
+              next: (dailyConsumption) => {
+                patchState(store, { dailyConsumption });
+                store.setDailyConsumptionLoaded();
+              },
+              error: (error) => {
+                patchState(store, { dailyConsumption: null });
+                store.handleDailyConsumptionError(error);
+                store.setDailyConsumptionLoaded();
+              }
+            })
+          )
+        )
+      )
+    );
+
+    const loadTopPurchases = rxMethod<TopPurchasesFilter>(
+      pipe(
+        tap((filter) => {
+          store.clearTopPurchasesErrors();
+          store.setTopPurchasesLoading();
+          patchState(store, { topPurchasesFilter: filter });
+        }),
+        switchMap((filter) =>
+          store.classStatisticsHttp.getTopPurchases(filter).pipe(
+            mapResponse({
+              next: (topPurchases) => {
+                patchState(store, { topPurchases });
+                store.setTopPurchasesLoaded();
+              },
+              error: (error) => {
+                patchState(store, { topPurchases: null });
+                store.handleTopPurchasesError(error);
+                store.setTopPurchasesLoaded();
+              }
+            })
+          )
+        )
+      )
+    );
+
     const deactivate = () => patchState(store, { active: false });
 
     const reload = () => {
@@ -172,9 +259,25 @@ export const ClassStatisticsStore = signalStore(
 
       loadAllLocations(classId);
       loadLocation({ classId, locationId: store.locationId() });
+      const dailyConsumptionFilter = store.dailyConsumptionFilter();
+      if (dailyConsumptionFilter) {
+        loadDailyConsumption({ classId, filter: dailyConsumptionFilter });
+      }
+      const topPurchasesFilter = store.topPurchasesFilter();
+      if (topPurchasesFilter) {
+        loadTopPurchases(topPurchasesFilter);
+      }
     };
 
-    return { loadAllLocations, loadLocation, loadItemEvolution, deactivate, reload };
+    return {
+      loadAllLocations,
+      loadLocation,
+      loadItemEvolution,
+      loadDailyConsumption,
+      loadTopPurchases,
+      deactivate,
+      reload
+    };
   }),
   withEventHandlers((store, events = inject(Events)) => ({
     stockChanged: events

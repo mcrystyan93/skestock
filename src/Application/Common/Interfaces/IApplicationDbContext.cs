@@ -13,6 +13,7 @@ public interface IApplicationDbContext
     DbSet<ClassBalance> ClassBalances { get; }
     DbSet<ClassItemStockVisibility> ClassItemStockVisibilities { get; }
     DbSet<DailyItemConsumption> DailyItemConsumptions { get; }
+    DbSet<ItemPurchaseStatistic> ItemPurchaseStatistics { get; }
     DbSet<FileMetadata> FileMetadata { get; }
     DbSet<Item> Items { get; }
     DbSet<ItemImportBatch> ItemImportBatches { get; }
