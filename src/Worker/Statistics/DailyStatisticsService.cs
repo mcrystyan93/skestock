@@ -5,6 +5,7 @@ using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.ScheduledJobs.Commands.RecordScheduledJobRun;
 using skestock.Application.Features.ScheduledJobs.Models;
 using skestock.Application.Features.ScheduledJobs.Queries.GetScheduledJobLastRun;
+using skestock.Application.Features.Statistics.Commands.MaterializeDailyConsumption;
 using skestock.Domain.Enums;
 using Worker.Services;
 using SharedServices = skestock.Shared.Services;
@@ -31,6 +32,7 @@ public class DailyStatisticsService(
     private static int MaxAttempts => RetryDelays.Length + 1;
 
     private readonly DailyScheduleCalculator _schedule = new(options.Value);
+    private readonly TimeZoneInfo _timeZone = TimeZoneInfo.FindSystemTimeZoneById(options.Value.TimeZone);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -61,8 +63,33 @@ public class DailyStatisticsService(
         }
     }
 
-    protected virtual Task ExecuteJobAsync(ISender sender, CancellationToken cancellationToken) =>
-        Task.CompletedTask;
+    protected virtual async Task ExecuteJobAsync(
+        ISender sender,
+        DailyStatisticsJobContext context,
+        CancellationToken cancellationToken)
+    {
+        var (fromDate, toDate) = ConsumptionRangeCalculator.Calculate(
+            timeProvider.GetUtcNow(),
+            context.LastSucceededAtUtc,
+            _timeZone,
+            options.Value.MaxBackfillDays);
+
+        var result = await sender.Send(
+            new MaterializeDailyConsumptionCommand
+            {
+                FromDate = fromDate,
+                ToDate = toDate,
+                TimeZoneId = options.Value.TimeZone
+            },
+            cancellationToken);
+
+        EnsureSuccess(result);
+        logger.LogInformation(
+            "Materialized {RowCount} daily consumption rows for {FromDate}..{ToDate}.",
+            result.Value,
+            fromDate,
+            toDate);
+    }
 
     protected virtual Task DelayAsync(TimeSpan delay, CancellationToken cancellationToken) =>
         Task.Delay(delay, timeProvider, cancellationToken);
@@ -211,7 +238,10 @@ public class DailyStatisticsService(
             logger.LogInformation(
                 "Daily statistics run started for scheduled occurrence {Occurrence}.",
                 occurrence);
-            await ExecuteJobAsync(sender, cancellationToken);
+            await ExecuteJobAsync(
+                sender,
+                new DailyStatisticsJobContext(occurrence, lastRun?.LastSucceededAt),
+                cancellationToken);
             logger.LogInformation(
                 "Daily statistics run finished for scheduled occurrence {Occurrence}.",
                 occurrence);

@@ -1,5 +1,6 @@
 using skestock.Application;
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Features.Statistics.Commands.MaterializeDailyConsumption;
 using skestock.Infrastructure;
 using skestock.ServiceDefaults;
 using Worker.Queues;
@@ -50,6 +51,9 @@ builder.Services
             }
         },
         "DailyStatistics:TimeZone must identify a valid system time zone.")
+    .Validate(
+        options => options.MaxBackfillDays is >= 1 and <= MaterializeDailyConsumptionCommand.MaxDays,
+        $"DailyStatistics:MaxBackfillDays must be between 1 and {MaterializeDailyConsumptionCommand.MaxDays}.")
     .ValidateOnStart();
 
 builder.Services.AddHostedService<GoodsReceiptImportQueueProcessingService>();

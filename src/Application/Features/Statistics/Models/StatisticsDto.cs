@@ -42,3 +42,39 @@ public record ClassItemStockEvolutionDto
     public string Unit { get; init; } = string.Empty;
     public List<ClassItemStockEvolutionPointDto> Points { get; init; } = [];
 }
+
+public record DailyConsumptionAverageDto
+{
+    public DateOnly FromDate { get; init; }
+    public DateOnly ToDate { get; init; }
+    public int Days { get; init; }
+    public int TotalQuantity { get; init; }
+    public decimal TotalValue { get; init; }
+    public decimal AverageQuantity { get; init; }
+    public decimal AverageValue { get; init; }
+}
+
+public record DailyConsumptionAveragesDto
+{
+    public DailyConsumptionAverageDto Last7Days { get; init; } = new();
+    public DailyConsumptionAverageDto Last30Days { get; init; } = new();
+}
+
+public record DailyConsumptionPointDto
+{
+    public DateOnly Date { get; init; }
+    public int Quantity { get; init; }
+    public decimal Value { get; init; }
+}
+
+public record ClassDailyConsumptionDto
+{
+    public Guid ClassId { get; init; }
+    public DateOnly? FromDate { get; init; }
+    public DateOnly? ToDate { get; init; }
+    public List<DailyConsumptionPointDto> Points { get; init; } = [];
+    public int TotalQuantity { get; init; }
+    public decimal TotalValue { get; init; }
+    public decimal AverageQuantity { get; init; }
+    public decimal AverageValue { get; init; }
+}

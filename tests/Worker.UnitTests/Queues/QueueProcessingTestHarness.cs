@@ -253,6 +253,7 @@ internal sealed class WorkerTestDbContext(DbContextOptions<WorkerTestDbContext> 
     public DbSet<CategoryImportBatchFile> CategoryImportBatchFiles => Set<CategoryImportBatchFile>();
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
     public DbSet<ClassItemStockVisibility> ClassItemStockVisibilities => Set<ClassItemStockVisibility>();
+    public DbSet<DailyItemConsumption> DailyItemConsumptions => Set<DailyItemConsumption>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
     public DbSet<Item> Items => Set<Item>();
     public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();
@@ -274,6 +275,7 @@ internal sealed class WorkerTestDbContext(DbContextOptions<WorkerTestDbContext> 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Ignore<DailyItemConsumption>();
 
         modelBuilder.Entity<ProcessedMessage>().HasKey(message => message.Id);
         modelBuilder.Entity<WorkerTestEffect>().HasKey(effect => effect.Id);

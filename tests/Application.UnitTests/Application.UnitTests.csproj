@@ -19,6 +19,7 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Moq" />
+        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
         <PackageReference Include="Shouldly" />
         <PackageReference Include="Azure.Storage.Blobs" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />

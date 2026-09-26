@@ -12,6 +12,7 @@ public interface IApplicationDbContext
     DbSet<CategoryImportBatchFile> CategoryImportBatchFiles { get; }
     DbSet<ClassBalance> ClassBalances { get; }
     DbSet<ClassItemStockVisibility> ClassItemStockVisibilities { get; }
+    DbSet<DailyItemConsumption> DailyItemConsumptions { get; }
     DbSet<FileMetadata> FileMetadata { get; }
     DbSet<Item> Items { get; }
     DbSet<ItemImportBatch> ItemImportBatches { get; }

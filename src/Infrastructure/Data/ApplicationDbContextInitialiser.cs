@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace skestock.Infrastructure.Data;
@@ -20,6 +21,11 @@ public static class InitialiserExtensions
 
         await initialiser.InitialiseAsync();
         await initialiser.SeedAsync();
+
+        if (app.Environment.IsDevelopment())
+        {
+            await initialiser.SeedDemoClassAsync();
+        }
     }
 }
 
@@ -392,5 +398,245 @@ public class ApplicationDbContextInitialiser
             .ExecuteUpdateAsync(s => s
                 .SetProperty(c => c.CreatedById, administratorIdentityId)
                 .SetProperty(c => c.LastModifiedById, administratorIdentityId));
+    }
+
+    private const string DemoClassName = "SKE Demo";
+
+    public async Task SeedDemoClassAsync()
+    {
+        try
+        {
+            await TrySeedDemoClassAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while seeding the demo class.");
+            throw;
+        }
+    }
+
+    private async Task TrySeedDemoClassAsync()
+    {
+        var existingClassId = await _context.SchoolClasses
+            .Where(c => c.Name == DemoClassName)
+            .Select(c => (Guid?)c.Id)
+            .FirstOrDefaultAsync();
+        if (existingClassId is { } classIdToBackfill)
+        {
+            await SeedDemoAnalyticsAsync(classIdToBackfill);
+            return;
+        }
+
+        var administrator = await _userManager.FindByNameAsync(DefaultAdministrators[0].UserName)
+                            ?? throw new InvalidOperationException("Seed administrator not found.");
+        // UserProfile FKs (UserId, CreatedById, ...) reference UserProfiles.IdentityId.
+        var profileId = administrator.Id;
+
+        var categoryIds = await _context.Categories.Select(c => c.Id).ToListAsync();
+        var locationIds = await _context.Locations.Select(l => l.Id).ToListAsync();
+        if (categoryIds.Count == 0 || locationIds.Count == 0)
+        {
+            return;
+        }
+
+        var random = new Random(20260926);
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var startDate = today.AddMonths(-6);
+
+        var schoolClass = new SchoolClass
+        {
+            Name = DemoClassName, StartDate = startDate, EndDate = today.AddMonths(1), Status = ClassStatus.Active
+        };
+        _context.SchoolClasses.Add(schoolClass);
+
+        string[] units = ["buc", "kg", "l", "cutie"];
+        var items = new List<(Item Item, Guid LocationId, decimal BasePrice)>();
+        for (var n = 1; n <= 30; n++)
+        {
+            var isPerishable = random.Next(2) == 0;
+            var item = new Item
+            {
+                Sku = $"DEMO-{n:00}",
+                Name = $"Demo item {n:00}",
+                Unit = units[random.Next(units.Length)],
+                MinThreshold = random.Next(5, 31),
+                IsPerishable = isPerishable,
+                ShelfLifeDays = isPerishable ? random.Next(7, 91) : null,
+                CategoryId = categoryIds[random.Next(categoryIds.Count)]
+            };
+            items.Add((item, locationIds[random.Next(locationIds.Count)],
+                Math.Round((decimal)(random.NextDouble() * 148 + 2), 2)));
+        }
+
+        _context.Items.AddRange(items.Select(i => i.Item));
+
+        var batches = new List<StockBatch>();
+        var transactions = new List<StockTransaction>();
+
+        foreach (var (item, locationId, basePrice) in items)
+        {
+            var open = new List<StockBatch>();
+
+            void Order(DateOnly day)
+            {
+                var quantity = random.Next(20, 201);
+                var price = Math.Round(basePrice * (decimal)(0.85 + random.NextDouble() * 0.3), 2);
+                var batch = new StockBatch
+                {
+                    Item = item,
+                    LocationId = locationId,
+                    ReceivedClass = schoolClass,
+                    Quantity = quantity,
+                    UnitPrice = price,
+                    ReceivedDate = day,
+                    ExpiryDate = item.ShelfLifeDays is { } shelfLife ? day.AddDays(shelfLife) : null
+                };
+                batches.Add(batch);
+                open.Add(batch);
+                transactions.Add(NewTransaction(item, locationId, batch, StockTransactionType.Order, quantity, "restock", day));
+            }
+
+            StockTransaction NewTransaction(Item txItem, Guid txLocationId, StockBatch batch,
+                StockTransactionType type, int change, string reason, DateOnly day) => new()
+            {
+                Item = txItem,
+                LocationId = txLocationId,
+                Batch = batch,
+                Class = schoolClass,
+                UserId = profileId,
+                Type = type,
+                QuantityChange = change,
+                Reason = reason,
+                CreatedAt = new DateTimeOffset(day.ToDateTime(new TimeOnly(random.Next(6, 18), random.Next(60))),
+                    TimeSpan.Zero)
+            };
+
+            Order(startDate);
+
+            for (var day = startDate.AddDays(1); day <= today; day = day.AddDays(1))
+            {
+                if (random.NextDouble() < 0.6)
+                {
+                    var toUse = random.Next(1, 11);
+                    foreach (var batch in open.Where(b => b.Quantity > 0).ToList())
+                    {
+                        if (toUse == 0)
+                        {
+                            break;
+                        }
+
+                        var taken = Math.Min(toUse, batch.Quantity);
+                        batch.Quantity -= taken;
+                        toUse -= taken;
+                        transactions.Add(NewTransaction(item, locationId, batch, StockTransactionType.Usage, -taken,
+                            "usage", day));
+                    }
+
+                    open.RemoveAll(b => b.Quantity == 0);
+                }
+
+                if (open.Sum(b => b.Quantity) < item.MinThreshold || random.NextDouble() < 0.02)
+                {
+                    Order(day);
+                }
+            }
+        }
+
+        _context.StockBatches.AddRange(batches);
+        _context.StockTransactions.AddRange(transactions);
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        // See SeedCategoriesAsync: stamp audit fields without the HTTP-user interceptor.
+        var classId = schoolClass.Id;
+        await _context.SchoolClasses.Where(c => c.Id == classId)
+            .ExecuteUpdateAsync(s => s.SetProperty(c => c.CreatedById, profileId)
+                .SetProperty(c => c.LastModifiedById, profileId));
+        var itemIds = items.Select(i => i.Item.Id).ToList();
+        await _context.Items.Where(i => itemIds.Contains(i.Id))
+            .ExecuteUpdateAsync(s => s.SetProperty(i => i.CreatedById, profileId)
+                .SetProperty(i => i.LastModifiedById, profileId));
+        await _context.StockBatches.Where(b => b.ReceivedClassId == classId)
+            .ExecuteUpdateAsync(s => s.SetProperty(b => b.CreatedById, profileId)
+                .SetProperty(b => b.LastModifiedById, profileId));
+        await _context.StockTransactions.Where(t => t.ClassId == classId)
+            .ExecuteUpdateAsync(s => s.SetProperty(t => t.CreatedById, profileId)
+                .SetProperty(t => t.LastModifiedById, profileId));
+
+        await SeedDemoAnalyticsAsync(classId);
+
+        _logger.LogInformation("Seeded demo class with {Batches} batches and {Transactions} transactions.",
+            batches.Count, transactions.Count);
+    }
+
+    // Materializes ClassBalance and DailyItemConsumption rows for the demo class so the statistics
+    // pages have data. Mirrors MaterializeDailyConsumptionCommandHandler: negative, non-transfer
+    // transactions grouped by local business day, valued at the batch unit price.
+    private async Task SeedDemoAnalyticsAsync(Guid classId)
+    {
+        var adminId = (await _userManager.FindByNameAsync(DefaultAdministrators[0].UserName))?.Id;
+
+        if (!await _context.ClassBalances.AnyAsync(b => b.ClassId == classId))
+        {
+            var pairs = await _context.StockTransactions
+                .Where(t => t.ClassId == classId)
+                .Select(t => new { t.ItemId, t.LocationId })
+                .Distinct()
+                .ToListAsync();
+
+            _context.ClassBalances.AddRange(pairs.Select(p => new ClassBalance
+            {
+                ClassId = classId, ItemId = p.ItemId, LocationId = p.LocationId, OpeningQty = 0
+            }));
+            await _context.SaveChangesAsync(CancellationToken.None);
+
+            await _context.ClassBalances.Where(b => b.ClassId == classId)
+                .ExecuteUpdateAsync(s => s.SetProperty(b => b.CreatedById, adminId)
+                    .SetProperty(b => b.LastModifiedById, adminId));
+        }
+
+        if (await _context.DailyItemConsumptions.AnyAsync(c => c.ClassId == classId))
+        {
+            return;
+        }
+
+        var consumed = await _context.StockTransactions
+            .AsNoTracking()
+            .Where(t => t.ClassId == classId
+                && t.QuantityChange < 0
+                && t.Type != StockTransactionType.Transfer)
+            .Select(t => new
+            {
+                t.ItemId,
+                t.LocationId,
+                t.CreatedAt,
+                t.QuantityChange,
+                UnitPrice = t.Batch != null ? t.Batch.UnitPrice : 0m
+            })
+            .ToListAsync();
+
+        var timeZone = TimeZoneInfo.FindSystemTimeZoneById(skestock.Shared.Services.BusinessTimeZoneId);
+        var computedAt = DateTimeOffset.UtcNow;
+
+        var rows = consumed
+            .GroupBy(t => new
+            {
+                t.ItemId,
+                t.LocationId,
+                Date = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(t.CreatedAt, timeZone).DateTime)
+            })
+            .Select(g => new DailyItemConsumption
+            {
+                Date = g.Key.Date,
+                ItemId = g.Key.ItemId,
+                ClassId = classId,
+                LocationId = g.Key.LocationId,
+                Quantity = g.Sum(t => -t.QuantityChange),
+                TotalValue = g.Sum(t => -t.QuantityChange * t.UnitPrice),
+                ComputedAt = computedAt
+            })
+            .ToList();
+
+        _context.DailyItemConsumptions.AddRange(rows);
+        await _context.SaveChangesAsync(CancellationToken.None);
     }
 }
