@@ -41,7 +41,7 @@ internal sealed class DailyStatisticsJob(
             options.MaxBackfillDays);
 
         // Existing history older than the regular range (e.g. on first publish) is backfilled
-        // once. An interrupted backfill leaves the gap in place, so the next run resumes it.
+        // once. See MaterializeDailyConsumptionAsync for how an interrupted backfill resumes.
         var backfillStart = await sender.Send(
             new GetConsumptionBackfillStartQuery { TimeZoneId = options.TimeZone },
             cancellationToken);
@@ -57,7 +57,10 @@ internal sealed class DailyStatisticsJob(
     }
 
     // The command accepts a bounded number of days, so long ranges are sent in consecutive
-    // windows, oldest first. A failed window aborts the run; earlier windows stay committed.
+    // windows, newest first. A failed window aborts the run while the committed windows stay.
+    // Because the oldest window is committed last, the earliest materialized date only reaches
+    // the start of history once the whole backfill succeeded, so an interrupted backfill is
+    // detected and restarted by the next run (re-materializing a window replaces its rows).
     private async Task MaterializeDailyConsumptionAsync(
         ISender sender,
         DateOnly fromDate,
@@ -69,7 +72,7 @@ internal sealed class DailyStatisticsJob(
             toDate,
             MaterializeDailyConsumptionCommand.MaxDays);
 
-        foreach (var (windowFrom, windowTo) in windows)
+        foreach (var (windowFrom, windowTo) in windows.Reverse())
         {
             var result = await sender.Send(
                 new MaterializeDailyConsumptionCommand
