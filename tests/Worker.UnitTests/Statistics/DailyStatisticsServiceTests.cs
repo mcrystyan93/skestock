@@ -80,15 +80,11 @@ public sealed class DailyStatisticsServiceTests
     }
 
     [Test]
-    public async Task Job_backfills_missing_history_in_windows_oldest_first()
+    public async Task Job_backfills_missing_history_in_windows_newest_first()
     {
         using var cancellation = new CancellationTokenSource();
         var sender = CreateSender(cancellation, out _);
-        sender
-            .Setup(mediator => mediator.Send(
-                It.IsAny<GetConsumptionBackfillStartQuery>(),
-                It.IsAny<CancellationToken>()))
-            .Returns(new ValueTask<Result<DateOnly?>>(Result.Ok<DateOnly?>(new DateOnly(2026, 6, 1))));
+        SetupBackfillStart(sender, new DateOnly(2026, 6, 1));
         var sentCommands = new List<MaterializeDailyConsumptionCommand>();
         sender
             .Setup(mediator => mediator.Send(
@@ -108,14 +104,59 @@ public sealed class DailyStatisticsServiceTests
         await testService.RunAsync(cancellation.Token);
 
         sentCommands.Count.ShouldBe(4);
-        sentCommands[0].FromDate.ShouldBe(new DateOnly(2026, 6, 1));
-        sentCommands[0].ToDate.ShouldBe(new DateOnly(2026, 7, 1));
-        sentCommands[^1].ToDate.ShouldBe(new DateOnly(2026, 9, 25));
+        sentCommands[0].ToDate.ShouldBe(new DateOnly(2026, 9, 25));
+        sentCommands[^1].FromDate.ShouldBe(new DateOnly(2026, 6, 1));
+        sentCommands[^1].ToDate.ShouldBe(new DateOnly(2026, 7, 1));
         for (var i = 1; i < sentCommands.Count; i++)
         {
-            sentCommands[i].FromDate.ShouldBe(sentCommands[i - 1].ToDate.AddDays(1));
+            sentCommands[i].ToDate.ShouldBe(sentCommands[i - 1].FromDate.AddDays(-1));
         }
     }
+
+    [Test]
+    public async Task Interrupted_backfill_never_commits_the_oldest_window()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var sender = CreateSender(cancellation, out var recordedRuns);
+        SetupBackfillStart(sender, new DateOnly(2026, 6, 1));
+        var sentCommands = new List<MaterializeDailyConsumptionCommand>();
+        sender
+            .Setup(mediator => mediator.Send(
+                It.IsAny<MaterializeDailyConsumptionCommand>(),
+                It.IsAny<CancellationToken>()))
+            .Callback<IRequest<Result<int>>, CancellationToken>((request, _) =>
+            {
+                sentCommands.Add((MaterializeDailyConsumptionCommand)request);
+                if (sentCommands.Count == 2)
+                {
+                    // Stop the service after the first failed attempt.
+                    cancellation.Cancel();
+                }
+            })
+            .Returns<IRequest<Result<int>>, CancellationToken>((_, _) =>
+                new ValueTask<Result<int>>(
+                    sentCommands.Count == 2 ? Result.Fail<int>("Window failed.") : Result.Ok(1)));
+        using var provider = CreateServiceProvider(sender);
+        var testService = CreateService(
+            provider,
+            CreateLockMock().Object,
+            new FakeTimeProvider(new DateTimeOffset(2026, 9, 25, 18, 0, 0, TimeSpan.Zero)),
+            out _);
+        testService.UseRealJob = true;
+
+        await testService.RunAsync(cancellation.Token);
+
+        sentCommands.Count.ShouldBe(2);
+        sentCommands.ShouldAllBe(command => command.FromDate > new DateOnly(2026, 6, 1));
+        recordedRuns.ShouldNotContain(run => run.SucceededAtUtc.HasValue);
+    }
+
+    private static void SetupBackfillStart(Mock<ISender> sender, DateOnly historyStart) =>
+        sender
+            .Setup(mediator => mediator.Send(
+                It.IsAny<GetConsumptionBackfillStartQuery>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(new ValueTask<Result<DateOnly?>>(Result.Ok<DateOnly?>(historyStart)));
 
     [Test]
     public async Task Job_materializes_purchase_statistics_after_consumption()

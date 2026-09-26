@@ -27420,9 +27420,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/overview/tabs/statistics/item-stock-evolution-card.ts": {
-    "mtime": 1790228332.695883,
-    "seen": 1790228414.2882898,
-    "ast_hash": "174cc69aa2637e224ef393fcccbdfac9",
+    "mtime": 1790444052.013,
+    "seen": 1790444850.8138094,
+    "ast_hash": "a611faf27dc1edf97e3f2539dddbd350",
     "semantic_hash": ""
   },
   "tests/Application.UnitTests/Features/Statistics/Queries/GetClassItemStockEvolution/GetClassItemStockEvolutionHandlerTests.cs": {
@@ -27552,9 +27552,9 @@
     "semantic_hash": ""
   },
   "tests/Worker.UnitTests/Statistics/DailyStatisticsServiceTests.cs": {
-    "mtime": 1790439322.403734,
-    "seen": 1790439381.3267288,
-    "ast_hash": "9d5d1513557de4ad7850bf8cbc95dc1f",
+    "mtime": 1790444814.8725893,
+    "seen": 1790444850.81424,
+    "ast_hash": "57ba8b65fb228b4b062b38ca220f3f77",
     "semantic_hash": ""
   },
   "src/Application/Common/Interfaces/IScheduledJobRunDbContext.cs": {
@@ -27720,9 +27720,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/overview/tabs/statistics/class-daily-consumption-chart.ts": {
-    "mtime": 1790436499.2213748,
-    "seen": 1790436538.688939,
-    "ast_hash": "64414d5b28802cc0d6c3d5a5d38c4aea",
+    "mtime": 1790443929.726,
+    "seen": 1790444850.8138018,
+    "ast_hash": "dc2fcd8801d906e788d0730826115bef",
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/overview/tabs/statistics/daily-consumption-card.ts": {
@@ -27822,9 +27822,9 @@
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/overview/tabs/statistics/top-purchases-card.ts": {
-    "mtime": 1790439227.3569372,
-    "seen": 1790439381.3263438,
-    "ast_hash": "74fd448a6385beb35cc27340f888a031",
+    "mtime": 1790443957.869,
+    "seen": 1790444850.8138115,
+    "ast_hash": "f02f6bb19cc72571913a61152b9cce31",
     "semantic_hash": ""
   },
   "src/Client/src/app/features/school-classes/overview/tabs/statistics/top-purchases-chart.ts": {
@@ -27882,9 +27882,9 @@
     "semantic_hash": ""
   },
   "src/Worker/Statistics/DailyStatisticsJob.cs": {
-    "mtime": 1790443689.8828492,
-    "seen": 1790443715.9015632,
-    "ast_hash": "d1062382c205065fc388e0d17ca13db2",
+    "mtime": 1790444814.8723345,
+    "seen": 1790444850.8141057,
+    "ast_hash": "c7b9d10c5a2ca02194f2906dd93a2c92",
     "semantic_hash": ""
   },
   "src/Worker/Statistics/DailyStatisticsRetryPolicy.cs": {
