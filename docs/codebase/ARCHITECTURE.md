@@ -22,6 +22,8 @@ HTTP endpoint group
 
 For imports, a command writes domain data and an `OutboxMessage`; Web publishes the envelope to Azure Queue; Worker checks `ProcessedMessages`, dispatches the original Mediator request in a transaction, and deletes or poisons the queue message. For realtime changes, domain event handlers use `IRealtimeNotifier` and SignalR.
 
+Separately, Worker's `DailyStatisticsService` schedules a locked, persisted run; `DailyStatisticsJob` dispatches `GetConsumptionBackfillStartQuery`, bounded `MaterializeDailyConsumptionCommand` windows, then `MaterializePurchaseStatisticsCommand`. Daily-consumption windows are re-materialized on retry; purchase-statistics failures are logged without failing the consumption run.
+
 ### 3) Layer/Module Responsibilities
 
 | Layer | Owns | Must not own | Evidence |
@@ -46,6 +48,7 @@ For imports, a command writes domain data and an `OutboxMessage`; Web publishes 
 | SaveChanges interceptors | `src/Infrastructure/Data/Interceptors` | Audit fields and post-commit domain events |
 | Transactional outbox + idempotent queue consumer | `src/Web/BackgroundJobs`, `src/Worker/Queues` | At-least-once async processing without losing messages |
 | Client SignalStore features | `src/Client/src/app/shared`, `src/Client/src/app/features` | Reusable loading/error/collection state |
+| Scheduled materialization | `src/Worker/Statistics/DailyStatisticsJob.cs`, `src/Application/Features/Statistics` | Backfill daily consumption and refresh purchase statistics through Mediator |
 
 ### 5) Known Architectural Risks
 
@@ -63,3 +66,5 @@ For imports, a command writes domain data and an `OutboxMessage`; Web publishes 
 - `src/Web/BackgroundJobs/OutboxPublisherService.cs`
 - `src/Worker/Queues/QueueProcessingService.cs`
 - `src/Client/src/app/core/signalr/signalr-bridge.ts`
+- `src/Worker/Statistics/DailyStatisticsService.cs`, `src/Worker/Statistics/DailyStatisticsJob.cs`
+- `src/Application/Features/Statistics/Commands/MaterializeDailyConsumption/MaterializeDailyConsumptionCommand.cs`

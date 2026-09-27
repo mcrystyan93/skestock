@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, input, signal, untracked } from '@
 import { FormsModule } from '@angular/forms';
 import { form, FormField } from '@angular/forms/signals';
 import { NzCardComponent } from 'ng-zorro-antd/card';
+import { NzSegmentedComponent, NzSegmentedItemComponent } from 'ng-zorro-antd/segmented';
 import { CategoryDropdownValue, ItemDropdownValue, LocationDropdownValue } from '@ske/models';
 import { CategoryDropdown } from '@ske/shared/categories';
 import { ErrorAlert } from '@ske/shared/errors';
@@ -9,9 +10,11 @@ import { ItemDropdown } from '@ske/shared/items';
 import { LoaderDirective } from '@ske/shared/loader';
 import { LocationDropdown } from '@ske/shared/locations';
 import { ClassStatisticsStore } from '../../../services/class-statistics.store';
+import { ConsumptionPeriod } from './class-consumption-periods';
 import { ClassDailyConsumptionChart } from './class-daily-consumption-chart';
 
 type DailyConsumptionFilterModel = {
+  period: ConsumptionPeriod;
   item: ItemDropdownValue;
   location: LocationDropdownValue;
   category: CategoryDropdownValue;
@@ -22,6 +25,8 @@ type DailyConsumptionFilterModel = {
     FormsModule,
     FormField,
     NzCardComponent,
+    NzSegmentedComponent,
+    NzSegmentedItemComponent,
     ItemDropdown,
     LocationDropdown,
     CategoryDropdown,
@@ -32,7 +37,16 @@ type DailyConsumptionFilterModel = {
   selector: 'ske-daily-consumption-card',
   template: `
     <nz-card class="min-h-110 flex-body has-chart"
-             nzTitle="Consum mediu zilnic">
+             [nzTitle]="title()">
+      <div class="px-4 pt-2">
+        <nz-segmented [formField]="filterForm.period"
+                      aria-label="Perioada consumului">
+          @for (option of periodOptions; track option.value) {
+            <label nz-segmented-item
+                   [nzValue]="option.value">{{ option.label }}</label>
+          }
+        </nz-segmented>
+      </div>
       <div class="mb-3 grid grid-cols-1 gap-2 sm:grid-cols-3 px-4 pt-2">
         <ske-item-dropdown [formField]="filterForm.item"
                            [itemIds]="store.itemIds()"
@@ -60,8 +74,8 @@ type DailyConsumptionFilterModel = {
                              [validationErrors]="store.dailyConsumptionValidationErrors()" />
         } @else {
           <ske-class-daily-consumption-chart [data]="store.dailyConsumption()"
-                                             [emptyMessage]="emptyMessage()"
-                                             ariaLabel="Consumul zilnic și media pentru filtrele selectate" />
+                                             [period]="filterForm.period().value()"
+                                             [emptyMessage]="emptyMessage()" />
         }
       </ng-container>
     </nz-card>
@@ -75,12 +89,25 @@ export class DailyConsumptionCard {
   public readonly active = input(false);
   public readonly store = inject(ClassStatisticsStore);
 
+  public readonly periodOptions: { value: ConsumptionPeriod; label: string }[] = [
+    { value: 'daily', label: 'Zilnic' },
+    { value: 'weekly', label: 'Săptămânal' },
+    { value: 'monthly', label: 'Lunar' }
+  ];
+
   private readonly _formModel = signal<DailyConsumptionFilterModel>({
+    period: 'daily',
     item: null,
     location: null,
     category: null
   });
   public readonly filterForm = form(this._formModel);
+
+  public readonly title = computed(() => ({
+    daily: 'Consum mediu zilnic',
+    weekly: 'Consum mediu săptămânal',
+    monthly: 'Consum mediu lunar'
+  })[this.filterForm.period().value()]);
 
   private readonly _itemId = computed(() => this.filterForm.item().value()?.id ?? null);
   private readonly _locationId = computed(() => this.filterForm.location().value()?.id ?? null);
