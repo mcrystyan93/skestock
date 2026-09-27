@@ -1,45 +1,55 @@
-# Plan: graficul consumului pe zi, saptamana si luna
+# Plan: Observability hardening
 
-Spec aprobata: `docs/specs/class-consumption-periods.md`.
+Approved spec: `docs/specs/observability-hardening.md`.
 
-## Decizii
+## Decisions
 
-- Refolosim punctele zilnice, deja completate cu zero, primite prin
-  `GET /api/statistics/class/{classId}/daily-consumption`. Nu modificam API,
-  store-ul, persistenta sau statisticile globale pentru ultimele 7/30 zile.
-- Grupam datele in client dupa saptamana luni-duminica si luna calendaristica
-  folosind chei `YYYY-MM-DD` in UTC pentru calcule, fara sa schimbam semantica
-  zilelor locale din payload. Mediile pe perioada includ prima/ultima perioada
-  chiar daca sunt partiale. Totalurile zilnice si media zilnica raman cele din
-  raspunsul API.
-- Selectorul cu trei segmente sta in card, iar graficul primeste granularitatea
-  si deriveaza seria, linia mediei, etichetele si tooltipul. Schimbarea
-  segmentului nu declanseaza un nou request si nu atinge filtrele.
+- Four independent slices; each is buildable, testable and shippable on its own:
+  A request logging, B trace propagation, C production export, D Worker log levels.
+- A and D are pure code/config fixes with no schema or deploy impact → done first (low risk,
+  immediate value, removes the payload-in-logs exposure).
+- B is split by layer along the message path so every step keeps the build green and old
+  messages valid: contract + schema → capture → publish → consume.
+- C only depends on B for *usefulness* (connected traces), not for correctness; it can ship
+  independently.
+- No new NuGet packages. `ActivitySource` name `skestock.Messaging`, registered via
+  `AddSource("skestock.*")` in ServiceDefaults.
 
-## Dependente si ordine
+## Dependency graph
 
-1. Gruparea pura si testele sale stabilesc semantica numerica si granita dintre
-   perioade.
-2. Cardul si graficul folosesc transformarea verificata; apoi se verifica
-   interactiunea si accesibilitatea.
+```
+T1 request logging ─┐
+T2 worker log levels├─ independent
+                    │
+T3 contract+migration ─→ T4 capture interceptor ─→ T5 publisher producer span ─→ T6 worker consumer span
+                                                                                   │
+T7 production dashboard (independent; verified end-to-end after T6) ◄──────────────┘
+T8 final verification (all)
+```
 
-## Lista de sarcini
+Parallelisable: T1, T2, T3, T7. Sequential: T3 → T4 → T5 → T6 → T8.
 
-Sarcinile si checkpoint-urile executabile sunt in `tasks/todo.md`.
+## Checkpoints
 
-## Riscuri si mitigari
+- After T1+T2: `dotnet build`, `dotnet test tests/Application.UnitTests`, no `{@` in `src`.
+- After T3: `has-pending-model-changes` clean; legacy envelope test green.
+- After T6: `dotnet test tests/Worker.UnitTests`; manual AppHost run shows one trace
+  webapi → worker.
+- After T7: `bash -n deploy/deploy.sh`; quadlet files reviewed; workflow env render includes
+  OTLP endpoint.
 
-| Risc | Mitigare |
+## Risks and mitigations
+
+| Risk | Mitigation |
 |---|---|
-| Decalaj de fus orar la limita de saptamana | Operatii UTC pe datele civile `DateOnly` serializate, fara convertirea in ora locala a browserului |
-| Perioade fara consum sau partiale | Grupare din seria zilnica deja completata, teste pentru zero-uri si prima/ultima perioada |
-| Tooltip ambigu pentru perioada | Eticheta explicita de interval pentru saptamana si de luna/an pentru luna |
+| Removing `{@Request}` loses debugging context | Request name + UserId + trace/span IDs (log correlation) remain; payloads were unsafe anyway. |
+| Worker parents to a long-finished Web span → very long traces | Acceptable for a small system; spans are correct W3C parent/child. Revisit with links if traces get unwieldy. |
+| Migration on production with in-flight outbox rows | Columns are nullable; no data backfill; publisher/worker tolerate nulls. |
+| `StartActivity` returns null when nobody listens | All code null-safe (`activity?.`); tests register an `ActivityListener`. |
+| Dashboard container down or restarting | `Wants=` not `Requires=`; OTLP exporter drops silently, app unaffected. |
+| Dashboard browser token only in journald | Documented lookup in `deploy/README.md`; UI bound to 127.0.0.1. |
+| Timing-based perf test flakiness | Use a 600 ms delay vs 500 ms threshold for the slow case; fast case uses no delay. |
 
-## Verificare finala
+## Task list
 
-Testele Vitest vizate si build-ul Angular trec; comutarea pastreaza filtrele,
-mesajul gol, totalurile si mediile conform specificatiei.
-
-## Intrebari deschise
-
-Niciuna.
+Executable tasks with acceptance and verification are in `tasks/todo.md`.

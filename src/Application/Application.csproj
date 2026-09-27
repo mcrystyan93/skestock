@@ -26,7 +26,6 @@
   <ItemGroup>
     <Folder Include="Features\Categories\Commands\CreateCategory\" />
     <Folder Include="Features\Categories\Queries\GetCategoryById\" />
-    <Folder Include="Models\" />
   </ItemGroup>
 
   <ItemGroup>

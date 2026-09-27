@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using skestock.Application.Queues;
 using skestock.Application.Queues.Interfaces;
 using skestock.Domain.Queues;
 
@@ -61,8 +63,21 @@ public class OutboxPublisherService(
                 MessageId = outboxMessage.Id,
                 Type = outboxMessage.Type,
                 Payload = outboxMessage.Payload,
-                UserId = outboxMessage.UserId
+                UserId = outboxMessage.UserId,
+                TraceParent = outboxMessage.TraceParent,
+                TraceState = outboxMessage.TraceState
             };
+
+            // Continues the trace of the request that wrote the outbox row; the queue send span
+            // nests under this producer span.
+            using var activity = MessagingTelemetry.StartActivity(
+                $"publish {outboxMessage.QueueName}",
+                ActivityKind.Producer,
+                outboxMessage.TraceParent,
+                outboxMessage.TraceState);
+            activity?.SetTag(MessagingTelemetry.SystemTag, MessagingTelemetry.SystemName);
+            activity?.SetTag(MessagingTelemetry.DestinationNameTag, outboxMessage.QueueName);
+            activity?.SetTag(MessagingTelemetry.MessageIdTag, outboxMessage.Id);
 
             try
             {
@@ -76,6 +91,8 @@ public class OutboxPublisherService(
             }
             catch (Exception ex)
             {
+                activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+
                 var retryCount = await claimStore.RecordFailureAsync(
                     claim,
                     outboxMessage.Id,

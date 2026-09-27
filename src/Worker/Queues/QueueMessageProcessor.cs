@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Azure.Storage.Queues.Models;
 using FluentResults;
@@ -36,6 +37,7 @@ public sealed class QueueMessageProcessor(
 
     public async Task<QueueMessageProcessingResult> ProcessAsync(
         QueueMessage message,
+        string queueName,
         CancellationToken cancellationToken)
     {
         if (!TryDecodeEnvelope(message, out var envelope))
@@ -43,6 +45,31 @@ public sealed class QueueMessageProcessor(
             return QueueMessageProcessingResult.Permanent();
         }
 
+        // Continues the trace of the request that produced the message, so Mediator, EF and SQL
+        // spans of the Worker appear under the originating HTTP request.
+        using var activity = MessagingTelemetry.StartActivity(
+            $"process {queueName}",
+            ActivityKind.Consumer,
+            envelope.TraceParent,
+            envelope.TraceState);
+        activity?.SetTag(MessagingTelemetry.SystemTag, MessagingTelemetry.SystemName);
+        activity?.SetTag(MessagingTelemetry.DestinationNameTag, queueName);
+        activity?.SetTag(MessagingTelemetry.MessageIdTag, envelope.MessageId.ToString());
+
+        var result = await ProcessEnvelopeAsync(envelope, cancellationToken);
+
+        if (result.Status is QueueMessageProcessingStatus.PermanentFailure or QueueMessageProcessingStatus.RetryableFailure)
+        {
+            activity?.SetStatus(ActivityStatusCode.Error, result.Status.ToString());
+        }
+
+        return result;
+    }
+
+    private async Task<QueueMessageProcessingResult> ProcessEnvelopeAsync(
+        MessageEnvelope envelope,
+        CancellationToken cancellationToken)
+    {
         // Handlers authorize and audit as the user who originally triggered the work.
         ambientUser.Id = envelope.UserId;
 

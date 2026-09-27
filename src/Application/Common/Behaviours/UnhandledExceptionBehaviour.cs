@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace skestock.Application.Common.Behaviours;
 
@@ -14,9 +14,7 @@ public class UnhandledExceptionBehaviour<TRequest, TResponse>(ILogger<TRequest> 
         }
         catch (Exception ex)
         {
-            var requestName = typeof(TRequest).Name;
-
-            logger.LogError(ex, "skestock Request: Unhandled Exception for Request {Name} {@Request}", requestName, request);
+            logger.UnhandledRequestException(ex, typeof(TRequest).Name);
 
             throw;
         }

@@ -59,6 +59,25 @@ Protect the application with an Access policy that allows the service token used
 
 Back up the Podman volumes `skestock-db-data`, `skestock-cache-data`, and `storage-data` before treating the mini PC as production infrastructure. Azurite is still an emulator; migrate Blob/Queue to Azure Storage before requiring cloud-grade durability.
 
+## Telemetry
+
+The `skestock-dashboard` unit runs the standalone Aspire Dashboard as the production OTLP receiver. Web and Worker export logs, traces, and metrics to `http://skestock-dashboard:18889` (the `OTEL_EXPORTER_OTLP_ENDPOINT` value that the workflow writes into `production.env`), and each unit sets its own `OTEL_SERVICE_NAME` (`webapi` and `worker`). The OTLP port is reachable only on the `skestock` Podman network. The application units only `Want` the dashboard, so if it is down the app still runs; it just doesn't export telemetry.
+
+The dashboard UI is bound to `127.0.0.1:18888` on the mini PC and is never exposed publicly. Open it through an SSH tunnel:
+
+```bash
+ssh -L 18888:127.0.0.1:18888 <deploy-host>
+# then browse to http://localhost:18888
+```
+
+The UI asks for a browser token. The dashboard prints a login URL containing the token each time it starts:
+
+```bash
+journalctl --user -u skestock-dashboard --no-pager | grep -i 'login'
+```
+
+Telemetry is kept only in memory: restarting the dashboard clears it. For this reason, deployments start the dashboard but never restart it. Update the pinned image tag in `quadlet/skestock-dashboard.container` together with Aspire upgrades.
+
 ## Rollback
 
 The previous Web and Worker image tags are retained locally as `localhost/skestock-web:previous` and `localhost/skestock-worker:previous`. A rollback should retag the desired GHCR SHA as `current`, restart the two application units, and repeat the health check. Infrastructure services are not recreated during normal application releases.

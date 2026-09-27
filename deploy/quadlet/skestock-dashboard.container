@@ -1,0 +1,19 @@
+[Unit]
+Description=skestock telemetry dashboard (Aspire Dashboard, in-memory OTLP receiver)
+
+[Container]
+ContainerName=skestock-dashboard
+Image=mcr.microsoft.com/dotnet/aspire-dashboard:13.5.2
+Network=skestock.network
+# The UI is reachable only from the host itself; use an SSH tunnel (see deploy/README.md).
+PublishPort=127.0.0.1:18888:18888
+# OTLP (gRPC 18889) is not published: only containers on the skestock network can send telemetry.
+Environment=DASHBOARD__OTLP__AUTHMODE=Unsecured
+Environment=DASHBOARD__FRONTEND__AUTHMODE=BrowserToken
+
+[Service]
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=default.target

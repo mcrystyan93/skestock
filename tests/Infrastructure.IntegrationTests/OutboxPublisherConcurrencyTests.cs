@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Queues;
 using skestock.Application.Queues.Interfaces;
 using skestock.Domain.Queues;
 using skestock.Infrastructure.Data;
@@ -236,6 +238,51 @@ public sealed class OutboxPublisherConcurrencyTests
         }
     }
 
+    [Test]
+    public async Task PublishedEnvelope_CarriesTraceContextUnderProducerSpan()
+    {
+        const string traceParent = "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01";
+        var messageId = Guid.NewGuid();
+        using var listener = new ActivityListener
+        {
+            ShouldListenTo = source => source.Name == MessagingTelemetry.ActivitySourceName,
+            Sample = static (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded
+        };
+        ActivitySource.AddActivityListener(listener);
+        try
+        {
+            await SeedMessageAsync(new OutboxMessage
+            {
+                Id = messageId,
+                Type = "test.message",
+                Payload = "{}",
+                QueueName = $"outbox-test-{Guid.NewGuid():N}",
+                CreatedAtUtc = DateTimeOffset.UtcNow,
+                TraceParent = traceParent,
+                TraceState = "vendor=value"
+            });
+
+            var sender = new RecordingQueueSender();
+            using var serviceProvider = CreatePublisherServiceProvider(sender);
+            var publisher = new TestableOutboxPublisherService(
+                serviceProvider.GetRequiredService<IServiceScopeFactory>());
+
+            await publisher.PublishOnceAsync(CancellationToken.None);
+
+            var sent = sender.Sent.ShouldHaveSingleItem();
+            sent.Envelope.TraceParent.ShouldBe(traceParent);
+            sent.Envelope.TraceState.ShouldBe("vendor=value");
+            sent.Activity.ShouldNotBeNull();
+            sent.Activity.Kind.ShouldBe(ActivityKind.Producer);
+            sent.Activity.TraceId.ToHexString().ShouldBe("0af7651916cd43dd8448eb211c80319c");
+            sent.Activity.ParentSpanId.ToHexString().ShouldBe("b7ad6b7169203331");
+        }
+        finally
+        {
+            await DeleteMessageAsync(messageId);
+        }
+    }
+
     private static ServiceProvider CreatePublisherServiceProvider(IQueueSender sender)
     {
         var services = new ServiceCollection();
@@ -279,8 +326,17 @@ public sealed class OutboxPublisherConcurrencyTests
         Func<CancellationToken, Task>? send = null) : IQueueSender
     {
         private int _sendCount;
+        private readonly List<(MessageEnvelope Envelope, Activity? Activity)> _sent = [];
 
         public int SendCount => Volatile.Read(ref _sendCount);
+
+        public IReadOnlyList<(MessageEnvelope Envelope, Activity? Activity)> Sent
+        {
+            get
+            {
+                lock (_sent) return [.. _sent];
+            }
+        }
 
         public Task SendAsync(
             MessageEnvelope message,
@@ -288,6 +344,7 @@ public sealed class OutboxPublisherConcurrencyTests
             CancellationToken ct = default)
         {
             Interlocked.Increment(ref _sendCount);
+            lock (_sent) _sent.Add((message, Activity.Current));
             return send?.Invoke(ct) ?? Task.CompletedTask;
         }
     }
