@@ -19,14 +19,15 @@ public class ProcessItemImportBatchCommandHandler(
     IBlobStorageService blobStorageService,
     IItemDocumentExtractionService itemDocumentExtractionService,
     ILogger<ProcessItemImportBatchCommandHandler> logger,
-    IOptions<ImportBatchOptions> importBatchOptions) : IRequestHandler<ProcessItemImportBatchCommand, Result>
+    IOptions<ImportBatchOptions> importBatchOptions)
+    : IRequestHandler<ProcessItemImportBatchCommand, Result>
 {
     public async ValueTask<Result> Handle(ProcessItemImportBatchCommand request, CancellationToken cancellationToken)
     {
         var batch = await dbContext.ItemImportBatches
-            .Include(b => b.Files).ThenInclude(f => f.FileMetadata)
-            .Include(b => b.History)
-            .FirstOrDefaultAsync(b => b.Id == request.ItemImportBatchId, cancellationToken);
+            .Include(importBatch => importBatch.Files).ThenInclude(file => file.FileMetadata)
+            .Include(importBatch => importBatch.History)
+            .FirstOrDefaultAsync(importBatch => importBatch.Id == request.ItemImportBatchId, cancellationToken);
 
         if (batch is null)
         {
@@ -34,42 +35,20 @@ public class ProcessItemImportBatchCommandHandler(
             return Result.Fail(new ItemImportBatchErrors.ItemImportBatchNotFound(request.ItemImportBatchId));
         }
 
-        if (batch.Status is ItemImportBatchStatus.PendingReview or ItemImportBatchStatus.Confirmed or ItemImportBatchStatus.Failed)
+        if (batch.Status is ItemImportBatchStatus.PendingReview or
+            ItemImportBatchStatus.Confirmed or ItemImportBatchStatus.Failed)
         {
             logger.LogInformation("Item import batch already processed: {ItemImportBatchId}, Status: {Status}",
                 request.ItemImportBatchId, batch.Status);
             return Result.Ok();
         }
 
-        var now = DateTimeOffset.UtcNow;
-        if (batch.HasActiveProcessingLease(now))
-            throw new ImportBatchProcessingInProgressException(batch.Id);
+        await ClaimProcessingLeaseAsync(batch, cancellationToken);
 
-        batch.RecordAttempt(now.AddSeconds(importBatchOptions.Value.ProcessingLeaseSeconds));
-        batch.History.Add(ImportBatchHistory.Processing(batch.AttemptCount));
+        var streams = new List<Stream>(batch.Files.Count);
         try
         {
-            await dbContext.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            throw new ImportBatchProcessingInProgressException(batch.Id);
-        }
-
-        var orderedFiles = batch.Files.OrderBy(f => f.SortOrder).ToList();
-        var streams = new List<Stream>(orderedFiles.Count);
-
-        try
-        {
-            var inputs = new List<DocumentExtractionInput>(orderedFiles.Count);
-            foreach (var file in orderedFiles)
-            {
-                var stream = await blobStorageService.DownloadAsync(
-                    new DownloadDto(file.FileMetadata.BlobPath, file.FileMetadata.BlobContainer), cancellationToken);
-                streams.Add(stream);
-                inputs.Add(new DocumentExtractionInput(stream, file.FileMetadata.ContentType, file.FileMetadata.OriginalName));
-            }
-
+            var inputs = await DownloadInputsAsync(batch, streams, cancellationToken);
             var extraction = await itemDocumentExtractionService.ExtractAsync<ItemExtractionResult>(
                 inputs, cancellationToken);
 
@@ -82,9 +61,7 @@ public class ProcessItemImportBatchCommandHandler(
             logger.LogError(ex, "Unprocessable item import batch: {ItemImportBatchId}",
                 request.ItemImportBatchId);
 
-            batch.MarkAsFailed(ex.Message);
-            batch.History.Add(ImportBatchHistory.Failed(batch.AttemptCount, ex.Message));
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await MarkAsFailedAsync(batch, ex.Message, cancellationToken);
             return Result.Ok();
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -96,12 +73,11 @@ public class ProcessItemImportBatchCommandHandler(
                     request.ItemImportBatchId);
 
                 var failureMessage = $"Processing failed after {batch.AttemptCount} attempts: {ex.Message}";
-                batch.MarkAsFailed(failureMessage);
-                batch.History.Add(ImportBatchHistory.Failed(batch.AttemptCount, failureMessage));
-                await dbContext.SaveChangesAsync(cancellationToken);
+                await MarkAsFailedAsync(batch, failureMessage, cancellationToken);
                 return Result.Ok();
             }
 
+            // Let the queue retry transient failures without waiting for the lease to expire.
             batch.ReleaseProcessingLease();
             await dbContext.SaveChangesAsync(cancellationToken);
             throw;
@@ -113,5 +89,49 @@ public class ProcessItemImportBatchCommandHandler(
         }
 
         return Result.Ok();
+    }
+
+    private async Task ClaimProcessingLeaseAsync(ItemImportBatch batch, CancellationToken cancellationToken)
+    {
+        var now = DateTimeOffset.UtcNow;
+        if (batch.HasActiveProcessingLease(now))
+            throw new ImportBatchProcessingInProgressException(batch.Id);
+
+        batch.RecordAttempt(now.AddSeconds(importBatchOptions.Value.ProcessingLeaseSeconds));
+        batch.History.Add(ImportBatchHistory.Processing(batch.AttemptCount));
+
+        // Commit the lease before external I/O so concurrent workers cannot process the same batch.
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new ImportBatchProcessingInProgressException(batch.Id);
+        }
+    }
+
+    private async Task<List<DocumentExtractionInput>> DownloadInputsAsync(
+        ItemImportBatch batch, List<Stream> streams, CancellationToken cancellationToken)
+    {
+        var inputs = new List<DocumentExtractionInput>(batch.Files.Count);
+        foreach (var file in batch.Files.OrderBy(file => file.SortOrder))
+        {
+            var stream = await blobStorageService.DownloadAsync(
+                new DownloadDto(file.FileMetadata.BlobPath, file.FileMetadata.BlobContainer),
+                cancellationToken);
+            streams.Add(stream);
+            inputs.Add(new DocumentExtractionInput(
+                stream, file.FileMetadata.ContentType, file.FileMetadata.OriginalName));
+        }
+
+        return inputs;
+    }
+
+    private Task MarkAsFailedAsync(ItemImportBatch batch, string message, CancellationToken cancellationToken)
+    {
+        batch.MarkAsFailed(message);
+        batch.History.Add(ImportBatchHistory.Failed(batch.AttemptCount, message));
+        return dbContext.SaveChangesAsync(cancellationToken);
     }
 }

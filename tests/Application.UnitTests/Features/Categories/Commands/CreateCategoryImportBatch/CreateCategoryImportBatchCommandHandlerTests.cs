@@ -96,6 +96,47 @@ public class CreateCategoryImportBatchCommandHandlerTests
     }
 
     [Test]
+    public async Task Handle_WithMatchingClientRequestId_ReturnsExistingBatchWithoutEnqueuingAgain()
+    {
+        var (context, file, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        var handler = new CreateCategoryImportBatchCommandHandler(context, new FakeUser(userProfile.IdentityId));
+        var command = new CreateCategoryImportBatchCommand
+        {
+            FileMetadataIds = [file.Id],
+            ClientRequestId = Guid.NewGuid()
+        };
+
+        var first = await handler.Handle(command, CancellationToken.None);
+        var repeated = await handler.Handle(command, CancellationToken.None);
+
+        repeated.Value.Id.ShouldBe(first.Value.Id);
+        (await context.OutboxMessages.CountAsync(CancellationToken.None)).ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Handle_WithReusedClientRequestIdAndDifferentFiles_ReturnsConflict()
+    {
+        var (context, file, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        var handler = new CreateCategoryImportBatchCommandHandler(context, new FakeUser(userProfile.IdentityId));
+        var clientRequestId = Guid.NewGuid();
+        await handler.Handle(new CreateCategoryImportBatchCommand
+        {
+            FileMetadataIds = [file.Id],
+            ClientRequestId = clientRequestId
+        }, CancellationToken.None);
+
+        var result = await handler.Handle(new CreateCategoryImportBatchCommand
+        {
+            FileMetadataIds = [Guid.NewGuid()],
+            ClientRequestId = clientRequestId
+        }, CancellationToken.None);
+
+        result.IsFailed.ShouldBeTrue();
+    }
+
+    [Test]
     public async Task Handle_WithoutAuthenticatedUser_Throws()
     {
         var (context, file, _) = await CreateContextAsync();

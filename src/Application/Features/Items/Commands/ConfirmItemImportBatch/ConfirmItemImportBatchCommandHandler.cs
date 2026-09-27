@@ -12,16 +12,15 @@ public class ConfirmItemImportBatchCommandHandler(IApplicationDbContext dbContex
     : IRequestHandler<ConfirmItemImportBatchCommand, Result<ItemImportBatchConfirmationResultDto>>
 {
     public async ValueTask<Result<ItemImportBatchConfirmationResultDto>> Handle(
-        ConfirmItemImportBatchCommand request,
-        CancellationToken cancellationToken)
+        ConfirmItemImportBatchCommand request, CancellationToken cancellationToken)
     {
         if (user.Id is not { } identityId)
             return Result.Fail(new ItemImportBatchErrors.ItemImportBatchNotFound(request.BatchId));
 
         var batch = await dbContext.ItemImportBatches
-            .Include(b => b.History)
-            .FirstOrDefaultAsync(
-                b => b.Id == request.BatchId && b.UploadedByUserId == identityId,
+            .Include(importBatch => importBatch.History)
+            .FirstOrDefaultAsync(importBatch =>
+                importBatch.Id == request.BatchId && importBatch.UploadedByUserId == identityId,
                 cancellationToken);
 
         if (batch is null)
@@ -37,11 +36,7 @@ public class ConfirmItemImportBatchCommandHandler(IApplicationDbContext dbContex
         if (batch.Status != ItemImportBatchStatus.PendingReview)
             return Result.Fail(new ItemImportBatchErrors.ItemImportBatchNotInReview(request.BatchId, batch.Status));
 
-        var duplicateItemIds = request.Items
-            .GroupBy(item => item.ItemId)
-            .Where(group => group.Key != Guid.Empty && group.Count() > 1)
-            .Select(group => group.Key)
-            .ToArray();
+        var duplicateItemIds = FindDuplicateItemIds(request.Items);
 
         if (duplicateItemIds.Length > 0)
             return Result.Fail(new ItemImportBatchErrors.DuplicateItemsInBatch(request.BatchId, duplicateItemIds));
@@ -60,19 +55,8 @@ public class ConfirmItemImportBatchCommandHandler(IApplicationDbContext dbContex
         {
             BatchId = batch.Id,
             Status = ItemImportBatchStatus.Confirmed,
-            Items = request.Items.Select(item =>
-            {
-                var selectedItem = selectedItems[item.ItemId];
-                return new ItemImportBatchResultItemDto
-                {
-                    Id = selectedItem.Id,
-                    Sku = selectedItem.Sku,
-                    Name = selectedItem.Name,
-                    CategoryName = selectedItem.Category.Name,
-                    Created = false,
-                    CategoryCreated = false
-                };
-            }).ToList()
+            // The selected catalog item, not the reviewed text, is the source of truth.
+            Items = request.Items.Select(item => ToResultItem(selectedItems[item.ItemId])).ToList()
         };
 
         batch.MarkAsConfirmed(JsonSerializer.Serialize(result));
@@ -88,8 +72,8 @@ public class ConfirmItemImportBatchCommandHandler(IApplicationDbContext dbContex
             // otherwise preserve the original concurrency error for the caller to handle.
             var currentBatch = await dbContext.ItemImportBatches
                 .AsNoTracking()
-                .SingleOrDefaultAsync(
-                    b => b.Id == batch.Id && b.UploadedByUserId == identityId,
+                .SingleOrDefaultAsync(importBatch =>
+                    importBatch.Id == batch.Id && importBatch.UploadedByUserId == identityId,
                     cancellationToken);
 
             if (currentBatch?.Status == ItemImportBatchStatus.Confirmed &&
@@ -105,5 +89,26 @@ public class ConfirmItemImportBatchCommandHandler(IApplicationDbContext dbContex
         }
 
         return Result.Ok(result);
+    }
+
+    private static Guid[] FindDuplicateItemIds(IEnumerable<ConfirmItemImportBatchItem> items)
+    {
+        return items.GroupBy(item => item.ItemId)
+            .Where(group => group.Key != Guid.Empty && group.Count() > 1)
+            .Select(group => group.Key)
+            .ToArray();
+    }
+
+    private static ItemImportBatchResultItemDto ToResultItem(Item item)
+    {
+        return new ItemImportBatchResultItemDto
+        {
+            Id = item.Id,
+            Sku = item.Sku,
+            Name = item.Name,
+            CategoryName = item.Category.Name,
+            Created = false,
+            CategoryCreated = false
+        };
     }
 }

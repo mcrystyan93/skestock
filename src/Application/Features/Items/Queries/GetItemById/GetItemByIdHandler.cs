@@ -9,32 +9,32 @@ public class GetItemByIdHandler(IApplicationDbContext dbContext)
 {
     public async ValueTask<Result<ItemDto>> Handle(GetItemByIdQuery request, CancellationToken cancellationToken)
     {
-        var item = await dbContext.Items
+        var itemDto = await dbContext.Items
             .AsNoTracking()
-            .Where(i => i.Id == request.Id)
-            .Select(i => new ItemDto
+            .Where(item => item.Id == request.Id)
+            .Select(item => new ItemDto
             {
-                Id = i.Id,
-                Sku = i.Sku,
-                Name = i.Name,
-                Description = i.Description,
-                Unit = i.Unit,
-                MinThreshold = i.MinThreshold,
-                IsPerishable = i.IsPerishable,
-                ShelfLifeDays = i.ShelfLifeDays,
-                IsActive = i.IsActive,
-                CategoryId = i.CategoryId,
-                CategoryName = i.Category != null ? i.Category.Name : null,
-                CreatedByName = i.CreatedBy != null ? i.CreatedBy.FullName : null,
-                LastModifiedByName = i.LastModifiedBy != null ? i.LastModifiedBy.FullName : null,
-                CreatedDate = i.CreatedDate,
-                LastModifiedDate = i.LastModifiedDate
+                Id = item.Id,
+                Sku = item.Sku,
+                Name = item.Name,
+                Description = item.Description,
+                Unit = item.Unit,
+                MinThreshold = item.MinThreshold,
+                IsPerishable = item.IsPerishable,
+                ShelfLifeDays = item.ShelfLifeDays,
+                IsActive = item.IsActive,
+                CategoryId = item.CategoryId,
+                CategoryName = item.Category != null ? item.Category.Name : null,
+                CreatedByName = item.CreatedBy != null ? item.CreatedBy.FullName : null,
+                LastModifiedByName = item.LastModifiedBy != null ? item.LastModifiedBy.FullName : null,
+                CreatedDate = item.CreatedDate,
+                LastModifiedDate = item.LastModifiedDate
             })
             .SingleOrDefaultAsync(cancellationToken);
 
-        if (item is null)
+        if (itemDto is null)
             return Result.Fail(new ItemErrors.ItemNotFound(request.Id));
 
-        return Result.Ok(item);
+        return Result.Ok(itemDto);
     }
 }

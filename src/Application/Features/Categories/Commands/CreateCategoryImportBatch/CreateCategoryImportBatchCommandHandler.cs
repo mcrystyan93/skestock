@@ -21,25 +21,15 @@ public class CreateCategoryImportBatchCommandHandler(IApplicationDbContext dbCon
 
         if (request.ClientRequestId is { } clientRequestId)
         {
-            var existing = await dbContext.CategoryImportBatches
-                .AsNoTracking()
-                .Include(batch => batch.Files)
-                .Where(batch => batch.UploadedByUserId == identityId && batch.ClientRequestId == clientRequestId)
-                .FirstOrDefaultAsync(cancellationToken);
+            var existing = await FindExistingBatchAsync(identityId, clientRequestId, cancellationToken);
 
             if (existing is not null)
-            {
-                if (!existing.Files.OrderBy(file => file.SortOrder)
-                    .Select(file => file.FileMetadataId)
-                    .SequenceEqual(request.FileMetadataIds))
-                    return Result.Fail(new CategoryImportBatchErrors.IdempotencyConflict(clientRequestId));
-
-                return Result.Ok(ToMutationDto(existing));
-            }
+                return MatchExistingBatch(existing, clientRequestId, request.FileMetadataIds);
         }
 
         var batch = CategoryImportBatch.Create(identityId, request.ClientRequestId, request.FileMetadataIds);
         dbContext.CategoryImportBatches.Add(batch);
+        // Persist the queue message with the batch so a successful creation always schedules processing.
         dbContext.OutboxMessages.Add(new OutboxMessage
         {
             Type = typeof(ProcessCategoryImportBatchCommand).AssemblyQualifiedName!,
@@ -54,23 +44,37 @@ public class CreateCategoryImportBatchCommandHandler(IApplicationDbContext dbCon
         }
         catch (DbUpdateException) when (request.ClientRequestId is not null)
         {
-            var existing = await dbContext.CategoryImportBatches
-                .AsNoTracking()
-                .Include(importBatch => importBatch.Files)
-                .Where(importBatch => importBatch.UploadedByUserId == identityId &&
-                                      importBatch.ClientRequestId == request.ClientRequestId)
-                .SingleOrDefaultAsync(cancellationToken);
+            // Another request may have won the unique client-request-id race.
+            var existing = await FindExistingBatchAsync(identityId, request.ClientRequestId.Value, cancellationToken);
 
             if (existing is null)
                 throw;
 
-            if (!existing.Files.OrderBy(file => file.SortOrder)
-                .Select(file => file.FileMetadataId)
-                .SequenceEqual(request.FileMetadataIds))
-                return Result.Fail(new CategoryImportBatchErrors.IdempotencyConflict(request.ClientRequestId.Value));
-
-            return Result.Ok(ToMutationDto(existing));
+            return MatchExistingBatch(existing, request.ClientRequestId.Value, request.FileMetadataIds);
         }
+
+        return Result.Ok(ToMutationDto(batch));
+    }
+
+    private Task<CategoryImportBatch?> FindExistingBatchAsync(
+        Guid identityId, Guid clientRequestId, CancellationToken cancellationToken)
+    {
+        return dbContext.CategoryImportBatches
+            .AsNoTracking()
+            .Include(batch => batch.Files)
+            .SingleOrDefaultAsync(batch =>
+                batch.UploadedByUserId == identityId && batch.ClientRequestId == clientRequestId,
+                cancellationToken);
+    }
+
+    private static Result<CategoryImportBatchMutationDto> MatchExistingBatch(
+        CategoryImportBatch batch, Guid clientRequestId, IReadOnlyCollection<Guid> fileMetadataIds)
+    {
+        var originalFileIds = batch.Files.OrderBy(file => file.SortOrder)
+            .Select(file => file.FileMetadataId);
+
+        if (!originalFileIds.SequenceEqual(fileMetadataIds))
+            return Result.Fail(new CategoryImportBatchErrors.IdempotencyConflict(clientRequestId));
 
         return Result.Ok(ToMutationDto(batch));
     }

@@ -18,12 +18,8 @@ public class GetAllItemsHandler(IApplicationDbContext dbContext)
     {
         var effectiveSort = DynamicSortBuilder<Item>.BuildEffectiveSort(request.Sort, SortConfiguration);
         var cursorState = CursorCodec<Item>.Decode(request.Cursor);
-
-        var query = dbContext.Items
-            .AsNoTracking();
-
-        query = FilterQueryBuilder<Item>.Apply(
-            query,
+        var query = FilterQueryBuilder<Item>.Apply(
+            dbContext.Items.AsNoTracking(),
             request.Filters,
             FilterConfiguration,
             TextSearchCollation.IsSqlServer(dbContext.Database));
@@ -33,9 +29,9 @@ public class GetAllItemsHandler(IApplicationDbContext dbContext)
             var term = request.SearchTerm.Trim();
             // Name/Sku carry the accent-insensitive collation at the column level (see ItemConfiguration),
             // so the search needs no per-row EF.Functions.Collate and is provider-agnostic.
-            query = query.Where(i =>
-                i.Name.Contains(term) ||
-                (i.Sku != null && i.Sku.Contains(term)));
+            query = query.Where(item =>
+                item.Name.Contains(term) ||
+                (item.Sku != null && item.Sku.Contains(term)));
         }
 
         if (cursorState?.KeyValues.Count > 0)
@@ -48,37 +44,37 @@ public class GetAllItemsHandler(IApplicationDbContext dbContext)
         }
 
         var pageSize = Math.Clamp(request.PageSize, 1, PaginationConstants.DEFAULT_PAGE_SIZE);
-
+        // Fetch one extra row to detect the next page without a count query.
         var items = await OrderByBuilder<Item>.ApplyOrderBy(query, effectiveSort, SortConfiguration)
-            .Select(i => new
+            .Select(item => new
             {
                 // Only the sort-key columns are needed to rebuild the next cursor.
                 CursorItem = new Item
                 {
-                    Id = i.Id,
-                    Name = i.Name,
-                    Sku = i.Sku,
-                    Unit = i.Unit,
-                    CreatedDate = i.CreatedDate,
-                    LastModifiedDate = i.LastModifiedDate
+                    Id = item.Id,
+                    Name = item.Name,
+                    Sku = item.Sku,
+                    Unit = item.Unit,
+                    CreatedDate = item.CreatedDate,
+                    LastModifiedDate = item.LastModifiedDate
                 },
                 Data = new ItemDto
                 {
-                    Id = i.Id,
-                    Sku = i.Sku,
-                    Name = i.Name,
-                    Description = i.Description,
-                    Unit = i.Unit,
-                    MinThreshold = i.MinThreshold,
-                    IsPerishable = i.IsPerishable,
-                    ShelfLifeDays = i.ShelfLifeDays,
-                    IsActive = i.IsActive,
-                    CategoryId = i.CategoryId,
-                    CategoryName = i.Category != null ? i.Category.Name : null,
-                    CreatedByName = i.CreatedBy != null ? i.CreatedBy.FullName : null,
-                    LastModifiedByName = i.LastModifiedBy != null ? i.LastModifiedBy.FullName : null,
-                    CreatedDate = i.CreatedDate,
-                    LastModifiedDate = i.LastModifiedDate
+                    Id = item.Id,
+                    Sku = item.Sku,
+                    Name = item.Name,
+                    Description = item.Description,
+                    Unit = item.Unit,
+                    MinThreshold = item.MinThreshold,
+                    IsPerishable = item.IsPerishable,
+                    ShelfLifeDays = item.ShelfLifeDays,
+                    IsActive = item.IsActive,
+                    CategoryId = item.CategoryId,
+                    CategoryName = item.Category != null ? item.Category.Name : null,
+                    CreatedByName = item.CreatedBy != null ? item.CreatedBy.FullName : null,
+                    LastModifiedByName = item.LastModifiedBy != null ? item.LastModifiedBy.FullName : null,
+                    CreatedDate = item.CreatedDate,
+                    LastModifiedDate = item.LastModifiedDate
                 }
             })
             .Take(pageSize + 1)
@@ -88,28 +84,22 @@ public class GetAllItemsHandler(IApplicationDbContext dbContext)
         if (hasNextPage)
             items.RemoveAt(items.Count - 1);
 
-        var pageItems = items.Select(item => item.Data).ToList();
         var lastItem = items.LastOrDefault()?.CursorItem;
-
-        var data = new PaginatedResponse<ItemDto>
+        return Result.Ok(new PaginatedResponse<ItemDto>
         {
-            Data = pageItems,
+            Data = items.Select(item => item.Data).ToList(),
             HasNextPage = hasNextPage,
             NextCursor = lastItem is not null
                 ? CursorCodec<Item>.Encode(lastItem, effectiveSort, SortConfiguration)
                 : null,
             Sort =
             [
-                ..effectiveSort.Select(s => new PaginationSort
+                ..effectiveSort.Select(sort => new PaginationSort
                 {
-                    Key = MapSortKey(s.Key),
-                    Value = s.Direction == "desc" ? "descend" : "ascend"
+                    Key = char.ToLowerInvariant(sort.Key[0]) + sort.Key[1..],
+                    Value = sort.Direction == "desc" ? "descend" : "ascend"
                 })
             ]
-        };
-
-        return Result.Ok(data);
+        });
     }
-
-    private static string MapSortKey(string propertyName) => char.ToLowerInvariant(propertyName[0]) + propertyName[1..];
 }

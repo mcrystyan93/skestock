@@ -65,6 +65,7 @@ public class ConfirmCategoryImportBatchCommandHandler(IApplicationDbContext dbCo
         }
         catch (DbUpdateConcurrencyException)
         {
+            // Return the winner's recorded result if another request confirmed this batch first.
             var currentBatch = await dbContext.CategoryImportBatches
                 .AsNoTracking()
                 .SingleOrDefaultAsync(importBatch =>
@@ -102,41 +103,44 @@ public class ConfirmCategoryImportBatchCommandHandler(IApplicationDbContext dbCo
         if (reviewedNames.Count == 0)
             return result;
 
-        var upperNames = reviewedNames.Select(name => name.ToUpperInvariant()).ToList();
-        var existingQuery = dbContext.Categories.AsQueryable();
-        existingQuery = TextSearchCollation.IsSqlServer(dbContext.Database)
-            ? existingQuery.Where(category => upperNames.Contains(
-                EF.Functions.Collate(category.Name.Trim(), TextSearchCollation.AccentInsensitive)))
-            : existingQuery.Where(category => upperNames.Contains(category.Name.Trim().ToUpper()));
-        var existing = await existingQuery.ToListAsync(cancellationToken);
-        var existingByName = existing.ToDictionary(
-            category => category.Name.Trim().ToLowerInvariant(), category => category);
+        var existingByName = await FindExistingCategoriesAsync(reviewedNames, cancellationToken);
 
         foreach (var name in reviewedNames)
         {
             var key = name.ToLowerInvariant();
-            if (existingByName.TryGetValue(key, out var match))
+            var created = false;
+            if (!existingByName.TryGetValue(key, out var category))
             {
-                result.Add(new CategoryImportBatchResultCategoryDto
-                {
-                    Id = match.Id,
-                    Name = match.Name,
-                    Created = false
-                });
-                continue;
+                category = new Category { Name = name };
+                dbContext.Categories.Add(category);
+                existingByName[key] = category;
+                created = true;
             }
 
-            var category = new Category { Name = name };
-            dbContext.Categories.Add(category);
-            existingByName[key] = category;
             result.Add(new CategoryImportBatchResultCategoryDto
             {
                 Id = category.Id,
                 Name = category.Name,
-                Created = true
+                Created = created
             });
         }
 
         return result;
+    }
+
+    private async Task<Dictionary<string, Category>> FindExistingCategoriesAsync(
+        List<string> reviewedNames, CancellationToken cancellationToken)
+    {
+        var upperNames = reviewedNames.Select(name => name.ToUpperInvariant()).ToList();
+        var categories = dbContext.Categories.AsQueryable();
+        // SQL Server uses an accent-insensitive collation; the alternative keeps in-memory queries usable.
+        var matchingCategories = TextSearchCollation.IsSqlServer(dbContext.Database)
+            ? categories.Where(category => upperNames.Contains(
+                EF.Functions.Collate(category.Name.Trim(), TextSearchCollation.AccentInsensitive)))
+            : categories.Where(category => upperNames.Contains(category.Name.Trim().ToUpper()));
+
+        var existing = await matchingCategories.ToListAsync(cancellationToken);
+        return existing.ToDictionary(
+            category => category.Name.Trim().ToLowerInvariant(), category => category);
     }
 }

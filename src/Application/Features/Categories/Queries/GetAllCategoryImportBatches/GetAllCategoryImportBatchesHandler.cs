@@ -23,28 +23,13 @@ public class GetAllCategoryImportBatchesHandler(IApplicationDbContext dbContext)
         var effectiveSort = DynamicSortBuilder<CategoryImportBatch>.BuildEffectiveSort(
             request.Sort, SortConfiguration);
         var cursorState = CursorCodec<CategoryImportBatch>.Decode(request.Cursor);
+        var useSqlServerCollation = TextSearchCollation.IsSqlServer(dbContext.Database);
         var query = FilterQueryBuilder<CategoryImportBatch>.Apply(
             dbContext.CategoryImportBatches.AsNoTracking(),
             request.Filters,
             FilterConfiguration,
-            TextSearchCollation.IsSqlServer(dbContext.Database));
-
-        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-        {
-            var term = request.SearchTerm.Trim();
-            query = TextSearchCollation.IsSqlServer(dbContext.Database)
-                ? query.Where(batch =>
-                    (batch.ErrorMessage != null &&
-                     EF.Functions.Collate(batch.ErrorMessage, TextSearchCollation.AccentInsensitive).Contains(term)) ||
-                    batch.Files.Any(file =>
-                        EF.Functions.Collate(file.FileMetadata.OriginalName, TextSearchCollation.AccentInsensitive).Contains(term) ||
-                        EF.Functions.Collate(file.FileMetadata.BlobPath, TextSearchCollation.AccentInsensitive).Contains(term)))
-                : query.Where(batch =>
-                    (batch.ErrorMessage != null && batch.ErrorMessage.Contains(term)) ||
-                    batch.Files.Any(file =>
-                        file.FileMetadata.OriginalName.Contains(term) ||
-                        file.FileMetadata.BlobPath.Contains(term)));
-        }
+            useSqlServerCollation);
+        query = ApplySearch(query, request.SearchTerm, useSqlServerCollation);
 
         if (cursorState?.KeyValues.Count > 0)
         {
@@ -53,6 +38,7 @@ public class GetAllCategoryImportBatchesHandler(IApplicationDbContext dbContext)
         }
 
         var pageSize = Math.Clamp(request.PageSize, 1, PaginationConstants.DEFAULT_PAGE_SIZE);
+        // Fetch one extra row to determine whether a next page exists without a count query.
         var batches = await OrderByBuilder<CategoryImportBatch>.ApplyOrderBy(
                 query, effectiveSort, SortConfiguration)
             .Select(batch => new
@@ -104,5 +90,26 @@ public class GetAllCategoryImportBatchesHandler(IApplicationDbContext dbContext)
                 })
             ]
         });
+    }
+
+    private static IQueryable<CategoryImportBatch> ApplySearch(
+        IQueryable<CategoryImportBatch> query, string? searchTerm, bool useSqlServerCollation)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return query;
+
+        var term = searchTerm.Trim();
+        return useSqlServerCollation
+            ? query.Where(batch =>
+                (batch.ErrorMessage != null &&
+                 EF.Functions.Collate(batch.ErrorMessage, TextSearchCollation.AccentInsensitive).Contains(term)) ||
+                batch.Files.Any(file =>
+                    EF.Functions.Collate(file.FileMetadata.OriginalName, TextSearchCollation.AccentInsensitive).Contains(term) ||
+                    EF.Functions.Collate(file.FileMetadata.BlobPath, TextSearchCollation.AccentInsensitive).Contains(term)))
+            : query.Where(batch =>
+                (batch.ErrorMessage != null && batch.ErrorMessage.Contains(term)) ||
+                batch.Files.Any(file =>
+                    file.FileMetadata.OriginalName.Contains(term) ||
+                    file.FileMetadata.BlobPath.Contains(term)));
     }
 }

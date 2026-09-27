@@ -28,32 +28,6 @@ public class EditItemCommandHandler(IApplicationDbContext dbContext)
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        // Category navigation isn't guaranteed to be loaded on the tracked entity above (only
-        // the FK is set), so the category name is resolved with a follow-up lookup here -
-        // mirrors CreateItemCommandHandler.
-        var categoryName = await dbContext.Categories
-            .AsNoTracking()
-            .Where(c => c.Id == request.CategoryId)
-            .Select(c => c.Name)
-            .SingleOrDefaultAsync(cancellationToken);
-
-        return Result.Ok(new ItemDto
-        {
-            Id = item.Id,
-            Sku = item.Sku,
-            Name = item.Name,
-            Description = item.Description,
-            Unit = item.Unit,
-            MinThreshold = item.MinThreshold,
-            IsPerishable = item.IsPerishable,
-            ShelfLifeDays = item.ShelfLifeDays,
-            IsActive = item.IsActive,
-            CategoryId = item.CategoryId,
-            CategoryName = categoryName,
-            CreatedByName = item.CreatedBy?.FullName,
-            LastModifiedByName = item.LastModifiedBy?.FullName,
-            CreatedDate = item.CreatedDate,
-            LastModifiedDate = item.LastModifiedDate
-        });
+        return Result.Ok(await ItemDtoMapper.FromTrackedItemAsync(dbContext, item, cancellationToken));
     }
 }
