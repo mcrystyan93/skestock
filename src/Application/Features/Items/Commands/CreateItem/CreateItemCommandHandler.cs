@@ -27,32 +27,6 @@ public class CreateItemCommandHandler(IApplicationDbContext dbContext)
         item.AddDomainEvent(new ItemCreatedEvent(item));
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        // Category/CreatedBy/LastModifiedBy navigations aren't loaded on a freshly-inserted
-        // entity (only the *Id FKs are set), so the category name is resolved with a follow-up
-        // lookup here - mirrors CreateLocationCommandHandler's ParentLocation lookup.
-        var categoryName = await dbContext.Categories
-            .AsNoTracking()
-            .Where(c => c.Id == request.CategoryId)
-            .Select(c => c.Name)
-            .SingleOrDefaultAsync(cancellationToken);
-
-        return Result.Ok(new ItemDto
-        {
-            Id = item.Id,
-            Sku = item.Sku,
-            Name = item.Name,
-            Description = item.Description,
-            Unit = item.Unit,
-            MinThreshold = item.MinThreshold,
-            IsPerishable = item.IsPerishable,
-            ShelfLifeDays = item.ShelfLifeDays,
-            IsActive = item.IsActive,
-            CategoryId = item.CategoryId,
-            CategoryName = categoryName,
-            CreatedByName = item.CreatedBy?.FullName,
-            LastModifiedByName = item.LastModifiedBy?.FullName,
-            CreatedDate = item.CreatedDate,
-            LastModifiedDate = item.LastModifiedDate
-        });
+        return Result.Ok(await ItemDtoMapper.FromTrackedItemAsync(dbContext, item, cancellationToken));
     }
 }

@@ -46,6 +46,7 @@
 - Web endpoint groups are PascalCase classes under `src/Web/Endpoints`.
 - Angular uses `src/app/core`, `src/app/features/<feature>`, and `src/app/shared/<feature>`, with `@ske/...` TypeScript aliases.
 - Generated/build output (`bin`, `obj`, `dist`, `.angular`, graph artifacts) is not source convention.
+- End-to-end, user-facing flow documentation lives in [feature workflows](../features/README.md), organized by feature rather than by implementation layer.
 
 ### 5) Evidence
 
@@ -57,3 +58,4 @@
 - `src/Application/Features`
 - `src/Client/tsconfig.json`
 - `tests/TestAppHost/Program.cs`
+- `docs/features/README.md`

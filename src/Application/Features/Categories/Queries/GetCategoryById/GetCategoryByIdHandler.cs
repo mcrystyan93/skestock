@@ -9,32 +9,32 @@ public class GetCategoryByIdHandler(IApplicationDbContext dbContext)
 {
     public async ValueTask<Result<CategoryDto>> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
     {
-        var category = await dbContext.Categories
+        var categoryDto = await dbContext.Categories
             .AsNoTracking()
-            .Where(c => c.Id == request.Id)
-            .Select(c => new CategoryDto
+            .Where(category => category.Id == request.Id)
+            .Select(category => new CategoryDto
             {
-                Id = c.Id,
-                Name = c.Name,
-                ItemCount = c.Items.Count,
-                Icon = c.Icon == null
+                Id = category.Id,
+                Name = category.Name,
+                ItemCount = category.Items.Count,
+                Icon = category.Icon == null
                     ? null
                     : new CategoryIconDto
                     {
-                        Name = c.Icon.Name,
-                        FileName = c.Icon.FileName,
-                        Path = c.Icon.Path
+                        Name = category.Icon.Name,
+                        FileName = category.Icon.FileName,
+                        Path = category.Icon.Path
                     },
-                CreatedByName = c.CreatedBy != null ? c.CreatedBy.FullName : null,
-                LastModifiedByName = c.LastModifiedBy != null ? c.LastModifiedBy.FullName : null,
-                CreatedDate = c.CreatedDate,
-                LastModifiedDate = c.LastModifiedDate
+                CreatedByName = category.CreatedBy != null ? category.CreatedBy.FullName : null,
+                LastModifiedByName = category.LastModifiedBy != null ? category.LastModifiedBy.FullName : null,
+                CreatedDate = category.CreatedDate,
+                LastModifiedDate = category.LastModifiedDate
             })
             .SingleOrDefaultAsync(cancellationToken);
 
-        if (category is null)
+        if (categoryDto is null)
             return Result.Fail(new CategoryErrors.CategoryNotFound(request.Id));
 
-        return Result.Ok(category);
+        return Result.Ok(categoryDto);
     }
 }
