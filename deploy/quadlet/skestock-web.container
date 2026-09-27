@@ -1,13 +1,16 @@
 [Unit]
 Description=skestock Web API and Angular frontend
 Requires=skestock-db.service skestock-cache.service skestock-storage.service
-After=skestock-db.service skestock-cache.service skestock-storage.service
+# Wants (not Requires): telemetry being unavailable must never stop the application.
+Wants=skestock-dashboard.service
+After=skestock-db.service skestock-cache.service skestock-storage.service skestock-dashboard.service
 
 [Container]
 ContainerName=skestock-webapi
 Image=localhost/skestock-web:current
 Network=skestock.network
 EnvironmentFile=%h/.config/skestock/production.env
+Environment=OTEL_SERVICE_NAME=webapi
 Volume=skestock-data-protection-keys.volume:/var/lib/skestock/data-protection-keys:Z
 PublishPort=7001:8080
 

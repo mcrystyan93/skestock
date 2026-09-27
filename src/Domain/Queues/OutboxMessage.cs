@@ -13,4 +13,6 @@ public class OutboxMessage
     public DateTimeOffset? ClaimedUntilUtc { get; set; }  // expired claims can be safely recovered
     public int RetryCount { get; set; }
     public string? Error { get; set; }
+    public string? TraceParent { get; set; }        // W3C traceparent of the activity that created the message
+    public string? TraceState { get; set; }         // W3C tracestate accompanying TraceParent
 }

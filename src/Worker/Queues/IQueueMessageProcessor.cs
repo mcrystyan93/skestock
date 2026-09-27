@@ -11,5 +11,6 @@ public interface IQueueMessageProcessor
 {
     Task<QueueMessageProcessingResult> ProcessAsync(
         QueueMessage message,
+        string queueName,
         CancellationToken cancellationToken);
 }

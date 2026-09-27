@@ -83,7 +83,7 @@ public abstract class QueueProcessingService<TService>(
         // One scope per message: a fresh DbContext and AmbientUser for every message.
         using var scope = scopeFactory.CreateScope();
         var processor = scope.ServiceProvider.GetRequiredService<IQueueMessageProcessor>();
-        var result = await processor.ProcessAsync(message, cancellationToken);
+        var result = await processor.ProcessAsync(message, queueName, cancellationToken);
 
         var disposition = QueueMessageDispositionPolicy.Decide(result.Status, message.DequeueCount);
         await ApplyDispositionAsync(message, result, disposition, cancellationToken);

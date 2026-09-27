@@ -1,5 +1,4 @@
 using skestock.Application.Common.Interfaces;
-using skestock.Domain.Entities;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.Features.Statistics.Commands.MaterializePurchaseStatistics;
@@ -16,57 +15,47 @@ public sealed class MaterializePurchaseStatisticsCommandHandler(
         var timeZone = TimeZoneInfo.FindSystemTimeZoneById(request.TimeZoneId);
         var computedAt = timeProvider.GetUtcNow();
 
-        // Received quantity lives on the Order transaction; StockBatch.Quantity is what remains.
+        // Only goods receipts are purchases: manually created Order transactions (e.g. stock batches
+        // entered outside a receipt) are excluded. Received quantity lives on the receipt's Order
+        // transaction; StockBatch.Quantity is what remains.
         var lines = await dbContext.StockTransactions
             .AsNoTracking()
-            .Where(t => t.Type == StockTransactionType.Order && t.QuantityChange > 0)
+            .Where(t => t.Type == StockTransactionType.Order
+                        && t.QuantityChange > 0
+                        && t.GoodsReceipt != null)
             .Select(t => new PurchaseLine(
                 t.ItemId,
-                t.ClassId,
-                t.GoodsReceiptId ?? t.Id,
+                t.GoodsReceipt!.ClassId,
+                t.GoodsReceipt.Id,
                 t.QuantityChange,
                 t.Batch != null ? t.Batch.UnitPrice : 0m,
-                t.GoodsReceipt != null ? t.GoodsReceipt.ReceivedAt : t.CreatedAt))
+                t.GoodsReceipt.ReceivedAt))
             .ToListAsync(cancellationToken);
 
-        var statistics = PurchaseStatisticsCalculator.Calculate(
-            lines,
-            LocalCalendarDay.GetDate(computedAt, timeZone),
-            timeZone,
-            computedAt);
+        var today = LocalCalendarDay.GetDate(computedAt, timeZone);
 
         var strategy = dbContext.Database.CreateExecutionStrategy();
-        await strategy.ExecuteAsync(
+        var count = await strategy.ExecuteAsync(
             async strategyCancellationToken =>
             {
                 dbContext.ItemPurchaseStatistics.Local.Clear();
+
+                // Calculated per attempt so a retried execution adds fresh, untracked entities.
+                var statistics = PurchaseStatisticsCalculator.Calculate(lines, today, timeZone, computedAt);
 
                 await using var transaction =
                     await dbContext.Database.BeginTransactionAsync(strategyCancellationToken);
 
                 await dbContext.ItemPurchaseStatistics.ExecuteDeleteAsync(strategyCancellationToken);
 
-                dbContext.ItemPurchaseStatistics.AddRange(statistics.Select(Clone));
+                dbContext.ItemPurchaseStatistics.AddRange(statistics);
                 await dbContext.SaveChangesAsync(strategyCancellationToken);
                 await transaction.CommitAsync(strategyCancellationToken);
+
+                return statistics.Count;
             },
             cancellationToken);
 
-        return Result.Ok(statistics.Count);
+        return Result.Ok(count);
     }
-
-    // A fresh instance per strategy attempt, so a retried execution never re-adds tracked entities.
-    private static ItemPurchaseStatistic Clone(ItemPurchaseStatistic source) => new()
-    {
-        Scope = source.Scope,
-        ClassId = source.ClassId,
-        ItemId = source.ItemId,
-        TotalQuantity = source.TotalQuantity,
-        TotalValue = source.TotalValue,
-        PurchaseCount = source.PurchaseCount,
-        AverageQuantity = source.AverageQuantity,
-        AverageUnitPrice = source.AverageUnitPrice,
-        LastPurchasedAt = source.LastPurchasedAt,
-        ComputedAt = source.ComputedAt
-    };
 }

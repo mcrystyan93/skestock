@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using skestock.Application.Common.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -6,36 +6,24 @@ namespace skestock.Application.Common.Behaviours;
 
 public class PerformanceBehaviour<TRequest, TResponse>(
     ILogger<TRequest> logger,
-    IUser user,
-    IIdentityService identityService)
+    IUser user)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull, IMessage
 {
-    private readonly Stopwatch _timer = new();
+    private const long LongRunningThresholdMilliseconds = 500;
 
     public async ValueTask<TResponse> Handle(TRequest request, MessageHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
     {
-        _timer.Start();
+        // Measured per invocation: a scoped behaviour instance can serve several sends.
+        var startedAt = Stopwatch.GetTimestamp();
 
         var response = await next(request, cancellationToken);
 
-        _timer.Stop();
+        var elapsedMilliseconds = (long)Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds;
 
-        var elapsedMilliseconds = _timer.ElapsedMilliseconds;
-
-        if (elapsedMilliseconds > 500)
+        if (elapsedMilliseconds > LongRunningThresholdMilliseconds)
         {
-            var requestName = typeof(TRequest).Name;
-            var userId = user.Id;
-            var userName = string.Empty;
-
-            if (userId!=null)
-            {
-                userName = await identityService.GetUserNameAsync(userId.Value);
-            }
-
-            logger.LogWarning("skestock Long Running Request: {Name} ({ElapsedMilliseconds} milliseconds) {@UserId} {@UserName} {@Request}",
-                requestName, elapsedMilliseconds, userId, userName, request);
+            logger.LongRunningRequest(typeof(TRequest).Name, elapsedMilliseconds, user.Id);
         }
 
         return response;

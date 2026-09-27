@@ -3,8 +3,9 @@ using skestock.Domain.Enums;
 namespace skestock.Domain.Entities;
 
 // Materialized purchase totals for one item in one scope (a rolling window across all classes, or
-// one class's full history). A purchase is a received stock line (an Order transaction); purchases
-// on the same goods receipt count once towards PurchaseCount.
+// one class's full history). A purchase is a goods receipt line (its Order transaction); manually
+// created Order transactions are excluded, and lines on the same receipt count once towards
+// PurchaseCount.
 public class ItemPurchaseStatistic : BaseEntity
 {
     public PurchaseStatisticsScope Scope { get; set; }

@@ -208,6 +208,8 @@ jobs:
             printf 'ConnectionStrings__blobservice=%s\n' "$blob_connection_string"
             printf 'ConnectionStrings__queues=%s\n' "$queue_connection_string"
             printf 'Storage__PublicBlobEndpoint=%s\n' "$STORAGE_PUBLIC_BLOB_ENDPOINT"
+            printf 'OTEL_EXPORTER_OTLP_ENDPOINT=%s\n' "http://skestock-dashboard:18889"
+            printf 'OTEL_RESOURCE_ATTRIBUTES=%s\n' "deployment.environment=production"
           } > "$runtime_env"
 
           origin_index=0

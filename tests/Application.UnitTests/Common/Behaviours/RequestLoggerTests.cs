@@ -1,47 +1,68 @@
-﻿using skestock.Application.Common.Behaviours;
+using skestock.Application.Common.Behaviours;
 using skestock.Application.Common.Interfaces;
 using Mediator;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using Shouldly;
 
 namespace skestock.Application.UnitTests.Common.Behaviours;
 
 public record TestCommand : IRequest;
 
+public record SensitiveCommand(string Payload) : IRequest;
+
 public class RequestLoggerTests
 {
-    private Mock<ILogger<TestCommand>> _logger = null!;
-    private Mock<IUser> _user = null!;
-    private Mock<IIdentityService> _identityService = null!;
+    private const string SensitivePayload = "base64-file-content-and-personal-data";
 
-    [SetUp]
-    public void Setup()
+    [Test]
+    public async Task ShouldLogRequestNameAndUserIdAtDebug()
     {
-        _logger = new Mock<ILogger<TestCommand>>();
-        _user = new Mock<IUser>();
-        _identityService = new Mock<IIdentityService>();
+        var userId = Guid.NewGuid();
+        var logger = new CapturingLogger<SensitiveCommand>();
+        var requestLogger = new LoggingBehaviour<SensitiveCommand, Unit>(logger, CreateUser(userId));
+
+        await requestLogger.Handle(
+            new SensitiveCommand(SensitivePayload),
+            static (_, _) => new ValueTask<Unit>(Unit.Value),
+            CancellationToken.None);
+
+        var entry = logger.Entries.ShouldHaveSingleItem();
+        entry.Level.ShouldBe(LogLevel.Debug);
+        entry.State.ShouldContain(new KeyValuePair<string, object?>("RequestName", nameof(SensitiveCommand)));
+        entry.State.ShouldContain(new KeyValuePair<string, object?>("UserId", userId));
     }
 
     [Test]
-    public async Task ShouldCallGetUserNameAsyncOnceIfAuthenticated()
+    public async Task ShouldNeverLogRequestPayload()
     {
-        _user.Setup(x => x.Id).Returns(Guid.NewGuid());
+        var logger = new CapturingLogger<SensitiveCommand>();
+        var request = new SensitiveCommand(SensitivePayload);
+        var requestLogger = new LoggingBehaviour<SensitiveCommand, Unit>(logger, CreateUser(Guid.NewGuid()));
 
-        var requestLogger = new LoggingBehaviour<TestCommand, Unit>(_logger.Object, _user.Object, _identityService.Object);
+        await requestLogger.Handle(request, static (_, _) => new ValueTask<Unit>(Unit.Value), CancellationToken.None);
 
-        await requestLogger.Handle(new TestCommand(), static (_, _) => new ValueTask<Unit>(Unit.Value), new CancellationToken());
-
-        _identityService.Verify(i => i.GetUserNameAsync(It.IsAny<Guid>()), Times.Once);
+        var entry = logger.Entries.ShouldHaveSingleItem();
+        entry.Message.ShouldNotContain(SensitivePayload);
+        entry.State.ShouldNotContain(pair => ReferenceEquals(pair.Value, request));
     }
 
     [Test]
-    public async Task ShouldNotCallGetUserNameAsyncOnceIfUnauthenticated()
+    public async Task ShouldNotLogWhenDebugIsDisabled()
     {
-        var requestLogger = new LoggingBehaviour<TestCommand, Unit>(_logger.Object, _user.Object, _identityService.Object);
+        var logger = new CapturingLogger<TestCommand>(LogLevel.Information);
+        var requestLogger = new LoggingBehaviour<TestCommand, Unit>(logger, CreateUser(null));
 
-        await requestLogger.Handle(new TestCommand(), static (_, _) => new ValueTask<Unit>(Unit.Value), new CancellationToken());
+        await requestLogger.Handle(new TestCommand(), static (_, _) => new ValueTask<Unit>(Unit.Value), CancellationToken.None);
 
-        _identityService.Verify(i => i.GetUserNameAsync(It.IsAny<Guid>()), Times.Never);
+        logger.Entries.ShouldBeEmpty();
+    }
+
+    private static IUser CreateUser(Guid? id)
+    {
+        var user = new Mock<IUser>();
+        user.Setup(x => x.Id).Returns(id);
+        return user.Object;
     }
 }

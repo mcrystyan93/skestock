@@ -57,13 +57,17 @@ podman tag "$worker_image" localhost/skestock-worker:current
 
 systemctl --user daemon-reload
 systemctl --user enable skestock-db.service skestock-cache.service skestock-storage.service
+systemctl --user enable skestock-dashboard.service
 systemctl --user enable skestock-web.service skestock-worker.service
 systemctl --user start skestock-db.service skestock-cache.service skestock-storage.service
+# Started, not restarted: the dashboard keeps telemetry in memory only.
+systemctl --user start skestock-dashboard.service
 systemctl --user restart skestock-web.service skestock-worker.service
 
 systemctl --user is-active --quiet skestock-db.service
 systemctl --user is-active --quiet skestock-cache.service
 systemctl --user is-active --quiet skestock-storage.service
+systemctl --user is-active --quiet skestock-dashboard.service
 systemctl --user is-active --quiet skestock-web.service
 systemctl --user is-active --quiet skestock-worker.service
 

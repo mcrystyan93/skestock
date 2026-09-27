@@ -3,8 +3,7 @@ using skestock.Domain.Enums;
 
 namespace skestock.Application.Features.Statistics.Commands.MaterializePurchaseStatistics;
 
-// One received stock line. PurchaseKey identifies the purchase event: the goods receipt when the
-// line belongs to one, otherwise the transaction itself.
+// One goods receipt line. PurchaseKey identifies the purchase event (the goods receipt).
 public sealed record PurchaseLine(
     Guid ItemId,
     Guid ClassId,
