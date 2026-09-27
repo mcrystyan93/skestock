@@ -30,6 +30,7 @@ Command naming is feature-specific: `Items` uses `Edit/Disable/Enable`, Location
 - Use `Guard.Against.*` for argument/configuration guards.
 - Use Application abstractions (`IApplicationDbContext`, `IBlobStorageService`, `IQueueSender`, `IRealtimeNotifier`) from handlers.
 - Angular components/services use `inject()`, `@Service()`, signals, `input()`/`output()`, and named exports; import through aliases.
+- Angular's configured component/service schematics use `skipTests: true`; add colocated `.spec.ts` files explicitly when behavior needs coverage.
 
 ### 4) Error and Logging Conventions
 
@@ -55,3 +56,4 @@ Command naming is feature-specific: `Items` uses `Edit/Disable/Enable`, Location
 - `src/Application/Common/Behaviours`
 - `src/Web/Infrastructure/ProblemDetailsExceptionHandler.cs`
 - `src/Client/tsconfig.json`
+- `src/Client/angular.json`

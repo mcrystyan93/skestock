@@ -4,12 +4,26 @@ import type { ApexAxisChartSeries, ApexChart, ApexOptions } from 'apexcharts';
 import { ChartComponent } from 'ng-apexcharts';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { ThemeService } from '@ske/theme';
+import { ConsumptionPeriod, summarizeConsumption } from './class-consumption-periods';
 
 const CHART_HEIGHT = 320;
 const USAGE_COLOR = '#1f6c72';
 const AVERAGE_COLOR = '#d4380d';
 const QUANTITY_FORMATTER = new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 2 });
 const CURRENCY_FORMATTER = new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' });
+const DAY_FORMATTER = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const MONTH_FORMATTER = new Intl.DateTimeFormat('ro-RO', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+const PERIOD_LABELS: Record<ConsumptionPeriod, string> = {
+  daily: 'zilnică',
+  weekly: 'săptămânală',
+  monthly: 'lunară'
+};
+const PERIOD_ADVERBS: Record<ConsumptionPeriod, string> = {
+  daily: 'zilnic',
+  weekly: 'săptămânal',
+  monthly: 'lunar'
+};
 
 @Component({
   selector: 'ske-class-daily-consumption-chart',
@@ -19,7 +33,7 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat('ro-RO', { style: 'currency', c
       <p class="mb-2 text-sm px-4"
          nz-typography
          nzType="secondary">
-        Medie zilnică: <strong>{{ averageQuantityLabel() }}</strong> buc. ·
+        Medie {{ periodLabel() }}: <strong>{{ averageQuantityLabel() }}</strong> buc. ·
         <strong>{{ averageValueLabel() }}</strong>
       </p>
       <apx-chart [series]="series()"
@@ -47,7 +61,7 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat('ro-RO', { style: 'currency', c
 export class ClassDailyConsumptionChart {
   public readonly data = input<ClassDailyConsumptionDto | null>(null);
   public readonly emptyMessage = input.required<string>();
-  public readonly ariaLabel = input.required<string>();
+  public readonly period = input<ConsumptionPeriod>('daily');
 
   private readonly _themeService = inject(ThemeService);
 
@@ -59,17 +73,27 @@ export class ClassDailyConsumptionChart {
 
   public readonly hasChartData = computed(() => (this.data()?.totalQuantity ?? 0) > 0);
 
+  public readonly summary = computed(() => {
+    const data = this.data();
+    return data ? summarizeConsumption(data, this.period()) : null;
+  });
+
+  public readonly periodLabel = computed(() => PERIOD_LABELS[this.period()]);
+  public readonly ariaLabel = computed(() =>
+    `Consumul ${PERIOD_ADVERBS[this.period()]} și media ${this.periodLabel()} pentru filtrele selectate`
+  );
+
   public readonly averageQuantityLabel = computed(() =>
-    QUANTITY_FORMATTER.format(this.data()?.averageQuantity ?? 0)
+    QUANTITY_FORMATTER.format(this.summary()?.averageQuantity ?? 0)
   );
 
   public readonly averageValueLabel = computed(() =>
-    CURRENCY_FORMATTER.format(this.data()?.averageValue ?? 0)
+    CURRENCY_FORMATTER.format(this.summary()?.averageValue ?? 0)
   );
 
   public readonly series = computed<ApexAxisChartSeries>(() => [{
     name: 'Consum',
-    data: (this.data()?.points ?? []).map((point) => ({
+    data: (this.summary()?.points ?? []).map((point) => ({
       x: Date.parse(`${point.date}T00:00:00Z`),
       y: point.quantity
     }))
@@ -88,7 +112,7 @@ export class ClassDailyConsumptionChart {
 
   public readonly xaxis = computed<ApexOptions['xaxis']>(() => ({
     type: 'datetime',
-    labels: { datetimeUTC: true, format: 'dd MMM' }
+    labels: { datetimeUTC: true, format: this.period() === 'monthly' ? 'MMM yyyy' : 'dd MMM' }
   }));
 
   public readonly yaxis = computed<ApexOptions['yaxis']>(() => ({
@@ -96,9 +120,21 @@ export class ClassDailyConsumptionChart {
   }));
 
   public readonly tooltip = computed<ApexOptions['tooltip']>(() => {
-    const points = this.data()?.points ?? [];
+    const points = this.summary()?.points ?? [];
+    const period = this.period();
     return {
-      x: { format: 'dd MMM yyyy' },
+      x: {
+        formatter: (value: number) => {
+          const start = new Date(value);
+          if (period === 'monthly') return MONTH_FORMATTER.format(start);
+          if (period === 'weekly') {
+            const end = new Date(value);
+            end.setUTCDate(end.getUTCDate() + 6);
+            return `${DAY_FORMATTER.format(start)} – ${DAY_FORMATTER.format(end)}`;
+          }
+          return DAY_FORMATTER.format(start);
+        }
+      },
       y: {
         formatter: (value, options) => {
           const point = points[options?.dataPointIndex ?? -1];
@@ -111,7 +147,7 @@ export class ClassDailyConsumptionChart {
 
   public readonly annotations = computed<ApexOptions['annotations']>(() => ({
     yaxis: [{
-      y: this.data()?.averageQuantity ?? 0,
+      y: this.summary()?.averageQuantity ?? 0,
       borderColor: AVERAGE_COLOR,
       strokeDashArray: 4,
       label: {

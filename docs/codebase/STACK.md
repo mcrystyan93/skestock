@@ -9,7 +9,7 @@
 | Backend language/runtime | C# on .NET 10 (`net10.0`) | `Directory.Build.props`, `global.json` |
 | SDK | `10.0.110`, `rollForward: latestFeature` | `global.json` |
 | .NET package manager | NuGet Central Package Management | `Directory.Packages.props` |
-| Frontend | Angular `^22.1.0`, TypeScript `~6.0.2`, npm `11.16.0` | `src/Client/package.json` |
+| Frontend | Angular `^22.2.0`, TypeScript `~6.0.3`, npm `11.16.0` | `src/Client/package.json` |
 | .NET solution/build | MSBuild XML solution (`skestock.slnx`) | `skestock.slnx` |
 | Orchestration | .NET Aspire `13.5.2` AppHost | `src/AppHost/AppHost.csproj`, `aspire.config.json` |
 
@@ -24,11 +24,12 @@
 | FluentValidation | `12.1.1` | Request validators | `src/Application/DependencyInjection.cs` |
 | FluentResults | `4.0.0` | Typed expected-failure results | `Directory.Packages.props`, `src/Application/Common/Errors` |
 | HybridCache/FusionCache + Redis | `10.9.0` / `2.7.2` / Aspire `13.5.2` | L1/L2 caching, tag invalidation, Redis backplane | `src/Infrastructure/DependencyInjection.cs` |
-| Azure Blob/Queue clients | Aspire `13.5.3`, Blob `12.28.0` | SAS file storage and import queues | `src/Infrastructure/Storage`, `src/Infrastructure/Queues` |
+| Azure Blob/Queue clients | Aspire `13.5.3`, Blob `12.28.0` | SAS file storage and import queues | `Directory.Packages.props`, `src/Infrastructure/Storage`, `src/Infrastructure/Queues` |
 | SignalR Redis backplane | `10.0.11` | Realtime server-to-client notifications | `src/Infrastructure/DependencyInjection.cs`, `src/Infrastructure/Realtime` |
 | Scalar | `2.17.1` | OpenAPI reference UI at `/scalar` | `src/Web/Program.cs` |
 | OpenTelemetry | `1.18.0` | Logs, metrics, traces, optional OTLP export | `src/ServiceDefaults/Extensions.cs` |
-| Angular/ng-zorro/NgRx Signals | Angular `22.1`, ng-zorro `22.0.1`, NgRx `22.0.0` | SPA UI, components, signal-based client state | `src/Client/package.json` |
+| Angular/ng-zorro/NgRx Signals | Angular `^22.2.0`, ng-zorro `^22.1.1`, NgRx `^22.0.1` | SPA UI, components, signal-based client state | `src/Client/package.json` |
+| ApexCharts / ng-apexcharts | `^7.6.1` / `^3.1.0` | Client statistics charts | `src/Client/package.json` |
 
 ### 3) Development Toolchain
 
@@ -38,7 +39,7 @@
 | Shouldly `4.3.0` | Assertions | `Directory.Packages.props` |
 | Moq `4.20.72` | Unit-test mocks | `Directory.Packages.props` |
 | Respawn `7.0.0` | SQL reset for functional tests | `tests/Application.FunctionalTests/Infrastructure/DatabaseResetter.cs` |
-| Vitest `4.0.8` | Angular unit/component tests | `src/Client/package.json` |
+| Vitest `^5.0.2` | Angular unit/component tests | `src/Client/package.json` |
 | EditorConfig | Formatting/analyzer preferences | `.editorconfig` |
 | Clean Architecture template `10.8.0` | CQRS scaffolding | `README.md`, `Directory.Packages.props` |
 
@@ -63,6 +64,7 @@ cd src/Client && npm test
 - Aspire supplies SQL Server, Redis, Azure Storage/Azurite, service discovery, and connection strings through `WithReference(...)`.
 - `src/Web/appsettings.json` intentionally has no connection-string fallback; full local development must use `src/AppHost` or provide every required external connection/configuration explicitly.
 - Aspire secret parameters include SQL and Redis passwords; OpenAI settings are injected by AppHost or deployment.
+- Worker binds and validates `DailyStatistics` schedule, time zone, and backfill options at startup.
 - Production configuration is rendered from GitHub Environment variables/secrets into a protected runtime env file; see `deploy/production.env.example`.
 - Web and Worker Dockerfiles use Node 22 for the Angular build (Web image) and .NET 10 SDK/ASP.NET runtime images.
 
@@ -76,4 +78,5 @@ cd src/Client && npm test
 - `src/AppHost/Program.cs`
 - `src/Web/Dockerfile`, `src/Worker/Dockerfile`
 - `src/Client/package.json`
+- `src/Worker/Program.cs`, `src/Worker/Statistics/DailyStatisticsOptions.cs`
 - `.github/workflows/deploy-production.yml`

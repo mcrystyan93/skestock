@@ -37,7 +37,7 @@
 - OpenAI HTTP uses standard resilience with a two-minute attempt timeout, five-minute total timeout, exponential retries, and circuit breaker settings.
 - Outbox publishing claims bounded batches, uses leases/retry counts, and records failures.
 - Azure queue consumers use visibility timeouts, duplicate detection through `ProcessedMessages`, permanent/retryable classification, and poison queues.
-- Daily statistics uses a Redis lock, persisted `ScheduledJobRun`, startup catch-up, and retries at 1/5/15 minutes.
+- Daily statistics uses a Redis lock, persisted `ScheduledJobRun`, startup catch-up, and retries at 1/5/15 minutes. It materializes daily consumption through Mediator, then attempts purchase statistics as non-blocking secondary work.
 - Aspire `.WaitFor(...)` gates dependent services on resource readiness; it is startup ordering, not a runtime fallback.
 
 ### 5) Observability
@@ -52,6 +52,6 @@
 - `src/Infrastructure/DependencyInjection.cs`
 - `src/Infrastructure/Storage`, `src/Infrastructure/Queues`, `src/Infrastructure/Distributed`
 - `src/Web/BackgroundJobs/OutboxPublisherService.cs`
-- `src/Worker/Queues`, `src/Worker/Statistics`
+- `src/Worker/Queues`, `src/Worker/Statistics/DailyStatisticsService.cs`, `src/Worker/Statistics/DailyStatisticsJob.cs`
 - `.github/workflows/deploy-production.yml`
 - `deploy/production.env.example`

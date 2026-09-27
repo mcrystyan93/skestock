@@ -5,7 +5,7 @@
 ### 1) Test Stack and Commands
 
 - .NET framework: NUnit `4.6.1`, NUnit3 adapter/analyzers, Shouldly `4.3.0`, Moq `4.20.72`, Respawn `7.0.0`, coverlet collector.
-- Client framework: Vitest `4.0.8` through Angular CLI.
+- Client framework: Vitest `^5.0.2` through Angular CLI (`@angular/build:unit-test`).
 
 ```bash
 dotnet test
@@ -26,6 +26,7 @@ cd src/Client && npm ci && npm test
 - `Worker.UnitTests` covers queue processing and daily schedule/worker behavior.
 - `Domain.UnitTests` is a project shell with no test files currently.
 - Client specs are colocated under `src/Client/src/**/*.spec.ts`.
+- The Angular schematics default to `skipTests: true`; existing specs are added manually.
 
 ### 3) Test Scope Matrix
 
@@ -34,7 +35,7 @@ cd src/Client && npm ci && npm test
 | Unit | Present | Application handlers, validators, filters, keyset, cache, queue processor, daily schedule | No external resources |
 | Functional HTTP | Present | Web API through `WebApiFactory` and test Aspire resources | `FunctionalTestSetup` waits up to 90 seconds for database/cache/queues |
 | Infrastructure integration | Present | `ApplicationDbContext`, outbox claims, exporters, data protection | Requires containerized dependencies |
-| Worker integration | Partial | Worker processor unit tests and functional host includes Worker/Azurite | Inspect individual tests before assuming every queue path is covered |
+| Worker integration | Partial | Worker processor unit tests; test Aspire host provisions Worker and Azurite | HTTP functional setup waits for database/cache/queues, not Worker health; inspect individual tests before assuming every queue path is covered |
 | Domain unit | Missing | `tests/Domain.UnitTests` | Add when domain invariants/behavior grow |
 | Browser E2E | Not configured | — | No dedicated Playwright/Cypress project found |
 
@@ -49,6 +50,7 @@ cd src/Client && npm ci && npm test
 
 - Coverlet is available, but no coverage threshold/gate was found.
 - The only GitHub Actions workflow is manually triggered production deployment; it validates build/unit/client tests during deployment but is not a push/PR gate.
+- `src/Client/README.md` mentions `ng e2e`, but `src/Client/angular.json` defines only build, serve, and test targets; there is no configured browser E2E runner.
 - Functional/integration tiers are environment-sensitive because they require Docker/Podman and Aspire resource health.
 - Domain behavior and browser-level behavior are the clearest coverage gaps.
 
@@ -57,8 +59,10 @@ cd src/Client && npm ci && npm test
 - `tests/Application.FunctionalTests/FunctionalTestSetup.cs`
 - `tests/Application.FunctionalTests/Infrastructure/{TestApp,TestBase,WebApiFactory,DatabaseResetter}.cs`
 - `tests/TestAppHost/Program.cs`
-- `tests/Infrastructure.IntegrationTests/IntegrationTestSetup.cs`
+- `tests/Infrastructure.IntegrationTests/OutboxPublisherConcurrencyTests.cs` (`IntegrationTestSetup` is defined here)
 - `tests/Worker.UnitTests`
 - `tests/Domain.UnitTests/Domain.UnitTests.csproj`
 - `src/Client/package.json`
+- `src/Client/angular.json`
+- `src/Client/README.md`
 - `run-functional-tests.sh`, `functional-tests.runsettings`
