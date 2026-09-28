@@ -8,10 +8,13 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace skestock.Application.FunctionalTests.Infrastructure;
 
-public class WebApiFactory(string connectionString, string cacheConnectionString, string queueConnectionString)
+public class WebApiFactory(
+    string connectionString,
+    string cacheConnectionString,
+    string queueConnectionString,
+    string blobConnectionString)
     : WebApplicationFactory<Program>
 {
-    private const string TestStorageConnectionString = "UseDevelopmentStorage=true";
     private const string TestOpenAiApiKey = "functional-test-api-key";
     private const string TestOpenAiModel = "functional-test-model";
 
@@ -20,7 +23,7 @@ public class WebApiFactory(string connectionString, string cacheConnectionString
         builder
             .UseSetting("ConnectionStrings:skestockDb", connectionString)
             .UseSetting($"ConnectionStrings:{skestock.Shared.Services.Cache}", cacheConnectionString)
-            .UseSetting($"ConnectionStrings:{skestock.Shared.Services.BlobService}", TestStorageConnectionString)
+            .UseSetting($"ConnectionStrings:{skestock.Shared.Services.BlobService}", blobConnectionString)
             .UseSetting($"ConnectionStrings:{skestock.Shared.Services.Queues}", queueConnectionString)
             .UseSetting("OpenApiSettings:ApiKey", TestOpenAiApiKey)
             .UseSetting("OpenApiSettings:Model", TestOpenAiModel);

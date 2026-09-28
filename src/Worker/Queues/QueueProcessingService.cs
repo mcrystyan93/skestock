@@ -1,6 +1,9 @@
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
+using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using skestock.Application.Queues;
+using Worker.Services;
 
 namespace Worker.Queues;
 
@@ -20,6 +23,7 @@ public abstract class QueueProcessingService<TService>(
     QueueServiceClient queueServiceClient,
     ILogger<TService> logger,
     IServiceScopeFactory scopeFactory,
+    WorkerHeartbeat heartbeat,
     string queueName,
     TimeSpan visibilityTimeout)
     : BackgroundService
@@ -32,6 +36,10 @@ public abstract class QueueProcessingService<TService>(
     private readonly QueueClient _client = queueServiceClient.GetQueueClient(queueName);
     private readonly string _poisonQueueName = queueName + PoisonQueueSuffix;
 
+    // A healthy loop completes an iteration at least once per visibility timeout plus the poll
+    // delay; two poll intervals leave slack for the receive call itself.
+    private readonly WorkerHeartbeat _heartbeat = heartbeat.Register(queueName, visibilityTimeout + 2 * PollInterval);
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await _client.CreateIfNotExistsAsync(cancellationToken: stoppingToken);
@@ -41,6 +49,7 @@ public abstract class QueueProcessingService<TService>(
             try
             {
                 var receivedCount = await ReceiveAndProcessBatchAsync(stoppingToken);
+                _heartbeat.Beat(queueName);
                 if (receivedCount == 0)
                 {
                     await Task.Delay(PollInterval, stoppingToken);
@@ -55,6 +64,9 @@ public abstract class QueueProcessingService<TService>(
                 // Messages that were not deleted become visible again after the visibility
                 // timeout, so a failed iteration never loses work.
                 logger.LogError(ex, "Queue polling loop failed for {QueueName}", queueName);
+                // The loop is alive even though this iteration failed; dependency outages are
+                // reported by the Web health checks, not by restarting the Worker.
+                _heartbeat.Beat(queueName);
                 await Task.Delay(PollInterval, stoppingToken);
             }
         }
@@ -103,6 +115,7 @@ public abstract class QueueProcessingService<TService>(
 
             case QueueMessageDisposition.MoveToPoison:
                 LogPoisonReason(message, result.Status);
+                RecordPoisoned(result.Status);
                 // Send before deleting: if deleting fails, the message is re-delivered rather than lost.
                 await SendToPoisonQueueAsync(message, result, cancellationToken);
                 await DeleteMessageAsync(message, cancellationToken);
@@ -121,6 +134,17 @@ public abstract class QueueProcessingService<TService>(
                 throw new ArgumentOutOfRangeException(nameof(disposition), disposition, "Unknown disposition.");
         }
     }
+
+    private void RecordPoisoned(QueueMessageProcessingStatus status) =>
+        MessagingTelemetry.PoisonedMessages.Add(1, new TagList
+        {
+            { MessagingTelemetry.SystemTag, MessagingTelemetry.SystemName },
+            { MessagingTelemetry.DestinationNameTag, queueName },
+            {
+                MessagingTelemetry.PoisonReasonTag,
+                status == QueueMessageProcessingStatus.PermanentFailure ? "permanent" : "retry_exhausted"
+            }
+        });
 
     private void LogPoisonReason(QueueMessage message, QueueMessageProcessingStatus status)
     {

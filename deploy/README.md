@@ -15,7 +15,7 @@ Environment variables:
 | `PUBLIC_ORIGINS` | Comma-separated browser origins allowed by Web |
 | `STORAGE_PUBLIC_BLOB_ENDPOINT` | Absolute HTTPS endpoint used in browser-facing Azurite SAS URLs, such as `https://blob.example.com` |
 | `OPENAI_MODEL` | OpenAI model name |
-| `DEPLOY_HEALTH_URL` | Public URL checked after deployment, normally `http://host:7001/scalar` |
+| `DEPLOY_HEALTH_URL` | Public URL checked after deployment, normally `http://host:7001/health` (returns only `Healthy`/`Degraded`/`Unhealthy`; 503 when unhealthy) |
 
 Environment secrets:
 

@@ -11,6 +11,13 @@ Image=localhost/skestock-worker:current
 Network=skestock.network
 EnvironmentFile=%h/.config/skestock/production.env
 Environment=OTEL_SERVICE_NAME=worker
+# The Worker touches this file every 30 s while every queue loop is alive (HeartbeatFileService).
+# A stale file means a hung loop: Podman kills the container and systemd restarts it.
+HealthCmd=/bin/sh -c 'test $(( $(date +%%s) - $(stat -c %%Y /tmp/skestock-worker.heartbeat) )) -lt 180'
+HealthInterval=60s
+HealthStartPeriod=120s
+HealthRetries=3
+HealthOnFailure=kill
 
 [Service]
 Restart=always

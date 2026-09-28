@@ -11,6 +11,7 @@ using skestock.Application.Features.Categories.Commands.ProcessCategoryImportBat
 using skestock.Application.Features.GoodsReceipts.Commands.ProcessGoodsReceiptImport;
 using skestock.Application.Features.Items.Commands.ProcessItemImportBatch;
 using Worker.Queues;
+using Worker.Services;
 
 namespace Worker.UnitTests.Queues;
 
@@ -258,19 +259,22 @@ public sealed class QueueProcessingServiceTests
                 await new TestableCategoryProcessor(
                     harness.QueueServiceClient.Object,
                     NullLogger<CategoryImportBatchQueueProcessingService>.Instance,
-                    harness.ScopeFactory).RunAsync(harness.StopToken);
+                    harness.ScopeFactory,
+                    new WorkerHeartbeat(TimeProvider.System)).RunAsync(harness.StopToken);
                 break;
             case QueueProcessorKind.GoodsReceipt:
                 await new TestableGoodsReceiptProcessor(
                     harness.QueueServiceClient.Object,
                     NullLogger<GoodsReceiptImportQueueProcessingService>.Instance,
-                    harness.ScopeFactory).RunAsync(harness.StopToken);
+                    harness.ScopeFactory,
+                    new WorkerHeartbeat(TimeProvider.System)).RunAsync(harness.StopToken);
                 break;
             case QueueProcessorKind.Item:
                 await new TestableItemProcessor(
                     harness.QueueServiceClient.Object,
                     NullLogger<ItemImportQueueProcessingService>.Instance,
-                    harness.ScopeFactory).RunAsync(harness.StopToken);
+                    harness.ScopeFactory,
+                    new WorkerHeartbeat(TimeProvider.System)).RunAsync(harness.StopToken);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(kind), kind, null);
@@ -325,8 +329,9 @@ public sealed class QueueProcessingServiceTests
     private sealed class TestableCategoryProcessor(
         QueueServiceClient queueServiceClient,
         ILogger<CategoryImportBatchQueueProcessingService> logger,
-        IServiceScopeFactory scopeFactory)
-        : CategoryImportBatchQueueProcessingService(queueServiceClient, logger, scopeFactory)
+        IServiceScopeFactory scopeFactory,
+        WorkerHeartbeat heartbeat)
+        : CategoryImportBatchQueueProcessingService(queueServiceClient, logger, scopeFactory, heartbeat)
     {
         public Task RunAsync(CancellationToken cancellationToken) => ExecuteAsync(cancellationToken);
     }
@@ -334,8 +339,9 @@ public sealed class QueueProcessingServiceTests
     private sealed class TestableGoodsReceiptProcessor(
         QueueServiceClient queueServiceClient,
         ILogger<GoodsReceiptImportQueueProcessingService> logger,
-        IServiceScopeFactory scopeFactory)
-        : GoodsReceiptImportQueueProcessingService(queueServiceClient, logger, scopeFactory)
+        IServiceScopeFactory scopeFactory,
+        WorkerHeartbeat heartbeat)
+        : GoodsReceiptImportQueueProcessingService(queueServiceClient, logger, scopeFactory, heartbeat)
     {
         public Task RunAsync(CancellationToken cancellationToken) => ExecuteAsync(cancellationToken);
     }
@@ -343,8 +349,9 @@ public sealed class QueueProcessingServiceTests
     private sealed class TestableItemProcessor(
         QueueServiceClient queueServiceClient,
         ILogger<ItemImportQueueProcessingService> logger,
-        IServiceScopeFactory scopeFactory)
-        : ItemImportQueueProcessingService(queueServiceClient, logger, scopeFactory)
+        IServiceScopeFactory scopeFactory,
+        WorkerHeartbeat heartbeat)
+        : ItemImportQueueProcessingService(queueServiceClient, logger, scopeFactory, heartbeat)
     {
         public Task RunAsync(CancellationToken cancellationToken) => ExecuteAsync(cancellationToken);
     }

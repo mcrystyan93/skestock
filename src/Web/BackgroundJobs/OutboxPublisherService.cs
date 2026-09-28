@@ -22,6 +22,10 @@ public class OutboxPublisherService(
         MaxRetries: 5,
         Lease: TimeSpan.FromMinutes(5));
 
+    // COUNT over the pending rows is cheap but not free; the gauge only needs coarse freshness.
+    private static readonly TimeSpan PendingRefreshInterval = TimeSpan.FromSeconds(30);
+    private DateTimeOffset? _pendingRefreshedAt;
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
@@ -78,6 +82,7 @@ public class OutboxPublisherService(
             activity?.SetTag(MessagingTelemetry.SystemTag, MessagingTelemetry.SystemName);
             activity?.SetTag(MessagingTelemetry.DestinationNameTag, outboxMessage.QueueName);
             activity?.SetTag(MessagingTelemetry.MessageIdTag, outboxMessage.Id);
+            var destination = outboxMessage.QueueName ?? "unknown";
 
             try
             {
@@ -92,6 +97,9 @@ public class OutboxPublisherService(
             catch (Exception ex)
             {
                 activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                var errorType = ex.GetType().FullName ?? ex.GetType().Name;
+                activity?.SetTag(MessagingTelemetry.ErrorTypeTag, errorType);
+                RecordSent(destination, errorType);
 
                 var retryCount = await claimStore.RecordFailureAsync(
                     claim,
@@ -118,6 +126,11 @@ public class OutboxPublisherService(
                 continue;
             }
 
+            RecordSent(destination, errorType: null);
+            MessagingTelemetry.OutboxLag.Record(
+                (timeProvider.GetUtcNow() - outboxMessage.CreatedAtUtc).TotalSeconds,
+                DestinationTags(destination));
+
             var completed = await claimStore.MarkPublishedAsync(
                 claim,
                 outboxMessage.Id,
@@ -132,6 +145,46 @@ public class OutboxPublisherService(
             }
         }
 
+        await RefreshPendingCountAsync(claimStore, cancellationToken);
+
         return claim.Messages.Count;
     }
+
+    private async Task RefreshPendingCountAsync(IOutboxClaimStore claimStore, CancellationToken cancellationToken)
+    {
+        var now = timeProvider.GetUtcNow();
+        if (_pendingRefreshedAt is { } refreshedAt && now - refreshedAt < PendingRefreshInterval)
+        {
+            return;
+        }
+
+        _pendingRefreshedAt = now;
+        try
+        {
+            MessagingTelemetry.ReportOutboxPending(
+                await claimStore.CountPendingAsync(_claimOptions.MaxRetries, cancellationToken));
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // Metrics must never stop publishing; the gauge keeps its previous value.
+            logger.LogWarning(ex, "Could not count pending outbox messages.");
+        }
+    }
+
+    private static void RecordSent(string destination, string? errorType)
+    {
+        var tags = DestinationTags(destination);
+        if (errorType is not null)
+        {
+            tags.Add(MessagingTelemetry.ErrorTypeTag, errorType);
+        }
+
+        MessagingTelemetry.SentMessages.Add(1, tags);
+    }
+
+    private static TagList DestinationTags(string destination) => new()
+    {
+        { MessagingTelemetry.SystemTag, MessagingTelemetry.SystemName },
+        { MessagingTelemetry.DestinationNameTag, destination }
+    };
 }

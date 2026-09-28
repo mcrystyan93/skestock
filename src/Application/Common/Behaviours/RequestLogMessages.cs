@@ -29,4 +29,10 @@ internal static partial class RequestLogMessages
         Level = LogLevel.Error,
         Message = "Unhandled exception for request {RequestName}")]
     public static partial void UnhandledRequestException(this ILogger logger, Exception exception, string requestName);
+
+    [LoggerMessage(
+        EventId = 1003,
+        Level = LogLevel.Warning,
+        Message = "Discarded unreadable cache entry {CacheKey} for {RequestName}; recomputing")]
+    public static partial void UnreadableCacheEntry(this ILogger logger, string cacheKey, string requestName);
 }

@@ -1,4 +1,5 @@
 using Azure.Storage.Queues;
+using Worker.Services;
 using SharedServices = skestock.Shared.Services;
 
 namespace Worker.Queues;
@@ -6,11 +7,13 @@ namespace Worker.Queues;
 public class ItemImportQueueProcessingService(
     QueueServiceClient queueServiceClient,
     ILogger<ItemImportQueueProcessingService> logger,
-    IServiceScopeFactory scopeFactory)
+    IServiceScopeFactory scopeFactory,
+    WorkerHeartbeat heartbeat)
     : QueueProcessingService<ItemImportQueueProcessingService>(
         queueServiceClient,
         logger,
         scopeFactory,
+        heartbeat,
         SharedServices.ItemImportQueue,
         VisibilityTimeout)
 {

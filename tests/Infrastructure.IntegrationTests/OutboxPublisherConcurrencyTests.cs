@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -16,6 +17,9 @@ namespace skestock.Infrastructure.IntegrationTests;
 public sealed class IntegrationTestSetup
 {
     internal static string DatabaseConnectionString { get; private set; } = null!;
+    internal static string CacheConnectionString { get; private set; } = null!;
+    internal static string BlobConnectionString { get; private set; } = null!;
+    internal static string QueueConnectionString { get; private set; } = null!;
 
     private static DistributedApplication? _app;
 
@@ -51,6 +55,9 @@ public sealed class IntegrationTestSetup
             Services.Queues, cancellationToken);
 
         DatabaseConnectionString = (await _app.GetConnectionStringAsync(Services.Database))!;
+        CacheConnectionString = (await _app.GetConnectionStringAsync(Services.Cache))!;
+        BlobConnectionString = (await _app.GetConnectionStringAsync(Services.BlobService))!;
+        QueueConnectionString = (await _app.GetConnectionStringAsync(Services.Queues))!;
 
         await using var dbContext = CreateDbContext();
         await dbContext.Database.MigrateAsync(cancellationToken);
@@ -283,6 +290,86 @@ public sealed class OutboxPublisherConcurrencyTests
         }
     }
 
+    [Test]
+    public async Task SuccessfulPublish_RecordsSentMessageLagAndPendingCount()
+    {
+        var messageId = Guid.NewGuid();
+        var queueName = $"outbox-test-{Guid.NewGuid():N}";
+        using var metrics = new MessagingMetricsRecorder();
+        try
+        {
+            await SeedMessageAsync(new OutboxMessage
+            {
+                Id = messageId,
+                Type = "test.message",
+                Payload = "{}",
+                QueueName = queueName,
+                CreatedAtUtc = DateTimeOffset.UtcNow.AddSeconds(-30)
+            });
+
+            using var serviceProvider = CreatePublisherServiceProvider(new RecordingQueueSender());
+            var publisher = new TestableOutboxPublisherService(
+                serviceProvider.GetRequiredService<IServiceScopeFactory>());
+
+            await publisher.PublishOnceAsync(CancellationToken.None);
+
+            var sent = metrics.For("messaging.client.sent.messages", queueName).ShouldHaveSingleItem();
+            sent.Value.ShouldBe(1);
+            sent.Tags[MessagingTelemetry.SystemTag].ShouldBe(MessagingTelemetry.SystemName);
+            sent.Tags.ShouldNotContainKey(MessagingTelemetry.ErrorTypeTag);
+            sent.Tags.ShouldNotContainKey(MessagingTelemetry.MessageIdTag);
+
+            var lag = metrics.For("skestock.outbox.lag", queueName).ShouldHaveSingleItem();
+            lag.Value.ShouldBeGreaterThanOrEqualTo(30);
+            lag.Tags.ShouldNotContainKey(MessagingTelemetry.MessageIdTag);
+
+            await using var dbContext = IntegrationTestSetup.CreateDbContext();
+            var expectedPending = await dbContext.OutboxMessages
+                .CountAsync(x => x.ProcessedAtUtc == null && x.RetryCount < 5);
+            metrics.ObservePending().ShouldBe(expectedPending);
+        }
+        finally
+        {
+            await DeleteMessageAsync(messageId);
+        }
+    }
+
+    [Test]
+    public async Task FailedPublish_RecordsSentMessageWithErrorTypeAndNoLag()
+    {
+        var messageId = Guid.NewGuid();
+        var queueName = $"outbox-test-{Guid.NewGuid():N}";
+        using var metrics = new MessagingMetricsRecorder();
+        try
+        {
+            await SeedMessageAsync(new OutboxMessage
+            {
+                Id = messageId,
+                Type = "test.message",
+                Payload = "{}",
+                QueueName = queueName,
+                CreatedAtUtc = DateTimeOffset.UtcNow
+            });
+
+            var sender = new RecordingQueueSender(
+                _ => Task.FromException(new InvalidOperationException("queue unavailable")));
+            using var serviceProvider = CreatePublisherServiceProvider(sender);
+            var publisher = new TestableOutboxPublisherService(
+                serviceProvider.GetRequiredService<IServiceScopeFactory>());
+
+            await publisher.PublishOnceAsync(CancellationToken.None);
+
+            var sent = metrics.For("messaging.client.sent.messages", queueName).ShouldHaveSingleItem();
+            sent.Tags[MessagingTelemetry.ErrorTypeTag].ShouldBe(typeof(InvalidOperationException).FullName);
+            metrics.For("skestock.outbox.lag", queueName).ShouldBeEmpty();
+            metrics.ObservePending().ShouldNotBeNull().ShouldBeGreaterThanOrEqualTo(1);
+        }
+        finally
+        {
+            await DeleteMessageAsync(messageId);
+        }
+    }
+
     private static ServiceProvider CreatePublisherServiceProvider(IQueueSender sender)
     {
         var services = new ServiceCollection();
@@ -346,6 +433,69 @@ public sealed class OutboxPublisherConcurrencyTests
             Interlocked.Increment(ref _sendCount);
             lock (_sent) _sent.Add((message, Activity.Current));
             return send?.Invoke(ct) ?? Task.CompletedTask;
+        }
+    }
+
+    private sealed class MessagingMetricsRecorder : IDisposable
+    {
+        private readonly MeterListener _listener = new();
+        private readonly List<(string Instrument, double Value, Dictionary<string, object?> Tags)> _measurements = [];
+        private long? _pending;
+
+        public MessagingMetricsRecorder()
+        {
+            _listener.InstrumentPublished = (instrument, listener) =>
+            {
+                if (instrument.Meter.Name == MessagingTelemetry.MeterName)
+                {
+                    listener.EnableMeasurementEvents(instrument);
+                }
+            };
+            _listener.SetMeasurementEventCallback<double>((instrument, value, tags, _) => Record(instrument, value, tags));
+            _listener.SetMeasurementEventCallback<long>((instrument, value, tags, _) => Record(instrument, value, tags));
+            _listener.Start();
+        }
+
+        public List<(string Instrument, double Value, Dictionary<string, object?> Tags)> For(
+            string instrument,
+            string queueName)
+        {
+            lock (_measurements)
+            {
+                return _measurements
+                    .Where(m => m.Instrument == instrument
+                                && Equals(m.Tags.GetValueOrDefault(MessagingTelemetry.DestinationNameTag), queueName))
+                    .ToList();
+            }
+        }
+
+        public long? ObservePending()
+        {
+            _pending = null;
+            _listener.RecordObservableInstruments();
+            return _pending;
+        }
+
+        public void Dispose() => _listener.Dispose();
+
+        private void Record(Instrument instrument, double value, ReadOnlySpan<KeyValuePair<string, object?>> tags)
+        {
+            if (instrument.Name == "skestock.outbox.pending")
+            {
+                _pending = (long)value;
+                return;
+            }
+
+            var copy = new Dictionary<string, object?>(StringComparer.Ordinal);
+            foreach (var tag in tags)
+            {
+                copy[tag.Key] = tag.Value;
+            }
+
+            lock (_measurements)
+            {
+                _measurements.Add((instrument.Name, value, copy));
+            }
         }
     }
 }
