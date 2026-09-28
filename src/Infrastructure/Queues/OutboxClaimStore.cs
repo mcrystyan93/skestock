@@ -108,4 +108,9 @@ public sealed class OutboxClaimStore(IApplicationDbContext dbContext) : IOutboxC
             .Select(x => x.RetryCount)
             .SingleAsync(cancellationToken);
     }
+
+    // Served by the filtered IX on ProcessedAtUtc IS NULL, so the count only reads pending rows.
+    public Task<int> CountPendingAsync(int maxRetries, CancellationToken cancellationToken) =>
+        dbContext.OutboxMessages
+            .CountAsync(x => x.ProcessedAtUtc == null && x.RetryCount < maxRetries, cancellationToken);
 }

@@ -40,9 +40,12 @@ public sealed class QueueMessageProcessor(
         string queueName,
         CancellationToken cancellationToken)
     {
+        var startedAt = Stopwatch.GetTimestamp();
         if (!TryDecodeEnvelope(message, out var envelope))
         {
-            return QueueMessageProcessingResult.Permanent();
+            var invalid = QueueMessageProcessingResult.Permanent(null, QueueMessageProcessingResult.InvalidEnvelopeErrorType);
+            RecordDuration(invalid, queueName, startedAt);
+            return invalid;
         }
 
         // Continues the trace of the request that produced the message, so Mediator, EF and SQL
@@ -61,10 +64,37 @@ public sealed class QueueMessageProcessor(
         if (result.Status is QueueMessageProcessingStatus.PermanentFailure or QueueMessageProcessingStatus.RetryableFailure)
         {
             activity?.SetStatus(ActivityStatusCode.Error, result.Status.ToString());
+            activity?.SetTag(MessagingTelemetry.ErrorTypeTag, result.ErrorType);
         }
 
+        RecordDuration(result, queueName, startedAt);
         return result;
     }
+
+    private static void RecordDuration(QueueMessageProcessingResult result, string queueName, long startedAt)
+    {
+        var tags = new TagList
+        {
+            { MessagingTelemetry.SystemTag, MessagingTelemetry.SystemName },
+            { MessagingTelemetry.DestinationNameTag, queueName },
+            { MessagingTelemetry.ProcessingStatusTag, ToTagValue(result.Status) }
+        };
+        if (result.ErrorType is not null)
+        {
+            tags.Add(MessagingTelemetry.ErrorTypeTag, result.ErrorType);
+        }
+
+        MessagingTelemetry.ProcessDuration.Record(Stopwatch.GetElapsedTime(startedAt).TotalSeconds, tags);
+    }
+
+    private static string ToTagValue(QueueMessageProcessingStatus status) => status switch
+    {
+        QueueMessageProcessingStatus.Succeeded => "succeeded",
+        QueueMessageProcessingStatus.Duplicate => "duplicate",
+        QueueMessageProcessingStatus.RetryableFailure => "retryable_failure",
+        QueueMessageProcessingStatus.PermanentFailure => "permanent_failure",
+        _ => throw new ArgumentOutOfRangeException(nameof(status), status, "Unknown processing status.")
+    };
 
     private async Task<QueueMessageProcessingResult> ProcessEnvelopeAsync(
         MessageEnvelope envelope,
@@ -86,7 +116,7 @@ public sealed class QueueMessageProcessor(
 
             return committed
                 ? QueueMessageProcessingResult.Succeeded(envelope)
-                : QueueMessageProcessingResult.Permanent(envelope);
+                : QueueMessageProcessingResult.Permanent(envelope, QueueMessageProcessingResult.FailedResultErrorType);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -111,9 +141,10 @@ public sealed class QueueMessageProcessor(
                 "Failed dispatching message {Id}; it will be retried unless the failure is permanent.",
                 envelope.MessageId);
 
+            var errorType = ex.GetType().FullName ?? ex.GetType().Name;
             return MessageFailureClassifier.IsPermanent(ex)
-                ? QueueMessageProcessingResult.Permanent(envelope)
-                : QueueMessageProcessingResult.Retryable(envelope);
+                ? QueueMessageProcessingResult.Permanent(envelope, errorType)
+                : QueueMessageProcessingResult.Retryable(envelope, errorType);
         }
     }
 

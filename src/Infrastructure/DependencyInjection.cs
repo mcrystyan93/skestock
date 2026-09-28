@@ -8,6 +8,9 @@ using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.SignalR.StackExchangeRedis;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Common.Models.Options;
 using skestock.Application.Documents.Interfaces;
@@ -31,6 +34,7 @@ using skestock.Infrastructure.Realtime;
 using StackExchange.Redis;
 using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
+using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
 
 namespace skestock.Infrastructure;
 
@@ -81,22 +85,36 @@ public static class DependencyInjection
             redisConnectionString,
             message: $"Connection string '{Services.Cache}' not found.");
 
-        builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
-        {
-            var configuration = ConfigurationOptions.Parse(redisConnectionString);
-            configuration.AbortOnConnectFail = false;
-            return ConnectionMultiplexer.Connect(configuration);
-        });
+        // One traced multiplexer per process (Aspire adds OpenTelemetry instrumentation and a health
+        // check); the lock, the FusionCache backplane and SignalR all reuse it.
+        builder.AddRedisClientBuilder(
+                Services.Cache,
+                configureOptions: options => options.AbortOnConnectFail = false)
+            .WithDistributedCache();
         builder.Services.AddSingleton<IDistributedLock, RedisDistributedLock>();
 
-        builder.AddRedisDistributedCache(Services.Cache);
+        // L1 memory + L2 Redis (IDistributedCache registered above) + backplane for L1 invalidation.
+        // A Redis outage degrades to L1/database: hard timeout, background L2 writes, circuit breaker.
         builder.Services.AddFusionCache()
-            .WithBackplane(
-                new RedisBackplane(new RedisBackplaneOptions()
+            .WithOptions(options =>
+            {
+                options.CacheKeyPrefix = "skestock:";
+                options.DistributedCacheCircuitBreakerDuration = TimeSpan.FromSeconds(30);
+            })
+            .WithDefaultEntryOptions(options =>
+            {
+                options.DistributedCacheHardTimeout = TimeSpan.FromSeconds(2);
+                options.AllowBackgroundDistributedCacheOperations = true;
+            })
+            .WithSerializer(new FusionCacheSystemTextJsonSerializer())
+            .WithRegisteredDistributedCache()
+            .WithBackplane(sp => new RedisBackplane(
+                Options.Create(new RedisBackplaneOptions
                 {
-                    Configuration = builder.Configuration.GetConnectionString(Services.Cache)
-                })
-            )
+                    ConnectionMultiplexerFactory = () =>
+                        Task.FromResult(sp.GetRequiredService<IConnectionMultiplexer>())
+                }),
+                sp.GetRequiredService<ILogger<RedisBackplane>>()))
             .AsHybridCache();
 
         builder.AddAzureBlobServiceClient(Services.BlobService);
@@ -124,9 +142,13 @@ public static class DependencyInjection
                 options.ClientTimeoutInterval =
                     TimeSpan.FromSeconds(30); // if no ping/activity in this window, connection is dead
             })
-            .AddStackExchangeRedis(redisConnectionString!, options =>
+            .AddStackExchangeRedis();
+        builder.Services.AddOptions<RedisOptions>()
+            .Configure<IServiceProvider>((options, sp) =>
             {
                 options.Configuration.ChannelPrefix = RedisChannel.Literal("skestock:signalr:");
+                options.ConnectionFactory = _ =>
+                    Task.FromResult(sp.GetRequiredService<IConnectionMultiplexer>());
             });
         builder.Services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
 

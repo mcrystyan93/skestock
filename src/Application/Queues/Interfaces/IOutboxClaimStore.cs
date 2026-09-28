@@ -24,6 +24,12 @@ public interface IOutboxClaimStore
         Guid messageId,
         string error,
         CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Counts messages still waiting to be published: unprocessed and not yet dead-lettered by
+    /// reaching <paramref name="maxRetries"/>.
+    /// </summary>
+    Task<int> CountPendingAsync(int maxRetries, CancellationToken cancellationToken);
 }
 
 /// <summary>

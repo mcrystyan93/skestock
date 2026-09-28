@@ -9,6 +9,8 @@ public class FunctionalTestSetup
     internal static DatabaseResetter? DbResetter { get; private set; }
 
     private static WebApiFactory? _factory;
+
+    internal static WebApiFactory Factory => _factory ?? throw new InvalidOperationException("Functional test host not started.");
     private static DistributedApplication? _app;
 
     [OneTimeSetUp]
@@ -45,8 +47,9 @@ public class FunctionalTestSetup
         var connectionString = (await _app.GetConnectionStringAsync(Services.Database))!;
         var cacheConnectionString = (await _app.GetConnectionStringAsync(Services.Cache))!;
         var queueConnectionString = (await _app.GetConnectionStringAsync(Services.Queues))!;
+        var blobConnectionString = (await _app.GetConnectionStringAsync(Services.BlobService))!;
 
-        _factory = new WebApiFactory(connectionString, cacheConnectionString, queueConnectionString);
+        _factory = new WebApiFactory(connectionString, cacheConnectionString, queueConnectionString, blobConnectionString);
         ScopeFactory = _factory.Services.GetRequiredService<IServiceScopeFactory>();
         DbResetter = await DatabaseResetter.CreateAsync(connectionString);
     }

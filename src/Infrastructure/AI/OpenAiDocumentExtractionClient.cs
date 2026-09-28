@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -122,7 +123,92 @@ public sealed class OpenAiDocumentExtractionClient(
             }
         };
 
+    /// <summary>
+    /// Wraps the Responses API call in a GenAI <c>chat</c> client span and records duration and
+    /// token metrics. The HttpClient span nests under it.
+    /// </summary>
     private async Task<TResult> SendAsync<TResult>(JsonObject requestBody, CancellationToken cancellationToken)
+        where TResult : class
+    {
+        var call = new ChatCall(options.Value.Model);
+        using var activity = GenAiTelemetry.ActivitySource.StartActivity($"chat {call.RequestModel}", ActivityKind.Client);
+        activity?.SetTag(GenAiTelemetry.OperationNameTag, GenAiTelemetry.ChatOperation);
+        activity?.SetTag(GenAiTelemetry.ProviderNameTag, GenAiTelemetry.OpenAiProvider);
+        activity?.SetTag(GenAiTelemetry.RequestModelTag, call.RequestModel);
+        activity?.SetTag(GenAiTelemetry.ResultTypeTag, typeof(TResult).Name);
+
+        var startedAt = Stopwatch.GetTimestamp();
+        try
+        {
+            return await SendCoreAsync<TResult>(requestBody, call, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            call.ErrorType ??= ex switch
+            {
+                TransientExtractionException => "transient",
+                UnprocessableDocumentException => "unprocessable",
+                _ => ex.GetType().FullName ?? ex.GetType().Name
+            };
+
+            // Exception messages can echo the OpenAI error body, so only the classification is recorded.
+            activity?.SetStatus(ActivityStatusCode.Error, call.ErrorType);
+            activity?.SetTag(GenAiTelemetry.ErrorTypeTag, call.ErrorType);
+            throw;
+        }
+        finally
+        {
+            RecordTelemetry(activity, call, Stopwatch.GetElapsedTime(startedAt));
+        }
+    }
+
+    private static void RecordTelemetry(Activity? activity, ChatCall call, TimeSpan elapsed)
+    {
+        var tags = new TagList
+        {
+            { GenAiTelemetry.OperationNameTag, GenAiTelemetry.ChatOperation },
+            { GenAiTelemetry.ProviderNameTag, GenAiTelemetry.OpenAiProvider },
+            { GenAiTelemetry.RequestModelTag, call.RequestModel }
+        };
+        if (call.ResponseModel is not null)
+        {
+            tags.Add(GenAiTelemetry.ResponseModelTag, call.ResponseModel);
+            activity?.SetTag(GenAiTelemetry.ResponseModelTag, call.ResponseModel);
+        }
+
+        activity?.SetTag(GenAiTelemetry.ResponseIdTag, call.ResponseId);
+
+        if (call.ErrorType is not null)
+        {
+            var failureTags = tags;
+            failureTags.Add(GenAiTelemetry.ErrorTypeTag, call.ErrorType);
+            GenAiTelemetry.OperationDuration.Record(elapsed.TotalSeconds, failureTags);
+        }
+        else
+        {
+            GenAiTelemetry.OperationDuration.Record(elapsed.TotalSeconds, tags);
+        }
+
+        RecordTokens(activity, tags, GenAiTelemetry.InputTokensTag, "input", call.InputTokens);
+        RecordTokens(activity, tags, GenAiTelemetry.OutputTokensTag, "output", call.OutputTokens);
+    }
+
+    private static void RecordTokens(Activity? activity, TagList tags, string spanTag, string tokenType, long? count)
+    {
+        if (count is not { } tokens)
+        {
+            return;
+        }
+
+        activity?.SetTag(spanTag, tokens);
+        tags.Add(GenAiTelemetry.TokenTypeTag, tokenType);
+        GenAiTelemetry.TokenUsage.Record(tokens, tags);
+    }
+
+    private async Task<TResult> SendCoreAsync<TResult>(
+        JsonObject requestBody,
+        ChatCall call,
+        CancellationToken cancellationToken)
         where TResult : class
     {
         HttpResponseMessage response;
@@ -132,10 +218,12 @@ public sealed class OpenAiDocumentExtractionClient(
         }
         catch (HttpRequestException ex)
         {
+            call.ErrorType = ex.GetType().FullName;
             throw new TransientExtractionException("OpenAI request failed (network)", ex);
         }
         catch (TaskCanceledException ex) when (!cancellationToken.IsCancellationRequested)
         {
+            call.ErrorType = "timeout";
             throw new TransientExtractionException("OpenAI request timed out", ex);
         }
 
@@ -144,6 +232,7 @@ public sealed class OpenAiDocumentExtractionClient(
             if (!response.IsSuccessStatusCode)
             {
                 var statusCode = (int)response.StatusCode;
+                call.ErrorType = statusCode.ToString(System.Globalization.CultureInfo.InvariantCulture);
                 var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 if (statusCode == 429 || statusCode >= 500)
@@ -155,6 +244,7 @@ public sealed class OpenAiDocumentExtractionClient(
             }
 
             var payload = await response.Content.ReadFromJsonAsync<JsonObject>(cancellationToken: cancellationToken);
+            call.ReadResponseMetadata(payload);
 
             var status = payload?["status"]?.GetValue<string>();
             if (status == "incomplete")
@@ -190,5 +280,30 @@ public sealed class OpenAiDocumentExtractionClient(
                 throw new UnprocessableDocumentException("OpenAI's response did not match the expected schema", ex);
             }
         }
+    }
+
+    /// <summary>Telemetry metadata collected while one chat call runs. Never holds content.</summary>
+    private sealed class ChatCall(string requestModel)
+    {
+        public string RequestModel { get; } = requestModel;
+        public string? ResponseModel { get; private set; }
+        public string? ResponseId { get; private set; }
+        public long? InputTokens { get; private set; }
+        public long? OutputTokens { get; private set; }
+        public string? ErrorType { get; set; }
+
+        public void ReadResponseMetadata(JsonObject? payload)
+        {
+            ResponseModel = ReadString(payload?["model"]);
+            ResponseId = ReadString(payload?["id"]);
+            InputTokens = ReadLong(payload?["usage"]?["input_tokens"]);
+            OutputTokens = ReadLong(payload?["usage"]?["output_tokens"]);
+        }
+
+        private static string? ReadString(JsonNode? node) =>
+            node is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
+
+        private static long? ReadLong(JsonNode? node) =>
+            node is JsonValue value && value.TryGetValue<long>(out var number) ? number : null;
     }
 }

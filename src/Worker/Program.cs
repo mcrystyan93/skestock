@@ -23,6 +23,14 @@ builder.Services.AddScoped<IUser>(sp => sp.GetRequiredService<AmbientUser>());
 builder.Services.AddScoped<IQueueMessageProcessor, QueueMessageProcessor>();
 
 builder.Services
+    .AddOptions<WorkerHeartbeatOptions>()
+    .BindConfiguration(Services.WorkerSettings)
+    .Validate(options => !string.IsNullOrWhiteSpace(options.HeartbeatFile), "Worker:HeartbeatFile is required.")
+    .ValidateOnStart();
+builder.Services.AddSingleton<WorkerHeartbeat>();
+builder.Services.AddHostedService<HeartbeatFileService>();
+
+builder.Services
     .AddOptions<DailyStatisticsOptions>()
     .BindConfiguration(Services.DailyStatisticsSettings)
     .Validate(

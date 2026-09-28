@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
@@ -53,14 +54,21 @@ public static class Extensions
             .WithMetrics(metrics =>
             {
                 metrics.AddAspNetCoreInstrumentation()
+                    .AddMeter("skestock.*")
                     .AddHttpClientInstrumentation()
-                    .AddRuntimeInstrumentation();
+                    .AddRuntimeInstrumentation()
+                    // Defaults only (no per-level metrics); FusionCache metric tags never include cache keys.
+                    .AddFusionCacheInstrumentation();
             })
             .WithTracing(tracing =>
             {
                 tracing.AddSource(builder.Environment.ApplicationName)
                     .AddSource("skestock.*")
-                    .AddAspNetCoreInstrumentation()
+                    // Built-in ASP.NET Core ActivitySource for SignalR hub invocations.
+                    .AddSource("Microsoft.AspNetCore.SignalR.Server")
+                    .AddFusionCacheInstrumentation()
+                    .AddAspNetCoreInstrumentation(options =>
+                        options.Filter = context => !IsHealthEndpoint(context.Request.Path))
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     //.AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation();
@@ -99,22 +107,28 @@ public static class Extensions
         return builder;
     }
 
+    private const string HealthEndpointPath = "/health";
+    private const string AlivenessEndpointPath = "/alive";
+
+    /// <summary>
+    /// Maps <c>/health</c> (every check) and <c>/alive</c> (checks tagged <c>live</c>) in all
+    /// environments. They are anonymous and use the default writer, which returns only the
+    /// aggregate status text (503 when Unhealthy) — never check names or failure details.
+    /// </summary>
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
-        // Adding health checks endpoints to applications in non-development environments has security implications.
-        // See https://aka.ms/dotnet/aspire/healthchecks for details before enabling these endpoints in non-development environments.
-        if (app.Environment.IsDevelopment())
-        {
-            // All health checks must pass for app to be considered ready to accept traffic after starting
-            app.MapHealthChecks("/health");
+        app.MapHealthChecks(HealthEndpointPath).AllowAnonymous();
 
-            // Only health checks tagged with the "live" tag must pass for app to be considered alive
-            app.MapHealthChecks("/alive", new HealthCheckOptions
-            {
-                Predicate = r => r.Tags.Contains("live")
-            });
-        }
+        app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions
+        {
+            Predicate = r => r.Tags.Contains("live")
+        }).AllowAnonymous();
 
         return app;
     }
+
+    /// <summary>Health probes are polled constantly; they are excluded from traces.</summary>
+    public static bool IsHealthEndpoint(PathString path) =>
+        path.Equals(HealthEndpointPath, StringComparison.OrdinalIgnoreCase)
+        || path.Equals(AlivenessEndpointPath, StringComparison.OrdinalIgnoreCase);
 }

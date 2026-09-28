@@ -2,6 +2,7 @@ using FluentResults;
 using Mediator;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using skestock.Application.Common.Behaviours;
 using skestock.Application.Common.Caching;
 using NUnit.Framework;
@@ -31,6 +32,10 @@ public class CachingBehaviorTests
         _handlerCalls = 0;
     }
 
+    private readonly CapturingLogger<CachingBehavior<CacheableTestQuery, Result<string>>> _logger = new();
+
+    private CachingBehavior<CacheableTestQuery, Result<string>> CreateBehavior() => new(_cache, _logger);
+
     private ValueTask<Result<string>> Next(CacheableTestQuery request, CancellationToken cancellationToken)
     {
         _handlerCalls++;
@@ -40,7 +45,7 @@ public class CachingBehaviorTests
     [Test]
     public async Task Handle_WithBypassCache_AlwaysCallsNextAndNeverReturnsCachedValue()
     {
-        var behavior = new CachingBehavior<CacheableTestQuery, Result<string>>(_cache);
+        var behavior = CreateBehavior();
         var request = new CacheableTestQuery("key1", Bypass: true);
 
         var first = await behavior.Handle(request, Next, CancellationToken.None);
@@ -54,7 +59,7 @@ public class CachingBehaviorTests
     [Test]
     public async Task Handle_OnCacheMissThenHit_OnlyCallsNextOnce()
     {
-        var behavior = new CachingBehavior<CacheableTestQuery, Result<string>>(_cache);
+        var behavior = CreateBehavior();
         var request = new CacheableTestQuery("key2");
 
         var first = await behavior.Handle(request, Next, CancellationToken.None);
@@ -68,7 +73,7 @@ public class CachingBehaviorTests
     [Test]
     public async Task Handle_WithDifferentCacheKeys_CallsNextForEachDistinctKey()
     {
-        var behavior = new CachingBehavior<CacheableTestQuery, Result<string>>(_cache);
+        var behavior = CreateBehavior();
 
         await behavior.Handle(new CacheableTestQuery("keyA"), Next, CancellationToken.None);
         await behavior.Handle(new CacheableTestQuery("keyB"), Next, CancellationToken.None);
@@ -85,7 +90,7 @@ public class CachingBehaviorTests
             return new ValueTask<Result<string>>(Result.Fail<string>("boom"));
         }
 
-        var behavior = new CachingBehavior<CacheableTestQuery, Result<string>>(_cache);
+        var behavior = CreateBehavior();
         var request = new CacheableTestQuery("failkey");
 
         var first = await behavior.Handle(request, FailingNext, CancellationToken.None);
@@ -100,7 +105,7 @@ public class CachingBehaviorTests
     [Test]
     public async Task Handle_AfterTagInvalidation_CallsNextAgain()
     {
-        var behavior = new CachingBehavior<CacheableTestQuery, Result<string>>(_cache);
+        var behavior = CreateBehavior();
         var request = new CacheableTestQuery("key3");
 
         await behavior.Handle(request, Next, CancellationToken.None);
@@ -108,5 +113,24 @@ public class CachingBehaviorTests
         await behavior.Handle(request, Next, CancellationToken.None);
 
         _handlerCalls.ShouldBe(2);
+    }
+
+    [Test]
+    public async Task Handle_WithUndeserializableCachedPayload_TreatsItAsMissAndRecaches()
+    {
+        var request = new CacheableTestQuery("stale-shape");
+        await _cache.SetAsync(request.BuildCacheKey(), "{not valid json", tags: request.Tags);
+        var behavior = CreateBehavior();
+
+        var first = await behavior.Handle(request, Next, CancellationToken.None);
+        var second = await behavior.Handle(request, Next, CancellationToken.None);
+
+        first.Value.ShouldBe("value-1");
+        second.Value.ShouldBe("value-1");
+        _handlerCalls.ShouldBe(1);
+        var warning = _logger.Entries.ShouldHaveSingleItem();
+        warning.Level.ShouldBe(LogLevel.Warning);
+        warning.Message.ShouldContain(request.BuildCacheKey());
+        warning.Message.ShouldNotContain("not valid json");
     }
 }
