@@ -1,14 +1,15 @@
 import { TestBed } from '@angular/core/testing';
+import { CategoryDto } from '@ske/models';
 import { CategoryListSmall } from './category-list-small';
 
 describe('CategoryListSmall', () => {
   const filter = { filters: [], pageSize: 50, sort: [] };
 
-  function createFixture() {
+  function createFixture(loading = false) {
     const fixture = TestBed.createComponent(CategoryListSmall);
     fixture.componentRef.setInput('items', []);
     fixture.componentRef.setInput('filter', filter);
-    fixture.componentRef.setInput('loading', false);
+    fixture.componentRef.setInput('loading', loading);
     fixture.componentRef.setInput('hasNextPage', true);
     fixture.componentRef.setInput('isLoadingMore', false);
     fixture.detectChanges();
@@ -23,19 +24,38 @@ describe('CategoryListSmall', () => {
 
   it('emits onLoadMore when scrolling within the bottom threshold', () => {
     const fixture = createFixture();
-    const component = fixture.componentInstance;
-    const emit = vi.spyOn(component.onLoadMore, 'emit');
-    const viewport = fixture.nativeElement.querySelector('cdk-virtual-scroll-viewport') as HTMLElement;
+    const emit = vi.spyOn(fixture.componentInstance.onLoadMore, 'emit');
 
-    Object.defineProperties(viewport, {
-      scrollHeight: { value: 1000, configurable: true },
-      scrollTop: { value: 700, configurable: true },
-      clientHeight: { value: 100, configurable: true }
-    });
-
-    viewport.dispatchEvent(new Event('scroll'));
+    fixture.componentInstance.onScroll(createScrollEvent(1000, 700, 100));
 
     expect(emit).toHaveBeenCalledOnce();
+    fixture.destroy();
+  });
+
+  it('shows skeleton cards while loading', () => {
+    const fixture = createFixture(true);
+
+    expect((fixture.nativeElement as HTMLElement).querySelectorAll('nz-skeleton').length).toBe(4);
+    fixture.destroy();
+  });
+
+  it('shows the empty state when there are no categories', () => {
+    const fixture = createFixture();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('nz-empty')).not.toBeNull();
+    fixture.destroy();
+  });
+
+  it('emits onEdit on space without scrolling the page', () => {
+    const fixture = createFixture();
+    const emit = vi.spyOn(fixture.componentInstance.onEdit, 'emit');
+    const event = new KeyboardEvent('keydown', { key: ' ', cancelable: true });
+    const category = { id: 'c1', name: 'Papetărie' } as CategoryDto;
+
+    (fixture.componentInstance as unknown as { onSpace(e: Event, c: CategoryDto): void }).onSpace(event, category);
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(emit).toHaveBeenCalledWith(category);
     fixture.destroy();
   });
 

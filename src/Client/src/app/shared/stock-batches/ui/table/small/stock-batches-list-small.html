@@ -1,0 +1,50 @@
+@if (items().length === 0) {
+  @if (loading()) {
+    <div class="flex flex-col gap-2 p-2"
+         aria-busy="true"
+         aria-label="Se încarcă articolele recepției">
+      @for (placeholder of skeletonPlaceholders; track placeholder) {
+        <div class="rounded border border-gray-200 p-3 dark:border-gray-700">
+          <nz-skeleton [nzActive]="true"
+                       [nzTitle]="{ width: '60%' }"
+                       [nzParagraph]="{ rows: 1, width: '75%' }" />
+        </div>
+      }
+    </div>
+  } @else {
+    <nz-empty class="mt-4"
+              nzNotFoundContent="Nu există articole în această recepție" />
+  }
+} @else {
+  <div class="min-h-0 w-full grow overflow-x-hidden overflow-y-auto p-2"
+       role="list"
+       aria-label="Articole recepționate"
+       (scroll)="onScroll($event)">
+    @for (batch of items(); track batch.id) {
+      <article class="mb-2 min-w-0 rounded border border-gray-200 p-3 dark:border-gray-700"
+               role="listitem">
+        <strong class="block truncate"
+                [attr.title]="batch.itemName">{{ batch.itemName }}</strong>
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0! mt-1 truncate"
+             [attr.title]="batch.locationName">
+          {{ batch.locationName }}
+        </div>
+        <div class="mt-2 break-words text-sm">
+          {{ batch.quantity | number:'1.0-0' }} buc ×
+          {{ batch.unitPrice | currency:'RON' }} =
+          <strong>{{ batch.lineTotal | currency:'RON' }}</strong>
+        </div>
+      </article>
+    }
+  </div>
+
+  @if (isLoadingMore()) {
+    <div class="flex justify-center py-2">
+      <nz-spin nzSimple
+               nzSize="small"
+               nzTip="Se încarcă..." />
+    </div>
+  }
+}

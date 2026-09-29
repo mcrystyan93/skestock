@@ -27,7 +27,7 @@ import { CategoryListSmall } from '../tables/regular/small/category-list-small';
     }
 
     <div class="grow relative">
-      <ng-container *skeLayoutBreakpoint="'md';else:smallScreenListTemplate">
+      <ng-container *skeLayoutBreakpoint="'lg';else:smallScreenListTemplate">
         <ske-category-table [items]="categories()"
                             [filter]="filter()"
                             [loading]="loading()"

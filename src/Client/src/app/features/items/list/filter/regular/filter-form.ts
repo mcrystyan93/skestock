@@ -1,4 +1,5 @@
-import { Component, computed, effect, input, linkedSignal, output, untracked } from '@angular/core';
+import { Component, computed, effect, input, linkedSignal, output, signal, untracked } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import {
   buildEqualsFilterForDropdown,
   CategoryDropdownValue,
@@ -13,9 +14,11 @@ import { NzFormDirective } from 'ng-zorro-antd/form';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 import { NzInputDirective, NzInputPrefixDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { CategoryDropdown } from '@ske/shared/categories';
+import { LayoutBreakpoint } from '@ske/shared/directives';
+import { NzBadgeComponent } from 'ng-zorro-antd/badge';
+import { NzDrawerComponent, NzDrawerContentDirective } from 'ng-zorro-antd/drawer';
 
 @Component({
   imports: [
@@ -27,11 +30,14 @@ import { CategoryDropdown } from '@ske/shared/categories';
     NzIconDirective,
     NzInputDirective,
     FormField,
-    NzSpaceComponent,
-    NzSpaceItemDirective,
     NzButtonComponent,
     CategoryDropdown,
-    NzInputPrefixDirective
+    NzInputPrefixDirective,
+    NgTemplateOutlet,
+    LayoutBreakpoint,
+    NzBadgeComponent,
+    NzDrawerComponent,
+    NzDrawerContentDirective
   ],
   selector: 'ske-item-filter-form',
   styles: ``,
@@ -55,6 +61,18 @@ export class FilterForm {
 
   public readonly itemListFilterForm = form(this._formModel, (schemaPath) => {
     debounce(schemaPath.searchTerm, 300);
+  });
+
+  public readonly filtersOpen = signal(false);
+
+  public readonly activeFilterCount = computed(() =>
+    this.itemListFilterForm().value().category ? 1 : 0
+  );
+
+  public readonly filtersButtonLabel = computed(() => {
+    const count = this.activeFilterCount();
+
+    return count === 0 ? 'Filtre' : `Filtre, ${count} ${count === 1 ? 'filtru activ' : 'filtre active'}`;
   });
 
   private readonly _initialFilterEffectRef = effect(() => {

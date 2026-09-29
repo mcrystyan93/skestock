@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { form, FormField } from '@angular/forms/signals';
 import { NzCardComponent } from 'ng-zorro-antd/card';
@@ -8,6 +9,7 @@ import { ItemDropdown } from '@ske/shared/items';
 import { LoaderDirective } from '@ske/shared/loader';
 import { ClassStatisticsStore } from '../../../services/class-statistics.store';
 import { ClassItemStockEvolutionChart } from './class-item-stock-evolution-chart';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 
 type ItemSelectionModel = {
   item: ItemDropdownValue;
@@ -21,21 +23,19 @@ type ItemSelectionModel = {
     ItemDropdown,
     ErrorAlert,
     LoaderDirective,
-    ClassItemStockEvolutionChart
+    ClassItemStockEvolutionChart,
+    LayoutBreakpoint,
+    NgTemplateOutlet
   ],
   selector: 'ske-item-stock-evolution-card',
   template: `
     <nz-card class="min-h-110 flex-body has-chart"
              [nzExtra]="itemDropdownExtra"
-             nzTitle="Evoluția stocului articolului selectat">
-      <ng-template #itemDropdownExtra>
-        <div class="w-44 sm:w-56">
-          <ske-item-dropdown [formField]="itemForm.item"
-                             [itemIds]="store.itemIds()"
-                             [allowClear]="true"
-                             [allowEdit]="false"
-                             [allowCreate]="false"
-                             placeholder="Alegeți un articol" />
+             nzTitle="Evoluția stocului">
+      <ng-container *skeLayoutBreakpoint="'lg'; else mobileItemDropdown"></ng-container>
+      <ng-template #mobileItemDropdown>
+        <div class="px-4 pt-2">
+          <ng-container *ngTemplateOutlet="itemDropdown" />
         </div>
       </ng-template>
 
@@ -50,6 +50,24 @@ type ItemSelectionModel = {
                                                 ariaLabel="Evoluția stocului pentru articolul selectat" />
         }
       </ng-container>
+
+      <ng-template #itemDropdownExtra>
+        <ng-container *skeLayoutBreakpoint="'lg'; else noDesktopItemDropdown">
+          <div class="w-44 sm:w-56">
+            <ng-container *ngTemplateOutlet="itemDropdown" />
+          </div>
+        </ng-container>
+        <ng-template #noDesktopItemDropdown></ng-template>
+      </ng-template>
+
+      <ng-template #itemDropdown>
+        <ske-item-dropdown [formField]="itemForm.item"
+                           [itemIds]="store.itemIds()"
+                           [allowClear]="true"
+                           [allowEdit]="false"
+                           [allowCreate]="false"
+                           placeholder="Alegeți un articol" />
+      </ng-template>
     </nz-card>
   `,
   host: {

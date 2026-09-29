@@ -7,12 +7,16 @@ import { StockMoveModal, StockMoveModalData } from '../modals/move/stock-move-mo
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AddStockBatchModal } from '@ske/shared/stock-batches';
 import { StockCategoryItemsTable } from './stock-category-items-table';
+import { StockCategoryItemsSmall } from './stock-category-items-small';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 import { Events } from '@ngrx/signals/events';
 import { StockEvents } from '../../services/stock.events';
 
 @Component({
   imports: [
-    StockCategoryItemsTable
+    StockCategoryItemsTable,
+    StockCategoryItemsSmall,
+    LayoutBreakpoint
   ],
   selector: 'ske-stock-category-cards-container',
   styles: ``,
@@ -42,6 +46,7 @@ export class StockListContainer {
     const modalRef = this._nzModalService.create<StockAdjustmentModal, StockAdjustmentModalData>({
       nzContent: StockAdjustmentModal,
       nzData: { classId, item },
+      nzWrapClassName: 'modal-100 modal-lg-75',
       nzCentered: true,
       nzMaskClosable: false
     });
@@ -59,6 +64,7 @@ export class StockListContainer {
     const modalRef = this._nzModalService.create<StockMoveModal, StockMoveModalData>({
       nzContent: StockMoveModal,
       nzData: { classId, item },
+      nzWrapClassName: 'modal-100 modal-lg-75',
       nzCentered: true,
       nzMaskClosable: false
     });
@@ -90,6 +96,7 @@ export class StockListContainer {
     const modalRef = this._nzModalService.create({
       nzContent: AddStockBatchModal,
       nzData: { schoolClassId: classId, category, location },
+      nzWrapClassName: 'modal-100 modal-lg-75',
       nzCentered: true,
       nzMaskClosable: false
     });

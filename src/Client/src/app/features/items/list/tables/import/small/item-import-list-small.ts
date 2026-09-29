@@ -15,19 +15,13 @@ import {
   CdkVirtualScrollViewport,
 } from '@angular/cdk/scrolling';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { NzDividerComponent } from 'ng-zorro-antd/divider';
 import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
-import {
-  NzListComponent,
-  NzListEmptyComponent,
-  NzListItemActionComponent,
-  NzListItemActionsComponent,
-  NzListItemComponent,
-  NzListItemMetaComponent,
-  NzListItemMetaDescriptionComponent,
-  NzListItemMetaTitleComponent,
-} from 'ng-zorro-antd/list';
+import { NzCardComponent } from 'ng-zorro-antd/card';
+import { NzEmptyComponent } from 'ng-zorro-antd/empty';
+import { NzSkeletonComponent } from 'ng-zorro-antd/skeleton';
+import { NzSpinComponent } from 'ng-zorro-antd/spin';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
 
@@ -38,18 +32,14 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
     CdkVirtualForOf,
     CdkVirtualScrollViewport,
     NzButtonComponent,
-    NzDividerComponent,
     NzDropdownDirective,
     NzDropdownMenuComponent,
     NzIconDirective,
-    NzListComponent,
-    NzListEmptyComponent,
-    NzListItemActionComponent,
-    NzListItemActionsComponent,
-    NzListItemComponent,
-    NzListItemMetaComponent,
-    NzListItemMetaDescriptionComponent,
-    NzListItemMetaTitleComponent,
+    NzCardComponent,
+    NzEmptyComponent,
+    NzSkeletonComponent,
+    NzSpinComponent,
+    NzTypographyComponent,
     NzMenuDirective,
     NzMenuItemComponent,
     NzTagComponent,
@@ -57,7 +47,7 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
   selector: 'ske-item-import-list-small',
   templateUrl: './item-import-list-small.html',
   host: {
-    class: 'absolute block inset-0',
+    class: 'absolute inset-0 flex flex-col',
   },
 })
 export class ItemImportListSmall extends BaseList<
@@ -67,6 +57,11 @@ export class ItemImportListSmall extends BaseList<
   public readonly loading = input.required<boolean>();
   public readonly downloadFile = output<ItemImportBatchFileDto>();
   public readonly review = output<ItemImportBatchListItemDto>();
+
+  protected readonly cardRowHeight = 128;
+  protected readonly skeletonPlaceholders = [0, 1, 2, 3];
+
+  protected readonly trackById = (_: number, item: ItemImportBatchListItemDto) => item.id;
 
   public statusLabel(status: ItemImportBatchStatus): string {
     return ITEM_IMPORT_BATCH_STATUS_LABELS[status];

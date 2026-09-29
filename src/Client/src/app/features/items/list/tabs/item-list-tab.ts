@@ -15,7 +15,7 @@ import { LayoutBreakpoint } from '@ske/shared/directives';
     <ske-error-display [problemDetail]="problemDetail()" [validationErrors]="validationErrors()" />
 
     <div class="grow relative">
-      <ng-container *skeLayoutBreakpoint="'md'; else smallScreenListTemplate">
+      <ng-container *skeLayoutBreakpoint="'lg'; else smallScreenListTemplate">
         <ske-item-table
           [items]="items()"
           [filter]="filter()"

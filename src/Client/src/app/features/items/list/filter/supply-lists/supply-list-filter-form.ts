@@ -1,4 +1,5 @@
-import { Component, effect, input, linkedSignal, output, untracked } from '@angular/core';
+import { Component, computed, effect, input, linkedSignal, output, signal, untracked } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import {
   buildSupplyListActiveFilter,
   ColumnFilter,
@@ -15,6 +16,9 @@ import { NzFormControlComponent, NzFormDirective, NzFormItemComponent } from 'ng
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzInputDirective, NzInputPrefixDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzSegmentedComponent, NzSegmentedItemComponent } from 'ng-zorro-antd/segmented';
+import { NzBadgeComponent } from 'ng-zorro-antd/badge';
+import { NzDrawerComponent, NzDrawerContentDirective } from 'ng-zorro-antd/drawer';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 import { isEqual } from 'lodash-es';
 
 export type SupplyListFilterModel = {
@@ -27,7 +31,8 @@ const DEFAULT_FILTER: SupplyListFilterModel = { searchTerm: '', active: 'active'
 @Component({
   imports: [FormsModule, NzFormDirective, NzFormItemComponent, NzFormControlComponent, NzRowDirective,
     NzColDirective, NzInputWrapperComponent, NzIconDirective, NzInputDirective, FormField,
-    NzButtonComponent, NzInputPrefixDirective, NzSegmentedComponent, NzSegmentedItemComponent],
+    NzButtonComponent, NzInputPrefixDirective, NzSegmentedComponent, NzSegmentedItemComponent,
+    NgTemplateOutlet, LayoutBreakpoint, NzBadgeComponent, NzDrawerComponent, NzDrawerContentDirective],
   selector: 'ske-supply-list-filter-form',
   templateUrl: './supply-list-filter-form.html'
 })
@@ -50,6 +55,17 @@ export class SupplyListFilterForm {
       searchTerm: filter.searchTerm ?? '',
       active: getSupplyListActiveFilter(filter.filters)
     })
+  });
+
+  public readonly filtersOpen = signal(false);
+
+  public readonly activeFilterCount = computed(() =>
+    this.filterForm().value().active === DEFAULT_FILTER.active ? 0 : 1
+  );
+
+  public readonly filtersButtonLabel = computed(() => {
+    const count = this.activeFilterCount();
+    return count === 0 ? 'Filtre' : `Filtre, ${count} ${count === 1 ? 'filtru activ' : 'filtre active'}`;
   });
 
   public readonly filterForm = form(this._formModel, (path) => {

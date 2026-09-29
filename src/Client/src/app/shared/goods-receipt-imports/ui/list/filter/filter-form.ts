@@ -1,4 +1,5 @@
-import { Component, effect, input, linkedSignal, output, untracked } from '@angular/core';
+import { Component, computed, effect, input, linkedSignal, output, signal, untracked } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import {
   buildEqualsFilterForValue,
   ColumnFilter,
@@ -15,6 +16,10 @@ import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzSegmentedComponent, NzSegmentedItemComponent } from 'ng-zorro-antd/segmented';
+import { LayoutBreakpoint } from '@ske/shared/directives';
+import { NzBadgeComponent } from 'ng-zorro-antd/badge';
+import { NzDrawerComponent, NzDrawerContentDirective } from 'ng-zorro-antd/drawer';
+import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
 
 @Component({
   imports: [
@@ -28,7 +33,14 @@ import { NzSegmentedComponent, NzSegmentedItemComponent } from 'ng-zorro-antd/se
     FormField,
     NzButtonComponent,
     NzSegmentedComponent,
-    NzSegmentedItemComponent
+    NzSegmentedItemComponent,
+    NgTemplateOutlet,
+    LayoutBreakpoint,
+    NzBadgeComponent,
+    NzDrawerComponent,
+    NzDrawerContentDirective,
+    NzOptionComponent,
+    NzSelectComponent
   ],
   selector: 'ske-goods-receipt-imports-filter-form',
   styles: ``,
@@ -39,6 +51,7 @@ export class FilterForm {
   public readonly filter = input.required<GetAllGoodsReceiptImportsRequest>();
 
   public readonly onFilterChange = output<GetAllGoodsReceiptImportsRequest>();
+  public readonly filtersOpen = signal(false);
 
   private _initialFormChangeHandled = false;
 
@@ -61,6 +74,14 @@ export class FilterForm {
   public readonly goodsReceiptImportsFilterForm = form(this._formModel, (schemaPath) => {
     debounce(schemaPath.searchTerm, 300);
   });
+
+  public readonly activeFilterCount = computed(() =>
+    this.goodsReceiptImportsFilterForm().value().status === 'all' ? 0 : 1
+  );
+
+  public readonly filtersButtonLabel = computed(() =>
+    this.activeFilterCount() === 0 ? 'Filtre' : 'Filtre, 1 filtru activ'
+  );
 
   private readonly _formEffectChange = effect(() => {
     this.goodsReceiptImportsFilterForm().value();

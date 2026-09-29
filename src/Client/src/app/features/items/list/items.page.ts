@@ -59,7 +59,8 @@ export class ItemsPage implements OnInit, OnDestroy {
     this._modalService.create({
       nzContent: ItemImportModal,
       nzCentered: true,
-      nzMaskClosable: false
+      nzMaskClosable: false,
+      nzWrapClassName: 'modal-100 modal-lg-75'
     });
 
     // modalRef.afterClose.pipe(takeUntilDestroyed(this._destroyRef)).subscribe((result: ItemImportBatchDto | unknown) => {
@@ -78,8 +79,7 @@ export class ItemsPage implements OnInit, OnDestroy {
     const modalRef = this._modalService.create({
       nzContent: ItemImportReviewModal,
       nzData: importId,
-      // nzWidth: '95vw',
-      nzWrapClassName: 'modal-90',
+      nzWrapClassName: 'modal-100 modal-lg-75',
       nzCentered: true,
       nzMaskClosable: false
     });
@@ -110,7 +110,7 @@ export class ItemsPage implements OnInit, OnDestroy {
       },
       nzCentered: true,
       nzMaskClosable: false,
-      nzWrapClassName: 'modal-w-50'
+      nzWrapClassName: 'modal-100 modal-lg-75'
     });
 
     modalRef.afterClose.pipe(

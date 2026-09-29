@@ -36,6 +36,7 @@ export class HeaderContainer {
       nzData: {
         classId: this.classId()
       },
+      nzWrapClassName: 'modal-100 modal-lg-75',
       nzCentered: true,
       nzClosable: false
     });
@@ -56,17 +57,10 @@ export class HeaderContainer {
     const modalRef = this._nzModalService.create({
       nzContent: OrderListDetailModal,
       nzData: { classId },
-      nzWrapClassName: 'modal-90',
+      nzWrapClassName: 'modal-100 modal-lg-75',
       nzCentered: true,
       nzMaskClosable: false
     });
-  }
-
-  public openAnalytics() {
-    const classId = this.classId();
-    if (classId) {
-      void this._router.navigate(['/class-analytics'], { queryParams: { classId } });
-    }
   }
 
   public close() {

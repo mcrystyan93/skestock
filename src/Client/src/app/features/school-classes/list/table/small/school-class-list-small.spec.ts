@@ -4,11 +4,11 @@ import { SchoolClassListSmall } from './school-class-list-small';
 describe('SchoolClassListSmall', () => {
   const filter = { filters: [], pageSize: 50, sort: [] };
 
-  function createFixture() {
+  function createFixture(loading = false) {
     const fixture = TestBed.createComponent(SchoolClassListSmall);
     fixture.componentRef.setInput('items', []);
     fixture.componentRef.setInput('filter', filter);
-    fixture.componentRef.setInput('loading', false);
+    fixture.componentRef.setInput('loading', loading);
     fixture.componentRef.setInput('hasNextPage', true);
     fixture.componentRef.setInput('isLoadingMore', false);
     fixture.detectChanges();
@@ -19,6 +19,20 @@ describe('SchoolClassListSmall', () => {
     TestBed.configureTestingModule({
       imports: [SchoolClassListSmall],
     });
+  });
+
+  it('shows skeleton cards while loading', () => {
+    const fixture = createFixture(true);
+
+    expect((fixture.nativeElement as HTMLElement).querySelectorAll('nz-skeleton').length).toBe(4);
+    fixture.destroy();
+  });
+
+  it('shows the empty state when there are no classes', () => {
+    const fixture = createFixture();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('nz-empty')).not.toBeNull();
+    fixture.destroy();
   });
 
   it('emits onLoadMore when scrolling within the bottom threshold', () => {

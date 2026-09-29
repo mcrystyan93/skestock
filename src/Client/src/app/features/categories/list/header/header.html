@@ -1,44 +1,53 @@
-<nz-page-header nzTitle="Categorii"
-                [nzGhost]="false">
+@let compact = isCompact();
+@let action = actions[selectedTabIndex()];
+
+<nz-page-header [nzGhost]="false">
   <nz-breadcrumb nz-page-header-breadcrumb
+                 class="hidden! lg:block!"
                  nzSeparator=">">
     <nz-breadcrumb-item>Acasa</nz-breadcrumb-item>
     <nz-breadcrumb-item>Categorii</nz-breadcrumb-item>
   </nz-breadcrumb>
-  <nz-page-header-content class="pt-0!">
+  <nz-page-header-title>
+    <span class="flex items-center gap-1">
+      <ske-menu-toggle class="-ms-2" />
+      <span>Categorii</span>
+    </span>
+  </nz-page-header-title>
+  <nz-page-header-content class="pt-0! hidden lg:block">
     <div nz-typography
          nzType="secondary">Organizează produsele pe categorii și urmărește câte articole conține fiecare.
     </div>
   </nz-page-header-content>
   <nz-page-header-extra>
-    @switch (selectedTabIndex()) {
-      @case (0) {
-        <button nz-button
-                nzType="primary"
-                type="button"
-                (click)="onAdd.emit()">
-          <nz-icon nzType="icons:plus"></nz-icon>
-          Adaugă
-        </button>
-      }
-      @case (1) {
-        <button nz-button
-                nzType="primary"
-                type="button"
-                (click)="onImport.emit()">
-          <nz-icon nzType="icons:file-import"></nz-icon>
-          Importă
-        </button>
-      }
+    @if (compact) {
+      <button nz-button
+              nzType="primary"
+              nzShape="circle"
+              type="button"
+              nz-tooltip
+              [nzTooltipTitle]="action.label"
+              [attr.aria-label]="action.label"
+              (click)="action.run()">
+        <nz-icon [nzType]="action.icon"></nz-icon>
+      </button>
+    } @else {
+      <button nz-button
+              nzType="primary"
+              type="button"
+              [attr.aria-label]="action.label"
+              (click)="action.run()">
+        <nz-icon [nzType]="action.icon"></nz-icon>
+        {{ action.text }}
+      </button>
     }
   </nz-page-header-extra>
 
   <nz-page-header-footer>
-    <nz-tabs [(nzSelectedIndex)]="selectedTabIndex">
-      <nz-tab nzTitle="Categorii"></nz-tab>
-      <nz-tab nzTitle="Importuri categorii"></nz-tab>
-    </nz-tabs>
+    <ske-header-tabs [options]="tabs"
+                     [compact]="compact"
+                     [(selectedIndex)]="selectedTabIndex" />
   </nz-page-header-footer>
 </nz-page-header>
 
-<ske-theme-switcher class="absolute top-1.5 right-4" />
+<ske-theme-switcher class="absolute top-1.5 right-4 hidden lg:block" />

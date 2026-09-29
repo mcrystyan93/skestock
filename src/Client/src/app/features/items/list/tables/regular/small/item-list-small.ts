@@ -1,20 +1,12 @@
 import { Component, input, output } from '@angular/core';
 import { BaseList } from '@ske/shared/tables';
 import { GetAllItemsRequest, ItemDto } from '@ske/models';
-import {
-  NzListComponent,
-  NzListEmptyComponent,
-  NzListItemActionComponent,
-  NzListItemActionsComponent,
-  NzListItemComponent,
-  NzListItemMetaComponent,
-  NzListItemMetaDescriptionComponent,
-  NzListItemMetaTitleComponent,
-} from 'ng-zorro-antd/list';
-import { NzDividerComponent } from 'ng-zorro-antd/divider';
-import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { NzCardComponent } from 'ng-zorro-antd/card';
+import { NzEmptyComponent } from 'ng-zorro-antd/empty';
+import { NzSkeletonComponent } from 'ng-zorro-antd/skeleton';
+import { NzSpinComponent } from 'ng-zorro-antd/spin';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import {
   CdkFixedSizeVirtualScroll,
   CdkVirtualForOf,
@@ -23,18 +15,12 @@ import {
 
 @Component({
   imports: [
-    NzListComponent,
-    NzListEmptyComponent,
-    NzListItemActionComponent,
-    NzListItemActionsComponent,
-    NzListItemComponent,
-    NzListItemMetaComponent,
-    NzListItemMetaDescriptionComponent,
-    NzListItemMetaTitleComponent,
-    NzDividerComponent,
-    NzIconDirective,
-    NzButtonComponent,
+    NzCardComponent,
+    NzEmptyComponent,
+    NzSkeletonComponent,
+    NzSpinComponent,
     NzTagComponent,
+    NzTypographyComponent,
     CdkFixedSizeVirtualScroll,
     CdkVirtualForOf,
     CdkVirtualScrollViewport,
@@ -42,10 +28,24 @@ import {
   selector: 'ske-item-list-small',
   templateUrl: './item-list-small.html',
   host: {
-    class: 'absolute block inset-0',
+    class: 'absolute inset-0 flex flex-col',
   },
 })
 export class ItemListSmall extends BaseList<ItemDto, GetAllItemsRequest> {
   public readonly loading = input.required<boolean>();
   public readonly onEdit = output<ItemDto>();
+
+  protected readonly cardRowHeight = 84;
+  protected readonly skeletonPlaceholders = [0, 1, 2, 3];
+
+  protected readonly trackById = (_: number, item: ItemDto) => item.id;
+
+  protected subtitle(item: ItemDto): string {
+    return [item.sku, item.categoryName || '—'].filter(Boolean).join(' · ');
+  }
+
+  protected onSpace(event: Event, item: ItemDto): void {
+    event.preventDefault();
+    this.onEdit.emit(item);
+  }
 }

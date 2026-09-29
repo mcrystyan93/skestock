@@ -1,4 +1,5 @@
-import { Component, effect, input, linkedSignal, output, untracked } from '@angular/core';
+import { Component, computed, effect, input, linkedSignal, output, signal, untracked } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import {
   buildEqualsFilterForValue,
   CategoryImportBatchStatus,
@@ -13,8 +14,13 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 import { NzFormDirective } from 'ng-zorro-antd/form';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
+import { NzInputDirective, NzInputPrefixDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzSegmentedComponent, NzSegmentedItemComponent } from 'ng-zorro-antd/segmented';
+import { NzFormControlComponent, NzFormItemComponent } from 'ng-zorro-antd/form';
+import { NzBadgeComponent } from 'ng-zorro-antd/badge';
+import { NzDrawerComponent, NzDrawerContentDirective } from 'ng-zorro-antd/drawer';
+import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 
 @Component({
   imports: [
@@ -28,7 +34,17 @@ import { NzSegmentedComponent, NzSegmentedItemComponent } from 'ng-zorro-antd/se
     FormField,
     NzButtonComponent,
     NzSegmentedComponent,
-    NzSegmentedItemComponent
+    NzSegmentedItemComponent,
+    NzFormItemComponent,
+    NzFormControlComponent,
+    NzInputPrefixDirective,
+    NzBadgeComponent,
+    NzDrawerComponent,
+    NzDrawerContentDirective,
+    NzSelectComponent,
+    NzOptionComponent,
+    NgTemplateOutlet,
+    LayoutBreakpoint
   ],
   selector: 'ske-category-import-filter-form',
   templateUrl: './category-import-filter-form.html'
@@ -56,6 +72,18 @@ export class FilterForm {
     { label: 'Confirmate', value: 'confirmed' },
     { label: 'Esuate', value: 'failed' }
   ];
+
+  public readonly filtersOpen = signal(false);
+
+  public readonly activeFilterCount = computed(() => {
+    const status = this.filterForm().value().status;
+    return status && status !== 'all' ? 1 : 0;
+  });
+
+  public readonly filtersButtonLabel = computed(() => {
+    const count = this.activeFilterCount();
+    return count === 0 ? 'Filtre' : `Filtre, ${count} ${count === 1 ? 'filtru activ' : 'filtre active'}`;
+  });
 
   public readonly filterForm = form(this._formModel, (schemaPath) => {
     debounce(schemaPath.searchTerm, 300);

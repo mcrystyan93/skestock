@@ -3,10 +3,14 @@ import { Table } from './table';
 import { StockBatchListStore } from '../../services/stock-batch-list.store';
 import { isNil } from 'lodash-es';
 import { ColumnFilter } from '@ske/models';
+import { StockBatchesListSmall } from './small/stock-batches-list-small';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 
 @Component({
   imports: [
-    Table
+    Table,
+    StockBatchesListSmall,
+    LayoutBreakpoint
   ],
   selector: 'ske-stock-batches-table-container',
   styles: ``,

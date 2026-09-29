@@ -1,4 +1,5 @@
-import { Component, effect, input, linkedSignal, output, untracked } from '@angular/core';
+import { Component, computed, effect, input, linkedSignal, output, signal, untracked } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import {
   buildEqualsFilterForValue,
   ColumnFilter,
@@ -17,11 +18,16 @@ import { NzInputDirective, NzInputPrefixDirective, NzInputWrapperComponent } fro
 import { isEqual, isNil } from 'lodash-es';
 import { NzSegmentedComponent, NzSegmentedItemComponent } from 'ng-zorro-antd/segmented';
 import { NzBadgeComponent } from 'ng-zorro-antd/badge';
+import { NzDrawerComponent, NzDrawerContentDirective } from 'ng-zorro-antd/drawer';
+import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 
 @Component({
   imports: [FormsModule, NzFormDirective, NzFormItemComponent, NzFormControlComponent, NzRowDirective,
     NzColDirective, NzInputWrapperComponent, NzIconDirective, NzInputDirective, FormField,
-    NzButtonComponent, NzInputPrefixDirective, NzSegmentedComponent, NzSegmentedItemComponent, NzBadgeComponent],
+    NzButtonComponent, NzInputPrefixDirective, NzSegmentedComponent, NzSegmentedItemComponent, NzBadgeComponent,
+    NgTemplateOutlet, LayoutBreakpoint, NzDrawerComponent, NzDrawerContentDirective, NzSelectComponent,
+    NzOptionComponent],
   selector: 'ske-item-import-filter-form',
   templateUrl: './item-import-filter-form.html'
 })
@@ -48,6 +54,18 @@ export class ItemImportFilterForm {
     { label: 'Confirmate', value: 'confirmed' },
     { label: 'Esuate', value: 'failed' }
   ];
+
+  public readonly filtersOpen = signal(false);
+
+  public readonly activeFilterCount = computed(() => {
+    const status = this.filterForm().value().status;
+    return status && status !== 'all' ? 1 : 0;
+  });
+
+  public readonly filtersButtonLabel = computed(() => {
+    const count = this.activeFilterCount();
+    return count === 0 ? 'Filtre' : `Filtre, ${count} ${count === 1 ? 'filtru activ' : 'filtre active'}`;
+  });
 
   public readonly filterForm = form(this._formModel, (schemaPath) => {
     debounce(schemaPath.searchTerm, 300);

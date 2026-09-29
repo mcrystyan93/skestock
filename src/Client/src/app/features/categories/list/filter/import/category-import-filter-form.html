@@ -2,40 +2,110 @@
       nz-form
       nzNoColon
       nzLayout="horizontal">
-  <nz-row [nzGutter]="[16, 0]"
-          class="grow">
-    <nz-col nzFlex="auto">
-      <nz-form-item>
-        <nz-form-control nzSpan="24">
-          <nz-input-wrapper>
-            <nz-icon nzInputPrefix
-                     nzType="icons:magnifying-glass"></nz-icon>
-            <input type="text"
-                   nz-input
-                   id="categoryImportBatchSearchTerm"
-                   placeholder="Cautați..."
-                   [formField]="filterForm.searchTerm" />
-          </nz-input-wrapper>
-        </nz-form-control>
-      </nz-form-item>
-    </nz-col>
-    <nz-col>
-      <nz-segmented [formField]="filterForm.status">
-        @for (segmentOption of statusSegmentOptions; track segmentOption.value) {
-          <label nz-segmented-item
-                 [nzValue]="segmentOption.value">
-            {{ segmentOption.label }}
-          </label>
-        }
-      </nz-segmented>
-    </nz-col>
-    <nz-col nzFlex="none">
-      <button nz-button
-              type="button"
-              nzType="default"
-              (click)="clear()">
-        Reseteaza
-      </button>
-    </nz-col>
-  </nz-row>
+  <ng-container *skeLayoutBreakpoint="'lg'; else mobileFilters">
+    <nz-row [nzGutter]="[16, 0]"
+            class="grow">
+      <nz-col nzFlex="auto">
+        <nz-form-item>
+          <nz-form-control nzSpan="24">
+            <ng-container *ngTemplateOutlet="searchInput" />
+          </nz-form-control>
+        </nz-form-item>
+      </nz-col>
+      <nz-col>
+        <nz-segmented [formField]="filterForm.status"
+                      aria-label="Filtrează după status">
+          @for (segmentOption of statusSegmentOptions; track segmentOption.value) {
+            <label nz-segmented-item
+                   [nzValue]="segmentOption.value">
+              {{ segmentOption.label }}
+            </label>
+          }
+        </nz-segmented>
+      </nz-col>
+      <nz-col nzFlex="none">
+        <button nz-button
+                type="button"
+                nzType="default"
+                (click)="clear()">
+          Reseteaza
+        </button>
+      </nz-col>
+    </nz-row>
+  </ng-container>
+
+  <ng-template #mobileFilters>
+    <div class="mb-2 flex items-center gap-2">
+      <div class="min-w-0 grow">
+        <ng-container *ngTemplateOutlet="searchInput" />
+      </div>
+      <nz-badge [nzCount]="activeFilterCount()"
+                nzSize="small">
+        <button nz-button
+                type="button"
+                nzType="default"
+                aria-haspopup="dialog"
+                [attr.aria-expanded]="filtersOpen()"
+                [attr.aria-label]="filtersButtonLabel()"
+                (click)="filtersOpen.set(true)">
+          <nz-icon nzType="icons:sliders" />
+          Filtre
+        </button>
+      </nz-badge>
+    </div>
+
+    <nz-drawer nzTitle="Filtre"
+               nzPlacement="bottom"
+               nzHeight="auto"
+               [nzVisible]="filtersOpen()"
+               [nzFooter]="drawerFooter"
+               (nzOnClose)="filtersOpen.set(false)">
+      <ng-container *nzDrawerContent>
+        <div role="group"
+             aria-labelledby="categoryImportStatusLabel"
+             class="flex flex-col gap-2">
+          <span id="categoryImportStatusLabel">Status</span>
+          <nz-select class="w-full"
+                     nzPlaceHolder="Toate"
+                     aria-label="Status import"
+                     [formField]="filterForm.status">
+            @for (option of statusSegmentOptions; track option.value) {
+              <nz-option [nzValue]="option.value"
+                         [nzLabel]="option.label" />
+            }
+          </nz-select>
+        </div>
+      </ng-container>
+    </nz-drawer>
+
+    <ng-template #drawerFooter>
+      <div class="flex justify-end gap-2">
+        <button nz-button
+                type="button"
+                nzType="default"
+                (click)="clear()">
+          Resetează
+        </button>
+        <button nz-button
+                type="button"
+                nzType="primary"
+                (click)="filtersOpen.set(false)">
+          Gata
+        </button>
+      </div>
+    </ng-template>
+  </ng-template>
+
+  <ng-template #searchInput>
+    <nz-input-wrapper>
+      <nz-icon nzInputPrefix
+               nzType="icons:magnifying-glass"></nz-icon>
+      <input type="text"
+             nz-input
+             id="categoryImportBatchSearchTerm"
+             placeholder="Cautați..."
+             aria-label="Căutați importuri"
+             [formField]="filterForm.searchTerm" />
+    </nz-input-wrapper>
+  </ng-template>
 </form>

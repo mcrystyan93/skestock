@@ -1,37 +1,144 @@
-<nz-row [nzGutter]="[16, 16]"
-        nzAlign="middle">
-  <nz-col nzFlex="auto">
-    <nz-form-item>
-      <nz-form-control nzSpan="24">
-        <nz-input-wrapper>
-          <nz-icon nzInputPrefix
-                   nzType="icons:magnifying-glass"></nz-icon>
-          <input type="text"
-                 nz-input
-                 id="searchTerm"
-                 placeholder="Cautați..."
-                 [formField]="stockListFilterForm.searchTerm" />
-        </nz-input-wrapper>
-      </nz-form-control>
-    </nz-form-item>
-  </nz-col>
-  <nz-col>
-    <nz-form-item>
-      <nz-space-compact class="stock-form-compact">
-        <ske-location-dropdown [formField]="stockListFilterForm.location"
-                               placeholder="Locatie"
-                               class="min-w-48"
-                               [allowClear]="true" />
-        <ske-category-dropdown [formField]="stockListFilterForm.category"
-                               placeholder="Categorie"
-                               class="min-w-48"
-                               [allowClear]="true"
-                               [allowCreate]="false"
-                               [allowEdit]="false" />
-      </nz-space-compact>
-    </nz-form-item>
-  </nz-col>
-  <nz-col>
+<form (ngSubmit)="onSubmit()"
+      nz-form
+      nzNoColon
+      nzLayout="horizontal">
+  <ng-container *skeLayoutBreakpoint="'lg'; else mobileFilters">
+    <nz-row [nzGutter]="[16, 16]"
+            nzAlign="middle">
+      <nz-col nzFlex="auto">
+        <nz-form-item>
+          <nz-form-control nzSpan="24">
+            <ng-container *ngTemplateOutlet="searchInput" />
+          </nz-form-control>
+        </nz-form-item>
+      </nz-col>
+      <nz-col>
+        <nz-form-item>
+          <ng-container *ngTemplateOutlet="locationAndCategory" />
+        </nz-form-item>
+      </nz-col>
+      <nz-col>
+        <ng-container *ngTemplateOutlet="desktopStatusSegment" />
+      </nz-col>
+      <nz-col>
+        <button nz-button
+                type="button"
+                nzType="default"
+                [nzLoading]="loading()"
+                (click)="clear()">
+          Resetează
+        </button>
+      </nz-col>
+    </nz-row>
+  </ng-container>
+
+  <ng-template #mobileFilters>
+    <div class="mb-2 flex min-w-0 items-center gap-2">
+      <div class="min-w-0 grow">
+        <ng-container *ngTemplateOutlet="searchInput" />
+      </div>
+      <nz-badge [nzCount]="activeFilterCount()"
+                nzSize="small">
+        <button nz-button
+                type="button"
+                nzType="default"
+                aria-haspopup="dialog"
+                [attr.aria-expanded]="filtersOpen()"
+                [attr.aria-label]="filtersButtonLabel()"
+                class="shrink-0"
+                (click)="filtersOpen.set(true)">
+          <nz-icon nzType="icons:sliders" />
+          Filtre
+        </button>
+      </nz-badge>
+    </div>
+
+    <nz-drawer nzTitle="Filtre"
+               nzPlacement="bottom"
+               nzHeight="auto"
+               [nzVisible]="filtersOpen()"
+               [nzFooter]="drawerFooter"
+               (nzOnClose)="filtersOpen.set(false)">
+      <ng-container *nzDrawerContent>
+        <div class="flex flex-col gap-4">
+          <div role="group"
+               aria-labelledby="stockLocationFilterLabel"
+               class="flex flex-col gap-2">
+            <span id="stockLocationFilterLabel">Locație</span>
+            <ng-container *ngTemplateOutlet="locationDropdown" />
+          </div>
+          <div role="group"
+               aria-labelledby="stockCategoryFilterLabel"
+               class="flex flex-col gap-2">
+            <span id="stockCategoryFilterLabel">Categorie</span>
+            <ng-container *ngTemplateOutlet="categoryDropdown" />
+          </div>
+          <div role="group"
+               aria-labelledby="stockStatusFilterLabel"
+               class="flex flex-col gap-2">
+            <span id="stockStatusFilterLabel">Starea stocului</span>
+            <ng-container *ngTemplateOutlet="mobileStatusSegment" />
+          </div>
+        </div>
+      </ng-container>
+    </nz-drawer>
+
+    <ng-template #drawerFooter>
+      <div class="flex justify-end gap-2">
+        <button nz-button
+                type="button"
+                nzType="default"
+                [nzLoading]="loading()"
+                (click)="clear()">
+          Resetează
+        </button>
+        <button nz-button
+                type="button"
+                nzType="primary"
+                (click)="filtersOpen.set(false)">
+          Gata
+        </button>
+      </div>
+    </ng-template>
+  </ng-template>
+
+  <ng-template #searchInput>
+    <nz-input-wrapper>
+      <nz-icon nzInputPrefix
+               nzType="icons:magnifying-glass"></nz-icon>
+      <input type="text"
+             nz-input
+             id="stockSearchTerm"
+             placeholder="Căutați..."
+             aria-label="Căutați în stoc"
+             [formField]="stockListFilterForm.searchTerm" />
+    </nz-input-wrapper>
+  </ng-template>
+
+  <ng-template #locationAndCategory>
+    <nz-space-compact class="stock-form-compact">
+      <ng-container *ngTemplateOutlet="locationDropdown" />
+      <ng-container *ngTemplateOutlet="categoryDropdown" />
+    </nz-space-compact>
+  </ng-template>
+
+  <ng-template #locationDropdown>
+    <ske-location-dropdown [formField]="stockListFilterForm.location"
+                           placeholder="Locație"
+                           class="min-w-48"
+                           [allowClear]="true" />
+  </ng-template>
+
+  <ng-template #categoryDropdown>
+    <ske-category-dropdown [formField]="stockListFilterForm.category"
+                           placeholder="Categorie"
+                           class="min-w-48"
+                           [allowClear]="true"
+                           [allowCreate]="false"
+                           [allowEdit]="false" />
+  </ng-template>
+
+  <ng-template #desktopStatusSegment>
     <nz-segmented [formField]="stockListFilterForm.booleanSegmentValue">
       @for (option of booleanSegmentOptions; track option.value) {
         <label nz-segmented-item
@@ -40,15 +147,16 @@
         </label>
       }
     </nz-segmented>
-  </nz-col>
-  <nz-col>
-    <button nz-button
-            type="button"
-            nzType="default"
-            [nzLoading]="loading()"
-            (click)="clear()">
-      Reseteaza
-    </button>
+  </ng-template>
 
-  </nz-col>
-</nz-row>
+  <ng-template #mobileStatusSegment>
+    <nz-select [formField]="stockListFilterForm.booleanSegmentValue"
+               class="w-full"
+               nzPlaceHolder="Alegeți statusul">
+      @for (option of booleanSegmentOptions; track option.value) {
+        <nz-option [nzLabel]="option.label"
+                   [nzValue]="option.value" />
+      }
+    </nz-select>
+  </ng-template>
+</form>

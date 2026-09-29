@@ -59,7 +59,8 @@ export class CategoriesPage implements OnInit, OnDestroy {
     this._modalService.create({
       nzContent: CategoryImportModal,
       nzCentered: true,
-      nzMaskClosable: false
+      nzMaskClosable: false,
+      nzWrapClassName: 'modal-100 modal-lg-75'
     });
   }
 
@@ -71,7 +72,7 @@ export class CategoriesPage implements OnInit, OnDestroy {
     const modalRef = this._modalService.create({
       nzContent: CategoryImportReviewModal,
       nzData: importId,
-      nzWrapClassName: 'modal-lg-100 modal-xl-75',
+      nzWrapClassName: 'modal-100 modal-lg-75',
       nzCentered: true,
       nzMaskClosable: false
     });
@@ -99,7 +100,8 @@ export class CategoriesPage implements OnInit, OnDestroy {
         category
       },
       nzCentered: true,
-      nzMaskClosable: false
+      nzMaskClosable: false,
+      nzWrapClassName: 'modal-100 modal-lg-75'
     });
 
     modalRef.afterClose.pipe(

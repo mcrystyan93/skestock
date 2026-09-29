@@ -43,14 +43,14 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
     NzTypographyComponent
   ],
   host: {
-    class: 'ant-list-item py-1!'
+    class: 'ant-list-item flex-col! items-stretch! gap-2 py-2! lg:flex-row! lg:items-center! lg:gap-0'
   },
   selector: 'ske-order-list-line',
   styles: ``,
   template: `
     @let lineForm = line();
     @let productName = lineForm.productName().value();
-    <nz-list-item-meta>
+    <nz-list-item-meta class="w-full min-w-0 lg:w-auto lg:grow">
       <nz-list-item-meta-title>
         {{ productName }}
         @if (lineForm.productName().touched() && lineForm.productName().errors(); as errors) {
@@ -64,7 +64,7 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
         }
       </nz-list-item-meta-title>
       <nz-list-item-meta-description>
-        <nz-form-item class="mb-0!">
+        <nz-form-item class="mb-0! w-full min-w-0 lg:w-auto">
           <nz-form-control [nzErrorTip]="notesErrorTemplate">
             <nz-input-wrapper>
               <nz-icon nzInputPrefix
@@ -143,7 +143,7 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
       </nz-form-control>
     </nz-form-item>
 
-    <ul nz-list-item-actions>
+    <ul nz-list-item-actions class="m-0! self-end lg:self-auto">
       <nz-list-item-action>
         <button type="button"
                 nz-button

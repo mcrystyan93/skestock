@@ -6,10 +6,14 @@ import { FileStorageState } from '@ske/shared/storage';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReviewModal, ReviewModalData } from '../modals/review-modal';
+import { GoodsReceiptImportsListSmall } from './small/goods-receipt-imports-list-small';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 
 @Component({
   imports: [
-    Table
+    Table,
+    GoodsReceiptImportsListSmall,
+    LayoutBreakpoint
   ],
   selector: 'ske-goods-receipt-imports-table-container',
   styles: ``,
@@ -34,7 +38,7 @@ export class TableContainer {
     const modalRef = this._nzModalService.create({
       nzContent: ReviewModal,
       nzData: <ReviewModalData>{ importId: importDto.id },
-      nzWrapClassName: 'modal-100',
+      nzWrapClassName: 'modal-100 modal-lg-75',
       nzCentered: true,
       nzMaskClosable: false
     });
@@ -49,4 +53,3 @@ export class TableContainer {
       });
   }
 }
-

@@ -1,4 +1,5 @@
-import { Component, effect, input, linkedSignal, output, untracked } from '@angular/core';
+import { Component, computed, effect, input, linkedSignal, output, signal, untracked } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import {
   buildEqualsFilterForDropdown,
   CategoryDropdownValue,
@@ -18,7 +19,11 @@ import { NzSegmentedComponent, NzSegmentedItemComponent } from 'ng-zorro-antd/se
 import { NzInputDirective, NzInputPrefixDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { NzDividerComponent } from 'ng-zorro-antd/divider';
+import { NzFormDirective } from 'ng-zorro-antd/form';
+import { LayoutBreakpoint } from '@ske/shared/directives';
+import { NzBadgeComponent } from 'ng-zorro-antd/badge';
+import { NzDrawerComponent, NzDrawerContentDirective } from 'ng-zorro-antd/drawer';
+import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
 
 @Component({
   imports: [
@@ -36,7 +41,14 @@ import { NzDividerComponent } from 'ng-zorro-antd/divider';
     NzInputPrefixDirective,
     NzInputDirective,
     NzButtonComponent,
-    NzDividerComponent
+    NzFormDirective,
+    NgTemplateOutlet,
+    LayoutBreakpoint,
+    NzBadgeComponent,
+    NzDrawerComponent,
+    NzDrawerContentDirective,
+    NzOptionComponent,
+    NzSelectComponent
   ],
   selector: 'ske-stock-filter-form',
   styles: `
@@ -49,6 +61,7 @@ export class FilterForm {
 
   public readonly onFilterChange = output<GetClassLocationStockRequest>();
   public readonly onAdd = output<StockFilterAddPrefill>();
+  public readonly filtersOpen = signal(false);
   private _initialFormChangeHandled = false;
 
   public readonly booleanSegmentOptions = [
@@ -72,6 +85,18 @@ export class FilterForm {
 
   public readonly stockListFilterForm = form(this._formModel, (schemaPath) => {
     debounce(schemaPath.searchTerm, 300);
+  });
+
+  public readonly activeFilterCount = computed(() => {
+    const { location, category, booleanSegmentValue } = this.stockListFilterForm().value();
+
+    return Number(!!location) + Number(!!category) + Number(booleanSegmentValue !== StockBooleanField.All);
+  });
+
+  public readonly filtersButtonLabel = computed(() => {
+    const count = this.activeFilterCount();
+
+    return count === 0 ? 'Filtre' : `Filtre, ${count} ${count === 1 ? 'filtru activ' : 'filtre active'}`;
   });
 
   private readonly _formEffectChange = effect(() => {

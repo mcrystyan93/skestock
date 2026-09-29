@@ -4,6 +4,7 @@ import {
   orderListApiEvents,
   OrderListDetailModal,
   OrderListExportService,
+  OrderListListSmall,
   OrderListListStore,
   Table
 } from '@ske/shared/order-lists';
@@ -15,32 +16,48 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Events } from '@ngrx/signals/events';
 import { tap } from 'rxjs';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 
 @Component({
-  imports: [ErrorAlert, FilterContainer, Table],
+  imports: [ErrorAlert, FilterContainer, Table, OrderListListSmall, LayoutBreakpoint],
   providers: [OrderListListStore, NzModalService],
   selector: 'ske-school-class-overview-order-lists-tab',
   styles: ``,
   template: `
-    <ske-order-list-filter-container class="block mb-4" />
+    <ske-order-list-filter-container />
 
     <ske-error-display [problemDetail]="store.orderListsProblemDetail()"
-                       [validationErrors]="store.orderListsValidationErrors()"
-                       class="mb-2" />
+                       [validationErrors]="store.orderListsValidationErrors()" />
 
     <div class="grow relative">
-      <ske-order-list-table [items]="store.orderLists()"
-                            [filter]="store.filter()"
-                            [loading]="store.orderListsLoading()"
-                            [hasNextPage]="store.hasNextPage()"
-                            [isLoadingMore]="store.isLoadingMore()"
-                            [statusChangingId]="store.statusChangingId()"
-                            [downloadingIds]="exportService.downloadingIds()"
-                            (onFilterChange)="store.load($event)"
-                            (onLoadMore)="store.loadMore()"
-                            (onView)="openOrderList($event)"
-                            (onStatusChange)="changeStatus($event)"
-                            (onDownload)="downloadExcel($event)" />
+      <ng-container *skeLayoutBreakpoint="'lg'; else small">
+        <ske-order-list-table [items]="store.orderLists()"
+                              [filter]="store.filter()"
+                              [loading]="store.orderListsLoading()"
+                              [hasNextPage]="store.hasNextPage()"
+                              [isLoadingMore]="store.isLoadingMore()"
+                              [statusChangingId]="store.statusChangingId()"
+                              [downloadingIds]="exportService.downloadingIds()"
+                              (onFilterChange)="store.load($event)"
+                              (onLoadMore)="store.loadMore()"
+                              (onView)="openOrderList($event)"
+                              (onStatusChange)="changeStatus($event)"
+                              (onDownload)="downloadExcel($event)" />
+      </ng-container>
+
+      <ng-template #small>
+        <ske-order-list-list-small [items]="store.orderLists()"
+                                   [filter]="store.filter()"
+                                   [loading]="store.orderListsLoading()"
+                                   [hasNextPage]="store.hasNextPage()"
+                                   [isLoadingMore]="store.isLoadingMore()"
+                                   [statusChangingId]="store.statusChangingId()"
+                                   [downloadingIds]="exportService.downloadingIds()"
+                                   (onLoadMore)="store.loadMore()"
+                                   (onView)="openOrderList($event)"
+                                   (onStatusChange)="changeStatus($event)"
+                                   (onDownload)="downloadExcel($event)" />
+      </ng-template>
     </div>
   `,
   host: {
@@ -85,7 +102,7 @@ export class OrderListsTab {
         id: orderList.id,
         classId: orderList.classId
       },
-      nzWrapClassName: 'modal-90',
+      nzWrapClassName: 'modal-100 modal-lg-75',
       nzCentered: true,
       nzMaskClosable: false
     });

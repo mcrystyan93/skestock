@@ -1,15 +1,18 @@
 import {Component, computed, inject, input, output} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
 import {ClassStockByCategoryChartDto} from '@ske/models';
 import type {ApexAxisChartSeries, ApexChart, ApexOptions} from 'apexcharts';
 import {ChartComponent} from 'ng-apexcharts';
 import {NzTypographyComponent} from 'ng-zorro-antd/typography';
 import {ThemeService} from '@ske/theme';
+import {gridResponsiveMap, NzBreakpointService} from 'ng-zorro-antd/core/services';
 
 const MIN_CHART_HEIGHT = 360;
 // Room per bar and for the legend/axis, so long item lists stay readable instead of squashed.
 const BAR_ROW_HEIGHT = 28;
 const CHART_CHROME_HEIGHT = 110;
 const CATEGORY_LABEL_MAX_WIDTH = 180;
+const MAX_INLINE_LEGEND_SERIES = 12;
 const CATEGORY_COLORS = ['#1f6c72', '#c17d2e', '#56698c', '#a45047', '#6e8251', '#806596'];
 const QUANTITY_FORMATTER = new Intl.NumberFormat('ro-RO');
 
@@ -34,6 +37,25 @@ export type ClassStockByCategoryBar = { id: string; label: string };
                  [attr.aria-label]="ariaLabel()"
                  [theme]="{ mode: mode() }"
                  role="img"/>
+      @if (useScrollableLegend()) {
+        <p class="mx-4 mb-1 text-xs text-gray-500 dark:text-gray-400">
+          Categorii ({{ data()?.series?.length ?? 0 }}) · derulați lista pentru toate
+        </p>
+        <div class="mx-4 mb-3 grid max-h-32 grid-cols-1 gap-x-3 gap-y-1 overflow-y-auto rounded border border-gray-200 p-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1890ff] dark:border-gray-700"
+             role="list"
+             aria-label="Legendă: categorii de stoc"
+             tabindex="0">
+          @for (item of data()?.series ?? []; track item.name; let index = $index) {
+            <div class="flex min-w-0 items-start gap-2"
+                 role="listitem">
+              <span class="mt-1 h-3 w-3 shrink-0 rounded-sm"
+                    aria-hidden="true"
+                    [style.backgroundColor]="seriesColor(index)"></span>
+              <span class="min-w-0 break-words text-xs leading-4">{{ item.name }}</span>
+            </div>
+          }
+        </div>
+      }
     } @else {
       <div class="flex min-h-80 items-center justify-center px-4 text-center"
            role="status">
@@ -57,8 +79,16 @@ export class ClassStockByCategoryChart {
   public readonly barSelected = output<ClassStockByCategoryBar>();
 
   private readonly _themeService = inject(ThemeService);
+  private readonly _breakpoints = toSignal(
+    inject(NzBreakpointService).subscribe(gridResponsiveMap, true),
+    {initialValue: null}
+  );
 
   public readonly mode = computed(() => this._themeService.currentTheme() === 'dark' ? 'dark' : 'light');
+  public readonly isCompact = computed(() => !(this._breakpoints()?.lg ?? true));
+  public readonly useScrollableLegend = computed(() =>
+    this.isCompact() || (this.data()?.series.length ?? 0) > MAX_INLINE_LEGEND_SERIES
+  );
 
   public readonly hasChartData = computed(() => {
     const data = this.data();
@@ -107,6 +137,7 @@ export class ClassStockByCategoryChart {
   }));
 
   public readonly legend = computed<ApexOptions['legend']>(() => ({
+    show: !this.useScrollableLegend(),
     position: 'bottom',
     horizontalAlign: 'left'
   }));
@@ -119,6 +150,10 @@ export class ClassStockByCategoryChart {
   }));
 
   public readonly colors = computed<ApexOptions['colors']>(() => CATEGORY_COLORS);
+
+  public seriesColor(index: number): string {
+    return CATEGORY_COLORS[index % CATEGORY_COLORS.length];
+  }
 
   private emitBar(index: number) {
     const data = this.data();

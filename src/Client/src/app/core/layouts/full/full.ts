@@ -1,12 +1,16 @@
-import { Component, signal } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NgTemplateOutlet } from '@angular/common';
+import { RouterLink, RouterOutlet } from '@angular/router';
 import { NzContentComponent, NzLayoutComponent, NzSiderComponent } from 'ng-zorro-antd/layout';
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
-import { RouterLink, RouterOutlet } from '@angular/router';
-import { Header } from './header/header';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { NgTemplateOutlet } from '@angular/common';
-import { LayoutBreakpoint } from '@ske/shared/directives';
+import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzDrawerComponent, NzDrawerContentDirective } from 'ng-zorro-antd/drawer';
+import { gridResponsiveMap, NzBreakpointService } from 'ng-zorro-antd/core/services';
+import { LayoutBreakpoint } from '@ske/shared/directives';
+import { ThemeSwitcher } from '@ske/shared/theme';
+import { NavigationDrawerState } from './navigation-drawer.state';
 
 @Component({
   imports: [
@@ -17,17 +21,30 @@ import { NzDrawerComponent, NzDrawerContentDirective } from 'ng-zorro-antd/drawe
     RouterLink,
     NzContentComponent,
     RouterOutlet,
-    Header,
     NzIconDirective,
+    NzButtonComponent,
     NgTemplateOutlet,
     LayoutBreakpoint,
     NzDrawerComponent,
-    NzDrawerContentDirective
+    NzDrawerContentDirective,
+    ThemeSwitcher
   ],
   selector: 'ske-full',
-  styles: ``,
   templateUrl: './full.html',
 })
 export class Full {
-  public readonly drawerOpen = signal<boolean>(false);
+  protected readonly drawer = inject(NavigationDrawerState);
+
+  private readonly _breakpoints = toSignal(
+    inject(NzBreakpointService).subscribe(gridResponsiveMap, true),
+    { initialValue: null }
+  );
+
+  constructor() {
+    effect(() => {
+      if (this._breakpoints()?.lg) {
+        this.drawer.close();
+      }
+    });
+  }
 }
