@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "src/AppHost/Program.cs": {
-    "mtime": 1790229646.216502,
-    "seen": 1790230088.3958347,
-    "ast_hash": "80072e275d24b9d53d5b75fea87cfb0c",
+    "mtime": 1790660447.5898986,
+    "seen": 1790660850.7696288,
+    "ast_hash": "694074080f6eb88780f60694e1eb6078",
     "semantic_hash": ""
   },
   "src/AppHost/Properties/launchSettings.json": {
@@ -24654,9 +24654,9 @@
     "semantic_hash": ""
   },
   "aspire-output/docker-compose.yaml": {
-    "mtime": 1790231343.459532,
-    "seen": 1790317762.4091306,
-    "ast_hash": "a31c0d22311d0fe66f4b2593c3ef1a6e",
+    "mtime": 1790660837.7839832,
+    "seen": 1790660850.7708063,
+    "ast_hash": "d7c7e07d251ca8582e36ae600320c8a1",
     "semantic_hash": ""
   },
   "src/Application/Documents/Interfaces/IItemDocumentExtractionService.cs": {
@@ -28254,9 +28254,9 @@
     "semantic_hash": ""
   },
   "tasks/todo.md": {
-    "mtime": 1790602101.100302,
-    "seen": 1790602234.1887605,
-    "ast_hash": "c040c273f78f476f7eed793107605c28",
+    "mtime": 1790602234.6589918,
+    "seen": 1790660850.7709525,
+    "ast_hash": "13982769c1e00b504d4f5611837f7860",
     "semantic_hash": ""
   },
   "tests/Infrastructure.IntegrationTests/MaterializePurchaseStatisticsTests.cs": {

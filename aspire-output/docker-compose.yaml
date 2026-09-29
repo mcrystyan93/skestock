@@ -94,6 +94,16 @@ services:
         condition: "service_started"
     networks:
       - "aspire"
+    healthcheck:
+      test:
+        - "CMD"
+        - "bash"
+        - "-c"
+        - "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /health HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && head -n1 <&3 | grep -q ' 200 '"
+      interval: "30s"
+      timeout: "5s"
+      retries: 3
+      start_period: "60s"
   worker:
     image: "skestock-worker:latest"
     build:
@@ -132,6 +142,16 @@ services:
         condition: "service_started"
     networks:
       - "aspire"
+    healthcheck:
+      test:
+        - "CMD"
+        - "sh"
+        - "-c"
+        - "test $$(( $$(date +%s) - $$(stat -c %Y /tmp/skestock-worker.heartbeat) )) -lt 180"
+      interval: "60s"
+      timeout: "5s"
+      retries: 3
+      start_period: "120s"
   storage:
     image: "mcr.microsoft.com/azure-storage/azurite:3.35.0"
     command:
