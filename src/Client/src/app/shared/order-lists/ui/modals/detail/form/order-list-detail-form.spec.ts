@@ -22,7 +22,12 @@ describe('OrderListDetailForm', () => {
         provideNzIconsTesting(),
         provideNzIcons([
           createTestIcon('icons:trash-can'),
-          createTestIcon('icons:circle-exclamation')
+          createTestIcon('icons:circle-exclamation'),
+          createTestIcon('icons:circle-check'),
+          createTestIcon('icons:magnifying-glass'),
+          createTestIcon('icons:plus'),
+          createTestIcon('icons:minus'),
+          createTestIcon('icons:pencil')
         ]),
         OrderListDetailState,
         {

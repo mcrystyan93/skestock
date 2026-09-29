@@ -26,7 +26,7 @@
                role="listitem">
         <div class="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-2">
           <button type="button"
-                  class="after:absolute after:inset-0 block min-w-0 overflow-hidden text-left font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1890ff]"
+                  class="after:absolute after:inset-0 block min-w-0 overflow-hidden text-left font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
                   [attr.aria-label]="'Deschide comanda ' + (orderList.name || 'fără nume')"
                   [attr.title]="orderList.name || 'Comandă fără nume'"
                   (click)="onView.emit(orderList)">

@@ -1,11 +1,27 @@
+@import './tailwind-tokens';
+
+@success-color: @tw-green-600;
+@warning-color: @tw-amber-500;
+@error-color: @tw-red-600;
+@info-color: @tw-sky-600;
+@shadow-1-down: @tw-shadow-md;
+@shadow-2: @tw-shadow-md;
+@shadow-1-up: @tw-shadow-sm;
+@card-shadow: @tw-shadow-sm;
+@font-size-base: 14px;
+
 @margin-md: 17px;
-@border-radius-base: 4px;
+@border-radius-base: 6px;
 @border-radius-sm: 4px;
-@border-radius-lg: 4px;
+@border-radius-lg: 8px;
 //
 @card-padding-base: 12px;
 @table-border-radius-base: 0;
 @table-header-bg: @layout-body-background;
+@table-header-sort-bg: @table-header-bg;
+@table-header-sort-active-bg: @table-header-bg;
+@table-body-sort-bg: transparent;
+@table-fixed-header-sort-active-bg: @table-header-bg;
 
 @modal-widths: {
   10: 10%;
@@ -148,4 +164,8 @@ nz-card {
 // Clickable stacked-bar charts (e.g. the class stock drill-down).
 .ske-chart-selectable .apexcharts-bar-area {
   cursor: pointer;
+}
+
+tr[ske-stock-category-item-header-row] > td {
+  background-color: @ske-group-row-bg !important;
 }

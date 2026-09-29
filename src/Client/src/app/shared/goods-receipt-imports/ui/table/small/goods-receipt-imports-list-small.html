@@ -28,7 +28,7 @@
           <div class="min-w-0 grow">
             @if (importDto.status === 'pendingReview') {
               <button type="button"
-                      class="after:absolute after:inset-0 block max-w-full overflow-hidden text-left font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1890ff]"
+                      class="after:absolute after:inset-0 block max-w-full overflow-hidden text-left font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
                       [attr.aria-label]="'Revizuiește importul ' + fileName(importDto)"
                       [attr.title]="fileName(importDto)"
                       (click)="review.emit(importDto)">
