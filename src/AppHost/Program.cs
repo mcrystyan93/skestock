@@ -79,6 +79,19 @@ var web = builder.AddProject<Projects.Web>(Services.WebApi)
             Dockerfile = "src/Web/Dockerfile",
             Target = "final"
         };
+        // aspnet images ship bash but no curl/wget; /health returns 503 when unhealthy.
+        service.Healthcheck = new Aspire.Hosting.Docker.Resources.ServiceNodes.Healthcheck
+        {
+            Test =
+            [
+                "CMD", "bash", "-c",
+                "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /health HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && head -n1 <&3 | grep -q ' 200 '"
+            ],
+            Interval = "30s",
+            Timeout = "5s",
+            Retries = 3,
+            StartPeriod = "60s"
+        };
         service.AddVolume(new Aspire.Hosting.Docker.Resources.ServiceNodes.Volume
         {
             Name = Services.DataProtectionKeysVolume,
@@ -113,6 +126,20 @@ var worker = builder.AddProject<Projects.Worker>(Services.Worker)
             Context = "..",
             Dockerfile = "src/Worker/Dockerfile",
             Target = "final"
+        };
+        // HeartbeatFileService touches this file every 30s while every queue loop is polling.
+        // "$$" is compose's escape for a literal "$".
+        service.Healthcheck = new Aspire.Hosting.Docker.Resources.ServiceNodes.Healthcheck
+        {
+            Test =
+            [
+                "CMD", "sh", "-c",
+                "test $$(( $$(date +%s) - $$(stat -c %Y /tmp/skestock-worker.heartbeat) )) -lt 180"
+            ],
+            Interval = "60s",
+            Timeout = "5s",
+            Retries = 3,
+            StartPeriod = "120s"
         };
     })
     .WithEnvironment($"{Services.OpenApiSettings}__{Services.OpenApiKey}", openAiApiKey)
