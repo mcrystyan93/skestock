@@ -33,5 +33,6 @@ import { ThemeSwitcher } from '@ske/shared/theme';
 export class Header {
   public readonly selectedTabIndex = model(0);
   public readonly onAdd = output<void>();
+  public readonly onAddSupplyList = output<void>();
   public readonly onImport = output<void>();
 }

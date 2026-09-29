@@ -1,0 +1,135 @@
+<form nz-form
+      nzNoColon
+      nzLayout="vertical">
+  <nz-row [nzGutter]="[16, 0]">
+    <nz-col nzSpan="24"
+            [nzXl]="12">
+      <nz-form-item class="mb-2!"
+                    *skeletonInputLoader="loading()">
+        <nz-form-label nzRequired
+                       nzFor="supply-list-name"
+                       nzSpan="24">Nume
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="nameErrorTemplate"
+                         nzSpan="24">
+          <nz-input-wrapper nzShowCount
+                            [nzCount]="{ max: 200 }">
+            <input id="supply-list-name"
+                   type="text"
+                   nz-input
+                   placeholder="Numele listei"
+                   [formField]="supplyListForm.name">
+          </nz-input-wrapper>
+        </nz-form-control>
+        <ng-template #nameErrorTemplate>
+          @for (error of supplyListForm.name().errors(); track error.kind) {
+            <div class="ant-form-item-explain-error">{{ error.message }}</div>
+          }
+        </ng-template>
+      </nz-form-item>
+    </nz-col>
+    <nz-col nzSpan="24"
+            [nzMd]="12"
+            [nzXl]="6">
+      <nz-form-item class="mb-2!"
+                    *skeletonInputLoader="loading()">
+        <nz-form-label nzRequired
+                       nzFor="supply-list-frequency"
+                       nzSpan="24">Frecvență
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="frequencyErrorTemplate"
+                         nzSpan="24">
+          <nz-select nzId="supply-list-frequency"
+                     nzPlaceHolder="Alegeți frecvența"
+                     [formField]="supplyListForm.frequency">
+            @for (option of frequencyOptions; track option.value) {
+              <nz-option [nzValue]="option.value"
+                         [nzLabel]="option.label" />
+            }
+          </nz-select>
+        </nz-form-control>
+        <ng-template #frequencyErrorTemplate>
+          @for (error of supplyListForm.frequency().errors(); track error.kind) {
+            <div class="ant-form-item-explain-error">{{ error.message }}</div>
+          }
+        </ng-template>
+      </nz-form-item>
+    </nz-col>
+    @if (supplyListForm.frequency().value() === 'EveryXWeeks') {
+      <nz-col nzSpan="24"
+              [nzMd]="12"
+              [nzXl]="6">
+        <nz-form-item class="mb-2!"
+                      *skeletonInputLoader="loading()">
+          <nz-form-label nzRequired
+                         nzFor="supply-list-interval"
+                         nzSpan="24">Interval (săptămâni)
+          </nz-form-label>
+          <nz-form-control [nzErrorTip]="intervalErrorTemplate"
+                           nzSpan="24">
+            <nz-input-number nzId="supply-list-interval"
+                             class="w-full!"
+                             [nzMin]="minIntervalWeeks"
+                             [nzMax]="maxIntervalWeeks"
+                             [nzStep]="1"
+                             [nzPrecision]="0"
+                             nzPlaceHolder="ex. 2"
+                             [formField]="supplyListForm.intervalWeeks" />
+          </nz-form-control>
+          <ng-template #intervalErrorTemplate>
+            @for (error of supplyListForm.intervalWeeks().errors(); track error.kind) {
+              <div class="ant-form-item-explain-error">{{ error.message }}</div>
+            }
+          </ng-template>
+        </nz-form-item>
+      </nz-col>
+    }
+    <nz-col nzSpan="24">
+      <nz-form-item class="mb-2!"
+                    *skeletonInputLoader="loading()">
+        <nz-form-label nzFor="supply-list-note"
+                       nzSpan="24">Notă
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="noteErrorTemplate">
+          <nz-textarea-count [nzMaxCharacterCount]="1000">
+            <textarea id="supply-list-note"
+                      nz-input
+                      rows="1"
+                      placeholder="Notițe despre listă"
+                      [formField]="supplyListForm.note"></textarea>
+          </nz-textarea-count>
+        </nz-form-control>
+        <ng-template #noteErrorTemplate>
+          @for (error of supplyListForm.note().errors(); track error.kind) {
+            <div class="ant-form-item-explain-error">{{ error.message }}</div>
+          }
+        </ng-template>
+      </nz-form-item>
+    </nz-col>
+    @if (editable()) {
+      <nz-col nzSpan="24">
+        <nz-form-item class="mb-2!"
+                      *skeletonInputLoader="loading()">
+          <nz-form-control>
+            <ske-item-dropdown [formField]="supplyListForm.lineItem"
+                               [allowCreate]="false"
+                               [allowEdit]="false"
+                               placeholder="Căutați și adăugați un articol" />
+          </nz-form-control>
+        </nz-form-item>
+      </nz-col>
+    }
+  </nz-row>
+
+  <nz-divider nzSize="small" />
+
+  <nz-list>
+    @for (line of supplyListForm.lines; track $index) {
+      <ske-supply-list-line [line]="line"
+                            [disabled]="loading() || !editable()"
+                            (remove)="removeLine(line().value().itemId)" />
+    } @empty {
+      <nz-list-empty nzNoResult="Lista nu conține articole." />
+    }
+  </nz-list>
+</form>

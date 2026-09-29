@@ -1,0 +1,43 @@
+<form (ngSubmit)="onSubmit()"
+      nz-form
+      nzNoColon
+      nzLayout="horizontal">
+  <nz-row [nzGutter]="[16, 8]"
+          class="grow">
+    <nz-col nzFlex="auto">
+      <nz-form-item class="mb-0!">
+        <nz-form-control nzSpan="24">
+          <nz-input-wrapper>
+            <nz-icon nzInputPrefix
+                     nzType="icons:magnifying-glass"></nz-icon>
+            <input type="text"
+                   nz-input
+                   id="supplyListSearchTerm"
+                   placeholder="Căutați după nume..."
+                   aria-label="Căutați liste după nume"
+                   [formField]="filterForm.searchTerm" />
+          </nz-input-wrapper>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col>
+      <nz-segmented [formField]="filterForm.active"
+                    aria-label="Filtrează după status">
+        @for (option of activeSegmentOptions; track option.value) {
+          <label nz-segmented-item
+                 [nzValue]="option.value">
+            {{ option.label }}
+          </label>
+        }
+      </nz-segmented>
+    </nz-col>
+    <nz-col nzFlex="none">
+      <button nz-button
+              type="button"
+              nzType="default"
+              (click)="clear()">
+        Resetează
+      </button>
+    </nz-col>
+  </nz-row>
+</form>

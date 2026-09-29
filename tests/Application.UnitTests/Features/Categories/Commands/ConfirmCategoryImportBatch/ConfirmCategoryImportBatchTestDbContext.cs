@@ -36,6 +36,8 @@ public class ConfirmCategoryImportBatchTestDbContext(DbContextOptions<ConfirmCat
     public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
     public DbSet<OrderList> OrderLists => Set<OrderList>();
     public DbSet<OrderListLine> OrderListLines => Set<OrderListLine>();
+    public DbSet<SupplyList> SupplyLists => Set<SupplyList>();
+    public DbSet<SupplyListLine> SupplyListLines => Set<SupplyListLine>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

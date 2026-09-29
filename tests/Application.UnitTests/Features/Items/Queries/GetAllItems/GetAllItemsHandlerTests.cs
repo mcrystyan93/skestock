@@ -43,6 +43,8 @@ public class ItemTestDbContext(DbContextOptions<ItemTestDbContext> options)
     public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
     public DbSet<OrderList> OrderLists => Set<OrderList>();
     public DbSet<OrderListLine> OrderListLines => Set<OrderListLine>();
+    public DbSet<SupplyList> SupplyLists => Set<SupplyList>();
+    public DbSet<SupplyListLine> SupplyListLines => Set<SupplyListLine>();
 
     public DbSet<GoodsReceiptImport> GoodsReceiptImports => Set<GoodsReceiptImport>();
     public DbSet<GoodsReceiptImportLine> GoodsReceiptImportLines => Set<GoodsReceiptImportLine>();

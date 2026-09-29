@@ -1,0 +1,47 @@
+<div *nzModalTitle>
+  @let supplyList = store.supplyList();
+  <div class="flex gap-2 items-center">
+    <div>
+      @if (supplyList.name) {
+        Lista: {{ supplyList.name }}
+      } @else {
+        Listă nouă
+      }
+    </div>
+    @if (supplyList.id) {
+      <nz-tag [nzColor]="supplyList.isActive ? 'success' : 'default'">
+        {{ supplyList.isActive ? 'Activă' : 'Inactivă' }}
+      </nz-tag>
+    }
+  </div>
+</div>
+
+<ske-error-display [problemDetail]="store.supplyListProblemDetail()"
+                   [validationErrors]="store.supplyListValidationErrors()" />
+
+<ske-supply-list-detail-form [loading]="busy()"
+                             [supplyList]="store.supplyList()" />
+
+<div *nzModalFooter>
+  <nz-space>
+    <button nz-button
+            *nzSpaceItem
+            nzType="default"
+            type="button"
+            (click)="close()"
+            [disabled]="busy()">
+      Închide
+    </button>
+    @if (editable()) {
+      <button nz-button
+              *nzSpaceItem
+              nzType="primary"
+              type="button"
+              (click)="save()"
+              [nzLoading]="busy()"
+              [disabled]="busy()">
+        Salvează
+      </button>
+    }
+  </nz-space>
+</div>

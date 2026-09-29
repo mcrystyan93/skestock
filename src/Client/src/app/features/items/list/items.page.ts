@@ -1,6 +1,9 @@
 import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ItemListState } from '../services/item-list.store';
-import { GetAllItemsRequest, ItemDto, ItemImportBatchListItemDto } from '@ske/models';
+import { GetAllItemsRequest, ItemDto, ItemImportBatchListItemDto, SupplyListListItemDto } from '@ske/models';
+import { SupplyListDetailModal, SupplyListDetailModalData } from '@ske/shared/supply-lists';
+import { SupplyListListState } from '../services/supply-list-list.store';
+import { SupplyListTab } from './tabs/supply-list-tab';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { Header } from './header/header';
 import { ItemDetailModal, ItemImportModal, ItemImportReviewModal, ItemImportState } from '@ske/shared/items';
@@ -16,11 +19,12 @@ import { ItemListTab } from './tabs/item-list-tab';
     NzTabsComponent,
     NzTabComponent,
     ItemListTab,
-    ItemImportListTab
+    ItemImportListTab,
+    SupplyListTab
   ],
   selector: 'ske-items-page',
   templateUrl: './items.page.html',
-  providers: [ItemListState, ItemImportState, NzModalService],
+  providers: [ItemListState, ItemImportState, SupplyListListState, NzModalService],
   host: {
     class: 'flex flex-col grow gap-4'
   }
@@ -28,6 +32,7 @@ import { ItemListTab } from './tabs/item-list-tab';
 export class ItemsPage implements OnInit, OnDestroy {
   public readonly listStore = inject(ItemListState);
   public readonly importStore = inject(ItemImportState);
+  public readonly supplyListStore = inject(SupplyListListState);
   public readonly selectedTabIndex = signal(0);
 
   private readonly _modalService = inject(NzModalService);
@@ -88,11 +93,13 @@ export class ItemsPage implements OnInit, OnDestroy {
   public ngOnInit() {
     this._signalRGroupManager.join(realtimeGroups.itemsList);
     this._signalRGroupManager.join(realtimeGroups.itemImportBatchesList);
+    this._signalRGroupManager.join(realtimeGroups.supplyListsList);
   }
 
   public ngOnDestroy() {
     this._signalRGroupManager.leave(realtimeGroups.itemsList);
     this._signalRGroupManager.leave(realtimeGroups.itemImportBatchesList);
+    this._signalRGroupManager.leave(realtimeGroups.supplyListsList);
   }
 
   private openItemModal(item: ItemDto | null = null) {
@@ -129,5 +136,45 @@ export class ItemsPage implements OnInit, OnDestroy {
     }
 
     this.listStore.toggleActive(item);
+  }
+
+  public openSupplyListModal(id: string | null = null) {
+    const modalRef = this._modalService.create<SupplyListDetailModal, SupplyListDetailModalData, boolean>({
+      nzContent: SupplyListDetailModal,
+      nzData: { id },
+      nzCentered: true,
+      nzMaskClosable: false,
+      nzClosable: true,
+      nzOnCancel: (instance) => {
+        instance.close();
+        return false;
+      },
+      nzWrapClassName: 'modal-100 modal-lg-75'
+    });
+
+    modalRef.afterClose.pipe(
+      takeUntilDestroyed(this._destroyRef)
+    ).subscribe((saved) => {
+      if (saved)
+        this.supplyListStore.reload();
+    });
+  }
+
+  public onToggleSupplyListActive(supplyList: SupplyListListItemDto) {
+    if (supplyList.isActive) {
+      this._modalService.confirm({
+        nzTitle: 'Confirmați dezactivarea listei?',
+        nzContent: `Lista „${supplyList.name}” va fi dezactivată și nu va mai putea fi modificată până la reactivare.`,
+        nzOkText: 'Dezactivează',
+        nzCancelText: 'Nu',
+        nzOkDanger: true,
+        nzCentered: true,
+        nzIconType: 'icons:circle-exclamation',
+        nzOnOk: () => this.supplyListStore.toggleActive(supplyList)
+      });
+      return;
+    }
+
+    this.supplyListStore.toggleActive(supplyList);
   }
 }

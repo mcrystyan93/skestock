@@ -1,5 +1,6 @@
 <ske-item-header [(selectedTabIndex)]="selectedTabIndex"
                  (onAdd)="onAdd()"
+                 (onAddSupplyList)="openSupplyListModal()"
                  (onImport)="onImport()" />
 
 <nz-tabs [nzSelectedIndex]="selectedTabIndex()"
@@ -18,6 +19,10 @@
                        (onLoadMore)="onLoadMore()"
                        (onEdit)="onEdit($event)"
                        (onToggleActive)="onToggleActive($event)" />
+  </nz-tab>
+  <nz-tab>
+    <ske-supply-list-tab (open)="openSupplyListModal($event.id)"
+                         (toggleActive)="onToggleSupplyListActive($event)" />
   </nz-tab>
   <nz-tab>
     <ske-item-import-list-tab (review)="onReview($event)" />

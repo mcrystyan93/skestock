@@ -1,0 +1,79 @@
+@let dimensions = tableDimensions();
+@let sort = sortByKey();
+
+<nz-table #table
+          nzTableLayout="fixed"
+          [nzData]="itemsVirtualData()"
+          [nzVirtualItemSize]="virtualItemSize()"
+          [nzVirtualMinBufferPx]="virtualMinBufferPx()"
+          [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
+          [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          [nzLoading]="loading()"
+          nzSize="small"
+          [nzScroll]="{ x: dimensions.width, y: dimensions.height }">
+  <thead>
+  <tr>
+    <th nzShowSort
+        [nzSortOrder]="sort.get('name') ?? null"
+        (nzSortOrderChange)="onSortChange($event, 'name')">{{ columns.name.label }}
+    </th>
+    <th nzWidth="240px"
+        nzShowSort
+        [nzSortOrder]="sort.get('frequency') ?? null"
+        (nzSortOrderChange)="onSortChange($event, 'frequency')">{{ columns.frequency.label }}
+    </th>
+    <th nzWidth="120px">{{ columns.lineCount.label }}</th>
+    <th nzWidth="120px">{{ columns.isActive.label }}</th>
+    <th nzWidth="180px"
+        nzShowSort
+        [nzSortOrder]="sort.get('lastModifiedDate') ?? null"
+        (nzSortOrderChange)="onSortChange($event, 'lastModifiedDate')">{{ columns.lastModifiedDate.label }}
+    </th>
+    <th nzRight
+        nzWidth="200px">{{ columns.actions.label }}
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <ng-template nz-virtual-scroll
+               let-supplyList>
+    <tr (click)="open.emit(supplyList)"
+        class="cursor-pointer">
+      <td><strong>{{ supplyList.name }}</strong></td>
+      <td>{{ frequencyLabel(supplyList) }}</td>
+      <td>{{ supplyList.lineCount }}</td>
+      <td>
+        <nz-tag [nzColor]="supplyList.isActive ? 'success' : 'default'">
+          {{ supplyList.isActive ? 'Activă' : 'Inactivă' }}
+        </nz-tag>
+      </td>
+      <td>{{ supplyList.lastModifiedDate | timeAgo }}</td>
+      <td nzRight>
+        <button type="button"
+                nz-button
+                nzType="primary"
+                skeStopClick
+                (click)="open.emit(supplyList)"
+                [attr.aria-label]="'Deschide lista ' + supplyList.name">
+          Deschide
+        </button>
+        <button type="button"
+                nz-button
+                nzType="text"
+                skeStopClick
+                [nzDanger]="supplyList.isActive"
+                [nzLoading]="togglingId() === supplyList.id"
+                [disabled]="togglingId() !== null"
+                (click)="toggleActive.emit(supplyList)"
+                nz-tooltip
+                [nzTooltipTitle]="supplyList.isActive ? 'Dezactivează' : 'Activează'"
+                [attr.aria-label]="(supplyList.isActive ? 'Dezactivează lista ' : 'Activează lista ') + supplyList.name">
+          <nz-icon [nzType]="supplyList.isActive ? 'icons:ban' : 'icons:circle-check'"></nz-icon>
+        </button>
+      </td>
+    </tr>
+  </ng-template>
+  </tbody>
+</nz-table>

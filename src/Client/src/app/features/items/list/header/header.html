@@ -20,6 +20,15 @@
         <button nz-button
                 nzType="primary"
                 type="button"
+                (click)="onAddSupplyList.emit()">
+          <nz-icon nzType="icons:plus"></nz-icon>
+          Adaugă listă
+        </button>
+      }
+      @case (2) {
+        <button nz-button
+                nzType="primary"
+                type="button"
                 (click)="onImport.emit()">
           <nz-icon nzType="icons:upload"></nz-icon>
           Importa
@@ -30,6 +39,7 @@
   <nz-page-header-footer>
     <nz-tabs [(nzSelectedIndex)]="selectedTabIndex">
       <nz-tab nzTitle="Articole"></nz-tab>
+      <nz-tab nzTitle="Liste"></nz-tab>
       <nz-tab nzTitle="Importuri articole"></nz-tab>
     </nz-tabs>
   </nz-page-header-footer>

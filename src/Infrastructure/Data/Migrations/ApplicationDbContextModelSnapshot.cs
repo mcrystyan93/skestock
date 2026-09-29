@@ -1308,6 +1308,109 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("StockTransactions");
                 });
 
+            modelBuilder.Entity("skestock.Domain.Entities.SupplyList", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Frequency")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int?>("IntervalWeeks")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("LastModifiedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("LastModifiedById");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("SupplyLists", t =>
+                        {
+                            t.HasCheckConstraint("CK_SupplyLists_IntervalWeeks", "([Frequency] = 'EveryXWeeks' AND [IntervalWeeks] BETWEEN 2 AND 52) OR ([Frequency] <> 'EveryXWeeks' AND [IntervalWeeks] IS NULL)");
+                        });
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.SupplyListLine", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("LastModifiedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<Guid>("SupplyListId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("LastModifiedById");
+
+                    b.HasIndex("SupplyListId", "ItemId")
+                        .IsUnique();
+
+                    b.ToTable("SupplyListLines");
+                });
+
             modelBuilder.Entity("skestock.Domain.Entities.UserProfile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2306,6 +2409,60 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("skestock.Domain.Entities.SupplyList", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("LastModifiedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("LastModifiedBy");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.SupplyListLine", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("LastModifiedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.SupplyList", "SupplyList")
+                        .WithMany("Lines")
+                        .HasForeignKey("SupplyListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Item");
+
+                    b.Navigation("LastModifiedBy");
+
+                    b.Navigation("SupplyList");
+                });
+
             modelBuilder.Entity("skestock.Domain.Entities.UserProfile", b =>
                 {
                     b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
@@ -2397,6 +2554,11 @@ namespace skestock.Infrastructure.Data.Migrations
             modelBuilder.Entity("skestock.Domain.Entities.StockBatch", b =>
                 {
                     b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.SupplyList", b =>
+                {
+                    b.Navigation("Lines");
                 });
 
             modelBuilder.Entity("skestock.Domain.Entities.UserProfile", b =>

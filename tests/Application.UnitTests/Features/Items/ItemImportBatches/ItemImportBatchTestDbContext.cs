@@ -27,6 +27,8 @@ public sealed class ItemImportBatchTestDbContext(DbContextOptions<ItemImportBatc
     public DbSet<GoodsReceiptImportLine> GoodsReceiptImportLines => Set<GoodsReceiptImportLine>();
     public DbSet<OrderList> OrderLists => Set<OrderList>();
     public DbSet<OrderListLine> OrderListLines => Set<OrderListLine>();
+    public DbSet<SupplyList> SupplyLists => Set<SupplyList>();
+    public DbSet<SupplyListLine> SupplyListLines => Set<SupplyListLine>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
