@@ -2,7 +2,8 @@
       nzNoColon
       nzLayout="vertical">
   <nz-row [nzGutter]="[16, 0]">
-    <nz-col [nzXl]="12">
+    <nz-col [nzLg]="12"
+            [nzXs]="24">
       <nz-form-item nzLayout="vertical"
                     class="mb-2!"
                     *skeletonInputLoader="loading()">
@@ -30,7 +31,8 @@
         </ng-template>
       </nz-form-item>
     </nz-col>
-    <nz-col [nzXl]="12">
+    <nz-col [nzLg]="12"
+            [nzXs]="24">
       <nz-form-item *skeletonInputLoader="loading()"
                     class="mb-2!">
         <nz-form-label nzSpan="24">Nota</nz-form-label>
@@ -54,6 +56,10 @@
       </nz-form-item>
     </nz-col>
     <nz-col nzSpan="24">
+      <nz-divider nzSize="small"></nz-divider>
+    </nz-col>
+    <nz-col [nzLg]="24"
+            [nzXs]="24">
       <nz-form-item *skeletonInputLoader="loading()"
                     class="mb-2!">
         <nz-form-control>
@@ -63,13 +69,6 @@
       </nz-form-item>
     </nz-col>
   </nz-row>
-
-  <ske-order-list-low-stock-items (addProducts)="addLowStockItems($event)"
-                                  [classId]="classId()"
-                                  [disabled]="loading() || !editable()"
-                                  [orderListLines]="orderListForm.lines().value()" />
-
-  <nz-divider nzSize="small" />
 
   @if (orderListForm.lines().touched()) {
     @for (error of orderListForm.lines().errors(); track $index) {

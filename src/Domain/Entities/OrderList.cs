@@ -30,7 +30,7 @@ public class OrderList : BaseAuditableEntity, IKeysetEntity
             Status = OrderListStatus.Draft
         };
 
-        orderList.AddDomainEvent(new OrderListCreatedEvent(orderList.Id));
+        orderList.AddDomainEvent(new OrderListCreatedEvent(orderList.Id, classId));
 
         return orderList;
     }
@@ -46,14 +46,14 @@ public class OrderList : BaseAuditableEntity, IKeysetEntity
         Status = OrderListStatus.Submitted;
         SubmittedAt = DateTimeOffset.UtcNow;
 
-        AddDomainEvent(new OrderListSubmittedEvent(Id));
+        AddDomainEvent(new OrderListSubmittedEvent(Id, ClassId));
     }
 
     public void Cancel()
     {
         Status = OrderListStatus.Cancelled;
 
-        AddDomainEvent(new OrderListCancelledEvent(Id));
+        AddDomainEvent(new OrderListCancelledEvent(Id, ClassId));
     }
 
     // Returns a cancelled list to the editable draft state so it can be approved again.
@@ -62,6 +62,6 @@ public class OrderList : BaseAuditableEntity, IKeysetEntity
         Status = OrderListStatus.Draft;
         SubmittedAt = null;
 
-        AddDomainEvent(new OrderListReopenedEvent(Id));
+        AddDomainEvent(new OrderListReopenedEvent(Id, ClassId));
     }
 }

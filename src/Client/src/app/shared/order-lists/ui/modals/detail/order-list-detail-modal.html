@@ -2,28 +2,35 @@
   @let name = store.orderList().name;
   <div class="flex gap-2">
     <div>
-      @if (name) {
+      @if (name && !isWizard()) {
         Comanda: {{ name }}
       } @else {
-        Comanda noua
+        Comandă nouă
       }
     </div>
-    <nz-tag nzColor="default">
-      <nz-icon [nzType]="'icons:' + statusIcon()"></nz-icon>
-      {{ statusLabel() }}
-    </nz-tag>
+    @if (!isWizard()) {
+      <nz-tag nzColor="default">
+        <nz-icon [nzType]="'icons:' + statusIcon()"></nz-icon>
+        {{ statusLabel() }}
+      </nz-tag>
+    }
   </div>
 </div>
 
-<ske-error-display [problemDetail]="store.orderListProblemDetail()"
-                   [validationErrors]="store.orderListValidationErrors()" />
+@if (isWizard()) {
+  <ske-order-list-wizard-container [classId]="modalData().classId" />
+}
 
-<ske-order-list-detail-form [loading]="busy()"
-                            [classId]="modalData().classId"
-                            [orderList]="store.orderList()" />
+<div [hidden]="!onEditorStep()">
+  <ske-error-display [problemDetail]="store.orderListProblemDetail()"
+                     [validationErrors]="store.orderListValidationErrors()" />
+
+  <ske-order-list-detail-form [loading]="busy()"
+                              [orderList]="store.orderList()" />
+</div>
 
 <div *nzModalFooter>
-  <nz-space>
+  <nz-space nzWrap class="justify-end">
 
     @if (canExport()) {
       <button nz-button
@@ -44,10 +51,34 @@
             (click)="close()"
             [nzLoading]="busy()"
             [disabled]="busy()">
-      Inchide
+      Închide
     </button>
 
-    @if (editable()) {
+    @if (isWizard() && wizard.step() !== 'source') {
+      <button nz-button
+              *nzSpaceItem
+              nzType="default"
+              type="button"
+              [disabled]="busy()"
+              (click)="back()">
+        <nz-icon nzType="icons:arrow-left"></nz-icon>
+        Înapoi
+      </button>
+    }
+
+    @if (isWizard() && !onEditorStep()) {
+      <button nz-button
+              *nzSpaceItem
+              nzType="primary"
+              type="button"
+              [disabled]="!wizard.canGoNext()"
+              (click)="next()">
+        Continuă
+        <nz-icon nzType="icons:arrow-right"></nz-icon>
+      </button>
+    }
+
+    @if (editable() && onEditorStep()) {
       <nz-space-compact *nzSpaceItem>
         <button nz-button
                 nzType="primary"
@@ -55,7 +86,7 @@
                 (click)="save()"
                 [nzLoading]="busy()"
                 [disabled]="busy()">
-          Salveaza si inchide
+          Salvează și închide
         </button>
         <button nz-button
                 nzType="primary"
@@ -73,7 +104,7 @@
             <li nz-menu-item
                 [nzDisabled]="busy()"
                 (click)="save(false)">
-              Salveaza
+              Salvează
             </li>
           </ul>
         </nz-dropdown-menu>

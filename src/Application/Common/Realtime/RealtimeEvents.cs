@@ -21,6 +21,10 @@ public static class RealtimeEvents
     public const string SupplyListUpdated = "SupplyListUpdated";
     public const string SupplyListDisabled = "SupplyListDisabled";
     public const string SupplyListEnabled = "SupplyListEnabled";
+    public const string OrderListCreated = "OrderListCreated";
+    public const string OrderListSubmitted = "OrderListSubmitted";
+    public const string OrderListCancelled = "OrderListCancelled";
+    public const string OrderListReopened = "OrderListReopened";
     public const string StockAdjusted = "StockAdjusted";
     public const string StockMoved = "StockMoved";
     public const string StockBatchCreated = "StockBatchCreated";

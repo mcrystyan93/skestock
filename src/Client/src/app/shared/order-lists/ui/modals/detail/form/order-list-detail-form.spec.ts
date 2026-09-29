@@ -1,12 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { type ItemAutocompleteValue, type LowStockItemDto } from '@ske/models';
+import { type ItemAutocompleteValue } from '@ske/models';
 import { By } from '@angular/platform-browser';
 import { ItemAutocomplete } from '@ske/shared/items';
 import { ItemsHttp } from '../../../../../items/services/items.http';
 import { OrderListDetailForm } from './order-list-detail-form';
 import { OrderListDetailState } from '../../../../services/order-list-detail.store';
 import { OrderListsHttp } from '../../../../services/order-lists.http';
-import { StockHttp } from '@ske/shared/stock';
 import { provideDispatcher } from '@ngrx/signals/events';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
@@ -44,12 +43,6 @@ describe('OrderListDetailForm', () => {
             create: vi.fn(),
             update: vi.fn()
           }
-        },
-        {
-          provide: StockHttp,
-          useValue: {
-            getLowStockItems: vi.fn()
-          }
         }
       ]
     });
@@ -84,6 +77,21 @@ describe('OrderListDetailForm', () => {
     ).toBe('');
   });
 
+  it('does not add an item that is already in the list', () => {
+    const item = { id: 'item-1', name: 'Creion', sku: null, unit: 'buc' } as unknown as ItemAutocompleteValue;
+    const autocomplete = fixture.debugElement.query(
+      By.directive(ItemAutocomplete)
+    ).componentInstance as ItemAutocomplete;
+
+    autocomplete.value.set(item);
+    TestBed.tick();
+    autocomplete.value.set(item);
+    TestBed.tick();
+
+    expect(fixture.componentInstance.orderListForm.lines().value()).toHaveLength(1);
+    expect(fixture.componentInstance.orderListForm.lineItem().value()).toBeNull();
+  });
+
   it('shows the collection validation message when no lines are present', async () => {
     const result = await fixture.componentInstance.submit();
 
@@ -96,7 +104,7 @@ describe('OrderListDetailForm', () => {
   });
 
   it('rejects non-positive line quantities', async () => {
-    fixture.componentInstance.addLowStockItems([createLowStockItem()]);
+    fixture.componentInstance.orderListForm.lines().value.set([createLine()]);
     fixture.componentInstance.orderListForm.lines().value.update(lines =>
       lines.map(line => ({ ...line, quantity: 0 }))
     );
@@ -112,7 +120,7 @@ describe('OrderListDetailForm', () => {
   });
 
   it('shows line length validation messages', async () => {
-    fixture.componentInstance.addLowStockItems([createLowStockItem()]);
+    fixture.componentInstance.orderListForm.lines().value.set([createLine()]);
     fixture.componentInstance.orderListForm.lines().value.update(lines =>
       lines.map(line => ({
         ...line,
@@ -159,13 +167,15 @@ describe('OrderListDetailForm', () => {
   });
 });
 
-function createLowStockItem(): LowStockItemDto {
+function createLine() {
   return {
+    id: null,
     itemId: 'item-1',
-    itemName: 'Creion',
-    sku: null,
+    productName: 'Creion',
+    quantity: 1,
     unit: 'buc',
-    locationName: 'Depozit'
+    notes: '',
+    clientKey: 'line-1'
   };
 }
 

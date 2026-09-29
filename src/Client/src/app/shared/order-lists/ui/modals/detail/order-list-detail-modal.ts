@@ -4,8 +4,6 @@ import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/drop
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
 import { NzSpaceCompactComponent, NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
-import { orderListApiEvents, OrderListDetailState } from '../../../services/order-list-detail.store';
-import { OrderListExportService } from '../../../services/order-list-export.service';
 import {
   CreateOrderListRequest,
   ORDER_LIST_STATUS_ICONS,
@@ -27,6 +25,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Events, provideDispatcher } from '@ngrx/signals/events';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
+import {
+  NEW_ORDER_LIST_ROUTE_ID,
+  orderListApiEvents,
+  OrderListDetailState,
+  OrderListExportService,
+  OrderListWizardStore
+} from '@ske/shared/order-lists/services';
+import { OrderListWizardContainer } from '../wizard/order-list-wizard-container';
 
 @Component({
   imports: [
@@ -43,17 +49,19 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
     ErrorAlert,
     OrderListDetailForm,
     NzModalTitleDirective,
-    NzTagComponent
+    NzTagComponent,
+    OrderListWizardContainer
   ],
   selector: 'ske-order-list-detail-modal',
   styles: ``,
   templateUrl: './order-list-detail-modal.html',
-  providers: [provideDispatcher(), OrderListDetailState]
+  providers: [provideDispatcher(), OrderListDetailState, OrderListWizardStore]
 })
 export class OrderListDetailModal {
   public readonly modalData = signal<OrderListDetailModalData>(inject(NZ_MODAL_DATA));
 
   public readonly store = inject(OrderListDetailState);
+  public readonly wizard = inject(OrderListWizardStore);
   public readonly exportService = inject(OrderListExportService);
 
   private readonly _nzModalRef = inject(NzModalRef);
@@ -67,6 +75,15 @@ export class OrderListDetailModal {
 
   public readonly busy = computed(() =>
     this.store.orderListLoading() || this._pendingSave() !== null
+  );
+
+  // A new order goes through the wizard until it is saved; after that it behaves like any opened order.
+  public readonly isWizard = computed(() =>
+    isNil(this.modalData().id) && isNil(this.store.orderList().id)
+  );
+
+  public readonly onEditorStep = computed(() =>
+    !this.isWizard() || this.wizard.step() === 'edit'
   );
 
   public readonly editable = computed(() => {
@@ -98,10 +115,7 @@ export class OrderListDetailModal {
       return;
 
     this.initialLoad = true;
-    const { id, classId } = this.modalData();
-
-    if (typeof classId === 'string' && classId.trim().length > 0)
-      this.store.loadLowStockItems(classId);
+    const { id } = this.modalData();
 
     if (isNil(id))
       return;
@@ -120,6 +134,45 @@ export class OrderListDetailModal {
       takeUntilDestroyed(this._destroyRef)
     )
     .subscribe(({ payload }) => this.handleSaveFailure(payload.operationId));
+
+  public next() {
+    const wizard = this.wizard;
+
+    if (wizard.step() !== 'selection' || wizard.prefillKey() === wizard.loadedPrefillKey()) {
+      wizard.advance(this.modalData().classId);
+      return;
+    }
+
+    if (!wizard.canGoNext())
+      return;
+
+    const hasEdits = wizard.loadedPrefillKey() !== null && this._formComponent()?.orderListForm().dirty();
+
+    if (!hasEdits) {
+      this.openEditorWithPrefill();
+      return;
+    }
+
+    this._nzModalService.confirm({
+      nzTitle: 'Actualizați lista din selecția nouă?',
+      nzContent: 'Selecția s-a schimbat, iar modificările făcute în listă vor fi pierdute.',
+      nzOkText: 'Actualizează',
+      nzCancelText: 'Rămâi',
+      nzOnOk: () => this.openEditorWithPrefill()
+    });
+  }
+
+  public back() {
+    this.wizard.back();
+  }
+
+  private openEditorWithPrefill() {
+    if (!this.wizard.advance(this.modalData().classId))
+      return;
+
+    this.store.loadOrderList({ id: NEW_ORDER_LIST_ROUTE_ID, prefill: this.wizard.buildPrefill() });
+    this.wizard.markPrefillLoaded();
+  }
 
   public close(force = false) {
     if (!force && this.busy())
@@ -219,11 +272,6 @@ export class OrderListDetailModal {
 
     if (!isNil(orderListId))
       this.store.loadOrderList({ id: orderListId });
-
-    const classId = this.modalData().classId;
-
-    if (typeof classId === 'string' && classId.trim().length > 0)
-      this.store.loadLowStockItems(classId);
   }
 }
 

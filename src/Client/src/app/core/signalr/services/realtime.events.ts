@@ -23,6 +23,10 @@ export const realtimeEvents = eventGroup({
     supplyListUpdated: type<{ supplyListId: string }>(),
     supplyListDisabled: type<{ supplyListId: string }>(),
     supplyListEnabled: type<{ supplyListId: string }>(),
+    orderListCreated: type<{ orderListId: string, classId: string }>(),
+    orderListSubmitted: type<{ orderListId: string, classId: string }>(),
+    orderListCancelled: type<{ orderListId: string, classId: string }>(),
+    orderListReopened: type<{ orderListId: string, classId: string }>(),
     stockAdjusted: type<{ classId: string, locationId: string }>(),
     stockMoved: type<{
       classId: string,
