@@ -22,11 +22,6 @@ public interface IKeysetSortConfiguration<TEntity> where TEntity : class
     Expression<Func<TEntity, dynamic>> GetPropertyExpression(string propertyName);
 
     /// <summary>
-    /// Get the property value from an entity instance for cursor encoding.
-    /// </summary>
-    object? GetPropertyValue(TEntity entity, string propertyName);
-
-    /// <summary>
     /// Default sort tuple (e.g. descending by Created, then Id).
     /// </summary>
     List<(string Key, string Direction)> DefaultSort { get; }

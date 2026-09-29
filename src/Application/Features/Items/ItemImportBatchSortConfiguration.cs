@@ -27,14 +27,4 @@ public sealed class ItemImportBatchSortConfiguration : IKeysetSortConfiguration<
             "Id" => batch => batch.Id,
             _ => batch => batch.Id
         };
-
-    public object? GetPropertyValue(ItemImportBatch entity, string propertyName) =>
-        propertyName switch
-        {
-            "UploadedAt" => entity.UploadedAt,
-            "CreatedDate" => entity.CreatedDate,
-            "LastModifiedDate" => entity.LastModifiedDate,
-            "Id" => entity.Id,
-            _ => null
-        };
 }

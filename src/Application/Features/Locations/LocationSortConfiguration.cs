@@ -12,7 +12,7 @@ public sealed class LocationSortConfiguration : IKeysetSortConfiguration<Locatio
             ["name"] = ["Name", "Id"],
             ["type"] = ["Type", "Id"],
             ["createdDate"] = ["CreatedDate", "Id"],
-            ["lastModifiedDate"] = ["LastModified", "Id"],
+            ["lastModifiedDate"] = ["LastModifiedDate", "Id"],
             ["id"] = ["Id"]
         };
 
@@ -28,19 +28,6 @@ public sealed class LocationSortConfiguration : IKeysetSortConfiguration<Locatio
             "LastModifiedDate" => d => d.LastModifiedDate,
             "Id" => d => d.Id,
             _ => d => d.Id
-        };
-    }
-
-    public object? GetPropertyValue(Location entity, string propertyName)
-    {
-        return propertyName switch
-        {
-            "Name" => entity.Name,
-            "Type" => entity.Type,
-            "CreatedDate" => entity.CreatedDate,
-            "LastModified" => entity.LastModifiedDate,
-            "Id" => entity.Id,
-            _ => null
         };
     }
 }

@@ -17,16 +17,9 @@ public class GetAllLocationsQueryValidatorTests
     private static string BuildCursor(List<PaginationSort> sort)
     {
         var effectiveSort = DynamicSortBuilder<Location>.BuildEffectiveSort(sort, SortConfiguration);
-        var entity = new Location
-        {
-            Id = Guid.NewGuid(),
-            Name = "Test Location",
-            Type = "Room",
-            CreatedDate = DateTimeOffset.UtcNow,
-            LastModifiedDate = DateTimeOffset.UtcNow
-        };
+        var cursor = new LocationCursor(Guid.NewGuid(), "Test Location", "Room", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
 
-        return CursorCodec<Location>.Encode(entity, effectiveSort, SortConfiguration)!;
+        return CursorCodec<Location>.Encode(cursor, effectiveSort)!;
     }
 
     [Test]

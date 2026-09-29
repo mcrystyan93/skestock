@@ -12,21 +12,20 @@ public class CursorCodec<TEntity> where TEntity : class, IKeysetEntity
     };
 
     public static string? Encode(
-        TEntity lastEntity,
-        List<(string Key, string Direction)> effectiveSort,
-        IKeysetSortConfiguration<TEntity> sortConfig)
+        IKeysetCursor lastCursor,
+        List<(string Key, string Direction)> effectiveSort)
     {
         if (effectiveSort.Count == 0)
             return null;
 
         var keyValues = new Dictionary<string, object?>();
 
-        // Gather all sort field values from last entity. Null values are stored explicitly
+        // Gather all sort field values from the last row's cursor projection. Null values are stored explicitly
         // (not skipped) so KeysetPredicateBuilder can still build correct tie-breaker predicates
         // for deeper sort keys when a nullable column happens to be null on the boundary row.
         foreach ((string sortKey, var _) in effectiveSort)
         {
-            keyValues[sortKey] = sortConfig.GetPropertyValue(lastEntity, sortKey);
+            keyValues[sortKey] = lastCursor.GetValue(sortKey);
         }
 
         var sort = effectiveSort

@@ -14,7 +14,7 @@ public class CursorCodecTests
         var entity = new KeysetTestItem { Id = KeysetTestIds.Of(7), CreatedDate = DateTimeOffset.UtcNow, Priority = 42 };
         var sort = new List<(string Key, string Direction)> { ("Priority", "asc"), ("Id", "asc") };
 
-        var token = CursorCodec<KeysetTestItem>.Encode(entity, sort, Config);
+        var token = CursorCodec<KeysetTestItem>.Encode(entity, sort);
         var decoded = CursorCodec<KeysetTestItem>.Decode(token);
 
         decoded.ShouldNotBeNull();
@@ -31,7 +31,7 @@ public class CursorCodecTests
         var entity = new KeysetTestItem { Id = KeysetTestIds.Of(7), CreatedDate = DateTimeOffset.UtcNow, Priority = null };
         var sort = new List<(string Key, string Direction)> { ("Priority", "asc"), ("Id", "asc") };
 
-        var token = CursorCodec<KeysetTestItem>.Encode(entity, sort, Config);
+        var token = CursorCodec<KeysetTestItem>.Encode(entity, sort);
         var decoded = CursorCodec<KeysetTestItem>.Decode(token);
 
         decoded.ShouldNotBeNull();
@@ -60,7 +60,7 @@ public class CursorCodecTests
         var entity = new KeysetTestItem { Id = KeysetTestIds.Of(1), CreatedDate = DateTimeOffset.UtcNow };
         var sort = new List<(string Key, string Direction)> { ("CreatedDate", "desc"), ("Id", "desc") };
 
-        var decoded = CursorCodec<KeysetTestItem>.Decode(CursorCodec<KeysetTestItem>.Encode(entity, sort, Config))!;
+        var decoded = CursorCodec<KeysetTestItem>.Decode(CursorCodec<KeysetTestItem>.Encode(entity, sort))!;
 
         CursorCodec<KeysetTestItem>.MatchesSort(decoded, sort).ShouldBeTrue();
     }
@@ -72,7 +72,7 @@ public class CursorCodecTests
         var originalSort = new List<(string Key, string Direction)> { ("CreatedDate", "desc"), ("Id", "desc") };
         var requestedSort = new List<(string Key, string Direction)> { ("CreatedDate", "asc"), ("Id", "desc") };
 
-        var decoded = CursorCodec<KeysetTestItem>.Decode(CursorCodec<KeysetTestItem>.Encode(entity, originalSort, Config))!;
+        var decoded = CursorCodec<KeysetTestItem>.Decode(CursorCodec<KeysetTestItem>.Encode(entity, originalSort))!;
 
         CursorCodec<KeysetTestItem>.MatchesSort(decoded, requestedSort).ShouldBeFalse();
     }
@@ -84,7 +84,7 @@ public class CursorCodecTests
         var originalSort = new List<(string Key, string Direction)> { ("Priority", "asc"), ("Id", "asc") };
         var requestedSort = new List<(string Key, string Direction)> { ("Id", "asc"), ("Priority", "asc") };
 
-        var decoded = CursorCodec<KeysetTestItem>.Decode(CursorCodec<KeysetTestItem>.Encode(entity, originalSort, Config))!;
+        var decoded = CursorCodec<KeysetTestItem>.Decode(CursorCodec<KeysetTestItem>.Encode(entity, originalSort))!;
 
         CursorCodec<KeysetTestItem>.MatchesSort(decoded, requestedSort).ShouldBeFalse();
     }
@@ -96,7 +96,7 @@ public class CursorCodecTests
         var originalSort = new List<(string Key, string Direction)> { ("CreatedDate", "desc"), ("Id", "desc") };
         var requestedSort = new List<(string Key, string Direction)> { ("Id", "desc") };
 
-        var decoded = CursorCodec<KeysetTestItem>.Decode(CursorCodec<KeysetTestItem>.Encode(entity, originalSort, Config))!;
+        var decoded = CursorCodec<KeysetTestItem>.Decode(CursorCodec<KeysetTestItem>.Encode(entity, originalSort))!;
 
         CursorCodec<KeysetTestItem>.MatchesSort(decoded, requestedSort).ShouldBeFalse();
     }

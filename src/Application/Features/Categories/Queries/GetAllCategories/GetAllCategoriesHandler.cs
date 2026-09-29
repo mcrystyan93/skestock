@@ -37,7 +37,7 @@ public class GetAllCategoriesHandler(IApplicationDbContext dbContext)
         var categories = await OrderByBuilder<Category>.ApplyOrderBy(query, effectiveSort, SortConfiguration)
             .Select(category => new
             {
-                CursorItem = category,
+                Cursor = new CategoryCursor(category.Id, category.Name, category.CreatedDate, category.LastModifiedDate),
                 Data = new CategoryDto
                 {
                     Id = category.Id,
@@ -64,13 +64,13 @@ public class GetAllCategoriesHandler(IApplicationDbContext dbContext)
         if (hasNextPage)
             categories.RemoveAt(categories.Count - 1);
 
-        var lastCategory = categories.LastOrDefault()?.CursorItem;
+        var lastCategory = categories.LastOrDefault()?.Cursor;
         return Result.Ok(new PaginatedResponse<CategoryDto>
         {
             Data = categories.Select(category => category.Data).ToList(),
             HasNextPage = hasNextPage,
             NextCursor = lastCategory is not null
-                ? CursorCodec<Category>.Encode(lastCategory, effectiveSort, SortConfiguration)
+                ? CursorCodec<Category>.Encode(lastCategory, effectiveSort)
                 : null,
             Sort =
             [

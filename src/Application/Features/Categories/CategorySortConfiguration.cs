@@ -28,16 +28,4 @@ public sealed class CategorySortConfiguration : IKeysetSortConfiguration<Categor
             _ => d => d.Id
         };
     }
-
-    public object? GetPropertyValue(Category entity, string propertyName)
-    {
-        return propertyName switch
-        {
-            "Name" => entity.Name,
-            "CreatedDate" => entity.CreatedDate,
-            "LastModifiedDate" => entity.LastModifiedDate,
-            "Id" => entity.Id,
-            _ => null
-        };
-    }
 }

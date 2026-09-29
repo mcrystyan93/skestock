@@ -52,7 +52,7 @@ public class GetAllLocationsHandler(IApplicationDbContext dbContext)
         var locations = await OrderByBuilder<Location>.ApplyOrderBy(query, effectiveSort, SortConfiguration)
             .Select(l => new
             {
-                CursorItem = l,
+                Cursor = new LocationCursor(l.Id, l.Name, l.Type, l.CreatedDate, l.LastModifiedDate),
                 Data = new LocationDto
                 {
                     Id = l.Id,
@@ -75,14 +75,14 @@ public class GetAllLocationsHandler(IApplicationDbContext dbContext)
             locations.RemoveAt(locations.Count - 1);
 
         var pageItems = locations.Select(location => location.Data).ToList();
-        var lastLocation = locations.LastOrDefault()?.CursorItem;
+        var lastLocation = locations.LastOrDefault()?.Cursor;
 
         var data = new PaginatedResponse<LocationDto>
         {
             Data = pageItems,
             HasNextPage = hasNextPage,
             NextCursor = lastLocation is not null
-                ? CursorCodec<Location>.Encode(lastLocation, effectiveSort, SortConfiguration)
+                ? CursorCodec<Location>.Encode(lastLocation, effectiveSort)
                 : null,
             Sort =
             [

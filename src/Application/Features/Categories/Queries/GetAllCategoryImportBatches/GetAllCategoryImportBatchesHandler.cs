@@ -43,7 +43,7 @@ public class GetAllCategoryImportBatchesHandler(IApplicationDbContext dbContext)
                 query, effectiveSort, SortConfiguration)
             .Select(batch => new
             {
-                CursorItem = batch,
+                Cursor = new CategoryImportBatchCursor(batch.Id, batch.UploadedAt, batch.CreatedDate, batch.LastModifiedDate),
                 Data = new CategoryImportBatchListItemDto
                 {
                     Id = batch.Id,
@@ -73,13 +73,13 @@ public class GetAllCategoryImportBatchesHandler(IApplicationDbContext dbContext)
         if (hasNextPage)
             batches.RemoveAt(batches.Count - 1);
 
-        var lastBatch = batches.LastOrDefault()?.CursorItem;
+        var lastBatch = batches.LastOrDefault()?.Cursor;
         return Result.Ok(new PaginatedResponse<CategoryImportBatchListItemDto>
         {
             Data = batches.Select(batch => batch.Data).ToList(),
             HasNextPage = hasNextPage,
             NextCursor = lastBatch is not null
-                ? CursorCodec<CategoryImportBatch>.Encode(lastBatch, effectiveSort, SortConfiguration)
+                ? CursorCodec<CategoryImportBatch>.Encode(lastBatch, effectiveSort)
                 : null,
             Sort =
             [

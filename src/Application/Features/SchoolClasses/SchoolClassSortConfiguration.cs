@@ -32,18 +32,4 @@ public sealed class SchoolClassSortConfiguration : IKeysetSortConfiguration<Scho
             _ => d => d.Id
         };
     }
-
-    public object? GetPropertyValue(SchoolClass entity, string propertyName)
-    {
-        return propertyName switch
-        {
-            "Name" => entity.Name,
-            "StartDate" => entity.StartDate,
-            "EndDate" => entity.EndDate,
-            "CreatedDate" => entity.CreatedDate,
-            "LastModifiedDate" => entity.LastModifiedDate,
-            "Id" => entity.Id,
-            _ => null
-        };
-    }
 }

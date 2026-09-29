@@ -50,6 +50,18 @@ public static class Extensions
             logging.IncludeScopes = true;
         });
 
+        // Outside development, stdout lands in journald: keep it structured (scopes carry TraceId/SpanId)
+        // so logs stay queryable when the OTLP dashboard is down or has been restarted.
+        if (!builder.Environment.IsDevelopment())
+        {
+            builder.Logging.AddJsonConsole(options =>
+            {
+                options.IncludeScopes = true;
+                options.UseUtcTimestamp = true;
+                options.TimestampFormat = "yyyy-MM-ddTHH:mm:ss.fffZ";
+            });
+        }
+
         builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics =>
             {

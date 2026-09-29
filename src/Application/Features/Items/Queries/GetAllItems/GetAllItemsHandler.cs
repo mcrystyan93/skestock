@@ -48,16 +48,7 @@ public class GetAllItemsHandler(IApplicationDbContext dbContext)
         var items = await OrderByBuilder<Item>.ApplyOrderBy(query, effectiveSort, SortConfiguration)
             .Select(item => new
             {
-                // Only the sort-key columns are needed to rebuild the next cursor.
-                CursorItem = new Item
-                {
-                    Id = item.Id,
-                    Name = item.Name,
-                    Sku = item.Sku,
-                    Unit = item.Unit,
-                    CreatedDate = item.CreatedDate,
-                    LastModifiedDate = item.LastModifiedDate
-                },
+                Cursor = new ItemCursor(item.Id, item.Name, item.Sku, item.Unit, item.CreatedDate, item.LastModifiedDate),
                 Data = new ItemDto
                 {
                     Id = item.Id,
@@ -84,13 +75,13 @@ public class GetAllItemsHandler(IApplicationDbContext dbContext)
         if (hasNextPage)
             items.RemoveAt(items.Count - 1);
 
-        var lastItem = items.LastOrDefault()?.CursorItem;
+        var lastItem = items.LastOrDefault()?.Cursor;
         return Result.Ok(new PaginatedResponse<ItemDto>
         {
             Data = items.Select(item => item.Data).ToList(),
             HasNextPage = hasNextPage,
             NextCursor = lastItem is not null
-                ? CursorCodec<Item>.Encode(lastItem, effectiveSort, SortConfiguration)
+                ? CursorCodec<Item>.Encode(lastItem, effectiveSort)
                 : null,
             Sort =
             [

@@ -17,17 +17,9 @@ public class GetAllSchoolClassesQueryValidatorTests
     private static string BuildCursor(List<PaginationSort> sort)
     {
         var effectiveSort = DynamicSortBuilder<SchoolClass>.BuildEffectiveSort(sort, SortConfiguration);
-        var entity = new SchoolClass
-        {
-            Id = Guid.NewGuid(),
-            Name = "Test Class",
-            StartDate = new DateOnly(2026, 1, 1),
-            EndDate = new DateOnly(2026, 6, 1),
-            CreatedDate = DateTimeOffset.UtcNow,
-            LastModifiedDate = DateTimeOffset.UtcNow
-        };
+        var cursor = new SchoolClassCursor(Guid.NewGuid(), "Test Class", new DateOnly(2026, 1, 1), new DateOnly(2026, 6, 1), DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
 
-        return CursorCodec<SchoolClass>.Encode(entity, effectiveSort, SortConfiguration)!;
+        return CursorCodec<SchoolClass>.Encode(cursor, effectiveSort)!;
     }
 
     [Test]

@@ -17,15 +17,9 @@ public class GetAllCategoriesQueryValidatorTests
     private static string BuildCursor(List<PaginationSort> sort)
     {
         var effectiveSort = DynamicSortBuilder<Category>.BuildEffectiveSort(sort, SortConfiguration);
-        var entity = new Category
-        {
-            Id = Guid.NewGuid(),
-            Name = "Test Category",
-            CreatedDate = DateTimeOffset.UtcNow,
-            LastModifiedDate = DateTimeOffset.UtcNow
-        };
+        var cursor = new CategoryCursor(Guid.NewGuid(), "Test Category", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
 
-        return CursorCodec<Category>.Encode(entity, effectiveSort, SortConfiguration)!;
+        return CursorCodec<Category>.Encode(cursor, effectiveSort)!;
     }
 
     [Test]

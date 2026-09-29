@@ -17,20 +17,9 @@ public class GetAllStockBatchesQueryValidatorTests
     private static string BuildCursor(List<PaginationSort> sort)
     {
         var effectiveSort = DynamicSortBuilder<StockBatch>.BuildEffectiveSort(sort, SortConfiguration);
-        var entity = new StockBatch
-        {
-            Id = Guid.NewGuid(),
-            Item = null!,
-            Location = null!,
-            ReceivedClass = null!,
-            Quantity = 1,
-            UnitPrice = 1m,
-            ReceivedDate = new DateOnly(2024, 1, 1),
-            CreatedDate = DateTimeOffset.UtcNow,
-            LastModifiedDate = DateTimeOffset.UtcNow
-        };
+        var cursor = new StockBatchCursor(Guid.NewGuid(), new DateOnly(2024, 1, 1), DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
 
-        return CursorCodec<StockBatch>.Encode(entity, effectiveSort, SortConfiguration)!;
+        return CursorCodec<StockBatch>.Encode(cursor, effectiveSort)!;
     }
 
     [Test]

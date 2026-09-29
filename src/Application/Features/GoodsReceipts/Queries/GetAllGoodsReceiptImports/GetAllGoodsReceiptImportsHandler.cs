@@ -56,7 +56,7 @@ public class GetAllGoodsReceiptImportsHandler(IApplicationDbContext dbContext)
         var imports = await OrderByBuilder<GoodsReceiptImport>.ApplyOrderBy(query, effectiveSort, SortConfiguration)
             .Select(i => new
             {
-                CursorItem = i,
+                Cursor = new GoodsReceiptImportCursor(i.Id, i.UploadedAt, i.CreatedDate, i.LastModifiedDate),
                 Data = new GoodsReceiptImportListItemDto
                 {
                     Id = i.Id,
@@ -80,14 +80,14 @@ public class GetAllGoodsReceiptImportsHandler(IApplicationDbContext dbContext)
             imports.RemoveAt(imports.Count - 1);
 
         var pageItems = imports.Select(i => i.Data).ToList();
-        var lastImport = imports.LastOrDefault()?.CursorItem;
+        var lastImport = imports.LastOrDefault()?.Cursor;
 
         var data = new PaginatedResponse<GoodsReceiptImportListItemDto>
         {
             Data = pageItems,
             HasNextPage = hasNextPage,
             NextCursor = lastImport is not null
-                ? CursorCodec<GoodsReceiptImport>.Encode(lastImport, effectiveSort, SortConfiguration)
+                ? CursorCodec<GoodsReceiptImport>.Encode(lastImport, effectiveSort)
                 : null,
             Sort =
             [

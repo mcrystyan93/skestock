@@ -11,7 +11,7 @@ public sealed class GoodsReceiptSortConfiguration : IKeysetSortConfiguration<Goo
         {
             ["receivedAt"] = ["ReceivedAt", "Id"],
             ["createdDate"] = ["CreatedDate", "Id"],
-            ["lastModifiedDate"] = ["LastModified", "Id"],
+            ["lastModifiedDate"] = ["LastModifiedDate", "Id"],
             ["id"] = ["Id"]
         };
 
@@ -26,18 +26,6 @@ public sealed class GoodsReceiptSortConfiguration : IKeysetSortConfiguration<Goo
             "LastModifiedDate" => r => r.LastModifiedDate,
             "Id" => r => r.Id,
             _ => r => r.Id
-        };
-    }
-
-    public object? GetPropertyValue(GoodsReceipt entity, string propertyName)
-    {
-        return propertyName switch
-        {
-            "ReceivedAt" => entity.ReceivedAt,
-            "CreatedDate" => entity.CreatedDate,
-            "LastModifiedDate" => entity.LastModifiedDate,
-            "Id" => entity.Id,
-            _ => null
         };
     }
 }

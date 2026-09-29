@@ -131,7 +131,7 @@ public class KeysetPredicateBuilderTests
                 break;
 
             seenIds.AddRange(pageItems.Select(x => KeysetTestIds.ToInt(x.Id)));
-            cursor = CursorCodec<KeysetTestItem>.Encode(pageItems[^1], effectiveSort, Config);
+            cursor = CursorCodec<KeysetTestItem>.Encode(pageItems[^1], effectiveSort);
         }
 
         return seenIds;

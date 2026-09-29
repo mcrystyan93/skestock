@@ -55,7 +55,7 @@ public class GetAllStockBatchesHandler(IApplicationDbContext dbContext)
         var batches = await OrderByBuilder<StockBatch>.ApplyOrderBy(query, effectiveSort, SortConfiguration)
             .Select(b => new
             {
-                CursorItem = b,
+                Cursor = new StockBatchCursor(b.Id, b.ReceivedDate, b.CreatedDate, b.LastModifiedDate),
                 Data = new StockBatchListItemDto
                 {
                     Id = b.Id,
@@ -80,14 +80,14 @@ public class GetAllStockBatchesHandler(IApplicationDbContext dbContext)
             batches.RemoveAt(batches.Count - 1);
 
         var pageItems = batches.Select(b => b.Data).ToList();
-        var lastBatch = batches.LastOrDefault()?.CursorItem;
+        var lastBatch = batches.LastOrDefault()?.Cursor;
 
         var data = new PaginatedResponse<StockBatchListItemDto>
         {
             Data = pageItems,
             HasNextPage = hasNextPage,
             NextCursor = lastBatch is not null
-                ? CursorCodec<StockBatch>.Encode(lastBatch, effectiveSort, SortConfiguration)
+                ? CursorCodec<StockBatch>.Encode(lastBatch, effectiveSort)
                 : null,
             Sort =
             [

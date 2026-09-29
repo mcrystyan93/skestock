@@ -40,7 +40,7 @@ public sealed class GetAllItemImportBatchesHandler(IApplicationDbContext dbConte
         var batches = await OrderByBuilder<ItemImportBatch>.ApplyOrderBy(query, effectiveSort, SortConfiguration)
             .Select(batch => new
             {
-                CursorItem = batch,
+                Cursor = new ItemImportBatchCursor(batch.Id, batch.UploadedAt, batch.CreatedDate, batch.LastModifiedDate),
                 Data = new ItemImportBatchListItemDto
                 {
                     Id = batch.Id,
@@ -72,13 +72,13 @@ public sealed class GetAllItemImportBatchesHandler(IApplicationDbContext dbConte
         if (hasNextPage)
             batches.RemoveAt(batches.Count - 1);
 
-        var lastBatch = batches.LastOrDefault()?.CursorItem;
+        var lastBatch = batches.LastOrDefault()?.Cursor;
         return Result.Ok(new PaginatedResponse<ItemImportBatchListItemDto>
         {
             Data = batches.Select(batch => batch.Data).ToList(),
             HasNextPage = hasNextPage,
             NextCursor = lastBatch is not null
-                ? CursorCodec<ItemImportBatch>.Encode(lastBatch, effectiveSort, SortConfiguration)
+                ? CursorCodec<ItemImportBatch>.Encode(lastBatch, effectiveSort)
                 : null,
             Sort =
             [
