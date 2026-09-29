@@ -492,7 +492,7 @@ $RECYCLE.BIN/
 *.db-wal
 
 # Graphify's local extraction cache and transient query state
-graphify-out/cache/
+graphify-out/
 
 # Local/generated environment files (secrets)
 .env
