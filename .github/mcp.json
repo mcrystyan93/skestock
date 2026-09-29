@@ -1,0 +1,41 @@
+{
+  "mcpServers": {
+    "playwright-test": {
+      "type": "stdio",
+      "command": "npm",
+      "args": ["exec", "--prefix", "src/Client", "--", "playwright", "run-test-mcp-server", "-c", "src/Client/playwright.config.ts"],
+      "tools": ["*"]
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@0.0.83"],
+      "tools": ["*"]
+    },
+    "microsoftdocs/mcp": {
+      "type": "http",
+      "url": "https://learn.microsoft.com/api/mcp",
+      "x-metadata": {
+        "registry": {
+          "api": {
+            "baseUrl": "https://api.mcp.github.com",
+            "version": "v0.1"
+          },
+          "mcpServer": {
+            "name": "microsoftdocs/mcp",
+            "version": "1.0.0"
+          }
+        }
+      }
+    },
+    "angular-cli": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@angular/cli",
+        "mcp"
+      ]
+    }
+  }
+}

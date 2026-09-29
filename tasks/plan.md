@@ -1,45 +1,46 @@
-# Plan: SupplyList – frontend + realtime
+# Plan: Navigare responsive – etapa 1 (Articole)
 
-Spec: `docs/specs/supply-lists-client.md` (aprobat).
+Spec: `docs/specs/responsive-navigation.md`
 
 ## Componente și dependențe
 
 ```text
-T1 Backend realtime (events + handlers + constants)      ─┐
-T2 Client models (supply-list.ts + frequency labels)      ├─> T4 Collection feature + list store (+ realtime)
-T3 Client realtime constants/events ──────────────────────┘        │
-T2 ─> T5 HTTP service ─> T4                                         v
-T2,T5 ─> T6 Detail store ─> T7 Detail form (Signal Forms) ─> T8 Detail modal
-T4 ─> T9 Filter form ─┐
-T4 ─> T10 Table ──────┴─> T11 Tab + header + page wiring (modal, toggle, join/leave)
-T11 ─> T12 Verificare finală (build, teste, manual AppHost)
+T1 NavigationDrawerState + MenuToggle  (core/layouts, fără UI în layout)
+        │
+        ▼
+T2 Layout full: sider extins ≥ lg; < lg drawer (dacă hasToggle) / sider collapsed (altfel)
+        │
+        ▼
+T3 Header Articole: ☰ lângă titlu, breadcrumb + temă ascunse < lg
+        │
+        ▼
+T4 Verificare finală (teste, build, screenshot-uri 360/768/1280, graphify update)
 ```
 
-## Ordine
+Secvențial: T2 depinde de starea din T1, T3 de butonul din T1 și de drawer-ul din T2.
 
-1. **Backend realtime (T1)** – mic, izolat; verificat cu `dotnet build` + teste unitare.
-2. **Fundația client (T2, T3, T5)** – modele, constante, HTTP. Paralelizabile.
-3. **State (T4, T6)** – feature reutilizabil de colecție + store listă (cu event handlers) și
-   store de detaliu.
-4. **UI modal (T7, T8)** – formular Signal Forms cu linii (`applyEach`, `ItemAutocomplete`), apoi
-   modalul care îl găzduiește (create/update/read-only).
-5. **UI tab (T9, T10, T11)** – filtru, tabel, integrarea în pagină (tab index 1, header, modal
-   `modal-100 modal-lg-75`, confirmare dezactivare, SignalR join/leave).
-6. **Verificare (T12).**
+## Decizii
+
+- `NavigationDrawerState` (`@Service()`): `open`, `toggle()`, `close()`, `register()` /
+  `unregister()` → `hasToggle` (computed pe un contor).
+- `MenuToggle` (`ske-menu-toggle`): se înregistrează în constructor, se deînregistrează prin
+  `DestroyRef`; randează butonul doar sub lg (`*skeLayoutBreakpoint` negat → folosim
+  `NzBreakpointService` / clasa `lg:hidden`). Se folosește `lg:hidden` pe host: simplu, fără JS.
+  Înregistrarea rămâne activă și la ≥ lg, dar acolo layout-ul oricum arată sider-ul extins.
+- Layout: `*skeLayoutBreakpoint="'lg'; else small"` → sider 200px extins. În `small`:
+  `@if (hasToggle())` → `nz-drawer`, altfel sider-ul collapsed de acum. Un singur `menuTemplate`
+  cu parametru `collapsed`.
+- Drawer se închide la: ✕, mască, Esc (ng-zorro), navigare (`nzCloseOnNavigation`), click în
+  meniu, trecere la ≥ lg (effect pe breakpoint).
 
 ## Riscuri
 
 | Risc | Mitigare |
 |---|---|
-| Reindexarea tab-urilor strică butoanele din header | Actualizare simultană `header.html` + `items.page.html`; verificare manuală. |
-| Signal Forms cu array de linii și câmp condiționat (`intervalWeeks`) | Copiem tiparul din `order-list-detail-form.ts` (`applyEach`, `required` cu `when`). |
-| Enum-ul `frequency` – răspuns PascalCase, request acceptă orice caz | Modelul TS folosește PascalCase; trimitem identic. |
-| Evenimente duplicate la Disable/Enable idempotente | Eveniment doar la schimbarea efectivă a stării; test unitar. |
-| Tabel virtual în tab ascuns (dimensiuni 0) | Același container `absolute inset-0` ca tab-urile existente. |
+| `nzInlineCollapsed` rămâne „lipit” la schimbarea de breakpoint | instanțe separate de meniu per ramură (template randat în contexte diferite) |
+| Pagina se schimbă și ☰ dispare cu drawer-ul deschis | `unregister()` închide drawer-ul când contorul ajunge la 0 |
+| Titlul `nzTitle` string nu permite buton | se folosește `nz-page-header-title` cu conținut |
 
-## Checkpoints
+## Checkpoint-uri
 
-- După T1: `dotnet build` + `dotnet test tests/Application.UnitTests --filter FullyQualifiedName~SupplyLists`.
-- După T6: `npm test` (store-uri).
-- După T8: `npm run build`.
-- După T11/T12: `npm test`, `npm run build`, verificare manuală în AppHost (2 browsere pentru realtime).
+După fiecare task: teste țintite + screenshot-uri Playwright (360 / 768 / 1280px) inspectate vizual.
