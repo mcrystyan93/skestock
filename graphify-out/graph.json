@@ -68968,7 +68968,7 @@
       },
       "norm_label": ".handle_withcursorfromdifferentsort_throwsvalidationexception()",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L268"
+      "source_location": "L273"
     },
     {
       "id": "tests_application_functionaltests_features_stockbatches_queries_getallstockbatches_getallstockbatchesquerytests_skestock_application_functionaltests_features_stockbatches_queries_getallstockbatches_getallstockbatchesquerytests_handle_withgoodsreceiptidfilter_returnsonlybatchesfromthatreceipt",
@@ -69004,7 +69004,7 @@
       },
       "norm_label": ".handle_withinvalidpagesize_throwsvalidationexception()",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L246"
+      "source_location": "L251"
     },
     {
       "id": "tests_application_functionaltests_features_stockbatches_queries_getallstockbatches_getallstockbatchesquerytests_skestock_application_functionaltests_features_stockbatches_queries_getallstockbatches_getallstockbatchesquerytests_handle_withitemidfilter_returnsonlymatchingbatches",
@@ -69040,7 +69040,7 @@
       },
       "norm_label": ".handle_withmalformedcursor_throwsvalidationexception()",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L260"
+      "source_location": "L265"
     },
     {
       "id": "tests_application_functionaltests_features_stockbatches_queries_getallstockbatches_getallstockbatchesquerytests_skestock_application_functionaltests_features_stockbatches_queries_getallstockbatches_getallstockbatchesquerytests_handle_withnomatches_returnsemptypage",
@@ -217269,7 +217269,7 @@
         "ref_token": "Test"
       },
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L268",
+      "source_location": "L273",
       "weight": 1.0
     },
     {
@@ -217299,7 +217299,7 @@
         "ref_token": "Test"
       },
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L246",
+      "source_location": "L251",
       "weight": 1.0
     },
     {
@@ -217329,7 +217329,7 @@
         "ref_token": "Test"
       },
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L260",
+      "source_location": "L265",
       "weight": 1.0
     },
     {
@@ -243132,7 +243132,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L271",
+      "source_location": "L276",
       "weight": 1.0
     },
     {
@@ -243144,7 +243144,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L272",
+      "source_location": "L277",
       "weight": 1.0
     },
     {
@@ -243156,7 +243156,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L273",
+      "source_location": "L278",
       "weight": 1.0
     },
     {
@@ -243168,7 +243168,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L274",
+      "source_location": "L279",
       "weight": 1.0
     },
     {
@@ -243180,7 +243180,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L274",
+      "source_location": "L279",
       "weight": 1.0
     },
     {
@@ -243192,7 +243192,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L278",
+      "source_location": "L283",
       "weight": 1.0
     },
     {
@@ -243204,7 +243204,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L278",
+      "source_location": "L283",
       "weight": 1.0
     },
     {
@@ -243216,7 +243216,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L281",
+      "source_location": "L286",
       "weight": 1.0
     },
     {
@@ -243312,7 +243312,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L249",
+      "source_location": "L254",
       "weight": 1.0
     },
     {
@@ -243324,7 +243324,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L250",
+      "source_location": "L255",
       "weight": 1.0
     },
     {
@@ -243336,7 +243336,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L251",
+      "source_location": "L256",
       "weight": 1.0
     },
     {
@@ -243348,7 +243348,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L252",
+      "source_location": "L257",
       "weight": 1.0
     },
     {
@@ -243360,7 +243360,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L254",
+      "source_location": "L259",
       "weight": 1.0
     },
     {
@@ -243372,7 +243372,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L254",
+      "source_location": "L259",
       "weight": 1.0
     },
     {
@@ -243468,7 +243468,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L263",
+      "source_location": "L268",
       "weight": 1.0
     },
     {
@@ -243480,7 +243480,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L263",
+      "source_location": "L268",
       "weight": 1.0
     },
     {
@@ -363341,7 +363341,7 @@
         "ref_token": "ValidationException"
       },
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L290",
+      "source_location": "L295",
       "weight": 1.0
     },
     {
@@ -363356,7 +363356,7 @@
         "ref_token": "ValidationException"
       },
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L256",
+      "source_location": "L261",
       "weight": 1.0
     },
     {
@@ -363371,7 +363371,7 @@
         "ref_token": "ValidationException"
       },
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L265",
+      "source_location": "L270",
       "weight": 1.0
     },
     {
@@ -455362,7 +455362,7 @@
         "ref_token": "Task"
       },
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L268",
+      "source_location": "L273",
       "weight": 1.0
     },
     {
@@ -455392,7 +455392,7 @@
         "ref_token": "Task"
       },
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L246",
+      "source_location": "L251",
       "weight": 1.0
     },
     {
@@ -455422,7 +455422,7 @@
         "ref_token": "Task"
       },
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L260",
+      "source_location": "L265",
       "weight": 1.0
     },
     {
@@ -552807,7 +552807,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L246",
+      "source_location": "L251",
       "weight": 1.0
     },
     {
@@ -552818,7 +552818,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L260",
+      "source_location": "L265",
       "weight": 1.0
     },
     {
@@ -552829,7 +552829,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs",
-      "source_location": "L268",
+      "source_location": "L273",
       "weight": 1.0
     },
     {
@@ -590047,5 +590047,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "bafd641364e81e5c022d74986ff084efd452425e"
+  "built_at_commit": "1282b2a7d78b561eabd95991f46c65d0d24c6efb"
 }
