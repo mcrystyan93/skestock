@@ -2,11 +2,11 @@
   <h4 nz-typography>Mută stoc</h4>
   <div class="flex flex-row gap-2 items-center">
     @if (modalData().item.categoryIcon; as categoryIcon) {
-      <span class="text-4xl text-blue-500">
+      <span class="text-4xl text-primary-600 dark:text-primary-400">
         <nz-icon [nzType]="'icons:' + categoryIcon.fileName"></nz-icon>
       </span>
     } @else {
-      <span class="text-4xl text-blue-500">
+      <span class="text-4xl text-primary-600 dark:text-primary-400">
         <nz-icon nzType="icons:shelves"></nz-icon>
       </span>
     }

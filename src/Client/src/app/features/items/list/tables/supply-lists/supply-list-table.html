@@ -32,7 +32,7 @@
         (nzSortOrderChange)="onSortChange($event, 'lastModifiedDate')">{{ columns.lastModifiedDate.label }}
     </th>
     <th nzRight
-        nzWidth="200px">{{ columns.actions.label }}
+        nzWidth="100px">{{ columns.actions.label }}
     </th>
   </tr>
   </thead>
@@ -53,24 +53,15 @@
       <td nzRight>
         <button type="button"
                 nz-button
-                nzType="primary"
-                skeStopClick
-                (click)="open.emit(supplyList)"
-                [attr.aria-label]="'Deschide lista ' + supplyList.name">
-          Deschide
-        </button>
-        <button type="button"
-                nz-button
                 nzType="text"
                 skeStopClick
-                [nzDanger]="supplyList.isActive"
                 [nzLoading]="togglingId() === supplyList.id"
                 [disabled]="togglingId() !== null"
                 (click)="toggleActive.emit(supplyList)"
                 nz-tooltip
                 [nzTooltipTitle]="supplyList.isActive ? 'Dezactivează' : 'Activează'"
                 [attr.aria-label]="(supplyList.isActive ? 'Dezactivează lista ' : 'Activează lista ') + supplyList.name">
-          <nz-icon [nzType]="supplyList.isActive ? 'icons:ban' : 'icons:circle-check'"></nz-icon>
+          <nz-icon [nzType]="supplyList.isActive ? 'icons:trash-can' : 'icons:circle-check'"></nz-icon>
         </button>
       </td>
     </tr>

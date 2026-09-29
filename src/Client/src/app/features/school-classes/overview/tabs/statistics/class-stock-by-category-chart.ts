@@ -41,7 +41,7 @@ export type ClassStockByCategoryBar = { id: string; label: string };
         <p class="mx-4 mb-1 text-xs text-gray-500 dark:text-gray-400">
           Categorii ({{ data()?.series?.length ?? 0 }}) · derulați lista pentru toate
         </p>
-        <div class="mx-4 mb-3 grid max-h-32 grid-cols-1 gap-x-3 gap-y-1 overflow-y-auto rounded border border-gray-200 p-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1890ff] dark:border-gray-700"
+        <div class="mx-4 mb-3 grid max-h-32 grid-cols-1 gap-x-3 gap-y-1 overflow-y-auto rounded border border-gray-200 p-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:border-gray-700"
              role="list"
              aria-label="Legendă: categorii de stoc"
              tabindex="0">

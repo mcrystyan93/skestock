@@ -20,11 +20,11 @@
     @for (category of categories(); track category.categoryId) {
       <section class="min-w-0"
                [attr.aria-labelledby]="'stock-category-' + category.categoryId">
-        <div class="sticky top-0 z-20 mb-2 flex min-w-0 items-center gap-2 bg-[#f0f2f5] dark:bg-[#151515] py-1">
+        <div class="sticky top-0 z-20 mb-2 flex min-w-0 items-center gap-2 bg-slate-50 dark:bg-slate-950 py-1">
           <nz-icon [nzType]="category.categoryIcon?.fileName
             ? ('icons:' + category.categoryIcon.fileName)
             : 'icons:box'"
-                   class="shrink-0 text-lg text-blue-500!" />
+                   class="shrink-0 text-lg text-primary-600! dark:text-primary-400!" />
           <h2 [id]="'stock-category-' + category.categoryId"
               class="mb-0! min-w-0 truncate text-sm font-semibold"
               [attr.title]="category.categoryName">
@@ -73,7 +73,7 @@
               <div class="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-2 gap-y-1">
                 <div class="min-w-0">
                   <button type="button"
-                          class="after:absolute after:inset-0 block max-w-full overflow-hidden text-left font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1890ff]"
+                          class="after:absolute after:inset-0 block max-w-full overflow-hidden text-left font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
                           [attr.aria-label]="'Ajustează stocul pentru ' + item.itemName + ' la ' + item.locationName"
                           [attr.title]="item.itemName"
                           (click)="adjust.emit(item)">
