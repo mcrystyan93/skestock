@@ -1,0 +1,102 @@
+@if (items().length === 0) {
+  @if (loading()) {
+    <div class="flex flex-col gap-2 px-4 py-2"
+         aria-busy="true"
+         aria-label="Se încarcă recepțiile">
+      @for (placeholder of skeletonPlaceholders; track placeholder) {
+        <nz-card nzSize="small">
+          <nz-skeleton [nzActive]="true"
+                       [nzTitle]="{ width: '55%' }"
+                       [nzParagraph]="{ rows: 2, width: '70%' }" />
+        </nz-card>
+      }
+    </div>
+  } @else {
+    <nz-empty class="mt-8"
+              nzNotFoundContent="Nu există comenzi recepționate" />
+  }
+} @else {
+  <div class="min-h-0 w-full grow overflow-x-hidden overflow-y-auto px-4 pb-2 pt-2"
+       role="list"
+       aria-label="Comenzi recepționate"
+       (scroll)="onScroll($event)">
+    @for (receipt of items(); track receipt.id) {
+      <nz-card nzSize="small"
+               class="mb-2! min-w-0"
+               role="listitem">
+        <div class="flex min-w-0 items-start justify-between gap-2">
+          <div class="min-w-0 grow">
+            <strong class="block break-words"
+                    [attr.title]="receipt.note">
+              {{ receipt.note || 'Aviz fără notă' }}
+            </strong>
+            <span nz-typography
+                  nzType="secondary"
+                  class="mb-0! text-sm">
+              {{ receipt.receivedAt | date:'mediumDate' }}
+            </span>
+          </div>
+          <strong class="shrink-0 text-right">{{ receipt.totalAmount | currency:'RON' }}</strong>
+        </div>
+
+        <div class="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+          <span class="font-medium">
+            {{ receipt.lineCount }} {{ receipt.lineCount === 1 ? 'articol' : 'articole' }}
+            <span aria-hidden="true"> · </span>
+            {{ receipt.totalQuantity | number:'1.0-0' }} buc
+          </span>
+          <span nz-typography
+                nzType="secondary"
+                class="mb-0! min-w-0 truncate"
+                [attr.title]="receipt.createdByName || 'Utilizator necunoscut'">
+            {{ receipt.createdDate | timeAgo }}
+            <span aria-hidden="true"> · </span>
+            {{ receipt.createdByName || 'Utilizator necunoscut' }}
+          </span>
+        </div>
+
+        <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+          <button nz-button
+                  nzType="default"
+                  type="button"
+                  class="relative z-10 min-h-10"
+                  [attr.aria-expanded]="isExpanded(receipt.id)"
+                  [attr.aria-controls]="isExpanded(receipt.id) ? 'receipt-batches-' + receipt.id : null"
+                  (click)="toggleRow(receipt.id)">
+            <nz-icon nzType="icons:chevron-down"
+                     [class.rotate-180]="isExpanded(receipt.id)"
+                     aria-hidden="true" />
+            {{ isExpanded(receipt.id) ? 'Ascunde articolele' : 'Vezi articolele' }}
+          </button>
+          <button nz-button
+                  nzType="text"
+                  type="button"
+                  class="relative z-10 h-10! min-h-10! w-10! min-w-10! p-0!"
+                  [disabled]="!receipt.fileMetadataId"
+                  nz-tooltip
+                  nzTooltipTitle="Descarcă fișierul"
+                  aria-label="Descarcă fișierul"
+                  skeStopClick
+                  (click)="downloadFile.emit(receipt)">
+            <nz-icon nzType="icons:download" />
+          </button>
+        </div>
+
+        @if (isExpanded(receipt.id)) {
+          <div [id]="'receipt-batches-' + receipt.id"
+               class="relative mt-2 h-64 min-h-0 overflow-hidden rounded border border-gray-200 dark:border-gray-700">
+            <ske-stock-batches-table-container [goodsReceiptId]="receipt.id" />
+          </div>
+        }
+      </nz-card>
+    }
+  </div>
+
+  @if (isLoadingMore()) {
+    <div class="flex justify-center py-2">
+      <nz-spin nzSimple
+               nzSize="small"
+               nzTip="Se încarcă..." />
+    </div>
+  }
+}

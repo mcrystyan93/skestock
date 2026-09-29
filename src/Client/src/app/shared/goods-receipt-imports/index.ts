@@ -1,6 +1,7 @@
 export * from './services/goods-receipt-imports.http';
 export * from './services/goods-receipt-import-collection.feature';
 export * from './ui/table/table-container';
+export * from './ui/table/small/goods-receipt-imports-list-small';
 export * from './ui/list/filter/filter-container';
 export * from './ui/list/goods-receipt-imports-list';
 export * from './ui/modals/review-modal';

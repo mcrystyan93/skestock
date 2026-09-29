@@ -1,27 +1,46 @@
+@let compact = isCompact();
+@let selectedAction = action();
+
 <nz-page-header [nzGhost]="false"
                 class="block min-w-0 max-w-full overflow-hidden">
   <nz-breadcrumb nz-page-header-breadcrumb
+                 class="hidden! lg:block!"
                  nzSeparator=">">
     <nz-breadcrumb-item>Acasa</nz-breadcrumb-item>
     <nz-breadcrumb-item>Clase</nz-breadcrumb-item>
     <nz-breadcrumb-item>{{ schoolClass().name }}</nz-breadcrumb-item>
   </nz-breadcrumb>
   <nz-page-header-title>
-    {{ schoolClass().name }}
+    <span class="flex min-w-0 flex-col">
+      <span class="flex min-w-0 items-center gap-1">
+        <ske-menu-toggle class="-ms-2" />
+        <span class="min-w-0 truncate"
+              [attr.title]="schoolClass().name ?? ''">{{ schoolClass().name }}</span>
+      </span>
+      @if (compact) {
+        <span class="ms-7 block text-xs text-gray-500 dark:text-gray-400">
+          {{ schoolClass().startDate | date }} - {{ schoolClass().endDate | date }}
+        </span>
+      }
+    </span>
   </nz-page-header-title>
-  <nz-page-header-subtitle>
-    {{ schoolClass().startDate | date }} - {{ schoolClass().endDate | date }}
+  <nz-page-header-subtitle class="hidden! lg:block!">
+    @if (!compact) {
+      <span class="block max-w-full break-words">
+      {{ schoolClass().startDate | date }} - {{ schoolClass().endDate | date }}
+      </span>
+    }
   </nz-page-header-subtitle>
 
-  <nz-page-header-content class="block w-full min-w-0 max-w-full">
-    <div class="w-full min-w-0 max-w-full overflow-x-auto overflow-y-hidden">
-      <div class="flex w-max min-w-full flex-nowrap gap-4">
+  <nz-page-header-content class="hidden! w-full min-w-0 max-w-full lg:block!">
+    <div class="w-full min-w-0 max-w-full">
+      <div class="grid w-full min-w-0 grid-cols-2 gap-x-3 gap-y-2 lg:flex lg:w-max lg:min-w-full lg:flex-nowrap lg:gap-4">
         @switch (selectedTabIndex()) {
           @case (0) {
-            <nz-statistic class="flex-none"
+            <nz-statistic class="min-w-0 lg:flex-none"
                           nzTitle="Nr total de articole"
                           [nzValue]="summary().distinctItemsCount ?? 0" />
-            <nz-statistic class="flex-none"
+            <nz-statistic class="min-w-0 lg:flex-none"
                           nzTitle="Articole cu stoc redus"
                           [nzValueTemplate]="lowStockItemsCountTemplate">
               <ng-template #lowStockItemsCountTemplate>
@@ -32,7 +51,7 @@
                 </div>
               </ng-template>
             </nz-statistic>
-            <nz-statistic class="flex-none"
+            <nz-statistic class="min-w-0 lg:flex-none"
                           nzTitle="Articole posibil expirate"
                           [nzValueTemplate]="expiredStockItemsCountTemplate">
               <ng-template #expiredStockItemsCountTemplate>
@@ -45,21 +64,27 @@
             </nz-statistic>
           }
           @case (2) {
-            <nz-statistic class="flex-none"
+            <nz-statistic class="min-w-0 lg:flex-none"
                           nzTitle="Comenzi receptionate"
                           [nzValue]="summary().noOfGoodsReceipt ?? 0" />
-            <nz-statistic class="flex-none"
+            <nz-statistic class="min-w-0 lg:flex-none"
                           nzTitle="Totalul comenzilor"
                           [nzValueTemplate]="totalAmountTemplate">
               <ng-template #totalAmountTemplate>
-                {{ summary().totalAmount ?? 0 | currency:'RON' }}
+                @if (compact) {
+                  <span class="block max-w-full break-all text-sm leading-5">
+                    {{ summary().totalAmount ?? 0 | currency:'RON' }}
+                  </span>
+                } @else {
+                  {{ summary().totalAmount ?? 0 | currency:'RON' }}
+                }
               </ng-template>
             </nz-statistic>
-            <ske-goods-receipt-cost-statistic class="flex-none"
+            <ske-goods-receipt-cost-statistic class="min-w-0 lg:flex-none"
                                               [receipts]="summary().goodsReceipts ?? []" />
           }
           @case (3) {
-            <nz-statistic class="flex-none"
+            <nz-statistic class="min-w-0 lg:flex-none"
                           nzTitle="Comenzi in procesare"
                           [nzValueTemplate]="processingImportsCountTemplate" />
             <ng-template #processingImportsCountTemplate>
@@ -67,7 +92,7 @@
                 {{ summary().processingImportsCount ?? 0 }}
               </div>
             </ng-template>
-            <nz-statistic class="flex-none"
+            <nz-statistic class="min-w-0 lg:flex-none"
                           nzTitle="Comenzi in asteptare"
                           [nzValueTemplate]="pendingReviewImportsCountTemplate" />
             <ng-template #pendingReviewImportsCountTemplate>
@@ -77,7 +102,7 @@
                 {{ summary().pendingReviewImportsCount ?? 0 }}
               </div>
             </ng-template>
-            <nz-statistic class="flex-none"
+            <nz-statistic class="min-w-0 lg:flex-none"
                           nzTitle="Comenzi confirmate"
                           [nzValueTemplate]="confirmedImportsCountTemplate" />
             <ng-template #confirmedImportsCountTemplate>
@@ -87,7 +112,7 @@
                 {{ summary().confirmedImportsCount ?? 0 }}
               </div>
             </ng-template>
-            <nz-statistic class="flex-none"
+            <nz-statistic class="min-w-0 lg:flex-none"
                           nzTitle="Comenzi esuate"
                           [nzValueTemplate]="failedImportsCountTemplate">
               <ng-template #failedImportsCountTemplate>
@@ -106,62 +131,64 @@
 
   <nz-page-header-extra>
     <nz-space>
-      <button type="button"
-              *nzSpaceItem
-              nz-button
-              nzType="default"
-              (click)="onClose.emit()">
-        <nz-icon nzType="icons:xmark"></nz-icon>
-        Inchide
-      </button>
-
-      @switch (selectedTabIndex()) {
-        @case (0) {
-          <button nz-button
-                  *nzSpaceItem
-                  nzType="primary"
-                  type="button"
-                  (click)="onAddStock.emit()">
-            <nz-icon nzType="icons:plus"></nz-icon>
-            Adauga articol
-          </button>
-        }
-        @case (1) {
-          <button nz-button
-                  *nzSpaceItem
-                  nzType="primary"
-                  type="button"
-                  (click)="onOrderCreate.emit()">
-            <nz-icon nzType="icons:plus"></nz-icon>
-            Creaza comanda
-          </button>
-        }
-        @case (3) {
-          <button nz-button
-                  *nzSpaceItem
-                  nzType="primary"
-                  type="button"
-                  (click)="onAddGoodsReceipt.emit()">
-            <nz-icon nzType="icons:file-import"></nz-icon>
-            Import aviz comanda
-          </button>
-        }
-
+      @if (compact) {
+        <button type="button"
+                *nzSpaceItem
+                nz-button
+                nzType="default"
+                nzShape="circle"
+                nz-tooltip
+                nzTooltipTitle="Închide"
+                aria-label="Închide"
+                class="h-10! min-h-10! w-10! min-w-10! p-0!"
+                (click)="onClose.emit()">
+          <nz-icon nzType="icons:xmark"></nz-icon>
+        </button>
+      } @else {
+        <button type="button"
+                *nzSpaceItem
+                nz-button
+                nzType="default"
+                (click)="onClose.emit()">
+          <nz-icon nzType="icons:xmark"></nz-icon>
+          Închide
+        </button>
       }
 
-
+      @if (selectedAction) {
+        @if (compact) {
+          <button *nzSpaceItem
+                  nz-button
+                  nzType="primary"
+                  nzShape="circle"
+                  nz-tooltip
+                  [nzTooltipTitle]="selectedAction.label"
+                  [attr.aria-label]="selectedAction.label"
+                  class="h-10! min-h-10! w-10! min-w-10! p-0!"
+                  type="button"
+                  (click)="selectedAction.run()">
+            <nz-icon [nzType]="selectedAction.icon"></nz-icon>
+          </button>
+        } @else {
+          <button *nzSpaceItem
+                  nz-button
+                  nzType="primary"
+                  type="button"
+                  [attr.aria-label]="selectedAction.label"
+                  (click)="selectedAction.run()">
+            <nz-icon [nzType]="selectedAction.icon"></nz-icon>
+            {{ selectedAction.text }}
+          </button>
+        }
+      }
     </nz-space>
   </nz-page-header-extra>
 
   <nz-page-header-footer class="mt-0!">
-    <nz-tabs [(nzSelectedIndex)]="selectedTabIndex">
-      <nz-tab nzTitle="Stoc"></nz-tab>
-      <nz-tab nzTitle="Comenzi"></nz-tab>
-      <nz-tab nzTitle="Comenzi receptionate"></nz-tab>
-      <nz-tab nzTitle="Comenzi importate"></nz-tab>
-      <nz-tab nzTitle="Statistici"></nz-tab>
-    </nz-tabs>
+    <ske-header-tabs [options]="tabs"
+                     [compact]="compact"
+                     [(selectedIndex)]="selectedTabIndex" />
   </nz-page-header-footer>
 </nz-page-header>
 
-<ske-theme-switcher class="absolute top-1.5 right-4" />
+<ske-theme-switcher class="absolute top-1.5 right-4 hidden lg:block" />

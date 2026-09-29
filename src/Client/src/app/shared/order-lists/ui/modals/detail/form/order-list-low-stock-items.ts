@@ -47,7 +47,8 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
         @for (location of store.lowStockItemsByLocation().keys(); track location) {
           @let products = store.lowStockItemsByLocation().get(location) ?? [];
           @let allWereAdded = allItemsAdded().get(location) ?? false;
-          <nz-col [nzSpan]="6">
+          <nz-col [nzSpan]="6"
+                  [nzXs]="24">
             <nz-alert [nzType]="allWereAdded ? 'success' : 'warning'"
                       [nzMessage]="location"
                       [nzDescription]="allWereAdded ? 'Toate articolele au fost adăugate' : products.length + ' articole cu stoc scăzut'"
@@ -57,6 +58,8 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
                 <button type="button"
                         nz-button
                         nzType="text"
+                        class="h-10! min-h-10! w-10! min-w-10! p-0!"
+                        [attr.aria-label]="'Adaugă ' + products.length + ' articole cu stoc redus din ' + location"
                         [disabled]="disabled()"
                         (click)="addProducts.emit(products)">
                   <nz-icon nzType="icons:plus"

@@ -1,9 +1,22 @@
-<ske-goods-receipt-imports-table [items]="store.goodsReceiptImports()"
-                                 [filter]="store.filter()"
-                                 [loading]="store.goodsReceiptImportsLoading()"
-                                 [hasNextPage]="store.hasNextPage()"
-                                 [isLoadingMore]="store.isLoadingMore()"
-                                 (onFilterChange)="store.load($event)"
-                                 (onLoadMore)="store.loadMore()"
-                                 (downloadFile)="downloadFile($event)"
-                                 (review)="review($event)"/>
+<ng-container *skeLayoutBreakpoint="'lg'; else small">
+  <ske-goods-receipt-imports-table [items]="store.goodsReceiptImports()"
+                                   [filter]="store.filter()"
+                                   [loading]="store.goodsReceiptImportsLoading()"
+                                   [hasNextPage]="store.hasNextPage()"
+                                   [isLoadingMore]="store.isLoadingMore()"
+                                   (onFilterChange)="store.load($event)"
+                                   (onLoadMore)="store.loadMore()"
+                                   (downloadFile)="downloadFile($event)"
+                                   (review)="review($event)" />
+</ng-container>
+
+<ng-template #small>
+  <ske-goods-receipt-imports-list-small [items]="store.goodsReceiptImports()"
+                                        [filter]="store.filter()"
+                                        [loading]="store.goodsReceiptImportsLoading()"
+                                        [hasNextPage]="store.hasNextPage()"
+                                        [isLoadingMore]="store.isLoadingMore()"
+                                        (onLoadMore)="store.loadMore()"
+                                        (downloadFile)="downloadFile($event)"
+                                        (review)="review($event)" />
+</ng-template>

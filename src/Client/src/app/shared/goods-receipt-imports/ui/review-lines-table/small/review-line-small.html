@@ -1,0 +1,133 @@
+<article class="min-w-0 rounded border border-gray-200 p-3 dark:border-gray-700"
+         [class]="hasProduct ? '' : '!bg-amber-500/10'">
+  <div class="flex min-w-0 items-start gap-2">
+    <div class="min-w-0 grow">
+      <div class="mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">Produs</div>
+      <nz-form-item class="mb-0!">
+        <nz-form-control [nzErrorTip]="errorTemplate"
+                         nzSpan="24">
+          <ske-item-dropdown [formField]="lineForm().item"
+                             [allowClear]="true"
+                             [allowEdit]="false"
+                             [allowCreate]="!hasProduct"
+                             [placeholder]="itemPlaceholder"
+                             [createPrefill]="createPrefill(line())"
+                             [createButtonTemplate]="createItemTemplate"
+                             [attr.aria-label]="'Produs pentru linia ' + (line().extractedName ?? '')" />
+          <ng-template #createItemTemplate>Crează</ng-template>
+        </nz-form-control>
+      </nz-form-item>
+      @if (!hasProduct) {
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0! mt-1 break-words text-xs">
+          Din aviz: {{ missingItemSource }}
+        </div>
+      }
+    </div>
+    <div class="flex shrink-0 gap-1">
+      <button nz-button
+              nzType="text"
+              type="button"
+              class="h-10! min-h-10! w-10! min-w-10! p-0!"
+              nz-tooltip
+              nzTooltipTitle="Împarte rândul"
+              [attr.aria-label]="'Împarte rândul pentru ' + productName"
+              (click)="split()">
+        <nz-icon nzType="icons:split" />
+      </button>
+      @if (canRemove()) {
+        <button nz-button
+                nzType="text"
+                type="button"
+                nz-tooltip
+                nzTooltipTitle="Șterge rândul"
+                [attr.aria-label]="'Șterge rândul pentru ' + productName"
+                class="h-10! min-h-10! w-10! min-w-10! p-0!"
+                (click)="remove()">
+          <nz-icon nzType="icons:trash-can" />
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="mt-3 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+    <div class="min-w-0">
+      <label class="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Locație</label>
+      <nz-form-item class="mb-0!">
+        <nz-form-control [nzErrorTip]="errorTemplate">
+          <ske-location-dropdown [formField]="lineForm().location"
+                                 [prePopulateWithDefault]="true"
+                                 [attr.aria-label]="'Locația pentru ' + productName" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    <div class="min-w-0">
+      <label class="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Cantitate</label>
+      <nz-form-item class="mb-0!">
+        <nz-form-control [nzErrorTip]="errorTemplate"
+                         [nzValidateStatus]="quantityValidateStatus()"
+                         nzWarningTip="Cantitatea introdusă este mai mare decât cea originală"
+                         nzHasFeedback>
+          <nz-input-number [formField]="lineForm().quantity"
+                           [nzControls]="false"
+                           class="w-full!"
+                           [attr.aria-label]="'Cantitate pentru ' + productName">
+            <div nzInputAddonBefore>
+              <nz-icon nzType="icons:circle-info"
+                       nz-tooltip
+                       nzTooltipTrigger="hover"
+                       [nzTooltipTitle]="'Cantitatea originală: ' + (line().originalQuantity ?? 0)"
+                       aria-hidden="true" />
+            </div>
+          </nz-input-number>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    @if (line().item?.isPerishable) {
+      <div class="min-w-0">
+        <label class="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Data expirării</label>
+        <nz-form-item class="mb-0!">
+          <nz-form-control [nzErrorTip]="errorTemplate">
+            <nz-date-picker [formField]="lineForm().expiryDate"
+                            nzFormat="dd.MM.yyyy"
+                            class="w-full!"
+                            [attr.aria-label]="'Data expirării pentru ' + productName" />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    }
+
+    <div class="min-w-0">
+      <label class="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Preț unitar</label>
+      <nz-form-item class="mb-0!">
+        <nz-form-control [nzErrorTip]="errorTemplate">
+          <nz-input-number [formField]="lineForm().unitPrice"
+                           [nzFormatter]="unitPriceFormatter"
+                           [nzParser]="unitPriceParser"
+                           [nzMin]="0"
+                           class="w-full!"
+                           [attr.aria-label]="'Preț unitar pentru ' + productName">
+            <span nzInputAddonAfter>RON</span>
+          </nz-input-number>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+  </div>
+</article>
+
+<ng-template #errorTemplate
+             let-control>
+  @let formControl = control.control;
+  @if (formControl.errors?.required; as requiredError) {
+    {{ requiredError.message }}
+  }
+  @if (formControl.errors?.min; as minError) {
+    {{ minError.message }}
+  }
+  @if (formControl.errors?.totalSum; as totalSumError) {
+    {{ totalSumError.message }}
+  }
+</ng-template>

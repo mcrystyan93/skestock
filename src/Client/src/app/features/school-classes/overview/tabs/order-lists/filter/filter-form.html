@@ -2,42 +2,120 @@
       nz-form
       nzNoColon
       nzLayout="horizontal">
-  <nz-row [nzGutter]="[16, 16]"
-          nzAlign="middle"
-          class="grow">
-    <nz-col nzFlex="auto">
-      <nz-form-item>
-        <nz-form-control nzSpan="24">
-          <nz-input-wrapper>
-            <nz-icon nzInputPrefix
-                     nzType="icons:magnifying-glass"></nz-icon>
-            <input type="text"
-                   nz-input
-                   id="orderListSearchTerm"
-                   placeholder="Cautați..."
-                   [formField]="orderListFilterForm.searchTerm" />
-          </nz-input-wrapper>
-        </nz-form-control>
-      </nz-form-item>
-    </nz-col>
-    <nz-col>
-      <nz-segmented [formField]="orderListFilterForm.status">
-        @for (segmentOption of statusSegmentOptions; track segmentOption.value) {
-          <label nz-segmented-item
-                 [nzValue]="segmentOption.value">
-            {{ segmentOption.label }}
-          </label>
-        }
-      </nz-segmented>
-    </nz-col>
-    <nz-col>
-      <button nz-button
-              type="button"
-              nzType="default"
-              [nzLoading]="loading()"
-              (click)="clear()">
-        Reseteaza
-      </button>
-    </nz-col>
-  </nz-row>
+  <ng-container *skeLayoutBreakpoint="'lg'; else mobileFilters">
+    <nz-row [nzGutter]="[16, 16]"
+            nzAlign="middle"
+            class="grow">
+      <nz-col nzFlex="auto">
+        <nz-form-item>
+          <nz-form-control nzSpan="24">
+            <ng-container *ngTemplateOutlet="searchInput" />
+          </nz-form-control>
+        </nz-form-item>
+      </nz-col>
+      <nz-col>
+        <ng-container *ngTemplateOutlet="desktopStatusSegment" />
+      </nz-col>
+      <nz-col>
+        <button nz-button
+                type="button"
+                nzType="default"
+                [nzLoading]="loading()"
+                (click)="clear()">
+          Resetează
+        </button>
+      </nz-col>
+    </nz-row>
+  </ng-container>
+
+  <ng-template #mobileFilters>
+    <div class="mb-2 flex min-w-0 items-center gap-2">
+      <div class="min-w-0 grow">
+        <ng-container *ngTemplateOutlet="searchInput" />
+      </div>
+      <nz-badge [nzCount]="activeFilterCount()"
+                nzSize="small">
+        <button nz-button
+                type="button"
+                nzType="default"
+                aria-haspopup="dialog"
+                [attr.aria-expanded]="filtersOpen()"
+                [attr.aria-label]="filtersButtonLabel()"
+                class="shrink-0"
+                (click)="filtersOpen.set(true)">
+          <nz-icon nzType="icons:sliders" />
+          Filtre
+        </button>
+      </nz-badge>
+    </div>
+
+    <nz-drawer nzTitle="Filtre"
+               nzPlacement="bottom"
+               nzHeight="auto"
+               [nzVisible]="filtersOpen()"
+               [nzFooter]="drawerFooter"
+               (nzOnClose)="filtersOpen.set(false)">
+      <ng-container *nzDrawerContent>
+        <div role="group"
+             aria-labelledby="orderListStatusFilterLabel"
+             class="flex flex-col gap-2">
+          <span id="orderListStatusFilterLabel">Statusul comenzii</span>
+          <ng-container *ngTemplateOutlet="mobileStatusSegment" />
+        </div>
+      </ng-container>
+    </nz-drawer>
+
+    <ng-template #drawerFooter>
+      <div class="flex justify-end gap-2">
+        <button nz-button
+                type="button"
+                nzType="default"
+                [nzLoading]="loading()"
+                (click)="clear()">
+          Resetează
+        </button>
+        <button nz-button
+                type="button"
+                nzType="primary"
+                (click)="filtersOpen.set(false)">
+          Gata
+        </button>
+      </div>
+    </ng-template>
+  </ng-template>
+
+  <ng-template #searchInput>
+    <nz-input-wrapper>
+      <nz-icon nzInputPrefix
+               nzType="icons:magnifying-glass"></nz-icon>
+      <input type="text"
+             nz-input
+             id="orderListSearchTerm"
+             placeholder="Căutați..."
+             aria-label="Căutați comenzi"
+             [formField]="orderListFilterForm.searchTerm" />
+    </nz-input-wrapper>
+  </ng-template>
+
+  <ng-template #desktopStatusSegment>
+    <nz-segmented [formField]="orderListFilterForm.status">
+      @for (segmentOption of statusSegmentOptions; track segmentOption.value) {
+        <label nz-segmented-item
+               [nzValue]="segmentOption.value">
+          {{ segmentOption.label }}
+        </label>
+      }
+    </nz-segmented>
+  </ng-template>
+
+  <ng-template #mobileStatusSegment>
+    <nz-select [formField]="orderListFilterForm.status"
+               class="w-full"
+               nzPlaceHolder="Alegeți statusul">
+      @for (segmentOption of statusSegmentOptions; track segmentOption.value) {
+        <nz-option [nzLabel]="segmentOption.label"
+                   [nzValue]="segmentOption.value" />
+      }
+    </nz-select>
+  </ng-template>
 </form>

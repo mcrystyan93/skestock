@@ -1,10 +1,22 @@
-<ske-stock-category-items-table [items]="store.groupedStockItems()"
-                                [filter]="{}"
-                                [isLoadingMore]="false"
-                                [hasNextPage]="false"
-                                [loading]="store.stockItemsLoading()"
-                                (add)="addStock($event)"
-                                (adjust)="onAdjust($event)"
-                                (move)="onMove($event)"
-                                (removeExpired)="onRemoveExpired($event)"
-                                (visibilityChange)="onVisibilityChange($event)" />
+<ng-container *skeLayoutBreakpoint="'lg'; else small">
+  <ske-stock-category-items-table [items]="store.groupedStockItems()"
+                                  [filter]="{}"
+                                  [isLoadingMore]="false"
+                                  [hasNextPage]="false"
+                                  [loading]="store.stockItemsLoading()"
+                                  (add)="addStock($event)"
+                                  (adjust)="onAdjust($event)"
+                                  (move)="onMove($event)"
+                                  (removeExpired)="onRemoveExpired($event)"
+                                  (visibilityChange)="onVisibilityChange($event)" />
+</ng-container>
+
+<ng-template #small>
+  <ske-stock-category-items-small [items]="store.groupedStockItems()"
+                                  [loading]="store.stockItemsLoading()"
+                                  (add)="addStock($event)"
+                                  (adjust)="onAdjust($event)"
+                                  (move)="onMove($event)"
+                                  (removeExpired)="onRemoveExpired($event)"
+                                  (visibilityChange)="onVisibilityChange($event)" />
+</ng-template>

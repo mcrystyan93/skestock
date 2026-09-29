@@ -108,6 +108,18 @@ describe('FilterForm', () => {
     expect(emittedFilters).toEqual([]);
   });
 
+  it('counts location, category, and non-default stock status filters', async () => {
+    render();
+    await settle();
+
+    component.stockListFilterForm.location().value.set({ id: 'location-1', name: 'Sala 1' } as never);
+    component.stockListFilterForm.category().value.set({ id: 'category-1', name: 'Papetarie' } as never);
+    component.stockListFilterForm.booleanSegmentValue().value.set('expiredOnly' as never);
+
+    expect(component.activeFilterCount()).toBe(3);
+    expect(component.filtersButtonLabel()).toBe('Filtre, 3 filtre active');
+  });
+
   it('emits selected category and location when adding a stock batch', async () => {
     render(createFilter({
       filters: [

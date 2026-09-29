@@ -8,10 +8,6 @@ export const fullRoutes: Routes = [
     canActivate: [authGuard],
     children: [
       {
-        path: 'home',
-        loadChildren: () => import('@ske/features/home').then((m) => m.homeRoutes)
-      },
-      {
         path: 'categories',
         loadChildren: () => import('@ske/features/categories').then((m) => m.categoriesRoutes)
       },
@@ -22,10 +18,6 @@ export const fullRoutes: Routes = [
       {
         path: 'school-classes',
         loadChildren: () => import('@ske/features/school-classes').then((m) => m.schoolClassesRoutes)
-      },
-      {
-        path: 'class-analytics',
-        loadChildren: () => import('@ske/features/class-analytics').then((m) => m.classAnalyticsRoutes)
       }
     ]
   }

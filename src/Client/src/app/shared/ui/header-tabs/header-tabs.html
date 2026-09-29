@@ -1,0 +1,16 @@
+@if (compact()) {
+  <div class="px-1 pb-2">
+    <nz-segmented nzBlock
+                  [attr.aria-label]="ariaLabel()"
+                  [nzOptions]="segmentOptions()"
+                  [ngModel]="selectedIndex()"
+                  (ngModelChange)="selectedIndex.set($event)" />
+  </div>
+} @else {
+  <nz-tabs [nzSelectedIndex]="selectedIndex()"
+           (nzSelectedIndexChange)="selectedIndex.set($event)">
+    @for (option of options(); track option.label) {
+      <nz-tab [nzTitle]="option.label"></nz-tab>
+    }
+  </nz-tabs>
+}

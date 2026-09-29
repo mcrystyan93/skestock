@@ -1,28 +1,45 @@
 import { Component, effect, inject, input, untracked } from '@angular/core';
-import { Table } from '@ske/shared/goods-receipts';
+import { GoodsReceiptListSmall, Table } from '@ske/shared/goods-receipts';
 import { SchoolClassOverviewStore } from '../../../services/school-class-overview.store';
 import { isNil } from 'lodash-es';
 import { ColumnFilter, GoodsReceiptListItemDto } from '@ske/models';
 import { FileStorageState } from '@ske/shared/storage';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 
 @Component({
   imports: [
-    Table
+    Table,
+    GoodsReceiptListSmall,
+    LayoutBreakpoint
   ],
   providers: [FileStorageState],
   selector: 'ske-school-class-overview-goods-receipts-tab',
   styles: ``,
   template: `
 
-    <ske-goods-receipts-table [items]="store.goodsReceipts()"
-                              [filter]="store.filter()"
-                              [loading]="store.goodsReceiptsLoading()"
-                              [expandedReceiptId]="receiptId()"
-                              [hasNextPage]="store.hasGoodsReceiptsNextPage()"
-                              [isLoadingMore]="store.isLoadingMoreGoodsReceipts()"
-                              (onFilterChange)="store.loadGoodsReceipts($event)"
-                              (onLoadMore)="store.loadMoreGoodsReceipts()"
-                              (downloadFile)="downloadFile($event)" />
+    <ng-container *skeLayoutBreakpoint="'lg'; else small">
+      <ske-goods-receipts-table [items]="store.goodsReceipts()"
+                                [filter]="store.filter()"
+                                [loading]="store.goodsReceiptsLoading()"
+                                [expandedReceiptId]="receiptId()"
+                                [hasNextPage]="store.hasGoodsReceiptsNextPage()"
+                                [isLoadingMore]="store.isLoadingMoreGoodsReceipts()"
+                                (onFilterChange)="store.loadGoodsReceipts($event)"
+                                (onLoadMore)="store.loadMoreGoodsReceipts()"
+                                (downloadFile)="downloadFile($event)" />
+    </ng-container>
+
+    <ng-template #small>
+      <ske-goods-receipt-list-small [items]="store.goodsReceipts()"
+                                    [filter]="store.filter()"
+                                    [loading]="store.goodsReceiptsLoading()"
+                                    [expandedReceiptId]="receiptId()"
+                                    [hasNextPage]="store.hasGoodsReceiptsNextPage()"
+                                    [isLoadingMore]="store.isLoadingMoreGoodsReceipts()"
+                                    (onFilterChange)="store.loadGoodsReceipts($event)"
+                                    (onLoadMore)="store.loadMoreGoodsReceipts()"
+                                    (downloadFile)="downloadFile($event)" />
+    </ng-template>
 
   `
 })

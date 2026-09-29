@@ -21,7 +21,10 @@ describe('SupplyListFilterForm', () => {
       imports: [SupplyListFilterForm],
       providers: [
         provideNzIconsTesting(),
-        provideNzIcons([{ name: 'icons:magnifying-glass', icon: '<svg viewBox="0 0 24 24"></svg>' }])
+        provideNzIcons([
+          { name: 'icons:magnifying-glass', icon: '<svg viewBox="0 0 24 24"></svg>' },
+          { name: 'icons:sliders', icon: '<svg viewBox="0 0 24 24"></svg>' }
+        ])
       ]
     });
 

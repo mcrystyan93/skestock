@@ -6,7 +6,7 @@
                    [validationErrors]="store.schoolClassesValidationErrors()"
                    class="px-4" />
 <div class="grow relative">
-  <ng-container *skeLayoutBreakpoint="'md'; else smallScreenListTemplate">
+  <ng-container *skeLayoutBreakpoint="'lg'; else smallScreenListTemplate">
     <ske-school-class-table [items]="store.schoolClasses()"
                             [filter]="store.filter()"
                             [loading]="store.schoolClassesLoading()"

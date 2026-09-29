@@ -1,59 +1,68 @@
-<cdk-virtual-scroll-viewport itemSize="73"
-                             class="h-full w-full"
-                             (scroll)="onScroll($event)">
-  <nz-list [nzLoading]="loading()">
-    @if (items().length === 0) {
-      <nz-list-empty />
-    }
-
-    <nz-list-item *cdkVirtualFor="let schoolClass of items(); trackBy: (index, item) => item.id"
-                  class="px-4!">
-      <nz-list-item-meta>
-        <nz-list-item-meta-title>
-          <span class="block truncate"
-                [attr.title]="schoolClass.name">
-            {{ schoolClass.name }}
-          </span>
-        </nz-list-item-meta-title>
-
-        <nz-list-item-meta-description>
-          <div class="flex min-w-0 items-center">
-            <span class="shrink-0">
+@if (items().length === 0) {
+  @if (loading()) {
+    <div class="flex flex-col gap-2 px-4"
+         aria-busy="true"
+         aria-label="Se încarcă clasele">
+      @for (placeholder of skeletonPlaceholders; track placeholder) {
+        <nz-card nzSize="small">
+          <nz-skeleton [nzActive]="true"
+                       [nzTitle]="{ width: '60%' }"
+                       [nzParagraph]="{ rows: 1, width: '40%' }" />
+        </nz-card>
+      }
+    </div>
+  } @else {
+    <nz-empty class="mt-8"
+              nzNotFoundContent="Nu există clase" />
+  }
+} @else {
+  <cdk-virtual-scroll-viewport [itemSize]="cardRowHeight"
+                               class="min-h-0 w-full grow [&_.cdk-virtual-scroll-content-wrapper]:w-full"
+                               (scroll)="onScroll($event)">
+    <div *cdkVirtualFor="let schoolClass of items(); trackBy: trackById"
+         class="box-border px-4 pb-2"
+         [style.height.px]="cardRowHeight">
+      <nz-card nzSize="small"
+               nzHoverable
+               class="relative h-full cursor-pointer">
+        <div class="flex min-w-0 items-center gap-2">
+          <div class="min-w-0 grow">
+            <button type="button"
+                    class="block max-w-full min-w-0 cursor-pointer truncate overflow-hidden! border-0 bg-transparent p-0 text-start font-semibold text-inherit outline-none after:absolute after:inset-0 after:content-[''] focus-visible:after:outline-2 focus-visible:after:outline-[#1890ff]"
+                    [attr.title]="schoolClass.name"
+                    [attr.aria-label]="'Vizualizează clasa ' + schoolClass.name"
+                    (click)="onView.emit(schoolClass)">
+              {{ schoolClass.name }}
+            </button>
+            <div nz-typography
+                 nzType="secondary"
+                 class="mb-0! truncate">
               {{ schoolClass.startDate | date }} - {{ schoolClass.endDate | date }}
-            </span>
-            <nz-divider nzType="vertical" />
+            </div>
             <nz-badge [nzStatus]="statusColor(schoolClass.status)"
-                      [nzText]="statusLabel(schoolClass.status)">
-
-            </nz-badge>
+                      [nzText]="statusLabel(schoolClass.status)" />
           </div>
-        </nz-list-item-meta-description>
-      </nz-list-item-meta>
-
-      <ul nz-list-item-actions>
-        <nz-list-item-action>
           <button type="button"
                   nz-button
                   nzType="text"
-                  title="Vizualizeaza"
-                  aria-label="Vizualizeaza"
-                  (click)="onView.emit(schoolClass)">
-            <nz-icon nzType="icons:eye" />
-            Vizualizeaza
-          </button>
-        </nz-list-item-action>
-        <nz-list-item-action>
-          <button type="button"
-                  nz-button
-                  nzType="text"
-                  title="Editeaza"
-                  aria-label="Editeaza"
+                  nzShape="circle"
+                  class="relative shrink-0"
+                  nz-tooltip
+                  nzTooltipTitle="Modifică"
+                  [attr.aria-label]="'Modifică clasa ' + schoolClass.name"
                   (click)="onEdit.emit(schoolClass)">
             <nz-icon nzType="icons:pencil" />
-            Modifica
           </button>
-        </nz-list-item-action>
-      </ul>
-    </nz-list-item>
-  </nz-list>
-</cdk-virtual-scroll-viewport>
+        </div>
+      </nz-card>
+    </div>
+  </cdk-virtual-scroll-viewport>
+
+  @if (isLoadingMore()) {
+    <div class="flex justify-center py-2">
+      <nz-spin nzSimple
+               nzSize="small"
+               nzTip="Se încarcă..." />
+    </div>
+  }
+}

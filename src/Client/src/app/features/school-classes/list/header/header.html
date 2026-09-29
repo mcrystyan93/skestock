@@ -1,25 +1,46 @@
-<nz-page-header nzTitle="Clase"
-                [nzGhost]="false">
+@let compact = isCompact();
+
+<nz-page-header [nzGhost]="false">
   <nz-breadcrumb nz-page-header-breadcrumb
+                 class="hidden! lg:block!"
                  nzSeparator=">">
     <nz-breadcrumb-item>Acasa</nz-breadcrumb-item>
     <nz-breadcrumb-item>Clase</nz-breadcrumb-item>
   </nz-breadcrumb>
-  <nz-page-header-content class="pt-0!">
+  <nz-page-header-title>
+    <span class="flex items-center gap-1">
+      <ske-menu-toggle class="-ms-2" />
+      <span>Clase</span>
+    </span>
+  </nz-page-header-title>
+  <nz-page-header-content class="pt-0! hidden lg:block">
     <div nz-typography
          nzType="secondary"
          class="mb-0!">Urmareste clasele si gestioneaza datele asociate acestora.
     </div>
   </nz-page-header-content>
   <nz-page-header-extra>
-    <button nz-button
-            nzType="primary"
-            type="button"
-            (click)="onAdd.emit()">
-      <nz-icon nzType="icons:plus"></nz-icon>
-      Adaugă
-    </button>
+    @if (compact) {
+      <button nz-button
+              nzType="primary"
+              nzShape="circle"
+              type="button"
+              nz-tooltip
+              nzTooltipTitle="Adaugă clasă"
+              aria-label="Adaugă clasă"
+              (click)="onAdd.emit()">
+        <nz-icon nzType="icons:plus"></nz-icon>
+      </button>
+    } @else {
+      <button nz-button
+              nzType="primary"
+              type="button"
+              (click)="onAdd.emit()">
+        <nz-icon nzType="icons:plus"></nz-icon>
+        Adaugă
+      </button>
+    }
   </nz-page-header-extra>
 </nz-page-header>
 
-<ske-theme-switcher class="absolute top-1.5 right-4" />
+<ske-theme-switcher class="absolute top-1.5 right-4 hidden lg:block" />

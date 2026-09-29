@@ -1,82 +1,89 @@
-<cdk-virtual-scroll-viewport itemSize="73"
-                             class="h-full w-full"
-                             (scroll)="onScroll($event)">
-  <nz-list>
-    @if (items().length === 0) {
-      <nz-list-empty/>
-    }
-
-    <nz-list-item *cdkVirtualFor="let categoryImport of items(); trackBy: (index, item) => item.id">
-      <nz-list-item-meta>
-        <nz-list-item-meta-title>
-          <span class="block truncate"
-                [attr.title]="fileNames(categoryImport)">
-            {{ fileNames(categoryImport) }}
-          </span>
-        </nz-list-item-meta-title>
-
-        <nz-list-item-meta-description>
-          <div class="flex min-w-0 items-center">
-            <span class="shrink-0">
-              <nz-tag [nzColor]="statusColor(categoryImport.status)">
-                {{ statusLabel(categoryImport.status) }}
-              </nz-tag>
-            </span>
-            <nz-divider nzType="vertical"/>
-            <span class="shrink-0">
-              <nz-icon nzType="icons:clock"/>
-              {{ categoryImport.uploadedAt | date: 'short' }}
-            </span>
-            <!--            @if (categoryImport.errorMessage) {-->
-            <!--              <nz-divider nzType="vertical"/>-->
-            <!--              <span class="min-w-0 truncate"-->
-            <!--                    [attr.title]="categoryImport.errorMessage">-->
-            <!--                {{ categoryImport.errorMessage }}-->
-            <!--              </span>-->
-            <!--            }-->
-          </div>
-        </nz-list-item-meta-description>
-      </nz-list-item-meta>
-
-      <ul nz-list-item-actions>
-        <nz-list-item-action>
+@if (items().length === 0) {
+  @if (loading()) {
+    <div class="flex flex-col gap-2 px-4"
+         aria-busy="true"
+         aria-label="Se încarcă importurile">
+      @for (placeholder of skeletonPlaceholders; track placeholder) {
+        <nz-card nzSize="small">
+          <nz-skeleton [nzActive]="true"
+                       [nzTitle]="{ width: '60%' }"
+                       [nzParagraph]="{ rows: 1, width: '40%' }" />
+        </nz-card>
+      }
+    </div>
+  } @else {
+    <nz-empty class="mt-8"
+              nzNotFoundContent="Nu există importuri" />
+  }
+} @else {
+  <cdk-virtual-scroll-viewport [itemSize]="cardRowHeight"
+                               class="min-h-0 w-full grow [&_.cdk-virtual-scroll-content-wrapper]:w-full"
+                               (scroll)="onScroll($event)">
+    <div *cdkVirtualFor="let categoryImport of items(); trackBy: trackById"
+         class="box-border px-4 pb-2"
+         [style.height.px]="cardRowHeight">
+      <nz-card nzSize="small"
+               class="h-full">
+        <div class="flex min-w-0 items-center justify-between gap-2">
+          @if (categoryImport.status === 'pendingReview') {
+            <button type="button"
+                    class="min-w-0 cursor-pointer truncate overflow-hidden! border-0 bg-transparent p-0 text-start font-semibold text-inherit outline-none after:absolute after:inset-0 after:content-[''] focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-blue-500"
+                    [attr.title]="fileNames(categoryImport)"
+                    [attr.aria-label]="'Vizualizează importul ' + fileNames(categoryImport)"
+                    (click)="review.emit(categoryImport)">{{ fileNames(categoryImport) }}</button>
+          } @else {
+            <strong nz-typography
+                    class="mb-0! min-w-0 truncate"
+                    [attr.title]="fileNames(categoryImport)">{{ fileNames(categoryImport) }}</strong>
+          }
+          <nz-tag class="me-0! shrink-0"
+                  [nzColor]="statusColor(categoryImport.status)">
+            {{ statusLabel(categoryImport.status) }}
+          </nz-tag>
+        </div>
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0! mt-1 truncate"
+             [attr.title]="categoryImport.errorMessage ?? null">
+          <nz-icon nzType="icons:clock" />
+          {{ categoryImport.uploadedAt | date: 'short' }}
+          @if (categoryImport.errorMessage) {
+            · {{ categoryImport.errorMessage }}
+          }
+        </div>
+        <div class="relative mt-2 flex items-center justify-end gap-2">
           <button type="button"
                   nz-button
-                  nzType="link"
-                  title="Revizuieste"
-                  aria-label="Revizuieste"
-                  [disabled]="categoryImport.status !== 'pendingReview'"
-                  (click)="review.emit(categoryImport)">
-            <nz-icon nzType="icons:eye"/>
-            Vizualizeaza
-          </button>
-        </nz-list-item-action>
-        <nz-list-item-action>
-          <button
-            type="button"
-            nz-button
-            nzType="link"
-            nz-dropdown
-            [nzDropdownMenu]="menu"
-            title="Descarca fisierele"
-            [attr.aria-label]="'Actiuni pentru importul ' + categoryImport.id"
-          >
-            <nz-icon nzType="icons:file-arrow-down"/>
-            Descarca
+                  nzSize="small"
+                  nzType="default"
+                  nz-dropdown
+                  nzTrigger="click"
+                  [nzDropdownMenu]="menu"
+                  [attr.aria-label]="'Descarcă fișierele importului ' + fileNames(categoryImport)">
+            <nz-icon nzType="icons:file-arrow-down" />
+            Descarcă
           </button>
           <nz-dropdown-menu #menu="nzDropdownMenu">
             <ul nz-menu>
               @for (file of categoryImport.files; track file.fileMetadataId) {
                 <li nz-menu-item
                     (click)="downloadFile.emit(file)">
-                  <nz-icon nzType="icons:download"/>
-                  Descarca {{ file.originalName }}
+                  <nz-icon nzType="icons:download" />
+                  Descarcă {{ file.originalName }}
                 </li>
               }
             </ul>
           </nz-dropdown-menu>
-        </nz-list-item-action>
-      </ul>
-    </nz-list-item>
-  </nz-list>
-</cdk-virtual-scroll-viewport>
+        </div>
+      </nz-card>
+    </div>
+  </cdk-virtual-scroll-viewport>
+
+  @if (isLoadingMore()) {
+    <div class="flex justify-center py-2">
+      <nz-spin nzSimple
+               nzSize="small"
+               nzTip="Se încarcă..." />
+    </div>
+  }
+}

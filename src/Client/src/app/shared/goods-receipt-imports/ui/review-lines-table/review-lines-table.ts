@@ -5,19 +5,26 @@ import { LineMutationEvent, ReviewEditableLine } from '../../services/review.sto
 import { ReviewLine } from './review-line/review-line';
 import { isEmpty, isNil } from 'lodash-es';
 import { NzAlertComponent, NzAlertType } from 'ng-zorro-antd/alert';
+import { LayoutBreakpoint } from '@ske/shared/directives';
+import { ReviewLineSmall } from './small/review-line-small';
+import { NzSkeletonComponent } from 'ng-zorro-antd/skeleton';
 
 
 @Component({
   imports: [
     NzTableModule,
     ReviewLine,
-    NzAlertComponent
+    NzAlertComponent,
+    LayoutBreakpoint,
+    ReviewLineSmall,
+    NzSkeletonComponent
   ],
   selector: 'ske-goods-receipt-import-review-lines-table',
   styles: ``,
   templateUrl: './review-lines-table.html'
 })
 export class ReviewLinesTable {
+  protected readonly skeletonPlaceholders = [0, 1, 2];
 
   public readonly lines = input.required<ReviewEditableLine[]>();
   public readonly loading = input<boolean>();

@@ -56,6 +56,7 @@ export class SchoolClassesPage {
       },
       nzCentered: true,
       nzMaskClosable: false,
+      nzWrapClassName: 'modal-100 modal-lg-75'
     });
 
     modalRef.afterClose.pipe(takeUntilDestroyed(this._destroyRef)).subscribe(() => {

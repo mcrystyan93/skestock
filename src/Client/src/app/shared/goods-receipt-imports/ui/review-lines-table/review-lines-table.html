@@ -1,30 +1,33 @@
-@if (alertMessage(); as message) {
-  <nz-alert [nzShowIcon]="true"
-            [nzType]="message.type"
-            [nzMessage]="message.text"></nz-alert>
+@if (!loading()) {
+  @if (alertMessage(); as message) {
+    <nz-alert [nzShowIcon]="true"
+              [nzType]="message.type"
+              [nzMessage]="message.text"></nz-alert>
+  }
 }
 
-<nz-table #table
-          nzTableLayout="fixed"
-          [nzTemplateMode]="true"
-          [nzFrontPagination]="false"
-          [nzShowPagination]="false"
-          [nzLoading]="loading()"
-          nzSize="small"
-          [nzScroll]="{x: '1300px'}">
-  <thead>
-  <tr>
-    <th nzWidth="320px">Produs</th>
-    <th nzWidth="150px">Locatie</th>
-    <th nzWidth="150px">Cantitate</th>
-    <th nzWidth="170px">Data expirare</th>
-    <th nzWidth="130px">Pret unitar</th>
-    <th nzWidth="100px">
-      Actiuni
-    </th>
-  </tr>
-  </thead>
-  <tbody>
+<ng-container *skeLayoutBreakpoint="'lg'; else mobileLines">
+  <nz-table #table
+            nzTableLayout="fixed"
+            [nzTemplateMode]="true"
+            [nzFrontPagination]="false"
+            [nzShowPagination]="false"
+            [nzLoading]="loading()"
+            nzSize="small"
+            [nzScroll]="{x: '1300px'}">
+    <thead>
+    <tr>
+      <th nzWidth="320px">Produs</th>
+      <th nzWidth="150px">Locație</th>
+      <th nzWidth="150px">Cantitate</th>
+      <th nzWidth="170px">Data expirării</th>
+      <th nzWidth="130px">Preț unitar</th>
+      <th nzWidth="100px">
+        Acțiuni
+      </th>
+    </tr>
+    </thead>
+    <tbody>
     @for (lineField of linesForm.lines; track $index) {
       @let line = lineField().value();
       <tr ske-goods-import-review-line-row
@@ -34,7 +37,38 @@
           [canRemove]="canRemoveMap().get(line.sourceLineIndex)"
           (splitLine)="splitLine.emit({rowId:$event.rowId})"
           (removeLine)="removeLine.emit({rowId:$event.rowId})"></tr>
-
     }
-  </tbody>
-</nz-table>
+    </tbody>
+  </nz-table>
+</ng-container>
+
+<ng-template #mobileLines>
+  @if (loading()) {
+    <div class="flex flex-col gap-3"
+         aria-busy="true"
+         aria-label="Se încarcă liniile din aviz">
+      @for (placeholder of skeletonPlaceholders; track placeholder) {
+        <div class="rounded border border-gray-200 p-3 dark:border-gray-700">
+          <nz-skeleton [nzActive]="true"
+                       [nzTitle]="{ width: '55%' }"
+                       [nzParagraph]="{ rows: 2, width: '75%' }" />
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="flex flex-col gap-3"
+         role="list"
+         aria-label="Linii din avizul importat">
+      @for (lineField of linesForm.lines; track $index) {
+        @let line = lineField().value();
+        <ske-goods-import-review-line-small [lineForm]="lineField"
+                                            [line]="line"
+                                            [groupTotal]="groupTotals().get(line.sourceLineIndex)"
+                                            [canRemove]="canRemoveMap().get(line.sourceLineIndex)"
+                                            role="listitem"
+                                            (splitLine)="splitLine.emit({rowId:$event.rowId})"
+                                            (removeLine)="removeLine.emit({rowId:$event.rowId})" />
+      }
+    </div>
+  }
+</ng-template>

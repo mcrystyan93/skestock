@@ -1,53 +1,58 @@
-<cdk-virtual-scroll-viewport itemSize="73"
-                             class="h-full w-full"
-                             (scroll)="onScroll($event)">
-  <nz-list>
-    @if (items().length === 0) {
-      <nz-list-empty/>
-    }
-
-    <nz-list-item *cdkVirtualFor="let item of items(); trackBy: (index, item) => item.id">
-      <nz-list-item-meta>
-        <nz-list-item-meta-avatar>
+@if (items().length === 0) {
+  @if (loading()) {
+    <div class="flex flex-col gap-2 px-4"
+         aria-busy="true"
+         aria-label="Se încarcă categoriile">
+      @for (placeholder of skeletonPlaceholders; track placeholder) {
+        <nz-card nzSize="small">
+          <nz-skeleton [nzActive]="true"
+                       [nzTitle]="{ width: '60%' }"
+                       [nzParagraph]="{ rows: 1, width: '40%' }" />
+        </nz-card>
+      }
+    </div>
+  } @else {
+    <nz-empty class="mt-8"
+              nzNotFoundContent="Nu există categorii" />
+  }
+} @else {
+  <cdk-virtual-scroll-viewport [itemSize]="cardRowHeight"
+                               class="min-h-0 w-full grow [&_.cdk-virtual-scroll-content-wrapper]:w-full"
+                               (scroll)="onScroll($event)">
+    <div *cdkVirtualFor="let item of items(); trackBy: trackById"
+         class="box-border px-4 pb-2"
+         [style.height.px]="cardRowHeight">
+      <nz-card nzSize="small"
+               nzHoverable
+               role="button"
+               tabindex="0"
+               class="h-full cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1890ff]"
+               [attr.aria-label]="'Modifică categoria ' + item.name"
+               (click)="onEdit.emit(item)"
+               (keydown.enter)="onEdit.emit(item)"
+               (keydown.space)="onSpace($event, item)">
+        <div class="flex min-w-0 items-center gap-3">
           <nz-avatar class="shrink-0"
-                     [nzIcon]="!!item.icon?.fileName ? ('icons:' + item.icon!.fileName) : 'icons:box'"/>
-        </nz-list-item-meta-avatar>
+                     [nzIcon]="!!item.icon?.fileName ? ('icons:' + item.icon!.fileName) : 'icons:box'" />
+          <div class="min-w-0 grow">
+            <strong nz-typography
+                    class="mb-0! block truncate"
+                    [attr.title]="item.name">{{ item.name }}</strong>
+            <div nz-typography
+                 nzType="secondary"
+                 class="mb-0! truncate"
+                 [attr.title]="subtitle(item)">{{ subtitle(item) }}</div>
+          </div>
+        </div>
+      </nz-card>
+    </div>
+  </cdk-virtual-scroll-viewport>
 
-        <nz-list-item-meta-title>
-          {{ item.name }}
-        </nz-list-item-meta-title>
-
-        <nz-list-item-meta-description>
-          <span>
-            {{ columns.itemCount.label }}: {{ item.itemCount }}
-          </span>
-          <nz-divider nzType="vertical"/>
-          <span>
-            <nz-icon nzType="icons:clock"/>
-            {{ item.lastModifiedDate | date:'short' }}
-          </span>
-          <nz-divider nzType="vertical"/>
-          <span>
-            <nz-icon nzType="icons:user-pen"/>
-            {{ item.lastModifiedByName }}
-          </span>
-        </nz-list-item-meta-description>
-      </nz-list-item-meta>
-
-      <ul nz-list-item-actions>
-        <nz-list-item-action>
-          <button nz-button
-                  nzType="link"
-                  type="button"
-                  class="px-0!"
-                  title="Editeaza"
-                  [attr.aria-label]="'Editeaza'"
-                  (click)="onEdit.emit(item)">
-            <nz-icon nzType="icons:pencil"></nz-icon>
-            Modifica
-          </button>
-        </nz-list-item-action>
-      </ul>
-    </nz-list-item>
-  </nz-list>
-</cdk-virtual-scroll-viewport>
+  @if (isLoadingMore()) {
+    <div class="flex justify-center py-2">
+      <nz-spin nzSimple
+               nzSize="small"
+               nzTip="Se încarcă..." />
+    </div>
+  }
+}
