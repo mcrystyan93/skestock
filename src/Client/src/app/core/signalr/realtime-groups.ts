@@ -4,6 +4,7 @@ export const realtimeGroups = {
   itemsList: 'items-list',
   itemImportBatchesList: 'item-import-batches-list',
   goodsReceiptImportsList: 'goods-receipts-import-list',
+  supplyListsList: 'supply-lists-list',
   schoolClass: (classId: string): `school-class:${string}` => `school-class:${classId}`
 } as const;
 

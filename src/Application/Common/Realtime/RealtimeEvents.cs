@@ -17,6 +17,10 @@ public static class RealtimeEvents
     public const string ItemImportBatchCreated = "ItemImportBatchCreated";
     public const string ItemImportBatchProcessed = "ItemImportBatchProcessed";
     public const string ItemImportBatchConfirmed = "ItemImportBatchConfirmed";
+    public const string SupplyListCreated = "SupplyListCreated";
+    public const string SupplyListUpdated = "SupplyListUpdated";
+    public const string SupplyListDisabled = "SupplyListDisabled";
+    public const string SupplyListEnabled = "SupplyListEnabled";
     public const string StockAdjusted = "StockAdjusted";
     public const string StockMoved = "StockMoved";
     public const string StockBatchCreated = "StockBatchCreated";
