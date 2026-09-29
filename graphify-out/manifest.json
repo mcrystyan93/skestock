@@ -3090,10 +3090,10 @@
     "semantic_hash": "e7446e66a9481a7ba0e0c5e6285f7d07"
   },
   "tests/Application.FunctionalTests/Features/StockBatches/Queries/GetAllStockBatches/GetAllStockBatchesQueryTests.cs": {
-    "mtime": 1790314970.7516847,
-    "seen": 1790317762.408875,
-    "ast_hash": "a647123908aaf1a4d80a5145737dd93d",
-    "semantic_hash": "a647123908aaf1a4d80a5145737dd93d"
+    "mtime": 1790663556.345304,
+    "seen": 1790663637.4981883,
+    "ast_hash": "0fc5cbeacb04c4b1bf9a4ed779cd71de",
+    "semantic_hash": ""
   },
   "tests/Application.FunctionalTests/Features/Storage/Queries/GetFileDownload/GetFileDownloadQueryTests.cs": {
     "mtime": 1788852963.3652415,

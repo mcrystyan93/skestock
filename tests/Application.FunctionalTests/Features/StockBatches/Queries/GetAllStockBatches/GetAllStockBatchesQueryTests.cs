@@ -240,7 +240,12 @@ public class GetAllStockBatchesQueryTests : TestBase
         }
 
         collected.Select(b => b.Id).Distinct().Count().ShouldBe(7);
-        collected.Select(b => b.Quantity).ShouldBe(Enumerable.Range(0, 7));
+        collected.Select(b => b.Quantity).Order().ShouldBe(Enumerable.Range(0, 7));
+
+        // SQL Server orders uniqueidentifier by its own byte-group rules (not Guid v7 creation order);
+        // SqlGuid comparison mirrors those rules.
+        var ids = collected.Select(b => b.Id).ToList();
+        ids.ShouldBe(ids.OrderBy(id => new System.Data.SqlTypes.SqlGuid(id)).ToList());
     }
 
     [Test]

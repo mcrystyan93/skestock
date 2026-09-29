@@ -1,7 +1,7 @@
 # Graph Report - skestock  (2026-09-29)
 
 ## Corpus Check
-- 1424 files · ~987,703 words
+- 1424 files · ~987,734 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `bafd6413`
+- Built from commit: `1282b2a7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
