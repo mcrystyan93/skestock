@@ -34,6 +34,7 @@
       "@ske/shared/goods-receipts": ["./src/app/shared/goods-receipts"],
       "@ske/shared/goods-receipt-imports": ["./src/app/shared/goods-receipt-imports"],
       "@ske/shared/order-lists": ["./src/app/shared/order-lists"],
+      "@ske/shared/order-lists/services": ["./src/app/shared/order-lists/services/index.ts"],
       "@ske/shared/supply-lists": ["./src/app/shared/supply-lists"],
       "@ske/shared/stock-batches": ["./src/app/shared/stock-batches"],
       "@ske/shared/stock": ["./src/app/shared/stock"],

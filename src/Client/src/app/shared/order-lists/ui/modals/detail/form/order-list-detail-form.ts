@@ -1,7 +1,6 @@
-import { Component, computed, effect, input, linkedSignal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, linkedSignal, untracked } from '@angular/core';
 import {
   ItemAutocompleteValue,
-  LowStockItemDto,
   ORDER_LIST_STATUS_LABELS,
   OrderListDto,
   OrderListLineDto
@@ -23,9 +22,9 @@ import { NzInputDirective, NzInputWrapperComponent, NzTextareaCountComponent } f
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { ItemAutocomplete } from '@ske/shared/items';
 import { NzDividerComponent } from 'ng-zorro-antd/divider';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { OrderListLinesContainer } from './lines/order-list-lines-container';
 import { isNil } from 'lodash-es';
-import { OrderListLowStockItems } from './order-list-low-stock-items';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { SkeletonInputLoaderDirective } from '@ske/shared/loader';
 import type { OrderListLineFormModel } from './lines/order-list-line';
@@ -46,7 +45,6 @@ import type { OrderListLineFormModel } from './lines/order-list-line';
     ItemAutocomplete,
     NzDividerComponent,
     OrderListLinesContainer,
-    OrderListLowStockItems,
     NzTypographyComponent,
     SkeletonInputLoaderDirective
   ],
@@ -56,13 +54,13 @@ import type { OrderListLineFormModel } from './lines/order-list-line';
 })
 export class OrderListDetailForm {
   public readonly loading = input.required<boolean>();
-  public readonly classId = input<string | null>(null);
   public readonly orderList = input.required<Partial<OrderListDto>>();
   public readonly editable = computed(() => {
     const status = this.orderList().status;
     return isNil(status) || status === 'Draft';
   });
 
+  private readonly _nzMessageService = inject(NzMessageService);
   private _lineKeySequence = 0;
 
   private readonly _formModel = linkedSignal({
@@ -187,38 +185,25 @@ export class OrderListDetailForm {
       };
 
     untracked(() => {
-      // add line item to lines
-      this.orderListForm.lines().value.update(lines => [{
-        id: null,
-        ...line,
-        quantity: 1,
-        notes: '',
-        clientKey: this.createLineKey()
-      }, ...lines]);
+      const alreadyListed = !isNil(line.itemId)
+        && this.orderListForm.lines().value().some((existing) => existing.itemId === line.itemId);
+
+      if (alreadyListed) {
+        this._nzMessageService.warning('Articolul este deja în listă.');
+      } else {
+        this.orderListForm.lines().value.update(lines => [{
+          id: null,
+          ...line,
+          quantity: 1,
+          notes: '',
+          clientKey: this.createLineKey()
+        }, ...lines]);
+      }
 
       // reset line item
       this.orderListForm.lineItem().reset(null);
     });
   });
-
-  public addLowStockItems(items: LowStockItemDto[]) {
-    const lines = items.map(item => ({
-      id: null,
-      itemId: item.itemId,
-      productName: item.sku ? `(${item.sku}) ${item.itemName}` : item.itemName,
-      quantity: 1,
-      unit: item.unit ?? 'buc',
-      notes: '',
-      clientKey: this.createLineKey()
-    }));
-
-    // Add lines to the form. If an item already exists in the lines, do not add it again.
-    this.orderListForm.lines().value.update(existingLines => {
-      const existingItemIds = new Set(existingLines.map(line => line.itemId));
-      const newLines = lines.filter(line => !existingItemIds.has(line.itemId));
-      return [...newLines, ...existingLines];
-    });
-  }
 
   protected removeLine(line: OrderListLineFormModel) {
     const lines = this.orderListForm.lines().value();

@@ -1,0 +1,2 @@
+/** Tailwind picks these up from source; they style a card that holds a checkbox or radio as selected/focused. */
+export const CHECKABLE_CARD_CLASSES = 'cursor-pointer rounded-lg border border-solid border-gray-300 transition-colors hover:border-primary-500 has-checked:border-primary-600 has-checked:bg-indigo-50 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primary-600 dark:border-gray-700 dark:hover:border-primary-400 dark:has-checked:border-primary-400 dark:has-checked:bg-indigo-950';

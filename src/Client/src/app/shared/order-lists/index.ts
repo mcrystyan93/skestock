@@ -6,3 +6,4 @@ export * from './services/order-list-list.store';
 export * from './ui/modals/detail/order-list-detail-modal';
 export * from './ui/table/table';
 export * from './ui/table/small/order-list-list-small';
+export * from './services/order-list-wizard.store';
