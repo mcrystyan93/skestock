@@ -53,7 +53,7 @@ public class GetAllOrderListsHandler(IApplicationDbContext dbContext)
         var orderLists = await OrderByBuilder<OrderList>.ApplyOrderBy(query, effectiveSort, SortConfiguration)
             .Select(o => new
             {
-                CursorItem = o,
+                Cursor = new OrderListCursor(o.Id, o.Name, o.Status, o.CreatedDate, o.LastModifiedDate),
                 Data = new OrderListListItemDto
                 {
                     Id = o.Id,
@@ -76,14 +76,14 @@ public class GetAllOrderListsHandler(IApplicationDbContext dbContext)
             orderLists.RemoveAt(orderLists.Count - 1);
 
         var pageItems = orderLists.Select(o => o.Data).ToList();
-        var lastItem = orderLists.LastOrDefault()?.CursorItem;
+        var lastItem = orderLists.LastOrDefault()?.Cursor;
 
         var data = new PaginatedResponse<OrderListListItemDto>
         {
             Data = pageItems,
             HasNextPage = hasNextPage,
             NextCursor = lastItem is not null
-                ? CursorCodec<OrderList>.Encode(lastItem, effectiveSort, SortConfiguration)
+                ? CursorCodec<OrderList>.Encode(lastItem, effectiveSort)
                 : null,
             Sort =
             [

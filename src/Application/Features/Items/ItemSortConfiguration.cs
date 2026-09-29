@@ -32,18 +32,4 @@ public sealed class ItemSortConfiguration : IKeysetSortConfiguration<Item>
             _ => d => d.Id
         };
     }
-
-    public object? GetPropertyValue(Item entity, string propertyName)
-    {
-        return propertyName switch
-        {
-            "Name" => entity.Name,
-            "Sku" => entity.Sku,
-            "Unit" => entity.Unit,
-            "CreatedDate" => entity.CreatedDate,
-            "LastModifiedDate" => entity.LastModifiedDate,
-            "Id" => entity.Id,
-            _ => null
-        };
-    }
 }

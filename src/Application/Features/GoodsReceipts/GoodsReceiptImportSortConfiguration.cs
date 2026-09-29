@@ -11,7 +11,7 @@ public sealed class GoodsReceiptImportSortConfiguration : IKeysetSortConfigurati
         {
             ["uploadedAt"] = ["UploadedAt", "Id"],
             ["createdDate"] = ["CreatedDate", "Id"],
-            ["lastModifiedDate"] = ["LastModified", "Id"],
+            ["lastModifiedDate"] = ["LastModifiedDate", "Id"],
             ["id"] = ["Id"]
         };
 
@@ -26,18 +26,6 @@ public sealed class GoodsReceiptImportSortConfiguration : IKeysetSortConfigurati
             "LastModifiedDate" => i => i.LastModifiedDate,
             "Id" => i => i.Id,
             _ => i => i.Id
-        };
-    }
-
-    public object? GetPropertyValue(GoodsReceiptImport entity, string propertyName)
-    {
-        return propertyName switch
-        {
-            "UploadedAt" => entity.UploadedAt,
-            "CreatedDate" => entity.CreatedDate,
-            "LastModifiedDate" => entity.LastModifiedDate,
-            "Id" => entity.Id,
-            _ => null
         };
     }
 }

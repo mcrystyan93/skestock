@@ -56,7 +56,7 @@ public class GetAllGoodsReceiptsHandler(IApplicationDbContext dbContext)
         var receipts = await OrderByBuilder<GoodsReceipt>.ApplyOrderBy(query, effectiveSort, SortConfiguration)
             .Select(r => new
             {
-                CursorItem = r,
+                Cursor = new GoodsReceiptCursor(r.Id, r.ReceivedAt, r.CreatedDate, r.LastModifiedDate),
                 Data = new GoodsReceiptListItemDto
                 {
                     Id = r.Id,
@@ -84,14 +84,14 @@ public class GetAllGoodsReceiptsHandler(IApplicationDbContext dbContext)
             receipts.RemoveAt(receipts.Count - 1);
 
         var pageItems = receipts.Select(r => r.Data).ToList();
-        var lastReceipt = receipts.LastOrDefault()?.CursorItem;
+        var lastReceipt = receipts.LastOrDefault()?.Cursor;
 
         var data = new PaginatedResponse<GoodsReceiptListItemDto>
         {
             Data = pageItems,
             HasNextPage = hasNextPage,
             NextCursor = lastReceipt is not null
-                ? CursorCodec<GoodsReceipt>.Encode(lastReceipt, effectiveSort, SortConfiguration)
+                ? CursorCodec<GoodsReceipt>.Encode(lastReceipt, effectiveSort)
                 : null,
             Sort =
             [

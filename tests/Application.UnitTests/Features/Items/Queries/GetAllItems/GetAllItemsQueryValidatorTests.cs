@@ -17,16 +17,9 @@ public class GetAllItemsQueryValidatorTests
     private static string BuildCursor(List<PaginationSort> sort)
     {
         var effectiveSort = DynamicSortBuilder<Item>.BuildEffectiveSort(sort, SortConfiguration);
-        var entity = new Item
-        {
-            Id = Guid.NewGuid(),
-            Name = "Test Item",
-            Unit = "unit",
-            CreatedDate = DateTimeOffset.UtcNow,
-            LastModifiedDate = DateTimeOffset.UtcNow
-        };
+        var cursor = new ItemCursor(Guid.NewGuid(), "Test Item", null, "unit", DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
 
-        return CursorCodec<Item>.Encode(entity, effectiveSort, SortConfiguration)!;
+        return CursorCodec<Item>.Encode(cursor, effectiveSort)!;
     }
 
     [Test]

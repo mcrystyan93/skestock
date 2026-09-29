@@ -9,11 +9,19 @@ namespace skestock.Application.UnitTests.Common.Keyset;
 /// (<see cref="KeysetPredicateBuilder{TEntity}"/>, <see cref="OrderByBuilder{TEntity}"/>,
 /// <see cref="CursorCodec{TEntity}"/>) in isolation, without depending on EF Core or a real feature.
 /// </summary>
-public sealed class KeysetTestItem : IKeysetEntity
+public sealed class KeysetTestItem : IKeysetEntity, IKeysetCursor
 {
     public Guid Id { get; init; }
     public DateTimeOffset CreatedDate { get; init; }
     public int? Priority { get; init; }
+
+    public object? GetValue(string propertyName) => propertyName switch
+    {
+        nameof(CreatedDate) => CreatedDate,
+        nameof(Priority) => Priority,
+        nameof(Id) => Id,
+        _ => null
+    };
 }
 
 /// <summary>
@@ -53,13 +61,5 @@ public sealed class KeysetTestItemSortConfiguration : IKeysetSortConfiguration<K
         "Priority" => e => e.Priority!,
         "Id" => e => e.Id,
         _ => e => e.Id
-    };
-
-    public object? GetPropertyValue(KeysetTestItem entity, string propertyName) => propertyName switch
-    {
-        "CreatedDate" => entity.CreatedDate,
-        "Priority" => entity.Priority,
-        "Id" => entity.Id,
-        _ => null
     };
 }

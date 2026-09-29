@@ -17,21 +17,9 @@ public class GetAllGoodsReceiptImportsQueryValidatorTests
     private static string BuildCursor(List<PaginationSort> sort)
     {
         var effectiveSort = DynamicSortBuilder<GoodsReceiptImport>.BuildEffectiveSort(sort, SortConfiguration);
-        var entity = new GoodsReceiptImport
-        {
-            Id = Guid.NewGuid(),
-            ClassId = Guid.NewGuid(),
-            Class = null!,
-            FileMetadataId = Guid.NewGuid(),
-            FileMetadata = null!,
-            UploadedByUserId = Guid.NewGuid(),
-            UploadedByUser = null!,
-            BlobPath = "imports/receipt.pdf",
-            CreatedDate = DateTimeOffset.UtcNow,
-            LastModifiedDate = DateTimeOffset.UtcNow
-        };
+        var cursor = new GoodsReceiptImportCursor(Guid.NewGuid(), DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
 
-        return CursorCodec<GoodsReceiptImport>.Encode(entity, effectiveSort, SortConfiguration)!;
+        return CursorCodec<GoodsReceiptImport>.Encode(cursor, effectiveSort)!;
     }
 
     [Test]

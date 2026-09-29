@@ -52,7 +52,7 @@ public class GetAllSchoolClassesHandler(IApplicationDbContext dbContext)
         var items = await OrderByBuilder<SchoolClass>.ApplyOrderBy(query, effectiveSort, SortConfiguration)
             .Select(c => new
             {
-                CursorItem = c,
+                Cursor = new SchoolClassCursor(c.Id, c.Name, c.StartDate, c.EndDate, c.CreatedDate, c.LastModifiedDate),
                 Data = new SchoolClassDto
                 {
                     Id = c.Id,
@@ -74,14 +74,14 @@ public class GetAllSchoolClassesHandler(IApplicationDbContext dbContext)
             items.RemoveAt(items.Count - 1);
 
         var pageItems = items.Select(item => item.Data).ToList();
-        var lastItem = items.LastOrDefault()?.CursorItem;
+        var lastItem = items.LastOrDefault()?.Cursor;
 
         var data = new PaginatedResponse<SchoolClassDto>
         {
             Data = pageItems,
             HasNextPage = hasNextPage,
             NextCursor = lastItem is not null
-                ? CursorCodec<SchoolClass>.Encode(lastItem, effectiveSort, SortConfiguration)
+                ? CursorCodec<SchoolClass>.Encode(lastItem, effectiveSort)
                 : null,
             Sort =
             [

@@ -30,17 +30,4 @@ public sealed class OrderListSortConfiguration : IKeysetSortConfiguration<OrderL
             _ => o => o.Id
         };
     }
-
-    public object? GetPropertyValue(OrderList entity, string propertyName)
-    {
-        return propertyName switch
-        {
-            "CreatedDate" => entity.CreatedDate,
-            "LastModifiedDate" => entity.LastModifiedDate,
-            "Name" => entity.Name,
-            "Status" => entity.Status,
-            "Id" => entity.Id,
-            _ => null
-        };
-    }
 }

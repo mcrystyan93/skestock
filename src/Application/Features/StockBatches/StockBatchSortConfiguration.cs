@@ -11,7 +11,7 @@ public sealed class StockBatchSortConfiguration : IKeysetSortConfiguration<Stock
         {
             ["receivedDate"] = ["ReceivedDate", "Id"],
             ["createdDate"] = ["CreatedDate", "Id"],
-            ["lastModifiedDate"] = ["LastModified", "Id"],
+            ["lastModifiedDate"] = ["LastModifiedDate", "Id"],
             ["id"] = ["Id"]
         };
 
@@ -26,18 +26,6 @@ public sealed class StockBatchSortConfiguration : IKeysetSortConfiguration<Stock
             "LastModifiedDate" => b => b.LastModifiedDate,
             "Id" => b => b.Id,
             _ => b => b.Id
-        };
-    }
-
-    public object? GetPropertyValue(StockBatch entity, string propertyName)
-    {
-        return propertyName switch
-        {
-            "ReceivedDate" => entity.ReceivedDate,
-            "CreatedDate" => entity.CreatedDate,
-            "LastModifiedDate" => entity.LastModifiedDate,
-            "Id" => entity.Id,
-            _ => null
         };
     }
 }
