@@ -14,7 +14,7 @@ internal sealed class IdentityApiOperationTransformer : IOpenApiOperationTransfo
 {
     private static readonly Dictionary<string, (string Summary, string Description)> _metadata = new()
     {
-        ["api/Users/register"]                  = ("Register", "Creates a new user account."),
+        ["api/Users/register"]                  = ("Register (disabled)", "Always returns 404: self-registration is disabled; accounts are created by administrators."),
         ["api/Users/login"]                     = ("Log in", "Authenticates a user. Use ?useCookies=true for cookie-based authentication."),
         ["api/Users/refresh"]                   = ("Refresh token", "Returns a new access token using a valid refresh token."),
         ["api/Users/confirmEmail"]              = ("Confirm email", "Confirms a user's email address using the token sent by email."),

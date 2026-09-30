@@ -98,6 +98,19 @@
                       [attr.aria-label]="'Descarcă Excel pentru comanda ' + (orderList.name || '')">
                 <nz-icon nzType="icons:download" />
               </button>
+              <button nz-button
+                      nzType="text"
+                      type="button"
+                      class="relative z-10 h-10! min-h-10! w-10! min-w-10! p-0!"
+                      [nzLoading]="isDownloading(orderList.id)"
+                      [disabled]="isDownloading(orderList.id)"
+                      skeStopClick
+                      (click)="onDownloadImage.emit(orderList)"
+                      nz-tooltip
+                      [nzTooltipTitle]="'Descarcă imagine pentru comanda ' + (orderList.name || '')"
+                      [attr.aria-label]="'Descarcă imagine pentru comanda ' + (orderList.name || '')">
+                <nz-icon nzType="icons:file-image" />
+              </button>
             }
           </div>
         </div>

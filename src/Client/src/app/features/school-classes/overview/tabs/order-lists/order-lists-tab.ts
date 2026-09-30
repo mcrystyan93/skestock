@@ -42,7 +42,8 @@ import { LayoutBreakpoint } from '@ske/shared/directives';
                               (onLoadMore)="store.loadMore()"
                               (onView)="openOrderList($event)"
                               (onStatusChange)="changeStatus($event)"
-                              (onDownload)="downloadExcel($event)" />
+                              (onDownload)="downloadExcel($event)"
+                              (onDownloadImage)="downloadImage($event)" />
       </ng-container>
 
       <ng-template #small>
@@ -56,7 +57,8 @@ import { LayoutBreakpoint } from '@ske/shared/directives';
                                    (onLoadMore)="store.loadMore()"
                                    (onView)="openOrderList($event)"
                                    (onStatusChange)="changeStatus($event)"
-                                   (onDownload)="downloadExcel($event)" />
+                                   (onDownload)="downloadExcel($event)"
+                                   (onDownloadImage)="downloadImage($event)" />
       </ng-template>
     </div>
   `,
@@ -137,6 +139,10 @@ export class OrderListsTab {
 
   public downloadExcel(orderList: OrderListListItemDto) {
     this.exportService.download(orderList.id);
+  }
+
+  public downloadImage(orderList: OrderListListItemDto) {
+    this.exportService.download(orderList.id, 'png');
   }
 
 

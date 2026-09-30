@@ -3,12 +3,14 @@ import { HttpResponse } from '@angular/common/http';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { finalize } from 'rxjs';
 // noinspection ES6PreferShortImport
-import { OrderListsHttp } from './order-lists.http';
+import { OrderListExportFormat, OrderListsHttp } from './order-lists.http';
 
-const FALLBACK_FILE_NAME = 'comanda.xlsx';
+const FALLBACK_FILE_NAME = 'comanda';
+
+const FORMAT_LABELS: Record<OrderListExportFormat, string> = { xlsx: 'fișierului Excel', png: 'imaginii' };
 
 /**
- * Downloads the Excel export of a submitted order list and saves it in the browser,
+ * Downloads the Excel or PNG export of a submitted order list and saves it in the browser,
  * reading the file name from the response's Content-Disposition header.
  */
 @Service()
@@ -24,29 +26,29 @@ export class OrderListExportService {
     return this._downloadingIds().has(id);
   }
 
-  public download(id: string): void {
+  public download(id: string, format: OrderListExportFormat = 'xlsx'): void {
     if (this.isDownloading(id))
       return;
 
     this.setDownloading(id, true);
 
-    this._orderListsHttp.export(id)
+    this._orderListsHttp.export(id, format)
       .pipe(finalize(() => this.setDownloading(id, false)))
       .subscribe({
-        next: (response) => this.saveResponse(response),
-        error: () => this._nzMessageService.error('Descărcarea fișierului Excel a eșuat.')
+        next: (response) => this.saveResponse(response, format),
+        error: () => this._nzMessageService.error(`Descărcarea ${FORMAT_LABELS[format]} a eșuat.`)
       });
   }
 
-  private saveResponse(response: HttpResponse<Blob>): void {
+  private saveResponse(response: HttpResponse<Blob>, format: OrderListExportFormat): void {
     const blob = response.body;
 
     if (!blob) {
-      this._nzMessageService.error('Descărcarea fișierului Excel a eșuat.');
+      this._nzMessageService.error(`Descărcarea ${FORMAT_LABELS[format]} a eșuat.`);
       return;
     }
 
-    const fileName = parseContentDispositionFileName(response.headers.get('Content-Disposition'));
+    const fileName = parseContentDispositionFileName(response.headers.get('Content-Disposition'), format);
     triggerBrowserDownload(blob, fileName);
   }
 
@@ -62,9 +64,11 @@ export class OrderListExportService {
   }
 }
 
-function parseContentDispositionFileName(header: string | null): string {
+function parseContentDispositionFileName(header: string | null, format: OrderListExportFormat): string {
+  const fallback = `${FALLBACK_FILE_NAME}.${format}`;
+
   if (!header)
-    return FALLBACK_FILE_NAME;
+    return fallback;
 
   const utf8Match = /filename\*=UTF-8''([^;]+)/i.exec(header);
 
@@ -76,7 +80,7 @@ function parseContentDispositionFileName(header: string | null): string {
   if (asciiMatch?.[1])
     return asciiMatch[1].trim();
 
-  return FALLBACK_FILE_NAME;
+  return fallback;
 }
 
 function triggerBrowserDownload(blob: Blob, fileName: string): void {

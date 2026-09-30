@@ -66,6 +66,8 @@ public sealed class GetAllItemImportBatchesHandler(IApplicationDbContext dbConte
                 }
             })
             .Take(pageSize + 1)
+            // Avoids repeating batch columns (e.g. ErrorMessage) on every joined file row.
+            .AsSplitQuery()
             .ToListAsync(cancellationToken);
 
         var hasNextPage = batches.Count > pageSize;

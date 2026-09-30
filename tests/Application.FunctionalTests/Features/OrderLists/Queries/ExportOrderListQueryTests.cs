@@ -97,4 +97,27 @@ public class ExportOrderListQueryTests : TestBase
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is OrderListErrors.OrderListNotExportable);
     }
+
+    [Test]
+    public async Task Export_SubmittedListAsPng_ReturnsImage()
+    {
+        var (schoolClass, item) = await SeedPrerequisitesAsync();
+        await RunAsUserWithProfileAsync();
+
+        var created = await TestApp.SendAsync(new CreateOrderListCommand
+        {
+            ClassId = schoolClass.Id,
+            Name = $"{_prefix}-Image",
+            Lines = [new OrderListLineInput { ItemId = item.Id, Quantity = 2, Unit = "kg" }]
+        });
+        await TestApp.SendAsync(new SubmitOrderListCommand { Id = created.Value.Id });
+
+        var result = await TestApp.SendAsync(
+            new ExportOrderListQuery { Id = created.Value.Id, Format = ExportOrderListFormat.Png });
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.FileName.ShouldBe($"{_prefix}-Image.png");
+        result.Value.ContentType.ShouldBe("image/png");
+        result.Value.Content.Take(4).ShouldBe([0x89, 0x50, 0x4E, 0x47]);
+    }
 }

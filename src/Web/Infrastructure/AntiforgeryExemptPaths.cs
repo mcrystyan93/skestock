@@ -17,7 +17,6 @@ public static class AntiforgeryExemptPaths
     public static readonly string[] Prefixes =
     [
         "/api/Users/login",
-        "/api/Users/register",
         "/api/Users/refresh",
         "/api/Users/confirmEmail",
         "/api/Users/resendConfirmationEmail",

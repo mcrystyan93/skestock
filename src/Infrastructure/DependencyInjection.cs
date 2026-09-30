@@ -153,6 +153,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<IRealtimeNotifier, SignalRRealtimeNotifier>();
 
         builder.Services.AddSingleton<IOrderListExcelExporter, OrderListExcelExporter>();
+        builder.Services.AddSingleton<IOrderListImageExporter, OrderListImageExporter>();
     }
 
     private static void AddOpenAiExtraction(IHostApplicationBuilder builder)

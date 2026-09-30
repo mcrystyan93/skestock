@@ -33,4 +33,21 @@ public static class WebApplicationExtensions
 
         return app;
     }
+
+    /// <summary>
+    /// Answers 404 for the Identity self-registration endpoint. <c>MapIdentityApi</c> maps it as part
+    /// of one route group and offers no way to omit it, so it is short-circuited before routing and
+    /// model binding. Accounts are created by administrators only.
+    /// </summary>
+    public static IApplicationBuilder UseIdentityRegistrationDisabled(this IApplicationBuilder app) =>
+        app.Use(async (context, next) =>
+        {
+            if (context.Request.Path.Equals("/api/Users/register", StringComparison.OrdinalIgnoreCase))
+            {
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                return;
+            }
+
+            await next();
+        });
 }

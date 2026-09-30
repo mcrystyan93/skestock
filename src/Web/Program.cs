@@ -57,6 +57,8 @@ app.UseCors(policy => policy
     .WithExposedHeaders("Content-Disposition")
     .AllowCredentials());
 
+app.UseIdentityRegistrationDisabled();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

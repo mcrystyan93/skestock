@@ -9,6 +9,11 @@ import {
   UpdateOrderListRequest
 } from '@ske/models';
 
+export type OrderListExportFormat = 'xlsx' | 'png';
+
+// The API binds the enum query value case-sensitively (ExportOrderListFormat).
+const EXPORT_FORMAT_QUERY: Record<OrderListExportFormat, string> = { xlsx: 'Xlsx', png: 'Png' };
+
 /**
  * HTTP client for src/Web/Endpoints/OrderLists.cs, mapped under /api/OrderLists.
  */
@@ -24,8 +29,9 @@ export class OrderListsHttp {
     return this._httpClient.get<OrderListDto>(`/api/OrderLists/${id}`);
   }
 
-  public export(id: string) {
+  public export(id: string, format: OrderListExportFormat = 'xlsx') {
     return this._httpClient.get(`/api/OrderLists/${id}/export`, {
+      params: { format: EXPORT_FORMAT_QUERY[format] },
       responseType: 'blob',
       observe: 'response'
     });

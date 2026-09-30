@@ -5,5 +5,6 @@ public class ExportOrderListQueryValidator : AbstractValidator<ExportOrderListQu
     public ExportOrderListQueryValidator()
     {
         RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.Format).IsInEnum();
     }
 }

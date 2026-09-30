@@ -68,6 +68,7 @@ export class OrderListListSmall extends BaseList<OrderListListItemDto, GetAllOrd
   public readonly onView = output<OrderListListItemDto>();
   public readonly onStatusChange = output<OrderListStatusChange>();
   public readonly onDownload = output<OrderListListItemDto>();
+  public readonly onDownloadImage = output<OrderListListItemDto>();
 
   protected readonly skeletonPlaceholders = [0, 1, 2, 3];
 
