@@ -12,4 +12,7 @@
     <Folder Include="src\app\shared\order-lists\ui\" />
     <Folder Include="src\app\shared\order-lists\ui\modals\detail\form\lines\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="dist\**" />
+  </ItemGroup>
 </Project>

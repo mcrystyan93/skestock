@@ -35,17 +35,24 @@ compose.ConfigureComposeFile(file =>
 
 // builder.AddAzureContainerAppEnvironment("aca-env");
 var sqlPassword = builder.AddParameter("sql-password", secret: true);
-var databaseServer = builder
+var sqlServer = builder
     .AddSqlServer(Services.DatabaseServer)
     .PublishAsDockerComposeService((resource, service) =>
     {
         service.Name = Services.DatabaseServer;
+        // Loopback only: reach it remotely through an SSH tunnel, never directly from the LAN.
+        service.Ports.Add("127.0.0.1:1433:1433");
     })
     .WithComputeEnvironment(compose)
-    .WithEndpoint(targetPort: 1433, port: 1433, name: "tcp", isExternal: true)
     .WithDataVolume(Services.DatabaseVolumes)
-    .WithPassword(sqlPassword)
-    .AddDatabase(Services.Database);
+    .WithPassword(sqlPassword);
+if (builder.ExecutionContext.IsRunMode)
+{
+    // Published stacks bind SQL Server to the host's loopback only (see PublishAsDockerComposeService).
+    sqlServer.WithEndpoint(targetPort: 1433, port: 1433, name: "tcp", isExternal: true);
+}
+
+var databaseServer = sqlServer.AddDatabase(Services.Database);
 
 var redisPassword = builder.AddParameter("redis-password", secret: true);
 var cache = builder
@@ -103,7 +110,6 @@ var web = builder.AddProject<Projects.Web>(Services.WebApi)
     .WithEnvironment($"{Services.OpenApiSettings}__{Services.OpenApiKey}", openAiApiKey)
     .WithEnvironment($"{Services.OpenApiSettings}__{Services.OpenApiModel}", openAiModel)
     .WithComputeEnvironment(compose)
-    .WithReference(databaseServer)
     .WaitFor(databaseServer)
     .WithReference(cache)
     .WaitFor(cache)
@@ -145,13 +151,55 @@ var worker = builder.AddProject<Projects.Worker>(Services.Worker)
     .WithEnvironment($"{Services.OpenApiSettings}__{Services.OpenApiKey}", openAiApiKey)
     .WithEnvironment($"{Services.OpenApiSettings}__{Services.OpenApiModel}", openAiModel)
     .WithComputeEnvironment(compose)
-    .WithReference(databaseServer)
     .WaitFor(databaseServer)
     .WithReference(cache)
     .WaitFor(cache);
 
+if (builder.ExecutionContext.IsRunMode)
+{
+    web.WithReference(databaseServer);
+    worker.WithReference(databaseServer);
+}
+
 if (builder.ExecutionContext.IsPublishMode)
 {
+    var sqlAppPassword = builder.AddParameter("sql-app-password", secret: true);
+    var sqlMigratorPassword = builder.AddParameter("sql-migrator-password", secret: true);
+
+    // One-shot step: provisions the least-privilege logins as sa, then applies EF migrations as the
+    // migrator login. It is the only service (besides dbserver) that receives the sa credentials.
+    var migrator = builder.AddProject<Projects.Web>(Services.DatabaseMigrator)
+        .PublishAsDockerFile(container =>
+            container.WithDockerfile("../..", "src/Web/Dockerfile", "final"))
+        .PublishAsDockerComposeService((resource, service) =>
+        {
+            service.Name = Services.DatabaseMigrator;
+            service.Image = "skestock-webapi:latest";
+            service.Build = new Aspire.Hosting.Docker.Resources.ServiceNodes.Build
+            {
+                Context = "..",
+                Dockerfile = "src/Web/Dockerfile",
+                Target = "final"
+            };
+            service.Restart = "no";
+        })
+        .WithComputeEnvironment(compose)
+        .WithArgs(Services.MigrateArgument)
+        .WithReference(databaseServer)
+        .WaitFor(databaseServer)
+        .WithEnvironment(
+            $"{Services.DatabaseMigrationSettings}__{Services.DatabaseAppPassword}", sqlAppPassword)
+        .WithEnvironment(
+            $"{Services.DatabaseMigrationSettings}__{Services.DatabaseMigratorPassword}", sqlMigratorPassword);
+
+    var appConnectionString = ReferenceExpression.Create(
+        $"Server={Services.DatabaseServer},1433;User ID={Services.DatabaseAppLogin};Password={sqlAppPassword};Encrypt=True;TrustServerCertificate=True;Initial Catalog={Services.Database}");
+    foreach (var app in new[] { web, worker })
+    {
+        app.WithEnvironment($"ConnectionStrings__{Services.Database}", appConnectionString)
+            .WaitForCompletion(migrator);
+    }
+
     web.WithEndpoint(targetPort: 8080, port: 7001, name: "http", isExternal: true);
     web
         .WithEnvironment(

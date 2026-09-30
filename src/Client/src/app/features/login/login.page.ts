@@ -18,7 +18,7 @@ import { ErrorAlert } from '@ske/shared/errors';
     ErrorAlert
   ],
   host: {
-    class: 'flex h-screen w-screen flex-row items-center justify-center'
+    class: 'flex h-dvh w-full flex-row items-center justify-center'
   }
 })
 export class LoginPage {

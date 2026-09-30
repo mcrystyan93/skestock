@@ -31,6 +31,19 @@ public static class Services
     /// This is the name of the database that will be created and used by the application.
     /// </summary>
     public const string Database = "skestockDb";
+
+    /// <summary>Least-privilege login used by Web and Worker (data read/write only).</summary>
+    public const string DatabaseAppLogin = "skestock_app";
+
+    /// <summary>Login that owns the schema; used only by the one-shot migration service.</summary>
+    public const string DatabaseMigratorLogin = "skestock_migrator";
+
+    /// <summary>The one-shot service that provisions the logins and applies EF migrations.</summary>
+    public const string DatabaseMigrator = "db-migrate";
+    public const string MigrateArgument = "--migrate";
+    public const string DatabaseMigrationSettings = "DatabaseMigration";
+    public const string DatabaseAppPassword = "AppPassword";
+    public const string DatabaseMigratorPassword = "MigratorPassword";
     
     public const string DatabaseVolumes = "skestock-db-data";
     

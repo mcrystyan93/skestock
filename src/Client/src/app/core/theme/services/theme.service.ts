@@ -37,6 +37,17 @@ export class ThemeService {
     });
   }
 
+  // Keeps the mobile browser/status bar colour in sync with the user-selected theme.
+  private updateThemeColor(theme: Theme) {
+    const color = theme === Theme.dark ? '#141414' : '#ffffff';
+    this._document
+      .querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')
+      .forEach((meta) => {
+        meta.content = color;
+      });
+    this._document.documentElement.style.colorScheme = theme === Theme.dark ? 'dark' : 'light';
+  }
+
   public getSystemTheme(): Theme {
     return this._document.defaultView?.matchMedia?.('(prefers-color-scheme: dark)').matches ? Theme.dark : Theme.default;
   }
@@ -60,6 +71,7 @@ export class ThemeService {
 
           localStorage.setItem('theme', theme);
           this.currentTheme.set(theme);
+          this.updateThemeColor(theme);
 
           resolve(e);
         },

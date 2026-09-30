@@ -25,6 +25,24 @@ podman-compose \
   --build-arg "ANGULAR_BUILD_VERSION=$BUILD_VERSION" \
   webapi worker
 
+echo "Ensuring the database is running..."
+podman-compose \
+  -p aspire-output \
+  -f "$COMPOSE" \
+  up -d \
+  --no-build \
+  --no-deps \
+  dbserver
+
+# Provisions the least-privilege SQL logins and applies EF migrations. A non-zero exit aborts the
+# script (set -e) before Web and Worker are replaced.
+echo "Running database provisioning and migrations..."
+podman-compose \
+  -p aspire-output \
+  -f "$COMPOSE" \
+  run --rm --no-deps \
+  db-migrate
+
 echo "Replacing Web and Worker containers..."
 podman-compose \
   -p aspire-output \
