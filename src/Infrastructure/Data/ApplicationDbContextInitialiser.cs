@@ -15,13 +15,19 @@ namespace skestock.Infrastructure.Data;
 
 public static class InitialiserExtensions
 {
-    public static async Task InitialiseDatabaseAsync(this WebApplication app)
+    /// <param name="migrate">Applies EF migrations at startup. Only Development does; elsewhere the
+    /// one-shot <c>db-migrate</c> step (<see cref="DatabaseMigrationRunner"/>) owns the schema.</param>
+    public static async Task InitialiseDatabaseAsync(this WebApplication app, bool migrate = true)
     {
         using var scope = app.Services.CreateScope();
 
         var initialiser = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitialiser>();
 
-        await initialiser.InitialiseAsync();
+        if (migrate)
+        {
+            await initialiser.InitialiseAsync();
+        }
+
         await initialiser.SeedAsync();
 
         if (app.Environment.IsDevelopment())

@@ -1,10 +1,21 @@
 using skestock.Infrastructure.Data;
+using skestock.Shared;
 using Scalar.AspNetCore;
 using skestock.Application;
 using skestock.Infrastructure;
 using skestock.Infrastructure.Realtime;
 using skestock.ServiceDefaults;
 using skestock.Web;
+
+if (args.Contains(Services.MigrateArgument))
+{
+    var migrationConfiguration = new ConfigurationBuilder()
+        .AddEnvironmentVariables()
+        .Build();
+    using var loggerFactory = LoggerFactory.Create(logging => logging.AddSimpleConsole());
+    await DatabaseMigrationRunner.RunAsync(migrationConfiguration, loggerFactory.CreateLogger("db-migrate"));
+    return;
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +46,7 @@ else
 {
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
-    await app.InitialiseDatabaseAsync();
+    await app.InitialiseDatabaseAsync(migrate: false);
 }
 
 app.UseHttpsRedirection();

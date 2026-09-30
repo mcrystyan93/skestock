@@ -17,7 +17,9 @@ services:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "${SQL_PASSWORD}"
     ports:
-      - "1433:1433"
+      - "127.0.0.1:1433:1433"
+    expose:
+      - "1433"
     volumes:
       - type: "volume"
         target: "/var/opt/mssql"
@@ -55,20 +57,13 @@ services:
       HTTP_PORTS: "8080"
       OpenApiSettings__ApiKey: "${OPENAPISETTINGSAPIKEY}"
       OpenApiSettings__Model: "${OPENAPISETTINGSMODEL}"
-      ConnectionStrings__skestockDb: "Server=dbserver,1433;User ID=sa;Password=${SQL_PASSWORD};TrustServerCertificate=true;Initial Catalog=skestockDb"
-      SKESTOCKDB_HOST: "dbserver"
-      SKESTOCKDB_PORT: "1433"
-      SKESTOCKDB_USERNAME: "sa"
-      SKESTOCKDB_PASSWORD: "${SQL_PASSWORD}"
-      SKESTOCKDB_URI: "mssql://sa:${SQL_PASSWORD}@dbserver:1433/skestockDb"
-      SKESTOCKDB_JDBCCONNECTIONSTRING: "jdbc:sqlserver://dbserver:1433;databaseName=skestockDb;trustServerCertificate=true"
-      SKESTOCKDB_DATABASENAME: "skestockDb"
       ConnectionStrings__skestock-cache: "skestock-cache:6379,password=${REDIS_PASSWORD}"
       SKESTOCK_CACHE_HOST: "skestock-cache"
       SKESTOCK_CACHE_PORT: "6379"
       SKESTOCK_CACHE_PASSWORD: "${REDIS_PASSWORD}"
       SKESTOCK_CACHE_URI: "redis://:${REDIS_PASSWORD}@skestock-cache:6379"
       ASPNETCORE_ENVIRONMENT: "Production"
+      ConnectionStrings__skestockDb: "Server=dbserver,1433;User ID=skestock_app;Password=${SQL_APP_PASSWORD};Encrypt=True;TrustServerCertificate=True;Initial Catalog=skestockDb"
       DataProtection__KeysDirectory: "/var/lib/skestock/data-protection-keys"
       ConnectionStrings__blobservice: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://storage:10000/devstoreaccount1"
       ConnectionStrings__queues: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://storage:10001/devstoreaccount1"
@@ -90,6 +85,8 @@ services:
         condition: "service_started"
       skestock-cache:
         condition: "service_started"
+      db-migrate:
+        condition: "service_completed_successfully"
       storage:
         condition: "service_started"
     networks:
@@ -114,19 +111,12 @@ services:
       OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
       OpenApiSettings__ApiKey: "${OPENAPISETTINGSAPIKEY}"
       OpenApiSettings__Model: "${OPENAPISETTINGSMODEL}"
-      ConnectionStrings__skestockDb: "Server=dbserver,1433;User ID=sa;Password=${SQL_PASSWORD};TrustServerCertificate=true;Initial Catalog=skestockDb"
-      SKESTOCKDB_HOST: "dbserver"
-      SKESTOCKDB_PORT: "1433"
-      SKESTOCKDB_USERNAME: "sa"
-      SKESTOCKDB_PASSWORD: "${SQL_PASSWORD}"
-      SKESTOCKDB_URI: "mssql://sa:${SQL_PASSWORD}@dbserver:1433/skestockDb"
-      SKESTOCKDB_JDBCCONNECTIONSTRING: "jdbc:sqlserver://dbserver:1433;databaseName=skestockDb;trustServerCertificate=true"
-      SKESTOCKDB_DATABASENAME: "skestockDb"
       ConnectionStrings__skestock-cache: "skestock-cache:6379,password=${REDIS_PASSWORD}"
       SKESTOCK_CACHE_HOST: "skestock-cache"
       SKESTOCK_CACHE_PORT: "6379"
       SKESTOCK_CACHE_PASSWORD: "${REDIS_PASSWORD}"
       SKESTOCK_CACHE_URI: "redis://:${REDIS_PASSWORD}@skestock-cache:6379"
+      ConnectionStrings__skestockDb: "Server=dbserver,1433;User ID=skestock_app;Password=${SQL_APP_PASSWORD};Encrypt=True;TrustServerCertificate=True;Initial Catalog=skestockDb"
       ConnectionStrings__blobservice: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://storage:10000/devstoreaccount1"
       ConnectionStrings__queues: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://storage:10001/devstoreaccount1"
       Storage__PublicBlobEndpoint: "https://blob.cristian-cloud.com"
@@ -138,6 +128,8 @@ services:
         condition: "service_started"
       skestock-cache:
         condition: "service_started"
+      db-migrate:
+        condition: "service_completed_successfully"
       storage:
         condition: "service_started"
     networks:
@@ -152,6 +144,39 @@ services:
       timeout: "5s"
       retries: 3
       start_period: "120s"
+  db-migrate:
+    image: "skestock-webapi:latest"
+    build:
+      context: ".."
+      dockerfile: "src/Web/Dockerfile"
+      target: "final"
+    command:
+      - "--migrate"
+    environment:
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      HTTP_PORTS: "8080"
+      ConnectionStrings__skestockDb: "Server=dbserver,1433;User ID=sa;Password=${SQL_PASSWORD};TrustServerCertificate=true;Initial Catalog=skestockDb"
+      SKESTOCKDB_HOST: "dbserver"
+      SKESTOCKDB_PORT: "1433"
+      SKESTOCKDB_USERNAME: "sa"
+      SKESTOCKDB_PASSWORD: "${SQL_PASSWORD}"
+      SKESTOCKDB_URI: "mssql://sa:${SQL_PASSWORD}@dbserver:1433/skestockDb"
+      SKESTOCKDB_JDBCCONNECTIONSTRING: "jdbc:sqlserver://dbserver:1433;databaseName=skestockDb;trustServerCertificate=true"
+      SKESTOCKDB_DATABASENAME: "skestockDb"
+      DatabaseMigration__AppPassword: "${SQL_APP_PASSWORD}"
+      DatabaseMigration__MigratorPassword: "${SQL_MIGRATOR_PASSWORD}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://env-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "db-migrate"
+    expose:
+      - "8080"
+    depends_on:
+      dbserver:
+        condition: "service_started"
+    networks:
+      - "aspire"
+    restart: "no"
   storage:
     image: "mcr.microsoft.com/azure-storage/azurite:3.35.0"
     command:

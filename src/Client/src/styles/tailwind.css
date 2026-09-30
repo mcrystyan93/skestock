@@ -31,11 +31,11 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 html, body, ske-root {
-  @apply block h-screen w-screen;
+  @apply block h-dvh w-full;
 }
 
 ske-simple, ske-full {
-  @apply flex h-screen w-screen;
+  @apply flex h-dvh w-full;
 }
 
 nz-result {

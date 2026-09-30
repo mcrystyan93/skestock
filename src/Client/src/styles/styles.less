@@ -79,3 +79,28 @@ html, body {
 .selected-icon-fix > nz-select-top-control > .ant-select-selection-wrap > .ant-select-selection-item::after {
   display: none !important;
 }
+
+/* Mobile / touch friendliness */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  overscroll-behavior-y: none;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  box-sizing: border-box;
+}
+
+a, button, [role='button'], input, select, textarea, label {
+  touch-action: manipulation;
+}
+
+/* Prevent iOS Safari from zooming when focusing inputs smaller than 16px */
+@media (hover: none) and (pointer: coarse) {
+  input, select, textarea,
+  .ant-input, .ant-select-selection-search-input, .ant-picker-input > input, .ant-input-number-input {
+    font-size: 16px !important;
+  }
+}
