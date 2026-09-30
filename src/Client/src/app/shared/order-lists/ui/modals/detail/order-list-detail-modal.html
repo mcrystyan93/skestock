@@ -43,6 +43,16 @@
         <nz-icon nzType="icons:file-arrow-down"></nz-icon>
         Descarcă Excel
       </button>
+      <button nz-button
+              *nzSpaceItem
+              nzType="default"
+              type="button"
+              (click)="downloadImage()"
+              [nzLoading]="downloading()"
+              [disabled]="downloading()">
+        <nz-icon nzType="icons:file-image"></nz-icon>
+        Descarcă imagine
+      </button>
     }
     <button nz-button
             *nzSpaceItem

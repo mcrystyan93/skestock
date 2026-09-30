@@ -57,12 +57,14 @@ public class OrderLists : IEndpointGroup
         return result.ToOk();
     }
 
-    [EndpointSummary("Export an order list to Excel")]
-    [EndpointDescription("Generates an .xlsx export of a submitted order list, grouped by category.")]
+    [EndpointSummary("Export an order list")]
+    [EndpointDescription(
+        "Generates an export of a submitted order list, grouped by category. Use format=xlsx (default) or format=png.")]
     public static async Task<Results<FileContentHttpResult, ProblemHttpResult>> ExportOrderList(
-        ISender sender, Guid id, CancellationToken cancellationToken)
+        ISender sender, Guid id, CancellationToken cancellationToken,
+        ExportOrderListFormat format = ExportOrderListFormat.Xlsx)
     {
-        var result = await sender.Send(new ExportOrderListQuery { Id = id }, cancellationToken);
+        var result = await sender.Send(new ExportOrderListQuery { Id = id, Format = format }, cancellationToken);
 
         return result.ToFile();
     }

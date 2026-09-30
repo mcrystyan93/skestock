@@ -10,6 +10,8 @@
     <PackageReference Include="Aspire.Azure.Storage.Queues" />
     <PackageReference Include="Azure.Storage.Blobs" />
     <PackageReference Include="ClosedXML" />
+    <PackageReference Include="SkiaSharp" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Aspire.StackExchange.Redis" />
@@ -23,6 +25,10 @@
     <PackageReference Include="ZiggyCreatures.FusionCache" />
     <PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" />
     <PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Export\Fonts\*.ttf" />
   </ItemGroup>
 
   <ItemGroup>

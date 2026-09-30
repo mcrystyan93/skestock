@@ -20,7 +20,8 @@ describe('OrderListListSmall', () => {
         provideNzIconsTesting(),
         provideNzIcons([
           { name: 'icons:chevron-down', icon: '<svg viewBox="0 0 24 24"></svg>' },
-          { name: 'icons:download', icon: '<svg viewBox="0 0 24 24"></svg>' }
+          { name: 'icons:download', icon: '<svg viewBox="0 0 24 24"></svg>' },
+          { name: 'icons:file-image', icon: '<svg viewBox="0 0 24 24"></svg>' }
         ])
       ]
     });
@@ -48,13 +49,17 @@ describe('OrderListListSmall', () => {
     const component = fixture.componentInstance;
     const onView = vi.spyOn(component.onView, 'emit');
     const onDownload = vi.spyOn(component.onDownload, 'emit');
+    const onDownloadImage = vi.spyOn(component.onDownloadImage, 'emit');
     const element = fixture.nativeElement as HTMLElement;
 
     element.querySelector<HTMLButtonElement>('button[aria-label="Deschide comanda Comandă test"]')!.click();
     element.querySelector<HTMLButtonElement>('button[aria-label="Descarcă Excel pentru comanda Comandă test"]')!.click();
 
+    element.querySelector<HTMLButtonElement>('button[aria-label="Descarcă imagine pentru comanda Comandă test"]')!.click();
+
     expect(onView).toHaveBeenCalledWith(order);
     expect(onDownload).toHaveBeenCalledWith(order);
+    expect(onDownloadImage).toHaveBeenCalledWith(order);
     fixture.destroy();
   });
 

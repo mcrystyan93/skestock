@@ -199,6 +199,13 @@ export class OrderListDetailModal {
       this.exportService.download(id);
   }
 
+  public downloadImage() {
+    const id = this.store.orderList().id;
+
+    if (!isNil(id))
+      this.exportService.download(id, 'png');
+  }
+
   public async save(shouldClose: boolean = true) {
     if (this.busy() || !this.editable())
       return;

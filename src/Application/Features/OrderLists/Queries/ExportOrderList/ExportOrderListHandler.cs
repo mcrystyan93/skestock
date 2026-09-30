@@ -8,13 +8,17 @@ using skestock.Domain.Enums;
 
 namespace skestock.Application.Features.OrderLists.Queries.ExportOrderList;
 
-public class ExportOrderListHandler(IApplicationDbContext dbContext, IOrderListExcelExporter exporter)
+public class ExportOrderListHandler(IApplicationDbContext dbContext,
+    IOrderListExcelExporter excelExporter,
+    IOrderListImageExporter imageExporter)
     : IRequestHandler<ExportOrderListQuery, Result<FileExportResult>>
 {
     private const string UncategorizedGroupName = "Alte articole";
 
     private const string XlsxContentType =
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+    private const string PngContentType = "image/png";
 
     public async ValueTask<Result<FileExportResult>> Handle(
         ExportOrderListQuery request, CancellationToken cancellationToken)
@@ -76,18 +80,19 @@ public class ExportOrderListHandler(IApplicationDbContext dbContext, IOrderListE
             Groups = groups
         };
 
-        var content = exporter.Export(model);
-        var fileName = BuildFileName(data.Name, data.ClassName, data.SubmittedAt);
+        var isImage = request.Format == ExportOrderListFormat.Png;
+        var content = isImage ? imageExporter.Export(model) : excelExporter.Export(model);
+        var fileName = BuildFileName(data.Name, data.ClassName, data.SubmittedAt, isImage ? "png" : "xlsx");
 
         return Result.Ok(new FileExportResult
         {
             Content = content,
             FileName = fileName,
-            ContentType = XlsxContentType
+            ContentType = isImage ? PngContentType : XlsxContentType
         });
     }
 
-    private static string BuildFileName(string? name, string? className, DateTimeOffset? submittedAt)
+    private static string BuildFileName(string? name, string? className, DateTimeOffset? submittedAt, string extension)
     {
         var baseName = !string.IsNullOrWhiteSpace(name)
             ? name
@@ -100,6 +105,6 @@ public class ExportOrderListHandler(IApplicationDbContext dbContext, IOrderListE
         if (string.IsNullOrWhiteSpace(sanitized))
             sanitized = "comanda";
 
-        return $"{sanitized}.xlsx";
+        return $"{sanitized}.{extension}";
     }
 }

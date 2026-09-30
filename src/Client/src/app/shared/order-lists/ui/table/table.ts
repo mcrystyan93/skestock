@@ -64,6 +64,7 @@ export class Table extends BaseTableWithFilter<OrderListListItemDto, GetAllOrder
   public readonly onView = output<OrderListListItemDto>();
   public readonly onStatusChange = output<OrderListStatusChange>();
   public readonly onDownload = output<OrderListListItemDto>();
+  public readonly onDownloadImage = output<OrderListListItemDto>();
   public readonly columns = ORDER_LIST_TABLE_COLUMNS;
 
   constructor() {

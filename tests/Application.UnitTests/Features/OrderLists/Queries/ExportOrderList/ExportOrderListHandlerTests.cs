@@ -11,7 +11,7 @@ namespace skestock.Application.UnitTests.Features.OrderLists.Queries.ExportOrder
 
 public class ExportOrderListHandlerTests
 {
-    private sealed class RecordingExporter : IOrderListExcelExporter
+    private sealed class RecordingExporter : IOrderListExcelExporter, IOrderListImageExporter
     {
         public OrderListExportModel? Model { get; private set; }
 
@@ -74,7 +74,7 @@ public class ExportOrderListHandlerTests
         await context.SaveChangesAsync(CancellationToken.None);
 
         var exporter = new RecordingExporter();
-        var handler = new ExportOrderListHandler(context, exporter);
+        var handler = new ExportOrderListHandler(context, exporter, exporter);
 
         var result = await handler.Handle(new ExportOrderListQuery { Id = orderList.Id }, CancellationToken.None);
 
@@ -103,7 +103,7 @@ public class ExportOrderListHandlerTests
         context.OrderLists.Add(orderList);
         await context.SaveChangesAsync(CancellationToken.None);
 
-        var handler = new ExportOrderListHandler(context, new RecordingExporter());
+        var handler = new ExportOrderListHandler(context, new RecordingExporter(), new RecordingExporter());
 
         var result = await handler.Handle(new ExportOrderListQuery { Id = orderList.Id }, CancellationToken.None);
 
@@ -127,7 +127,7 @@ public class ExportOrderListHandlerTests
         context.OrderLists.Add(orderList);
         await context.SaveChangesAsync(CancellationToken.None);
 
-        var handler = new ExportOrderListHandler(context, new RecordingExporter());
+        var handler = new ExportOrderListHandler(context, new RecordingExporter(), new RecordingExporter());
 
         var result = await handler.Handle(new ExportOrderListQuery { Id = orderList.Id }, CancellationToken.None);
 
@@ -150,7 +150,7 @@ public class ExportOrderListHandlerTests
         context.OrderLists.Add(orderList);
         await context.SaveChangesAsync(CancellationToken.None);
 
-        var handler = new ExportOrderListHandler(context, new RecordingExporter());
+        var handler = new ExportOrderListHandler(context, new RecordingExporter(), new RecordingExporter());
 
         var result = await handler.Handle(new ExportOrderListQuery { Id = orderList.Id }, CancellationToken.None);
 
@@ -164,11 +164,51 @@ public class ExportOrderListHandlerTests
         var (context, _, _, _) = await CreateContextAsync();
         await using var _ = context;
 
-        var handler = new ExportOrderListHandler(context, new RecordingExporter());
+        var handler = new ExportOrderListHandler(context, new RecordingExporter(), new RecordingExporter());
 
         var result = await handler.Handle(new ExportOrderListQuery { Id = Guid.NewGuid() }, CancellationToken.None);
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is OrderListErrors.OrderListNotFound);
+    }
+
+    [Test]
+    public async Task ShouldUseImageExporterAndPngMetadataForPngFormat()
+    {
+        var (context, schoolClass, vegetables, _) = await CreateContextAsync();
+        await using var _ = context;
+
+        var carrot = AddItem(context, vegetables, "Morcovi");
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var orderList = OrderList.Create(schoolClass.Id, "Comanda Mea", null);
+        orderList.Lines.Add(new OrderListLine { ItemId = carrot.Id, ProductName = "Morcovi", Quantity = 1 });
+        orderList.Submit();
+        context.OrderLists.Add(orderList);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var excel = new RecordingExporter();
+        var image = new RecordingExporter();
+        var handler = new ExportOrderListHandler(context, excel, image);
+
+        var result = await handler.Handle(
+            new ExportOrderListQuery { Id = orderList.Id, Format = ExportOrderListFormat.Png },
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.FileName.ShouldBe("Comanda Mea.png");
+        result.Value.ContentType.ShouldBe("image/png");
+        image.Model.ShouldNotBeNull();
+        excel.Model.ShouldBeNull();
+    }
+
+    [Test]
+    public void ValidatorShouldRejectUnknownFormat()
+    {
+        var validator = new ExportOrderListQueryValidator();
+
+        validator.Validate(new ExportOrderListQuery { Id = Guid.NewGuid(), Format = (ExportOrderListFormat)99 })
+            .IsValid.ShouldBeFalse();
+        validator.Validate(new ExportOrderListQuery { Id = Guid.NewGuid() }).IsValid.ShouldBeTrue();
     }
 }
