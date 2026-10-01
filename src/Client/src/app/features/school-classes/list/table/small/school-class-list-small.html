@@ -24,28 +24,16 @@
          [style.height.px]="cardRowHeight">
       <nz-card nzSize="small"
                nzHoverable
-               class="relative h-full cursor-pointer">
-        <div class="flex min-w-0 items-center gap-2">
-          <div class="min-w-0 grow">
-            <button type="button"
-                    class="block max-w-full min-w-0 cursor-pointer truncate overflow-hidden! border-0 bg-transparent p-0 text-start font-semibold text-inherit outline-none after:absolute after:inset-0 after:content-[''] focus-visible:after:outline-2 focus-visible:after:outline-primary-600"
-                    [attr.title]="schoolClass.name"
-                    [attr.aria-label]="'Vizualizează clasa ' + schoolClass.name"
-                    (click)="onView.emit(schoolClass)">
-              {{ schoolClass.name }}
-            </button>
-            <div nz-typography
-                 nzType="secondary"
-                 class="mb-0! truncate">
-              {{ schoolClass.startDate | date }} - {{ schoolClass.endDate | date }}
-            </div>
-            <nz-badge [nzStatus]="statusColor(schoolClass.status)"
-                      [nzText]="statusLabel(schoolClass.status)" />
-          </div>
+               class="relative flex! h-full! cursor-pointer flex-col! [&_.ant-card-body]:flex [&_.ant-card-body]:h-full [&_.ant-card-body]:flex-col">
+        <div class="flex min-w-0 items-center justify-between gap-2">
+          <button type="button"
+                  class="min-w-0 cursor-pointer truncate overflow-hidden! border-0 bg-transparent p-0 text-start text-base! font-semibold [color:inherit] outline-none after:absolute after:inset-0 after:content-[''] focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-primary-600"
+                  [attr.title]="schoolClass.name"
+                  [attr.aria-label]="'Vizualizează clasa ' + schoolClass.name"
+                  (click)="onView.emit(schoolClass)">{{ schoolClass.name }}</button>
           <button type="button"
                   nz-button
                   nzType="text"
-                  nzShape="circle"
                   class="relative shrink-0"
                   nz-tooltip
                   nzTooltipTitle="Modifică"
@@ -53,6 +41,17 @@
                   (click)="onEdit.emit(schoolClass)">
             <nz-icon nzType="icons:pencil" />
           </button>
+        </div>
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0! mt-1 truncate">
+          <nz-icon nzType="icons:clock" />
+          {{ schoolClass.startDate | date }} - {{ schoolClass.endDate | date }}
+        </div>
+        <div class="grow"></div>
+        <div class="flex justify-end">
+          <nz-badge [nzStatus]="statusColor(schoolClass.status)"
+                    [nzText]="statusLabel(schoolClass.status)" />
         </div>
       </nz-card>
     </div>

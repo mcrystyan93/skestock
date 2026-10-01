@@ -6,6 +6,7 @@ import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
 import { NzSpaceCompactComponent, NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import {
   CreateOrderListRequest,
+  ORDER_LIST_STATUS_COLORS,
   ORDER_LIST_STATUS_ICONS,
   ORDER_LIST_STATUS_LABELS,
   OrderListLineRequest,
@@ -93,6 +94,10 @@ export class OrderListDetailModal {
 
   public readonly statusLabel = computed(() =>
     ORDER_LIST_STATUS_LABELS[this.store.orderList().status ?? 'Draft']
+  );
+
+  public readonly statusColor = computed(() =>
+    ORDER_LIST_STATUS_COLORS[this.store.orderList().status ?? 'Draft']
   );
 
   public readonly statusIcon = computed(() =>

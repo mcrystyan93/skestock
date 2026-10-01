@@ -13,7 +13,7 @@ import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
 import { NzBreadCrumbComponent, NzBreadCrumbItemComponent } from 'ng-zorro-antd/breadcrumb';
 import { ThemeSwitcher } from '@ske/shared/theme';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
-import { MenuToggle } from '@ske/layouts';
+import { MenuToggle } from '@ske/layouts/menu-toggle';
 
 @Component({
   imports: [

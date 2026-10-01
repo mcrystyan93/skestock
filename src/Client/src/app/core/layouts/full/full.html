@@ -7,25 +7,25 @@
   </ng-container>
 
   <ng-template #smallNavigation>
-      <nz-drawer [nzVisible]="drawer.open()"
-                 nzPlacement="left"
-                 nzWidth="260px"
-                 nzTitle="Ske"
-                 [nzClosable]="false"
-                 [nzExtra]="drawerClose"
-                 [nzFooter]="drawerFooter"
-                 [nzMaskClosable]="true"
-                 [nzCloseOnNavigation]="true"
-                 [nzBodyStyle]="{ padding: 0, overflow: 'hidden' }"
-                 (nzOnClose)="drawer.close()"
-                 nzWrapClassName="menuDrawer">
-        <nav *nzDrawerContent
-             class="h-full overflow-y-auto overflow-x-hidden"
-             id="ske-navigation-drawer"
-             aria-label="Meniu principal">
-          <ng-container *ngTemplateOutlet="menuTemplate; context: { $implicit: false }"></ng-container>
-        </nav>
-      </nz-drawer>
+    <nz-drawer [nzVisible]="drawer.open()"
+               nzPlacement="left"
+               nzWidth="260px"
+               nzTitle="Ske"
+               [nzClosable]="false"
+               [nzExtra]="drawerClose"
+               [nzFooter]="drawerFooter"
+               [nzMaskClosable]="true"
+               [nzCloseOnNavigation]="true"
+               [nzBodyStyle]="{ padding: 0, overflow: 'hidden' }"
+               (nzOnClose)="drawer.close()"
+               nzWrapClassName="menuDrawer">
+      <nav *nzDrawerContent
+           class="h-full overflow-y-auto overflow-x-hidden"
+           id="ske-navigation-drawer"
+           aria-label="Meniu principal">
+        <ng-container *ngTemplateOutlet="menuTemplate; context: { $implicit: false }"></ng-container>
+      </nav>
+    </nz-drawer>
   </ng-template>
 
   <nz-content class="flex! min-w-0">
@@ -46,7 +46,7 @@
 <ng-template #drawerFooter>
   <div class="flex items-center justify-between">
     <span>Temă</span>
-    <ske-theme-switcher/>
+    <ske-theme-switcher />
   </div>
 </ng-template>
 
@@ -57,7 +57,7 @@
       [nzInlineCollapsed]="collapsed"
       nzMode="inline">
     <li nz-menu-item
-        nzMatchRouter
+        [nzMatchRouter]="true"
         (click)="drawer.close()"
         [routerLink]="['/school-classes']">
       <nz-icon nzType="icons:school"
@@ -65,7 +65,7 @@
       <span>Clase</span>
     </li>
     <li nz-menu-item
-        nzMatchRouter
+        [nzMatchRouter]="true"
         (click)="drawer.close()"
         [routerLink]="['/categories']">
       <nz-icon nzType="icons:list"
@@ -73,7 +73,7 @@
       <span>Categorii</span>
     </li>
     <li nz-menu-item
-        nzMatchRouter
+        [nzMatchRouter]="true"
         (click)="drawer.close()"
         [routerLink]="['/items']">
       <nz-icon nzType="icons:box-open-full"

@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 import { BaseList } from '@ske/shared/tables';
 import {
@@ -24,10 +23,10 @@ import { NzSpinComponent } from 'ng-zorro-antd/spin';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
+import { TimeAgoPipe } from '@ske/shared/pipes';
 
 @Component({
   imports: [
-    DatePipe,
     CdkFixedSizeVirtualScroll,
     CdkVirtualForOf,
     CdkVirtualScrollViewport,
@@ -43,6 +42,7 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
     NzMenuDirective,
     NzMenuItemComponent,
     NzTagComponent,
+    TimeAgoPipe,
   ],
   selector: 'ske-item-import-list-small',
   templateUrl: './item-import-list-small.html',

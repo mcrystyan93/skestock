@@ -1,8 +1,10 @@
+// noinspection ES6PreferShortImport
+
 import { Component, computed, inject, input } from '@angular/core';
 import { ProblemDetails } from '@ske/models';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { ErrorMessageService } from '@ske/shared/errors';
+import { ErrorMessageService } from '../../services/error-message.service';
 
 @Component({
   imports: [

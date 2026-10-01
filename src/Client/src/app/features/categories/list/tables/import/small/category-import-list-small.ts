@@ -1,19 +1,14 @@
-import { DatePipe } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 import { BaseList } from '@ske/shared/tables';
 import {
   CATEGORY_IMPORT_BATCH_STATUS_COLORS,
   CATEGORY_IMPORT_BATCH_STATUS_LABELS,
-  GetAllCategoryImportBatchesRequest,
   CategoryImportBatchFileDto,
   CategoryImportBatchListItemDto,
   CategoryImportBatchStatus,
+  GetAllCategoryImportBatchesRequest
 } from '@ske/models';
-import {
-  CdkFixedSizeVirtualScroll,
-  CdkVirtualForOf,
-  CdkVirtualScrollViewport,
-} from '@angular/cdk/scrolling';
+import { CdkFixedSizeVirtualScroll, CdkVirtualForOf, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
@@ -24,10 +19,10 @@ import { NzSpinComponent } from 'ng-zorro-antd/spin';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
+import { TimeAgoPipe } from '@ske/shared/pipes';
 
 @Component({
   imports: [
-    DatePipe,
     CdkFixedSizeVirtualScroll,
     CdkVirtualForOf,
     CdkVirtualScrollViewport,
@@ -43,6 +38,7 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
     NzMenuDirective,
     NzMenuItemComponent,
     NzTagComponent,
+    TimeAgoPipe
   ],
   selector: 'ske-category-import-list-small',
   templateUrl: './category-import-list-small.html',

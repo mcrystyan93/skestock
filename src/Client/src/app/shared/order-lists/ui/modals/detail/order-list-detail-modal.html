@@ -1,7 +1,7 @@
 <div *nzModalTitle>
   @let name = store.orderList().name;
-  <div class="flex gap-2">
-    <div>
+  <div class="flex min-w-0 flex-col items-start gap-1">
+    <div class="min-w-0 wrap-break-word">
       @if (name && !isWizard()) {
         Comanda: {{ name }}
       } @else {
@@ -9,8 +9,10 @@
       }
     </div>
     @if (!isWizard()) {
-      <nz-tag nzColor="default">
-        <nz-icon [nzType]="'icons:' + statusIcon()"></nz-icon>
+      <nz-tag class="me-0!"
+              [nzColor]="statusColor()">
+        <nz-icon [nzType]="'icons:' + statusIcon()"
+                 class="me-1"></nz-icon>
         {{ statusLabel() }}
       </nz-tag>
     }
@@ -41,7 +43,7 @@
               [nzLoading]="downloading()"
               [disabled]="downloading()">
         <nz-icon nzType="icons:file-arrow-down"></nz-icon>
-        Descarcă Excel
+        <span class="max-sm:capitalize"><span class="max-sm:sr-only">Descarcă </span>Excel</span>
       </button>
       <button nz-button
               *nzSpaceItem
@@ -51,7 +53,7 @@
               [nzLoading]="downloading()"
               [disabled]="downloading()">
         <nz-icon nzType="icons:file-image"></nz-icon>
-        Descarcă imagine
+        <span class="max-sm:capitalize"><span class="max-sm:sr-only">Descarcă </span>imagine</span>
       </button>
     }
     <button nz-button

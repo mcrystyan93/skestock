@@ -14,7 +14,7 @@ import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
 import { NzBreadCrumbComponent, NzBreadCrumbItemComponent } from 'ng-zorro-antd/breadcrumb';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { ThemeSwitcher } from '@ske/shared/theme';
-import { MenuToggle } from '@ske/layouts';
+import { MenuToggle } from '@ske/layouts/menu-toggle';
 import { HeaderTabOption, HeaderTabs } from '@ske/shared/header-tabs';
 
 @Component({

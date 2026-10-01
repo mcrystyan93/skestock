@@ -17,7 +17,10 @@ describe('GoodsReceiptImportsListSmall', () => {
       imports: [GoodsReceiptImportsListSmall],
       providers: [
         provideNzIconsTesting(),
-        provideNzIcons([{ name: 'icons:download', icon: '<svg viewBox="0 0 24 24"></svg>' }])
+        provideNzIcons([
+          { name: 'icons:clock', icon: '<svg viewBox="0 0 24 24"></svg>' },
+          { name: 'icons:download', icon: '<svg viewBox="0 0 24 24"></svg>' }
+        ])
       ]
     });
   });

@@ -27,7 +27,7 @@ import { NavigationDrawerState } from './navigation-drawer.state';
     LayoutBreakpoint,
     NzDrawerComponent,
     NzDrawerContentDirective,
-    ThemeSwitcher
+    ThemeSwitcher,
   ],
   selector: 'ske-full',
   templateUrl: './full.html',

@@ -18,6 +18,7 @@
       "@ske/theme": ["./src/app/core/theme"],
       "@ske/auth": ["./src/app/core/auth"],
       "@ske/layouts": ["./src/app/core/layouts"],
+      "@ske/layouts/menu-toggle": ["./src/app/core/layouts/full/menu-toggle/menu-toggle.ts"],
       "@ske/signalr": ["./src/app/core/signalr"],
       "@ske/routes": ["./src/app/core/routes"],
       "@ske/shared/errors": ["./src/app/shared/errors"],

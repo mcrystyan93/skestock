@@ -5,13 +5,6 @@ import { NzFormControlComponent, NzFormItemComponent } from 'ng-zorro-antd/form'
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzInputDirective, NzInputPrefixDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
-import {
-  NzListItemActionComponent,
-  NzListItemActionsComponent,
-  NzListItemMetaComponent,
-  NzListItemMetaDescriptionComponent,
-  NzListItemMetaTitleComponent
-} from 'ng-zorro-antd/list';
 import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
 
 export type SupplyListLineFormModel = {
@@ -30,109 +23,100 @@ export type SupplyListLineFormModel = {
     NzIconDirective,
     NzInputDirective,
     NzInputNumberComponent,
-    NzListItemActionComponent,
-    NzListItemActionsComponent,
-    NzListItemMetaComponent,
-    NzListItemMetaDescriptionComponent,
-    NzListItemMetaTitleComponent,
     NzSpaceCompactComponent,
     FormField,
     NzInputWrapperComponent,
     NzInputPrefixDirective
   ],
   host: {
-    class: 'ant-list-item py-1!'
+    class: 'ant-list-item flex-col! items-stretch! gap-2 py-3!'
   },
   selector: 'ske-supply-list-line',
   template: `
     @let lineForm = line();
     @let itemName = lineForm.itemName().value();
-    <nz-list-item-meta>
-      <nz-list-item-meta-title>{{ itemName }}</nz-list-item-meta-title>
-      <nz-list-item-meta-description>
-        <nz-form-item class="mb-0!">
-          <nz-form-control>
-            <nz-input-wrapper>
-              <nz-icon nzInputPrefix
-                       nzType="icons:pencil"></nz-icon>
-              <input type="text"
-                     nz-input
-                     nzVariant="borderless"
-                     placeholder="Adaugă observații"
-                     [formField]="lineForm.notes"
-                     class="w-75!"
-                     [attr.aria-label]="'Observații pentru ' + itemName" />
-            </nz-input-wrapper>
-          </nz-form-control>
-        </nz-form-item>
-        @for (error of lineForm.notes().errors(); track error.kind) {
-          <div class="ant-form-item-explain-error"
-               role="alert">{{ error.message }}</div>
-        }
-      </nz-list-item-meta-description>
-    </nz-list-item-meta>
+    <div class="flex items-start gap-2">
+      <div class="min-w-0 flex-1 font-medium wrap-break-word">{{ itemName }}</div>
+      <button type="button"
+              nz-button
+              nzType="text"
+              nzSize="small"
+              class="shrink-0"
+              [disabled]="disabled()"
+              (click)="remove.emit()"
+              [attr.aria-label]="'Elimină ' + itemName">
+        <nz-icon nzType="icons:trash-can"></nz-icon>
+      </button>
+    </div>
 
-    <nz-form-item class="mb-0!">
-      <nz-form-control>
-        <nz-space-compact>
-          <button nz-button
-                  nzType="default"
-                  type="button"
-                  [disabled]="disabled()"
-                  (click)="changeQuantity(-1)"
-                  [attr.aria-label]="'Scade cantitatea pentru ' + itemName">
-            <nz-icon nzType="icons:minus"></nz-icon>
-          </button>
-          <nz-input-number [formField]="lineForm.quantity"
-                           class="w-20!"
-                           nzPlaceHolder="Cantitate"
-                           [nzMin]="0"
-                           [nzStep]="0.01"
-                           [nzControls]="false"
-                           [attr.aria-label]="'Cantitate pentru ' + itemName">
-          </nz-input-number>
-          <button nz-button
-                  nzType="default"
-                  type="button"
-                  [disabled]="disabled()"
-                  (click)="changeQuantity(1)"
-                  [attr.aria-label]="'Crește cantitatea pentru ' + itemName">
-            <nz-icon nzType="icons:plus"></nz-icon>
-          </button>
-          <input nz-input
-                 type="text"
-                 placeholder="Unitate de măsură"
-                 [formField]="lineForm.unit"
-                 class="w-30!"
-                 [attr.aria-label]="'Unitate de măsură pentru ' + itemName" />
-        </nz-space-compact>
-        @if (lineForm.quantity().touched()) {
-          @for (error of lineForm.quantity().errors(); track error.kind) {
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-start">
+      <nz-form-item class="mb-0! sm:flex-1">
+        <nz-form-control>
+          <nz-input-wrapper>
+            <nz-icon nzInputPrefix
+                     nzType="icons:pencil"></nz-icon>
+            <input type="text"
+                   nz-input
+                   placeholder="Adaugă observații"
+                   [formField]="lineForm.notes"
+                   [attr.aria-label]="'Observații pentru ' + itemName" />
+          </nz-input-wrapper>
+          @for (error of lineForm.notes().errors(); track error.kind) {
             <div class="ant-form-item-explain-error"
                  role="alert">{{ error.message }}</div>
           }
-        }
-        @if (lineForm.unit().touched()) {
-          @for (error of lineForm.unit().errors(); track error.kind) {
-            <div class="ant-form-item-explain-error"
-                 role="alert">{{ error.message }}</div>
-          }
-        }
-      </nz-form-control>
-    </nz-form-item>
+        </nz-form-control>
+      </nz-form-item>
 
-    <ul nz-list-item-actions>
-      <nz-list-item-action>
-        <button type="button"
-                nz-button
-                nzType="text"
-                [disabled]="disabled()"
-                (click)="remove.emit()"
-                [attr.aria-label]="'Elimină ' + itemName">
-          <nz-icon nzType="icons:trash-can"></nz-icon>
-        </button>
-      </nz-list-item-action>
-    </ul>
+      <nz-form-item class="mb-0!">
+        <nz-form-control>
+          <nz-space-compact class="flex! w-full">
+            <button nz-button
+                    nzType="default"
+                    type="button"
+                    [disabled]="disabled()"
+                    (click)="changeQuantity(-1)"
+                    [attr.aria-label]="'Scade cantitatea pentru ' + itemName">
+              <nz-icon nzType="icons:minus"></nz-icon>
+            </button>
+            <nz-input-number [formField]="lineForm.quantity"
+                             class="min-w-0 flex-1 sm:w-20 sm:flex-none"
+                             nzPlaceHolder="Cantitate"
+                             [nzMin]="0"
+                             [nzStep]="0.01"
+                             [nzControls]="false"
+                             [attr.aria-label]="'Cantitate pentru ' + itemName">
+            </nz-input-number>
+            <button nz-button
+                    nzType="default"
+                    type="button"
+                    [disabled]="disabled()"
+                    (click)="changeQuantity(1)"
+                    [attr.aria-label]="'Crește cantitatea pentru ' + itemName">
+              <nz-icon nzType="icons:plus"></nz-icon>
+            </button>
+            <input nz-input
+                   type="text"
+                   placeholder="U.M."
+                   [formField]="lineForm.unit"
+                   class="w-24! shrink-0"
+                   [attr.aria-label]="'Unitate de măsură pentru ' + itemName" />
+          </nz-space-compact>
+          @if (lineForm.quantity().touched()) {
+            @for (error of lineForm.quantity().errors(); track error.kind) {
+              <div class="ant-form-item-explain-error"
+                   role="alert">{{ error.message }}</div>
+            }
+          }
+          @if (lineForm.unit().touched()) {
+            @for (error of lineForm.unit().errors(); track error.kind) {
+              <div class="ant-form-item-explain-error"
+                   role="alert">{{ error.message }}</div>
+            }
+          }
+        </nz-form-control>
+      </nz-form-item>
+    </div>
   `
 })
 export class SupplyListLine {

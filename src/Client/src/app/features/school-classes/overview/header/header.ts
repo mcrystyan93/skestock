@@ -18,7 +18,7 @@ import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { GoodsReceiptCostStatistic } from './goods-receipt-cost-statistic';
 import { NzBreadCrumbComponent, NzBreadCrumbItemComponent } from 'ng-zorro-antd/breadcrumb';
 import { ThemeSwitcher } from '@ske/shared/theme';
-import { MenuToggle } from '@ske/layouts';
+import { MenuToggle } from '@ske/layouts/menu-toggle';
 import { HeaderTabOption, HeaderTabs } from '@ske/shared/header-tabs';
 import { NzBreakpointService, gridResponsiveMap } from 'ng-zorro-antd/core/services';
 import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';

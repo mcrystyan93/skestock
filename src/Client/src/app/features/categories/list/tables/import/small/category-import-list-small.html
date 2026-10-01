@@ -13,7 +13,7 @@
     </div>
   } @else {
     <nz-empty class="mt-8"
-              nzNotFoundContent="Nu există importuri" />
+              nzNotFoundContent="Nu există importuri"/>
   }
 } @else {
   <cdk-virtual-scroll-viewport [itemSize]="cardRowHeight"
@@ -23,45 +23,31 @@
          class="box-border px-4 pb-2"
          [style.height.px]="cardRowHeight">
       <nz-card nzSize="small"
-               class="h-full">
+               class="relative flex! h-full! flex-col! [&_.ant-card-body]:flex [&_.ant-card-body]:h-full [&_.ant-card-body]:flex-col"
+               [nzHoverable]="categoryImport.status === 'pendingReview'"
+               [class.cursor-pointer]="categoryImport.status === 'pendingReview'">
         <div class="flex min-w-0 items-center justify-between gap-2">
           @if (categoryImport.status === 'pendingReview') {
             <button type="button"
-                    class="min-w-0 cursor-pointer truncate overflow-hidden! border-0 bg-transparent p-0 text-start font-semibold text-inherit outline-none after:absolute after:inset-0 after:content-[''] focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-primary-600"
+                    class="min-w-0 cursor-pointer truncate overflow-hidden! border-0 bg-transparent p-0 text-start text-base! font-semibold [color:inherit] outline-none after:absolute after:inset-0 after:content-[''] focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-primary-600"
                     [attr.title]="fileNames(categoryImport)"
                     [attr.aria-label]="'Vizualizează importul ' + fileNames(categoryImport)"
                     (click)="review.emit(categoryImport)">{{ fileNames(categoryImport) }}</button>
           } @else {
             <strong nz-typography
-                    class="mb-0! min-w-0 truncate"
+                    class="mb-0! min-w-0 truncate text-base!"
                     [attr.title]="fileNames(categoryImport)">{{ fileNames(categoryImport) }}</strong>
           }
-          <nz-tag class="me-0! shrink-0"
-                  [nzColor]="statusColor(categoryImport.status)">
-            {{ statusLabel(categoryImport.status) }}
-          </nz-tag>
-        </div>
-        <div nz-typography
-             nzType="secondary"
-             class="mb-0! mt-1 truncate"
-             [attr.title]="categoryImport.errorMessage ?? null">
-          <nz-icon nzType="icons:clock" />
-          {{ categoryImport.uploadedAt | date: 'short' }}
-          @if (categoryImport.errorMessage) {
-            · {{ categoryImport.errorMessage }}
-          }
-        </div>
-        <div class="relative mt-2 flex items-center justify-end gap-2">
           <button type="button"
                   nz-button
-                  nzSize="small"
-                  nzType="default"
+                  nzType="text"
+                  class="relative shrink-0"
                   nz-dropdown
                   nzTrigger="click"
                   [nzDropdownMenu]="menu"
+                  [attr.title]="'Descarcă fișierele'"
                   [attr.aria-label]="'Descarcă fișierele importului ' + fileNames(categoryImport)">
             <nz-icon nzType="icons:file-arrow-down" />
-            Descarcă
           </button>
           <nz-dropdown-menu #menu="nzDropdownMenu">
             <ul nz-menu>
@@ -75,6 +61,23 @@
             </ul>
           </nz-dropdown-menu>
         </div>
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0! mt-1 truncate"
+             [attr.title]="categoryImport.errorMessage ?? null">
+          <nz-icon nzType="icons:clock" />
+          {{ categoryImport.uploadedAt | timeAgo }}
+          @if (categoryImport.errorMessage) {
+            · {{ categoryImport.errorMessage }}
+          }
+        </div>
+        <div class="grow"></div>
+        <div class="flex justify-end">
+          <nz-tag class="me-0! shrink-0"
+                  [nzColor]="statusColor(categoryImport.status)">
+            {{ statusLabel(categoryImport.status) }}
+          </nz-tag>
+        </div>
       </nz-card>
     </div>
   </cdk-virtual-scroll-viewport>
@@ -83,7 +86,7 @@
     <div class="flex justify-center py-2">
       <nz-spin nzSimple
                nzSize="small"
-               nzTip="Se încarcă..." />
+               nzTip="Se încarcă..."/>
     </div>
   }
 }

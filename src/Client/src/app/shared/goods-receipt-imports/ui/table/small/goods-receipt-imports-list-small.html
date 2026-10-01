@@ -16,55 +16,32 @@
               nzNotFoundContent="Nu există importuri" />
   }
 } @else {
-  <div class="min-h-0 w-full grow overflow-x-hidden overflow-y-auto px-4 pb-2"
+  <div class="flex min-h-0 w-full grow flex-col gap-2 overflow-x-hidden overflow-y-auto px-4 pb-2"
        role="list"
        aria-label="Importuri de aviz"
        (scroll)="onScroll($event)">
     @for (importDto of items(); track importDto.id) {
       <nz-card nzSize="small"
-               class="relative mb-2 min-w-0"
+               class="relative min-w-0"
+               [nzHoverable]="importDto.status === 'pendingReview'"
+               [class.cursor-pointer]="importDto.status === 'pendingReview'"
                role="listitem">
-        <div class="flex min-w-0 items-start justify-between gap-2">
-          <div class="min-w-0 grow">
-            @if (importDto.status === 'pendingReview') {
-              <button type="button"
-                      class="after:absolute after:inset-0 block max-w-full overflow-hidden text-left font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
-                      [attr.aria-label]="'Revizuiește importul ' + fileName(importDto)"
-                      [attr.title]="fileName(importDto)"
-                      (click)="review.emit(importDto)">
-                <span class="block truncate">{{ fileName(importDto) }}</span>
-              </button>
-            } @else {
-              <strong class="block truncate"
-                      [attr.title]="fileName(importDto)">
-                {{ fileName(importDto) }}
-              </strong>
-            }
-            <div class="mt-1 flex min-w-0 flex-wrap items-center gap-2">
-              <nz-tag [nzColor]="statusColor(importDto.status)"
-                      class="me-0!">
-                {{ statusLabel(importDto.status) }}
-              </nz-tag>
-              @if (importDto.processedAt) {
-                <span nz-typography
-                      nzType="secondary"
-                      class="mb-0! text-xs">
-                  Procesat {{ importDto.processedAt | timeAgo }}
-                </span>
-              } @else if (importDto.status === 'processing') {
-                <span nz-typography
-                      nzType="secondary"
-                      class="mb-0! text-xs">
-                  Procesare în curs
-                </span>
-              }
-            </div>
-          </div>
-
+        <div class="flex min-w-0 items-center justify-between gap-2">
+          @if (importDto.status === 'pendingReview') {
+            <button type="button"
+                    class="min-w-0 cursor-pointer truncate overflow-hidden! border-0 bg-transparent p-0 text-start text-base! font-semibold [color:inherit] outline-none after:absolute after:inset-0 after:content-[''] focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-primary-600"
+                    [attr.aria-label]="'Revizuiește importul ' + fileName(importDto)"
+                    [attr.title]="fileName(importDto)"
+                    (click)="review.emit(importDto)">{{ fileName(importDto) }}</button>
+          } @else {
+            <strong nz-typography
+                    class="mb-0! min-w-0 truncate text-base!"
+                    [attr.title]="fileName(importDto)">{{ fileName(importDto) }}</strong>
+          }
           <button nz-button
                   nzType="text"
                   type="button"
-                  class="relative z-10 h-10! min-h-10! w-10! min-w-10! p-0!"
+                  class="relative z-10 shrink-0"
                   nz-tooltip
                   nzTooltipTitle="Descarcă fișierul"
                   aria-label="Descarcă fișierul"
@@ -73,15 +50,15 @@
             <nz-icon nzType="icons:download" />
           </button>
         </div>
-
         <div nz-typography
              nzType="secondary"
-             class="mb-0! mt-2 text-sm">
-          Încărcat {{ importDto.uploadedAt | timeAgo }}
+             class="mb-0! mt-1 truncate"
+             [attr.title]="importDto.uploadedByName || 'Utilizator necunoscut'">
+          <nz-icon nzType="icons:clock" />
+          {{ importDto.uploadedAt | timeAgo }}
           <span aria-hidden="true"> · </span>
           {{ importDto.uploadedByName || 'Utilizator necunoscut' }}
         </div>
-
         @if (importDto.status === 'failed' && importDto.errorMessage) {
           <p nz-typography
              nzType="danger"
@@ -89,6 +66,21 @@
             {{ importDto.errorMessage }}
           </p>
         }
+        <div class="mt-2 flex min-w-0 items-center justify-between gap-2">
+          <span nz-typography
+                nzType="secondary"
+                class="mb-0! min-w-0 truncate">
+            @if (importDto.processedAt) {
+              Procesat {{ importDto.processedAt | timeAgo }}
+            } @else if (importDto.status === 'processing') {
+              Procesare în curs
+            }
+          </span>
+          <nz-tag [nzColor]="statusColor(importDto.status)"
+                  class="me-0! shrink-0">
+            {{ statusLabel(importDto.status) }}
+          </nz-tag>
+        </div>
       </nz-card>
     }
   </div>

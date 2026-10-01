@@ -16,79 +16,25 @@
               nzNotFoundContent="Nu există comenzi" />
   }
 } @else {
-  <div class="min-h-0 w-full grow overflow-x-hidden overflow-y-auto px-4 pb-2"
+  <div class="flex min-h-0 w-full grow flex-col gap-2 overflow-x-hidden overflow-y-auto px-4 pb-2"
        role="list"
        aria-label="Comenzile clasei"
        (scroll)="onScroll($event)">
     @for (orderList of items(); track orderList.id) {
       <nz-card nzSize="small"
-               class="relative mb-2 min-w-0"
+               class="relative min-w-0"
                role="listitem">
-        <div class="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-2 gap-y-2">
+        <div class="flex min-w-0 items-center justify-between gap-2">
           <button type="button"
-                  class="after:absolute after:inset-0 block min-w-0 overflow-hidden text-left font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+                  class="min-w-0 cursor-pointer truncate overflow-hidden! border-0 bg-transparent p-0 text-start text-base! font-semibold [color:inherit] outline-none after:absolute after:inset-0 after:content-[''] focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-primary-600"
                   [attr.aria-label]="'Deschide comanda ' + (orderList.name || 'fără nume')"
                   [attr.title]="orderList.name || 'Comandă fără nume'"
-                  (click)="onView.emit(orderList)">
-            <span class="block truncate">{{ orderList.name || 'Comandă fără nume' }}</span>
-          </button>
-
-          <div class="relative z-10 flex shrink-0 items-center">
-            <button nz-button
-                    nzType="text"
-                    type="button"
-                    nz-dropdown
-                    nzTrigger="click"
-                    nzPlacement="bottomRight"
-                    [nzDropdownMenu]="statusMenu"
-                    [disabled]="loading() || statusChangingId() !== null"
-                    [attr.aria-label]="'Schimbă statusul comenzii ' + (orderList.name || '')"
-                    skeStopClick>
-              <nz-tag [nzColor]="statusColor(orderList.status)"
-                      class="me-0!">
-                {{ statusLabel(orderList.status) }}
-              </nz-tag>
-              <nz-icon nzType="icons:chevron-down" />
-            </button>
-            <nz-dropdown-menu #statusMenu="nzDropdownMenu">
-              <ul nz-menu>
-                @for (action of availableActions(orderList.status); track action) {
-                  <li nz-menu-item
-                      [nzDanger]="action === 'cancel'"
-                      [nzDisabled]="loading() || statusChangingId() !== null"
-                      (click)="onStatusChange.emit({ id: orderList.id, action })">
-                    {{ actionLabel(action) }}
-                  </li>
-                }
-              </ul>
-            </nz-dropdown-menu>
-          </div>
-
-          <div class="col-span-2 flex min-w-0 flex-wrap items-center gap-2">
-            <nz-tag class="me-0!">
-              {{ orderList.lineCount }} {{ orderList.lineCount === 1 ? 'articol' : 'articole' }}
-            </nz-tag>
-            <span nz-typography
-                  nzType="secondary"
-                  class="mb-0! min-w-0 truncate"
-                  [attr.title]="orderList.createdByName || 'Utilizator necunoscut'">
-              {{ orderList.createdDate | timeAgo }}
-              <span aria-hidden="true"> · </span>
-              {{ orderList.createdByName || 'Utilizator necunoscut' }}
-            </span>
-          </div>
-
-          <div class="col-span-2 flex min-w-0 items-center justify-between gap-2">
-            <span nz-typography
-                  nzType="secondary"
-                  class="mb-0! truncate">
-              {{ orderList.submittedAt ? ('Trimisă ' + (orderList.submittedAt | timeAgo)) : 'Netrimisă' }}
-            </span>
-            @if (orderList.status === 'Submitted') {
+                  (click)="onView.emit(orderList)">{{ orderList.name || 'Comandă fără nume' }}</button>
+          @if (orderList.status === 'Submitted') {
+            <div class="relative z-10 flex shrink-0 items-center">
               <button nz-button
                       nzType="text"
                       type="button"
-                      class="relative z-10 h-10! min-h-10! w-10! min-w-10! p-0!"
                       [nzLoading]="isDownloading(orderList.id)"
                       [disabled]="isDownloading(orderList.id)"
                       skeStopClick
@@ -101,7 +47,6 @@
               <button nz-button
                       nzType="text"
                       type="button"
-                      class="relative z-10 h-10! min-h-10! w-10! min-w-10! p-0!"
                       [nzLoading]="isDownloading(orderList.id)"
                       [disabled]="isDownloading(orderList.id)"
                       skeStopClick
@@ -111,8 +56,54 @@
                       [attr.aria-label]="'Descarcă imagine pentru comanda ' + (orderList.name || '')">
                 <nz-icon nzType="icons:file-image" />
               </button>
-            }
-          </div>
+            </div>
+          }
+        </div>
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0! mt-1 truncate"
+             [attr.title]="orderList.createdByName || 'Utilizator necunoscut'">
+          <nz-icon nzType="icons:clock" />
+          {{ orderList.createdDate | timeAgo }}
+          <span aria-hidden="true"> · </span>
+          {{ orderList.createdByName || 'Utilizator necunoscut' }}
+        </div>
+        <div class="mt-2 flex min-w-0 items-center justify-between gap-2">
+          <span nz-typography
+                nzType="secondary"
+                class="mb-0! min-w-0 truncate">
+            {{ orderList.lineCount }} {{ orderList.lineCount === 1 ? 'articol' : 'articole' }}
+            <span aria-hidden="true"> · </span>
+            {{ orderList.submittedAt ? ('Trimisă ' + (orderList.submittedAt | timeAgo)) : 'Netrimisă' }}
+          </span>
+          <button type="button"
+                  class="relative z-10 inline-flex shrink-0 cursor-pointer items-center border-0 bg-transparent p-0 disabled:cursor-not-allowed disabled:opacity-60"
+                  nz-dropdown
+                  nzTrigger="click"
+                  nzPlacement="bottomRight"
+                  [nzDropdownMenu]="statusMenu"
+                  [disabled]="loading() || statusChangingId() !== null || availableActions(orderList.status).length === 0"
+                  [attr.aria-label]="'Schimbă statusul comenzii ' + (orderList.name || '') + ', status curent ' + statusLabel(orderList.status)"
+                  skeStopClick>
+            <nz-tag [nzColor]="statusColor(orderList.status)"
+                    class="me-0! inline-flex! items-center gap-1">
+              {{ statusLabel(orderList.status) }}
+              <nz-icon nzType="icons:chevron-down"
+                       class="text-[10px]" />
+            </nz-tag>
+          </button>
+          <nz-dropdown-menu #statusMenu="nzDropdownMenu">
+            <ul nz-menu>
+              @for (action of availableActions(orderList.status); track action) {
+                <li nz-menu-item
+                    [nzDanger]="action === 'cancel'"
+                    [nzDisabled]="loading() || statusChangingId() !== null"
+                    (click)="onStatusChange.emit({ id: orderList.id, action })">
+                  {{ actionLabel(action) }}
+                </li>
+              }
+            </ul>
+          </nz-dropdown-menu>
         </div>
       </nz-card>
     }

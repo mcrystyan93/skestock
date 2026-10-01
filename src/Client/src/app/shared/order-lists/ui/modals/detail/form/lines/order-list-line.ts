@@ -6,11 +6,6 @@ import { NzFormControlComponent, NzFormItemComponent } from 'ng-zorro-antd/form'
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzInputDirective, NzInputPrefixDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
-import {
-  NzListItemMetaComponent,
-  NzListItemMetaDescriptionComponent,
-  NzListItemMetaTitleComponent
-} from 'ng-zorro-antd/list';
 import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
 import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
@@ -28,9 +23,6 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
     NzIconDirective,
     NzInputDirective,
     NzInputNumberComponent,
-    NzListItemMetaComponent,
-    NzListItemMetaDescriptionComponent,
-    NzListItemMetaTitleComponent,
     NzSpaceCompactComponent,
     FormField,
     NzInputWrapperComponent,
@@ -39,67 +31,76 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
     NzTypographyComponent
   ],
   host: {
-    class: 'ant-list-item flex-nowrap! items-center! gap-3 py-2!'
+    class: 'ant-list-item flex-col! items-stretch! gap-2 py-3!'
   },
   selector: 'ske-order-list-line',
   styles: ``,
   template: `
     @let lineForm = line();
     @let productName = lineForm.productName().value();
-    <div class="flex min-w-0 grow flex-col gap-2 lg:flex-row lg:items-center lg:gap-0">
-      <nz-list-item-meta class="w-full min-w-0 lg:w-auto lg:grow">
-        <nz-list-item-meta-title>
-          {{ productName }}
-          @if (lineForm.productName().touched() && lineForm.productName().errors(); as errors) {
-            @for (error of errors; track error.kind) {
-              <div class="ant-form-item-explain-error"
-                   role="alert">
-                <nz-icon nzType="icons:circle-exclamation"></nz-icon>
-                {{ error.message }}
-              </div>
-            }
+    <div class="flex items-start gap-2">
+      <div class="min-w-0 flex-1">
+        <div class="font-medium wrap-break-word">{{ productName }}</div>
+        @if (lineForm.productName().touched() && lineForm.productName().errors(); as errors) {
+          @for (error of errors; track error.kind) {
+            <div class="ant-form-item-explain-error"
+                 role="alert">
+              <nz-icon nzType="icons:circle-exclamation"></nz-icon>
+              {{ error.message }}
+            </div>
           }
-        </nz-list-item-meta-title>
-        <nz-list-item-meta-description>
-          <nz-form-item class="mb-0! w-full min-w-0 lg:w-auto">
-            <nz-form-control [nzErrorTip]="notesErrorTemplate">
-              <nz-input-wrapper class="w-full lg:w-auto">
-                <nz-icon nzInputPrefix
-                         nzType="icons:pencil"></nz-icon>
-                <input type="text"
-                       nz-input
-                       nzVariant="borderless"
-                       placeholder="Adaugă notițe"
-                       [formField]="lineForm.notes"
-                       class="w-full! lg:w-75!"
-                       [attr.aria-label]="'Notițe pentru ' + productName" />
-              </nz-input-wrapper>
-            </nz-form-control>
-          </nz-form-item>
-          @if (historyHint(); as hint) {
-            <span class="text-xs"
-                  nz-typography
-                  nzType="secondary"
-                  tabindex="0"
-                  nz-tooltip
-                  [nzTooltipTitle]="historyTooltip()"
-                  [attr.aria-label]="historyTooltip()">{{ hint }}</span>
-          }
-        </nz-list-item-meta-description>
-      </nz-list-item-meta>
+        }
+        @if (historyHint(); as hint) {
+          <span class="text-xs"
+                nz-typography
+                nzType="secondary"
+                tabindex="0"
+                nz-tooltip
+                [nzTooltipTitle]="historyTooltip()"
+                [attr.aria-label]="historyTooltip()">{{ hint }}</span>
+        }
+      </div>
+      <button type="button"
+              nz-button
+              nzType="text"
+              nzSize="small"
+              nzDanger
+              class="shrink-0"
+              [disabled]="disabled()"
+              [attr.aria-label]="'Șterge articolul ' + productName"
+              (click)="remove.emit()">
+        <nz-icon nzType="icons:trash-can"></nz-icon>
+      </button>
+    </div>
 
-      <nz-form-item class="mb-0! w-full lg:w-auto">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-start">
+      <nz-form-item class="mb-0! sm:flex-1">
+        <nz-form-control [nzErrorTip]="notesErrorTemplate">
+          <nz-input-wrapper>
+            <nz-icon nzInputPrefix
+                     nzType="icons:pencil"></nz-icon>
+            <input type="text"
+                   nz-input
+                   placeholder="Adaugă notițe"
+                   [formField]="lineForm.notes"
+                   [attr.aria-label]="'Notițe pentru ' + productName" />
+          </nz-input-wrapper>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item class="mb-0!">
         <nz-form-control>
-          <nz-space-compact nzBlock>
-
+          <nz-space-compact class="flex! w-full">
             <button nz-button
                     nzType="default"
                     type="button"
-                    (click)="decreaseQuantity()">
+                    [disabled]="disabled()"
+                    (click)="decreaseQuantity()"
+                    [attr.aria-label]="'Scade cantitatea pentru ' + productName">
               <nz-icon nzType="icons:minus"></nz-icon>
             </button>
             <nz-input-number [formField]="lineForm.quantity"
-                             class="w-20! max-lg:w-auto! max-lg:flex-1"
+                             class="min-w-0 flex-1 sm:w-20 sm:flex-none"
                              nzPlaceHolder="Cantitate"
                              [nzMin]="0"
                              [nzStep]="0.01"
@@ -109,15 +110,17 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
             <button nz-button
                     nzType="default"
                     type="button"
-                    (click)="increaseQuantity()">
+                    [disabled]="disabled()"
+                    (click)="increaseQuantity()"
+                    [attr.aria-label]="'Crește cantitatea pentru ' + productName">
               <nz-icon nzType="icons:plus"></nz-icon>
             </button>
             <input nz-input
                    type="text"
-                   placeholder="Unitate de măsură"
+                   placeholder="U.M."
                    [formField]="lineForm.unit"
-                   class="w-30! max-lg:w-auto! max-lg:flex-1"
-                   aria-label="Unitate de măsură" />
+                   class="w-24! shrink-0"
+                   [attr.aria-label]="'Unitate de măsură pentru ' + productName" />
           </nz-space-compact>
           @if (lineForm.quantity().touched() && lineForm.quantity().errors(); as errors) {
             @for (error of errors; track error.kind) {
@@ -139,20 +142,7 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
           }
         </nz-form-control>
       </nz-form-item>
-
     </div>
-
-    <button type="button"
-            nz-button
-            nzType="text"
-            nzShape="circle"
-            nzDanger
-            class="shrink-0"
-            [disabled]="disabled()"
-            [attr.aria-label]="'Șterge articolul ' + productName"
-            (click)="remove.emit()">
-      <nz-icon nzType="icons:trash-can"></nz-icon>
-    </button>
 
     <ng-template #notesErrorTemplate>
       @if (lineForm.notes().errors(); as errors) {
