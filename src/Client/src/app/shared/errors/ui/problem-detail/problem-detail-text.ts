@@ -20,6 +20,9 @@ import { ErrorMessageService } from '../../services/error-message.service';
       <nz-icon nzType="icons:circle-info"></nz-icon>
       {{ messageToDisplay() }}
     </div>
+    @if (problemDetail()?.error?.diagnostics?.correlationId; as correlationId) {
+      <div>Correlation ID: {{ correlationId }}</div>
+    }
   `
 })
 export class ProblemDetailText {
