@@ -23,36 +23,42 @@
          class="box-border px-4 pb-2"
          [style.height.px]="cardRowHeight">
       <nz-card nzSize="small"
-               class="h-full">
+               class="relative flex! h-full! cursor-pointer flex-col! transition-shadow hover:shadow-md [&_.ant-card-body]:flex [&_.ant-card-body]:h-full [&_.ant-card-body]:flex-col">
         <div class="flex min-w-0 items-center justify-between gap-2">
           <button type="button"
-                  class="min-w-0 cursor-pointer truncate overflow-hidden! border-0 bg-transparent p-0 text-start font-semibold text-inherit outline-none after:absolute after:inset-0 after:content-[''] focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-primary-600"
+                  class="min-w-0 cursor-pointer truncate overflow-hidden! border-0 bg-transparent p-0 text-start text-base! font-semibold [color:inherit] outline-none after:absolute after:inset-0 after:content-[''] focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-primary-600"
                   [class.opacity-60]="!supplyList.isActive"
                   [attr.title]="supplyList.name"
                   [attr.aria-label]="'Deschide lista ' + supplyList.name"
                   (click)="open.emit(supplyList)">{{ supplyList.name }}</button>
-          <nz-tag class="me-0! shrink-0"
-                  [nzColor]="supplyList.isActive ? 'success' : 'default'">
-            {{ supplyList.isActive ? 'Activă' : 'Inactivă' }}
-          </nz-tag>
         </div>
         <div nz-typography
              nzType="secondary"
              class="mb-0! mt-1 truncate"
-             [attr.title]="subtitle(supplyList)">{{ subtitle(supplyList) }}</div>
-        <div class="relative mt-2 flex items-center justify-end gap-2">
+             [attr.title]="subtitle(supplyList)">
+          <nz-icon nzType="icons:clock" />
+          {{ subtitle(supplyList) }}
+        </div>
+        <div class="grow"></div>
+        <div class="relative flex items-center justify-between gap-2">
           <button type="button"
                   nz-button
+                  nzType="text"
                   nzSize="small"
-                  nzType="default"
+                  class="-ms-2"
                   [nzDanger]="supplyList.isActive"
                   [nzLoading]="togglingId() === supplyList.id"
                   [disabled]="togglingId() !== null"
+                  [attr.title]="supplyList.isActive ? 'Dezactivează lista' : 'Activează lista'"
                   [attr.aria-label]="(supplyList.isActive ? 'Dezactivează lista ' : 'Activează lista ') + supplyList.name"
                   (click)="toggleActive.emit(supplyList)">
             <nz-icon [nzType]="supplyList.isActive ? 'icons:ban' : 'icons:circle-check'" />
             {{ supplyList.isActive ? 'Dezactivează' : 'Activează' }}
           </button>
+          <nz-tag class="me-0! shrink-0"
+                  [nzColor]="supplyList.isActive ? 'success' : 'default'">
+            {{ supplyList.isActive ? 'Activă' : 'Inactivă' }}
+          </nz-tag>
         </div>
       </nz-card>
     </div>

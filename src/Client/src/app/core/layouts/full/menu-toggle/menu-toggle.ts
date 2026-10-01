@@ -15,7 +15,8 @@ import { NavigationDrawerState } from '../navigation-drawer.state';
             aria-controls="ske-navigation-drawer"
             [attr.aria-expanded]="drawer.open()"
             (click)="drawer.toggle()">
-      <nz-icon nzType="icons:bars" class="text-lg!"></nz-icon>
+      <nz-icon nzType="icons:bars"
+               class="text-lg!"></nz-icon>
     </button>
   `
 })

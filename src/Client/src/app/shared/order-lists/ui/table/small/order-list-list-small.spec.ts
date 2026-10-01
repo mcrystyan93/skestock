@@ -19,6 +19,7 @@ describe('OrderListListSmall', () => {
       providers: [
         provideNzIconsTesting(),
         provideNzIcons([
+          { name: 'icons:clock', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:chevron-down', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:download', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:file-image', icon: '<svg viewBox="0 0 24 24"></svg>' }

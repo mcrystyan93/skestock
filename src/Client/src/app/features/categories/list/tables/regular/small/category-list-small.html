@@ -23,7 +23,7 @@
          class="box-border px-4 pb-2"
          [style.height.px]="cardRowHeight">
       <nz-card nzSize="small"
-               nzHoverable
+               [nzHoverable]="true"
                role="button"
                tabindex="0"
                class="h-full cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
@@ -41,7 +41,8 @@
             <div nz-typography
                  nzType="secondary"
                  class="mb-0! truncate"
-                 [attr.title]="subtitle(item)">{{ subtitle(item) }}</div>
+                 [attr.title]="subtitle(item)">{{ subtitle(item) }}
+            </div>
           </div>
         </div>
       </nz-card>
