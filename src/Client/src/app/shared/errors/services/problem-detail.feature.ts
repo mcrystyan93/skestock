@@ -39,7 +39,12 @@ export function withProblemDetailsFeature<P extends string>(prefix: P) {
     withMethods((store) => {
       const methods = {
         [handleErrorKey](error: unknown) {
-          if (error instanceof HttpErrorResponse) error = error.error;
+          if (error instanceof HttpErrorResponse) {
+            const payload = error.error;
+            error = payload && typeof payload === 'object' && 'status' in payload
+              ? payload
+              : { status: error.status };
+          }
 
           if (isValidationProblem(error)) {
             patchState(store, {[validationErrorsKey]: error, [problemDetailKey]: null} as any);

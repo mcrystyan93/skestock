@@ -3,7 +3,8 @@ import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { ActivatedRoute, Router } from '@angular/router';
 import { inject } from '@angular/core';
-import { Credentials } from '@ske/models';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Credentials, ErrorCodes } from '@ske/models';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, switchMap, tap } from 'rxjs';
 import { AuthHttp } from './auth.http';
@@ -33,13 +34,13 @@ export const AuthStore = signalStore(
         tap(() => {
           store.clearLoginErrors();
           store.setLoginLoading();
-          patchState(store, { isAuthenticated: true });
         }),
         switchMap(payload =>
           store.authHttp.login(payload)
             .pipe(
               mapResponse({
                 next: () => {
+                  patchState(store, { isAuthenticated: true });
                   store.setLoginLoaded();
                   void store.signalR.connect().catch((error: unknown) => {
                     console.error('[SignalR] connection after login failed', error);
@@ -47,7 +48,12 @@ export const AuthStore = signalStore(
                   store.router.navigate(['./school-classes']);
                 },
                 error: (error) => {
-                  store.handleLoginError(error);
+                  patchState(store, { isAuthenticated: false });
+                  store.handleLoginError(
+                    error instanceof HttpErrorResponse && error.status === 401
+                      ? { status: 401, error: { code: ErrorCodes.auth.invalidCredentials } }
+                      : error,
+                  );
                   store.setLoginLoaded();
 
                   store.router.navigate(['./login']);

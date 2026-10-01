@@ -64,6 +64,8 @@ export class LoginForm {
   });
 
   public async submit() {
+    if (this.loading()) return;
+
     let formData: Credentials | null = null;
 
     const isValid = await submit(this.loginForm, async (data) => {
