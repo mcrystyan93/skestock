@@ -17,6 +17,8 @@ describe('StockCategoryItemsSmall', () => {
           { name: 'icons:ellipsis-vertical', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:arrow-right-arrow-left', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:trash', icon: '<svg viewBox="0 0 24 24"></svg>' },
+          { name: 'icons:cart-plus', icon: '<svg viewBox="0 0 24 24"></svg>' },
+          { name: 'icons:calendar-plus', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:eye', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:eye-slash', icon: '<svg viewBox="0 0 24 24"></svg>' }
         ])

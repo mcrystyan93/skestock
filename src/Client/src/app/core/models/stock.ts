@@ -99,6 +99,13 @@ export type RemoveExpiredStockRequest = {
   locationId: string;
 };
 
+/** Mirrors src/Application/Features/Stock/Models/StockRequests.cs (ExtendExpiredStockExpiryRequest). */
+export type ExtendExpiredStockExpiryRequest = RemoveExpiredStockRequest & {
+  extensionDays: number;
+};
+
+export const MAX_EXPIRY_EXTENSION_DAYS = 365;
+
 /** Mirrors the move-stock request handled by src/Web/Endpoints/Stock.cs. */
 export type MoveStockRequest = {
   classId: string;

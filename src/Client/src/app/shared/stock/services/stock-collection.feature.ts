@@ -1,5 +1,6 @@
 import {
   GetClassLocationStockRequest,
+  ExtendExpiredStockExpiryRequest,
   RemoveExpiredStockRequest,
   SetClassItemStockVisibilityRequest,
   StockItemCategoryGroup,
@@ -146,6 +147,31 @@ export function withStockCollection() {
         )
       );
 
+      const extendExpiredStockExpiry = rxMethod<ExtendExpiredStockExpiryRequest>(
+        pipe(
+          tap(() => {
+            store.setStockMutationLoading();
+            store.clearStockMutationErrors();
+          }),
+          switchMap((request) =>
+            store.stockHttp.extendExpiredStockExpiry(request).pipe(
+              mapResponse({
+                next: () => {
+                  store.messageService.success(`Expirarea a fost prelungită cu ${request.extensionDays} zile.`);
+                  store.setStockMutationLoaded();
+                  load(store.filter());
+                },
+                error: (error) => {
+                  store.handleStockMutationError(error);
+                  store.messageService.error('Expirarea nu a putut fi prelungită.');
+                  store.setStockMutationLoaded();
+                }
+              })
+            )
+          )
+        )
+      );
+
       const setClassItemStockVisibility = rxMethod<{
         classId: string;
         itemId: string;
@@ -180,7 +206,7 @@ export function withStockCollection() {
         )
       );
 
-      return { load, removeExpiredStock, setClassItemStockVisibility };
+      return { load, removeExpiredStock, extendExpiredStockExpiry, setClassItemStockVisibility };
     }),
     withEventHandlers((store, events = inject(Events)) => ({
       stockChanged: events.on(

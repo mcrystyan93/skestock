@@ -26,6 +26,15 @@ public static class OrderListRequests
         public List<OrderListLineRequest> Lines { get; init; } = [];
     }
 
+    public class AddItemToOrderListRequest
+    {
+        public Guid ClassId { get; init; }
+        public Guid ItemId { get; init; }
+        public decimal Quantity { get; init; }
+        public Guid? OrderListId { get; init; }
+        public string? NewOrderListName { get; init; }
+    }
+
     public class UpdateOrderListRequest
     {
         public string? Name { get; init; }

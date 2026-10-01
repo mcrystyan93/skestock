@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import {
+  AddItemToOrderListRequest,
   CreateOrderListRequest,
   GetAllOrderListsRequest,
   OrderListDto,
@@ -39,6 +40,10 @@ export class OrderListsHttp {
 
   public create(request: CreateOrderListRequest) {
     return this._httpClient.post<OrderListDto>('/api/OrderLists', request);
+  }
+
+  public addItem(request: AddItemToOrderListRequest) {
+    return this._httpClient.post<OrderListDto>('/api/OrderLists/add-item', request);
   }
 
   public update(id: string, request: UpdateOrderListRequest) {

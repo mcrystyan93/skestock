@@ -1,0 +1,103 @@
+<div *nzModalTitle>
+  <h4 nz-typography
+      class="mb-0!">Adaugă în comandă</h4>
+  <div nz-typography
+       nzType="secondary"
+       class="mb-0!">
+    {{ modalData.item.itemName }}
+  </div>
+</div>
+
+@if (store.draftsLoading()) {
+  <nz-skeleton [nzActive]="true"
+               [nzParagraph]="{ rows: 3 }"
+               aria-busy="true"
+               aria-label="Se încarcă comenzile" />
+} @else {
+  <ske-error-display [problemDetail]="store.addToOrderProblemDetail() ?? store.draftsProblemDetail()"
+                     [validationErrors]="store.addToOrderValidationErrors()" />
+
+  <form nz-form
+        nzLayout="vertical"
+        nzNoColon
+        (submit)="$event.preventDefault(); save()">
+    @if (store.drafts().length > 0) {
+      <nz-form-item class="mb-6!">
+        <nz-form-label nzRequired
+                       nzFor="add-to-order-target">Comandă</nz-form-label>
+        <nz-form-control>
+          <nz-select nzId="add-to-order-target"
+                     [formField]="addForm.target"
+                     class="w-full">
+            @for (draft of store.drafts(); track draft.id) {
+              <nz-option [nzValue]="draft.id"
+                         [nzLabel]="draft.name || 'Comandă fără nume'" />
+            }
+            <nz-option [nzValue]="newOrderValue"
+                       nzLabel="Comandă nouă…" />
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    } @else {
+      <p nz-typography
+         nzType="secondary">
+        Nu există comenzi ciornă pentru această clasă. Se va crea una nouă.
+      </p>
+    }
+
+    @if (isNewOrder()) {
+      <nz-form-item class="mb-6!">
+        <nz-form-label nzRequired
+                       nzFor="add-to-order-name">Nume comandă nouă</nz-form-label>
+        <nz-form-control [nzErrorTip]="nameErrorTemplate">
+          <input nz-input
+                 id="add-to-order-name"
+                 type="text"
+                 autocomplete="off"
+                 [formField]="addForm.newName" />
+          <ng-template #nameErrorTemplate>
+            @for (error of addForm.newName().errors(); track $index) {
+              <div class="ant-form-item-explain-error">{{ error.message }}</div>
+            }
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    }
+
+    <nz-form-item class="mb-6!">
+      <nz-form-label nzRequired
+                     nzFor="add-to-order-quantity">Cantitate ({{ modalData.item.unit }})</nz-form-label>
+      <nz-form-control [nzErrorTip]="quantityErrorTemplate">
+        <nz-input-number nzId="add-to-order-quantity"
+                         [formField]="addForm.quantity"
+                         [nzMin]="0.01"
+                         [nzStep]="1"
+                         class="w-full!" />
+        <ng-template #quantityErrorTemplate>
+          @for (error of addForm.quantity().errors(); track $index) {
+            <div class="ant-form-item-explain-error">{{ error.message }}</div>
+          }
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+}
+
+<div *nzModalFooter>
+  <div class="flex flex-wrap justify-end gap-2">
+    <button nz-button
+            nzType="default"
+            type="button"
+            (click)="close()">
+      Anulează
+    </button>
+    <button nz-button
+            nzType="primary"
+            type="button"
+            [disabled]="store.draftsLoading()"
+            [nzLoading]="store.addToOrderLoading()"
+            (click)="save()">
+      Adaugă
+    </button>
+  </div>
+</div>

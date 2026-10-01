@@ -39,7 +39,7 @@
     }
   </div>
 </td>
-<td>
+<td class="whitespace-nowrap">
   <button nz-button
           nzType="text"
           type="button"
@@ -55,20 +55,48 @@
           (click)="move.emit(stockItem)">
     <nz-icon nzType="icons:arrow-right-arrow-left"></nz-icon>
   </button>
+  <button nz-button
+          nzType="text"
+          type="button"
+          nz-tooltip
+          skeStopClick
+          nzTooltipTitle="Adaugă în comandă"
+          [attr.aria-label]="'Adaugă ' + stockItem.itemName + ' într-o comandă'"
+          (click)="addToOrder.emit(stockItem)">
+    <nz-icon nzType="icons:cart-plus"></nz-icon>
+  </button>
   @if (stockItem.expiredQuantity > 0) {
     <button nz-button
             nzType="text"
             type="button"
-            nz-popconfirm
+            nz-dropdown
+            nzTrigger="click"
+            nzPlacement="bottomRight"
             skeStopClick
             nz-tooltip
-            nzPopconfirmPlacement="topRight"
-            nzTooltipTitle="Elimină articolele expirate"
-            [nzPopconfirmTitle]="'Elimini cele ' + stockItem.expiredQuantity + ' articole expirate pentru ' + stockItem.itemName + '?'"
-            [attr.aria-label]="'Elimini cele ' + stockItem.expiredQuantity + ' articole expirate pentru ' + stockItem.itemName"
-            (nzOnConfirm)="removeExpired.emit(stockItem)">
-      <nz-icon nzType="icons:trash"></nz-icon>
+            nzTooltipTitle="Acțiuni pentru articole expirate"
+            [nzDropdownMenu]="expiredMenu"
+            [attr.aria-label]="'Acțiuni pentru articolele expirate ale ' + stockItem.itemName">
+      <nz-icon nzType="icons:calendar-exclamation"></nz-icon>
     </button>
+    <nz-dropdown-menu #expiredMenu="nzDropdownMenu">
+      <ul nz-menu>
+        <li nz-menu-item
+            (click)="extendExpiry.emit(stockItem)">
+          <nz-icon nzType="icons:calendar-plus" class="me-2" />
+          Prelungește expirarea
+        </li>
+        <li nz-menu-item
+            nzDanger
+            nz-popconfirm
+            nzPopconfirmPlacement="topRight"
+            [nzPopconfirmTitle]="'Elimini cele ' + stockItem.expiredQuantity + ' articole expirate pentru ' + stockItem.itemName + '?'"
+            (nzOnConfirm)="removeExpired.emit(stockItem)">
+          <nz-icon nzType="icons:trash" class="me-2" />
+          Elimină articolele expirate
+        </li>
+      </ul>
+    </nz-dropdown-menu>
   }
   <button nz-button
           skeStopClick

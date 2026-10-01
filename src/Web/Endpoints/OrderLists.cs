@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using skestock.Application.Common.Models;
+using skestock.Application.Features.OrderLists.Commands.AddItemToOrderList;
 using skestock.Application.Features.OrderLists.Commands.CancelOrderList;
 using skestock.Application.Features.OrderLists.Commands.CreateOrderList;
 using skestock.Application.Features.OrderLists.Commands.DeleteOrderList;
@@ -21,6 +22,7 @@ public class OrderLists : IEndpointGroup
         groupBuilder.MapGet(GetOrderListById, "{id}");
         groupBuilder.MapGet(ExportOrderList, "{id}/export");
         groupBuilder.MapPost(CreateOrderList, "");
+        groupBuilder.MapPost(AddItemToOrderList, "add-item");
         groupBuilder.MapPut(UpdateOrderList, "{id}");
         groupBuilder.MapPost(SubmitOrderList, "{id}/submit");
         groupBuilder.MapPost(CancelOrderList, "{id}/cancel");
@@ -85,6 +87,27 @@ public class OrderLists : IEndpointGroup
         var result = await sender.Send(command, cancellationToken);
 
         return result.ToCreated(v => $"/api/OrderLists/{v.Id}");
+    }
+
+    [EndpointSummary("Add a catalog item to a draft order list")]
+    [EndpointDescription("Adds an item to an existing draft order list of the class, or creates a new draft list " +
+                         "with the given name. When the item is already on the list, the quantity is added to " +
+                         "its existing line. Provide exactly one of orderListId or newOrderListName.")]
+    public static async Task<Results<Ok<OrderListDto>, ProblemHttpResult>> AddItemToOrderList(
+        ISender sender, OrderListRequests.AddItemToOrderListRequest request, CancellationToken cancellationToken)
+    {
+        var command = new AddItemToOrderListCommand
+        {
+            ClassId = request.ClassId,
+            ItemId = request.ItemId,
+            Quantity = request.Quantity,
+            OrderListId = request.OrderListId,
+            NewOrderListName = request.NewOrderListName
+        };
+
+        var result = await sender.Send(command, cancellationToken);
+
+        return result.ToOk();
     }
 
     [EndpointSummary("Update an order list")]

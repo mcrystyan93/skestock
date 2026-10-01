@@ -46,6 +46,8 @@ export class StockCategoryItemsSmall {
   public readonly adjust = output<StockItemDto>();
   public readonly move = output<StockItemDto>();
   public readonly removeExpired = output<StockItemDto>();
+  public readonly extendExpiry = output<StockItemDto>();
+  public readonly addToOrder = output<StockItemDto>();
   public readonly visibilityChange = output<StockItemDto>();
 
   public readonly categories = computed(() => this.items().filter(group => group.isHeader));

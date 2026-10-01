@@ -116,24 +116,34 @@
                       <li nz-menu-item
                           [nzDisabled]="item.quantity <= 0"
                           (click)="move.emit(item)">
-                        <nz-icon nzType="icons:arrow-right-arrow-left" />
+                        <nz-icon nzType="icons:arrow-right-arrow-left" class="me-2" />
                         Mută stocul
                       </li>
+                      <li nz-menu-item
+                          (click)="addToOrder.emit(item)">
+                        <nz-icon nzType="icons:cart-plus" class="me-2" />
+                        Adaugă în comandă
+                      </li>
                       @if (item.expiredQuantity > 0) {
+                        <li nz-menu-item
+                            (click)="extendExpiry.emit(item)">
+                          <nz-icon nzType="icons:calendar-plus" class="me-2" />
+                          Prelungește expirarea
+                        </li>
                         <li nz-menu-item
                             nzDanger
                             nz-popconfirm
                             nzPopconfirmPlacement="topRight"
                             [nzPopconfirmTitle]="'Elimini cele ' + item.expiredQuantity + ' articole expirate pentru ' + item.itemName + '?'"
                             (nzOnConfirm)="removeExpired.emit(item)">
-                          <nz-icon nzType="icons:trash" />
+                          <nz-icon nzType="icons:trash" class="me-2" />
                           Elimină articolele expirate
                         </li>
                       }
                       <li nz-menu-item
                           [attr.aria-label]="visibilityLabel(item)"
                           (click)="visibilityChange.emit(item)">
-                        <nz-icon [nzType]="item.hideWhenZeroStock ? 'icons:eye' : 'icons:eye-slash'" />
+                        <nz-icon [nzType]="item.hideWhenZeroStock ? 'icons:eye' : 'icons:eye-slash'" class="me-2" />
                         {{ item.hideWhenZeroStock ? 'Nu mai ascunde la stoc 0' : 'Ascunde la stoc 0' }}
                       </li>
                     </ul>
