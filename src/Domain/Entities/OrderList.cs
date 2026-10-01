@@ -17,6 +17,14 @@ public class OrderList : BaseAuditableEntity, IKeysetEntity
     // Set when the list is submitted; cleared when a cancelled list is reopened.
     public DateTimeOffset? SubmittedAt { get; private set; }
 
+    // SQL Server rowversion concurrency token for the aggregate. Line edits happen on child rows, so
+    // they call TouchLines() to modify this row and make concurrent line writers conflict instead
+    // of silently losing an update.
+    public byte[] Version { get; set; } = [];
+    public int LinesRevision { get; private set; }
+
+    public void TouchLines() => LinesRevision++;
+
     public ICollection<OrderListLine> Lines { get; set; } = new List<OrderListLine>();
 
     public static OrderList Create(Guid classId, string? name, string? note)

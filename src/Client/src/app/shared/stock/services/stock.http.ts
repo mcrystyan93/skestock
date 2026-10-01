@@ -5,6 +5,7 @@ import {
   GetClassLocationStockRequest,
   LowStockItemDto,
   MoveStockRequest,
+  ExtendExpiredStockExpiryRequest,
   RemoveExpiredStockRequest,
   SetClassItemStockVisibilityRequest,
   StockItemDto,
@@ -34,6 +35,10 @@ export class StockHttp {
 
   public removeExpiredStock(request: RemoveExpiredStockRequest) {
     return this._httpClient.post<void>('/api/Stock/remove-expired', request);
+  }
+
+  public extendExpiredStockExpiry(request: ExtendExpiredStockExpiryRequest) {
+    return this._httpClient.post<void>('/api/Stock/extend-expiry', request);
   }
 
   public moveStock(request: MoveStockRequest) {

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using skestock.Application.Features.Stock.Commands.AdjustStock;
+using skestock.Application.Features.Stock.Commands.ExtendExpiredStockExpiry;
 using skestock.Application.Features.Stock.Commands.MoveStock;
 using skestock.Application.Features.Stock.Commands.RemoveExpiredStock;
 using skestock.Application.Features.Stock.Commands.SetClassItemStockVisibility;
@@ -17,6 +18,7 @@ public class Stock : IEndpointGroup
         groupBuilder.MapGet(GetLowStockItems, "class/{classId}/low-stock");
         groupBuilder.MapPost(AdjustStock, "adjust");
         groupBuilder.MapPost(RemoveExpiredStock, "remove-expired");
+        groupBuilder.MapPost(ExtendExpiredStockExpiry, "extend-expiry");
         groupBuilder.MapPost(MoveStock, "move");
         groupBuilder.MapPatch(
             SetClassItemStockVisibility,
@@ -114,6 +116,26 @@ public class Stock : IEndpointGroup
             ClassId = request.ClassId,
             ItemId = request.ItemId,
             LocationId = request.LocationId
+        };
+
+        var result = await sender.Send(command, cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Extend the expiry of expired stock batches")]
+    [EndpointDescription("Sets the expiry date of every expired perishable batch with remaining quantity " +
+                          "for the requested class, item and location to today plus 'extensionDays'. " +
+                          "The item's shelf-life days are not changed. Each batch is audited.")]
+    public static async Task<Results<Ok, ProblemHttpResult>> ExtendExpiredStockExpiry(
+        ISender sender, ExtendExpiredStockExpiryRequest request, CancellationToken cancellationToken)
+    {
+        var command = new ExtendExpiredStockExpiryCommand
+        {
+            ClassId = request.ClassId,
+            ItemId = request.ItemId,
+            LocationId = request.LocationId,
+            ExtensionDays = request.ExtensionDays
         };
 
         var result = await sender.Send(command, cancellationToken);

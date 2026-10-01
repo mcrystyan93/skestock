@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using skestock.Domain.Entities;
 using skestock.Domain.Queues;
 
@@ -7,6 +8,7 @@ namespace skestock.Application.Common.Interfaces;
 public interface IApplicationDbContext
 {
     DatabaseFacade Database { get; }
+    ChangeTracker ChangeTracker { get; }
     DbSet<Category> Categories { get; }
     DbSet<CategoryImportBatch> CategoryImportBatches { get; }
     DbSet<CategoryImportBatchFile> CategoryImportBatchFiles { get; }

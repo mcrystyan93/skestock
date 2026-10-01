@@ -30,7 +30,16 @@ public class UpdateOrderListCommandHandler(IApplicationDbContext dbContext)
         foreach (var line in lines)
             orderList.Lines.Add(line);
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        orderList.TouchLines();
+
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Result.Fail(new OrderListErrors.ConcurrencyConflict(orderList.Id));
+        }
 
         var dto = await OrderListProjection.LoadAsync(dbContext, orderList.Id, cancellationToken);
         if (dto is null)

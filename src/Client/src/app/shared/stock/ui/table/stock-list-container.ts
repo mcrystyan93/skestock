@@ -3,6 +3,8 @@ import { StockStore } from '../../services/stock.store';
 import { CategoryDto, getDropdownFilterValue, StockItemDto } from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { StockAdjustmentModal, StockAdjustmentModalData } from '../modals/adjust/stock-adjustment-modal';
+import { StockExtendExpiryModal, StockExtendExpiryModalData } from '../modals/extend-expiry/stock-extend-expiry-modal';
+import { StockAddToOrderModal, StockAddToOrderModalData } from '../modals/add-to-order/stock-add-to-order-modal';
 import { StockMoveModal, StockMoveModalData } from '../modals/move/stock-move-modal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AddStockBatchModal } from '@ske/shared/stock-batches';
@@ -73,6 +75,41 @@ export class StockListContainer {
       takeUntilDestroyed(this._destroyRef)
     ).subscribe(() => {
       this.store.load(this.store.filter());
+    });
+  }
+
+  public onAddToOrder(item: StockItemDto): void {
+    this._nzModalService.create<StockAddToOrderModal, StockAddToOrderModalData>({
+      nzContent: StockAddToOrderModal,
+      nzData: { classId: this.store.filter().classId, item },
+      nzWrapClassName: 'modal-w-90 modal-w-md-50 modal-w-xl-30',
+      nzCentered: true,
+      nzMaskClosable: false
+    });
+  }
+
+  public onExtendExpiry(item: StockItemDto): void {
+    const classId = this.store.filter().classId;
+
+    const modalRef = this._nzModalService.create<StockExtendExpiryModal, StockExtendExpiryModalData, number>({
+      nzContent: StockExtendExpiryModal,
+      nzData: { item },
+      nzWrapClassName: 'modal-w-90 modal-w-md-50 modal-w-xl-30',
+      nzCentered: true,
+      nzMaskClosable: false
+    });
+
+    modalRef.afterClose.pipe(
+      takeUntilDestroyed(this._destroyRef)
+    ).subscribe((extensionDays) => {
+      if (extensionDays) {
+        this.store.extendExpiredStockExpiry({
+          classId,
+          itemId: item.itemId,
+          locationId: item.locationId,
+          extensionDays
+        });
+      }
     });
   }
 

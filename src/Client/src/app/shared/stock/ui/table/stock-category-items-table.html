@@ -51,6 +51,8 @@
           (click)="adjust.emit(category.item)"
           (move)="move.emit($event)"
           (removeExpired)="removeExpired.emit($event)"
+          (extendExpiry)="extendExpiry.emit($event)"
+          (addToOrder)="addToOrder.emit($event)"
           (visibilityChange)="visibilityChange.emit($event)">
       </tr>
     }

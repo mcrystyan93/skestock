@@ -31,6 +31,14 @@ public static class StockRequests
         public Guid LocationId { get; init; }
     }
 
+    public class ExtendExpiredStockExpiryRequest
+    {
+        public Guid ClassId { get; init; }
+        public Guid ItemId { get; init; }
+        public Guid LocationId { get; init; }
+        public int ExtensionDays { get; init; }
+    }
+
     public class MoveStockRequest
     {
         [JsonPropertyName("classId")] public Guid ClassId { get; init; }

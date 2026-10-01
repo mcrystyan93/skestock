@@ -93,6 +93,16 @@ export type CreateOrderListRequest = {
   lines: OrderListLineRequest[];
 };
 
+/** Mirrors src/Application/Features/OrderLists/Models/OrderListRequests.cs (AddItemToOrderListRequest). */
+export type AddItemToOrderListRequest = {
+  classId: string;
+  itemId: string;
+  quantity: number;
+  /** Exactly one of orderListId / newOrderListName must be provided. */
+  orderListId?: string | null;
+  newOrderListName?: string | null;
+};
+
 /** Mirrors src/Application/Features/OrderLists/Models/OrderListRequests.cs. */
 export type UpdateOrderListRequest = {
   name?: string | null;

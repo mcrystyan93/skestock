@@ -35,6 +35,20 @@ public static class OrderListErrors
         }
     }
 
+    public sealed class ConcurrencyConflict : Error
+    {
+        public const string ErrorCode = "order_lists.concurrency_conflict";
+
+        public ConcurrencyConflict(Guid orderListId)
+            : base("The order list was changed by another operation. Please reload and try again.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
+            Metadata.Add(ErrorMetadataKeys.Title, "Order list changed concurrently");
+            Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
+            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object> { ["orderListId"] = orderListId });
+        }
+    }
+
     public sealed class OrderListNotDeletable : Error
     {
         public const string ErrorCode = "order_lists.not_deletable";

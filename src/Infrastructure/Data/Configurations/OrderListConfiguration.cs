@@ -14,6 +14,8 @@ public class OrderListConfiguration : IEntityTypeConfiguration<OrderList>
         builder.Property(l => l.Note)
             .HasMaxLength(1000);
 
+        builder.Property(l => l.Version).IsRowVersion();
+
         builder.Property(l => l.Status)
             .HasConversion<string>()
             .HasMaxLength(20)
