@@ -1,0 +1,37 @@
+  [mcp_servers.rider]
+    url = "http://127.0.0.1:64482/stream"
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["@playwright/mcp@latest"]
+
+[mcp_servers.playwright.tools.browser_navigate]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_tabs]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_fill_form]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_click]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_resize]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_evaluate]
+approval_mode = "approve"
+
+[mcp_servers.angular-cli]
+enabled = true
+command = "npx"
+args = ["-y", "@angular/cli", "mcp"]
+
+[mcp_servers.playwright-test]
+enabled = true
+command = "npm"
+args = ["exec", "--prefix", "/home/militarucristian/RiderProjects/skestock/src/Client", "--", "playwright", "run-test-mcp-server", "-c", "/home/militarucristian/RiderProjects/skestock/src/Client/playwright.config.ts"]
+
+[mcp_servers.playwright-test.tools.browser_tabs]
+approval_mode = "approve"
