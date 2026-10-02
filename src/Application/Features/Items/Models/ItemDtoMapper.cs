@@ -1,5 +1,6 @@
 using skestock.Application.Common.Interfaces;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Items;
 
 namespace skestock.Application.Features.Items.Models;
 

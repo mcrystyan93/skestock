@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Shouldly;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.OrderLists;
 using skestock.Domain.Enums;
 using skestock.Domain.Events.OrderList;
 

@@ -6,6 +6,7 @@ using skestock.Application.Features.Locations.Queries.GetAllLocations;
 using skestock.Domain.Entities;
 using NUnit.Framework;
 using Shouldly;
+using skestock.Domain.Entities.Locations;
 
 namespace skestock.Application.UnitTests.Features.Locations.Queries.GetAllLocations;
 

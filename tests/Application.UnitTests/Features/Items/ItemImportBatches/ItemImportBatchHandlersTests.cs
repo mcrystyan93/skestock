@@ -16,6 +16,10 @@ using skestock.Application.Features.Items.Queries.GetItemImportBatchById;
 using skestock.Application.Storage.DTOs;
 using skestock.Application.Storage.Interfaces;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Storage;
+using skestock.Domain.Entities.Users;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.UnitTests.Features.Items.ItemImportBatches;

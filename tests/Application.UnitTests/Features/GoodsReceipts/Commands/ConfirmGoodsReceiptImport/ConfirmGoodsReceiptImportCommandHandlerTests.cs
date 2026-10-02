@@ -5,6 +5,12 @@ using skestock.Application.Features.GoodsReceipts.Commands.ConfirmGoodsReceiptIm
 using skestock.Application.Features.GoodsReceipts.Models;
 using skestock.Application.UnitTests.Features.GoodsReceipts.Commands.CreateGoodsReceipt;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.GoodsReceipts;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Locations;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Users;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.UnitTests.Features.GoodsReceipts.Commands.ConfirmGoodsReceiptImport;

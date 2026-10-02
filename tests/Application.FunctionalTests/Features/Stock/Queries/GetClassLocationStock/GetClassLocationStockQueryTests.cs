@@ -2,6 +2,13 @@ using skestock.Application.Features.Stock.Queries.GetClassLocationStock;
 using skestock.Application.Features.Stock.Commands.SetClassItemStockVisibility;
 using skestock.Application.Common.Filtering;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.GoodsReceipts;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Locations;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Stock;
+using skestock.Domain.Entities.Users;
 
 namespace skestock.Application.FunctionalTests.Features.Stock.Queries.GetClassLocationStock;
 

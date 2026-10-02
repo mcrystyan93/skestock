@@ -1,6 +1,7 @@
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Locations.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Locations;
 
 namespace skestock.Application.Features.Locations.Commands.CreateLocation;
 

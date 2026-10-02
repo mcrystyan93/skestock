@@ -4,6 +4,10 @@ using skestock.Application.Common.Interfaces;
 using skestock.Application.Common.Security;
 using skestock.Application.Features.GoodsReceipts.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.GoodsReceipts;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Stock;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.Features.GoodsReceipts.Commands.ConfirmGoodsReceiptImport;

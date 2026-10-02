@@ -4,6 +4,7 @@ using skestock.Application.Common.Keyset;
 using skestock.Application.Common.Models;
 using skestock.Application.Features.SupplyLists.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SupplyLists;
 
 namespace skestock.Application.Features.SupplyLists.Queries.GetAllSupplyLists;
 

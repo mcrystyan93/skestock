@@ -5,6 +5,8 @@ using skestock.Application.Features.SchoolClasses.Commands.InitializeSchoolClass
 using skestock.Application.Features.SchoolClasses.Commands.UpdateClassDepartmentResponsiblePerson;
 using skestock.Application.Features.SchoolClasses.Queries.GetSchoolClassById;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Users;
 
 namespace skestock.Application.FunctionalTests.Features.ClassConfiguration;
 

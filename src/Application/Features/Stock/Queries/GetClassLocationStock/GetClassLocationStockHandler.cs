@@ -6,6 +6,8 @@ using skestock.Application.Features.Items;
 using skestock.Application.Features.Stock.Models;
 using skestock.Application.Features.StockBatches;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Stock;
 
 namespace skestock.Application.Features.Stock.Queries.GetClassLocationStock;
 

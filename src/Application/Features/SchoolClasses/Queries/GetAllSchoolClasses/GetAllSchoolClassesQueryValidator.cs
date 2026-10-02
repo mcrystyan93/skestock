@@ -2,6 +2,7 @@ using skestock.Application.Common.Errors;
 using skestock.Application.Common.Keyset;
 using skestock.Application.Common.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.Features.SchoolClasses.Queries.GetAllSchoolClasses;
 

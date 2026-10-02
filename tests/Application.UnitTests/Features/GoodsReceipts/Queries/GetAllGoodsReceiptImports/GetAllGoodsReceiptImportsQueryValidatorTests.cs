@@ -6,6 +6,7 @@ using skestock.Application.Features.GoodsReceipts.Queries.GetAllGoodsReceiptImpo
 using skestock.Domain.Entities;
 using NUnit.Framework;
 using Shouldly;
+using skestock.Domain.Entities.GoodsReceipts;
 
 namespace skestock.Application.UnitTests.Features.GoodsReceipts.Queries.GetAllGoodsReceiptImports;
 

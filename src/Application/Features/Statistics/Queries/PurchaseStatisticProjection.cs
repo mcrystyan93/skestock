@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using skestock.Application.Features.Statistics.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Statistics;
 
 namespace skestock.Application.Features.Statistics.Queries;
 

@@ -2,6 +2,7 @@ using skestock.Application.Common.Interfaces;
 using skestock.Application.Storage.Interfaces;
 using skestock.Application.Storage.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Storage;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.Storage.Commands.RequestUpload;

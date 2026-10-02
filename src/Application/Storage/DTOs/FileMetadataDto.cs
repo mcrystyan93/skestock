@@ -1,4 +1,5 @@
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Storage;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.Storage.DTOs;

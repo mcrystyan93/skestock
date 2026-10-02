@@ -5,6 +5,7 @@ using skestock.Application.Features.SupplyLists.Commands.CreateSupplyList;
 using skestock.Application.Features.SupplyLists.Commands.UpdateSupplyList;
 using skestock.Application.Features.SupplyLists.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SupplyLists;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.UnitTests.Features.SupplyLists;

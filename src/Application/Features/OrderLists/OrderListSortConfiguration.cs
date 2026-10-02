@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using skestock.Application.Common.Keyset;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.OrderLists;
 
 namespace skestock.Application.Features.OrderLists;
 

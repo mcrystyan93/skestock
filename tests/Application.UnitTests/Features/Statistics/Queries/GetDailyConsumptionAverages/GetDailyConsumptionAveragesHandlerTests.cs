@@ -5,6 +5,11 @@ using Shouldly;
 using skestock.Application.Features.Statistics.Queries.GetDailyConsumptionAverages;
 using skestock.Application.UnitTests.Features.GoodsReceipts.Commands.CreateGoodsReceipt;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Locations;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Statistics;
 
 namespace skestock.Application.UnitTests.Features.Statistics.Queries.GetDailyConsumptionAverages;
 

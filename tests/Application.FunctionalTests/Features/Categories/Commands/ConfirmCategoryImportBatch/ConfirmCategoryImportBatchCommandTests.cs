@@ -1,5 +1,8 @@
 using skestock.Application.Features.Categories.Commands.ConfirmCategoryImportBatch;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Storage;
+using skestock.Domain.Entities.Users;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.FunctionalTests.Features.Categories.Commands.ConfirmCategoryImportBatch;

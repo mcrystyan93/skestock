@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using skestock.Application.Common.Filtering;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Items;
 
 namespace skestock.Infrastructure.Data.Configurations;
 

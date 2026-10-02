@@ -1,6 +1,7 @@
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.StockBatches.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Stock;
 using skestock.Domain.Enums;
 using skestock.Domain.Events.StockBatches;
 

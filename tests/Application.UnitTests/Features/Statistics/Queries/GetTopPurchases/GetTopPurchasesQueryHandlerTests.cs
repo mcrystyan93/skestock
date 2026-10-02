@@ -5,6 +5,10 @@ using skestock.Application.Features.Statistics.Queries.GetItemsPurchaseHistory;
 using skestock.Application.Features.Statistics.Queries.GetTopPurchases;
 using skestock.Application.UnitTests.Features.GoodsReceipts.Commands.CreateGoodsReceipt;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Statistics;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.UnitTests.Features.Statistics.Queries.GetTopPurchases;

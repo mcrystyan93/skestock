@@ -6,6 +6,7 @@ using skestock.Application.Common.Errors;
 using skestock.Application.Features.ClassConfiguration.Commands.SaveDepartment;
 using skestock.Application.Features.ClassConfiguration.Commands.SaveInvitationCount;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.UnitTests.Features.ClassConfiguration;
 

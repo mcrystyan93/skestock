@@ -2,6 +2,7 @@ using skestock.Application.Common.Exceptions;
 using skestock.Application.Features.SchoolClasses.Commands.CreateSchoolClass;
 using skestock.Application.Features.SchoolClasses.Queries.GetAllSchoolClasses;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SchoolClasses;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.FunctionalTests.Features.SchoolClasses.Commands.CreateSchoolClass;

@@ -1,10 +1,11 @@
+using skestock.Domain.Entities.Items;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.Features.GoodsReceipts.Models;
 
 /// <summary>
 /// The AI extraction for a single import, joined against the item catalog so each extracted line
-/// carries its best-guess catalog match (by <see cref="Domain.Entities.Item.Sku"/>) - or null when
+/// carries its best-guess catalog match (by <see cref="Item.Sku"/>) - or null when
 /// no item matches, meaning the line will create a new item on confirm. Drives the review screen.
 /// </summary>
 public record GoodsReceiptImportReviewDto

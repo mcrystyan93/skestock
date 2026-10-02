@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using skestock.Application.Common.Filtering;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.GoodsReceipts;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.Features.GoodsReceipts;

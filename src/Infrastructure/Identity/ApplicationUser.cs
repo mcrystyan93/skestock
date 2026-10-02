@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Users;
 
 namespace skestock.Infrastructure.Identity;
 

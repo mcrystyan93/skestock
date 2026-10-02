@@ -4,6 +4,7 @@ using skestock.Application.Common.Keyset;
 using skestock.Application.Common.Models;
 using skestock.Application.Features.Locations.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Locations;
 
 namespace skestock.Application.Features.Locations.Queries.GetAllLocations;
 

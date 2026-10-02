@@ -7,6 +7,7 @@ using skestock.Domain.Entities;
 using skestock.Domain.Enums;
 using NUnit.Framework;
 using Shouldly;
+using skestock.Domain.Entities.Storage;
 
 namespace skestock.Application.UnitTests.Features.Categories.Commands.CreateCategoryImportBatch;
 

@@ -5,6 +5,9 @@ using skestock.Domain.Entities;
 using skestock.Domain.Enums;
 using NUnit.Framework;
 using Shouldly;
+using skestock.Domain.Entities.GoodsReceipts;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Storage;
 
 namespace skestock.Application.UnitTests.Features.GoodsReceipts.Queries.GetAllGoodsReceipts;
 

@@ -11,6 +11,17 @@ using skestock.Application.Storage.DTOs;
 using skestock.Application.Storage.Interfaces;
 using skestock.Application.Storage.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.GoodsReceipts;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Locations;
+using skestock.Domain.Entities.OrderLists;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Statistics;
+using skestock.Domain.Entities.Stock;
+using skestock.Domain.Entities.Storage;
+using skestock.Domain.Entities.SupplyLists;
+using skestock.Domain.Entities.Users;
 using skestock.Domain.Queues;
 using skestock.Domain.Enums;
 

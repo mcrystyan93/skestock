@@ -1,9 +1,10 @@
 using skestock.Application.Common.Keyset;
+using skestock.Domain.Entities.Locations;
 
 namespace skestock.Application.Features.Locations;
 
 /// <summary>
-/// Sort-key columns of a <see cref="Domain.Entities.Location"/> row, projected alongside the list DTO so the
+/// Sort-key columns of a <see cref="Location"/> row, projected alongside the list DTO so the
 /// next cursor can be encoded without loading the full entity.
 /// </summary>
 public sealed record LocationCursor(Guid Id, string Name, string Type, DateTimeOffset CreatedDate, DateTimeOffset LastModifiedDate) : IKeysetCursor

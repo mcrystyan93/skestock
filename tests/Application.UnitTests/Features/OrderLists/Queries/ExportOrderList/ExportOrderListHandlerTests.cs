@@ -6,6 +6,10 @@ using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.OrderLists.Models;
 using skestock.Application.Features.OrderLists.Queries.ExportOrderList;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.OrderLists;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.UnitTests.Features.OrderLists.Queries.ExportOrderList;
 

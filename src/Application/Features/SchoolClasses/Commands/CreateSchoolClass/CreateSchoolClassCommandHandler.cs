@@ -2,6 +2,7 @@ using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.SchoolClasses.Models;
 using skestock.Domain.Entities;
 using skestock.Application.Common.Errors;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.Features.SchoolClasses.Commands.CreateSchoolClass;
 

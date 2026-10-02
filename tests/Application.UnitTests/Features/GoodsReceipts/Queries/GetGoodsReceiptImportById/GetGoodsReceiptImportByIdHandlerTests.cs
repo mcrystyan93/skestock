@@ -4,6 +4,10 @@ using Shouldly;
 using skestock.Application.Features.GoodsReceipts.Models;
 using skestock.Application.Features.GoodsReceipts.Queries.GetGoodsReceiptImportById;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.GoodsReceipts;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.UnitTests.Features.GoodsReceipts.Queries.GetGoodsReceiptImportById;
 

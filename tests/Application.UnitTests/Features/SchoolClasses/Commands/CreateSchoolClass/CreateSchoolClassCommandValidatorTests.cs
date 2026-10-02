@@ -5,6 +5,7 @@ using skestock.Domain.Entities;
 using skestock.Domain.Enums;
 using NUnit.Framework;
 using Shouldly;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.UnitTests.Features.SchoolClasses.Commands.CreateSchoolClass;
 

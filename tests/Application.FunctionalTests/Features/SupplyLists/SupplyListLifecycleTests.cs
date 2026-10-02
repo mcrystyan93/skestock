@@ -9,6 +9,9 @@ using skestock.Application.Features.SupplyLists.Models;
 using skestock.Application.Features.SupplyLists.Queries.GetAllSupplyLists;
 using skestock.Application.Features.SupplyLists.Queries.GetSupplyListById;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Users;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.FunctionalTests.Features.SupplyLists;

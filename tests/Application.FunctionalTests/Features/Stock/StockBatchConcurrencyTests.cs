@@ -2,6 +2,11 @@ using skestock.Domain.Entities;
 using skestock.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Locations;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Stock;
 
 namespace skestock.Application.FunctionalTests.Features.Stock;
 

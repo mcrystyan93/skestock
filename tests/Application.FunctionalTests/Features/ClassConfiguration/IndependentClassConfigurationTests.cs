@@ -12,6 +12,7 @@ using skestock.Application.Features.ClassConfiguration.Queries.GetDepartment;
 using skestock.Application.Features.ClassConfiguration.Commands.DeleteDepartment;
 using skestock.Application.Features.ClassConfiguration.Queries.GetInvitationCount;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.FunctionalTests.Features.ClassConfiguration;
 

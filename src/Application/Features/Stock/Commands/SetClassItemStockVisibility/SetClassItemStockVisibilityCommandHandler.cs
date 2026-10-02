@@ -1,5 +1,6 @@
 using skestock.Application.Common.Interfaces;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Stock;
 using skestock.Domain.Events.Stock;
 
 namespace skestock.Application.Features.Stock.Commands.SetClassItemStockVisibility;

@@ -4,6 +4,7 @@ using skestock.Application.Features.Categories.Commands.CreateCategory;
 using skestock.Domain.Entities;
 using NUnit.Framework;
 using Shouldly;
+using skestock.Domain.Entities.Categories;
 
 namespace skestock.Application.UnitTests.Features.Categories.Commands.CreateCategory;
 

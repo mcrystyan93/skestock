@@ -3,6 +3,7 @@ using skestock.Application.Features.Stock.Commands.MoveStock;
 using skestock.Domain.Entities;
 using NUnit.Framework;
 using Shouldly;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.UnitTests.Features.Stock.Commands.MoveStock;
 

@@ -6,6 +6,7 @@ using skestock.Application.Features.StockBatches.Queries.GetAllStockBatches;
 using skestock.Domain.Entities;
 using NUnit.Framework;
 using Shouldly;
+using skestock.Domain.Entities.Stock;
 
 namespace skestock.Application.UnitTests.Features.StockBatches.Queries.GetAllStockBatches;
 

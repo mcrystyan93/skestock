@@ -6,6 +6,7 @@ using skestock.Domain.Enums;
 using skestock.Domain.Queues;
 using skestock.Shared;
 using System.Text.Json;
+using skestock.Domain.Entities.GoodsReceipts;
 
 namespace skestock.Application.Features.GoodsReceipts.Commands.CreateGoodsReceiptImport;
 

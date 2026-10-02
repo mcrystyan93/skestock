@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using skestock.Application.Common.Keyset;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.GoodsReceipts;
 
 namespace skestock.Application.Features.GoodsReceipts;
 

@@ -1,4 +1,5 @@
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.ScheduledJobs;
 
 namespace skestock.Application.Common.Interfaces;
 

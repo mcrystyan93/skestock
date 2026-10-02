@@ -5,6 +5,9 @@ using skestock.Application.Common.Errors;
 using skestock.Application.Features.OrderLists.Commands.CreateOrderList;
 using skestock.Application.Features.OrderLists.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.UnitTests.Features.OrderLists.Commands.CreateOrderList;
 
