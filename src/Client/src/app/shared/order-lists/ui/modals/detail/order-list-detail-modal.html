@@ -90,6 +90,28 @@
       </button>
     }
 
+    @if (canShowApproval()) {
+      <div *nzSpaceItem
+           class="flex items-center gap-2">
+        <button nz-button
+                nzType="primary"
+                type="button"
+                (click)="approve()"
+                [nzLoading]="busy()"
+                [disabled]="busy() || !hasLines()"
+                [attr.aria-describedby]="hasLines() ? null : 'order-list-approval-help'">
+          Aprobă
+        </button>
+        @if (!hasLines()) {
+          <span id="order-list-approval-help"
+                role="status"
+                class="max-w-60 text-xs text-gray-600 dark:text-gray-300">
+            Adăugați cel puțin un articol pentru a putea aproba comanda.
+          </span>
+        }
+      </div>
+    }
+
     @if (editable() && onEditorStep()) {
       <nz-space-compact *nzSpaceItem>
         <button nz-button

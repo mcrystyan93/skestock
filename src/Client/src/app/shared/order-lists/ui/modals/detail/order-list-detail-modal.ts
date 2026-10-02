@@ -72,7 +72,10 @@ export class OrderListDetailModal {
   private readonly _nzModalService = inject(NzModalService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _pendingSave = signal<PendingSave | null>(null);
+  private readonly _pendingSubmitOperationId = signal<string | null>(null);
+  private readonly _approvalInProgress = signal(false);
   private _saveSequence = 0;
+  private _submitSequence = 0;
 
   public readonly busy = computed(() =>
     this.store.orderListLoading() || this._pendingSave() !== null
@@ -90,6 +93,17 @@ export class OrderListDetailModal {
   public readonly editable = computed(() => {
     const status = this.store.orderList().status;
     return isNil(status) || status === 'Draft';
+  });
+
+  public readonly canShowApproval = computed(() =>
+    !this.isWizard()
+    && this.onEditorStep()
+    && this.store.orderList().status === 'Draft'
+  );
+
+  public readonly hasLines = computed(() => {
+    const formLines = this._formComponent()?.orderListForm.lines().value();
+    return (formLines ?? this.store.orderList().lines ?? []).length > 0;
   });
 
   public readonly statusLabel = computed(() =>
@@ -139,6 +153,18 @@ export class OrderListDetailModal {
       takeUntilDestroyed(this._destroyRef)
     )
     .subscribe(({ payload }) => this.handleSaveFailure(payload.operationId));
+
+  private readonly _submitSuccessRef = this._storeEvents.on(orderListApiEvents.submitSuccess)
+    .pipe(
+      takeUntilDestroyed(this._destroyRef)
+    )
+    .subscribe(({ payload }) => this.handleSubmitSuccess(payload.operationId));
+
+  private readonly _submitFailureRef = this._storeEvents.on(orderListApiEvents.submitFailure)
+    .pipe(
+      takeUntilDestroyed(this._destroyRef)
+    )
+    .subscribe(({ payload }) => this.handleSubmitFailure(payload.operationId));
 
   public next() {
     const wizard = this.wizard;
@@ -211,7 +237,25 @@ export class OrderListDetailModal {
       this.exportService.download(id, 'png');
   }
 
+  public approve() {
+    if (!this.canShowApproval() || this.busy() || this._approvalInProgress() || !this.hasLines())
+      return;
+
+    this._nzModalService.confirm({
+      nzTitle: 'Aprobați comanda?',
+      nzContent: 'Trimiterea finalizează planul comenzii pentru următorul pas de aprovizionare. '
+        + 'Comanda nu va mai putea fi modificată. Doriți să continuați?',
+      nzOkText: 'Confirmă trimiterea',
+      nzCancelText: 'Renunță',
+      nzOnOk: () => this.submitAfterConfirmation()
+    });
+  }
+
   public async save(shouldClose: boolean = true) {
+    await this.saveDraft(shouldClose, false);
+  }
+
+  private async saveDraft(shouldClose: boolean, shouldSubmit: boolean) {
     if (this.busy() || !this.editable())
       return;
 
@@ -226,10 +270,44 @@ export class OrderListDetailModal {
       return;
 
     const operationId = `save-${++this._saveSequence}`;
-    this._pendingSave.set({ operationId, shouldClose });
+    this._pendingSave.set({ operationId, shouldClose, shouldSubmit });
 
     if (!this.store.saveOrderList(this.mapSaveRequest(formData), operationId))
       this._pendingSave.set(null);
+  }
+
+  private async submitAfterConfirmation() {
+    if (!this.canShowApproval() || this.busy() || this._approvalInProgress() || !this.hasLines())
+      return;
+
+    this._approvalInProgress.set(true);
+
+    try {
+      const formComponent = this._formComponent();
+
+      if (isNil(formComponent))
+        return;
+
+      if (formComponent.orderListForm().dirty()) {
+        await this.saveDraft(false, true);
+        return;
+      }
+
+      this.submit();
+    } finally {
+      this._approvalInProgress.set(false);
+    }
+  }
+
+  private submit() {
+    const orderListId = this.store.orderList().id;
+
+    if (isNil(orderListId) || this.busy())
+      return;
+
+    const operationId = `submit-${++this._submitSequence}`;
+    this._pendingSubmitOperationId.set(operationId);
+    this.store.submitOrderList({ operationId });
   }
 
   private mapSaveRequest(formData: OrderListDetailFormModel): CreateOrderListRequest | UpdateOrderListRequest {
@@ -264,6 +342,13 @@ export class OrderListDetailModal {
       return;
 
     this._pendingSave.set(null);
+
+    if (pendingSave.shouldSubmit) {
+      this._formComponent()?.orderListForm().reset();
+      this.submit();
+      return;
+    }
+
     this._nzMessageService.success('Comanda a fost salvată cu succes!');
 
     if (pendingSave.shouldClose) {
@@ -277,6 +362,19 @@ export class OrderListDetailModal {
   private handleSaveFailure(operationId: string) {
     if (this._pendingSave()?.operationId === operationId)
       this._pendingSave.set(null);
+  }
+
+  private handleSubmitSuccess(operationId: string) {
+    if (this._pendingSubmitOperationId() !== operationId)
+      return;
+
+    this._pendingSubmitOperationId.set(null);
+    this._nzMessageService.success('Comanda a fost aprobată.');
+  }
+
+  private handleSubmitFailure(operationId: string) {
+    if (this._pendingSubmitOperationId() === operationId)
+      this._pendingSubmitOperationId.set(null);
   }
 
   private reloadModalData() {
@@ -295,4 +393,5 @@ type OrderListDetailModalData = {
 type PendingSave = {
   operationId: string;
   shouldClose: boolean;
+  shouldSubmit: boolean;
 };

@@ -28,7 +28,9 @@ export const orderListApiEvents = eventGroup({
   source: 'Order List API',
   events: {
     saveSuccess: type<{ operationId: string }>(),
-    saveFailure: type<{ operationId: string }>()
+    saveFailure: type<{ operationId: string }>(),
+    submitSuccess: type<{ operationId: string }>(),
+    submitFailure: type<{ operationId: string }>()
   }
 });
 
@@ -136,8 +138,8 @@ export const OrderListDetailState = signalStore(
             mapResponse({
               next: (orderList) => {
                 patchState(store, { orderList });
-                store.dispatcher.saveSuccess({ operationId });
                 store.setOrderListLoaded();
+                store.dispatcher.saveSuccess({ operationId });
               },
               error: (error) => {
                 store.handleOrderListError(error);
@@ -175,7 +177,41 @@ export const OrderListDetailState = signalStore(
       return true;
     };
 
-    return { loadOrderList, saveOrderList };
+    const submitOrderList = rxMethod<{ operationId: string }>(
+      pipe(
+        tap(() => {
+          store.setOrderListLoading();
+          store.clearOrderListErrors();
+        }),
+        switchMap(({ operationId }) => {
+          const id = store.orderList().id;
+
+          if (!hasValidId(id)) {
+            store.handleOrderListError({ title: 'Order list ID missing', status: 400 });
+            store.setOrderListLoaded();
+            store.dispatcher.submitFailure({ operationId });
+            return EMPTY;
+          }
+
+          return store.orderListHttp.submit(id).pipe(
+            mapResponse({
+              next: (orderList) => {
+                patchState(store, { orderList });
+                store.dispatcher.submitSuccess({ operationId });
+                store.setOrderListLoaded();
+              },
+              error: (error) => {
+                store.handleOrderListError(error);
+                store.dispatcher.submitFailure({ operationId });
+                store.setOrderListLoaded();
+              }
+            })
+          );
+        })
+      )
+    );
+
+    return { loadOrderList, saveOrderList, submitOrderList };
   })
 );
 

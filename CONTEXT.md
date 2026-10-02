@@ -23,6 +23,12 @@ is the date the goods were received.
 An order list is a plan of what to buy. It is not a purchase and does not count towards purchase
 statistics until its items are actually received.
 
+## Order list submission (Trimiterea listei de comandă)
+
+Submitting an order list finalizes the plan for the next purchasing step. A submitted list is no
+longer editable and is not itself a purchase or goods receipt.
+_Avoid_: Order approval as a separate business state or process.
+
 ## Purchase frequency (Frecvență achiziții)
 
 Purchase frequency is how many separate times an item was bought. All of an item's lines on the
