@@ -1,0 +1,18 @@
+<section class="min-w-0"
+         aria-labelledby="invitations-heading">
+  <div class="mb-4">
+    <h2 id="invitations-heading"
+        class="mb-1 text-lg font-semibold">Invitații</h2>
+    <p nz-typography
+       nzType="secondary"
+       class="mb-0!">
+      Această valoare se copiază în fiecare clasă nouă. Clasele existente își păstrează valoarea
+      inițială.
+    </p>
+  </div>
+  <ske-error-display [problemDetail]="store.invitationsProblemDetail()"
+                     [validationErrors]="store.invitationsValidationErrors()" />
+  <ske-configuration-invitations-card [invitationCount]="store.invitationCount()"
+                                      [loading]="store.invitationsLoading()"
+                                      (onSave)="save()" />
+</section>

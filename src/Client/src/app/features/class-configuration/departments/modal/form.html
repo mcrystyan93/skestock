@@ -1,0 +1,42 @@
+<form nz-form
+      nzLayout="vertical"
+      nzNoColon
+      (submit)="$event.preventDefault()">
+  <nz-form-item *skeletonInputLoader="loading()">
+    <nz-form-label nzRequired
+                   nzFor="department-name">Nume
+    </nz-form-label>
+    <nz-form-control [nzErrorTip]="nameErrorTemplate">
+      <nz-input-wrapper nzShowCount
+                        [nzCount]="{ max: departmentForm.name().maxLength?.() ?? 100 }">
+        <input nz-input
+               id="department-name"
+               [formField]="departmentForm.name"
+               autocomplete="off" />
+      </nz-input-wrapper>
+      <ng-template #nameErrorTemplate>
+        @for (error of departmentForm.name().errors(); track $index) {
+          <div class="ant-form-item-explain-error">{{ error.message }}</div>
+        }
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item *skeletonInputLoader="loading()">
+    <nz-form-label nzRequired
+                   nzFor="department-responsibilities">Responsabilități
+    </nz-form-label>
+    <nz-form-control [nzErrorTip]="responsibilityErrorTemplate">
+      <textarea
+        nz-input
+        id="department-responsibilities"
+        rows="4"
+        [formField]="departmentForm.responsibilities"
+      ></textarea>
+      <ng-template #responsibilityErrorTemplate>
+        @for (error of departmentForm.responsibilities().errors(); track $index) {
+          <div class="ant-form-item-explain-error">{{ error.message }}</div>
+        }
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+</form>

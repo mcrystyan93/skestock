@@ -1,4 +1,5 @@
-using skestock.Application.Features.ClassConfiguration.Commands.SaveSharedClassConfiguration;
+using skestock.Application.Features.ClassConfiguration.Commands.SaveDepartment;
+using skestock.Application.Features.ClassConfiguration.Commands.SaveInvitationCount;
 using skestock.Application.Features.SchoolClasses.Commands.CreateSchoolClass;
 using skestock.Application.Features.SchoolClasses.Commands.InitializeSchoolClassConfiguration;
 using skestock.Application.Features.SchoolClasses.Commands.UpdateClassDepartmentResponsiblePerson;
@@ -13,10 +14,10 @@ public sealed class ClassConfigurationTests : TestBase
     public async Task CreateClass_CopiesConfigurationAndKeepsSnapshotWhenGlobalConfigurationChanges()
     {
         await SetUpAdministratorAsync();
-        var initial = await TestApp.SendAsync(new SaveSharedClassConfigurationCommand
+        await TestApp.SendAsync(new SaveInvitationCountCommand { InvitationCount = 24 });
+        var initial = await TestApp.SendAsync(new SaveDepartmentCommand
         {
-            InvitationCount = 24,
-            Departments = [new DepartmentTemplateInput(null, "Bibliotecă", "Organizează împrumutul de cărți")]
+            Name = "Bibliotecă", Responsibilities = "Organizează împrumutul de cărți"
         });
 
         var firstClass = await TestApp.SendAsync(new CreateSchoolClassCommand
@@ -28,14 +29,10 @@ public sealed class ClassConfigurationTests : TestBase
         firstClass.Value.InvitationCount.ShouldBe(24);
         firstClass.Value.Departments.Single().Name.ShouldBe("Bibliotecă");
 
-        await TestApp.SendAsync(new SaveSharedClassConfigurationCommand
+        await TestApp.SendAsync(new SaveInvitationCountCommand { InvitationCount = 30 });
+        await TestApp.SendAsync(new SaveDepartmentCommand
         {
-            InvitationCount = 30,
-            Departments =
-            [
-                new DepartmentTemplateInput(initial.Value.Departments.Single().Id, "Bibliotecă nouă",
-                    "Responsabilități noi")
-            ]
+            Id = initial.Value.Id, Name = "Bibliotecă nouă", Responsibilities = "Responsabilități noi"
         });
         var secondClass = await TestApp.SendAsync(new CreateSchoolClassCommand
         {
@@ -55,10 +52,10 @@ public sealed class ClassConfigurationTests : TestBase
     public async Task InitializeExistingClass_CopiesCurrentConfigurationOnlyOnce()
     {
         await SetUpAdministratorAsync();
-        await TestApp.SendAsync(new SaveSharedClassConfigurationCommand
+        await TestApp.SendAsync(new SaveInvitationCountCommand { InvitationCount = 18 });
+        await TestApp.SendAsync(new SaveDepartmentCommand
         {
-            InvitationCount = 18,
-            Departments = [new DepartmentTemplateInput(null, "Comunicare", "Pregătește informările")]
+            Name = "Comunicare", Responsibilities = "Pregătește informările"
         });
         var schoolClass = new SchoolClass
         {
@@ -89,10 +86,10 @@ public sealed class ClassConfigurationTests : TestBase
     public async Task UpdateResponsiblePerson_ChangesOnlyTheSelectedClassDepartment()
     {
         await SetUpAdministratorAsync();
-        await TestApp.SendAsync(new SaveSharedClassConfigurationCommand
+        await TestApp.SendAsync(new SaveInvitationCountCommand { InvitationCount = 8 });
+        await TestApp.SendAsync(new SaveDepartmentCommand
         {
-            InvitationCount = 8,
-            Departments = [new DepartmentTemplateInput(null, "Logistică", "Gestionează materialele")]
+            Name = "Logistică", Responsibilities = "Gestionează materialele"
         });
         var schoolClass = await TestApp.SendAsync(new CreateSchoolClassCommand
         {

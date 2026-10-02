@@ -1,4 +1,5 @@
 using FluentResults;
+using skestock.Application.Common.Errors;
 using skestock.Application.Common.Caching;
 using NUnit.Framework;
 using Shouldly;
@@ -86,4 +87,21 @@ public class ResultCacheTransformerTests
         roundTripped.IsSuccess.ShouldBeFalse();
         roundTripped.Errors.Select(e => e.Message).ShouldBe(["something went wrong"]);
     }
+    [Test]
+    public void SerializedRoundTrip_PreservesProblemDetailsMetadata()
+    {
+        var id = Guid.NewGuid();
+        var original = Result.Fail<string>(new ClassConfigurationErrors.DepartmentNotFound(id));
+
+        var serialized = ResultCacheTransformer.Serialize(original);
+        var restored = ResultCacheTransformer.Deserialize<Result<string>>(serialized);
+        var error = restored.Errors.Single();
+
+        error.Metadata[ErrorMetadataKeys.StatusCode].ShouldBe(404);
+        error.Metadata[ErrorMetadataKeys.Title].ShouldBe("Department not found");
+        error.Metadata[ErrorMetadataKeys.Code].ShouldBe("class_configuration.department_not_found");
+        var parameters = error.Metadata[ErrorMetadataKeys.Params].ShouldBeAssignableTo<IReadOnlyDictionary<string, object>>();
+        parameters["departmentId"].ShouldBe(id.ToString());
+    }
+
 }

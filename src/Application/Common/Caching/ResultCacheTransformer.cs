@@ -23,7 +23,10 @@ public static class ResultCacheTransformer
         var cachedErrors = result.Errors
             .Select(error => new CachedError(
                 message: error.Message,
-                errorType: error.GetType().FullName ?? error.GetType().Name))
+                errorType: error.GetType().FullName ?? error.GetType().Name)
+            {
+                Metadata = new Dictionary<string, object>(error.Metadata)
+            })
             .ToList();
 
         return new ResultCache<T>(isSuccess: false, errors: cachedErrors);
@@ -39,13 +42,27 @@ public static class ResultCacheTransformer
             return Result.Ok(cached.Value!);
         }
 
-        // Reconstruct failure result from cached errors
-        var result = Result.Fail<T>(cached.Errors
-            .Select(e => e.Message)
-            .ToList());
-
-        return result;
+        return Result.Fail<T>(cached.Errors.Select(cachedError =>
+        {
+            var error = new Error(cachedError.Message);
+            foreach (var (key, value) in cachedError.Metadata)
+                error.WithMetadata(key, value is JsonElement element ? RestoreMetadataValue(element) : value);
+            return error;
+        }));
     }
+
+    private static object RestoreMetadataValue(JsonElement element) => element.ValueKind switch
+    {
+        JsonValueKind.String => element.GetString()!,
+        JsonValueKind.Number when element.TryGetInt32(out var number) => number,
+        JsonValueKind.Number when element.TryGetInt64(out var number) => number,
+        JsonValueKind.Number => element.GetDecimal(),
+        JsonValueKind.True => true,
+        JsonValueKind.False => false,
+        JsonValueKind.Object => element.EnumerateObject().ToDictionary(property => property.Name, property => RestoreMetadataValue(property.Value)),
+        JsonValueKind.Array => element.EnumerateArray().Select(RestoreMetadataValue).ToArray(),
+        _ => null!
+    };
 
     public static string Serialize(object result)
     {

@@ -1,0 +1,52 @@
+<div *nzModalTitle>
+  @let department = store.department();
+  @let departmentName = department?.name ?? null;
+  {{
+    departmentName ? 'Editează departamentul \'' + departmentName + '\'' : 'Adaugă departament'
+  }}
+</div>
+<ske-error-display [problemDetail]="store.departmentProblemDetail()"
+                   [validationErrors]="store.departmentValidationErrors()" />
+
+
+<ske-configuration-department-form [loading]="store.departmentLoading()"
+                                   [department]="store.department()" />
+  
+
+<div *nzModalFooter>
+  <nz-space>
+    <button nz-button
+            *nzSpaceItem
+            nzType="default"
+            type="button"
+            (click)="close()"
+            [nzLoading]="store.departmentLoading()">
+      Închide
+    </button>
+    <nz-space-compact *nzSpaceItem>
+      <button nz-button
+              nzType="primary"
+              type="button"
+              (click)="save()"
+              [nzLoading]="store.departmentLoading()">
+        Salvează și închide
+      </button>
+      <button nz-button
+              nzType="primary"
+              type="button"
+              nz-dropdown
+              [nzDropdownMenu]="menu"
+              aria-label="Opțiuni de salvare"
+              [disabled]="store.departmentLoading()">
+        <nz-icon nzType="icons:chevron-down" />
+      </button>
+      <nz-dropdown-menu #menu="nzDropdownMenu">
+        <ul nz-menu>
+          <li nz-menu-item
+              (click)="save(false)">Salvează
+          </li>
+        </ul>
+      </nz-dropdown-menu>
+    </nz-space-compact>
+  </nz-space>
+</div>

@@ -1,0 +1,20 @@
+<nz-page-header [nzGhost]="false">
+  <nz-breadcrumb nz-page-header-breadcrumb class="hidden! lg:block!" nzSeparator=">">
+    <nz-breadcrumb-item>Acasa</nz-breadcrumb-item>
+    <nz-breadcrumb-item>Configurare</nz-breadcrumb-item>
+  </nz-breadcrumb>
+  <nz-page-header-title>
+    <div class="flex items-center gap-1">
+      <ske-menu-toggle class="-ms-2" />
+      <span>Configurare</span>
+    </div>
+  </nz-page-header-title>
+  <nz-page-header-content class="pt-0! hidden! lg:block!">
+    <div nz-typography nzType="secondary" class="mb-0!">
+      Alegeți departamentele și numărul de invitații pentru clasele noi. Clasele existente își
+      păstrează configurarea inițială.
+    </div>
+  </nz-page-header-content>
+</nz-page-header>
+
+<ske-theme-switcher class="absolute top-1.5 right-4 hidden lg:block" />

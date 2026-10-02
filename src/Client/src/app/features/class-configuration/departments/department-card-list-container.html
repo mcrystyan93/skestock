@@ -1,0 +1,44 @@
+<section class="min-w-0"
+         aria-labelledby="departments-heading"
+         [attr.aria-busy]="store.departmentsLoading()">
+  <div class="mb-4 flex items-start justify-between gap-4">
+    <div class="min-w-0">
+      <h2 id="departments-heading"
+          class="mb-1 text-lg font-semibold">Departamente</h2>
+      <p nz-typography
+         nzType="secondary"
+         class="mb-0!">
+        Numele și responsabilitățile se copiază în clase noi. Fiecare clasă își completează separat
+        responsabilul.
+      </p>
+    </div>
+    <button nz-button
+            nzType="default"
+            type="button"
+            [disabled]="store.departmentsLoading()"
+            (click)="openDepartment()">
+      <nz-icon nzType="icons:plus"/>
+      Adaugă
+    </button>
+  </div>
+  <ske-error-display [problemDetail]="store.departmentsProblemDetail()"
+                     [validationErrors]="store.departmentsValidationErrors()"/>
+  <ng-container *skeLoader="store.departmentsLoading()">
+    <ul class="m-0 grid list-none grid-cols-1 gap-4 p-0 lg:grid-cols-2">
+      @for (department of store.departments(); track department.id) {
+        <li class="min-w-0">
+          <ske-configuration-department-card [department]="department"
+                                             [loading]="store.departmentsLoading()"
+                                             (onEdit)="openDepartment(department)"
+                                             (onRemove)="deleteDepartment(department)"
+          />
+        </li>
+      } @empty {
+        <li class="lg:col-span-2">
+          <nz-empty nzNotFoundContent="Nu există departamente configurate. Adăugați primul departament pentru a-l include în clasele noi."
+          />
+        </li>
+      }
+    </ul>
+  </ng-container>
+</section>

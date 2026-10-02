@@ -1,0 +1,62 @@
+<nz-card [nzTitle]="cardTitle"
+         class="min-w-0"
+         [attr.aria-busy]="loading()">
+  <ng-container *skeLoader="loading()">
+    <form nz-form
+          nzLayout="vertical"
+          nzNoColon
+          class="mt-4 w-full lg:max-w-sm"
+          (submit)="$event.preventDefault(); onSave.emit()">
+      <nz-form-item>
+        <nz-form-label nzRequired
+                       nzFor="invitation-count">
+          Invitații pentru fiecare clasă nouă
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="invitationCountErrorTemplate">
+          <nz-input-number nzId="invitation-count"
+                           [formField]="invitationsForm.invitationCount"
+                           [nzMin]="0"
+                           [nzMax]="maxInvitationCount"
+                           [nzStep]="1"
+                           class="w-full!"
+                           [attr.aria-invalid]="
+              invitationsForm.invitationCount().touched() &&
+              invitationsForm.invitationCount().invalid()
+                ? 'true'
+                : null
+            "
+                           [attr.aria-describedby]="
+              invitationsForm.invitationCount().touched() &&
+              invitationsForm.invitationCount().invalid()
+                ? 'invitation-count-errors'
+                : 'invitation-help'
+            " />
+          <ng-template #invitationCountErrorTemplate>
+            <div id="invitation-count-errors">
+              @for (error of invitationsForm.invitationCount().errors(); track $index) {
+                <div class="ant-form-item-explain-error">{{ error.message }}</div>
+              }
+            </div>
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+      <p id="invitation-help"
+         nz-typography
+         nzType="secondary"
+         class="-mt-2 mb-0!">
+        Introduceți un număr întreg pozitiv sau zero.
+      </p>
+      <button nz-button
+              class="mt-2!"
+              nzType="primary"
+              type="submit"
+              [nzLoading]="loading() || invitationsForm().submitting()">
+        Salvează
+      </button>
+    </form>
+  </ng-container>
+</nz-card>
+
+<ng-template #cardTitle>
+  <h3 class="mb-0! text-base font-semibold">Număr de invitații</h3>
+</ng-template>
