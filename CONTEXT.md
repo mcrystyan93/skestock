@@ -3,40 +3,52 @@
 ## Class item stock evolution
 
 Class item stock evolution is the running balance of signed `StockTransaction.QuantityChange`
-values for one item across every location in a school class. Its timeline begins with the first
-transaction for that class and item, with all transaction dates grouped by UTC calendar day.
-Transfer-out and transfer-in entries offset each other in the class-wide total.
+values for one item across every location in a school class. Its timeline begins with the first transaction for that
+class and item, with all transaction dates grouped by UTC calendar day. Transfer-out and transfer-in entries offset each
+other in the class-wide total.
 
 ## Goods receipt (Recepție)
 
-A goods receipt is one order that the school has received: a delivery with one or more received
-item lines. It is the point at which purchased stock enters a school class.
+A goods receipt is one order that the school has received: a delivery with one or more received item lines. It is the
+point at which purchased stock enters a school class.
 
 ## Purchase (Achiziție)
 
-A purchase is one received item line. Its quantity is the amount received, not the amount still
-left in stock, and its value is that quantity multiplied by the unit price paid. The purchase date
-is the date the goods were received.
+A purchase is one received item line. Its quantity is the amount received, not the amount still left in stock, and its
+value is that quantity multiplied by the unit price paid. The purchase date is the date the goods were received.
 
 ## Order list (Listă de comandă)
 
-An order list is a plan of what to buy. It is not a purchase and does not count towards purchase
-statistics until its items are actually received.
+An order list is a plan of what to buy. It is not a purchase and does not count towards purchase statistics until its
+items are actually received.
 
 ## Order list submission (Trimiterea listei de comandă)
 
-Submitting an order list finalizes the plan for the next purchasing step. A submitted list is no
-longer editable and is not itself a purchase or goods receipt.
-_Avoid_: Order approval as a separate business state or process.
+Submitting an order list finalizes the plan for the next purchasing step. A submitted list is no longer editable and is
+not itself a purchase or goods receipt. _Avoid_: Order approval as a separate business state or process.
 
 ## Purchase frequency (Frecvență achiziții)
 
-Purchase frequency is how many separate times an item was bought. All of an item's lines on the
-same goods receipt count as one time.
+Purchase frequency is how many separate times an item was bought. All of an item's lines on the same goods receipt count
+as one time.
 
 ## Top purchases (Top achiziții)
 
-Top purchases ranks items by total purchased quantity, total purchase value, or purchase
-frequency. The ranking covers either one school class's whole history or the last 90 or 365
-calendar days across all classes. Quantities of items with different units are ranked together and
-shown with their unit.
+Top purchases ranks items by total purchased quantity, total purchase value, or purchase frequency. The ranking covers
+either one school class's whole history or the last 90 or 365 calendar days across all classes. Quantities of items with
+different units are ranked together and shown with their unit.
+
+## Department template (Model de departament)
+
+A department template defines a department name and responsibilities as free text in the shared configuration. School
+classes copy these templates to establish their own departments.
+
+## Class department (Departament al clasei)
+
+A class department is a copy of a department template belonging to one school class, with a responsible person recorded
+as free text for that class. Changes to the template do not change departments already copied into classes.
+
+## Invitation count (Număr de invitații)
+
+The invitation count is a nonnegative integer defined in the shared configuration and copied into each new school class.
+Each class retains its copied value when the shared configuration changes.

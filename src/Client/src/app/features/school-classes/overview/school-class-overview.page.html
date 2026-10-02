@@ -1,31 +1,35 @@
 <ske-school-class-overview-header-container [classId]="store.schoolClass()?.id ?? null"
-                                            class="min-w-0" />
+                                            class="min-w-0"/>
 
 <ske-error-display [problemDetail]="store.schoolClassProblemDetail()"
-                   [validationErrors]="store.schoolClassValidationErrors()" />
+                   [validationErrors]="store.schoolClassValidationErrors()"/>
 
 <nz-tabs [nzSelectedIndex]="store.selectedTabIndex()"
          [nzTabBarStyle]="{display:'none'}"
          class="inner-scroll grow ">
   <nz-tab>
-    <ske-class-stock [classId]="store.schoolClass()?.id ?? null" />
+    <ske-class-stock [classId]="store.schoolClass()?.id ?? null"/>
   </nz-tab>
   <nz-tab>
-    <ske-school-class-overview-order-lists-tab [classId]="store.schoolClass()?.id ?? null" />
+    <ske-school-class-overview-order-lists-tab [classId]="store.schoolClass()?.id ?? null"/>
   </nz-tab>
   <nz-tab>
 
     <ske-error-display [problemDetail]="store.goodsReceiptsProblemDetail()"
-                       [validationErrors]="store.goodsReceiptsValidationErrors()" />
+                       [validationErrors]="store.goodsReceiptsValidationErrors()"/>
 
     <ske-school-class-overview-goods-receipts-tab [classId]="store.schoolClass()?.id ?? null"
-                                                  [receiptId]="store.receiptIdQueryParam()" />
+                                                  [receiptId]="store.receiptIdQueryParam()"/>
   </nz-tab>
   <nz-tab>
-    <ske-school-class-overview-goods-receipt-imports-tab [classId]="store.schoolClass()?.id ?? null" />
+    <ske-school-class-overview-goods-receipt-imports-tab [classId]="store.schoolClass()?.id ?? null"/>
   </nz-tab>
   <nz-tab>
     <ske-school-class-overview-statistics-tab [classId]="store.schoolClass()?.id ?? null"
-                                              [active]="store.selectedTabIndex() === 4" />
+                                              [active]="store.selectedTabIndex() === 4"/>
+  </nz-tab>
+  <nz-tab>
+    <ske-school-class-departments-tab [schoolClass]="store.schoolClass()"
+                                      (refreshed)="refreshClass()"/>
   </nz-tab>
 </nz-tabs>

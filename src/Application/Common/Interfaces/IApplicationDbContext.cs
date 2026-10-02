@@ -22,6 +22,10 @@ public interface IApplicationDbContext
     DbSet<ItemImportBatchFile> ItemImportBatchFiles { get; }
     DbSet<Location> Locations { get; }
     DbSet<SchoolClass> SchoolClasses { get; }
+
+    DbSet<SharedClassConfiguration> SharedClassConfigurations =>
+        throw new NotSupportedException("This test context does not support shared class configuration.");
+
     DbSet<StockBatch> StockBatches { get; }
     DbSet<StockTransaction> StockTransactions { get; }
     DbSet<GoodsReceipt> GoodsReceipts { get; }
@@ -34,6 +38,6 @@ public interface IApplicationDbContext
     DbSet<UserProfile> UserProfiles { get; }
     DbSet<OutboxMessage> OutboxMessages { get; }
     DbSet<ProcessedMessage> ProcessedMessages { get; }
-    
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

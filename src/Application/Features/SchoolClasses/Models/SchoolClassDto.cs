@@ -9,11 +9,16 @@ public record SchoolClassDto
     public DateOnly StartDate { get; init; }
     public DateOnly EndDate { get; init; }
     public ClassStatus Status { get; init; }
+    public int? InvitationCount { get; init; }
+    public bool IsConfigurationInitialized { get; init; }
+    public IReadOnlyList<ClassDepartmentDto> Departments { get; init; } = [];
     public string? CreatedByName { get; init; }
     public string? LastModifiedByName { get; init; }
     public DateTimeOffset CreatedDate { get; init; }
     public DateTimeOffset LastModifiedDate { get; init; }
 }
+
+public sealed record ClassDepartmentDto(Guid Id, string Name, string Responsibilities, string? ResponsiblePerson);
 
 public record GoodsReceiptSummary(
     Guid Id,

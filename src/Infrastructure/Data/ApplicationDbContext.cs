@@ -16,7 +16,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         IApplicationDbContext,
         IScheduledJobRunDbContext
 {
-
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<CategoryImportBatch> CategoryImportBatches => Set<CategoryImportBatch>();
     public DbSet<CategoryImportBatchFile> CategoryImportBatchFiles => Set<CategoryImportBatchFile>();
@@ -30,6 +29,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ItemImportBatchFile> ItemImportBatchFiles => Set<ItemImportBatchFile>();
     public DbSet<Location> Locations => Set<Location>();
     public DbSet<SchoolClass> SchoolClasses => Set<SchoolClass>();
+    public DbSet<SharedClassConfiguration> SharedClassConfigurations => Set<SharedClassConfiguration>();
     public DbSet<StockBatch> StockBatches => Set<StockBatch>();
     public DbSet<StockTransaction> StockTransactions => Set<StockTransaction>();
     public DbSet<GoodsReceipt> GoodsReceipts => Set<GoodsReceipt>();

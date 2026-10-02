@@ -46,7 +46,7 @@
 <ng-template #drawerFooter>
   <div class="flex items-center justify-between">
     <span>Temă</span>
-    <ske-theme-switcher />
+    <ske-theme-switcher/>
   </div>
 </ng-template>
 
@@ -79,6 +79,14 @@
       <nz-icon nzType="icons:box-open-full"
                class="text-2xl!"></nz-icon>
       <span>Articole</span>
+    </li>
+    <li nz-menu-item
+        [nzMatchRouter]="true"
+        (click)="drawer.close()"
+        [routerLink]="['/configuration']">
+      <nz-icon nzType="icons:gear"
+               class="text-2xl!"></nz-icon>
+      <span>Configurare</span>
     </li>
   </ul>
 </ng-template>

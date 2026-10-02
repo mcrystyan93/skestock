@@ -7,7 +7,8 @@ namespace skestock.Application.Features.SchoolClasses.Queries.GetSchoolClassById
 public class GetSchoolClassByIdHandler(IApplicationDbContext dbContext)
     : IRequestHandler<GetSchoolClassByIdQuery, Result<SchoolClassDto>>
 {
-    public async ValueTask<Result<SchoolClassDto>> Handle(GetSchoolClassByIdQuery request, CancellationToken cancellationToken)
+    public async ValueTask<Result<SchoolClassDto>> Handle(GetSchoolClassByIdQuery request,
+        CancellationToken cancellationToken)
     {
         var schoolClass = await dbContext.SchoolClasses
             .AsNoTracking()
@@ -19,6 +20,12 @@ public class GetSchoolClassByIdHandler(IApplicationDbContext dbContext)
                 StartDate = c.StartDate,
                 EndDate = c.EndDate,
                 Status = c.Status,
+                InvitationCount = c.InvitationCount,
+                IsConfigurationInitialized = c.InvitationCount.HasValue,
+                Departments = c.Departments.OrderBy(department => department.Name)
+                    .Select(department => new ClassDepartmentDto(
+                        department.Id, department.Name, department.Responsibilities, department.ResponsiblePerson))
+                    .ToArray(),
                 CreatedByName = c.CreatedBy != null ? c.CreatedBy.FullName : null,
                 LastModifiedByName = c.LastModifiedBy != null ? c.LastModifiedBy.FullName : null,
                 CreatedDate = c.CreatedDate,
