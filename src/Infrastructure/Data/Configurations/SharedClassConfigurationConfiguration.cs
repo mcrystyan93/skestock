@@ -11,5 +11,8 @@ public class SharedClassConfigurationConfiguration : IEntityTypeConfiguration<Sh
     {
         builder.Property(configuration => configuration.Id).ValueGeneratedNever();
         builder.Property(configuration => configuration.InvitationCount).IsRequired();
+        builder.Property(configuration => configuration.Room4SeatCount).IsRequired().HasDefaultValue(0);
+        builder.Property(configuration => configuration.Room1SeatCount).IsRequired().HasDefaultValue(0);
+        builder.Property(configuration => configuration.Room6SeatCount).IsRequired().HasDefaultValue(0);
     }
 }
