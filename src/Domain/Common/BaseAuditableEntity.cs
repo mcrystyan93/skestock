@@ -1,4 +1,5 @@
 ﻿using skestock.Domain.Entities;
+using skestock.Domain.Entities.Users;
 
 namespace skestock.Domain.Common;
 

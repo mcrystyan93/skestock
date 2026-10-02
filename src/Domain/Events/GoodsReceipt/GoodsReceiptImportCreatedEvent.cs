@@ -1,4 +1,5 @@
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.GoodsReceipts;
 
 namespace skestock.Domain.Events.GoodsReceipt;
 
