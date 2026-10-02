@@ -47,6 +47,8 @@ public class CachedError
     /// </summary>
     public string ErrorType { get; set; } = string.Empty;
 
+    public Dictionary<string, object> Metadata { get; set; } = new();
+
     public CachedError() { }
 
     public CachedError(string message, string errorType)

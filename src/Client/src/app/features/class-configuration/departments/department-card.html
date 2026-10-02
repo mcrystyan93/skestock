@@ -1,0 +1,34 @@
+<nz-card class="min-w-0 h-full"
+         [nzTitle]="cardTitle"
+         [nzExtra]="cardExtra"
+         [attr.aria-busy]="loading()">
+  <ng-container *skeLoader="loading()">
+    <p class="mb-4 whitespace-pre-wrap break-words">{{ department().responsibilities }}</p>
+  </ng-container>
+</nz-card>
+
+<ng-template #cardTitle>
+  {{ department().name }}
+</ng-template>
+
+<ng-template #cardExtra>
+  <div class="flex flex-wrap gap-2">
+    <button nz-button
+            [disabled]="loading()"
+            type="button"
+            (click)="onEdit.emit()"
+            [attr.aria-label]="'Editează departamentul ' + department().name">
+      <nz-icon nzType="icons:pen" />
+      Editează
+    </button>
+    <button nz-button
+            [disabled]="loading()"
+            nzDanger
+            type="button"
+            (click)="onRemove.emit()"
+            [attr.aria-label]="'Șterge departamentul ' + department().name">
+      <nz-icon nzType="icons:trash" />
+      Șterge
+    </button>
+  </div>
+</ng-template>

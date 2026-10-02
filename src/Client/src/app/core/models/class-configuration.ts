@@ -4,13 +4,16 @@ export type DepartmentTemplateDto = {
   responsibilities: string;
 };
 
-export type SharedClassConfigurationDto = {
-  isConfigured: boolean;
-  invitationCount: number;
-  canManage: boolean;
-  departments: DepartmentTemplateDto[];
+export type SaveDepartmentRequest = {
+  id: string | null;
+  name: string;
+  responsibilities: string;
 };
 
-export type SaveSharedClassConfigurationRequest = {
+export type InvitationCountDto = {
+  invitationCount: number;
+};
+
+export type SaveInvitationCountRequest = {
   invitationCount: number;
 };
