@@ -1,4 +1,5 @@
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
 
 namespace skestock.Domain.Events.Categories;
 
