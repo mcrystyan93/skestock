@@ -497,3 +497,6 @@ graphify-out/
 
 # Local/generated environment files (secrets)
 .env
+
+# Playwright MCP artifacts
+.playwright-mcp/
