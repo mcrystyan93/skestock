@@ -154,7 +154,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.Category", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Categories.Category", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -195,7 +195,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.CategoryImportBatch", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Categories.CategoryImportBatch", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -268,7 +268,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("CategoryImportBatches");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.CategoryImportBatchFile", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Categories.CategoryImportBatchFile", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -310,265 +310,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("CategoryImportBatchFiles");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.ClassBalance", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ClassId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int?>("ClosingQty")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("CreatedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("ItemId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("LastModifiedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("LastModifiedDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("LocationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("OpeningQty")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClassId");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("ItemId");
-
-                    b.HasIndex("LastModifiedById");
-
-                    b.HasIndex("LocationId");
-
-                    b.ToTable("ClassBalances");
-                });
-
-            modelBuilder.Entity("skestock.Domain.Entities.ClassDepartment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Responsibilities")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResponsiblePerson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("SchoolClassId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SchoolClassId");
-
-                    b.ToTable("ClassDepartment");
-                });
-
-            modelBuilder.Entity("skestock.Domain.Entities.ClassItemStockVisibility", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ClassId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CreatedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("HideWhenZeroStock")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("ItemId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("LastModifiedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("LastModifiedDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("LocationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("ItemId");
-
-                    b.HasIndex("LastModifiedById");
-
-                    b.HasIndex("LocationId");
-
-                    b.HasIndex("ClassId", "ItemId", "LocationId")
-                        .IsUnique();
-
-                    b.ToTable("ClassItemStockVisibilities");
-                });
-
-            modelBuilder.Entity("skestock.Domain.Entities.DailyItemConsumption", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ClassId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("ComputedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<Guid>("ItemId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("LocationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalValue")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LocationId");
-
-                    b.HasIndex("ClassId", "Date")
-                        .HasDatabaseName("IX_DailyItemConsumptions_ClassId_Date");
-
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("ClassId", "Date"), new[] { "Quantity", "TotalValue" });
-
-                    b.HasIndex("ItemId", "Date")
-                        .HasDatabaseName("IX_DailyItemConsumptions_ItemId_Date");
-
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("ItemId", "Date"), new[] { "Quantity", "TotalValue" });
-
-                    b.HasIndex("Date", "ItemId", "ClassId", "LocationId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_DailyItemConsumptions_Date_ItemId_ClassId_LocationId");
-
-                    b.ToTable("DailyItemConsumptions");
-                });
-
-            modelBuilder.Entity("skestock.Domain.Entities.DepartmentTemplate", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Responsibilities")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SharedClassConfigurationId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SharedClassConfigurationId");
-
-                    b.ToTable("DepartmentTemplate");
-                });
-
-            modelBuilder.Entity("skestock.Domain.Entities.FileMetadata", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("BlobContainer")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("BlobPath")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTimeOffset?>("CompletedDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<Guid?>("CreatedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("ETag")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid>("FileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("LastModifiedById")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("LastModifiedDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("OriginalName")
-                        .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)");
-
-                    b.Property<long>("SizeBytes")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedById");
-
-                    b.HasIndex("LastModifiedById");
-
-                    b.ToTable("FileMetadata");
-                });
-
-            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceipt", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceipts.GoodsReceipt", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -620,7 +362,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("GoodsReceipts");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceiptImport", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceipts.GoodsReceiptImport", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -688,7 +430,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("GoodsReceiptImports");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceiptImportLine", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceipts.GoodsReceiptImportLine", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -744,7 +486,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("GoodsReceiptImportLines");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.Item", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Items.Item", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -829,7 +571,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("Items");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.ItemImportBatch", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Items.ItemImportBatch", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -908,7 +650,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("ItemImportBatches");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.ItemImportBatchFile", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Items.ItemImportBatchFile", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -950,59 +692,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("ItemImportBatchFiles");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.ItemPurchaseStatistic", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("AverageQuantity")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("AverageUnitPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid?>("ClassId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("ComputedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("ItemId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("LastPurchasedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("PurchaseCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Scope")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<int>("TotalQuantity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalValue")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClassId");
-
-                    b.HasIndex("ItemId", "Scope")
-                        .HasDatabaseName("IX_ItemPurchaseStatistics_ItemId_Scope");
-
-                    b.HasIndex("Scope", "ClassId", "ItemId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_ItemPurchaseStatistics_Scope_ClassId_ItemId");
-
-                    b.ToTable("ItemPurchaseStatistics");
-                });
-
-            modelBuilder.Entity("skestock.Domain.Entities.Location", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Locations.Location", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1049,7 +739,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("Locations");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.OrderList", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.OrderLists.OrderList", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1106,7 +796,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("OrderLists");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.OrderListLine", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.OrderLists.OrderListLine", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1159,7 +849,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("OrderListLines");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.ScheduledJobRun", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.ScheduledJobs.ScheduledJobRun", b =>
                 {
                     b.Property<string>("JobName")
                         .HasMaxLength(100)
@@ -1189,7 +879,60 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("ScheduledJobRuns");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.SchoolClass", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.SchoolClasses.ClassDepartment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Responsibilities")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ResponsiblePerson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("SchoolClassId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SchoolClassId");
+
+                    b.ToTable("ClassDepartment");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.SchoolClasses.DepartmentTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Responsibilities")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SharedClassConfigurationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SharedClassConfigurationId");
+
+                    b.ToTable("DepartmentTemplate");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.SchoolClasses.SchoolClass", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1233,7 +976,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("SchoolClasses");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.SharedClassConfiguration", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.SchoolClasses.SharedClassConfiguration", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("int");
@@ -1241,12 +984,221 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Property<int>("InvitationCount")
                         .HasColumnType("int");
 
+                    b.Property<int>("Room1SeatCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("Room4SeatCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("Room6SeatCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
                     b.HasKey("Id");
 
                     b.ToTable("SharedClassConfigurations");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.StockBatch", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Statistics.DailyItemConsumption", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClassId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("ComputedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("ClassId", "Date")
+                        .HasDatabaseName("IX_DailyItemConsumptions_ClassId_Date");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("ClassId", "Date"), new[] { "Quantity", "TotalValue" });
+
+                    b.HasIndex("ItemId", "Date")
+                        .HasDatabaseName("IX_DailyItemConsumptions_ItemId_Date");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("ItemId", "Date"), new[] { "Quantity", "TotalValue" });
+
+                    b.HasIndex("Date", "ItemId", "ClassId", "LocationId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_DailyItemConsumptions_Date_ItemId_ClassId_LocationId");
+
+                    b.ToTable("DailyItemConsumptions");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.Statistics.ItemPurchaseStatistic", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("AverageQuantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("AverageUnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid?>("ClassId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("ComputedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("LastPurchasedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("PurchaseCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<int>("TotalQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassId");
+
+                    b.HasIndex("ItemId", "Scope")
+                        .HasDatabaseName("IX_ItemPurchaseStatistics_ItemId_Scope");
+
+                    b.HasIndex("Scope", "ClassId", "ItemId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ItemPurchaseStatistics_Scope_ClassId_ItemId");
+
+                    b.ToTable("ItemPurchaseStatistics");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.Stock.ClassBalance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClassId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("ClosingQty")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("LastModifiedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("OpeningQty")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassId");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("LastModifiedById");
+
+                    b.HasIndex("LocationId");
+
+                    b.ToTable("ClassBalances");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.Stock.ClassItemStockVisibility", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClassId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("HideWhenZeroStock")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("LastModifiedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("LastModifiedById");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("ClassId", "ItemId", "LocationId")
+                        .IsUnique();
+
+                    b.ToTable("ClassItemStockVisibilities");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.Stock.StockBatch", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1314,7 +1266,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("StockBatches");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.StockTransaction", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Stock.StockTransaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1386,7 +1338,70 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("StockTransactions");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.SupplyList", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Storage.FileMetadata", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BlobContainer")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("BlobPath")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset?>("CompletedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ETag")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("FileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("LastModifiedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("OriginalName")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("LastModifiedById");
+
+                    b.ToTable("FileMetadata");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.SupplyLists.SupplyList", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1439,7 +1454,7 @@ namespace skestock.Infrastructure.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.SupplyListLine", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.SupplyLists.SupplyListLine", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1489,7 +1504,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("SupplyListLines");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.UserProfile", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Users.UserProfile", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1724,21 +1739,21 @@ namespace skestock.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.Category", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Categories.Category", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.OwnsOne("skestock.Domain.Entities.CategoryIcon", "Icon", b1 =>
+                    b.OwnsOne("skestock.Domain.Entities.Categories.CategoryIcon", "Icon", b1 =>
                         {
                             b1.Property<Guid>("CategoryId");
 
@@ -1773,28 +1788,28 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("LastModifiedBy");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.CategoryImportBatch", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Categories.CategoryImportBatch", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "UploadedByUser")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "UploadedByUser")
                         .WithMany()
                         .HasForeignKey("UploadedByUserId")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.OwnsMany("skestock.Domain.Entities.ImportBatchHistory", "History", b1 =>
+                    b.OwnsMany("skestock.Domain.Entities.Imports.ImportBatchHistory", "History", b1 =>
                         {
                             b1.Property<Guid>("Id")
                                 .HasColumnType("uniqueidentifier");
@@ -1838,27 +1853,27 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("UploadedByUser");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.CategoryImportBatchFile", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Categories.CategoryImportBatchFile", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.CategoryImportBatch", "Batch")
+                    b.HasOne("skestock.Domain.Entities.Categories.CategoryImportBatch", "Batch")
                         .WithMany("Files")
                         .HasForeignKey("CategoryImportBatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.FileMetadata", "FileMetadata")
+                    b.HasOne("skestock.Domain.Entities.Storage.FileMetadata", "FileMetadata")
                         .WithMany()
                         .HasForeignKey("FileMetadataId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
@@ -1873,175 +1888,27 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("LastModifiedBy");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.ClassBalance", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceipts.GoodsReceipt", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.SchoolClass", "Class")
-                        .WithMany("Balances")
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .HasPrincipalKey("IdentityId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("skestock.Domain.Entities.Item", "Item")
-                        .WithMany("ClassBalances")
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
-                        .WithMany()
-                        .HasForeignKey("LastModifiedById")
-                        .HasPrincipalKey("IdentityId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("skestock.Domain.Entities.Location", "Location")
-                        .WithMany("ClassBalances")
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Class");
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("Item");
-
-                    b.Navigation("LastModifiedBy");
-
-                    b.Navigation("Location");
-                });
-
-            modelBuilder.Entity("skestock.Domain.Entities.ClassDepartment", b =>
-                {
-                    b.HasOne("skestock.Domain.Entities.SchoolClass", "SchoolClass")
-                        .WithMany("Departments")
-                        .HasForeignKey("SchoolClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SchoolClass");
-                });
-
-            modelBuilder.Entity("skestock.Domain.Entities.ClassItemStockVisibility", b =>
-                {
-                    b.HasOne("skestock.Domain.Entities.SchoolClass", null)
-                        .WithMany()
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .HasPrincipalKey("IdentityId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("skestock.Domain.Entities.Item", null)
-                        .WithMany()
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
-                        .WithMany()
-                        .HasForeignKey("LastModifiedById")
-                        .HasPrincipalKey("IdentityId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("skestock.Domain.Entities.Location", null)
-                        .WithMany()
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("LastModifiedBy");
-                });
-
-            modelBuilder.Entity("skestock.Domain.Entities.DailyItemConsumption", b =>
-                {
-                    b.HasOne("skestock.Domain.Entities.SchoolClass", "Class")
-                        .WithMany()
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("skestock.Domain.Entities.Item", "Item")
-                        .WithMany()
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("skestock.Domain.Entities.Location", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Class");
-
-                    b.Navigation("Item");
-
-                    b.Navigation("Location");
-                });
-
-            modelBuilder.Entity("skestock.Domain.Entities.DepartmentTemplate", b =>
-                {
-                    b.HasOne("skestock.Domain.Entities.SharedClassConfiguration", "SharedClassConfiguration")
-                        .WithMany("DepartmentTemplates")
-                        .HasForeignKey("SharedClassConfigurationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SharedClassConfiguration");
-                });
-
-            modelBuilder.Entity("skestock.Domain.Entities.FileMetadata", b =>
-                {
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
-                        .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .HasPrincipalKey("IdentityId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
-                        .WithMany()
-                        .HasForeignKey("LastModifiedById")
-                        .HasPrincipalKey("IdentityId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("CreatedBy");
-
-                    b.Navigation("LastModifiedBy");
-                });
-
-            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceipt", b =>
-                {
-                    b.HasOne("skestock.Domain.Entities.SchoolClass", "Class")
+                    b.HasOne("skestock.Domain.Entities.SchoolClasses.SchoolClass", "Class")
                         .WithMany("GoodsReceipts")
                         .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", null)
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", null)
                         .WithMany("GoodsReceipts")
                         .HasForeignKey("UserProfileId");
 
@@ -2052,38 +1919,38 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("LastModifiedBy");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceiptImport", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceipts.GoodsReceiptImport", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.SchoolClass", "Class")
+                    b.HasOne("skestock.Domain.Entities.SchoolClasses.SchoolClass", "Class")
                         .WithMany()
                         .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.FileMetadata", "FileMetadata")
+                    b.HasOne("skestock.Domain.Entities.Storage.FileMetadata", "FileMetadata")
                         .WithMany()
                         .HasForeignKey("FileMetadataId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.GoodsReceipt", "ResultingGoodsReceipt")
+                    b.HasOne("skestock.Domain.Entities.GoodsReceipts.GoodsReceipt", "ResultingGoodsReceipt")
                         .WithMany()
                         .HasForeignKey("ResultingGoodsReceiptId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "UploadedByUser")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "UploadedByUser")
                         .WithMany()
                         .HasForeignKey("UploadedByUserId")
                         .HasPrincipalKey("IdentityId")
@@ -2103,32 +1970,32 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("UploadedByUser");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceiptImportLine", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceipts.GoodsReceiptImportLine", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.GoodsReceiptImport", "Import")
+                    b.HasOne("skestock.Domain.Entities.GoodsReceipts.GoodsReceiptImport", "Import")
                         .WithMany("Lines")
                         .HasForeignKey("ImportId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.Location", "Location")
+                    b.HasOne("skestock.Domain.Entities.Locations.Location", "Location")
                         .WithMany()
                         .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.Item", "MatchedItem")
+                    b.HasOne("skestock.Domain.Entities.Items.Item", "MatchedItem")
                         .WithMany()
                         .HasForeignKey("MatchedItemId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -2144,21 +2011,21 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("MatchedItem");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.Item", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Items.Item", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.Category", "Category")
+                    b.HasOne("skestock.Domain.Entities.Categories.Category", "Category")
                         .WithMany("Items")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
@@ -2171,28 +2038,28 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("LastModifiedBy");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.ItemImportBatch", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Items.ItemImportBatch", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "UploadedByUser")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "UploadedByUser")
                         .WithMany()
                         .HasForeignKey("UploadedByUserId")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.OwnsMany("skestock.Domain.Entities.ImportBatchHistory", "History", b1 =>
+                    b.OwnsMany("skestock.Domain.Entities.Imports.ImportBatchHistory", "History", b1 =>
                         {
                             b1.Property<Guid>("Id")
                                 .HasColumnType("uniqueidentifier");
@@ -2236,27 +2103,27 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("UploadedByUser");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.ItemImportBatchFile", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Items.ItemImportBatchFile", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.FileMetadata", "FileMetadata")
+                    b.HasOne("skestock.Domain.Entities.Storage.FileMetadata", "FileMetadata")
                         .WithMany()
                         .HasForeignKey("FileMetadataId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.ItemImportBatch", "Batch")
+                    b.HasOne("skestock.Domain.Entities.Items.ItemImportBatch", "Batch")
                         .WithMany("Files")
                         .HasForeignKey("ItemImportBatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
@@ -2271,39 +2138,21 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("LastModifiedBy");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.ItemPurchaseStatistic", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Locations.Location", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.SchoolClass", "Class")
-                        .WithMany()
-                        .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("skestock.Domain.Entities.Item", "Item")
-                        .WithMany()
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Class");
-
-                    b.Navigation("Item");
-                });
-
-            modelBuilder.Entity("skestock.Domain.Entities.Location", b =>
-                {
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.Location", "ParentLocation")
+                    b.HasOne("skestock.Domain.Entities.Locations.Location", "ParentLocation")
                         .WithMany("ChildLocations")
                         .HasForeignKey("ParentLocationId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -2315,21 +2164,21 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("ParentLocation");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.OrderList", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.OrderLists.OrderList", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.SchoolClass", "Class")
+                    b.HasOne("skestock.Domain.Entities.SchoolClasses.SchoolClass", "Class")
                         .WithMany()
                         .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
@@ -2342,26 +2191,26 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("LastModifiedBy");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.OrderListLine", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.OrderLists.OrderListLine", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.Item", "Item")
+                    b.HasOne("skestock.Domain.Entities.Items.Item", "Item")
                         .WithMany()
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.OrderList", "OrderList")
+                    b.HasOne("skestock.Domain.Entities.OrderLists.OrderList", "OrderList")
                         .WithMany("Lines")
                         .HasForeignKey("OrderListId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2376,15 +2225,37 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("OrderList");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.SchoolClass", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.SchoolClasses.ClassDepartment", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.SchoolClasses.SchoolClass", "SchoolClass")
+                        .WithMany("Departments")
+                        .HasForeignKey("SchoolClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SchoolClass");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.SchoolClasses.DepartmentTemplate", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.SchoolClasses.SharedClassConfiguration", "SharedClassConfiguration")
+                        .WithMany("DepartmentTemplates")
+                        .HasForeignKey("SharedClassConfigurationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SharedClassConfiguration");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.SchoolClasses.SchoolClass", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
@@ -2395,37 +2266,162 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("LastModifiedBy");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.StockBatch", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Statistics.DailyItemConsumption", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.SchoolClasses.SchoolClass", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("skestock.Domain.Entities.Items.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("skestock.Domain.Entities.Locations.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("Item");
+
+                    b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.Statistics.ItemPurchaseStatistic", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.SchoolClasses.SchoolClass", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.Items.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("Item");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.Stock.ClassBalance", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.SchoolClasses.SchoolClass", "Class")
+                        .WithMany("Balances")
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.GoodsReceipt", "GoodsReceipt")
-                        .WithMany("Batches")
-                        .HasForeignKey("GoodsReceiptId");
-
-                    b.HasOne("skestock.Domain.Entities.Item", "Item")
-                        .WithMany("Batches")
+                    b.HasOne("skestock.Domain.Entities.Items.Item", "Item")
+                        .WithMany("ClassBalances")
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.Location", "Location")
+                    b.HasOne("skestock.Domain.Entities.Locations.Location", "Location")
+                        .WithMany("ClassBalances")
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Item");
+
+                    b.Navigation("LastModifiedBy");
+
+                    b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.Stock.ClassItemStockVisibility", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.SchoolClasses.SchoolClass", null)
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.Items.Item", null)
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("LastModifiedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.Locations.Location", null)
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("LastModifiedBy");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.Stock.StockBatch", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.GoodsReceipts.GoodsReceipt", "GoodsReceipt")
+                        .WithMany("Batches")
+                        .HasForeignKey("GoodsReceiptId");
+
+                    b.HasOne("skestock.Domain.Entities.Items.Item", "Item")
+                        .WithMany("Batches")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("LastModifiedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.Locations.Location", "Location")
                         .WithMany("Batches")
                         .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.SchoolClass", "ReceivedClass")
+                    b.HasOne("skestock.Domain.Entities.SchoolClasses.SchoolClass", "ReceivedClass")
                         .WithMany("BatchesReceived")
                         .HasForeignKey("ReceivedClassId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -2444,48 +2440,48 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("ReceivedClass");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.StockTransaction", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Stock.StockTransaction", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.StockBatch", "Batch")
+                    b.HasOne("skestock.Domain.Entities.Stock.StockBatch", "Batch")
                         .WithMany("Transactions")
                         .HasForeignKey("BatchId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.SchoolClass", "Class")
+                    b.HasOne("skestock.Domain.Entities.SchoolClasses.SchoolClass", "Class")
                         .WithMany("Transactions")
                         .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.GoodsReceipt", "GoodsReceipt")
+                    b.HasOne("skestock.Domain.Entities.GoodsReceipts.GoodsReceipt", "GoodsReceipt")
                         .WithMany("Transactions")
                         .HasForeignKey("GoodsReceiptId");
 
-                    b.HasOne("skestock.Domain.Entities.Item", "Item")
+                    b.HasOne("skestock.Domain.Entities.Items.Item", "Item")
                         .WithMany("Transactions")
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.Location", "Location")
+                    b.HasOne("skestock.Domain.Entities.Locations.Location", "Location")
                         .WithMany("Transactions")
                         .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "User")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "User")
                         .WithMany("Transactions")
                         .HasForeignKey("UserId")
                         .HasPrincipalKey("IdentityId")
@@ -2509,15 +2505,15 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.SupplyList", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Storage.FileMetadata", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
@@ -2528,27 +2524,46 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("LastModifiedBy");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.SupplyListLine", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.SupplyLists.SupplyList", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.Item", "Item")
-                        .WithMany()
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("skestock.Domain.Entities.SupplyList", "SupplyList")
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("LastModifiedBy");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.SupplyLists.SupplyListLine", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.Items.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("LastModifiedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.SupplyLists.SupplyList", "SupplyList")
                         .WithMany("Lines")
                         .HasForeignKey("SupplyListId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2563,9 +2578,9 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("SupplyList");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.UserProfile", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Users.UserProfile", b =>
                 {
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "CreatedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .HasPrincipalKey("IdentityId")
@@ -2573,11 +2588,11 @@ namespace skestock.Infrastructure.Data.Migrations
 
                     b.HasOne("skestock.Infrastructure.Identity.ApplicationUser", null)
                         .WithOne("UserProfile")
-                        .HasForeignKey("skestock.Domain.Entities.UserProfile", "IdentityId")
+                        .HasForeignKey("skestock.Domain.Entities.Users.UserProfile", "IdentityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("skestock.Domain.Entities.UserProfile", "LastModifiedBy")
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
                         .WithMany()
                         .HasForeignKey("LastModifiedById")
                         .HasPrincipalKey("IdentityId")
@@ -2588,29 +2603,29 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("LastModifiedBy");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.Category", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Categories.Category", b =>
                 {
                     b.Navigation("Items");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.CategoryImportBatch", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Categories.CategoryImportBatch", b =>
                 {
                     b.Navigation("Files");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceipt", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceipts.GoodsReceipt", b =>
                 {
                     b.Navigation("Batches");
 
                     b.Navigation("Transactions");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceiptImport", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.GoodsReceipts.GoodsReceiptImport", b =>
                 {
                     b.Navigation("Lines");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.Item", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Items.Item", b =>
                 {
                     b.Navigation("Batches");
 
@@ -2619,12 +2634,12 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("Transactions");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.ItemImportBatch", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Items.ItemImportBatch", b =>
                 {
                     b.Navigation("Files");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.Location", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Locations.Location", b =>
                 {
                     b.Navigation("Batches");
 
@@ -2635,12 +2650,12 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("Transactions");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.OrderList", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.OrderLists.OrderList", b =>
                 {
                     b.Navigation("Lines");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.SchoolClass", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.SchoolClasses.SchoolClass", b =>
                 {
                     b.Navigation("Balances");
 
@@ -2653,22 +2668,22 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("Transactions");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.SharedClassConfiguration", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.SchoolClasses.SharedClassConfiguration", b =>
                 {
                     b.Navigation("DepartmentTemplates");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.StockBatch", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Stock.StockBatch", b =>
                 {
                     b.Navigation("Transactions");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.SupplyList", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.SupplyLists.SupplyList", b =>
                 {
                     b.Navigation("Lines");
                 });
 
-            modelBuilder.Entity("skestock.Domain.Entities.UserProfile", b =>
+            modelBuilder.Entity("skestock.Domain.Entities.Users.UserProfile", b =>
                 {
                     b.Navigation("GoodsReceipts");
 
