@@ -1,16 +1,17 @@
-import { Component, effect, inject, input, OnDestroy, OnInit, signal, untracked } from '@angular/core';
-import { HeaderContainer } from './header/header-container';
-import { SchoolClassOverviewStore } from '../services/school-class-overview.store';
-import { isNil } from 'lodash-es';
-import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
-import { GoodsReceiptsTab } from './tabs/goods-receipts/goods-receipts-tab';
-import { GoodsReceiptImportsTab } from './tabs/goods-receipt-imports/goods-receipt-imports-tab';
-import { OrderListsTab } from './tabs/order-lists/order-lists-tab';
-import { StatisticsTab } from './tabs/statistics/statistics-tab';
-import { ClassStock } from '@ske/shared/stock';
-import { realtimeGroups, SignalRGroupManagerStore } from '@ske/signalr';
-import { ErrorAlert } from '@ske/shared/errors';
-import { QueryParamState } from '@ske/routes';
+import {Component, effect, inject, input, OnDestroy, OnInit, signal, untracked} from '@angular/core';
+import {HeaderContainer} from './header/header-container';
+import {SchoolClassOverviewStore} from '../services/school-class-overview.store';
+import {isNil} from 'lodash-es';
+import {NzTabComponent, NzTabsComponent} from 'ng-zorro-antd/tabs';
+import {GoodsReceiptsTab} from './tabs/goods-receipts/goods-receipts-tab';
+import {GoodsReceiptImportsTab} from './tabs/goods-receipt-imports/goods-receipt-imports-tab';
+import {OrderListsTab} from './tabs/order-lists/order-lists-tab';
+import {StatisticsTab} from './tabs/statistics/statistics-tab';
+import {ClassStock} from '@ske/shared/stock';
+import {realtimeGroups, SignalRGroupManagerStore} from '@ske/signalr';
+import {ErrorAlert} from '@ske/shared/errors';
+import {QueryParamState} from '@ske/routes';
+import {ClassDepartmentsTab} from './tabs/departments/class-departments-tab';
 
 @Component({
   imports: [
@@ -22,7 +23,8 @@ import { QueryParamState } from '@ske/routes';
     OrderListsTab,
     StatisticsTab,
     ClassStock,
-    ErrorAlert
+    ErrorAlert,
+    ClassDepartmentsTab
   ],
   selector: 'ske-school-class-overview-page',
   styles: ``,
@@ -42,6 +44,10 @@ export class SchoolClassOverviewPage implements OnInit, OnDestroy {
   public readonly categoryId = signal<string | null>(null);
   public readonly locationId = signal<string | null>(null);
   public readonly receiptId = signal<string | null>(null);
+
+  public refreshClass() {
+    this.store.load(this.id());
+  }
 
 
   public ngOnInit() {

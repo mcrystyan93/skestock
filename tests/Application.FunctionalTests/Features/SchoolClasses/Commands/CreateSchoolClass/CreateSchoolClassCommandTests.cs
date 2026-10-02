@@ -11,9 +11,10 @@ public class CreateSchoolClassCommandTests : TestBase
     private string _prefix = null!;
 
     [SetUp]
-    public void SetUpPrefix()
+    public async Task SetUpPrefix()
     {
         _prefix = $"FT{Guid.NewGuid():N}"[..10];
+        await TestApp.AddAsync(new SharedClassConfiguration { InvitationCount = 0 });
     }
 
     [Test]
@@ -45,9 +46,15 @@ public class CreateSchoolClassCommandTests : TestBase
     public async Task Handle_WithDuplicateName_ThrowsValidationException()
     {
         var name = $"{_prefix}-Fall2026";
-        await TestApp.SendAsync(new CreateSchoolClassCommand { Name = name, StartDate = new DateOnly(2026, 9, 1), EndDate = new DateOnly(2026, 12, 1) });
+        await TestApp.SendAsync(new CreateSchoolClassCommand
+        {
+            Name = name, StartDate = new DateOnly(2026, 9, 1), EndDate = new DateOnly(2026, 12, 1)
+        });
 
-        var act = async () => await TestApp.SendAsync(new CreateSchoolClassCommand { Name = name, StartDate = new DateOnly(2027, 1, 1), EndDate = new DateOnly(2027, 6, 1) });
+        var act = async () => await TestApp.SendAsync(new CreateSchoolClassCommand
+        {
+            Name = name, StartDate = new DateOnly(2027, 1, 1), EndDate = new DateOnly(2027, 6, 1)
+        });
 
         var exception = await act.ShouldThrowAsync<ValidationException>();
         exception.Errors.ShouldContainKey(nameof(CreateSchoolClassCommand.Name));
@@ -56,7 +63,10 @@ public class CreateSchoolClassCommandTests : TestBase
     [Test]
     public async Task Handle_WithEmptyName_ThrowsValidationException()
     {
-        var act = async () => await TestApp.SendAsync(new CreateSchoolClassCommand { Name = "", StartDate = new DateOnly(2026, 9, 1), EndDate = new DateOnly(2026, 12, 1) });
+        var act = async () => await TestApp.SendAsync(new CreateSchoolClassCommand
+        {
+            Name = "", StartDate = new DateOnly(2026, 9, 1), EndDate = new DateOnly(2026, 12, 1)
+        });
 
         var exception = await act.ShouldThrowAsync<ValidationException>();
         exception.Errors.ShouldContainKey(nameof(CreateSchoolClassCommand.Name));
@@ -67,9 +77,7 @@ public class CreateSchoolClassCommandTests : TestBase
     {
         var act = async () => await TestApp.SendAsync(new CreateSchoolClassCommand
         {
-            Name = $"{_prefix}-Invalid",
-            StartDate = new DateOnly(2026, 12, 1),
-            EndDate = new DateOnly(2026, 9, 1)
+            Name = $"{_prefix}-Invalid", StartDate = new DateOnly(2026, 12, 1), EndDate = new DateOnly(2026, 9, 1)
         });
 
         var exception = await act.ShouldThrowAsync<ValidationException>();
@@ -98,7 +106,10 @@ public class CreateSchoolClassCommandTests : TestBase
         before.Value.Data.Count().ShouldBe(0);
 
         var name = $"{_prefix}-Spring2027";
-        await TestApp.SendAsync(new CreateSchoolClassCommand { Name = name, StartDate = new DateOnly(2027, 1, 1), EndDate = new DateOnly(2027, 6, 1) });
+        await TestApp.SendAsync(new CreateSchoolClassCommand
+        {
+            Name = name, StartDate = new DateOnly(2027, 1, 1), EndDate = new DateOnly(2027, 6, 1)
+        });
 
         var after = await TestApp.SendAsync(new GetAllSchoolClassesQuery { SearchTerm = _prefix });
         after.Value.Data.Count().ShouldBe(1);

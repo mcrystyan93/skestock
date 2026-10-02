@@ -1,5 +1,5 @@
-import { Routes } from '@angular/router';
-import { authGuard } from '@ske/auth';
+import {Routes} from '@angular/router';
+import {authGuard} from '@ske/auth';
 
 export const fullRoutes: Routes = [
   {
@@ -7,6 +7,11 @@ export const fullRoutes: Routes = [
     loadComponent: () => import('./full').then((m) => m.Full),
     canActivate: [authGuard],
     children: [
+      {
+        path: 'configuration',
+        loadComponent: () =>
+          import('../../../features/class-configuration/configuration.page').then((m) => m.ConfigurationPage)
+      },
       {
         path: 'categories',
         loadChildren: () => import('@ske/features/categories').then((m) => m.categoriesRoutes)

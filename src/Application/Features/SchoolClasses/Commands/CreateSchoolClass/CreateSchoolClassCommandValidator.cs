@@ -36,7 +36,8 @@ public class CreateSchoolClassCommandValidator : AbstractValidator<CreateSchoolC
             .WithErrorCode(ValidationErrorCodes.InvalidDateRange);
     }
 
-    private static async Task<bool> IsNameUniqueAsync(IApplicationDbContext dbContext, string name, CancellationToken cancellationToken)
+    private static async Task<bool> IsNameUniqueAsync(IApplicationDbContext dbContext, string name,
+        CancellationToken cancellationToken)
     {
         var normalized = name.Trim().ToLower();
         var query = dbContext.SchoolClasses.AsNoTracking().AsQueryable();

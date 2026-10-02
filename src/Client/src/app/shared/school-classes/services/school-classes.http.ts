@@ -1,5 +1,5 @@
-import { HttpClient } from '@angular/common/http';
-import { inject, Service } from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {inject, Service} from '@angular/core';
 import {
   CreateSchoolClassRequest,
   GetAllSchoolClassesRequest,
@@ -34,5 +34,16 @@ export class SchoolClassesHttp {
 
   public update(id: string, request: UpdateSchoolClassRequest) {
     return this._httpClient.put<SchoolClassDto>(`/api/SchoolClasses/${id}`, request);
+  }
+
+  public updateDepartmentResponsiblePerson(classId: string, departmentId: string, responsiblePerson: string) {
+    return this._httpClient.put<void>(
+      `/api/SchoolClasses/${classId}/departments/${departmentId}/responsible-person`,
+      {responsiblePerson}
+    );
+  }
+
+  public initializeConfiguration(classId: string) {
+    return this._httpClient.post<void>(`/api/SchoolClasses/${classId}/initialize-configuration`, {});
   }
 }

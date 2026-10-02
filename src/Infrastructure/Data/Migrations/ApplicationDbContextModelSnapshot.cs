@@ -358,6 +358,34 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("ClassBalances");
                 });
 
+            modelBuilder.Entity("skestock.Domain.Entities.ClassDepartment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Responsibilities")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ResponsiblePerson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("SchoolClassId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SchoolClassId");
+
+                    b.ToTable("ClassDepartment");
+                });
+
             modelBuilder.Entity("skestock.Domain.Entities.ClassItemStockVisibility", b =>
                 {
                     b.Property<Guid>("Id")
@@ -450,6 +478,31 @@ namespace skestock.Infrastructure.Data.Migrations
                         .HasDatabaseName("IX_DailyItemConsumptions_Date_ItemId_ClassId_LocationId");
 
                     b.ToTable("DailyItemConsumptions");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.DepartmentTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Responsibilities")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SharedClassConfigurationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SharedClassConfigurationId");
+
+                    b.ToTable("DepartmentTemplate");
                 });
 
             modelBuilder.Entity("skestock.Domain.Entities.FileMetadata", b =>
@@ -1151,6 +1204,9 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Property<DateOnly>("EndDate")
                         .HasColumnType("date");
 
+                    b.Property<int?>("InvitationCount")
+                        .HasColumnType("int");
+
                     b.Property<Guid?>("LastModifiedById")
                         .HasColumnType("uniqueidentifier");
 
@@ -1175,6 +1231,19 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.HasIndex("LastModifiedById");
 
                     b.ToTable("SchoolClasses");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.SharedClassConfiguration", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InvitationCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SharedClassConfigurations");
                 });
 
             modelBuilder.Entity("skestock.Domain.Entities.StockBatch", b =>
@@ -1847,6 +1916,17 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("Location");
                 });
 
+            modelBuilder.Entity("skestock.Domain.Entities.ClassDepartment", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.SchoolClass", "SchoolClass")
+                        .WithMany("Departments")
+                        .HasForeignKey("SchoolClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SchoolClass");
+                });
+
             modelBuilder.Entity("skestock.Domain.Entities.ClassItemStockVisibility", b =>
                 {
                     b.HasOne("skestock.Domain.Entities.SchoolClass", null)
@@ -1909,6 +1989,17 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("Item");
 
                     b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.DepartmentTemplate", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.SharedClassConfiguration", "SharedClassConfiguration")
+                        .WithMany("DepartmentTemplates")
+                        .HasForeignKey("SharedClassConfigurationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SharedClassConfiguration");
                 });
 
             modelBuilder.Entity("skestock.Domain.Entities.FileMetadata", b =>
@@ -2555,9 +2646,16 @@ namespace skestock.Infrastructure.Data.Migrations
 
                     b.Navigation("BatchesReceived");
 
+                    b.Navigation("Departments");
+
                     b.Navigation("GoodsReceipts");
 
                     b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.SharedClassConfiguration", b =>
+                {
+                    b.Navigation("DepartmentTemplates");
                 });
 
             modelBuilder.Entity("skestock.Domain.Entities.StockBatch", b =>

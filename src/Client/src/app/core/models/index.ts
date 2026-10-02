@@ -18,3 +18,4 @@ export * from './class-statistics';
 export * from './base';
 export * from './order-list';
 export * from './supply-list';
+export * from './class-configuration';

@@ -1,5 +1,5 @@
-import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
-import { PAGINATION_PAGE_SIZE } from './category';
+import {BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition} from './pagination';
+import {PAGINATION_PAGE_SIZE} from './category';
 
 /**
  * Mirrors src/Domain/Enums/ClassStatus.cs. No JsonStringEnumConverter is registered for this
@@ -21,10 +21,20 @@ export type SchoolClassDto = {
   startDate: string;
   endDate: string;
   status: ClassStatus;
+  invitationCount?: number | null;
+  isConfigurationInitialized?: boolean;
+  departments?: ClassDepartmentDto[];
   createdByName?: string | null;
   lastModifiedByName?: string | null;
   createdDate: string;
   lastModifiedDate: string;
+};
+
+export type ClassDepartmentDto = {
+  id: string;
+  name: string;
+  responsibilities: string;
+  responsiblePerson: string | null;
 };
 
 export type SchoolClassDropdownValue = SchoolClassDto | Partial<SchoolClassDto> | null;
@@ -125,10 +135,10 @@ export const SCHOOL_CLASS_TABLE_COLUMNS: TableColumnDefinition<SchoolClassTableC
 };
 
 export const CLASS_STATUS_OPTIONS: Array<{ label: string; value: ClassStatus }> = [
-  { label: 'Viitoare', value: ClassStatus.Upcoming },
-  { label: 'Activă', value: ClassStatus.Active },
-  { label: 'Suspendată', value: ClassStatus.Paused },
-  { label: 'Închisă', value: ClassStatus.Closed }
+  {label: 'Viitoare', value: ClassStatus.Upcoming},
+  {label: 'Activă', value: ClassStatus.Active},
+  {label: 'Suspendată', value: ClassStatus.Paused},
+  {label: 'Închisă', value: ClassStatus.Closed}
 ];
 
 export const CLASS_STATUS_LABELS: Record<ClassStatus, string> = {

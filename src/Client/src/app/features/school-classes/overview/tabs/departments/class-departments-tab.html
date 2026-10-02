@@ -1,0 +1,73 @@
+<section class="mx-auto flex w-full max-w-5xl flex-col gap-5">
+  <header>
+    <h2 class="m-0 text-xl font-semibold">Departamentele clasei</h2>
+    <p class="mb-0 mt-1 text-sm text-gray-600 dark:text-gray-300">
+      Departamentele sunt copiate din configurarea generală. Aici puteți completa responsabilul fiecăruia.
+    </p>
+  </header>
+
+  @if (error(); as errorMessage) {
+    <p role="alert"
+       class="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:bg-red-950 dark:text-red-200">{{ errorMessage }}</p>
+  }
+  @if (message(); as successMessage) {
+    <p role="status"
+       class="rounded-lg border border-green-300 bg-green-50 p-3 text-sm text-green-800 dark:bg-green-950 dark:text-green-200">{{ successMessage }}</p>
+  }
+
+  @if (schoolClass().invitationCount == null) {
+    <article class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+      <h3 class="mt-0 text-lg font-medium">Configurarea inițială nu a fost copiată</h3>
+      <p class="text-sm text-gray-600 dark:text-gray-300">
+        Copiați departamentele și numărul de invitații configurat în această clasă. Valorile vor rămâne cele
+        inițiale.
+      </p>
+      <button type="button"
+              class="min-h-11 rounded-md bg-primary px-4 py-2 font-medium text-white disabled:opacity-60"
+              [disabled]="busyId() === 'initialize'"
+              (click)="initialize()">
+        {{ busyId() === 'initialize' ? 'Se copiază…' : 'Copiază configurarea în clasă' }}
+      </button>
+    </article>
+  } @else {
+    <article class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900 md:p-5">
+      <p class="m-0 text-sm text-gray-600 dark:text-gray-300">Număr de invitații pentru această clasă</p>
+      <p class="mb-0 mt-1 text-2xl font-semibold">{{ schoolClass().invitationCount }}</p>
+    </article>
+
+    @if ((schoolClass().departments ?? []).length === 0) {
+      <div class="rounded-xl border border-dashed border-gray-300 p-6 text-sm text-gray-600 dark:border-gray-700 dark:text-gray-300">
+        Nu sunt departamente definite pentru această clasă.
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        @for (department of schoolClass().departments ?? []; track department.id) {
+          <article class="flex min-w-0 flex-col gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900 md:p-5">
+            <div>
+              <h3 class="m-0 break-words text-lg font-medium">{{ department.name }}</h3>
+              <p class="mb-0 mt-2 whitespace-pre-line break-words text-sm leading-6 text-gray-600 dark:text-gray-300">{{ department.responsibilities }}</p>
+            </div>
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <label class="flex min-w-0 flex-1 flex-col gap-1 text-sm font-medium"
+                     [for]="'responsible-' + department.id">
+                Responsabil
+                <input class="min-h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-base font-normal text-gray-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                       [id]="'responsible-' + department.id"
+                       type="text"
+                       autocomplete="name"
+                       [value]="draft(department.id, department.responsiblePerson)"
+                       (input)="setDraft(department.id, $any($event.target).value)"/>
+              </label>
+              <button type="button"
+                      class="min-h-11 shrink-0 rounded-md border border-primary px-4 py-2 font-medium text-primary hover:bg-primary/5 disabled:opacity-60"
+                      [disabled]="busyId() === department.id"
+                      (click)="saveResponsiblePerson(department.id, department.responsiblePerson)">
+                {{ busyId() === department.id ? 'Se salvează…' : 'Salvează' }}
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  }
+</section>

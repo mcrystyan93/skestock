@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using skestock.Application.Common.Models;
 using skestock.Application.Features.SchoolClasses.Commands.CreateSchoolClass;
+using skestock.Application.Features.SchoolClasses.Commands.InitializeSchoolClassConfiguration;
 using skestock.Application.Features.SchoolClasses.Commands.UpdateSchoolClass;
+using skestock.Application.Features.SchoolClasses.Commands.UpdateClassDepartmentResponsiblePerson;
 using skestock.Application.Features.SchoolClasses.Models;
 using skestock.Application.Features.SchoolClasses.Queries.GetAllSchoolClasses;
 using skestock.Application.Features.SchoolClasses.Queries.GetSchoolClassById;
@@ -18,6 +20,8 @@ public class SchoolClasses : IEndpointGroup
         groupBuilder.MapGet(GetSchoolClassSummary, "{id}/summary");
         groupBuilder.MapPost(CreateSchoolClass, "");
         groupBuilder.MapPut(UpdateSchoolClass, "{id}");
+        groupBuilder.MapPut(UpdateDepartmentResponsiblePerson, "{id}/departments/{departmentId}/responsible-person");
+        groupBuilder.MapPost(InitializeSchoolClassConfiguration, "{id}/initialize-configuration");
     }
 
     [EndpointSummary("Get all school classes")]
@@ -66,10 +70,7 @@ public class SchoolClasses : IEndpointGroup
     {
         var command = new CreateSchoolClassCommand
         {
-            Name = request.Name,
-            StartDate = request.StartDate,
-            EndDate = request.EndDate,
-            Status = request.Status
+            Name = request.Name, StartDate = request.StartDate, EndDate = request.EndDate, Status = request.Status
         };
 
         var result = await sender.Send(command, cancellationToken);
@@ -80,7 +81,8 @@ public class SchoolClasses : IEndpointGroup
     [EndpointSummary("Update an existing school class")]
     [EndpointDescription("Updates an existing school class in the database.")]
     public static async Task<Results<Ok<SchoolClassDto>, ProblemHttpResult>> UpdateSchoolClass(
-        ISender sender, Guid id, SchoolClassRequests.UpdateSchoolClassRequest request, CancellationToken cancellationToken)
+        ISender sender, Guid id, SchoolClassRequests.UpdateSchoolClassRequest request,
+        CancellationToken cancellationToken)
     {
         var command = new UpdateSchoolClassCommand
         {
@@ -95,4 +97,27 @@ public class SchoolClasses : IEndpointGroup
 
         return result.ToOk();
     }
+
+    public static async Task<Results<Ok, ProblemHttpResult>> UpdateDepartmentResponsiblePerson(
+        ISender sender, Guid id, Guid departmentId, UpdateDepartmentResponsiblePersonRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result =
+            await sender.Send(
+                new UpdateClassDepartmentResponsiblePersonCommand
+                {
+                    SchoolClassId = id, DepartmentId = departmentId, ResponsiblePerson = request.ResponsiblePerson
+                }, cancellationToken);
+        return result.ToOk();
+    }
+
+    public static async Task<Results<Ok, ProblemHttpResult>> InitializeSchoolClassConfiguration(
+        ISender sender, Guid id, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new InitializeSchoolClassConfigurationCommand { SchoolClassId = id },
+            cancellationToken);
+        return result.ToOk();
+    }
 }
+
+public sealed record UpdateDepartmentResponsiblePersonRequest(string? ResponsiblePerson);
