@@ -10,6 +10,8 @@ using skestock.Application.Documents.Models;
 using skestock.Application.Storage.DTOs;
 using skestock.Application.Storage.Interfaces;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Imports;
+using skestock.Domain.Entities.Items;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.Features.Items.Commands.ProcessItemImportBatch;

@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
 
 namespace skestock.Application.UnitTests.Features.SupplyLists;
 

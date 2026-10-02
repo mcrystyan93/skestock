@@ -9,6 +9,7 @@ using skestock.Application.Features.SupplyLists.Commands.EnableSupplyList;
 using skestock.Application.Features.SupplyLists.Commands.UpdateSupplyList;
 using skestock.Application.Features.SupplyLists.EventHandlers;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SupplyLists;
 using skestock.Domain.Enums;
 using skestock.Domain.Events.SupplyLists;
 

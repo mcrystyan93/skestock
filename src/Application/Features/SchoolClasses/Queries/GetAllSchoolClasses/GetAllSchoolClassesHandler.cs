@@ -4,6 +4,7 @@ using skestock.Application.Common.Keyset;
 using skestock.Application.Common.Models;
 using skestock.Application.Features.SchoolClasses.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.Features.SchoolClasses.Queries.GetAllSchoolClasses;
 

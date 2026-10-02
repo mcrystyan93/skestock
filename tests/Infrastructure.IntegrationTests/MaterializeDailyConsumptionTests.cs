@@ -1,6 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using skestock.Application.Features.Statistics.Commands.MaterializeDailyConsumption;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Locations;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Statistics;
+using skestock.Domain.Entities.Stock;
+using skestock.Domain.Entities.Users;
 using skestock.Domain.Enums;
 using skestock.Infrastructure.Identity;
 

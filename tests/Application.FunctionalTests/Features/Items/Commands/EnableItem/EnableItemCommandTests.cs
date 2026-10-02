@@ -3,6 +3,8 @@ using skestock.Application.Features.Items.Commands.CreateItem;
 using skestock.Application.Features.Items.Commands.DisableItem;
 using skestock.Application.Features.Items.Commands.EnableItem;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
 
 namespace skestock.Application.FunctionalTests.Features.Items.Commands.EnableItem;
 

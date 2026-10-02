@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Storage;
 
 namespace skestock.Infrastructure.Data.Configurations;
 

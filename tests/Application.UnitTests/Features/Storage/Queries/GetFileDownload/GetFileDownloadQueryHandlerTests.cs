@@ -8,6 +8,7 @@ using skestock.Application.Storage.Interfaces;
 using skestock.Application.Storage.Queries.GetFileDownload;
 using skestock.Application.UnitTests.Features.Storage.Commands.ConfirmUpload;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Storage;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.UnitTests.Features.Storage.Queries.GetFileDownload;

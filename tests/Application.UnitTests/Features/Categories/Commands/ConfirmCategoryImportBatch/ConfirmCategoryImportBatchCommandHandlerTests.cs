@@ -4,6 +4,7 @@ using Shouldly;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Categories.Commands.ConfirmCategoryImportBatch;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.UnitTests.Features.Categories.Commands.ConfirmCategoryImportBatch;

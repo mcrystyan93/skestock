@@ -4,6 +4,8 @@ using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Items.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Imports;
+using skestock.Domain.Entities.Items;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.Features.Items.Commands.ConfirmItemImportBatch;

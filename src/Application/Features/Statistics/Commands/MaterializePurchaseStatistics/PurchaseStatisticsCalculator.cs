@@ -1,4 +1,5 @@
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Statistics;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.Features.Statistics.Commands.MaterializePurchaseStatistics;

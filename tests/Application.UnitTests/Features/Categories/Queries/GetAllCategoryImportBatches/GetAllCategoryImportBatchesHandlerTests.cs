@@ -4,6 +4,9 @@ using Shouldly;
 using skestock.Application.Features.Categories.Queries.GetAllCategoryImportBatches;
 using skestock.Application.UnitTests.Features.Categories.Commands.CreateCategoryImportBatch;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Storage;
+using skestock.Domain.Entities.Users;
 
 namespace skestock.Application.UnitTests.Features.Categories.Queries.GetAllCategoryImportBatches;
 

@@ -3,6 +3,9 @@ using NUnit.Framework;
 using Shouldly;
 using skestock.Application.Features.OrderLists.Commands.AddItemToOrderList;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.UnitTests.Features.OrderLists.Commands.AddItemToOrderList;
 

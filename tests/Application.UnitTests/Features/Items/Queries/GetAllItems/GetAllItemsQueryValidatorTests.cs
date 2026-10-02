@@ -6,6 +6,7 @@ using skestock.Application.Features.Items.Queries.GetAllItems;
 using skestock.Domain.Entities;
 using NUnit.Framework;
 using Shouldly;
+using skestock.Domain.Entities.Items;
 
 namespace skestock.Application.UnitTests.Features.Items.Queries.GetAllItems;
 

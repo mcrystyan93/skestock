@@ -8,6 +8,12 @@ using skestock.Application.Features.StockBatches.Queries.GetAllStockBatches;
 using skestock.Domain.Entities;
 using NUnit.Framework;
 using Shouldly;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.GoodsReceipts;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Locations;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Stock;
 
 namespace skestock.Application.UnitTests.Features.StockBatches.Queries.GetAllStockBatches;
 

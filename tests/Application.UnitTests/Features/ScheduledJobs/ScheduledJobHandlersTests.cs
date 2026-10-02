@@ -5,6 +5,7 @@ using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.ScheduledJobs.Commands.RecordScheduledJobRun;
 using skestock.Application.Features.ScheduledJobs.Queries.GetScheduledJobLastRun;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.ScheduledJobs;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.UnitTests.Features.ScheduledJobs;

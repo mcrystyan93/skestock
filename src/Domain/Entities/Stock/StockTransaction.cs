@@ -1,0 +1,36 @@
+using skestock.Domain.Entities.GoodsReceipts;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Locations;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Users;
+using skestock.Domain.Enums;
+
+namespace skestock.Domain.Entities.Stock;
+
+public class StockTransaction: BaseAuditableEntity
+{
+
+    public Guid ItemId { get; set; }
+    public Item Item { get; set; } = null!;
+
+    public Guid LocationId { get; set; }
+    public Location Location { get; set; } = null!;
+
+    public Guid? BatchId { get; set; }
+    public StockBatch? Batch { get; set; }
+
+    public Guid ClassId { get; set; }
+    public SchoolClass Class { get; set; } = null!;
+
+    public Guid UserId { get; set; }
+    public UserProfile User { get; set; } = null!;
+
+    public StockTransactionType Type { get; set; }
+    public int QuantityChange { get; set; } // positive or negative
+    public string? Reason { get; set; }      // e.g. "expired", "damaged", "restock"
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    
+    public Guid? GoodsReceiptId { get; set; } // null for transactions not tied to a bulk receipt
+    public GoodsReceipt? GoodsReceipt { get; set; }
+
+}

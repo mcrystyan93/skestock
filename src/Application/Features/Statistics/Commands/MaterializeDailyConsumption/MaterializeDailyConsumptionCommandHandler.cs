@@ -2,6 +2,7 @@ using skestock.Application.Common.Interfaces;
 using skestock.Domain.Entities;
 using skestock.Domain.Enums;
 using skestock.Application.Features.Statistics;
+using skestock.Domain.Entities.Statistics;
 
 namespace skestock.Application.Features.Statistics.Commands.MaterializeDailyConsumption;
 

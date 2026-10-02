@@ -4,6 +4,8 @@ using skestock.Application.Common.Models;
 using skestock.Application.Features.Categories.Models;
 using skestock.Application.Features.Categories.Queries.GetAllCategories;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
 
 namespace skestock.Application.FunctionalTests.Features.Categories.Queries.GetAllCategories;
 

@@ -4,6 +4,8 @@ using skestock.Application.Features.Items.Commands.EditItem;
 using skestock.Domain.Entities;
 using NUnit.Framework;
 using Shouldly;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
 
 namespace skestock.Application.UnitTests.Features.Items.Commands.EditItem;
 

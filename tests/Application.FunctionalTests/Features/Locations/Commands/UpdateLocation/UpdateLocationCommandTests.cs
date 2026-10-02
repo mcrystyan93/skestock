@@ -2,6 +2,7 @@ using skestock.Application.Common.Exceptions;
 using skestock.Application.Features.Locations.Commands.CreateLocation;
 using skestock.Application.Features.Locations.Commands.UpdateLocation;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Locations;
 
 namespace skestock.Application.FunctionalTests.Features.Locations.Commands.UpdateLocation;
 

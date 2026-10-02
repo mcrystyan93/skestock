@@ -10,6 +10,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.GoodsReceipts;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Locations;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Statistics;
+using skestock.Domain.Entities.Stock;
+using skestock.Domain.Entities.Users;
 
 namespace skestock.Infrastructure.Data;
 
@@ -461,11 +469,11 @@ public class ApplicationDbContextInitialiser
         _context.SchoolClasses.Add(schoolClass);
 
         string[] units = ["buc", "kg", "l", "cutie"];
-        var items = new List<(Item Item, Guid LocationId, decimal BasePrice)>();
+        var items = new List<(Domain.Entities.Items.Item Item, Guid LocationId, decimal BasePrice)>();
         for (var n = 1; n <= 30; n++)
         {
             var isPerishable = random.Next(2) == 0;
-            var item = new Item
+            var item = new Domain.Entities.Items.Item
             {
                 Sku = $"DEMO-{n:00}",
                 Name = $"Demo item {n:00}",
@@ -507,7 +515,7 @@ public class ApplicationDbContextInitialiser
                 transactions.Add(NewTransaction(item, locationId, batch, StockTransactionType.Order, quantity, "restock", day));
             }
 
-            StockTransaction NewTransaction(Item txItem, Guid txLocationId, StockBatch batch,
+            StockTransaction NewTransaction(Domain.Entities.Items.Item txItem, Guid txLocationId, StockBatch batch,
                 StockTransactionType type, int change, string reason, DateOnly day) => new()
             {
                 Item = txItem,
@@ -692,7 +700,7 @@ public class ApplicationDbContextInitialiser
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
         string[] units = ["buc", "kg", "l", "cutie"];
-        var items = new List<(Item Item, Guid LocationId, decimal BasePrice)>();
+        var items = new List<(Domain.Entities.Items.Item Item, Guid LocationId, decimal BasePrice)>();
         for (var n = 1; n <= 50; n++)
         {
             var isPerishable = random.Next(2) == 0;

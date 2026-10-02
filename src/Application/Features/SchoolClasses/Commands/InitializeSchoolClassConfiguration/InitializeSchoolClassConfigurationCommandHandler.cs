@@ -1,6 +1,7 @@
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.Features.SchoolClasses.Commands.InitializeSchoolClassConfiguration;
 

@@ -1,9 +1,10 @@
 using skestock.Application.Common.Keyset;
+using skestock.Domain.Entities.Stock;
 
 namespace skestock.Application.Features.StockBatches;
 
 /// <summary>
-/// Sort-key columns of a <see cref="Domain.Entities.StockBatch"/> row, projected alongside the list DTO so the
+/// Sort-key columns of a <see cref="StockBatch"/> row, projected alongside the list DTO so the
 /// next cursor can be encoded without loading the full entity.
 /// </summary>
 public sealed record StockBatchCursor(Guid Id, DateOnly ReceivedDate, DateTimeOffset CreatedDate, DateTimeOffset LastModifiedDate) : IKeysetCursor

@@ -6,6 +6,7 @@ using skestock.Application.Common.Models;
 using skestock.Application.Features.Items.Commands.ProcessItemImportBatch;
 using skestock.Application.Features.Items.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Items;
 using skestock.Domain.Queues;
 using skestock.Shared;
 

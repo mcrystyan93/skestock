@@ -7,6 +7,18 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Filtering;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.GoodsReceipts;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Locations;
+using skestock.Domain.Entities.OrderLists;
+using skestock.Domain.Entities.ScheduledJobs;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Statistics;
+using skestock.Domain.Entities.Stock;
+using skestock.Domain.Entities.Storage;
+using skestock.Domain.Entities.SupplyLists;
+using skestock.Domain.Entities.Users;
 using skestock.Domain.Queues;
 
 namespace skestock.Infrastructure.Data;

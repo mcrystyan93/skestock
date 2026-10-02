@@ -1,6 +1,8 @@
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.GoodsReceipts.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.GoodsReceipts;
+using skestock.Domain.Entities.Stock;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.Features.GoodsReceipts.Commands.CreateGoodsReceipt;

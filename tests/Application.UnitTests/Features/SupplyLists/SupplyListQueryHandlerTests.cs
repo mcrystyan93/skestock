@@ -5,6 +5,7 @@ using skestock.Application.Common.Filtering;
 using skestock.Application.Features.SupplyLists.Queries.GetAllSupplyLists;
 using skestock.Application.Features.SupplyLists.Queries.GetSupplyListById;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SupplyLists;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.UnitTests.Features.SupplyLists;

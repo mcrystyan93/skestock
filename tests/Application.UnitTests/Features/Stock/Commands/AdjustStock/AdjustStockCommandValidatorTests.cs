@@ -6,6 +6,11 @@ using skestock.Domain.Entities;
 using skestock.Domain.Enums;
 using NUnit.Framework;
 using Shouldly;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Locations;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Stock;
 
 namespace skestock.Application.UnitTests.Features.Stock.Commands.AdjustStock;
 

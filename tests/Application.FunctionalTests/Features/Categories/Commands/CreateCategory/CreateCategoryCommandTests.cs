@@ -3,6 +3,7 @@ using skestock.Application.Features.Categories.Commands.CreateCategory;
 using skestock.Application.Features.Categories.Models;
 using skestock.Application.Features.Categories.Queries.GetAllCategories;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
 
 namespace skestock.Application.FunctionalTests.Features.Categories.Commands.CreateCategory;
 

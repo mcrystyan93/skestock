@@ -7,6 +7,7 @@ using skestock.Application.Features.SupplyLists.Commands.CreateSupplyList;
 using skestock.Application.Features.SupplyLists.Models;
 using skestock.Application.Features.SupplyLists.Queries.GetSupplyListById;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SupplyLists;
 using skestock.Domain.Enums;
 using CategoryCache = skestock.Application.Features.Categories.CacheConstants;
 using ItemCache = skestock.Application.Features.Items.CacheConstants;

@@ -1,6 +1,7 @@
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Categories.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
 
 namespace skestock.Application.Features.Categories.Commands.CreateCategory;
 

@@ -1,9 +1,10 @@
 using skestock.Application.Common.Keyset;
+using skestock.Domain.Entities.GoodsReceipts;
 
 namespace skestock.Application.Features.GoodsReceipts;
 
 /// <summary>
-/// Sort-key columns of a <see cref="Domain.Entities.GoodsReceiptImport"/> row, projected alongside the list DTO so the
+/// Sort-key columns of a <see cref="GoodsReceiptImport"/> row, projected alongside the list DTO so the
 /// next cursor can be encoded without loading the full entity.
 /// </summary>
 public sealed record GoodsReceiptImportCursor(Guid Id, DateTimeOffset UploadedAt, DateTimeOffset CreatedDate, DateTimeOffset LastModifiedDate) : IKeysetCursor

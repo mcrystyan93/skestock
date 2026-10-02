@@ -10,6 +10,9 @@ using skestock.Application.Features.GoodsReceipts.Models;
 using skestock.Application.Storage.DTOs;
 using skestock.Application.Storage.Interfaces;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.GoodsReceipts;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Storage;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.UnitTests.Features.GoodsReceipts.Commands.ProcessGoodsReceiptImport;

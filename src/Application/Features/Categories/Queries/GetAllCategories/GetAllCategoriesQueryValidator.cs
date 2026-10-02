@@ -3,6 +3,7 @@ using skestock.Application.Common.Keyset;
 using skestock.Application.Common.Models;
 using skestock.Application.Features.Categories;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
 
 namespace skestock.Application.Features.Categories.Queries.GetAllCategories;
 

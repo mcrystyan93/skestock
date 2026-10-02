@@ -1,6 +1,7 @@
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.OrderLists.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.OrderLists;
 
 namespace skestock.Application.Features.OrderLists;
 

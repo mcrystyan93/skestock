@@ -2,6 +2,7 @@ using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.ClassConfiguration.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.Features.ClassConfiguration.Commands.SaveDepartment;
 

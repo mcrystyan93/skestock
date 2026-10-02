@@ -1,6 +1,7 @@
 using skestock.Application.Common.Exceptions;
 using skestock.Application.Features.SchoolClasses.Queries.GetSchoolClassById;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SchoolClasses;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.FunctionalTests.Features.SchoolClasses.Queries.GetSchoolClassById;

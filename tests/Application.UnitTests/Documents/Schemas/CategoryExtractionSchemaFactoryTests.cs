@@ -4,6 +4,7 @@ using Shouldly;
 using skestock.Application.Documents.Models;
 using skestock.Application.UnitTests.Features.Categories.Commands.CreateCategory;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
 using skestock.Infrastructure.AI.Schemas;
 
 namespace skestock.Application.UnitTests.Documents.Schemas;

@@ -3,6 +3,7 @@ using skestock.Application.Common.Models;
 using skestock.Application.Features.Locations.Models;
 using skestock.Application.Features.Locations.Queries.GetAllLocations;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Locations;
 
 namespace skestock.Application.FunctionalTests.Features.Locations.Queries.GetAllLocations;
 

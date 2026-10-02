@@ -6,6 +6,7 @@ using skestock.Application.Documents.Models;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Categories.Queries.GetCategoryImportBatchById;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.UnitTests.Features.Categories.Queries.GetCategoryImportBatchById;

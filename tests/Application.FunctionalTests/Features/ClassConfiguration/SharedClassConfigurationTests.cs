@@ -8,6 +8,7 @@ using skestock.Application.Features.ClassConfiguration.Queries.GetDepartments;
 using skestock.Application.Features.ClassConfiguration.Queries.GetInvitationCount;
 using skestock.Application.Common.Errors;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.FunctionalTests.Features.ClassConfiguration;
 

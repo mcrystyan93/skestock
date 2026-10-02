@@ -4,6 +4,8 @@ using Shouldly;
 using skestock.Application.Common.Errors;
 using skestock.Application.Features.OrderLists.Commands.SubmitOrderList;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.OrderLists;
+using skestock.Domain.Entities.SchoolClasses;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.UnitTests.Features.OrderLists.Commands.SubmitOrderList;

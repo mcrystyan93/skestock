@@ -3,6 +3,7 @@ using skestock.Application.Common.Models;
 using skestock.Application.Features.SchoolClasses.Models;
 using skestock.Application.Features.SchoolClasses.Queries.GetAllSchoolClasses;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SchoolClasses;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.FunctionalTests.Features.SchoolClasses.Queries.GetAllSchoolClasses;

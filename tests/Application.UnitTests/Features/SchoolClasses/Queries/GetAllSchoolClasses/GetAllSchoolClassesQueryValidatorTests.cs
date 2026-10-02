@@ -6,6 +6,7 @@ using skestock.Application.Features.SchoolClasses.Queries.GetAllSchoolClasses;
 using skestock.Domain.Entities;
 using NUnit.Framework;
 using Shouldly;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.UnitTests.Features.SchoolClasses.Queries.GetAllSchoolClasses;
 

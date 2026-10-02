@@ -5,6 +5,7 @@ using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Categories.Commands.ProcessCategoryImportBatch;
 using skestock.Application.Features.Categories.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
 using skestock.Domain.Queues;
 using skestock.Shared;
 

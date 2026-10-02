@@ -5,6 +5,10 @@ using skestock.Application.Features.OrderLists.Commands.SubmitOrderList;
 using skestock.Application.Features.OrderLists.Models;
 using skestock.Application.Features.OrderLists.Queries.ExportOrderList;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Users;
 
 namespace skestock.Application.FunctionalTests.Features.OrderLists.Queries;
 

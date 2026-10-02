@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using skestock.Application.Common.Keyset;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.Features.SchoolClasses;
 

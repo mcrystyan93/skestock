@@ -4,6 +4,7 @@ using skestock.Application.Common.Keyset;
 using skestock.Application.Common.Models;
 using skestock.Application.Features.StockBatches.Models;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Stock;
 
 namespace skestock.Application.Features.StockBatches.Queries.GetAllStockBatches;
 

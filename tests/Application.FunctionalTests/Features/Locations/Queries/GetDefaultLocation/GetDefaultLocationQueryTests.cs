@@ -1,5 +1,6 @@
 using skestock.Application.Features.Locations.Queries.GetDefaultLocation;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Locations;
 
 namespace skestock.Application.FunctionalTests.Features.Locations.Queries.GetDefaultLocation;
 

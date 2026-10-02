@@ -1,9 +1,10 @@
 using skestock.Application.Common.Keyset;
+using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.Features.SchoolClasses;
 
 /// <summary>
-/// Sort-key columns of a <see cref="Domain.Entities.SchoolClass"/> row, projected alongside the list DTO so the
+/// Sort-key columns of a <see cref="SchoolClass"/> row, projected alongside the list DTO so the
 /// next cursor can be encoded without loading the full entity.
 /// </summary>
 public sealed record SchoolClassCursor(Guid Id, string Name, DateOnly StartDate, DateOnly EndDate, DateTimeOffset CreatedDate, DateTimeOffset LastModifiedDate) : IKeysetCursor

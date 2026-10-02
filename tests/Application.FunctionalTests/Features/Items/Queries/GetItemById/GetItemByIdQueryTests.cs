@@ -1,6 +1,8 @@
 using skestock.Application.Common.Exceptions;
 using skestock.Application.Features.Items.Queries.GetItemById;
 using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Items;
 
 namespace skestock.Application.FunctionalTests.Features.Items.Queries.GetItemById;
 
