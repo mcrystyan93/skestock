@@ -3,6 +3,8 @@ import { inject, Service } from '@angular/core';
 import {
   DepartmentTemplateDto,
   InvitationCountDto,
+  RoomConfigurationDto,
+  SaveRoomConfigurationRequest,
   SaveDepartmentRequest,
   SaveInvitationCountRequest,
 } from '@ske/models';
@@ -43,5 +45,13 @@ export class ConfigurationHttp {
       `${CONFIGURATION_ENDPOINT}/invitations`,
       request,
     );
+  }
+
+  public getRoomConfiguration() {
+    return this._httpClient.get<RoomConfigurationDto>(`${CONFIGURATION_ENDPOINT}/rooms`);
+  }
+
+  public saveRoomConfiguration(request: SaveRoomConfigurationRequest) {
+    return this._httpClient.put<RoomConfigurationDto>(`${CONFIGURATION_ENDPOINT}/rooms`, request);
   }
 }

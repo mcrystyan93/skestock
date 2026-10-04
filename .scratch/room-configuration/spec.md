@@ -5,7 +5,7 @@ Status: Approved — aprobat de utilizator la 2026-10-02.
 ## Obiectiv
 
 Administratorul poate salva numărul de locuri pentru trei săli fixe în configurația globală `SharedClassConfiguration`:
-Sala 4 (principală), Sala 1 și Sala 6 (secundare). Utilizatorii autentificați pot citi configurația. Implementarea
+Sala 4 (principală), Sala 2 și Sala 6 (secundare). Utilizatorii autentificați pot citi configurația. Implementarea
 include doar backend, cu teste unitare și funcționale.
 
 Aceasta este o singură capabilitate: configurarea capacității sălilor.
@@ -19,7 +19,7 @@ infrastructura de test existentă; nu sunt necesare dependențe noi.
 ## Contract și comportament propus
 
 - `SharedClassConfiguration` primește trei proprietăți `int`: `Room4SeatCount`,
-  `Room1SeatCount`, `Room6SeatCount`. Identitatea și rolul sălilor sunt fixe.
+  `Room2SeatCount`, `Room6SeatCount`. Identitatea și rolul sălilor sunt fixe.
 - `RoomConfigurationDto` expune aceleași trei valori.
 - `GetRoomConfigurationQuery` citește singleton-ul fără tracking, cu caching. Absența configurației produce trei
   zerouri, fără scriere în baza de date.
@@ -32,13 +32,14 @@ infrastructura de test existentă; nu sunt necesare dependențe noi.
 ```json
 {
   "room4SeatCount": 120,
-  "room1SeatCount": 30,
+  "room2SeatCount": 30,
   "room6SeatCount": 40
 }
 ```
 
 - PUT cere explicit toate cele trei valori. Câmpurile lipsă/null și valorile negative produc `400 Bad Request` cu
-  ProblemDetails, fără modificări persistate. Zero este valid; limita maximă este `int.MaxValue`.
+  ProblemDetails, fără modificări persistate. Zero este valid; limita maximă este 200, conform completării aprobate la 2026-10-04
+  în [specificația UI și limita API](../room-configuration-ui/spec.md).
 - Cererile anonime sunt respinse cu `401`; PUT al unui utilizator autentificat fără rol de administrator este respins cu
   `403`. Autorizarea există și pe CQRS.
 - Salvarea invalidează tag-ul global al configurației și tag-ul pentru săli. Următorul GET returnează valorile
@@ -95,7 +96,7 @@ namespace skestock.Application.Features.ClassConfiguration.Models;
 
 public sealed record RoomConfigurationDto(
     int Room4SeatCount,
-    int Room1SeatCount,
+    int Room2SeatCount,
     int Room6SeatCount);
 ```
 

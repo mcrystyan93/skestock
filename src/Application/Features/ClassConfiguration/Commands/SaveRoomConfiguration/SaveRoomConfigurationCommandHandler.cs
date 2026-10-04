@@ -19,11 +19,11 @@ public sealed class SaveRoomConfigurationCommandHandler(IApplicationDbContext db
         }
 
         configuration.Room4SeatCount = request.Room4SeatCount!.Value;
-        configuration.Room1SeatCount = request.Room1SeatCount!.Value;
+        configuration.Room2SeatCount = request.Room2SeatCount!.Value;
         configuration.Room6SeatCount = request.Room6SeatCount!.Value;
 
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Ok(new RoomConfigurationDto(
-            configuration.Room4SeatCount, configuration.Room1SeatCount, configuration.Room6SeatCount));
+            configuration.Room4SeatCount, configuration.Room2SeatCount, configuration.Room6SeatCount));
     }
 }

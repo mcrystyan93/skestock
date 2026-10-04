@@ -12,7 +12,7 @@ using skestock.Infrastructure.Data;
 namespace skestock.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261002191243_AddRoomSeatCounts")]
+    [Migration("20261004080225_AddRoomSeatCounts")]
     partial class AddRoomSeatCounts
     {
         /// <inheritdoc />
@@ -987,7 +987,7 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Property<int>("InvitationCount")
                         .HasColumnType("int");
 
-                    b.Property<int>("Room1SeatCount")
+                    b.Property<int>("Room2SeatCount")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(0);

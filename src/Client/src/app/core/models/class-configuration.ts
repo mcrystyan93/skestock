@@ -17,3 +17,11 @@ export type InvitationCountDto = {
 export type SaveInvitationCountRequest = {
   invitationCount: number;
 };
+
+export type RoomConfigurationDto = {
+  room4SeatCount: number;
+  room2SeatCount: number;
+  room6SeatCount: number;
+};
+
+export type SaveRoomConfigurationRequest = RoomConfigurationDto;

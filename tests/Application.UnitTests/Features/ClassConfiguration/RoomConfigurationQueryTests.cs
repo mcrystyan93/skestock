@@ -16,7 +16,7 @@ public class RoomConfigurationQueryTests
             .Handle(new GetRoomConfigurationQuery(), CancellationToken.None);
 
         result.Value.Room4SeatCount.ShouldBe(0);
-        result.Value.Room1SeatCount.ShouldBe(0);
+        result.Value.Room2SeatCount.ShouldBe(0);
         result.Value.Room6SeatCount.ShouldBe(0);
         context.Configurations.ShouldBeEmpty();
     }
@@ -28,7 +28,7 @@ public class RoomConfigurationQueryTests
         context.Configurations.Add(new SharedClassConfiguration
         {
             Room4SeatCount = 120,
-            Room1SeatCount = 30,
+            Room2SeatCount = 30,
             Room6SeatCount = 40
         });
         await context.SaveChangesAsync();
@@ -37,7 +37,7 @@ public class RoomConfigurationQueryTests
             .Handle(new GetRoomConfigurationQuery(), CancellationToken.None);
 
         result.Value.Room4SeatCount.ShouldBe(120);
-        result.Value.Room1SeatCount.ShouldBe(30);
+        result.Value.Room2SeatCount.ShouldBe(30);
         result.Value.Room6SeatCount.ShouldBe(40);
     }
 }
