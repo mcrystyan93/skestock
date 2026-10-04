@@ -23,7 +23,7 @@
   <ske-order-list-wizard-container [classId]="modalData().classId" />
 }
 
-<div [hidden]="!onEditorStep()">
+<div [hidden]="!onEditorStep()" class="grow flex flex-col">
   <ske-error-display [problemDetail]="store.orderListProblemDetail()"
                      [validationErrors]="store.orderListValidationErrors()" />
 

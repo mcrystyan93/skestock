@@ -1,10 +1,5 @@
 import { Component, computed, effect, inject, input, linkedSignal, untracked } from '@angular/core';
-import {
-  ItemAutocompleteValue,
-  ORDER_LIST_STATUS_LABELS,
-  OrderListDto,
-  OrderListLineDto
-} from '@ske/models';
+import { ItemAutocompleteValue, ORDER_LIST_STATUS_LABELS, OrderListDto, OrderListLineDto } from '@ske/models';
 import {
   applyEach,
   disabled,
@@ -49,7 +44,9 @@ import type { OrderListLineFormModel } from './lines/order-list-line';
     SkeletonInputLoaderDirective
   ],
   selector: 'ske-order-list-detail-form',
-  styles: ``,
+  host:{
+    class: 'grow flex flex-col'
+  },
   templateUrl: './order-list-detail-form.html'
 })
 export class OrderListDetailForm {
