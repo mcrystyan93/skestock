@@ -1,0 +1,129 @@
+<nz-card [nzTitle]="cardTitle"
+         class="min-w-0"
+         [attr.aria-busy]="loading()">
+  <ng-container *skeLoader="loading()">
+    <form nz-form
+          nzLayout="vertical"
+          nzNoColon
+          novalidate
+          class="mt-4 w-full"
+          (submit)="$event.preventDefault(); onSave.emit()">
+      <div class="grid grid-cols-1 gap-x-4 md:grid-cols-3">
+        <nz-form-item>
+          <nz-form-label nzRequired
+                         nzFor="room-4-seat-count">Sala 4 — principală
+          </nz-form-label>
+          <nz-form-control [nzErrorTip]="room4ErrorTemplate">
+            <nz-input-number nzId="room-4-seat-count"
+                             [formField]="roomsForm.room4SeatCount"
+                             [nzMin]="0"
+                             [nzMax]="maxSeatCount"
+                             [nzStep]="1"
+                             class="w-full!"
+                             [attr.aria-invalid]="
+                roomsForm.room4SeatCount().touched() && roomsForm.room4SeatCount().invalid()
+                  ? 'true'
+                  : null
+              "
+                             [attr.aria-describedby]="
+                roomsForm.room4SeatCount().touched() && roomsForm.room4SeatCount().invalid()
+                  ? 'room-4-errors'
+                  : 'room-count-help'
+              "/>
+            <ng-template #room4ErrorTemplate>
+              <div id="room-4-errors">
+                @for (error of roomsForm.room4SeatCount().errors(); track $index) {
+                  <div class="ant-form-item-explain-error">{{ error.message }}</div>
+                }
+              </div>
+            </ng-template>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label nzRequired
+                         nzFor="room-2-seat-count">Sala 2 — secundară
+          </nz-form-label>
+          <nz-form-control [nzErrorTip]="room2ErrorTemplate">
+            <nz-input-number nzId="room-2-seat-count"
+                             [formField]="roomsForm.room2SeatCount"
+                             [nzMin]="0"
+                             [nzMax]="maxSeatCount"
+                             [nzStep]="1"
+                             class="w-full!"
+                             [attr.aria-invalid]="
+                roomsForm.room2SeatCount().touched() && roomsForm.room2SeatCount().invalid()
+                  ? 'true'
+                  : null
+              "
+                             [attr.aria-describedby]="
+                roomsForm.room2SeatCount().touched() && roomsForm.room2SeatCount().invalid()
+                  ? 'room-2-errors'
+                  : 'room-count-help'
+              "/>
+            <ng-template #room2ErrorTemplate>
+              <div id="room-2-errors">
+                @for (error of roomsForm.room2SeatCount().errors(); track $index) {
+                  <div class="ant-form-item-explain-error">{{ error.message }}</div>
+                }
+              </div>
+            </ng-template>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label nzRequired
+                         nzFor="room-6-seat-count">Sala 6 — secundară
+          </nz-form-label>
+          <nz-form-control [nzErrorTip]="room6ErrorTemplate">
+            <nz-input-number
+              nzId="room-6-seat-count"
+              [formField]="roomsForm.room6SeatCount"
+              [nzMin]="0"
+              [nzMax]="maxSeatCount"
+              [nzStep]="1"
+              class="w-full!"
+              [attr.aria-invalid]="
+                roomsForm.room6SeatCount().touched() && roomsForm.room6SeatCount().invalid()
+                  ? 'true'
+                  : null
+              "
+              [attr.aria-describedby]="
+                roomsForm.room6SeatCount().touched() && roomsForm.room6SeatCount().invalid()
+                  ? 'room-6-errors'
+                  : 'room-count-help'
+              "
+            />
+            <ng-template #room6ErrorTemplate>
+              <div id="room-6-errors">
+                @for (error of roomsForm.room6SeatCount().errors(); track $index) {
+                  <div class="ant-form-item-explain-error">{{ error.message }}</div>
+                }
+              </div>
+            </ng-template>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <p id="room-count-help"
+         nz-typography
+         nzType="secondary"
+         class="-mt-2 mb-0!">
+        Introduceți un număr întreg între 0 și {{ maxSeatCount }}.
+      </p>
+      <button
+        nz-button
+        class="mt-3!"
+        nzType="primary"
+        type="submit"
+        [nzLoading]="loading() || roomsForm().submitting()"
+      >
+        Salvează
+      </button>
+    </form>
+  </ng-container>
+</nz-card>
+
+<ng-template #cardTitle>
+  <h3 class="mb-0! text-base font-semibold">Numărul de locuri</h3>
+</ng-template>

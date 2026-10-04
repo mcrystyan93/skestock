@@ -1,0 +1,17 @@
+<section class="min-w-0"
+         aria-labelledby="rooms-heading">
+  <div class="mb-4">
+    <h2 id="rooms-heading"
+        class="mb-1 text-lg font-semibold">Numărul de locuri</h2>
+    <p nz-typography
+       nzType="secondary"
+       class="mb-0!">
+      Configurați numărul de locuri pentru fiecare sală.
+    </p>
+  </div>
+  <ske-error-display [problemDetail]="store.roomsProblemDetail()"
+                     [validationErrors]="store.roomsValidationErrors()" />
+  <ske-configuration-rooms-card [configuration]="store.roomConfiguration()"
+                                [loading]="store.roomsLoading()"
+                                (onSave)="save()" />
+</section>

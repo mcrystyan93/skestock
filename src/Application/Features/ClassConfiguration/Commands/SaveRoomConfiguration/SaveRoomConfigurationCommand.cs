@@ -9,7 +9,7 @@ namespace skestock.Application.Features.ClassConfiguration.Commands.SaveRoomConf
 public sealed class SaveRoomConfigurationCommand : IRequest<Result<RoomConfigurationDto>>, ICacheInvalidation
 {
     public int? Room4SeatCount { get; init; }
-    public int? Room1SeatCount { get; init; }
+    public int? Room2SeatCount { get; init; }
     public int? Room6SeatCount { get; init; }
 
     public IReadOnlyCollection<string> Tags => [CacheConstants.ConfigurationTag, CacheConstants.RoomConfigurationTag];

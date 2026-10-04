@@ -1,2 +1,3 @@
 export const MAX_INVITATION_COUNT = 2147483647;
+export const MAX_ROOM_SEAT_COUNT = 200;
 export const MAX_DEPARTMENT_NAME_LENGTH = 100;

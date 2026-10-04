@@ -24,7 +24,7 @@ public class RoomConfigurationEndpointTests : TestBase
 
         (await client.GetAsync("/api/ClassConfiguration/rooms")).StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
         (await client.PutAsJsonAsync("/api/ClassConfiguration/rooms",
-            new { room4SeatCount = 120, room1SeatCount = 30, room6SeatCount = 40 }))
+            new { room4SeatCount = 120, room2SeatCount = 30, room6SeatCount = 40 }))
             .StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
@@ -38,7 +38,7 @@ public class RoomConfigurationEndpointTests : TestBase
         (await getResponse.Content.ReadFromJsonAsync<RoomConfigurationDto>())!
             .ShouldBe(new RoomConfigurationDto(0, 0, 0));
         (await client.PutAsJsonAsync("/api/ClassConfiguration/rooms",
-                new { room4SeatCount = 120, room1SeatCount = 30, room6SeatCount = 40 }))
+            new { room4SeatCount = 120, room2SeatCount = 30, room6SeatCount = 40 }))
             .StatusCode.ShouldBe(HttpStatusCode.Forbidden);
     }
 
@@ -48,36 +48,54 @@ public class RoomConfigurationEndpointTests : TestBase
         using var client = await LoginAsync(administrator: true);
 
         var createResponse = await client.PutAsJsonAsync("/api/ClassConfiguration/rooms",
-            new { room4SeatCount = 120, room1SeatCount = 30, room6SeatCount = 40 });
+            new { room4SeatCount = 120, room2SeatCount = 30, room6SeatCount = 40 });
         createResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
         (await createResponse.Content.ReadFromJsonAsync<RoomConfigurationDto>())!
             .ShouldBe(new RoomConfigurationDto(120, 30, 40));
 
         var updateResponse = await client.PutAsJsonAsync("/api/ClassConfiguration/rooms",
-            new { room4SeatCount = 135, room1SeatCount = 32, room6SeatCount = 45 });
+            new { room4SeatCount = 200, room2SeatCount = 200, room6SeatCount = 200 });
         updateResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await updateResponse.Content.ReadFromJsonAsync<RoomConfigurationDto>())!
+            .ShouldBe(new RoomConfigurationDto(200, 200, 200));
 
         var getResponse = await client.GetAsync("/api/ClassConfiguration/rooms");
         getResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
         (await getResponse.Content.ReadFromJsonAsync<RoomConfigurationDto>())!
-            .ShouldBe(new RoomConfigurationDto(135, 32, 45));
+            .ShouldBe(new RoomConfigurationDto(200, 200, 200));
     }
 
     [Test]
-    public async Task SaveEndpoint_IncompleteOrNegativePayloadReturnsValidationProblemWithoutWriting()
+    public async Task SaveEndpoint_InvalidPayloadReturnsValidationProblemWithoutWritingOrUpdating()
     {
         using var client = await LoginAsync(administrator: true);
 
+        var initial = await client.PutAsJsonAsync("/api/ClassConfiguration/rooms",
+            new { room4SeatCount = 120, room2SeatCount = 30, room6SeatCount = 40 });
+        initial.StatusCode.ShouldBe(HttpStatusCode.OK);
+
         var incomplete = await client.PutAsJsonAsync("/api/ClassConfiguration/rooms",
-            new { room4SeatCount = 120, room1SeatCount = 30 });
+            new { room4SeatCount = 120, room2SeatCount = 30 });
         var negative = await client.PutAsJsonAsync("/api/ClassConfiguration/rooms",
-            new { room4SeatCount = -1, room1SeatCount = 30, room6SeatCount = 40 });
+            new { room4SeatCount = -1, room2SeatCount = 30, room6SeatCount = 40 });
+        var room4TooLarge = await client.PutAsJsonAsync("/api/ClassConfiguration/rooms",
+            new { room4SeatCount = 201, room2SeatCount = 30, room6SeatCount = 40 });
+        var room2TooLarge = await client.PutAsJsonAsync("/api/ClassConfiguration/rooms",
+            new { room4SeatCount = 120, room2SeatCount = int.MaxValue, room6SeatCount = 40 });
+        var room6TooLarge = await client.PutAsJsonAsync("/api/ClassConfiguration/rooms",
+            new { room4SeatCount = 120, room2SeatCount = 30, room6SeatCount = 201 });
 
         incomplete.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         incomplete.Content.Headers.ContentType!.MediaType.ShouldBe("application/problem+json");
         negative.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         negative.Content.Headers.ContentType!.MediaType.ShouldBe("application/problem+json");
-        (await TestApp.CountAsync<skestock.Domain.Entities.SchoolClasses.SharedClassConfiguration>()).ShouldBe(0);
+        room4TooLarge.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        room2TooLarge.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        room6TooLarge.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+
+        var afterInvalidRequests = await client.GetFromJsonAsync<RoomConfigurationDto>("/api/ClassConfiguration/rooms");
+        afterInvalidRequests.ShouldBe(new RoomConfigurationDto(120, 30, 40));
+        (await TestApp.CountAsync<skestock.Domain.Entities.SchoolClasses.SharedClassConfiguration>()).ShouldBe(1);
     }
 
     private static async Task<HttpClient> LoginAsync(bool administrator)

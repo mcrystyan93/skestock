@@ -11,7 +11,7 @@ namespace skestock.Infrastructure.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
-                name: "Room1SeatCount",
+                name: "Room2SeatCount",
                 table: "SharedClassConfigurations",
                 type: "int",
                 nullable: false,
@@ -36,7 +36,7 @@ namespace skestock.Infrastructure.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Room1SeatCount",
+                name: "Room2SeatCount",
                 table: "SharedClassConfigurations");
 
             migrationBuilder.DropColumn(

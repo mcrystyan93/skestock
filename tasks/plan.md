@@ -1,114 +1,107 @@
-# Plan de implementare: Configurația locurilor pentru săli
+# Plan: Numărul de locuri în Configuration și limita API
 
-Status: Complete — specificația, planul și sarcinile au fost aprobate; implementarea finalizată la 2026-10-02.
+Status: Complete — plan aprobat și implementat la 2026-10-04.
 
-## Obiectiv și sursa cerințelor
+## Obiectiv
 
-Implementăm configurația globală pentru Sala 4 (principală), Sala 1 și Sala 6 (secundare),
-conform [specificației aprobate](../.scratch/room-configuration/spec.md). Scope: model persistat, migrație, CQRS,
-GET/PUT și teste backend.
+Implementăm [specificația aprobată](../.scratch/room-configuration-ui/spec.md):
+secțiune cu un card pentru Sala 4, Sala 2 și Sala 6, feature dedicat în
+ConfigurationStore și validare 0–200 în frontend și backend.
+[Planul backend finalizat anterior](room-configuration-backend-plan.md) este păstrat separat.
 
 ## Decizii tehnice
 
-- Extindem singleton-ul `SharedClassConfiguration` cu trei proprietăți `int`. Nu introducem entități noi, identificatori
-  dinamici sau configurare per clasă.
-- Mapping-ul EF declară proprietățile obligatorii. Generăm migrația
-  `AddRoomSeatCounts` cu `dotnet ef`; verificăm că noile coloane sunt populate cu zero pentru înregistrările existente.
-- DTO-ul folosește trei `int`. Comanda folosește trei `int?`, pentru a distinge câmpurile lipsă/null de zero.
-  Validatorul impune prezența și valori >= 0; handler-ul mapează valorile validate în modelul nenulabil.
-- Generăm use case-urile cu template-ul `ca-usecase`, apoi adaptăm tipurile
-  `Result`, validatorul, autorizarea și cache-ul la convențiile locale.
-- Query-ul returnează un DTO cu zero dacă singleton-ul lipsește, fără scrieri. Comanda creează singleton-ul la nevoie și
-  persistă cele trei valori printr-un singur `SaveChangesAsync`, păstrând invitațiile și departamentele.
-- Query-ul utilizează tag-ul global și un tag dedicat `RoomConfigurationTag`, cu expirare de cinci minute, conform
-  query-ului existent pentru invitații. Comanda invalidează aceleași tag-uri.
-- Grupul existent `ClassConfiguration` expune ruta `rooms` prin GET și PUT. GET cere autentificare; PUT cere rolul
-  Administrator. Aplicăm aceleași restricții prin atribute pe cererile Mediator.
-- Păstrăm toate modificările deja prezente în working tree, inclusiv mutările entităților în subdirectoare. Nu
-  refactorizăm codul adiacent.
+- Backend: adăugăm limita superioară în validatorul existent, folosind codurile
+  standard de validare. Păstrăm required/min, autorizarea, cache-ul și handler-ul.
+  Nu modificăm schema sau datele existente.
+- Client: DTO/request cu trei numere și GET/PUT prin ConfigurationHttp.
+  Folosim interceptorul existent și ruta `/api/ClassConfiguration/rooms`.
+- Store: `withRooms()` compune state, loading și ProblemDetails independente.
+  `rxMethod`/`mapResponse` gestionează GET și PUT → GET; numai răspunsurile
+  confirmate înlocuiesc datele. Erorile se curăță înaintea fiecărei cereri.
+- Prezentare: `RoomsCard` folosește signal inputs/outputs și Signal Forms,
+  trei input-uri native `nz-input`, validare required/integer/min/max și
+  butonul Salvează. Nu injectează store sau HTTP.
+- Container: `RoomsSection` injectează store-ul, afișează erorile și coordonează
+  submit-ul valid; pagina îl adaugă după Invitații și încarcă sălile la inițializare.
+- Scaffolding prin Angular CLI; teste focalizate scrise manual. Refolosim
+  componentele ng-zorro, loader-ul și stilurile existente, fără dependențe noi.
+- Lucrăm secvențial în acest chat și păstrăm modificările locale preexistente.
 
-## Dependențe și ordine
+## Dependențe și task-uri
 
 ```text
-Proprietăți domeniu + mapping EF
-    ├── migrație generată
-    └── DTO + tag cache
-            ├── query + unit tests
-            └── command + validator + unit tests
-                        ↓
-                endpoint-uri GET/PUT
-                        ↓
-             teste funcționale CQRS/HTTP
-                        ↓
-              build, regresii, graphify
+01 Limita API + teste
+    ↓
+02 Contract client + HTTP
+    ├── 03 Feature rooms în store
+    └── 04 Card prezentational
+                ↓ (03 + 04)
+        05 Container + pagină
+                ↓
+        06 Verificare finală
 ```
 
-## Etape
+03 și 04 sunt independente după stabilirea contractului, dar nu necesită
+agenți paraleli. Fiecare task include verificarea propriului comportament.
 
-- [x] 1. **Persistență:** proprietăți, mapping și migrație (aproximativ cinci fișiere, incluzând designer-ul și snapshot-ul
-   generate).
-- [x] 2. **Citire:** DTO, tag cache, query/handler și teste unitare pentru valori salvate și configurație absentă (aproximativ
-   cinci fișiere).
-- [x] 3. **Salvare:** command, validator, handler și teste unitare pentru validare, create/update și păstrarea configurației
-   existente (aproximativ cinci fișiere).
-- [x] 4. **HTTP:** adăugarea GET/PUT în grupul existent și teste funcționale pentru contract, autorizare și payload invalid
-   (aproximativ două fișiere).
-- [x] 5. **Persistență/cache/regresii:** teste funcționale CQRS pentru singleton, refresh după GET inițial și update,
-   păstrarea invitațiilor/departamentelor și păstrarea locurilor când acestea sunt actualizate (un fișier de teste nou).
-- [x] 6. **Verificare finală:** build, teste relevante și toate unit tests Application, verificarea migrației/modelului,
-   revizuirea diff-ului și `graphify update .`.
+1. [x] [Limita 200 în backend](../.scratch/room-configuration-ui/issues/01-backend-seat-limit.md)
+2. [x] [Contractul HTTP client](../.scratch/room-configuration-ui/issues/02-client-room-http.md)
+3. [x] [Feature rooms în ConfigurationStore](../.scratch/room-configuration-ui/issues/03-rooms-store-feature.md)
+4. [x] [Cardul pentru numărul de locuri](../.scratch/room-configuration-ui/issues/04-rooms-presentation-card.md)
+5. [x] [Secțiunea și integrarea în pagină](../.scratch/room-configuration-ui/issues/05-rooms-section-page.md)
+6. [x] [Verificarea fluxului complet](../.scratch/room-configuration-ui/issues/06-rooms-verification.md)
+
+Task tracker: câte un issue Markdown în `.scratch/room-configuration-ui/issues/`,
+conform `docs/agents/issue-tracker.md`; nu duplicăm lista în `tasks/todo.md`.
 
 ## Checkpoint-uri
 
-- După etapele 1–2: build și testele unitare pentru citire; verificarea structurii migrației și absenței scrierilor la
-  GET fără configurație.
-- După etapele 3–4: build și testele unitare/funcționale focalizate; verificarea unui ciclu HTTP PUT → GET și a
-  răspunsurilor 400/401/403.
-- După etapele 5–6: toate criteriile specificației verificate; raportăm separat orice verificare blocată de mediu, fără
-  a declara acele teste ca trecute.
+- [x] După 01–02: build backend, teste pentru limita API și testele HTTP client.
+- [x] După 03–04: testele feature/card și build Angular; fiecare sală acceptă
+  0/200 și respinge câmp gol, -1, fracții și 201.
+- [x] După 05–06: flux GET → editare → PUT → GET, stări de eroare/loading,
+  accesibilitate și layout mobil/desktop verificate. Browserul folosește un API
+  rooms interceptat; testele funcționale verifică endpoint-ul real.
 
 ## Verificare executabilă
+
+Din rădăcina repository-ului:
 
 ```bash
 dotnet build
 dotnet test tests/Application.UnitTests --filter FullyQualifiedName~ClassConfiguration
 ./run-functional-tests.sh --filter FullyQualifiedName~ClassConfiguration
 dotnet test tests/Application.UnitTests
-dotnet ef migrations has-pending-model-changes --project src/Infrastructure --startup-project src/Web --context ApplicationDbContext
+dotnet run --project src/AppHost
 graphify update .
 ```
 
-Testele sunt scrise înaintea comportamentului corespunzător, apoi executate în ciclul red/green, folosind fixture-urile
-existente. Testele funcționale folosesc
-`TestBase`/Respawn și elimină cache-ul configurației între cazuri.
+Din `src/Client`:
+
+```bash
+npm run build
+npm test -- --watch=false
+npm run e2e -- --project=chromium --project=mobile e2e/specs/room-configuration.spec.ts
+```
+
+În task-uri folosim `--include` pentru testele Angular focalizate; comportamentul
+este implementat în ciclul red/green. E2E folosește aplicația reală și interceptează
+ruta rooms pentru a evita scrieri în baza locală; testele funcționale verifică API-ul
+real. Orice blocaj de mediu este raportat explicit.
 
 ## Riscuri și măsuri
 
-| Risc                                                      | Măsură                                                                             |
-|-----------------------------------------------------------|------------------------------------------------------------------------------------|
-| Payload lipsă confundat cu zero                           | Proprietăți nullable în command și validare explicită de prezență                  |
-| GET returnează valori vechi                               | Teste cu cache încălzit înainte de create și update                                |
-| Actualizarea suprascrie invitații/departamente sau locuri | Teste de păstrare a valorilor în ambele direcții                                   |
-| Modificări locale preexistente în domeniu                 | Edităm fișierele în locațiile actuale și verificăm diff-ul limitat la feature      |
-| Container runtime indisponibil                            | Verificăm setup-ul existent; raportăm concret orice blocaj pentru functional tests |
-| Model EF diferit de migrație                              | Generare prin CLI și verificare `has-pending-model-changes`                        |
-
-## Task tracker și execuție
-
-Sarcinile sunt în `.scratch/room-configuration/issues/`, conform tracker-ului proiectului. Fiecare issue conține
-dependențe, criterii de acceptare și verificare. Etapa Tasks este aprobată, implementată și verificată. Nu există un duplicat
-`tasks/todo.md`.
-
-1. [Persistența numărului de locuri](../.scratch/room-configuration/issues/01-room-seat-count-persistence.md)
-2. [Citirea configurației sălilor](../.scratch/room-configuration/issues/02-get-room-configuration.md)
-3. [Salvarea și validarea configurației sălilor](../.scratch/room-configuration/issues/03-save-room-configuration.md)
-4. [Endpoint-urile GET și PUT pentru săli](../.scratch/room-configuration/issues/04-room-configuration-http.md)
-5. [Persistența, cache-ul și regresiile configurației](../.scratch/room-configuration/issues/05-room-configuration-functional.md)
-6. [Verificarea finală a implementării](../.scratch/room-configuration/issues/06-room-configuration-verification.md)
-
-Implementarea se execută secvențial, în acest chat. Testele unitare și funcționale pot fi rulate independent când
-resursele permit. Nu sunt necesari subagenți pentru această schimbare.
+| Risc | Măsură |
+|---|---|
+| Câmp gol interpretat ca zero sau NaN | Teste care golesc input-ul și verifică lipsa cererii HTTP |
+| Regula max anulează required/min | Reguli FluentValidation separate și teste pentru fiecare câmp |
+| Valori istorice peste 200 | GET le păstrează, formularul indică eroarea și permite corectarea |
+| Reîncărcarea suprascrie editări | Sincronizăm formularul numai cu datele confirmate; loading blochează editarea și submit repetat |
+| PUT reușit, GET de confirmare eșuat | Afișăm eroarea și păstrăm ultima configurație confirmată, fără succes fals |
+| Alte features pierd state/error | State și metode rooms distincte; testăm independența |
+| Resurse AppHost indisponibile | Folosim setup-ul existent și raportăm verificările neexecutate |
 
 ## Întrebări deschise
 
-Nu există întrebări de cerințe rămase după aprobarea specificației.
+Nu există întrebări de cerințe. Aprobarea planului și task-urilor precede implementarea.

@@ -11,7 +11,7 @@ Sursa: [specificația aprobată](../spec.md) și [planul aprobat](../../../tasks
 
 ## Criterii de acceptare
 
-- [x] Modelul conține Room4SeatCount, Room1SeatCount și Room6SeatCount de tip int, obligatorii în mapping.
+- [x] Modelul conține Room4SeatCount, Room2SeatCount și Room6SeatCount de tip int, obligatorii în mapping.
 - [x] Migrația adaugă cele trei coloane cu zero pentru datele existente; designer-ul și snapshot-ul sunt generate prin
   CLI.
 - [x] Nu schimbăm schema claselor sau comportamentul invitațiilor/departamentelor.

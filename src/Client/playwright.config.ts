@@ -11,7 +11,7 @@ export default defineConfig({
   workers: process.env['CI'] ? 1 : undefined,
   reporter: [['html', { open: 'never' }], ['list']],
   use: {
-    baseURL: process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:7001',
+    baseURL: process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://webfrontend-skestock.dev.localhost:7001',
     locale: 'ro-RO',
     timezoneId: 'Europe/Bucharest',
     trace: 'on-first-retry',

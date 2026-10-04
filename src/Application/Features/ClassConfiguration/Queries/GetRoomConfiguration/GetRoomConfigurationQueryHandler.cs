@@ -12,7 +12,7 @@ public sealed class GetRoomConfigurationQueryHandler(IApplicationDbContext dbCon
     {
         var configuration = await dbContext.SharedClassConfigurations.AsNoTracking()
             .Where(item => item.Id == SharedClassConfiguration.SingletonId)
-            .Select(item => new RoomConfigurationDto(item.Room4SeatCount, item.Room1SeatCount, item.Room6SeatCount))
+            .Select(item => new RoomConfigurationDto(item.Room4SeatCount, item.Room2SeatCount, item.Room6SeatCount))
             .SingleOrDefaultAsync(cancellationToken);
 
         return Result.Ok(configuration ?? new RoomConfigurationDto(0, 0, 0));

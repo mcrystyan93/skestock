@@ -14,16 +14,16 @@ public class RoomConfigurationCommandTests
         await using var context = new ClassConfigurationTestDbContext();
 
         var result = await new SaveRoomConfigurationCommandHandler(context.ApplicationContext).Handle(
-            new SaveRoomConfigurationCommand { Room4SeatCount = 120, Room1SeatCount = 30, Room6SeatCount = 40 },
+            new SaveRoomConfigurationCommand { Room4SeatCount = 120, Room2SeatCount = 30, Room6SeatCount = 40 },
             CancellationToken.None);
 
         result.Value.Room4SeatCount.ShouldBe(120);
-        result.Value.Room1SeatCount.ShouldBe(30);
+        result.Value.Room2SeatCount.ShouldBe(30);
         result.Value.Room6SeatCount.ShouldBe(40);
         var configuration = await context.Configurations.Include(item => item.DepartmentTemplates).SingleAsync();
         configuration.Id.ShouldBe(SharedClassConfiguration.SingletonId);
         configuration.Room4SeatCount.ShouldBe(120);
-        configuration.Room1SeatCount.ShouldBe(30);
+        configuration.Room2SeatCount.ShouldBe(30);
         configuration.Room6SeatCount.ShouldBe(40);
     }
 
@@ -36,18 +36,18 @@ public class RoomConfigurationCommandTests
         {
             InvitationCount = 42,
             Room4SeatCount = 10,
-            Room1SeatCount = 20,
+            Room2SeatCount = 20,
             Room6SeatCount = 30,
             DepartmentTemplates = [department]
         });
         await context.SaveChangesAsync();
 
         var result = await new SaveRoomConfigurationCommandHandler(context.ApplicationContext).Handle(
-            new SaveRoomConfigurationCommand { Room4SeatCount = 120, Room1SeatCount = 35, Room6SeatCount = 45 },
+            new SaveRoomConfigurationCommand { Room4SeatCount = 120, Room2SeatCount = 35, Room6SeatCount = 45 },
             CancellationToken.None);
 
         result.Value.Room4SeatCount.ShouldBe(120);
-        result.Value.Room1SeatCount.ShouldBe(35);
+        result.Value.Room2SeatCount.ShouldBe(35);
         result.Value.Room6SeatCount.ShouldBe(45);
         var configuration = context.Configurations.Single();
         configuration.InvitationCount.ShouldBe(42);
