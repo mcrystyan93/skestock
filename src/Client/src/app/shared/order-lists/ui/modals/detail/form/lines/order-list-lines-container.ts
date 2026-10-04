@@ -1,34 +1,48 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FieldTree } from '@angular/forms/signals';
-import { NzListComponent, NzListEmptyComponent } from 'ng-zorro-antd/list';
 import { PurchaseStatisticDto } from '@ske/models';
 import { ClassStatisticsHttp } from '@ske/shared/class-statistics';
 import { catchError, map, of } from 'rxjs';
 import { OrderListLine, type OrderListLineFormModel } from './order-list-line';
+import { NzEmptyComponent } from 'ng-zorro-antd/empty';
 
 @Component({
   imports: [
-    NzListComponent,
-    NzListEmptyComponent,
+    NzEmptyComponent,
     OrderListLine
   ],
   selector: 'ske-order-list-lines-container',
-  styles: ``,
+  host:{
+    class: 'grow -mx-6 -mb-6 relative',
+  },
   template: `
-    @let history = purchaseHistory.value();
-    <nz-list>
-      @if (lines().length === 0) {
-        <nz-list-empty />
-      }
-      @for (line of lines(); track $index; let index = $index) {
-        @let itemId = line.itemId().value();
-        <ske-order-list-line [line]="line"
-                             [disabled]="disabled()"
-                             [history]="itemId ? (history.get(itemId) ?? null) : null"
-                             (remove)="remove.emit(line().value())" />
-      }
-    </nz-list>
+    <div class="absolute inset-0 overflow-y-auto">
+      <div class="p-2 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 xxxl:grid-cols-4 gap-2">
+        @let history = purchaseHistory.value();
+        @for (line of lines(); track $index; let index = $index) {
+          @let itemId = line.itemId().value();
+          <ske-order-list-line [line]="line"
+                               [disabled]="disabled()"
+                               [history]="itemId ? (history.get(itemId) ?? null) : null"
+                               (remove)="remove.emit(line().value())" />
+        } @empty {
+          <nz-empty nzNotFoundContent="Adauga articole" />
+        }
+        <!--      <nz-list>-->
+        <!--        @if (lines().length === 0) {-->
+        <!--          <nz-list-empty />-->
+        <!--        }-->
+        <!--        @for (line of lines(); track $index; let index = $index) {-->
+        <!--          @let itemId = line.itemId().value();-->
+        <!--          <ske-order-list-line [line]="line"-->
+        <!--                               [disabled]="disabled()"-->
+        <!--                               [history]="itemId ? (history.get(itemId) ?? null) : null"-->
+        <!--                               (remove)="remove.emit(line().value())" />-->
+        <!--        }-->
+        <!--      </nz-list>-->
+      </div>
+    </div>
   `
 })
 export class OrderListLinesContainer {

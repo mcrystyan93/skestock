@@ -1,14 +1,16 @@
 import { Component, computed, input, output } from '@angular/core';
 import { PurchaseStatisticDto } from '@ske/models';
 import { FieldTree, FormField } from '@angular/forms/signals';
-import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { NzFormControlComponent, NzFormItemComponent } from 'ng-zorro-antd/form';
-import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { NzInputDirective, NzInputPrefixDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
-import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
-import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
-import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
+import { NzCardComponent } from 'ng-zorro-antd/card';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
+import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
+import { NzFormControlComponent, NzFormItemComponent } from 'ng-zorro-antd/form';
+import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
+import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
+import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
+import { NzColDirective } from 'ng-zorro-antd/grid';
 
 const QUANTITY_FORMATTER = new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 2 });
 const CURRENCY_FORMATTER = new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' });
@@ -17,39 +19,30 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
 
 @Component({
   imports: [
-    NzButtonComponent,
-    NzFormControlComponent,
-    NzFormItemComponent,
-    NzIconDirective,
-    NzInputDirective,
-    NzInputNumberComponent,
-    NzSpaceCompactComponent,
-    FormField,
-    NzInputWrapperComponent,
-    NzInputPrefixDirective,
+    NzCardComponent,
+    NzTypographyComponent,
     NzTooltipDirective,
-    NzTypographyComponent
+    NzButtonComponent,
+    NzIconDirective,
+    NzFormItemComponent,
+    NzFormControlComponent,
+    NzInputWrapperComponent,
+    NzInputDirective,
+    FormField,
+    NzSpaceCompactComponent,
+    NzInputNumberComponent,
+    NzColDirective
   ],
-  host: {
-    class: 'ant-list-item flex-col! items-stretch! gap-2 py-3!'
-  },
   selector: 'ske-order-list-line',
   styles: ``,
   template: `
     @let lineForm = line();
     @let productName = lineForm.productName().value();
-    <div class="flex items-start gap-2">
-      <div class="min-w-0 flex-1">
-        <div class="font-medium wrap-break-word">{{ productName }}</div>
-        @if (lineForm.productName().touched() && lineForm.productName().errors(); as errors) {
-          @for (error of errors; track error.kind) {
-            <div class="ant-form-item-explain-error"
-                 role="alert">
-              <nz-icon nzType="icons:circle-exclamation"></nz-icon>
-              {{ error.message }}
-            </div>
-          }
-        }
+    <nz-card [nzTitle]="titleTemplate"
+             [nzExtra]="extraTemplate"
+             nzSize="small">
+      <ng-template #titleTemplate>
+        <div>{{ productName }}</div>
         @if (historyHint(); as hint) {
           <span class="text-xs"
                 nz-typography
@@ -59,101 +52,102 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
                 [nzTooltipTitle]="historyTooltip()"
                 [attr.aria-label]="historyTooltip()">{{ hint }}</span>
         }
+      </ng-template>
+      <ng-template #extraTemplate>
+        <button type="button"
+                nz-button
+                nzType="text"
+                nzDanger
+                class="shrink-0"
+                [disabled]="disabled()"
+                [attr.aria-label]="'Șterge articolul ' + productName"
+                (click)="remove.emit()">
+          <nz-icon nzType="icons:trash-can"></nz-icon>
+        </button>
+      </ng-template>
+
+      <div class="flex flex-col gap-2">
+        <nz-form-item class="mb-0!">
+          <nz-form-control nzSpan="24">
+            <nz-space-compact class="flex! w-full">
+              <button nz-button
+                      nzType="default"
+                      type="button"
+                      [disabled]="disabled()"
+                      (click)="decreaseQuantity()"
+                      [attr.aria-label]="'Scade cantitatea pentru ' + productName">
+                <nz-icon nzType="icons:minus"></nz-icon>
+              </button>
+              <nz-input-number [formField]="lineForm.quantity"
+                               class="min-w-0 flex-1 grow"
+                               nzPlaceHolder="Cantitate"
+                               [nzMin]="0"
+                               [nzStep]="0.01"
+                               [nzControls]="false"
+                               [attr.aria-label]="'Cantitate pentru ' + productName">
+              </nz-input-number>
+              <button nz-button
+                      nzType="default"
+                      type="button"
+                      [disabled]="disabled()"
+                      (click)="increaseQuantity()"
+                      [attr.aria-label]="'Crește cantitatea pentru ' + productName">
+                <nz-icon nzType="icons:plus"></nz-icon>
+              </button>
+              <input nz-input
+                     type="text"
+                     placeholder="U.M."
+                     [formField]="lineForm.unit"
+                     class="w-24! shrink-0"
+                     [attr.aria-label]="'Unitate de măsură pentru ' + productName" />
+            </nz-space-compact>
+            @if (lineForm.quantity().touched() && lineForm.quantity().errors(); as errors) {
+              @for (error of errors; track error.kind) {
+                <div class="ant-form-item-explain-error"
+                     role="alert">
+                  <nz-icon nzType="icons:circle-exclamation"></nz-icon>
+                  {{ error.message }}
+                </div>
+              }
+            }
+            @if (lineForm.unit().touched() && lineForm.unit().errors(); as errors) {
+              @for (error of errors; track error.kind) {
+                <div class="ant-form-item-explain-error"
+                     role="alert">
+                  <nz-icon nzType="icons:circle-exclamation"></nz-icon>
+                  {{ error.message }}
+                </div>
+              }
+            }
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item class="mb-0!">
+          <nz-form-control [nzErrorTip]="notesErrorTemplate"
+                           nzSpan="24">
+            <nz-input-wrapper>
+              <nz-icon nzInputPrefix
+                       nzType="icons:pencil"></nz-icon>
+              <input type="text"
+                     nz-input
+                     placeholder="Adaugă notițe"
+                     [formField]="lineForm.notes"
+                     [attr.aria-label]="'Notițe pentru ' + productName" />
+            </nz-input-wrapper>
+          </nz-form-control>
+          <ng-template #notesErrorTemplate>
+            @if (lineForm.notes().errors(); as errors) {
+              @for (error of errors; track error.kind) {
+                <div class="ant-form-item-explain-error">
+                  <nz-icon nzType="icons:circle-exclamation"></nz-icon>
+                  {{ error.message }}
+                </div>
+              }
+            }
+          </ng-template>
+        </nz-form-item>
       </div>
-      <button type="button"
-              nz-button
-              nzType="text"
-              nzSize="small"
-              nzDanger
-              class="shrink-0"
-              [disabled]="disabled()"
-              [attr.aria-label]="'Șterge articolul ' + productName"
-              (click)="remove.emit()">
-        <nz-icon nzType="icons:trash-can"></nz-icon>
-      </button>
-    </div>
-
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-start">
-      <nz-form-item class="mb-0! sm:flex-1">
-        <nz-form-control [nzErrorTip]="notesErrorTemplate">
-          <nz-input-wrapper>
-            <nz-icon nzInputPrefix
-                     nzType="icons:pencil"></nz-icon>
-            <input type="text"
-                   nz-input
-                   placeholder="Adaugă notițe"
-                   [formField]="lineForm.notes"
-                   [attr.aria-label]="'Notițe pentru ' + productName" />
-          </nz-input-wrapper>
-        </nz-form-control>
-      </nz-form-item>
-
-      <nz-form-item class="mb-0!">
-        <nz-form-control>
-          <nz-space-compact class="flex! w-full">
-            <button nz-button
-                    nzType="default"
-                    type="button"
-                    [disabled]="disabled()"
-                    (click)="decreaseQuantity()"
-                    [attr.aria-label]="'Scade cantitatea pentru ' + productName">
-              <nz-icon nzType="icons:minus"></nz-icon>
-            </button>
-            <nz-input-number [formField]="lineForm.quantity"
-                             class="min-w-0 flex-1 sm:w-20 sm:flex-none"
-                             nzPlaceHolder="Cantitate"
-                             [nzMin]="0"
-                             [nzStep]="0.01"
-                             [nzControls]="false"
-                             [attr.aria-label]="'Cantitate pentru ' + productName">
-            </nz-input-number>
-            <button nz-button
-                    nzType="default"
-                    type="button"
-                    [disabled]="disabled()"
-                    (click)="increaseQuantity()"
-                    [attr.aria-label]="'Crește cantitatea pentru ' + productName">
-              <nz-icon nzType="icons:plus"></nz-icon>
-            </button>
-            <input nz-input
-                   type="text"
-                   placeholder="U.M."
-                   [formField]="lineForm.unit"
-                   class="w-24! shrink-0"
-                   [attr.aria-label]="'Unitate de măsură pentru ' + productName" />
-          </nz-space-compact>
-          @if (lineForm.quantity().touched() && lineForm.quantity().errors(); as errors) {
-            @for (error of errors; track error.kind) {
-              <div class="ant-form-item-explain-error"
-                   role="alert">
-                <nz-icon nzType="icons:circle-exclamation"></nz-icon>
-                {{ error.message }}
-              </div>
-            }
-          }
-          @if (lineForm.unit().touched() && lineForm.unit().errors(); as errors) {
-            @for (error of errors; track error.kind) {
-              <div class="ant-form-item-explain-error"
-                   role="alert">
-                <nz-icon nzType="icons:circle-exclamation"></nz-icon>
-                {{ error.message }}
-              </div>
-            }
-          }
-        </nz-form-control>
-      </nz-form-item>
-    </div>
-
-    <ng-template #notesErrorTemplate>
-      @if (lineForm.notes().errors(); as errors) {
-        @for (error of errors; track error.kind) {
-          <div class="ant-form-item-explain-error">
-            <nz-icon nzType="icons:circle-exclamation"></nz-icon>
-            {{ error.message }}
-          </div>
-        }
-      }
-    </ng-template>
+    </nz-card>
   `
 })
 export class OrderListLine {
