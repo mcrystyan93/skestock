@@ -1,4 +1,5 @@
 using System.Text.Json;
+using FluentValidation.Results;
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Common.Security;
@@ -54,10 +55,13 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
         var itemInfoById = await dbContext.Items
             .AsNoTracking()
             .Where(i => existingItemIds.Contains(i.Id))
-            .Select(i => new { i.Id, i.IsPerishable, i.ShelfLifeDays })
-            .ToDictionaryAsync(i => i.Id, i => (i.IsPerishable, i.ShelfLifeDays), cancellationToken);
+            .Select(i => new { i.Id, i.Name, i.IsPerishable, i.ShelfLifeDays })
+            .ToDictionaryAsync(i => i.Id, cancellationToken);
 
-        var receivedDate = ResolveReceivedDate(import.ExtractedDataJson);
+        var extraction = string.IsNullOrWhiteSpace(import.ExtractedDataJson)
+            ? null
+            : JsonSerializer.Deserialize<GoodsReceiptExtractionResult>(import.ExtractedDataJson);
+        var receivedDate = extraction?.ReceivedAt ?? DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime);
         var receipt = new GoodsReceipt
         {
             ReceivedAt = new DateTimeOffset(receivedDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero),
@@ -70,6 +74,15 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
         foreach (var line in request.Lines)
         {
             var newItem = line.ItemId is null ? newItemsByKey[BuildNewItemKey(line)] : null;
+
+            var sourceName = extraction is not null
+                && line.SourceLineIndex >= 0 && line.SourceLineIndex < extraction.LineItems.Count
+                    ? extraction.LineItems[line.SourceLineIndex].Name
+                    : null;
+            var rawItemText = !string.IsNullOrWhiteSpace(sourceName)
+                ? sourceName
+                : newItem?.Name ?? itemInfoById.GetValueOrDefault(line.ItemId ?? Guid.Empty)?.Name;
+            ValidateSnapshotText(rawItemText);
 
             var expiryDate = line.ExpiryDate;
             if (expiryDate is null
@@ -107,6 +120,18 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
                 GoodsReceipt = receipt
             };
 
+            import.Lines.Add(new GoodsReceiptImportLine
+            {
+                Import = import,
+                RawItemText = rawItemText!,
+                MatchedItemId = newItem is null ? line.ItemId : null,
+                MatchedItem = newItem,
+                LocationId = line.LocationId,
+                Quantity = line.Quantity,
+                UnitPrice = line.UnitPrice,
+                ExpiryDate = expiryDate
+            });
+
             receipt.Batches.Add(batch);
             receipt.Transactions.Add(transaction);
             receipt.TotalAmount += batch.LineTotal;
@@ -116,7 +141,7 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
 
         import.MarkAsConfirmed(receipt.Id);
 
-        // Single SaveChanges wraps the receipt header, every batch/transaction, and any newly created
+        // Single SaveChanges wraps the import snapshots, receipt header, every batch/transaction, and any newly created
         // items/categories in one implicit transaction: all-or-nothing.
         await dbContext.SaveChangesAsync(cancellationToken);
 
@@ -208,16 +233,24 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
             ? $"sku:{line.Sku.Trim().ToLowerInvariant()}"
             : $"name:{line.Name?.Trim().ToLowerInvariant()}|cat:{line.CategoryName?.Trim().ToLowerInvariant()}";
 
-    private static DateOnly ResolveReceivedDate(string? extractedDataJson)
+    private static void ValidateSnapshotText(string? text)
     {
-        if (!string.IsNullOrWhiteSpace(extractedDataJson))
-        {
-            var extraction = JsonSerializer.Deserialize<GoodsReceiptExtractionResult>(extractedDataJson);
-            if (extraction?.ReceivedAt is { } extractedDate)
-                return extractedDate;
-        }
+        // Keep in sync with GoodsReceiptImportLineConfiguration's HasMaxLength.
+        const int rawItemTextMaxLength = 500;
+        if (!string.IsNullOrWhiteSpace(text) && text.Length <= rawItemTextMaxLength)
+            return;
 
-        return DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime);
+        throw new Common.Exceptions.ValidationException([
+            new ValidationFailure(nameof(ConfirmGoodsReceiptImportCommand.Lines),
+                string.IsNullOrWhiteSpace(text)
+                    ? "An import snapshot must have item text"
+                    : $"Import snapshot item text must not exceed {rawItemTextMaxLength} characters")
+            {
+                ErrorCode = string.IsNullOrWhiteSpace(text)
+                    ? ValidationErrorCodes.Required
+                    : ValidationErrorCodes.MaxLength
+            }
+        ]);
     }
 
     private async Task<Result<GoodsReceiptDto>> ProjectReceiptAsync(Guid receiptId, CancellationToken cancellationToken)
