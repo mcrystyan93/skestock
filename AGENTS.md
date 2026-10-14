@@ -57,3 +57,142 @@ Rules:
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+
+## Imported GitHub Copilot instructions
+
+The following sections copy the contents of the Copilot instruction files. Apply
+this guidance when working in `src/Client/**`; the original `applyTo` metadata
+uses the former `src/Web/ClientApp/**` path and is retained for provenance.
+
+For detailed NG-ZORRO component APIs and examples, consult
+`.github/instructions/llms-full.txt` when implementing or checking a component.
+That file is a documentation reference and is not embedded here because it
+exceeds Codex's default instruction size limit.
+
+### Source: `.github/instructions/angular-guidelines.instructions.md`
+
+---
+applyTo: 'src/Web/ClientApp/**'
+---
+You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
+
+## TypeScript Best Practices
+
+- Use strict type checking
+- Prefer type inference when the type is obvious
+- Avoid the `any` type; use `unknown` when type is uncertain
+
+## Angular Best Practices
+
+- Always use standalone components over NgModules
+- Must NOT set `standalone: true` inside Angular decorators. It's the default in Angular v20+.
+- Do NOT set `changeDetection: ChangeDetectionStrategy.OnPush` explicitly. `OnPush` is the default in Angular v22+.
+- Use signals for state management
+- Implement lazy loading for feature routes
+- Do NOT use the `@HostBinding` and `@HostListener` decorators. Put host bindings inside the `host` object of the `@Component` or `@Directive` decorator instead
+- Use `NgOptimizedImage` for all static images.
+  - `NgOptimizedImage` does not work for inline base64 images.
+
+## Accessibility Requirements
+
+- It MUST pass all AXE checks.
+- It MUST follow all WCAG AA minimums, including focus management, color contrast, and ARIA attributes.
+
+## Components
+
+- Keep components small and focused on a single responsibility
+- Use `input()` and `output()` functions instead of decorators
+- Use `computed()` for derived state
+- Prefer inline templates for small components
+- Prefer Signal Forms (`@angular/forms/signals`) for new forms. They are stable in Angular v22+ and provide signal-based state, type-safe field access, and schema-based validation
+- When not using Signal Forms, prefer Reactive forms instead of Template-driven ones
+- Do NOT use `ngClass`, use `class` bindings instead
+- Do NOT use `ngStyle`, use `style` bindings instead
+- When using external templates/styles, use paths relative to the component TS file.
+
+## State Management
+
+- Use signals for local component state
+- Use `computed()` for derived state
+- Keep state transformations pure and predictable
+- Do NOT use `mutate` on signals, use `update` or `set` instead
+
+## Templates
+
+- Keep templates simple and avoid complex logic
+- Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
+- Use the async pipe to handle observables
+- Do not assume globals like (`new Date()`) are available.
+
+## Services
+
+- Design services around a single responsibility
+- Use the `providedIn: 'root'` option for singleton services
+- Prefer the `@Service` decorator over `@Injectable({providedIn: 'root'})` for new singleton services (Angular v22+)
+- Use the `inject()` function instead of constructor injection
+
+
+### Source: `.github/instructions/ng-zorro-guidelines.instructions.md`
+
+---
+applyTo: 'src/Web/ClientApp/**'
+---
+# ng-zorro-antd Component Documentation (English)
+
+Use this guidance when generating Angular UI code with `ng-zorro-antd` in this repository.
+
+## Version and Platform Expectations
+
+- Target Angular `^22.0.0` and `ng-zorro-antd` matching Angular major versions.
+- Prefer standalone components and application-level providers in `app.config.ts`.
+- Use Angular native control flow (`@if`, `@for`, `@switch`) and modern signal-based patterns used by this codebase.
+
+## Core ng-zorro Rules
+
+- Import only required component APIs and icons; avoid broad imports that increase bundle size.
+- Prefer immutable state updates for inputs passed to NG-ZORRO components.
+- Use global config via `provideNzConfig(...)` for shared defaults instead of repeating per-component settings.
+- For overlays inside custom scroll containers, ensure CDK scrolling support (`CdkScrollable` / `ScrollingModule`) so positioning updates correctly.
+- For service-based UI (`NzModalService`, `NzDrawerService`, `NzMessageService`, `NzNotificationService`), pass strongly typed options and keep side effects in component/store methods.
+
+## Animations
+
+- For disabling animations globally or locally, use `provideNzNoAnimation()`.
+- For component-level template control, use the `nzNoAnimation` directive.
+- Use `provideNzWave({ disabled: true })` (or `provideNzNoAnimation`) to disable wave effects when required.
+
+## Date Components (Critical in v22)
+
+- Date components require an explicit `NzDateAdapter` provider at application root.
+- Configure one of:
+  - `provideNzDateFnsAdapter(...)`
+  - `provideNzNativeDateAdapter(...)`
+  - `provideNzDateAdapter(CustomAdapter, ...)`
+- If locale changes at runtime, update adapter locale via `dateAdapter.setLocale(...)`.
+- Ensure date format tokens match the selected adapter/date library.
+
+## Internationalization and Direction
+
+- Configure `provideNzI18n(...)` and Angular locale data registration together.
+- Respect runtime RTL/LTR requirements via `dir` or component/service config (`nzDirection`).
+
+## Theming
+
+- Prefer official theming/global config hooks (`provideNzConfig`, `NzConfigService.set`) for dynamic theme updates.
+- Keep theme strategy consistent (CSS variables vs Less-based) within a feature.
+
+## Component Usage Standards
+
+- Prefer documented component APIs over custom wrappers when a native NG-ZORRO option exists.
+- For forms, pair NG-ZORRO controls with Angular Reactive/Signal Forms and explicit validation states (`nzStatus`, form errors).
+- Use accessibility-friendly patterns: semantic labels, keyboard support, visible focus, and appropriate ARIA attributes.
+
+## Recommended Documentation Source
+
+When behavior is unclear, follow NG-ZORRO’s official docs first:
+
+- https://ng.ant.design/llms.txt
+- https://ng.ant.design/llms-full.txt
+- Single component docs: `https://ng.ant.design/components/<component>.en.md`
+
+Favor current, documented NG-ZORRO APIs and avoid deprecated patterns when equivalent modern APIs exist.
