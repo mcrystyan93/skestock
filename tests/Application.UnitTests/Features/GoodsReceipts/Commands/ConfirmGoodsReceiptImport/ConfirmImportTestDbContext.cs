@@ -20,7 +20,7 @@ namespace skestock.Application.UnitTests.Features.GoodsReceipts.Commands.Confirm
 /// <see cref="IApplicationDbContext"/> for ConfirmGoodsReceiptImport tests. Maps the goods-receipt
 /// write graph (receipt/batch/transaction), the item/category/location/class it references, plus
 /// <see cref="GoodsReceiptImport"/> (the source being confirmed). Mirrors the CreateGoodsReceipt
-/// test context with the import entity added.
+/// test context with the import and its confirmed snapshot lines added.
 /// </summary>
 public class ConfirmImportTestDbContext(DbContextOptions<ConfirmImportTestDbContext> options)
     : DbContext(options), IApplicationDbContext
@@ -139,10 +139,16 @@ public class ConfirmImportTestDbContext(DbContextOptions<ConfirmImportTestDbCont
             b.Ignore(i => i.CreatedBy);
             b.Ignore(i => i.LastModifiedBy);
             b.Ignore(i => i.ResultingGoodsReceipt);
-            b.Ignore(i => i.Lines);
+            b.HasMany(i => i.Lines).WithOne(l => l.Import).HasForeignKey(l => l.ImportId);
         });
 
-        builder.Ignore<GoodsReceiptImportLine>();
+        builder.Entity<GoodsReceiptImportLine>(b =>
+        {
+            b.HasOne(l => l.MatchedItem).WithMany().HasForeignKey(l => l.MatchedItemId);
+            b.HasOne(l => l.Location).WithMany().HasForeignKey(l => l.LocationId);
+            b.Ignore(l => l.CreatedBy);
+            b.Ignore(l => l.LastModifiedBy);
+        });
         builder.Ignore<ClassBalance>();
         builder.Ignore<FileMetadata>();
     }

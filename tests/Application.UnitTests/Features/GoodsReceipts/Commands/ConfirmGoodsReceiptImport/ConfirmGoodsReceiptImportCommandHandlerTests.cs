@@ -174,6 +174,10 @@ public class ConfirmGoodsReceiptImportCommandHandlerTests
         newItem.Sku.ShouldBe("SKU-NEW");
         newItem.CategoryId.ShouldBe(category.Id);
         newItem.IsActive.ShouldBeTrue();
+        context.ChangeTracker.Clear();
+        var snapshot = await context.GoodsReceiptImportLines.SingleAsync();
+        snapshot.MatchedItemId.ShouldBe(newItem.Id);
+        snapshot.RawItemText.ShouldBe("Beans");
     }
 
     [Test]
@@ -269,6 +273,7 @@ public class ConfirmGoodsReceiptImportCommandHandlerTests
 
         result.IsFailed.ShouldBeTrue();
         (await context.GoodsReceipts.CountAsync(CancellationToken.None)).ShouldBe(0);
+        (await context.GoodsReceiptImportLines.CountAsync(CancellationToken.None)).ShouldBe(0);
     }
 
     [Test]
@@ -294,6 +299,8 @@ public class ConfirmGoodsReceiptImportCommandHandlerTests
 
         var batch = await context.StockBatches.SingleAsync(b => b.ItemId == perishable.Id, CancellationToken.None);
         batch.ExpiryDate.ShouldBe(batch.ReceivedDate.AddDays(10));
+        context.ChangeTracker.Clear();
+        (await context.GoodsReceiptImportLines.SingleAsync()).ExpiryDate.ShouldBe(batch.ExpiryDate);
     }
 
     [Test]
@@ -311,4 +318,195 @@ public class ConfirmGoodsReceiptImportCommandHandlerTests
 
         result.IsFailed.ShouldBeTrue();
     }
+    [TestCase(null, 0, "Rice")]
+    [TestCase("  ", 0, "Rice")]
+    [TestCase("  Original rice text  ", 0, "  Original rice text  ")]
+    [TestCase("Original rice text", -1, "Rice")]
+    [TestCase("Original rice text", 1, "Rice")]
+    public async Task Handle_PersistsReviewedSnapshotWithSourceTextFallback(string? sourceName, int sourceIndex, string expectedText)
+    {
+        var (context, item, _, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        var import = await AddPendingImportAsync(context, schoolClass.Id);
+        import.ApplyExtractionResult(new GoodsReceiptExtractionResult
+        {
+            LineItems = [new GoodsReceiptLineItem { Name = sourceName }]
+        }.ToJson());
+        await context.SaveChangesAsync(CancellationToken.None);
+        var handler = new ConfirmGoodsReceiptImportCommandHandler(context, new FakeUser(userProfile.IdentityId));
+        var expiry = new DateOnly(2027, 1, 5);
+        item.IsPerishable = true;
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await handler.Handle(new ConfirmGoodsReceiptImportCommand
+        {
+            ImportId = import.Id,
+            Lines = [new ConfirmGoodsReceiptImportLine
+            {
+                ItemId = item.Id, LocationId = location.Id, Quantity = 12,
+                UnitPrice = 2.75m, ExpiryDate = expiry, SourceLineIndex = sourceIndex
+            }]
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        context.ChangeTracker.Clear();
+        var snapshot = await context.GoodsReceiptImportLines.SingleAsync();
+        snapshot.ImportId.ShouldBe(import.Id);
+        snapshot.MatchedItemId.ShouldBe(item.Id);
+        snapshot.LocationId.ShouldBe(location.Id);
+        snapshot.RawItemText.ShouldBe(expectedText);
+        snapshot.Quantity.ShouldBe(12);
+        snapshot.UnitPrice.ShouldBe(2.75m);
+        snapshot.ExpiryDate.ShouldBe(expiry);
+    }
+
+    [Test]
+    public async Task Handle_SplitNewItem_PersistsSeparateSnapshotsWithSharedResolvedItem()
+    {
+        var (context, _, _, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        var annex = new Location { Name = "Annex", Type = "StorageRoom" };
+        context.Locations.Add(annex);
+        var import = await AddPendingImportAsync(context, schoolClass.Id);
+        import.ApplyExtractionResult(new GoodsReceiptExtractionResult
+        {
+            LineItems = [new GoodsReceiptLineItem { Name = "Extracted beans", Quantity = 10 }]
+        }.ToJson());
+        await context.SaveChangesAsync(CancellationToken.None);
+        var handler = new ConfirmGoodsReceiptImportCommandHandler(context, new FakeUser(userProfile.IdentityId));
+
+        var result = await handler.Handle(new ConfirmGoodsReceiptImportCommand
+        {
+            ImportId = import.Id,
+            Lines =
+            [
+                new ConfirmGoodsReceiptImportLine { Name = "Beans", CategoryName = "Pantry", LocationId = location.Id, Quantity = 6, UnitPrice = 3m },
+                new ConfirmGoodsReceiptImportLine { Name = "Beans", CategoryName = "Pantry", LocationId = annex.Id, Quantity = 4, UnitPrice = 3m }
+            ]
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        context.ChangeTracker.Clear();
+        var beans = await context.Items.SingleAsync(i => i.Name == "Beans");
+        var snapshots = await context.GoodsReceiptImportLines.OrderByDescending(l => l.Quantity).ToListAsync();
+        snapshots.Count.ShouldBe(2);
+        snapshots.Select(l => l.MatchedItemId).ShouldAllBe(id => id == beans.Id);
+        snapshots.Select(l => l.RawItemText).ShouldAllBe(text => text == "Extracted beans");
+        snapshots[0].LocationId.ShouldBe(location.Id);
+        snapshots[0].Quantity.ShouldBe(6);
+        snapshots[1].LocationId.ShouldBe(annex.Id);
+        snapshots[1].Quantity.ShouldBe(4);
+    }
+
+    [Test]
+    public async Task Handle_StockEditsAndRepeatConfirmation_PreserveSnapshot()
+    {
+        var (context, item, _, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        var import = await AddPendingImportAsync(context, schoolClass.Id);
+        var handler = new ConfirmGoodsReceiptImportCommandHandler(context, new FakeUser(userProfile.IdentityId));
+        var command = new ConfirmGoodsReceiptImportCommand
+        {
+            ImportId = import.Id,
+            Lines = [new ConfirmGoodsReceiptImportLine { ItemId = item.Id, LocationId = location.Id, Quantity = 5, UnitPrice = 2m }]
+        };
+        var first = await handler.Handle(command, CancellationToken.None);
+        context.ChangeTracker.Clear();
+        var original = await context.GoodsReceiptImportLines.AsNoTracking().SingleAsync();
+        var batch = await context.StockBatches.SingleAsync();
+        batch.Quantity = 1;
+        batch.UnitPrice = 9m;
+        batch.ExpiryDate = new DateOnly(2027, 2, 1);
+        await context.SaveChangesAsync(CancellationToken.None);
+        context.ChangeTracker.Clear();
+
+        var second = await handler.Handle(command, CancellationToken.None);
+
+        second.Value.Id.ShouldBe(first.Value.Id);
+        context.ChangeTracker.Clear();
+        var snapshot = await context.GoodsReceiptImportLines.SingleAsync();
+        snapshot.Id.ShouldBe(original.Id);
+        snapshot.Quantity.ShouldBe(5);
+        snapshot.UnitPrice.ShouldBe(2m);
+        snapshot.ExpiryDate.ShouldBeNull();
+        snapshot.RawItemText.ShouldBe("Rice");
+        snapshot.MatchedItemId.ShouldBe(item.Id);
+        snapshot.LocationId.ShouldBe(location.Id);
+    }
+
+    [TestCase("")]
+    [TestCase("   ")]
+    [TestCase(null)]
+    public async Task Handle_UnusableSnapshotText_DoesNotPersistConfirmation(string? itemName)
+    {
+        var (context, item, _, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        item.Name = itemName!;
+        await context.SaveChangesAsync(CancellationToken.None);
+        var import = await AddPendingImportAsync(context, schoolClass.Id);
+        var handler = new ConfirmGoodsReceiptImportCommandHandler(context, new FakeUser(userProfile.IdentityId));
+
+        Should.Throw<skestock.Application.Common.Exceptions.ValidationException>(async () =>
+            await handler.Handle(new ConfirmGoodsReceiptImportCommand
+            {
+                ImportId = import.Id,
+                Lines = [new ConfirmGoodsReceiptImportLine { ItemId = item.Id, LocationId = location.Id, Quantity = 5 }]
+            }, CancellationToken.None));
+
+        context.ChangeTracker.Clear();
+        (await context.GoodsReceiptImportLines.CountAsync()).ShouldBe(0);
+        (await context.GoodsReceipts.CountAsync()).ShouldBe(0);
+        (await context.GoodsReceiptImports.SingleAsync()).Status.ShouldBe(GoodsReceiptImportStatus.PendingReview);
+    }
+
+    [TestCase(500, false)]
+    [TestCase(501, false)]
+    [TestCase(500, true)]
+    [TestCase(501, true)]
+    public async Task Handle_SnapshotTextLength_RespectsPersistenceLimit(int length, bool newItem)
+    {
+        var (context, item, _, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        var import = await AddPendingImportAsync(context, schoolClass.Id);
+        var text = new string('x', length);
+        if (!newItem)
+        {
+            import.ApplyExtractionResult(new GoodsReceiptExtractionResult
+            {
+                LineItems = [new GoodsReceiptLineItem { Name = text }]
+            }.ToJson());
+            await context.SaveChangesAsync(CancellationToken.None);
+        }
+        var handler = new ConfirmGoodsReceiptImportCommandHandler(context, new FakeUser(userProfile.IdentityId));
+        var command = new ConfirmGoodsReceiptImportCommand
+        {
+            ImportId = import.Id,
+            Lines = [new ConfirmGoodsReceiptImportLine
+            {
+                ItemId = newItem ? null : item.Id, Name = newItem ? text : null,
+                CategoryName = "New category", LocationId = location.Id, Quantity = 5
+            }]
+        };
+
+        if (length <= 500)
+        {
+            (await handler.Handle(command, CancellationToken.None)).IsSuccess.ShouldBeTrue();
+            context.ChangeTracker.Clear();
+            (await context.GoodsReceiptImportLines.SingleAsync()).RawItemText.ShouldBe(text);
+        }
+        else
+        {
+            var exception = Should.Throw<skestock.Application.Common.Exceptions.ValidationException>(async () =>
+                await handler.Handle(command, CancellationToken.None));
+            exception.Errors["Lines"].Single().Code.ShouldBe("validation.max_length");
+            context.ChangeTracker.Clear();
+            (await context.GoodsReceiptImportLines.CountAsync()).ShouldBe(0);
+            (await context.GoodsReceipts.CountAsync()).ShouldBe(0);
+            (await context.StockBatches.CountAsync()).ShouldBe(0);
+            (await context.Items.CountAsync()).ShouldBe(1);
+            (await context.Categories.CountAsync()).ShouldBe(1);
+            (await context.GoodsReceiptImports.SingleAsync()).Status.ShouldBe(GoodsReceiptImportStatus.PendingReview);
+        }
+    }
+
 }

@@ -1,107 +1,50 @@
-# Plan: Numărul de locuri în Configuration și limita API
+# Plan: Confirmed goods receipt import snapshots
 
-Status: Complete — plan aprobat și implementat la 2026-10-04.
+Status: Complete — approved and implemented on 2026-10-14
 
-## Obiectiv
+## Objective
+Implement the [approved spec](../.scratch/goods-receipt-import-snapshots/spec.md). The completed previous plan is preserved in [room-configuration-ui-plan.md](room-configuration-ui-plan.md).
 
-Implementăm [specificația aprobată](../.scratch/room-configuration-ui/spec.md):
-secțiune cu un card pentru Sala 4, Sala 2 și Sala 6, feature dedicat în
-ConfigurationStore și validare 0–200 în frontend și backend.
-[Planul backend finalizat anterior](room-configuration-backend-plan.md) este păstrat separat.
+## Decisions and Dependencies
+1. Map import lines in the existing handler test context, which currently ignores them.
+2. Write failing persistence tests, then create a snapshot alongside each batch using the resolved item and effective expiry. Attach through the tracked import collection and retain one SaveChangesAsync.
+3. Deserialize extraction once for source names and received date. Include catalog names in the existing item lookup for fallback text. Preserve nonblank source names; use catalog names when extraction or the source index is unavailable. Reject unusable or overlong text before saving without truncation.
+4. Update stale entity comments. Verify persisted snapshots remain unchanged after stock edits and repeat confirmation.
 
-## Decizii tehnice
+Work is sequential because both tasks share the handler tests. No migration or dependency change is needed.
 
-- Backend: adăugăm limita superioară în validatorul existent, folosind codurile
-  standard de validare. Păstrăm required/min, autorizarea, cache-ul și handler-ul.
-  Nu modificăm schema sau datele existente.
-- Client: DTO/request cu trei numere și GET/PUT prin ConfigurationHttp.
-  Folosim interceptorul existent și ruta `/api/ClassConfiguration/rooms`.
-- Store: `withRooms()` compune state, loading și ProblemDetails independente.
-  `rxMethod`/`mapResponse` gestionează GET și PUT → GET; numai răspunsurile
-  confirmate înlocuiesc datele. Erorile se curăță înaintea fiecărei cereri.
-- Prezentare: `RoomsCard` folosește signal inputs/outputs și Signal Forms,
-  trei input-uri native `nz-input`, validare required/integer/min/max și
-  butonul Salvează. Nu injectează store sau HTTP.
-- Container: `RoomsSection` injectează store-ul, afișează erorile și coordonează
-  submit-ul valid; pagina îl adaugă după Invitații și încarcă sălile la inițializare.
-- Scaffolding prin Angular CLI; teste focalizate scrise manual. Refolosim
-  componentele ng-zorro, loader-ul și stilurile existente, fără dependențe noi.
-- Lucrăm secvențial în acest chat și păstrăm modificările locale preexistente.
+## Task Index
+Tasks use the repository Markdown issue tracker:
+- [01 Persist snapshots](../.scratch/goods-receipt-import-snapshots/issues/01-persist-snapshots.md)
+- [02 Preservation and final verification](../.scratch/goods-receipt-import-snapshots/issues/02-preservation-and-verification.md), depends on 01.
 
-## Dependențe și task-uri
-
-```text
-01 Limita API + teste
-    ↓
-02 Contract client + HTTP
-    ├── 03 Feature rooms în store
-    └── 04 Card prezentational
-                ↓ (03 + 04)
-        05 Container + pagină
-                ↓
-        06 Verificare finală
-```
-
-03 și 04 sunt independente după stabilirea contractului, dar nu necesită
-agenți paraleli. Fiecare task include verificarea propriului comportament.
-
-1. [x] [Limita 200 în backend](../.scratch/room-configuration-ui/issues/01-backend-seat-limit.md)
-2. [x] [Contractul HTTP client](../.scratch/room-configuration-ui/issues/02-client-room-http.md)
-3. [x] [Feature rooms în ConfigurationStore](../.scratch/room-configuration-ui/issues/03-rooms-store-feature.md)
-4. [x] [Cardul pentru numărul de locuri](../.scratch/room-configuration-ui/issues/04-rooms-presentation-card.md)
-5. [x] [Secțiunea și integrarea în pagină](../.scratch/room-configuration-ui/issues/05-rooms-section-page.md)
-6. [x] [Verificarea fluxului complet](../.scratch/room-configuration-ui/issues/06-rooms-verification.md)
-
-Task tracker: câte un issue Markdown în `.scratch/room-configuration-ui/issues/`,
-conform `docs/agents/issue-tracker.md`; nu duplicăm lista în `tasks/todo.md`.
-
-## Checkpoint-uri
-
-- [x] După 01–02: build backend, teste pentru limita API și testele HTTP client.
-- [x] După 03–04: testele feature/card și build Angular; fiecare sală acceptă
-  0/200 și respinge câmp gol, -1, fracții și 201.
-- [x] După 05–06: flux GET → editare → PUT → GET, stări de eroare/loading,
-  accesibilitate și layout mobil/desktop verificate. Browserul folosește un API
-  rooms interceptat; testele funcționale verifică endpoint-ul real.
-
-## Verificare executabilă
-
-Din rădăcina repository-ului:
+## Checkpoints and Commands
+After 01, focused tests verify reloaded snapshots for existing/new items, splits, text fallback and explicit/derived expiry. After 02, run broader verification, review the diff against the spec and update the graph.
 
 ```bash
-dotnet build
-dotnet test tests/Application.UnitTests --filter FullyQualifiedName~ClassConfiguration
-./run-functional-tests.sh --filter FullyQualifiedName~ClassConfiguration
+dotnet test tests/Application.UnitTests --filter FullyQualifiedName~ConfirmGoodsReceiptImport
 dotnet test tests/Application.UnitTests
-dotnet run --project src/AppHost
+dotnet build
 graphify update .
 ```
 
-Din `src/Client`:
+## Risks and Mitigations
+- EF relationship resolution: explicit test mappings and assertions after clearing tracking.
+- Missing extraction: catalog-name fallback; keep current received-date fallback.
+- Raw text exceeds 500 characters: reject before save, never truncate.
+- Mutable stock affects history: independent scalar values and regression tests.
+- Repeat confirmation duplicates lines: preserve the existing early return and assert IDs/count/values.
+- In-memory tests cannot prove SQL rollback: retain the existing single save operation and report this limitation.
 
-```bash
-npm run build
-npm test -- --watch=false
-npm run e2e -- --project=chromium --project=mobile e2e/specs/room-configuration.spec.ts
-```
+## Open Questions
+No unresolved requirements. Plan and tasks approved on 2026-10-14.
 
-În task-uri folosim `--include` pentru testele Angular focalizate; comportamentul
-este implementat în ciclul red/green. E2E folosește aplicația reală și interceptează
-ruta rooms pentru a evita scrieri în baza locală; testele funcționale verifică API-ul
-real. Orice blocaj de mediu este raportat explicit.
-
-## Riscuri și măsuri
-
-| Risc | Măsură |
-|---|---|
-| Câmp gol interpretat ca zero sau NaN | Teste care golesc input-ul și verifică lipsa cererii HTTP |
-| Regula max anulează required/min | Reguli FluentValidation separate și teste pentru fiecare câmp |
-| Valori istorice peste 200 | GET le păstrează, formularul indică eroarea și permite corectarea |
-| Reîncărcarea suprascrie editări | Sincronizăm formularul numai cu datele confirmate; loading blochează editarea și submit repetat |
-| PUT reușit, GET de confirmare eșuat | Afișăm eroarea și păstrăm ultima configurație confirmată, fără succes fals |
-| Alte features pierd state/error | State și metode rooms distincte; testăm independența |
-| Resurse AppHost indisponibile | Folosim setup-ul existent și raportăm verificările neexecutate |
-
-## Întrebări deschise
-
-Nu există întrebări de cerințe. Aprobarea planului și task-urilor precede implementarea.
+## Verification Results
+- RED: 11 failing snapshot tests and 9 passing existing tests before implementation.
+- GREEN: all 20 initial focused tests passed after snapshot creation was implemented.
+- Final Application unit suite: 779 passed, zero failed/skipped; includes four additional snapshot text boundary cases.
+- Full solution build: zero warnings and zero errors.
+- `git diff --check`: clean.
+- `graphify update .`: completed successfully using AST extraction.
+- Code review: existing schema and inward dependencies preserved, no extra per-line queries, one save operation, repeat-confirmation early return preserved. No blocking findings.
+- Limitation: in-memory persistence tests do not prove SQL rollback; the existing single-save transaction boundary remains unchanged. Immutability is enforced by application behavior, not database write protection.
