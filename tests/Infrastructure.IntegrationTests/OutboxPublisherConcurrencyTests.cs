@@ -229,7 +229,7 @@ public sealed class OutboxPublisherConcurrencyTests
             await sendStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
             cancellation.Cancel();
 
-            Assert.CatchAsync<OperationCanceledException>(async () => await publishTask);
+            await Assert.CatchAsync<OperationCanceledException>(async () => await publishTask);
 
             await using var dbContext = IntegrationTestSetup.CreateDbContext();
             var message = await dbContext.OutboxMessages.SingleAsync(x => x.Id == messageId);
