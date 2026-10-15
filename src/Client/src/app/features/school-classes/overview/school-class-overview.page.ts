@@ -12,6 +12,7 @@ import {realtimeGroups, SignalRGroupManagerStore} from '@ske/signalr';
 import {ErrorAlert} from '@ske/shared/errors';
 import {QueryParamState} from '@ske/routes';
 import {ClassDepartmentsTab} from './tabs/departments/class-departments-tab';
+import {ClassInvitationsTab} from './tabs/invitations/class-invitations-tab';
 
 @Component({
   imports: [
@@ -24,7 +25,8 @@ import {ClassDepartmentsTab} from './tabs/departments/class-departments-tab';
     StatisticsTab,
     ClassStock,
     ErrorAlert,
-    ClassDepartmentsTab
+    ClassDepartmentsTab,
+    ClassInvitationsTab
   ],
   selector: 'ske-school-class-overview-page',
   styles: ``,
@@ -44,11 +46,6 @@ export class SchoolClassOverviewPage implements OnInit, OnDestroy {
   public readonly categoryId = signal<string | null>(null);
   public readonly locationId = signal<string | null>(null);
   public readonly receiptId = signal<string | null>(null);
-
-  public refreshClass() {
-    this.store.load(this.id());
-  }
-
 
   public ngOnInit() {
     this._signalRGroupManager.join(realtimeGroups.goodsReceiptImportsList);

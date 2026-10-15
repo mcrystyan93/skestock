@@ -259,7 +259,7 @@ export class ItemDropdown implements FormValueControl<ItemDropdownValue> {
       },
       nzCentered: true,
       nzMaskClosable: false,
-      nzWrapClassName: 'modal-w-50'
+      nzWrapClassName: 'modal-100 modal-lg-75'
     });
 
     modalRef.afterClose.pipe(

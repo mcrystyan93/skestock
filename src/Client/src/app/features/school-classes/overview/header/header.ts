@@ -75,7 +75,8 @@ export class Header {
     {label: 'Comenzi recepționate', compactLabel: 'Recepții'},
     {label: 'Comenzi importate', compactLabel: 'Importuri'},
     {label: 'Statistici', compactLabel: 'Stat.'},
-    {label: 'Departamente', compactLabel: 'Dept.'}
+    {label: 'Departamente', compactLabel: 'Dept.'},
+    {label: 'Invitații'}
   ];
 
   protected readonly action = computed<HeaderAction | null>(() => {

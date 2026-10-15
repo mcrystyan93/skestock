@@ -1,0 +1,25 @@
+<section class="mx-auto flex w-full max-w-5xl flex-col gap-2"
+         aria-labelledby="class-invitations-title">
+  <header>
+    <h2 id="class-invitations-title"
+        class="m-0 text-xl font-semibold">Invitațiile clasei</h2>
+    <p class="mb-0 mt-1 text-sm"
+       nz-typography
+       nzType="secondary">
+      Numărul de invitații este copiat din configurarea generală la inițializarea clasei.
+    </p>
+  </header>
+
+  @if (store.schoolClass().id) {
+    @if (store.schoolClass().invitationCount == null) {
+      @if (store.departmentsProblemDetail() || store.departmentsValidationErrors()) {
+        <ske-error-display [problemDetail]="store.departmentsProblemDetail()"
+                           [validationErrors]="store.departmentsValidationErrors()" />
+      }
+      <ske-class-configuration-initialization [loading]="store.departmentsLoading()"
+                                              (initialize)="store.initializeConfiguration()" />
+    } @else {
+      <ske-class-invitation-count [count]="store.schoolClass().invitationCount ?? 0" />
+    }
+  }
+</section>
