@@ -29,7 +29,9 @@
                                               [active]="store.selectedTabIndex() === 4"/>
   </nz-tab>
   <nz-tab>
-    <ske-school-class-departments-tab [schoolClass]="store.schoolClass()"
-                                      (refreshed)="refreshClass()"/>
+    <ske-school-class-departments-tab/>
+  </nz-tab>
+  <nz-tab>
+    <ske-school-class-invitations-tab/>
   </nz-tab>
 </nz-tabs>

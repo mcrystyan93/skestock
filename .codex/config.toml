@@ -23,10 +23,16 @@ approval_mode = "approve"
 [mcp_servers.playwright.tools.browser_evaluate]
 approval_mode = "approve"
 
+[mcp_servers.playwright.tools.browser_run_code_unsafe]
+approval_mode = "approve"
+
 [mcp_servers.angular-cli]
 enabled = true
 command = "npx"
 args = ["-y", "@angular/cli", "mcp"]
+
+[mcp_servers.angular-cli.tools.run_target]
+approval_mode = "approve"
 
 [mcp_servers.playwright-test]
 enabled = true

@@ -1,0 +1,19 @@
+<nz-card [nzTitle]="title">
+  <ng-template #title>
+    <h3 class="m-0 whitespace-normal text-lg font-medium">Configurarea inițială nu a fost copiată</h3>
+  </ng-template>
+  <p>
+    Copiați departamentele și numărul de invitații configurat în această clasă. Valorile vor rămâne cele
+    inițiale.
+  </p>
+  <button nz-button
+          nzType="primary"
+          nzSize="large"
+          type="button"
+          class="h-auto min-h-11 whitespace-normal"
+          [nzLoading]="loading()"
+          [disabled]="loading()"
+          (click)="initialize.emit()">
+    {{ loading() ? 'Se copiază…' : 'Copiază configurarea în clasă' }}
+  </button>
+</nz-card>

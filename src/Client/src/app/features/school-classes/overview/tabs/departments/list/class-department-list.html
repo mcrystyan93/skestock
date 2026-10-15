@@ -1,0 +1,13 @@
+@if ((store.schoolClass().departments ?? []).length === 0) {
+  <nz-empty nzNotFoundContent="Nu sunt departamente definite pentru această clasă." />
+} @else {
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    @for (department of store.schoolClass().departments ?? []; track department.id) {
+      <ske-class-department-card [department]="department"
+                                 [saving]="store.savingDepartmentId() === department.id"
+                                 [disabled]="store.departmentsLoading()"
+                                 (edited)="store.clearDepartmentsFeedback()"
+                                 (save)="store.saveResponsiblePerson({ departmentId: department.id, responsiblePerson: $event })" />
+    }
+  </div>
+}
