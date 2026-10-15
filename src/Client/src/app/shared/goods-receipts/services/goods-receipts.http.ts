@@ -6,6 +6,7 @@ import {
   GetAllGoodsReceiptsRequest,
   GoodsReceiptDto,
   GoodsReceiptImportDto,
+  GoodsReceiptImportLineDto,
   GoodsReceiptListItemDto,
   PaginatedResponse
 } from '@ske/models';
@@ -23,6 +24,10 @@ export class GoodsReceiptsHttp {
 
   public getById(id: string) {
     return this._httpClient.get<GoodsReceiptDto>(`/api/GoodsReceipts/${id}`);
+  }
+
+  public getImportLines(id: string) {
+    return this._httpClient.get<GoodsReceiptImportLineDto[]>(`/api/GoodsReceipts/${id}/import-lines`);
   }
 
   public create(request: CreateGoodsReceiptRequest) {

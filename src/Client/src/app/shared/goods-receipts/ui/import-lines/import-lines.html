@@ -1,0 +1,49 @@
+@if (loading()) {
+  <div class="p-3" role="status" aria-busy="true" aria-label="Se încarcă liniile salvate ale recepției">
+    <nz-skeleton [nzActive]="true" [nzTitle]="{ width: '60%' }" [nzParagraph]="{ rows: 3 }" />
+  </div>
+} @else if (lines().length === 0) {
+  <div role="status" class="p-3">
+    <nz-empty nzNotFoundContent="Nu există linii salvate pentru această recepție" />
+  </div>
+} @else {
+  <div class="desktop-lines">
+    <nz-table [nzData]="lines()" [nzFrontPagination]="false" [nzShowPagination]="false"
+              nzSize="small" nzTableLayout="fixed" [nzScroll]="{ x: '700px' }">
+      <thead>
+        <tr>
+          <th nzWidth="300px" scope="col">Articol</th>
+          <th nzWidth="150px" scope="col">Locație</th>
+          <th nzWidth="100px" scope="col" class="text-right!">Cantitate</th>
+          <th nzWidth="100px" scope="col" class="text-right!">Preț unitar</th>
+          <th nzWidth="120px" scope="col" class="text-right!">Valoare</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (line of lines(); track line.id) {
+          <tr>
+            <td class="whitespace-normal! break-words">{{ line.rawItemText }}</td>
+            <td class="whitespace-normal! break-words">{{ line.locationName ?? 'Locație nespecificată' }}</td>
+            <td class="text-right">{{ line.quantity | number:'1.0-0' }} buc</td>
+            <td class="text-right">{{ line.unitPrice | currency:'RON' }}</td>
+            <td class="text-right">{{ line.lineTotal | currency:'RON' }}</td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </div>
+  <div class="mobile-lines p-2" role="list" aria-label="Linii salvate ale recepției">
+    @for (line of lines(); track line.id) {
+      <article class="mb-2 min-w-0 rounded border border-gray-200 p-3 dark:border-gray-700" role="listitem">
+        <strong class="block break-words">{{ line.rawItemText }}</strong>
+        <div nz-typography nzType="secondary" class="mb-0! mt-1 break-words">
+          {{ line.locationName ?? 'Locație nespecificată' }}
+        </div>
+        <div class="mt-2 break-words text-sm">
+          {{ line.quantity | number:'1.0-0' }} buc × {{ line.unitPrice | currency:'RON' }} =
+          <strong>{{ line.lineTotal | currency:'RON' }}</strong>
+        </div>
+      </article>
+    }
+  </div>
+}

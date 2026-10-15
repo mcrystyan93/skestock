@@ -3,7 +3,7 @@ import { Component, effect, input, output, signal, untracked } from '@angular/co
 import { GetAllGoodsReceiptsRequest, GoodsReceiptListItemDto } from '@ske/models';
 import { BaseList } from '@ske/shared/tables';
 import { TimeAgoPipe } from '@ske/shared/pipes';
-import { TableContainer as StockBatchesTableContainer } from '@ske/shared/stock-batches';
+import { ImportLinesContainer } from '../../import-lines/import-lines-container';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzCardComponent } from 'ng-zorro-antd/card';
 import { NzEmptyComponent } from 'ng-zorro-antd/empty';
@@ -27,7 +27,7 @@ import { StopClick } from '@ske/shared/directives';
     NzSpinComponent,
     NzTooltipDirective,
     NzTypographyComponent,
-    StockBatchesTableContainer,
+    ImportLinesContainer,
     StopClick,
     TimeAgoPipe
   ],

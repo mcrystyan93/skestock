@@ -5,7 +5,7 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
-import { TableContainer as StockBatchesTableContainer } from '@ske/shared/stock-batches';
+import { ImportLinesContainer } from '../import-lines/import-lines-container';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { TimeAgoPipe } from '@ske/shared/pipes';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
@@ -17,7 +17,7 @@ import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
     NzButtonComponent,
     NzIconDirective,
     DatePipe,
-    StockBatchesTableContainer,
+    ImportLinesContainer,
     CurrencyPipe,
     DecimalPipe,
     NzTypographyComponent,

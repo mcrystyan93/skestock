@@ -308,3 +308,17 @@ export function buildGoodsReceiptListFilter(
     sort: prioritizeSort(currentFilter.sort ?? [], partialFilter.sort ?? [])
   };
 }
+
+/** Saved confirmation snapshot; locationName is the current catalog label. */
+export type GoodsReceiptImportLineDto = {
+  id: string;
+  importId: string;
+  rawItemText: string;
+  matchedItemId: string | null;
+  locationId: string | null;
+  locationName: string | null;
+  quantity: number;
+  unitPrice: number;
+  expiryDate: string | null;
+  lineTotal: number;
+};

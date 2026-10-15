@@ -1,0 +1,10 @@
+@if (store.linesProblemDetail() || store.linesValidationErrors()) {
+  <div class="p-3" role="alert">
+    <ske-error-display [problemDetail]="store.linesProblemDetail()" [validationErrors]="store.linesValidationErrors()" />
+    <button nz-button type="button" nzType="default" class="mt-2 min-h-10" (click)="store.retry()">
+      Reîncearcă încărcarea liniilor
+    </button>
+  </div>
+} @else {
+  <ske-goods-receipt-import-lines [lines]="store.lines()" [loading]="store.linesLoading()" />
+}

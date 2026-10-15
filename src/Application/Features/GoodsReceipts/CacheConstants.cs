@@ -6,4 +6,6 @@ public static class CacheConstants
     public const string GoodsReceiptListTag = "goods_receipts";
     public const string GoodsReceiptImport = "goods_receipt_import";
     public const string GoodsReceiptImportListTag = "goods_receipt_imports";
+
+    public static string BuildReceiptTag(Guid receiptId) => $"{GoodsReceipt}:{receiptId}";
 }
