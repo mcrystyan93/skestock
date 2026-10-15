@@ -8,6 +8,7 @@ using skestock.Application.Features.GoodsReceipts.Queries.GetAllGoodsReceipts;
 using skestock.Application.Features.GoodsReceipts.Queries.GetAllGoodsReceiptImports;
 using skestock.Application.Features.GoodsReceipts.Queries.GetGoodsReceiptById;
 using skestock.Application.Features.GoodsReceipts.Queries.GetGoodsReceiptImportById;
+using skestock.Application.Features.GoodsReceipts.Queries.GetGoodsReceiptImportLines;
 
 namespace skestock.Web.Endpoints;
 
@@ -17,6 +18,7 @@ public class GoodsReceipts : IEndpointGroup
     {
         groupBuilder.MapPost(GetAllGoodsReceipts, "get-all");
         groupBuilder.MapGet(GetGoodsReceiptById, "{id}");
+        groupBuilder.MapGet(GetGoodsReceiptImportLines, "{id:guid}/import-lines");
         groupBuilder.MapPost(CreateGoodsReceipt, "");
         groupBuilder.MapPost(CreateGoodsReceiptImport, "imports");
         groupBuilder.MapPost(GetAllGoodsReceiptImports, "imports/get-all");
@@ -49,6 +51,16 @@ public class GoodsReceipts : IEndpointGroup
         ISender sender, Guid id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetGoodsReceiptByIdQuery { Id = id }, cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Get saved goods receipt import lines")]
+    [EndpointDescription("Retrieves the confirmed import line snapshots for a goods receipt. Receipts without saved snapshots return an empty list.")]
+    public static async Task<Results<Ok<List<GoodsReceiptImportLineDto>>, ProblemHttpResult>> GetGoodsReceiptImportLines(
+        ISender sender, Guid id, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetGoodsReceiptImportLinesQuery { Id = id }, cancellationToken);
 
         return result.ToOk();
     }

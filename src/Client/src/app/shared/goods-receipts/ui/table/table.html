@@ -43,9 +43,14 @@
   <ng-template nz-virtual-scroll
                let-goodsReceipt>
     <tr>
-      <td [nzExpand]="expandedRows().has(goodsReceipt.id)"
-          (nzExpandChange)="toggleRow(goodsReceipt.id)">
-
+      <td>
+        <button nz-button nzType="text" type="button" class="h-10! w-10! p-0!"
+                [attr.aria-label]="expandedRows().has(goodsReceipt.id) ? 'Ascunde articolele' : 'Vezi articolele'"
+                [attr.aria-expanded]="expandedRows().has(goodsReceipt.id)"
+                [attr.aria-controls]="expandedRows().has(goodsReceipt.id) ? 'receipt-lines-' + goodsReceipt.id : null"
+                (click)="toggleRow(goodsReceipt.id)">
+          <nz-icon nzType="icons:chevron-down" [class.rotate-180]="expandedRows().has(goodsReceipt.id)" aria-hidden="true" />
+        </button>
       </td>
       <td>
         {{ goodsReceipt.receivedAt | date }}
@@ -82,8 +87,8 @@
 
     <tr [nzExpand]="expandedRows().has(goodsReceipt.id)">
       @defer (when expandedRows().has(goodsReceipt.id)) {
-        <div class="relative h-100">
-          <ske-stock-batches-table-container [goodsReceiptId]="goodsReceipt.id" />
+        <div [id]="'receipt-lines-' + goodsReceipt.id" class="relative h-100">
+          <ske-goods-receipt-import-lines-container [goodsReceiptId]="goodsReceipt.id" />
         </div>
       }
     </tr>

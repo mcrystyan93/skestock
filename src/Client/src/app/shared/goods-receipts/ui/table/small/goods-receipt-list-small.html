@@ -61,7 +61,7 @@
                   type="button"
                   class="relative z-10 min-h-10"
                   [attr.aria-expanded]="isExpanded(receipt.id)"
-                  [attr.aria-controls]="isExpanded(receipt.id) ? 'receipt-batches-' + receipt.id : null"
+                  [attr.aria-controls]="isExpanded(receipt.id) ? 'receipt-lines-' + receipt.id : null"
                   (click)="toggleRow(receipt.id)">
             <nz-icon nzType="icons:chevron-down"
                      [class.rotate-180]="isExpanded(receipt.id)"
@@ -83,9 +83,9 @@
         </div>
 
         @if (isExpanded(receipt.id)) {
-          <div [id]="'receipt-batches-' + receipt.id"
+          <div [id]="'receipt-lines-' + receipt.id"
                class="relative mt-2 h-64 min-h-0 overflow-hidden rounded border border-gray-200 dark:border-gray-700">
-            <ske-stock-batches-table-container [goodsReceiptId]="receipt.id" />
+            <ske-goods-receipt-import-lines-container [goodsReceiptId]="receipt.id" />
           </div>
         }
       </nz-card>

@@ -1,0 +1,149 @@
+using Microsoft.EntityFrameworkCore;
+using skestock.Application.Common.Interfaces;
+using skestock.Domain.Entities;
+using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.GoodsReceipts;
+using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Locations;
+using skestock.Domain.Entities.OrderLists;
+using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Entities.Statistics;
+using skestock.Domain.Entities.Stock;
+using skestock.Domain.Entities.Storage;
+using skestock.Domain.Entities.SupplyLists;
+using skestock.Domain.Entities.Users;
+using skestock.Domain.Queues;
+
+namespace skestock.Application.UnitTests.Features.GoodsReceipts.Queries.GetGoodsReceiptImportLines;
+
+public class GoodsReceiptImportLinesTestDbContext(DbContextOptions<GoodsReceiptImportLinesTestDbContext> options)
+    : DbContext(options), IApplicationDbContext
+{
+    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<CategoryImportBatch> CategoryImportBatches => Set<CategoryImportBatch>();
+    public DbSet<CategoryImportBatchFile> CategoryImportBatchFiles => Set<CategoryImportBatchFile>();
+    public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();
+    public DbSet<ClassItemStockVisibility> ClassItemStockVisibilities => Set<ClassItemStockVisibility>();
+    public DbSet<DailyItemConsumption> DailyItemConsumptions => Set<DailyItemConsumption>();
+    public DbSet<ItemPurchaseStatistic> ItemPurchaseStatistics => Set<ItemPurchaseStatistic>();
+    public DbSet<Item> Items => Set<Item>();
+    public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();
+    public DbSet<ItemImportBatchFile> ItemImportBatchFiles => Set<ItemImportBatchFile>();
+    public DbSet<Location> Locations => Set<Location>();
+    public DbSet<SchoolClass> SchoolClasses => Set<SchoolClass>();
+    public DbSet<StockBatch> StockBatches => Set<StockBatch>();
+    public DbSet<StockTransaction> StockTransactions => Set<StockTransaction>();
+    public DbSet<GoodsReceipt> GoodsReceipts => Set<GoodsReceipt>();
+    public DbSet<GoodsReceiptImport> GoodsReceiptImports => Set<GoodsReceiptImport>();
+    public DbSet<GoodsReceiptImportLine> GoodsReceiptImportLines => Set<GoodsReceiptImportLine>();
+    public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+    public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
+    public DbSet<OrderList> OrderLists => Set<OrderList>();
+    public DbSet<OrderListLine> OrderListLines => Set<OrderListLine>();
+    public DbSet<SupplyList> SupplyLists => Set<SupplyList>();
+    public DbSet<SupplyListLine> SupplyListLines => Set<SupplyListLine>();
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+        builder.Ignore<DailyItemConsumption>();
+
+        builder.Ignore<OrderList>();
+        builder.Ignore<OrderListLine>();
+
+
+        builder.Ignore<CategoryImportBatch>();
+        builder.Ignore<CategoryImportBatchFile>();
+
+        builder.Entity<UserProfile>(b =>
+        {
+            b.Ignore(u => u.CreatedBy);
+            b.Ignore(u => u.LastModifiedBy);
+            b.Ignore(u => u.Transactions);
+            b.Ignore(u => u.GoodsReceipts);
+        });
+
+        builder.Entity<Category>(b =>
+        {
+            b.HasOne(c => c.CreatedBy).WithMany().HasForeignKey(c => c.CreatedById);
+            b.HasOne(c => c.LastModifiedBy).WithMany().HasForeignKey(c => c.LastModifiedById);
+            b.OwnsOne(c => c.Icon);
+        });
+
+        builder.Entity<Item>(b =>
+        {
+            b.HasOne(i => i.CreatedBy).WithMany().HasForeignKey(i => i.CreatedById);
+            b.HasOne(i => i.LastModifiedBy).WithMany().HasForeignKey(i => i.LastModifiedById);
+            b.HasOne(i => i.Category).WithMany(c => c.Items).HasForeignKey(i => i.CategoryId);
+            b.Ignore(i => i.ClassBalances);
+        });
+
+        builder.Entity<Location>(b =>
+        {
+            b.HasOne(l => l.CreatedBy).WithMany().HasForeignKey(l => l.CreatedById);
+            b.HasOne(l => l.LastModifiedBy).WithMany().HasForeignKey(l => l.LastModifiedById);
+            b.Ignore(l => l.ParentLocation);
+            b.Ignore(l => l.ChildLocations);
+            b.Ignore(l => l.ClassBalances);
+        });
+
+        builder.Entity<SchoolClass>(b =>
+        {
+            b.HasOne(c => c.CreatedBy).WithMany().HasForeignKey(c => c.CreatedById);
+            b.HasOne(c => c.LastModifiedBy).WithMany().HasForeignKey(c => c.LastModifiedById);
+            b.Ignore(c => c.Balances);
+        });
+
+        builder.Entity<GoodsReceipt>(b =>
+        {
+            b.HasOne(r => r.Class).WithMany(c => c.GoodsReceipts).HasForeignKey(r => r.ClassId);
+            b.HasOne(r => r.CreatedBy).WithMany(u => u.GoodsReceipts).HasForeignKey(r => r.CreatedById);
+            b.HasOne(r => r.LastModifiedBy).WithMany().HasForeignKey(r => r.LastModifiedById);
+        });
+
+        builder.Entity<StockBatch>(b =>
+        {
+            b.HasOne(sb => sb.Item).WithMany(i => i.Batches).HasForeignKey(sb => sb.ItemId);
+            b.HasOne(sb => sb.Location).WithMany(l => l.Batches).HasForeignKey(sb => sb.LocationId);
+            b.HasOne(sb => sb.ReceivedClass).WithMany(c => c.BatchesReceived).HasForeignKey(sb => sb.ReceivedClassId);
+            b.HasOne(sb => sb.GoodsReceipt).WithMany(r => r.Batches).HasForeignKey(sb => sb.GoodsReceiptId);
+            b.HasOne(sb => sb.CreatedBy).WithMany().HasForeignKey(sb => sb.CreatedById);
+            b.HasOne(sb => sb.LastModifiedBy).WithMany().HasForeignKey(sb => sb.LastModifiedById);
+        });
+
+        builder.Entity<StockTransaction>(b =>
+        {
+            b.HasOne(t => t.Item).WithMany(i => i.Transactions).HasForeignKey(t => t.ItemId);
+            b.HasOne(t => t.Location).WithMany(l => l.Transactions).HasForeignKey(t => t.LocationId);
+            b.HasOne(t => t.Class).WithMany(c => c.Transactions).HasForeignKey(t => t.ClassId);
+            b.HasOne(t => t.Batch).WithMany(sb => sb.Transactions).HasForeignKey(t => t.BatchId);
+            b.HasOne(t => t.GoodsReceipt).WithMany(r => r.Transactions).HasForeignKey(t => t.GoodsReceiptId);
+            b.HasOne(t => t.User).WithMany(u => u.Transactions).HasForeignKey(t => t.UserId);
+            b.HasOne(t => t.CreatedBy).WithMany().HasForeignKey(t => t.CreatedById);
+            b.HasOne(t => t.LastModifiedBy).WithMany().HasForeignKey(t => t.LastModifiedById);
+        });
+
+        builder.Entity<GoodsReceiptImport>(b =>
+        {
+            b.HasOne(i => i.Class).WithMany().HasForeignKey(i => i.ClassId);
+            b.Ignore(i => i.FileMetadata);
+            b.Ignore(i => i.UploadedByUser);
+            b.Ignore(i => i.CreatedBy);
+            b.Ignore(i => i.LastModifiedBy);
+            b.Ignore(i => i.ResultingGoodsReceipt);
+            b.HasMany(i => i.Lines).WithOne(l => l.Import).HasForeignKey(l => l.ImportId);
+        });
+
+        builder.Entity<GoodsReceiptImportLine>(b =>
+        {
+            b.HasOne(l => l.MatchedItem).WithMany().HasForeignKey(l => l.MatchedItemId);
+            b.HasOne(l => l.Location).WithMany().HasForeignKey(l => l.LocationId);
+            b.Ignore(l => l.CreatedBy);
+            b.Ignore(l => l.LastModifiedBy);
+        });
+        builder.Ignore<ClassBalance>();
+        builder.Ignore<FileMetadata>();
+    }
+}
