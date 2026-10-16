@@ -1,6 +1,6 @@
 # 04: CloseSchoolClass fills in ClassBalance
 
-Status: open
+Status: resolved
 Type: task
 Blocked by: 03
 
@@ -11,11 +11,11 @@ rows for (source, target), then update them or add the missing ones with `Openin
 
 ## Acceptance criteria
 
-- [ ] Source: every (item, location) with at least one source batch gets `ClosingQty` = the sum of the positive remaining quantity
+- [x] Source: every (item, location) with at least one source batch gets `ClosingQty` = the sum of the positive remaining quantity
       (0 for pairs that are already empty).
-- [ ] Target: every (item, location) that received stock gets `OpeningQty += transferred`. A new row is created when one is missing,
+- [x] Target: every (item, location) that received stock gets `OpeningQty += transferred`. A new row is created when one is missing,
       and an existing row is added to. `ClosingQty` stays `null`.
-- [ ] A failed close writes no balance rows (they are part of the same save).
+- [x] A failed close writes no balance rows (they are part of the same save).
 
 ## Verification
 

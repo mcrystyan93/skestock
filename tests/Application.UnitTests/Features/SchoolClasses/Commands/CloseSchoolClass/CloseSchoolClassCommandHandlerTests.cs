@@ -204,4 +204,87 @@ public class CloseSchoolClassCommandHandlerTests
 
         (await CloseAsync()).IsSuccess.ShouldBeTrue();
     }
+
+    private Task<List<ClassBalance>> BalancesOf(SchoolClass owner) =>
+        _context.ClassBalances.AsNoTracking().Where(b => b.ClassId == owner.Id).ToListAsync();
+
+    [Test]
+    public async Task Handle_SetsSourceClosingQtyToTheTransferredQuantityPerItemAndLocation()
+    {
+        AddBatch(_source, 4);
+        AddBatch(_source, 6);
+
+        (await CloseAsync()).IsSuccess.ShouldBeTrue();
+
+        var balance = (await BalancesOf(_source)).ShouldHaveSingleItem();
+        balance.ItemId.ShouldBe(_item.Id);
+        balance.LocationId.ShouldBe(_location.Id);
+        balance.OpeningQty.ShouldBe(0);
+        balance.ClosingQty.ShouldBe(10);
+    }
+
+    [Test]
+    public async Task Handle_SetsSourceClosingQtyToZeroForDrainedPairs()
+    {
+        AddBatch(_source, 0);
+
+        (await CloseAsync()).IsSuccess.ShouldBeTrue();
+
+        (await BalancesOf(_source)).ShouldHaveSingleItem().ClosingQty.ShouldBe(0);
+        (await BalancesOf(_target)).ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task Handle_UpdatesAnExistingSourceBalanceInsteadOfAddingOne()
+    {
+        _context.ClassBalances.Add(new ClassBalance
+        {
+            Class = _source, Item = _item, Location = _location, OpeningQty = 12
+        });
+        AddBatch(_source, 5);
+
+        (await CloseAsync()).IsSuccess.ShouldBeTrue();
+
+        var balance = (await BalancesOf(_source)).ShouldHaveSingleItem();
+        balance.OpeningQty.ShouldBe(12);
+        balance.ClosingQty.ShouldBe(5);
+    }
+
+    [Test]
+    public async Task Handle_CreatesTargetOpeningQtyWithoutAClosingQty()
+    {
+        AddBatch(_source, 4);
+        AddBatch(_source, 6);
+
+        (await CloseAsync()).IsSuccess.ShouldBeTrue();
+
+        var balance = (await BalancesOf(_target)).ShouldHaveSingleItem();
+        balance.OpeningQty.ShouldBe(10);
+        balance.ClosingQty.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task Handle_AddsToAnExistingTargetOpeningQty()
+    {
+        _context.ClassBalances.Add(new ClassBalance
+        {
+            Class = _target, Item = _item, Location = _location, OpeningQty = 3
+        });
+        AddBatch(_source, 5);
+
+        (await CloseAsync()).IsSuccess.ShouldBeTrue();
+
+        (await BalancesOf(_target)).ShouldHaveSingleItem().OpeningQty.ShouldBe(8);
+    }
+
+    [Test]
+    public async Task Handle_WhenTheCloseFails_WritesNoBalances()
+    {
+        _target.Status = ClassStatus.Closed;
+        AddBatch(_source, 5);
+
+        (await CloseAsync()).IsFailed.ShouldBeTrue();
+
+        (await _context.ClassBalances.CountAsync()).ShouldBe(0);
+    }
 }

@@ -32,14 +32,28 @@ public sealed class CloseSchoolClassCommandHandler(IApplicationDbContext dbConte
         if (target.Status == ClassStatus.Closed)
             return Result.Fail(new SchoolClassErrors.TargetNotOpen(target.Id));
 
+        // Zero-quantity batches are loaded too: their (item, location) pairs still get a ClosingQty of 0.
         var sourceBatches = await dbContext.StockBatches
-            .Where(b => b.ReceivedClassId == source.Id && b.Quantity > 0)
+            .Where(b => b.ReceivedClassId == source.Id)
             .ToListAsync(cancellationToken);
 
-        var targetBatches = new List<StockBatch>(sourceBatches.Count);
+        var balances = await dbContext.ClassBalances
+            .Where(b => b.ClassId == source.Id || b.ClassId == target.Id)
+            .ToListAsync(cancellationToken);
+
+        var targetBatches = new List<StockBatch>();
         foreach (var sourceBatch in sourceBatches)
         {
             var quantity = sourceBatch.Quantity;
+
+            var sourceBalance = GetOrAddBalance(balances, source.Id, sourceBatch);
+            sourceBalance.ClosingQty ??= 0;
+            if (quantity <= 0)
+                continue;
+
+            sourceBalance.ClosingQty += quantity;
+            GetOrAddBalance(balances, target.Id, sourceBatch).OpeningQty += quantity;
+
             var targetBatch = new StockBatch
             {
                 ItemId = sourceBatch.ItemId,
@@ -73,6 +87,20 @@ public sealed class CloseSchoolClassCommandHandler(IApplicationDbContext dbConte
         }
 
         return Result.Ok();
+    }
+
+    // ClassBalance has no unique index, so look the row up here rather than relying on the database.
+    private ClassBalance GetOrAddBalance(List<ClassBalance> balances, Guid classId, StockBatch batch)
+    {
+        var balance = balances.FirstOrDefault(b =>
+            b.ClassId == classId && b.ItemId == batch.ItemId && b.LocationId == batch.LocationId);
+        if (balance is not null)
+            return balance;
+
+        balance = new ClassBalance { ClassId = classId, ItemId = batch.ItemId, LocationId = batch.LocationId };
+        balances.Add(balance);
+        dbContext.ClassBalances.Add(balance);
+        return balance;
     }
 
     private static StockTransaction RolloverTransaction(StockBatch batch, Guid classId, Guid userId, int change) =>
