@@ -1,3 +1,4 @@
+import { injectClassReadOnly } from '@ske/shared/school-classes';
 import { Component, input, output } from '@angular/core';
 import {
   GetAllGoodsReceiptImportsRequest,
@@ -43,6 +44,13 @@ export class GoodsReceiptImportsListSmall extends BaseList<
   GoodsReceiptImportListItemDto,
   GetAllGoodsReceiptImportsRequest
 > {
+  private readonly _readOnly = injectClassReadOnly();
+
+  // Reviewing confirms the import into stock, so a closed class can only download the files.
+  public canReview(importDto: GoodsReceiptImportListItemDto): boolean {
+    return importDto.status === 'pendingReview' && !this._readOnly();
+  }
+
   public readonly loading = input.required<boolean>();
   public readonly downloadFile = output<GoodsReceiptImportListItemDto>();
   public readonly review = output<GoodsReceiptImportListItemDto>();

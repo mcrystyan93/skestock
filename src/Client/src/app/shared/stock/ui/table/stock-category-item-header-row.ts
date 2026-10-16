@@ -1,3 +1,4 @@
+import { injectClassReadOnly } from '@ske/shared/school-classes';
 import { Component, computed, input, output } from '@angular/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
@@ -19,6 +20,7 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
   templateUrl: './stock-category-item-header-row.html'
 })
 export class StockCategoryItemHeaderRow {
+  public readonly readOnly = injectClassReadOnly();
   public readonly category = input.required<StockItemCategoryGroup>();
   public readonly items = input.required<StockItemDto[]>();
 

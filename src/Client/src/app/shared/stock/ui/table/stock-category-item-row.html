@@ -40,6 +40,7 @@
   </div>
 </td>
 <td class="whitespace-nowrap">
+  @if (!readOnly()) {
   <button nz-button
           nzType="text"
           type="button"
@@ -112,4 +113,5 @@
           (click)="visibilityChange.emit(stockItem)">
     <nz-icon [nzType]="stockItem.hideWhenZeroStock ? 'icons:eye' : 'icons:eye-slash'"></nz-icon>
   </button>
+  }
 </td>
