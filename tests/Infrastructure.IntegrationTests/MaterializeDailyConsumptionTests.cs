@@ -55,9 +55,10 @@ public sealed class MaterializeDailyConsumptionTests
             Tx(_seed.LocationId, -3, StockTransactionType.Adjustment, Utc(2030, 3, 30, 22, 0)),
             Tx(_seed.LocationId, -2, StockTransactionType.Adjustment, Utc(2030, 3, 31, 20, 59)),
             Tx(_seed.OtherLocationId, -4, StockTransactionType.Adjustment, Utc(2030, 3, 31, 10, 0)),
-            // Excluded: positive, transfer, and outside the local day.
+            // Excluded: positive, transfer, rollover, and outside the local day.
             Tx(_seed.LocationId, 5, StockTransactionType.Adjustment, Utc(2030, 3, 31, 12, 0)),
             Tx(_seed.LocationId, -7, StockTransactionType.Transfer, Utc(2030, 3, 31, 12, 0)),
+            Tx(_seed.LocationId, -6, StockTransactionType.Rollover, Utc(2030, 3, 31, 12, 0)),
             Tx(_seed.LocationId, -1, StockTransactionType.Adjustment, Utc(2030, 3, 30, 21, 59)),
             Tx(_seed.LocationId, -1, StockTransactionType.Adjustment, Utc(2030, 3, 31, 21, 0)));
 

@@ -1,0 +1,163 @@
+<nz-card nzTitle="Departamente" [nzExtra]="cardExtra" class="min-w-0">
+  <p nz-typography nzType="secondary" class="mb-0!">
+    Numele și responsabilitățile se copiază în clase noi. Fiecare clasă își completează separat
+    responsabilul.
+  </p>
+
+  <p nz-typography class="mb-0! mt-4 font-medium" aria-live="polite">
+    {{ store.departmentDrafts().length }} departamente configurate
+  </p>
+
+  @if (!store.canManage()) {
+    @if (store.entities().length === 0) {
+      <p
+        nz-typography
+        nzType="secondary"
+        class="mb-0! mt-4 rounded-md bg-gray-50 p-4 dark:bg-gray-800"
+      >
+        Nu există departamente configurate.
+      </p>
+    } @else {
+      <ul class="mt-3 flex min-w-0 flex-col divide-y divide-gray-200 dark:divide-gray-700">
+        @for (department of store.entities(); track department.id) {
+          <li class="min-w-0 py-3">
+            <h3 nz-typography class="mb-0! break-words font-medium">{{ department.name }}</h3>
+            <p nz-typography nzType="secondary" class="mb-0! mt-1 whitespace-pre-wrap break-words">
+              {{ department.responsibilities }}
+            </p>
+          </li>
+        }
+      </ul>
+    }
+    <p nz-typography nzType="secondary" class="mb-0! mt-4">
+      Doar administratorii pot modifica această configurare.
+    </p>
+  } @else {
+    <form nz-form nzLayout="vertical" nzNoColon class="mt-4" (submit)="$event.preventDefault()">
+      <div class="flex min-w-0 flex-col gap-4">
+        @for (
+          department of store.departmentDrafts();
+          track department.draftId;
+          let index = $index
+        ) {
+          @let departmentForm = departmentsForm[index];
+          <fieldset
+            class="min-w-0 rounded-md border border-gray-200 p-3 dark:border-gray-700 sm:p-4"
+          >
+            <legend class="px-1 text-sm font-medium">Departament {{ index + 1 }}</legend>
+            <div class="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
+              <div class="min-w-0">
+                <label class="mb-1 block text-sm font-medium" [for]="'department-name-' + index"
+                  >Nume</label
+                >
+                <input
+                  [id]="'department-name-' + index"
+                  [formField]="departmentForm.name"
+                  type="text"
+                  autocomplete="off"
+                  [attr.aria-invalid]="
+                    departmentForm.name().touched() && departmentForm.name().invalid()
+                      ? 'true'
+                      : null
+                  "
+                  [attr.aria-describedby]="
+                    departmentForm.name().touched() && departmentForm.name().invalid()
+                      ? 'department-name-error-' + index
+                      : null
+                  "
+                  (input)="clearFeedback()"
+                  class="min-h-10 w-full min-w-0 rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 outline-none focus-visible:ring-2 focus-visible:ring-primary-600 dark:border-gray-600 dark:bg-gray-950 dark:text-gray-100 dark:focus-visible:ring-primary-400"
+                />
+                @if (departmentForm.name().touched() && departmentForm.name().invalid()) {
+                  <ul
+                    class="mb-0 mt-1 list-none p-0 text-sm text-red-700 dark:text-red-300"
+                    [id]="'department-name-error-' + index"
+                  >
+                    @for (error of departmentForm.name().errors(); track $index) {
+                      <li>{{ error.message }}</li>
+                    }
+                  </ul>
+                }
+              </div>
+              <div class="min-w-0">
+                <label
+                  class="mb-1 block text-sm font-medium"
+                  [for]="'department-responsibilities-' + index"
+                  >Responsabilități</label
+                >
+                <textarea
+                  [id]="'department-responsibilities-' + index"
+                  [formField]="departmentForm.responsibilities"
+                  rows="3"
+                  [attr.aria-invalid]="
+                    departmentForm.responsibilities().touched() &&
+                    departmentForm.responsibilities().invalid()
+                      ? 'true'
+                      : null
+                  "
+                  [attr.aria-describedby]="
+                    departmentForm.responsibilities().touched() &&
+                    departmentForm.responsibilities().invalid()
+                      ? 'department-responsibilities-error-' + index
+                      : null
+                  "
+                  (input)="clearFeedback()"
+                  class="min-h-20 w-full min-w-0 resize-y rounded-md border border-gray-300 bg-white px-3 py-2 text-base text-gray-900 outline-none focus-visible:ring-2 focus-visible:ring-primary-600 dark:border-gray-600 dark:bg-gray-950 dark:text-gray-100 dark:focus-visible:ring-primary-400"
+                ></textarea>
+                @if (
+                  departmentForm.responsibilities().touched() &&
+                  departmentForm.responsibilities().invalid()
+                ) {
+                  <ul
+                    class="mb-0 mt-1 list-none p-0 text-sm text-red-700 dark:text-red-300"
+                    [id]="'department-responsibilities-error-' + index"
+                  >
+                    @for (error of departmentForm.responsibilities().errors(); track $index) {
+                      <li>{{ error.message }}</li>
+                    }
+                  </ul>
+                }
+              </div>
+            </div>
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              class="mt-3 min-h-10 focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 dark:focus-visible:ring-primary-400"
+              [attr.aria-label]="'Șterge departamentul ' + (department.name || index + 1)"
+              (click)="removeDepartment(index)"
+            >
+              <nz-icon nzType="icons:trash" />
+              Șterge departamentul
+            </button>
+          </fieldset>
+        } @empty {
+          <p
+            nz-typography
+            nzType="secondary"
+            class="mb-0! rounded-md bg-gray-50 p-4 dark:bg-gray-800"
+          >
+            Nu există departamente configurate. Adăugați primul departament pentru a-l include în
+            clasele noi.
+          </p>
+        }
+      </div>
+    </form>
+  }
+</nz-card>
+
+<ng-template #cardExtra>
+  @if (store.canManage()) {
+    <button
+      nz-button
+      nzType="default"
+      type="button"
+      class="min-h-10 focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 dark:focus-visible:ring-primary-400"
+      aria-label="Adaugă departament"
+      (click)="store.addDepartment()"
+    >
+      <nz-icon nzType="icons:plus" />
+      Adaugă
+    </button>
+  }
+</ng-template>

@@ -60,7 +60,8 @@ public sealed class MaterializeDailyConsumptionCommandHandler(
             .Where(t => t.CreatedAt >= startUtc
                 && t.CreatedAt < endUtc
                 && t.QuantityChange < 0
-                && t.Type != StockTransactionType.Transfer)
+                && t.Type != StockTransactionType.Transfer
+                && t.Type != StockTransactionType.Rollover)
             .GroupBy(t => new { t.ItemId, t.ClassId, t.LocationId })
             .Select(g => new
             {
