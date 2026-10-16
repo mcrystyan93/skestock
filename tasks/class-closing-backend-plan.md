@@ -31,7 +31,7 @@ status. Source: [approved spec](../.scratch/class-closing/spec.md). Tasks live i
 ## Tasks
 
 - [x] 01. **Statistics ignore Rollover** — two `Where` filters + unit tests (XS, ~4 files).
-- [ ] 02. **UpdateSchoolClass closed guard** — new error + handler check + unit tests (S, 3 files).
+- [x] 02. **UpdateSchoolClass closed guard** — new error + handler check + unit tests (S, 3 files).
 - [ ] 03. **CloseSchoolClass command** — errors, command, validator, handler, unit tests (M, 5 files).
 - [ ] 04. **ClassBalance on close** — upsert in the same save + unit tests (S, 2 files).
 - [ ] 05. **HTTP + functional tests** — `POST {id}/close`, functional tests for close and PUT guard (S, ~4 files).

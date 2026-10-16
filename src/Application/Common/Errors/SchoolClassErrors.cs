@@ -49,4 +49,15 @@ public static class SchoolClassErrors
                 new Dictionary<string, object> { ["schoolClassId"] = schoolClassId });
         }
     }
+
+    public sealed class StatusChangeNotAllowed : Error
+    {
+        public StatusChangeNotAllowed(Guid schoolClassId)
+            : base($"School class '{schoolClassId}' cannot be closed or reopened by editing its status; use the close action.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
+            Metadata.Add(ErrorMetadataKeys.Title, "Status change not allowed");
+            Metadata.Add(ErrorMetadataKeys.Code, "school_classes.status_change_not_allowed");
+        }
+    }
 }

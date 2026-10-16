@@ -1,6 +1,6 @@
 # 02: UpdateSchoolClass can no longer close or reopen a class
 
-Status: open
+Status: resolved
 Type: task
 Blocked by: —
 
@@ -12,9 +12,9 @@ Blocked by: —
 
 ## Acceptance criteria
 
-- [ ] Active→Closed and Closed→Active return 409 with the code above. Nothing is saved.
-- [ ] Editing the name or dates of a closed class that keeps `Status = Closed` succeeds.
-- [ ] Non-closed transitions (Upcoming↔Active↔Paused) work as before.
+- [x] Active→Closed and Closed→Active return 409 with the code above. Nothing is saved.
+- [x] Editing the name or dates of a closed class that keeps `Status = Closed` succeeds.
+- [x] Non-closed transitions (Upcoming↔Active↔Paused) work as before.
 
 ## Verification
 
