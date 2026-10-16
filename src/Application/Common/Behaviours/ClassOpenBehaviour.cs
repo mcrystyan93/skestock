@@ -4,6 +4,10 @@ using skestock.Domain.Enums;
 
 namespace skestock.Application.Common.Behaviours;
 
+/// <summary>
+/// Rejects a change to a closed class early, before validation. <see cref="ClassLockBehaviour{TRequest,TResponse}"/>
+/// repeats the check under a lock, close to the handler, so closing the class cannot race it.
+/// </summary>
 public class ClassOpenBehaviour<TRequest, TResponse>(IApplicationDbContext dbContext)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull, IMessage, IRequiresOpenClass
@@ -14,34 +18,12 @@ public class ClassOpenBehaviour<TRequest, TResponse>(IApplicationDbContext dbCon
         MessageHandlerDelegate<TRequest, TResponse> next,
         CancellationToken cancellationToken)
     {
-        var classId = await ResolveClassIdAsync(request, cancellationToken);
-
         // An unknown class falls through so the handler keeps returning its own not-found error.
-        if (classId is { } id
+        if (await dbContext.ResolveClassIdAsync(request, cancellationToken) is { } id
             && await dbContext.SchoolClasses.AsNoTracking()
                 .AnyAsync(c => c.Id == id && c.Status == ClassStatus.Closed, cancellationToken))
             return new TResponse().WithError(new SchoolClassErrors.SchoolClassClosed(id));
 
         return await next(request, cancellationToken);
-    }
-
-    private async Task<Guid?> ResolveClassIdAsync(TRequest request, CancellationToken cancellationToken)
-    {
-        if (request.ClassId is { } classId)
-            return classId;
-
-        if (request.OrderListId is { } orderListId)
-            return await dbContext.OrderLists.AsNoTracking()
-                .Where(o => o.Id == orderListId)
-                .Select(o => (Guid?)o.ClassId)
-                .SingleOrDefaultAsync(cancellationToken);
-
-        if (request.GoodsReceiptImportId is { } importId)
-            return await dbContext.GoodsReceiptImports.AsNoTracking()
-                .Where(i => i.Id == importId)
-                .Select(i => (Guid?)i.ClassId)
-                .SingleOrDefaultAsync(cancellationToken);
-
-        return null;
     }
 }

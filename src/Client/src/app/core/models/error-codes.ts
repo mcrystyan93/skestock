@@ -30,6 +30,7 @@ export const ErrorCodes = {
     schoolClassNotFound: 'school_classes.not_found',
     schoolClassClosed: 'school_classes.closed',
     schoolClassAlreadyClosed: 'school_classes.already_closed',
+    schoolClassConcurrentChange: 'school_classes.concurrent_change',
     schoolClassTargetNotOpen: 'school_classes.target_not_open',
     schoolClassStatusChangeNotAllowed: 'school_classes.status_change_not_allowed',
     goodsReceiptNotFound: 'goods_receipts.not_found',
