@@ -1,3 +1,4 @@
+import { injectClassReadOnly } from '@ske/shared/school-classes';
 import { Component, input, output } from '@angular/core';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import {
@@ -24,6 +25,7 @@ import { StockCategoryItemRow } from './stock-category-item-row';
   }
 })
 export class StockCategoryItemsTable extends BaseTableWithFilter<StockItemCategoryGroup, BasePaginationFilter> {
+  public readonly readOnly = injectClassReadOnly();
   public readonly loading = input.required<boolean>();
 
   public readonly add = output<Partial<CategoryDto> | null>();

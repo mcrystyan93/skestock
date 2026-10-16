@@ -1,3 +1,4 @@
+import { injectClassReadOnly } from '@ske/shared/school-classes';
 import { Component, computed, input, output } from '@angular/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
@@ -35,6 +36,7 @@ import { TimeAgoPipe } from '@ske/shared/pipes';
   }
 })
 export class StockCategoryItemRow {
+  public readonly readOnly = injectClassReadOnly();
   public readonly item = input.required<StockItemDto>();
 
   public readonly move = output<StockItemDto>();

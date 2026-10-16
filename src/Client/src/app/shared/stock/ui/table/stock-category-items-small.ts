@@ -1,3 +1,4 @@
+import { injectClassReadOnly } from '@ske/shared/school-classes';
 import { Component, computed, input, output } from '@angular/core';
 import { CategoryDto, StockItemCategoryGroup, StockItemDto } from '@ske/models';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
@@ -39,6 +40,7 @@ import { StopClick } from '@ske/shared/directives';
   }
 })
 export class StockCategoryItemsSmall {
+  public readonly readOnly = injectClassReadOnly();
   public readonly items = input.required<StockItemCategoryGroup[]>();
   public readonly loading = input.required<boolean>();
 

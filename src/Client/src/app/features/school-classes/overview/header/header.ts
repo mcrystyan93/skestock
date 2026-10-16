@@ -22,6 +22,7 @@ import {MenuToggle} from '@ske/layouts/menu-toggle';
 import {HeaderTabOption, HeaderTabs} from '@ske/shared/header-tabs';
 import {NzBreakpointService, gridResponsiveMap} from 'ng-zorro-antd/core/services';
 import {NzTooltipDirective} from 'ng-zorro-antd/tooltip';
+import {NzTagComponent} from 'ng-zorro-antd/tag';
 
 @Component({
   imports: [
@@ -45,7 +46,8 @@ import {NzTooltipDirective} from 'ng-zorro-antd/tooltip';
     ThemeSwitcher,
     MenuToggle,
     HeaderTabs,
-    NzTooltipDirective
+    NzTooltipDirective,
+    NzTagComponent
   ],
   selector: 'ske-school-class-overview-header',
   styles: ``,
@@ -80,12 +82,13 @@ export class Header {
     {label: 'Invitații'}
   ];
 
-  public readonly canCloseClass = computed(() => {
-    const status = this.schoolClass().status;
-    return !!this.schoolClass().id && status !== ClassStatus.Closed;
-  });
+  public readonly isClosed = computed(() => this.schoolClass().status === ClassStatus.Closed);
+  public readonly canCloseClass = computed(() => !!this.schoolClass().id && !this.isClosed());
 
   protected readonly action = computed<HeaderAction | null>(() => {
+    if (this.isClosed())
+      return null;
+
     switch (this.selectedTabIndex()) {
       case 0:
         return {text: 'Adaugă articol', label: 'Adaugă articol', icon: 'icons:plus', run: () => this.onAddStock.emit()};
