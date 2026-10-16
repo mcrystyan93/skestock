@@ -42,6 +42,10 @@ export class StockListContainer {
       this.addStock({ id: category?.id });
     });
 
+  private readonly _refreshEvents = this._events.on(StockEvents.refresh)
+    .pipe(takeUntilDestroyed(this._destroyRef))
+    .subscribe(() => this.store.load(this.store.filter()));
+
   public onAdjust(item: StockItemDto) {
     const classId = this.store.filter().classId;
 

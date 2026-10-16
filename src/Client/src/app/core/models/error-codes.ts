@@ -28,6 +28,9 @@ export const ErrorCodes = {
     itemNotFound: 'items.not_found',
     locationNotFound: 'locations.not_found',
     schoolClassNotFound: 'school_classes.not_found',
+    schoolClassAlreadyClosed: 'school_classes.already_closed',
+    schoolClassTargetNotOpen: 'school_classes.target_not_open',
+    schoolClassStatusChangeNotAllowed: 'school_classes.status_change_not_allowed',
     goodsReceiptNotFound: 'goods_receipts.not_found',
     goodsReceiptImportNotFound: 'goods_receipt_imports.not_found',
     goodsReceiptImportNotInReview: 'goods_receipt_imports.not_in_review',
@@ -46,6 +49,7 @@ export const ErrorCodes = {
   // ── Stock errors ──────────────────────────────────────────────────────────
   stock: {
     insufficientQuantity: 'stock.insufficient_quantity',
+    concurrencyConflict: 'stock.concurrency_conflict',
   },
 
   // ── Validation errors ────────────────────────────────────────────────────

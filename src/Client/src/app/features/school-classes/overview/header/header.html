@@ -155,6 +155,34 @@
         </button>
       }
 
+      @if (canCloseClass()) {
+        @if (compact) {
+          <button type="button"
+                  *nzSpaceItem
+                  nz-button
+                  nzType="default"
+                  nzDanger
+                  nzShape="circle"
+                  nz-tooltip
+                  nzTooltipTitle="Închide clasa"
+                  aria-label="Închide clasa"
+                  class="h-10! min-h-10! w-10! min-w-10! p-0!"
+                  (click)="onCloseClass.emit()">
+            <nz-icon nzType="icons:lock"></nz-icon>
+          </button>
+        } @else {
+          <button type="button"
+                  *nzSpaceItem
+                  nz-button
+                  nzType="default"
+                  nzDanger
+                  (click)="onCloseClass.emit()">
+            <nz-icon nzType="icons:lock"></nz-icon>
+            Închide clasa
+          </button>
+        }
+      }
+
       @if (selectedAction) {
         @if (compact) {
           <button *nzSpaceItem

@@ -34,6 +34,10 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
   [ErrorCodes.resource.itemNotFound]: 'Articolul nu a fost găsit.',
   [ErrorCodes.resource.locationNotFound]: 'Locația nu a fost găsită.',
   [ErrorCodes.resource.schoolClassNotFound]: 'Clasa nu a fost găsită.',
+  [ErrorCodes.resource.schoolClassAlreadyClosed]: 'Clasa este deja închisă.',
+  [ErrorCodes.resource.schoolClassTargetNotOpen]: 'Clasa selectată este închisă și nu poate primi stoc.',
+  [ErrorCodes.resource.schoolClassStatusChangeNotAllowed]:
+    'Clasa nu poate fi închisă sau redeschisă din editare. Folosiți acțiunea „Închide clasa”.',
   [ErrorCodes.resource.goodsReceiptNotFound]: 'Recepția de marfă nu a fost găsită.',
   [ErrorCodes.resource.goodsReceiptImportNotFound]: 'Importul de recepție nu a fost găsit.',
   [ErrorCodes.resource.goodsReceiptImportNotInReview]:
@@ -59,6 +63,8 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
   // ── Stock errors ──────────────────────────────────────────────────────────
   [ErrorCodes.stock.insufficientQuantity]:
     'Stocul disponibil nu este suficient pentru transfer.',
+  [ErrorCodes.stock.concurrencyConflict]:
+    'Stocul a fost modificat în timpul operației. Reîncărcați pagina și încercați din nou.',
 
   // ── Validation: top-level / request-shape codes ──────────────────────────
   [ErrorCodes.validation.failed]: 'Datele trimise nu sunt valide.',

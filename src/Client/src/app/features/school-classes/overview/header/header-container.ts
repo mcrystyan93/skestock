@@ -9,6 +9,9 @@ import { OrderListDetailModal } from '@ske/shared/order-lists';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { injectDispatch } from '@ngrx/signals/events';
 import { StockEvents } from '@ske/shared/stock';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
+import { CloseSchoolClassModal, CloseSchoolClassModalData } from '../close-class/close-school-class-modal';
 
 @Component({
   imports: [
@@ -60,6 +63,30 @@ export class HeaderContainer {
       nzWrapClassName: 'modal-100 modal-lg-75',
       nzCentered: true,
       nzMaskClosable: false
+    });
+  }
+
+  public closeClass() {
+    const schoolClass = this.store.schoolClass();
+
+    if (isNil(schoolClass.id)) {
+      this._nzMessageService.error('Clasa nu este disponibilă pentru închidere.');
+      return;
+    }
+
+    const modalRef = this._nzModalService.create<CloseSchoolClassModal, CloseSchoolClassModalData, boolean>({
+      nzContent: CloseSchoolClassModal,
+      nzData: { classId: schoolClass.id, className: schoolClass.name ?? '' },
+      nzCentered: true,
+      nzMaskClosable: false
+    });
+
+    modalRef.afterClose.pipe(
+      filter((closed) => closed === true),
+      takeUntilDestroyed(this._destroyRef)
+    ).subscribe(() => {
+      this.store.load(schoolClass.id!);
+      this._stockDispatcher.refresh();
     });
   }
 

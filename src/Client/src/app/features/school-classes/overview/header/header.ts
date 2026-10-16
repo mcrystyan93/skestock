@@ -8,7 +8,7 @@ import {
   NzPageHeaderSubtitleDirective,
   NzPageHeaderTitleDirective
 } from 'ng-zorro-antd/page-header';
-import {SchoolClassDto, SchoolClassSummary} from '@ske/models';
+import {ClassStatus, SchoolClassDto, SchoolClassSummary} from '@ske/models';
 import {CurrencyPipe, DatePipe} from '@angular/common';
 import {NzStatisticComponent} from 'ng-zorro-antd/statistic';
 import {NzTypographyComponent} from 'ng-zorro-antd/typography';
@@ -61,6 +61,7 @@ export class Header {
   public onOrderCreate = output<void>();
   public onAddStock = output<void>();
   public onClose = output<void>();
+  public onCloseClass = output<void>();
 
   private readonly _breakpoints = toSignal(
     inject(NzBreakpointService).subscribe(gridResponsiveMap, true),
@@ -78,6 +79,11 @@ export class Header {
     {label: 'Departamente', compactLabel: 'Dept.'},
     {label: 'Invitații'}
   ];
+
+  public readonly canCloseClass = computed(() => {
+    const status = this.schoolClass().status;
+    return !!this.schoolClass().id && status !== ClassStatus.Closed;
+  });
 
   protected readonly action = computed<HeaderAction | null>(() => {
     switch (this.selectedTabIndex()) {
