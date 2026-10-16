@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using skestock.Infrastructure.Data;
 using skestock.Application.Common.Exceptions;
 using skestock.Application.Features.Categories.Commands.CreateCategoryImportBatch;
 using skestock.Domain.Entities;
@@ -48,8 +51,9 @@ public class CreateCategoryImportBatchCommandTests : TestBase
     [Test]
     public async Task Handle_WithValidData_PersistsProcessingImportAndReturnsMutationDto()
     {
-        var file = await SeedFileMetadataAsync();
+        // Log in first: the file's CreatedById must be the uploading user for the ownership validation.
         await RunAsUserWithProfileAsync();
+        var file = await SeedFileMetadataAsync();
 
         var result = await TestApp.SendAsync(new CreateCategoryImportBatchCommand { FileMetadataIds = [file.Id] });
 
@@ -60,7 +64,11 @@ public class CreateCategoryImportBatchCommandTests : TestBase
         var persisted = await TestApp.FindAsync<CategoryImportBatch>(result.Value.Id);
         persisted.ShouldNotBeNull();
         persisted.Status.ShouldBe(CategoryImportBatchStatus.Processing);
-        persisted.Files.Single().FileMetadataId.ShouldBe(file.Id);
+        using var scope = FunctionalTestSetup.ScopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var files = await context.Set<CategoryImportBatchFile>().AsNoTracking()
+            .Where(f => f.CategoryImportBatchId == persisted.Id).ToListAsync();
+        files.Single().FileMetadataId.ShouldBe(file.Id);
         persisted.UploadedByUserId.ShouldBe(TestApp.GetUserId()!.Value);
     }
 
