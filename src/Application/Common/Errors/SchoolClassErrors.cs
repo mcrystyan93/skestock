@@ -60,4 +60,25 @@ public static class SchoolClassErrors
             Metadata.Add(ErrorMetadataKeys.Code, "school_classes.status_change_not_allowed");
         }
     }
+
+    public sealed class AlreadyClosed : Error
+    {
+        public AlreadyClosed(Guid schoolClassId) : base($"School class '{schoolClassId}' is already closed.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
+            Metadata.Add(ErrorMetadataKeys.Title, "School class already closed");
+            Metadata.Add(ErrorMetadataKeys.Code, "school_classes.already_closed");
+        }
+    }
+
+    public sealed class TargetNotOpen : Error
+    {
+        public TargetNotOpen(Guid schoolClassId)
+            : base($"School class '{schoolClassId}' is closed and cannot receive stock.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
+            Metadata.Add(ErrorMetadataKeys.Title, "Target school class is closed");
+            Metadata.Add(ErrorMetadataKeys.Code, "school_classes.target_not_open");
+        }
+    }
 }

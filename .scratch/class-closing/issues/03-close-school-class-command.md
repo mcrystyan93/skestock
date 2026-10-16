@@ -1,6 +1,6 @@
 # 03: CloseSchoolClass command (stock rollover + status)
 
-Status: open
+Status: resolved
 Type: task
 Blocked by: 01
 
@@ -17,13 +17,13 @@ transactions → `Status = Closed` → one `SaveChangesAsync`; `DbUpdateConcurre
 
 ## Acceptance criteria
 
-- [ ] Validator: `Id` and `TargetClassId` are required, `TargetClassId != Id`.
-- [ ] Missing source or target → 404 `school_classes.not_found`; source already closed → `already_closed`; target closed →
+- [x] Validator: `Id` and `TargetClassId` are required, `TargetClassId != Id`.
+- [x] Missing source or target → 404 `school_classes.not_found`; source already closed → `already_closed`; target closed →
       `target_not_open`.
-- [ ] Positive batches move with every field copied. The source ends at 0. Zero-qty batches create no batch and no transaction.
-- [ ] Each moved batch gets a `-qty` `Rollover` (source class, source batch) and a `+qty` `Rollover` (target class, new batch),
+- [x] Positive batches move with every field copied. The source ends at 0. Zero-qty batches create no batch and no transaction.
+- [x] Each moved batch gets a `-qty` `Rollover` (source class, source batch) and a `+qty` `Rollover` (target class, new batch),
       with `UserId` set to the current user.
-- [ ] A class with no stock still closes.
+- [x] A class with no stock still closes.
 
 ## Verification
 
