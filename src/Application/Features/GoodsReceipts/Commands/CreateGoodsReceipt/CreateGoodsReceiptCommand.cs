@@ -1,3 +1,4 @@
+using skestock.Application.Common.Behaviours;
 using skestock.Application.Common.Caching;
 using skestock.Application.Common.Security;
 using skestock.Application.Features.GoodsReceipts.Models;
@@ -19,8 +20,10 @@ public class CreateGoodsReceiptLine
 // is a required field distinct from the CreatedBy audit column, so an anonymous caller can't be
 // allowed through to the handler.
 [Authorize]
-public class CreateGoodsReceiptCommand : IRequest<Result<GoodsReceiptDto>>, ICacheInvalidation
+public class CreateGoodsReceiptCommand : IRequest<Result<GoodsReceiptDto>>, ICacheInvalidation, IRequiresOpenClass
 {
+    Guid? IRequiresOpenClass.ClassId => ClassId;
+
     public Guid ClassId { get; init; }
     public string? SupplierReference { get; init; }
     public string Note { get; init; } = string.Empty;

@@ -28,6 +28,7 @@ export const ErrorCodes = {
     itemNotFound: 'items.not_found',
     locationNotFound: 'locations.not_found',
     schoolClassNotFound: 'school_classes.not_found',
+    schoolClassClosed: 'school_classes.closed',
     schoolClassAlreadyClosed: 'school_classes.already_closed',
     schoolClassTargetNotOpen: 'school_classes.target_not_open',
     schoolClassStatusChangeNotAllowed: 'school_classes.status_change_not_allowed',

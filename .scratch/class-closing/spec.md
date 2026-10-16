@@ -179,3 +179,22 @@ one `SaveChangesAsync` wrapped in a `DbUpdateConcurrencyException` catch. Errors
 - Any failure leaves no partial state: the status and every batch stay unchanged.
 - Every error case returns the status code and error code listed in the Contract.
 - `dotnet build` is clean (warnings are errors) and every new test passes.
+
+## Addendum: a closed class rejects changes (2026-10-16)
+
+Requested after the frontend made a closed class read-only. The API must refuse the same actions.
+
+- New error `SchoolClassErrors.SchoolClassClosed`: `409`, code `school_classes.closed`.
+- New marker `IRequiresOpenClass` plus one pipeline behaviour, placed after Authorization and before Validation, so a closed class answers 409 before field validation. A request names its class
+  directly (`ClassId`), or through its order list (`OrderListId`) or goods receipt import (`GoodsReceiptImportId`).
+  If that class exists and is `Closed`, the behaviour returns the error and the handler never runs. An unknown class
+  falls through so the handler keeps returning its own not-found.
+- Marked commands: AdjustStock, MoveStock, RemoveExpiredStock, ExtendExpiredStockExpiry, SetClassItemStockVisibility,
+  CreateStockBatch, CreateGoodsReceipt, CreateGoodsReceiptImport, ConfirmGoodsReceiptImport, CreateOrderList,
+  AddItemToOrderList, UpdateOrderList, SubmitOrderList, CancelOrderList, ReopenOrderList, DeleteOrderList,
+  InitializeSchoolClassConfiguration, UpdateClassDepartmentResponsiblePerson.
+- Not marked: `UpdateSchoolClass` (name and dates of a closed class stay editable), `CloseSchoolClass`,
+  `ProcessGoodsReceiptImport` (background extraction of an already uploaded file, no change to class stock), global
+  configuration and supply list commands, and all queries.
+- Known limit: the check and the handler are separate queries, so a request racing the close can still slip through.
+  Stock changes are still caught by the batch rowversion. Order list changes are not.

@@ -1,11 +1,14 @@
+using skestock.Application.Common.Behaviours;
 using skestock.Application.Common.Caching;
 using skestock.Application.Common.Security;
 
 namespace skestock.Application.Features.Stock.Commands.ExtendExpiredStockExpiry;
 
 [Authorize]
-public class ExtendExpiredStockExpiryCommand : IRequest<Result>, ICacheInvalidation
+public class ExtendExpiredStockExpiryCommand : IRequest<Result>, ICacheInvalidation, IRequiresOpenClass
 {
+    Guid? IRequiresOpenClass.ClassId => ClassId;
+
     public const int MaxExtensionDays = 365;
 
     public Guid ClassId { get; init; }

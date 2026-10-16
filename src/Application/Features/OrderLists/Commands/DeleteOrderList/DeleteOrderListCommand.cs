@@ -1,11 +1,14 @@
+using skestock.Application.Common.Behaviours;
 using skestock.Application.Common.Caching;
 using skestock.Application.Common.Security;
 
 namespace skestock.Application.Features.OrderLists.Commands.DeleteOrderList;
 
 [Authorize]
-public class DeleteOrderListCommand : IRequest<Result>, ICacheInvalidation
+public class DeleteOrderListCommand : IRequest<Result>, ICacheInvalidation, IRequiresOpenClass
 {
+    Guid? IRequiresOpenClass.OrderListId => Id;
+
     public Guid Id { get; init; }
 
     public IReadOnlyCollection<string> Tags =>

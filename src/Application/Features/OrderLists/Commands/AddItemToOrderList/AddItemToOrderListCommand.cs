@@ -1,3 +1,4 @@
+using skestock.Application.Common.Behaviours;
 using skestock.Application.Common.Caching;
 using skestock.Application.Common.Security;
 using skestock.Application.Features.OrderLists.Models;
@@ -5,8 +6,10 @@ using skestock.Application.Features.OrderLists.Models;
 namespace skestock.Application.Features.OrderLists.Commands.AddItemToOrderList;
 
 [Authorize]
-public class AddItemToOrderListCommand : IRequest<Result<OrderListDto>>, ICacheInvalidation
+public class AddItemToOrderListCommand : IRequest<Result<OrderListDto>>, ICacheInvalidation, IRequiresOpenClass
 {
+    Guid? IRequiresOpenClass.ClassId => ClassId;
+
     public Guid ClassId { get; init; }
     public Guid ItemId { get; init; }
     public decimal Quantity { get; init; }

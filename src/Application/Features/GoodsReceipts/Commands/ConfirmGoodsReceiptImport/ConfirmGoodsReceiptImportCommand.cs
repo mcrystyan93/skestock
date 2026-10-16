@@ -1,3 +1,4 @@
+using skestock.Application.Common.Behaviours;
 using skestock.Application.Common.Caching;
 using skestock.Application.Common.Security;
 using skestock.Application.Features.GoodsReceipts.Models;
@@ -40,8 +41,10 @@ public class ConfirmGoodsReceiptImportLine
 // Requires an authenticated user for the same reason CreateGoodsReceiptCommand does:
 // StockTransaction.UserId (who physically received the goods) is required.
 [Authorize]
-public class ConfirmGoodsReceiptImportCommand : IRequest<Result<GoodsReceiptDto>>, ICacheInvalidation
+public class ConfirmGoodsReceiptImportCommand : IRequest<Result<GoodsReceiptDto>>, ICacheInvalidation, IRequiresOpenClass
 {
+    Guid? IRequiresOpenClass.GoodsReceiptImportId => ImportId;
+
     public Guid ImportId { get; init; }
     public string? SupplierReference { get; init; }
     public string Note { get; init; } = string.Empty;
