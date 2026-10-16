@@ -91,7 +91,6 @@ public class GoodsReceiptTestDbContext(DbContextOptions<GoodsReceiptTestDbContex
             b.HasOne(i => i.CreatedBy).WithMany().HasForeignKey(i => i.CreatedById);
             b.HasOne(i => i.LastModifiedBy).WithMany().HasForeignKey(i => i.LastModifiedById);
             b.HasOne(i => i.Category).WithMany(c => c.Items).HasForeignKey(i => i.CategoryId);
-            b.Ignore(i => i.ClassBalances);
         });
 
         builder.Entity<Location>(b =>
@@ -100,14 +99,12 @@ public class GoodsReceiptTestDbContext(DbContextOptions<GoodsReceiptTestDbContex
             b.HasOne(l => l.LastModifiedBy).WithMany().HasForeignKey(l => l.LastModifiedById);
             b.Ignore(l => l.ParentLocation);
             b.Ignore(l => l.ChildLocations);
-            b.Ignore(l => l.ClassBalances);
         });
 
         builder.Entity<SchoolClass>(b =>
         {
             b.HasOne(c => c.CreatedBy).WithMany().HasForeignKey(c => c.CreatedById);
             b.HasOne(c => c.LastModifiedBy).WithMany().HasForeignKey(c => c.LastModifiedById);
-            b.Ignore(c => c.Balances);
         });
 
         builder.Entity<GoodsReceipt>(b =>
@@ -139,7 +136,14 @@ public class GoodsReceiptTestDbContext(DbContextOptions<GoodsReceiptTestDbContex
             b.HasOne(t => t.LastModifiedBy).WithMany().HasForeignKey(t => t.LastModifiedById);
         });
 
-        builder.Ignore<ClassBalance>();
+        builder.Entity<ClassBalance>(b =>
+        {
+            b.HasOne(cb => cb.Class).WithMany(c => c.Balances).HasForeignKey(cb => cb.ClassId);
+            b.HasOne(cb => cb.Item).WithMany(i => i.ClassBalances).HasForeignKey(cb => cb.ItemId);
+            b.HasOne(cb => cb.Location).WithMany(l => l.ClassBalances).HasForeignKey(cb => cb.LocationId);
+            b.HasOne(cb => cb.CreatedBy).WithMany().HasForeignKey(cb => cb.CreatedById);
+            b.HasOne(cb => cb.LastModifiedBy).WithMany().HasForeignKey(cb => cb.LastModifiedById);
+        });
 
         builder.Entity<ClassItemStockVisibility>(b =>
         {
