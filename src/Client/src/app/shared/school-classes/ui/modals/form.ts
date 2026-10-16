@@ -1,6 +1,6 @@
-import { Component, input, linkedSignal } from '@angular/core';
+import { Component, computed, input, linkedSignal } from '@angular/core';
 import { ClassStatus, CLASS_STATUS_OPTIONS, SchoolClassDto } from '@ske/models';
-import { form, FormField, maxLength, required, submit, validate } from '@angular/forms/signals';
+import { disabled, form, FormField, maxLength, required, submit, validate } from '@angular/forms/signals';
 import { NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
 import { SkeletonInputLoaderDirective } from '@ske/shared/loader';
 import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
@@ -32,7 +32,11 @@ export class Form {
   public readonly loading = input.required<boolean>();
   public readonly schoolClass = input.required<Partial<SchoolClassDto>>();
 
-  public readonly statusOptions = CLASS_STATUS_OPTIONS;
+  // Closing and reopening go through the "Închide clasa" action, so the status can't be edited into or out
+  // of Closed here. A closed class stays editable (name, dates) with its status locked.
+  public readonly isClosed = computed(() => this.schoolClass().status === ClassStatus.Closed);
+  public readonly statusOptions = computed(() =>
+    this.isClosed() ? CLASS_STATUS_OPTIONS : CLASS_STATUS_OPTIONS.filter(o => o.value !== ClassStatus.Closed));
 
   private readonly _formModel = linkedSignal({
     source: () => this.schoolClass(),
@@ -58,6 +62,7 @@ export class Form {
     required(schemaPath.endDate, {
       message: 'Data de sfârșit este obligatorie.'
     });
+    disabled(schemaPath.status, () => this.isClosed());
     required(schemaPath.status, {
       message: 'Starea clasei este obligatorie.'
     });
