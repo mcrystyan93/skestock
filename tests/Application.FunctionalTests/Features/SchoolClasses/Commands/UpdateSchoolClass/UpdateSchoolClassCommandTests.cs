@@ -12,9 +12,11 @@ public class UpdateSchoolClassCommandTests : TestBase
     private string _prefix = null!;
 
     [SetUp]
-    public void SetUpPrefix()
+    public async Task SetUpPrefix()
     {
         _prefix = $"FT{Guid.NewGuid():N}"[..10];
+        // CreateSchoolClass requires the shared configuration singleton.
+        await TestApp.AddAsync(new SharedClassConfiguration { InvitationCount = 0 });
     }
 
     [Test]

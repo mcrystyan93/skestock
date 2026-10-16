@@ -1,6 +1,6 @@
 # Implementation Plan: Close a school class with stock rollover
 
-Status: Complete — 2026-10-16. Four UpdateSchoolClass functional tests fail on the baseline too (CreateSchoolClass needs a saved configuration).
+Status: Complete — 2026-10-16.
 
 ## Overview
 
