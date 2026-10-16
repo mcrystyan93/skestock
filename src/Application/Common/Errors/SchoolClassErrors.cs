@@ -61,6 +61,17 @@ public static class SchoolClassErrors
         }
     }
 
+    public sealed class SchoolClassClosed : Error
+    {
+        public SchoolClassClosed(Guid schoolClassId)
+            : base($"School class '{schoolClassId}' is closed and can no longer be changed.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
+            Metadata.Add(ErrorMetadataKeys.Title, "School class is closed");
+            Metadata.Add(ErrorMetadataKeys.Code, "school_classes.closed");
+        }
+    }
+
     public sealed class AlreadyClosed : Error
     {
         public AlreadyClosed(Guid schoolClassId) : base($"School class '{schoolClassId}' is already closed.")

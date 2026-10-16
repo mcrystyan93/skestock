@@ -34,6 +34,7 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
   [ErrorCodes.resource.itemNotFound]: 'Articolul nu a fost găsit.',
   [ErrorCodes.resource.locationNotFound]: 'Locația nu a fost găsită.',
   [ErrorCodes.resource.schoolClassNotFound]: 'Clasa nu a fost găsită.',
+  [ErrorCodes.resource.schoolClassClosed]: 'Clasa este închisă și nu mai poate fi modificată.',
   [ErrorCodes.resource.schoolClassAlreadyClosed]: 'Clasa este deja închisă.',
   [ErrorCodes.resource.schoolClassTargetNotOpen]: 'Clasa selectată este închisă și nu poate primi stoc.',
   [ErrorCodes.resource.schoolClassStatusChangeNotAllowed]:

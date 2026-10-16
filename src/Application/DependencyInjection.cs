@@ -26,6 +26,7 @@ public static class DependencyInjection
                 typeof(LoggingBehaviour<,>),
                 typeof(UnhandledExceptionBehaviour<,>),
                 typeof(AuthorizationBehaviour<,>),
+                typeof(ClassOpenBehaviour<,>),
                 typeof(ValidationBehaviour<,>),
                 typeof(PerformanceBehaviour<,>),
                 typeof(CachingBehavior<,>),

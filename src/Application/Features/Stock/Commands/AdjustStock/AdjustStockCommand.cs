@@ -1,3 +1,4 @@
+using skestock.Application.Common.Behaviours;
 using skestock.Application.Common.Caching;
 using skestock.Application.Common.Security;
 using skestock.Application.Features.Stock.Models;
@@ -9,8 +10,10 @@ namespace skestock.Application.Features.Stock.Commands.AdjustStock;
 // required field distinct from the CreatedBy audit column, same rationale as
 // CreateGoodsReceiptCommand.
 [Authorize]
-public class AdjustStockCommand : IRequest<Result<StockItemDto>>, ICacheInvalidation
+public class AdjustStockCommand : IRequest<Result<StockItemDto>>, ICacheInvalidation, IRequiresOpenClass
 {
+    Guid? IRequiresOpenClass.ClassId => ClassId;
+
     public Guid ClassId { get; init; }
     public Guid ItemId { get; init; }
     public Guid LocationId { get; init; }
