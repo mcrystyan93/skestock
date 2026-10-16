@@ -1,4 +1,0 @@
-:host button.ant-btn:focus-visible {
-  outline: 2px solid var(--color-primary-600);
-  outline-offset: 2px;
-}
