@@ -111,6 +111,18 @@ public class ClassOpenBehaviourTests
         _handlerRan.ShouldBeTrue();
     }
 
+    private sealed record AmbiguousTestCommand : IRequest<Result>, IRequiresOpenClass
+    {
+        Guid? IRequiresOpenClass.ClassId => Guid.NewGuid();
+        Guid? IRequiresOpenClass.OrderListId => Guid.NewGuid();
+    }
+
+    [Test]
+    public void Handle_WhenACommandNamesMoreThanOneTarget_Throws() =>
+        Should.Throw<InvalidOperationException>(async () =>
+            await new ClassOpenBehaviour<AmbiguousTestCommand, Result>(_context).Handle(
+                new AmbiguousTestCommand(), (_, _) => ValueTask.FromResult(Result.Ok()), CancellationToken.None));
+
     // Guards against adding a class-scoped command and forgetting to protect it.
     [TestCase(typeof(AdjustStockCommand))]
     [TestCase(typeof(MoveStockCommand))]

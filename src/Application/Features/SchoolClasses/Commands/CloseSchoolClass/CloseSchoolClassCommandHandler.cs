@@ -1,3 +1,4 @@
+using skestock.Application.Common.Behaviours;
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Domain.Entities.Stock;
@@ -8,14 +9,17 @@ namespace skestock.Application.Features.SchoolClasses.Commands.CloseSchoolClass;
 public sealed class CloseSchoolClassCommandHandler(IApplicationDbContext dbContext, IUser user)
     : IRequestHandler<CloseSchoolClassCommand, Result>
 {
-    public async ValueTask<Result> Handle(CloseSchoolClassCommand request, CancellationToken cancellationToken)
+    public async ValueTask<Result> Handle(CloseSchoolClassCommand request, CancellationToken cancellationToken) =>
+        await dbContext.InTransactionAsync(() => CloseAsync(request, cancellationToken), cancellationToken);
+
+    private async Task<Result> CloseAsync(CloseSchoolClassCommand request, CancellationToken cancellationToken)
     {
         var identityId = Guard.Against.Null(
             user.Id,
             message: "Closing a school class requires an authenticated user.");
 
-        var classes = await dbContext.SchoolClasses
-            .Where(c => c.Id == request.Id || c.Id == request.TargetClassId)
+        // The exclusive lock waits for in-flight changes to either class and blocks new ones until commit.
+        var classes = await dbContext.ExclusiveLock(request.Id, request.TargetClassId)
             .ToListAsync(cancellationToken);
 
         var source = classes.SingleOrDefault(c => c.Id == request.Id);
@@ -83,7 +87,7 @@ public sealed class CloseSchoolClassCommandHandler(IApplicationDbContext dbConte
         }
         catch (DbUpdateConcurrencyException)
         {
-            return Result.Fail(new StockErrors.ConcurrencyConflict(source.Id, Guid.Empty, Guid.Empty));
+            return Result.Fail(new SchoolClassErrors.ConcurrentChange(source.Id));
         }
 
         return Result.Ok();

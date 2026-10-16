@@ -14,7 +14,7 @@ public sealed class InitializeSchoolClassConfigurationCommandHandler(IApplicatio
         var strategy = dbContext.Database.CreateExecutionStrategy();
         return await strategy.ExecuteAsync(async () =>
         {
-            await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+            // ClassOpenBehaviour has already opened the transaction that makes the update and save atomic.
             var configuration = await dbContext.SharedClassConfigurations
                 .AsNoTracking()
                 .Include(item => item.DepartmentTemplates)
@@ -48,7 +48,6 @@ public sealed class InitializeSchoolClassConfigurationCommandHandler(IApplicatio
             }
 
             await dbContext.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
             return Result.Ok();
         });
     }

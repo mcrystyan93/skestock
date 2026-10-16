@@ -30,7 +30,9 @@ public static class DependencyInjection
                 typeof(ValidationBehaviour<,>),
                 typeof(PerformanceBehaviour<,>),
                 typeof(CachingBehavior<,>),
-                typeof(CacheInvalidationBehavior<,>)
+                typeof(CacheInvalidationBehavior<,>),
+                // Innermost, so its transaction commits before the cache is invalidated.
+                typeof(ClassLockBehaviour<,>)
             ];
         });
     }

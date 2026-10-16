@@ -16,7 +16,8 @@ public class UpdateSchoolClassCommandHandler(IApplicationDbContext dbContext)
         if (schoolClass is null)
             return Result.Fail(new SchoolClassErrors.SchoolClassNotFound(request.Id));
 
-        // Closing moves the remaining stock, so it only happens through the close command.
+        // Closing moves the remaining stock, so it only happens through the close command. A class that stays
+        // closed can still be renamed or re-dated, so this command deliberately does not require an open class.
         if ((request.Status == ClassStatus.Closed) != (schoolClass.Status == ClassStatus.Closed))
             return Result.Fail(new SchoolClassErrors.StatusChangeNotAllowed(request.Id));
 

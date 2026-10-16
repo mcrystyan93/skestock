@@ -82,6 +82,17 @@ public static class SchoolClassErrors
         }
     }
 
+    public sealed class ConcurrentChange : Error
+    {
+        public ConcurrentChange(Guid schoolClassId)
+            : base($"School class '{schoolClassId}' or its stock was changed by another operation. Please reload and try again.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
+            Metadata.Add(ErrorMetadataKeys.Title, "School class changed concurrently");
+            Metadata.Add(ErrorMetadataKeys.Code, "school_classes.concurrent_change");
+        }
+    }
+
     public sealed class TargetNotOpen : Error
     {
         public TargetNotOpen(Guid schoolClassId)
