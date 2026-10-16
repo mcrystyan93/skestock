@@ -1,6 +1,6 @@
 # Implementation Plan: Close a school class with stock rollover
 
-Status: Draft — awaiting approval.
+Status: Complete — 2026-10-16. Four UpdateSchoolClass functional tests fail on the baseline too (CreateSchoolClass needs a saved configuration).
 
 ## Overview
 
@@ -35,7 +35,7 @@ status. Source: [approved spec](../.scratch/class-closing/spec.md). Tasks live i
 - [x] 03. **CloseSchoolClass command** — errors, command, validator, handler, unit tests (M, 5 files).
 - [x] 04. **ClassBalance on close** — upsert in the same save + unit tests (S, 2 files).
 - [x] 05. **HTTP + functional tests** — `POST {id}/close`, functional tests for close and PUT guard (S, ~4 files).
-- [ ] 06. **Final verification** — build, all Application unit tests, focused functional tests, no pending model changes, graphify.
+- [x] 06. **Final verification** — build, all Application unit tests, focused functional tests, no pending model changes, graphify.
 
 ## Checkpoints
 

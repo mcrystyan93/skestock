@@ -1,15 +1,15 @@
 # 06: Final verification
 
-Status: open
+Status: resolved
 Type: task
 Blocked by: 05
 
 ## Acceptance criteria
 
-- [ ] `dotnet build` is clean (warnings are errors).
-- [ ] All Application unit tests pass, plus the focused functional tests (or the environment blocker is reported, not hidden).
-- [ ] `dotnet ef migrations has-pending-model-changes` reports no changes (no migration expected).
-- [ ] Every success criterion in the spec is checked; review the diff; `graphify update .`.
+- [x] `dotnet build` is clean (warnings are errors).
+- [x] All Application unit tests pass, plus the focused functional tests (or the environment blocker is reported, not hidden).
+- [x] `dotnet ef migrations has-pending-model-changes` reports no changes (no migration expected).
+- [x] Every success criterion in the spec is checked; review the diff; `graphify update .`.
 
 ## Verification
 

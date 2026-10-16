@@ -1,6 +1,6 @@
 # Spec: Close a school class and roll its stock over
 
-Status: Draft v2 — open questions answered 2026-10-16, awaiting approval.
+Status: Approved — 2026-10-16; implemented.
 
 ## Objective
 
