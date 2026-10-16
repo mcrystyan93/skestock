@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using skestock.Application.Common.Models;
+using skestock.Application.Features.SchoolClasses.Commands.CloseSchoolClass;
 using skestock.Application.Features.SchoolClasses.Commands.CreateSchoolClass;
 using skestock.Application.Features.SchoolClasses.Commands.InitializeSchoolClassConfiguration;
 using skestock.Application.Features.SchoolClasses.Commands.UpdateSchoolClass;
@@ -22,6 +23,7 @@ public class SchoolClasses : IEndpointGroup
         groupBuilder.MapPut(UpdateSchoolClass, "{id}");
         groupBuilder.MapPut(UpdateDepartmentResponsiblePerson, "{id}/departments/{departmentId}/responsible-person");
         groupBuilder.MapPost(InitializeSchoolClassConfiguration, "{id}/initialize-configuration");
+        groupBuilder.MapPost(CloseSchoolClass, "{id}/close");
     }
 
     [EndpointSummary("Get all school classes")]
@@ -109,6 +111,17 @@ public class SchoolClasses : IEndpointGroup
                     SchoolClassId = id, DepartmentId = departmentId, ResponsiblePerson = request.ResponsiblePerson
                 }, cancellationToken);
         return result.ToOk();
+    }
+
+    [EndpointSummary("Close a school class")]
+    [EndpointDescription("Closes a school class and transfers all of its remaining stock to the target school class.")]
+    public static async Task<Results<NoContent, ProblemHttpResult>> CloseSchoolClass(
+        ISender sender, Guid id, SchoolClassRequests.CloseSchoolClassRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new CloseSchoolClassCommand { Id = id, TargetClassId = request.TargetClassId }, cancellationToken);
+        return result.ToNoContent();
     }
 
     public static async Task<Results<Ok, ProblemHttpResult>> InitializeSchoolClassConfiguration(

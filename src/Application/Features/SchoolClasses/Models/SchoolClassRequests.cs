@@ -26,4 +26,9 @@ public static class SchoolClassRequests
         public DateOnly EndDate { get; init; }
         public ClassStatus Status { get; init; }
     }
+
+    public class CloseSchoolClassRequest
+    {
+        public Guid TargetClassId { get; init; }
+    }
 }

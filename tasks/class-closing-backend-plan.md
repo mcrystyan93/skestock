@@ -34,7 +34,7 @@ status. Source: [approved spec](../.scratch/class-closing/spec.md). Tasks live i
 - [x] 02. **UpdateSchoolClass closed guard** — new error + handler check + unit tests (S, 3 files).
 - [x] 03. **CloseSchoolClass command** — errors, command, validator, handler, unit tests (M, 5 files).
 - [x] 04. **ClassBalance on close** — upsert in the same save + unit tests (S, 2 files).
-- [ ] 05. **HTTP + functional tests** — `POST {id}/close`, functional tests for close and PUT guard (S, ~4 files).
+- [x] 05. **HTTP + functional tests** — `POST {id}/close`, functional tests for close and PUT guard (S, ~4 files).
 - [ ] 06. **Final verification** — build, all Application unit tests, focused functional tests, no pending model changes, graphify.
 
 ## Checkpoints

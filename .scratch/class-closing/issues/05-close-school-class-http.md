@@ -1,6 +1,6 @@
 # 05: POST /api/SchoolClasses/{id}/close endpoint + functional tests
 
-Status: open
+Status: resolved
 Type: task
 Blocked by: 02, 04
 
@@ -11,10 +11,10 @@ mapping failures through the existing problem-result mapper. Functional tests on
 
 ## Acceptance criteria
 
-- [ ] Admin `POST` → 204. The target's class stock query shows the transferred quantities; the source shows none and is `Closed`.
-- [ ] Non-admin → 403. Invalid body (empty target, target == source) → 400. Source already closed / target closed → 409.
-- [ ] `ClassBalance` rows are persisted as in the spec, and repeating the close returns 409 without double-counting.
-- [ ] PUT with `Status = Closed` on an open class → 409 (covers task 02 end to end).
+- [x] Admin `POST` → 204. The target's class stock query shows the transferred quantities; the source shows none and is `Closed`.
+- [x] Non-admin → 403. Invalid body (empty target, target == source) → 400. Source already closed / target closed → 409.
+- [x] `ClassBalance` rows are persisted as in the spec, and repeating the close returns 409 without double-counting.
+- [x] PUT with `Status = Closed` on an open class → 409 (covers task 02 end to end).
 
 ## Verification
 
