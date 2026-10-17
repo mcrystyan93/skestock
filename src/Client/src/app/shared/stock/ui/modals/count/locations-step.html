@@ -37,10 +37,11 @@
       @for (location of locations(); track location.id) {
         <label class="group flex min-h-16 items-center gap-3 p-4"
                [class]="cardClasses">
-          <input type="checkbox"
+          <input #checkbox
+                 type="checkbox"
                  class="sr-only"
                  [checked]="selectedLocationIds().includes(location.id)"
-                 (change)="toggleLocation(location.id, $any($event.target).checked)">
+                 (change)="toggleLocation(location.id, checkbox.checked)">
           <nz-icon nzType="icons:boxes-stacked"
                    class="text-2xl"
                    aria-hidden="true" />

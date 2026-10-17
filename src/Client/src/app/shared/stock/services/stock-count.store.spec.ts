@@ -117,13 +117,14 @@ describe('StockCountState', () => {
     http.bulkAdjustStock.mockReturnValue(of(undefined));
     const store = create();
     store.setSelectedLocationIds(['b']);
-    store.setReason(AdjustmentReason.Found);
-    store.setCount(store.rowsInScope()[0], 7);
+    store.setReason(AdjustmentReason.Miscount);
+    const row = store.rowsInScope()[0];
+    store.setCount(row, 7);
     store.submit();
 
     expect(http.bulkAdjustStock).toHaveBeenCalledExactlyOnceWith('c-1', {
-      reason: AdjustmentReason.Found,
-      lines: [{ itemId: 'i-A', locationId: 'b', actualQuantity: 7 }]
+      reason: AdjustmentReason.Miscount,
+      lines: [{ itemId: 'i-A', locationId: 'b', actualQuantity: 7, expectedQuantity: row.quantity }]
     });
     expect(store.completed()).toBe(true);
   });

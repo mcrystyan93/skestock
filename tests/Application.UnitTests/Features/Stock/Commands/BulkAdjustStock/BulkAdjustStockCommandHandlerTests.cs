@@ -140,4 +140,41 @@ public class BulkAdjustStockCommandHandlerTests
         error.Metadata[ErrorMetadataKeys.Code].ShouldBe(StockErrors.BulkConcurrencyConflict.ErrorCode);
         error.Metadata[ErrorMetadataKeys.StatusCode].ShouldBe(409);
     }
+
+    [Test]
+    public async Task Handle_WhenStockChangedSinceItWasCounted_ReturnsConflictAndSavesNothing()
+    {
+        var d = await BulkAdjustStockTestData.CreateAsync();
+        await using var _ = d.Context;
+        d.AddBatch(d.Rice, d.Pantry, 10);
+        d.AddBatch(d.Flour, d.Pantry, 10);
+        await d.Context.SaveChangesAsync(CancellationToken.None);
+
+        // The counter saw 10 rice but 7 flour; a receipt/move changed flour to 10 in between.
+        var result = await Handler(d).Handle(
+            Command(d, new Line(d.Rice.Id, d.Pantry.Id, 4, 10), new Line(d.Flour.Id, d.Pantry.Id, 3, 7)),
+            CancellationToken.None);
+
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.Single().Metadata[ErrorMetadataKeys.Code].ShouldBe(StockErrors.BulkConcurrencyConflict.ErrorCode);
+        (await d.Context.StockTransactions.CountAsync()).ShouldBe(0);
+        (await d.Context.StockBatches.SumAsync(b => b.Quantity)).ShouldBe(20);
+    }
+
+    [Test]
+    public async Task Handle_WhenExpectedQuantityMatches_AppliesTheCount()
+    {
+        var d = await BulkAdjustStockTestData.CreateAsync();
+        await using var _ = d.Context;
+        d.AddBatch(d.Rice, d.Pantry, 10);
+        await d.Context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await Handler(d).Handle(
+            Command(d, new Line(d.Rice.Id, d.Pantry.Id, 4, 10), new Line(d.Flour.Id, d.Pantry.Id, 2, 0)),
+            CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        (await d.Context.StockBatches.Where(b => b.ItemId == d.Rice.Id).SumAsync(b => b.Quantity)).ShouldBe(4);
+        (await d.Context.StockBatches.Where(b => b.ItemId == d.Flour.Id).SumAsync(b => b.Quantity)).ShouldBe(2);
+    }
 }

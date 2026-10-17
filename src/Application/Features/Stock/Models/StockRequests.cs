@@ -35,6 +35,8 @@ public static class StockRequests
         public Guid ItemId { get; init; }
         public Guid LocationId { get; init; }
         public int ActualQuantity { get; init; }
+        // Stock total the counter saw; the line is rejected if the live total differs. Null skips the check.
+        public int? ExpectedQuantity { get; init; }
     }
 
     public class RemoveExpiredStockRequest

@@ -33,6 +33,14 @@ public class BulkAdjustStockCommandHandler(IApplicationDbContext dbContext, IUse
                     .ThenBy(b => b.Id)
                     .ToList());
 
+        // Reject the whole count if any line's stock moved since the counter saw it; without this the
+        // absolute count would silently overwrite a concurrent receipt, move or surplus.
+        if (request.Lines.Any(l => l.ExpectedQuantity is { } expected
+                                   && expected != (byPair.TryGetValue((l.ItemId, l.LocationId), out var current)
+                                       ? current.Sum(b => b.Quantity)
+                                       : 0)))
+            return Result.Fail(new StockErrors.BulkConcurrencyConflict(request.ClassId));
+
         // One StockAdjustedEvent per touched location refreshes the list and summary over SignalR.
         var eventLocations = new HashSet<Guid>();
         foreach (var line in request.Lines)

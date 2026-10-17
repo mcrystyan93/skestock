@@ -11,7 +11,7 @@ public class BulkAdjustStockCommand : IRequest<Result>, ICacheInvalidation, IReq
 {
     Guid? IRequiresOpenClass.ClassId => ClassId;
 
-    public sealed record Line(Guid ItemId, Guid LocationId, int ActualQuantity);
+    public sealed record Line(Guid ItemId, Guid LocationId, int ActualQuantity, int? ExpectedQuantity = null);
 
     public Guid ClassId { get; init; }
 

@@ -42,7 +42,7 @@
                    [nzMin]="0"
                    [nzPrecision]="0"
                    [ngModel]="counted"
-                   (ngModelChange)="countChange.emit($event)" />
+                   (ngModelChange)="$event !== null && countChange.emit($event)" />
   <button type="button"
           nz-button
           nzType="primary"

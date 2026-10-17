@@ -150,6 +150,7 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
   [ErrorCodes.validation.emptyLines]: 'Recepția trebuie să conțină cel puțin o linie.',
   [ErrorCodes.validation.duplicateReceiptLine]:
     'Există linii duplicate pentru aceeași combinație de articol, locație și dată de expirare.',
+  [ErrorCodes.validation.duplicateCountLine]: 'Același articol și aceeași locație apar de mai multe ori în inventar.',
   [ErrorCodes.validation.expiryDateRequired]:
     'Data de expirare este obligatorie pentru articolele perisabile.',
   [ErrorCodes.validation.expiryDateNotAllowed]:

@@ -149,7 +149,8 @@ export const StockCountState = signalStore(
               lines: store.changes().map(({ row, newQuantity }) => ({
                 itemId: row.itemId,
                 locationId: row.locationId,
-                actualQuantity: newQuantity
+                actualQuantity: newQuantity,
+                expectedQuantity: row.quantity
               }))
             })
             .pipe(
@@ -174,11 +175,11 @@ export const StockCountState = signalStore(
       submit,
       setReason: (reason: AdjustmentReason) => patchState(store, { reason }),
       setSelectedLocationIds: (selectedLocationIds: string[]) => patchState(store, { selectedLocationIds }),
-      setCount: (row: StockItemDto, value: number | null) =>
+      setCount: (row: StockItemDto, value: number) =>
         patchState(store, (state) => {
           const { [stockCountRowKey(row)]: _, ...rest } = state.counts;
           return {
-            counts: value === null || value === row.quantity ? rest : { ...rest, [stockCountRowKey(row)]: value }
+            counts: value === row.quantity ? rest : { ...rest, [stockCountRowKey(row)]: value }
           };
         }),
       next: () => {

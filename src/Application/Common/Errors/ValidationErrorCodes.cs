@@ -40,6 +40,7 @@ public class ValidationErrorCodes
     public const string EmptyLines = "validation.empty_lines";
     /// <summary>Two or more lines in the same receipt reference the same item/location/expiry combination.</summary>
     public const string DuplicateReceiptLine = "validation.duplicate_receipt_line";
+    public const string DuplicateCountLine = "validation.duplicate_count_line";
     /// <summary>A perishable item's receipt line is missing its expiry date.</summary>
     public const string ExpiryDateRequired = "validation.expiry_date_required";
     /// <summary>A non-perishable item's receipt line supplied an expiry date, which isn't allowed.</summary>

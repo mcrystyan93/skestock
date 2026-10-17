@@ -119,7 +119,7 @@ public class Stock : IEndpointGroup
             ClassId = classId,
             Reason = request.Reason,
             Lines = request.Lines
-                .Select(l => new BulkAdjustStockCommand.Line(l.ItemId, l.LocationId, l.ActualQuantity))
+                .Select(l => new BulkAdjustStockCommand.Line(l.ItemId, l.LocationId, l.ActualQuantity, l.ExpectedQuantity))
                 .ToList()
         };
 
