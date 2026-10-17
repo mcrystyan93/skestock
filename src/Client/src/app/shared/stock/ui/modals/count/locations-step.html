@@ -1,0 +1,41 @@
+<nz-form-item class="mb-4!">
+  <nz-form-label nzFor="count-reason">Motiv ajustare</nz-form-label>
+  <nz-form-control>
+    <nz-select nzId="count-reason"
+               class="w-full"
+               [ngModel]="reason()"
+               (ngModelChange)="reasonChange.emit($event)">
+      @for (option of reasonOptions; track option.value) {
+        <nz-option [nzValue]="option.value"
+                   [nzLabel]="option.label" />
+      }
+    </nz-select>
+  </nz-form-control>
+</nz-form-item>
+
+@if (locations().length === 0) {
+  @if (!loading()) {
+    <nz-alert nzType="info"
+              nzShowIcon
+              nzMessage="Nu există articole cu stoc în această clasă." />
+  }
+} @else {
+  <div role="group"
+       aria-label="Locații"
+       class="mt-4! flex flex-col gap-3">
+    <label nz-checkbox
+           [nzChecked]="allSelected()"
+           [nzIndeterminate]="someSelected()"
+           (nzCheckedChange)="toggleAll($event)">
+      <strong>Selectează toate</strong>
+    </label>
+    @for (location of locations(); track location.id) {
+      <label nz-checkbox
+             class="ms-0!"
+             [nzChecked]="selectedLocationIds().includes(location.id)"
+             (nzCheckedChange)="toggleLocation(location.id, $event)">
+        {{ location.name }}
+      </label>
+    }
+  </div>
+}

@@ -38,6 +38,8 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
   [ErrorCodes.resource.schoolClassAlreadyClosed]: 'Clasa este deja închisă.',
   [ErrorCodes.resource.schoolClassConcurrentChange]:
     'Clasa sau stocul ei a fost modificat în timpul operației. Reîncărcați pagina și încercați din nou.',
+  [ErrorCodes.stock.bulkConcurrencyConflict]:
+    'Stocul a fost modificat în timpul inventarierii. Reîncărcați și încercați din nou.',
   [ErrorCodes.resource.schoolClassTargetNotOpen]: 'Clasa selectată este închisă și nu poate primi stoc.',
   [ErrorCodes.resource.schoolClassStatusChangeNotAllowed]:
     'Clasa nu poate fi închisă sau redeschisă din editare. Folosiți acțiunea „Închide clasa”.',
