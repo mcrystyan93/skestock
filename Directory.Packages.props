@@ -2,8 +2,11 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
+    <!-- Transitive via Aspire hosting; 2.5.302 has GHSA-qhrr-8q5h-9q3h. Drop once Aspire ships a patched version. -->
+    <PackageVersion Include="MessagePack" Version="2.5.307" />
     <PackageVersion Include="Ardalis.GuardClauses" Version="5.0.0" />
     <PackageVersion Include="Aspire.Azure.Storage.Blobs" Version="13.6.1" />
     <PackageVersion Include="Aspire.Azure.Storage.Queues" Version="13.6.1" />

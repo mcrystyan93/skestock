@@ -20,6 +20,7 @@
   </div>
 </td>
 <td>
+  @if (!readOnly()) {
   <button nz-button
           nzType="text"
           type="button"
@@ -28,4 +29,5 @@
     <nz-icon nzType="icons:plus"></nz-icon>
     Adauga
   </button>
+  }
 </td>

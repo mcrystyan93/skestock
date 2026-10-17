@@ -60,7 +60,7 @@
                 nzTrigger="hover"
                 nzPlacement="bottomLeft"
                 [nzDropdownMenu]="statusMenu"
-                [nzDisabled]="loading() || statusChangingId() !== null"
+                [nzDisabled]="loading() || statusChangingId() !== null || availableActions(orderList.status).length === 0"
                 skeStopClick
                 [attr.aria-label]="'Schimbă statusul comenzii ' + (orderList.name || '')">
           {{ statusLabel(orderList.status) }}

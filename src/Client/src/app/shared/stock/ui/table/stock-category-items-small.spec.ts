@@ -1,4 +1,6 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { CLASS_READ_ONLY } from '@ske/shared/school-classes';
 import { StockItemCategoryGroup, StockItemDto } from '@ske/models';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
@@ -54,6 +56,18 @@ describe('StockCategoryItemsSmall', () => {
 
     expect(add).toHaveBeenCalledWith({ id: 'category-1', name: 'Papetărie' });
     expect(adjust).toHaveBeenCalledWith(item);
+    fixture.destroy();
+  });
+
+  it('hides every stock action and cannot adjust when the class is closed', () => {
+    TestBed.configureTestingModule({ providers: [{ provide: CLASS_READ_ONLY, useValue: signal(true) }] });
+    const fixture = createFixture([createCategory([createStockItem()])]);
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(element.querySelector('button[aria-label="Adaugă stoc pentru Papetărie"]')).toBeNull();
+    expect(element.querySelector('button[aria-label^="Acțiuni pentru"]')).toBeNull();
+    expect(element.querySelector<HTMLButtonElement>('button[aria-label^="Ajustează stocul pentru Caiet"]')!.disabled)
+      .toBe(true);
     fixture.destroy();
   });
 

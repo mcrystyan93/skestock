@@ -165,4 +165,67 @@ public class UpdateSchoolClassCommandHandlerTests
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is skestock.Application.Common.Errors.SchoolClassErrors.SchoolClassNotFound);
     }
+
+    private static UpdateSchoolClassCommand Command(Guid id, string name, ClassStatus status) => new()
+    {
+        Id = id,
+        Name = name,
+        StartDate = new DateOnly(2026, 1, 1),
+        EndDate = new DateOnly(2026, 6, 1),
+        Status = status
+    };
+
+    [TestCase(ClassStatus.Active, ClassStatus.Closed)]
+    [TestCase(ClassStatus.Closed, ClassStatus.Active)]
+    [TestCase(ClassStatus.Closed, ClassStatus.Upcoming)]
+    public async Task Handle_WhenStatusChangesIntoOrOutOfClosed_ReturnsErrorAndSavesNothing(
+        ClassStatus current, ClassStatus requested)
+    {
+        var (context, schoolClass) = await CreateContextWithClassAsync();
+        await using var _ = context;
+        schoolClass.Status = current;
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new UpdateSchoolClassCommandHandler(context)
+            .Handle(Command(schoolClass.Id, "New Name", requested), CancellationToken.None);
+
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.ShouldContain(e => e is skestock.Application.Common.Errors.SchoolClassErrors.StatusChangeNotAllowed);
+        context.ChangeTracker.Clear();
+        var persisted = await context.SchoolClasses.SingleAsync(c => c.Id == schoolClass.Id, CancellationToken.None);
+        persisted.Name.ShouldBe("Old Name");
+        persisted.Status.ShouldBe(current);
+    }
+
+    [Test]
+    public async Task Handle_WhenClosedClassStaysClosed_UpdatesOtherFields()
+    {
+        var (context, schoolClass) = await CreateContextWithClassAsync();
+        await using var _ = context;
+        schoolClass.Status = ClassStatus.Closed;
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new UpdateSchoolClassCommandHandler(context)
+            .Handle(Command(schoolClass.Id, "Renamed", ClassStatus.Closed), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Name.ShouldBe("Renamed");
+        result.Value.Status.ShouldBe(ClassStatus.Closed);
+    }
+
+    [TestCase(ClassStatus.Upcoming, ClassStatus.Paused)]
+    [TestCase(ClassStatus.Paused, ClassStatus.Active)]
+    public async Task Handle_WhenNeitherStatusIsClosed_ChangesStatus(ClassStatus current, ClassStatus requested)
+    {
+        var (context, schoolClass) = await CreateContextWithClassAsync();
+        await using var _ = context;
+        schoolClass.Status = current;
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new UpdateSchoolClassCommandHandler(context)
+            .Handle(Command(schoolClass.Id, "Old Name", requested), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Status.ShouldBe(requested);
+    }
 }

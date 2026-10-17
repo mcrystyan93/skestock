@@ -1,0 +1,68 @@
+<div *nzModalTitle>Închide clasa {{ data.className }}</div>
+
+<nz-alert nzType="warning"
+          nzShowIcon
+          class="mb-4"
+          nzMessage="Acțiune ireversibilă"
+          nzDescription="Asigurați-vă că stocul a fost actualizat și reflectă stocul curent. Odată închisă, clasa nu mai poate fi redeschisă." />
+
+<p class="mb-3">
+  Stocul rămas pentru toate articolele va fi transferat în clasa selectată mai jos.
+</p>
+
+<label for="close-class-target"
+       class="mb-1 block font-medium">
+  Clasa care preia stocul
+</label>
+<nz-select id="close-class-target"
+           class="w-full"
+           nzPlaceHolder="Selectați clasa"
+           [formField]="closeForm.targetClassId"
+           [nzLoading]="store.schoolClassesLoading()"
+           [nzDropdownRender]="loadingMoreTemplate"
+           (nzScrollToBottom)="store.loadMore()">
+  @for (schoolClass of store.targets(); track schoolClass.id) {
+    <nz-option [nzValue]="schoolClass.id"
+               [nzLabel]="schoolClass.name" />
+  }
+</nz-select>
+
+<ng-template #loadingMoreTemplate>
+  @if (store.isLoadingMore()) {
+    <nz-spin />
+  }
+</ng-template>
+
+@if (!store.schoolClassesLoading() && store.targets().length === 0) {
+  <p class="mt-2 mb-0 text-sm"
+     role="status">
+    Nu există nicio altă clasă deschisă care să preia stocul. Creați mai întâi o clasă nouă.
+  </p>
+}
+
+<ske-error-display class="mt-3 block"
+                   [problemDetail]="store.closeProblemDetail()"
+                   [validationErrors]="store.closeValidationErrors()" />
+
+<div *nzModalFooter>
+  <nz-space>
+    <button *nzSpaceItem
+            nz-button
+            nzType="default"
+            type="button"
+            [disabled]="store.closeLoading()"
+            (click)="cancel()">
+      Anulează
+    </button>
+    <button *nzSpaceItem
+            nz-button
+            nzType="primary"
+            nzDanger
+            type="button"
+            [nzLoading]="store.closeLoading()"
+            [disabled]="closeForm.targetClassId().invalid()"
+            (click)="confirm()">
+      Închide clasa
+    </button>
+  </nz-space>
+</div>

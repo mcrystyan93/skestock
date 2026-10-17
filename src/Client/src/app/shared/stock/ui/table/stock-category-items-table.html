@@ -46,9 +46,9 @@
       </tr>
     } @else {
       <tr ske-stock-category-item-row
-          class="cursor-pointer"
+          [class.cursor-pointer]="!readOnly()"
           [item]="category.item"
-          (click)="adjust.emit(category.item)"
+          (click)="readOnly() || adjust.emit(category.item)"
           (move)="move.emit($event)"
           (removeExpired)="removeExpired.emit($event)"
           (extendExpiry)="extendExpiry.emit($event)"

@@ -8,7 +8,7 @@ import {
   NzPageHeaderSubtitleDirective,
   NzPageHeaderTitleDirective
 } from 'ng-zorro-antd/page-header';
-import {SchoolClassDto, SchoolClassSummary} from '@ske/models';
+import {ClassStatus, SchoolClassDto, SchoolClassSummary} from '@ske/models';
 import {CurrencyPipe, DatePipe} from '@angular/common';
 import {NzStatisticComponent} from 'ng-zorro-antd/statistic';
 import {NzTypographyComponent} from 'ng-zorro-antd/typography';
@@ -22,6 +22,7 @@ import {MenuToggle} from '@ske/layouts/menu-toggle';
 import {HeaderTabOption, HeaderTabs} from '@ske/shared/header-tabs';
 import {NzBreakpointService, gridResponsiveMap} from 'ng-zorro-antd/core/services';
 import {NzTooltipDirective} from 'ng-zorro-antd/tooltip';
+import {NzTagComponent} from 'ng-zorro-antd/tag';
 
 @Component({
   imports: [
@@ -45,7 +46,8 @@ import {NzTooltipDirective} from 'ng-zorro-antd/tooltip';
     ThemeSwitcher,
     MenuToggle,
     HeaderTabs,
-    NzTooltipDirective
+    NzTooltipDirective,
+    NzTagComponent
   ],
   selector: 'ske-school-class-overview-header',
   styles: ``,
@@ -61,6 +63,7 @@ export class Header {
   public onOrderCreate = output<void>();
   public onAddStock = output<void>();
   public onClose = output<void>();
+  public onCloseClass = output<void>();
 
   private readonly _breakpoints = toSignal(
     inject(NzBreakpointService).subscribe(gridResponsiveMap, true),
@@ -79,7 +82,13 @@ export class Header {
     {label: 'Invitații'}
   ];
 
+  public readonly isClosed = computed(() => this.schoolClass().status === ClassStatus.Closed);
+  public readonly canCloseClass = computed(() => !!this.schoolClass().id && !this.isClosed());
+
   protected readonly action = computed<HeaderAction | null>(() => {
+    if (this.isClosed())
+      return null;
+
     switch (this.selectedTabIndex()) {
       case 0:
         return {text: 'Adaugă articol', label: 'Adaugă articol', icon: 'icons:plus', run: () => this.onAddStock.emit()};

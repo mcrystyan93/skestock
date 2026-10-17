@@ -50,6 +50,7 @@
                 {{ lowStockItemsCount(category) }} redus
               </nz-tag>
             }
+            @if (!readOnly()) {
             <button nz-button
                     nzType="text"
                     nzShape="circle"
@@ -61,6 +62,7 @@
                     (click)="addStock(category)">
               <nz-icon nzType="icons:plus" />
             </button>
+            }
           </div>
         </div>
 
@@ -76,6 +78,7 @@
                           class="after:absolute after:inset-0 block max-w-full overflow-hidden text-left font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
                           [attr.aria-label]="'Ajustează stocul pentru ' + item.itemName + ' la ' + item.locationName"
                           [attr.title]="item.itemName"
+                          [disabled]="readOnly()"
                           (click)="adjust.emit(item)">
                     <span class="block truncate">{{ item.itemName }}</span>
                   </button>
@@ -98,6 +101,7 @@
                           nzType="warning"
                           class="text-xs">Stoc redus</span>
                   }
+                  @if (!readOnly()) {
                   <button nz-button
                           nzType="text"
                           nzShape="circle"
@@ -148,6 +152,7 @@
                       </li>
                     </ul>
                   </nz-dropdown-menu>
+                  }
                 </div>
 
                 <div class="col-span-2 min-w-0 text-sm">

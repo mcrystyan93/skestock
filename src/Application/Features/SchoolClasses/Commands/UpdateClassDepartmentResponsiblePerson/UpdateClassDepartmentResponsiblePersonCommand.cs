@@ -1,9 +1,12 @@
+using skestock.Application.Common.Behaviours;
 using skestock.Application.Common.Caching;
 
 namespace skestock.Application.Features.SchoolClasses.Commands.UpdateClassDepartmentResponsiblePerson;
 
-public sealed class UpdateClassDepartmentResponsiblePersonCommand : IRequest<Result>, ICacheInvalidation
+public sealed class UpdateClassDepartmentResponsiblePersonCommand : IRequest<Result>, ICacheInvalidation, IRequiresOpenClass
 {
+    Guid? IRequiresOpenClass.ClassId => SchoolClassId;
+
     public Guid SchoolClassId { get; init; }
     public Guid DepartmentId { get; init; }
     public string? ResponsiblePerson { get; init; }

@@ -1,3 +1,4 @@
+import { injectClassReadOnly } from '@ske/shared/school-classes';
 import { Component, computed, effect, inject, input, linkedSignal, untracked } from '@angular/core';
 import { ItemAutocompleteValue, ORDER_LIST_STATUS_LABELS, OrderListDto, OrderListLineDto } from '@ske/models';
 import {
@@ -52,7 +53,11 @@ import type { OrderListLineFormModel } from './lines/order-list-line';
 export class OrderListDetailForm {
   public readonly loading = input.required<boolean>();
   public readonly orderList = input.required<Partial<OrderListDto>>();
+  private readonly _readOnly = injectClassReadOnly();
   public readonly editable = computed(() => {
+    if (this._readOnly())
+      return false;
+
     const status = this.orderList().status;
     return isNil(status) || status === 'Draft';
   });

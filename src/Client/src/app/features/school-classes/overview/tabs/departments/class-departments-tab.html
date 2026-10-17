@@ -24,8 +24,17 @@
 
   @if (store.schoolClass().id) {
     @if (store.schoolClass().invitationCount == null) {
-      <ske-class-configuration-initialization [loading]="store.departmentsLoading()"
-                                              (initialize)="store.initializeConfiguration()" />
+      @if (store.isClosed()) {
+        <p role="status"
+           class="m-0"
+           nz-typography
+           nzType="secondary">
+          Clasa este închisă, deci configurarea inițială nu mai poate fi copiată.
+        </p>
+      } @else {
+        <ske-class-configuration-initialization [loading]="store.departmentsLoading()"
+                                                (initialize)="store.initializeConfiguration()" />
+      }
     } @else {
       <ske-class-department-list />
     }

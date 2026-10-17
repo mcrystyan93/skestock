@@ -16,6 +16,9 @@
         <ske-menu-toggle class="-ms-2" />
         <span class="min-w-0 truncate"
               [attr.title]="schoolClass().name ?? ''">{{ schoolClass().name }}</span>
+        @if (isClosed()) {
+          <nz-tag class="ms-1 shrink-0">Închisă</nz-tag>
+        }
       </span>
       @if (compact) {
         <span class="ms-7 block text-xs text-gray-500 dark:text-gray-400">
@@ -153,6 +156,34 @@
           <nz-icon nzType="icons:xmark"></nz-icon>
           Închide
         </button>
+      }
+
+      @if (canCloseClass()) {
+        @if (compact) {
+          <button type="button"
+                  *nzSpaceItem
+                  nz-button
+                  nzType="default"
+                  nzDanger
+                  nzShape="circle"
+                  nz-tooltip
+                  nzTooltipTitle="Închide clasa"
+                  aria-label="Închide clasa"
+                  class="h-10! min-h-10! w-10! min-w-10! p-0!"
+                  (click)="onCloseClass.emit()">
+            <nz-icon nzType="icons:lock"></nz-icon>
+          </button>
+        } @else {
+          <button type="button"
+                  *nzSpaceItem
+                  nz-button
+                  nzType="default"
+                  nzDanger
+                  (click)="onCloseClass.emit()">
+            <nz-icon nzType="icons:lock"></nz-icon>
+            Închide clasa
+          </button>
+        }
       }
 
       @if (selectedAction) {
