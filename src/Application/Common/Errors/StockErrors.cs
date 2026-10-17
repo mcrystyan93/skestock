@@ -66,4 +66,23 @@ public static class StockErrors
                 });
         }
     }
+
+    public sealed class BulkConcurrencyConflict : Error
+    {
+        public const string ErrorCode = "stock.bulk_concurrency_conflict";
+
+        public BulkConcurrencyConflict(Guid classId)
+            : base(
+                "The stock was changed by another operation while the count was being saved. Nothing was saved; please reload and try again.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
+            Metadata.Add(ErrorMetadataKeys.Title, "Stock changed concurrently");
+            Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
+            Metadata.Add(ErrorMetadataKeys.Params,
+                new Dictionary<string, object>
+                {
+                    ["classId"] = classId
+                });
+        }
+    }
 }

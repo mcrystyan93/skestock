@@ -24,6 +24,19 @@ public static class StockRequests
         public AdjustmentReason Reason { get; init; }
     }
 
+    public class BulkAdjustStockRequest
+    {
+        public AdjustmentReason Reason { get; init; }
+        public List<BulkAdjustStockLine> Lines { get; init; } = [];
+    }
+
+    public class BulkAdjustStockLine
+    {
+        public Guid ItemId { get; init; }
+        public Guid LocationId { get; init; }
+        public int ActualQuantity { get; init; }
+    }
+
     public class RemoveExpiredStockRequest
     {
         public Guid ClassId { get; init; }

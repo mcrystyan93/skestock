@@ -8,7 +8,7 @@ import { isNil } from 'lodash-es';
 import { OrderListDetailModal } from '@ske/shared/order-lists';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { injectDispatch } from '@ngrx/signals/events';
-import { StockEvents } from '@ske/shared/stock';
+import { StockCountModal, StockCountModalData, StockEvents } from '@ske/shared/stock';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { CloseSchoolClassModal, CloseSchoolClassModalData } from '../close-class/close-school-class-modal';
@@ -47,6 +47,29 @@ export class HeaderContainer {
 
   public onAddProduct() {
     this._stockDispatcher.addProduct();
+  }
+
+  public openStockCount() {
+    const classId = this.classId();
+
+    if (isNil(classId) || classId.trim().length === 0) {
+      this._nzMessageService.error('Clasa nu este disponibilă pentru inventar.');
+      return;
+    }
+
+    const modalRef = this._nzModalService.create<StockCountModal, StockCountModalData, boolean>({
+      nzContent: StockCountModal,
+      nzData: { classId },
+      nzWrapClassName: 'modal-100 modal-lg-75',
+      nzCentered: true,
+      nzMaskClosable: false,
+      nzClosable: false
+    });
+
+    modalRef.afterClose.pipe(
+      filter((saved) => saved === true),
+      takeUntilDestroyed(this._destroyRef)
+    ).subscribe(() => this._stockDispatcher.refresh());
   }
 
   public createOrderList() {
