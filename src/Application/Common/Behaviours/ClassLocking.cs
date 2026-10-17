@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using skestock.Application.Common.Interfaces;
 using skestock.Domain.Entities.SchoolClasses;
 
@@ -45,6 +46,10 @@ internal static class ClassLocking
                 $"SELECT * FROM [SchoolClasses] WITH (XLOCK, HOLDLOCK) WHERE [Id] = {classId} OR [Id] = {otherClassId}")
             : dbContext.SchoolClasses.Where(c => c.Id == classId || c.Id == otherClassId);
 
+    // ClassOpenBehaviour and ClassLockBehaviour both resolve the same request; remember the first answer.
+    // A request's order list / import never changes class, and an unknown target is not remembered.
+    private static readonly ConditionalWeakTable<IRequiresOpenClass, object> ResolvedClassIds = new();
+
     public static async Task<Guid?> ResolveClassIdAsync(
         this IApplicationDbContext dbContext, IRequiresOpenClass request, CancellationToken cancellationToken)
     {
@@ -55,18 +60,23 @@ internal static class ClassLocking
         if (request.ClassId is { } classId)
             return classId;
 
+        if (ResolvedClassIds.TryGetValue(request, out var cached))
+            return (Guid)cached;
+
+        Guid? resolved = null;
         if (request.OrderListId is { } orderListId)
-            return await dbContext.OrderLists.AsNoTracking()
+            resolved = await dbContext.OrderLists.AsNoTracking()
                 .Where(o => o.Id == orderListId)
                 .Select(o => (Guid?)o.ClassId)
                 .SingleOrDefaultAsync(cancellationToken);
-
-        if (request.GoodsReceiptImportId is { } importId)
-            return await dbContext.GoodsReceiptImports.AsNoTracking()
+        else if (request.GoodsReceiptImportId is { } importId)
+            resolved = await dbContext.GoodsReceiptImports.AsNoTracking()
                 .Where(i => i.Id == importId)
                 .Select(i => (Guid?)i.ClassId)
                 .SingleOrDefaultAsync(cancellationToken);
 
-        return null;
+        if (resolved is { } id)
+            ResolvedClassIds.AddOrUpdate(request, id);
+        return resolved;
     }
 }
