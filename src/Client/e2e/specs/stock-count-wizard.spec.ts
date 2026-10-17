@@ -346,9 +346,7 @@ async function checkStep(page: Page, testInfo: TestInfo, width: number, name: st
       return { name, left: r.left, right: r.right };
     });
     const steps = document.querySelector('.ant-modal nz-steps')!.getBoundingClientRect();
-    const stepsEl = document.querySelector('.ant-modal nz-steps')!;
-    const content = stepsEl.parentElement!.querySelector('ske-error-display ~ nz-spin, nz-spin') as HTMLElement;
-    const first = content.querySelector('.min-w-0 > *') as HTMLElement;
+    const first = document.querySelector('.ant-modal nz-spin .min-w-0 > *') as HTMLElement;
     return { body: { left: b.left, right: b.right }, titleRects, stepsBottom: steps.bottom, firstTop: first.getBoundingClientRect().top };
   }, titles);
   for (const t of geometry.titleRects) {

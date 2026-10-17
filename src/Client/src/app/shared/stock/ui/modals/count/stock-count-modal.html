@@ -3,14 +3,7 @@
       class="mb-0!">Inventar stoc</h4>
 </div>
 
-<nz-steps class="mb-4! [&_.ant-steps-item-content]:w-20! [&_.ant-steps-item-icon]:ms-7! [&_.ant-steps-item-tail]:ms-10!"
-          nzSize="small"
-          nzLabelPlacement="vertical"
-          [nzCurrent]="stepIndex()">
-  <nz-step nzTitle="Locații" />
-  <nz-step nzTitle="Articole" />
-  <nz-step nzTitle="Rezumat" />
-</nz-steps>
+<ske-stock-count-steps [step]="store.step()" />
 
 <ske-error-display [problemDetail]="store.stockCountProblemDetail()"
                    [validationErrors]="store.stockCountValidationErrors()" />
@@ -19,229 +12,38 @@
   <div class="min-w-0 wrap-anywhere">
     @switch (store.step()) {
       @case ('locations') {
-        <nz-form-item class="mb-4!">
-          <nz-form-label nzFor="count-reason">Motiv ajustare</nz-form-label>
-          <nz-form-control>
-            <nz-select nzId="count-reason"
-                       class="w-full"
-                       [ngModel]="store.reason()"
-                       (ngModelChange)="store.setReason($event)">
-              @for (option of reasonOptions; track option.value) {
-                <nz-option [nzValue]="option.value"
-                           [nzLabel]="option.label" />
-              }
-            </nz-select>
-          </nz-form-control>
-        </nz-form-item>
-
-        @if (store.locations().length === 0) {
-          @if (!store.stockCountLoading()) {
-            <nz-alert nzType="info"
-                      nzShowIcon
-                      nzMessage="Nu există articole cu stoc în această clasă." />
-          }
-        } @else {
-          <div role="group"
-               aria-label="Locații"
-               class="mt-4! flex flex-col gap-3">
-            <label nz-checkbox
-                   [nzChecked]="allSelected()"
-                   [nzIndeterminate]="someSelected()"
-                   (nzCheckedChange)="toggleAll($event)">
-              <strong>Selectează toate</strong>
-            </label>
-            @for (location of store.locations(); track location.id) {
-              <label nz-checkbox
-                     class="ms-0!"
-                     [nzChecked]="store.selectedLocationIds().includes(location.id)"
-                     (nzCheckedChange)="toggleLocation(location.id, $event)">
-                {{ location.name }}
-              </label>
-            }
-          </div>
-        }
+        <ske-stock-count-locations-step [locations]="store.locations()"
+                                        [selectedLocationIds]="store.selectedLocationIds()"
+                                        [reason]="store.reason()"
+                                        [loading]="store.stockCountLoading()"
+                                        (reasonChange)="store.setReason($event)"
+                                        (selectedLocationIdsChange)="store.setSelectedLocationIds($event)" />
       }
-
       @case ('items') {
         @if (store.currentRow(); as row) {
-          <div class="mb-3 flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <h4 nz-typography
-                  class="mb-0! wrap-anywhere">{{ row.itemName }}</h4>
-              <div nz-typography
-                   nzType="secondary"
-                   class="wrap-anywhere">
-                {{ row.categoryName }} &middot; {{ row.locationName }}
-              </div>
-            </div>
-            <strong class="shrink-0"
-                    aria-label="Poziție">{{ store.currentIndex() + 1 }} / {{ store.rowsInScope().length }}</strong>
-          </div>
-
-          <div class="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <div nz-typography
-                   nzType="secondary">Cantitate curentă</div>
-              <strong>{{ row.quantity | number:'1.0-2' }} {{ row.unit }}</strong>
-            </div>
-            <div>
-              <label for="count-quantity"
-                     class="block"
-                     nz-typography
-                     nzType="secondary">Cantitate numărată</label>
-              <nz-input-number nzId="count-quantity"
-                               class="w-full!"
-                               [nzMin]="0"
-                               [nzPrecision]="0"
-                               [ngModel]="currentCount()"
-                               (ngModelChange)="store.setCount(row, $event)" />
-            </div>
-          </div>
-
-          @if (currentCount() < row.quantity) {
-            <nz-alert nzType="warning"
-                      nzShowIcon
-                      [nzMessage]="'Cantitatea va fi redusă cu ' + (row.quantity - currentCount()) + ' ' + row.unit" />
-          } @else if (currentCount() > row.quantity) {
-            <nz-alert nzType="success"
-                      nzShowIcon
-                      [nzMessage]="'Cantitatea va fi crescută cu ' + (currentCount() - row.quantity) + ' ' + row.unit" />
-          }
+          <ske-stock-count-item-step [row]="row"
+                                     [position]="store.currentIndex() + 1"
+                                     [total]="store.rowsInScope().length"
+                                     [count]="currentCount()"
+                                     (countChange)="store.setCount(row, $event)" />
         }
       }
-
       @case ('summary') {
-        <p class="mb-2">{{ store.unchangedCount() }} articole nemodificate</p>
-
-        @if (store.changes().length === 0) {
-          <nz-alert nzType="info"
-                    nzShowIcon
-                    nzMessage="Nu există modificări de salvat." />
-        } @else {
-          <ng-container *skeLayoutBreakpoint="'md'; else cards">
-            <nz-table #table
-                      class="[&_table]:w-full! [&_table]:table-fixed!"
-                      nzSize="small"
-                      [nzData]="store.changes()"
-                      [nzFrontPagination]="false"
-                      [nzShowPagination]="false">
-              <thead>
-                <tr>
-                  <th class="w-[34%]">Articol</th>
-                  <th class="w-[30%]">Locație</th>
-                  <th class="w-[18%] text-right!">Cantitate</th>
-                  <th class="w-[18%] text-right!">Diferență</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (change of table.data; track change.key) {
-                  <tr class="cursor-pointer"
-                      (click)="store.goToRow(change.key)">
-                    <td class="wrap-anywhere">
-                      <button type="button"
-                              nz-button
-                              nzType="link"
-                              class="h-auto! p-0! whitespace-normal! text-left! wrap-anywhere">
-                        {{ change.row.itemName }}
-                      </button>
-                    </td>
-                    <td class="wrap-anywhere">{{ change.row.locationName }}</td>
-                    <td class="text-right!">{{ change.row.quantity }} → {{ change.newQuantity }}</td>
-                    <td class="text-right! font-semibold"
-                        [class.text-green-600]="change.delta > 0"
-                        [class.text-red-600]="change.delta < 0">
-                      {{ change.delta > 0 ? '+' : '' }}{{ change.delta }}
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </nz-table>
-          </ng-container>
-          <ng-template #cards>
-            <div class="flex flex-col gap-2">
-              @for (change of store.changes(); track change.key) {
-                <button type="button"
-                        class="w-full cursor-pointer rounded-md border border-solid border-gray-300 bg-transparent p-3 text-left dark:border-gray-600"
-                        (click)="store.goToRow(change.key)">
-                  <span class="block wrap-anywhere font-semibold">{{ change.row.itemName }}</span>
-                  <span class="block wrap-anywhere text-xs opacity-70">{{ change.row.locationName }}</span>
-                  <span class="mt-1 flex justify-between gap-2">
-                    <span>{{ change.row.quantity }} → {{ change.newQuantity }}</span>
-                    <span class="font-semibold"
-                          [class.text-green-600]="change.delta > 0"
-                          [class.text-red-600]="change.delta < 0">
-                      {{ change.delta > 0 ? '+' : '' }}{{ change.delta }}
-                    </span>
-                  </span>
-                </button>
-              }
-            </div>
-          </ng-template>
-        }
+        <ske-stock-count-summary-step [changes]="store.changes()"
+                                      [unchangedCount]="store.unchangedCount()"
+                                      (changeSelect)="store.goToRow($event)" />
       }
     }
   </div>
 </nz-spin>
 
-<div *nzModalFooter
-     class="flex flex-wrap justify-end gap-2">
-  <button nz-button
-          type="button"
-          class="h-10!"
-          [disabled]="store.stockCountLoading()"
-          (click)="close()">
-    Închide
-  </button>
-
-  @switch (store.step()) {
-    @case ('locations') {
-      <button nz-button
-              nzType="primary"
-              type="button"
-              class="h-10!"
-              [disabled]="store.rowsInScope().length === 0"
-              (click)="store.next()">
-        Următorul
-      </button>
-    }
-    @case ('items') {
-      <button nz-button
-              type="button"
-              class="h-10!"
-              (click)="store.previous()">
-        Înapoi
-      </button>
-      <button nz-button
-              type="button"
-              class="h-10!"
-              (click)="store.jumpToSummary()">
-        Sari la rezumat
-      </button>
-      <button nz-button
-              nzType="primary"
-              type="button"
-              class="h-10!"
-              (click)="store.next()">
-        Următorul
-      </button>
-    }
-    @case ('summary') {
-      <button nz-button
-              type="button"
-              class="h-10!"
-              [disabled]="store.stockCountLoading()"
-              (click)="store.previous()">
-        Înapoi
-      </button>
-      <button nz-button
-              nzType="primary"
-              type="button"
-              class="h-10!"
-              [nzLoading]="store.stockCountLoading()"
-              [disabled]="store.changes().length === 0"
-              (click)="store.submit()">
-        Finalizează
-      </button>
-    }
-  }
-</div>
+<ske-stock-count-footer *nzModalFooter
+                        [step]="store.step()"
+                        [loading]="store.stockCountLoading()"
+                        [canStart]="store.rowsInScope().length > 0"
+                        [canSubmit]="store.changes().length > 0"
+                        (close)="close()"
+                        (previous)="store.previous()"
+                        (next)="store.next()"
+                        (jumpToSummary)="store.jumpToSummary()"
+                        (submit)="store.submit()" />

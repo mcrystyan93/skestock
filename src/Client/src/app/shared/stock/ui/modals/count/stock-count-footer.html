@@ -1,0 +1,59 @@
+<button nz-button
+        type="button"
+        class="h-10!"
+        [disabled]="loading()"
+        (click)="close.emit()">
+  Închide
+</button>
+
+@switch (step()) {
+  @case ('locations') {
+    <button nz-button
+            nzType="primary"
+            type="button"
+            class="h-10!"
+            [disabled]="!canStart()"
+            (click)="next.emit()">
+      Următorul
+    </button>
+  }
+  @case ('items') {
+    <button nz-button
+            type="button"
+            class="h-10!"
+            (click)="previous.emit()">
+      Înapoi
+    </button>
+    <button nz-button
+            type="button"
+            class="h-10!"
+            (click)="jumpToSummary.emit()">
+      Sari la rezumat
+    </button>
+    <button nz-button
+            nzType="primary"
+            type="button"
+            class="h-10!"
+            (click)="next.emit()">
+      Următorul
+    </button>
+  }
+  @case ('summary') {
+    <button nz-button
+            type="button"
+            class="h-10!"
+            [disabled]="loading()"
+            (click)="previous.emit()">
+      Înapoi
+    </button>
+    <button nz-button
+            nzType="primary"
+            type="button"
+            class="h-10!"
+            [nzLoading]="loading()"
+            [disabled]="!canSubmit()"
+            (click)="submit.emit()">
+      Finalizează
+    </button>
+  }
+}

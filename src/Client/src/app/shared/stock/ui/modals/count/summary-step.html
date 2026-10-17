@@ -1,0 +1,16 @@
+<p class="mb-2">{{ unchangedCount() }} articole nemodificate</p>
+
+@if (changes().length === 0) {
+  <nz-alert nzType="info"
+            nzShowIcon
+            nzMessage="Nu există modificări de salvat." />
+} @else {
+  <ng-container *skeLayoutBreakpoint="'md'; else cards">
+    <ske-stock-count-changes-table [changes]="changes()"
+                                   (changeSelect)="changeSelect.emit($event)" />
+  </ng-container>
+  <ng-template #cards>
+    <ske-stock-count-changes-cards [changes]="changes()"
+                                   (changeSelect)="changeSelect.emit($event)" />
+  </ng-template>
+}

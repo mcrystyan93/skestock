@@ -1,0 +1,37 @@
+<nz-table #table
+          class="[&_table]:w-full! [&_table]:table-fixed!"
+          nzSize="small"
+          [nzData]="changes()"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false">
+  <thead>
+    <tr>
+      <th class="w-[34%]">Articol</th>
+      <th class="w-[30%]">Locație</th>
+      <th class="w-[18%] text-right!">Cantitate</th>
+      <th class="w-[18%] text-right!">Diferență</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (change of table.data; track change.key) {
+      <tr class="cursor-pointer"
+          (click)="changeSelect.emit(change.key)">
+        <td class="wrap-anywhere">
+          <button type="button"
+                  nz-button
+                  nzType="link"
+                  class="h-auto! p-0! whitespace-normal! text-left! wrap-anywhere">
+            {{ change.row.itemName }}
+          </button>
+        </td>
+        <td class="wrap-anywhere">{{ change.row.locationName }}</td>
+        <td class="text-right!">{{ change.row.quantity }} → {{ change.newQuantity }}</td>
+        <td class="text-right! font-semibold"
+            [class.text-green-600]="change.delta > 0"
+            [class.text-red-600]="change.delta < 0">
+          {{ change.delta > 0 ? '+' : '' }}{{ change.delta }}
+        </td>
+      </tr>
+    }
+  </tbody>
+</nz-table>
