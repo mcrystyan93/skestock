@@ -84,6 +84,32 @@ public sealed class ClassConfigurationTests : TestBase
         repeated.Errors.ShouldContain(error => error.Message.Contains("already has its initial configuration"));
     }
 
+    // Every guarded command holds a shared class lock, and this one then updates the class row itself:
+    // concurrent calls must end in one success and clean "already initialized" failures, never a deadlock error.
+    [Test]
+    public async Task InitializeExistingClass_WhenCalledConcurrently_InitializesOnceWithoutDeadlocking()
+    {
+        await SetUpAdministratorAsync();
+        await TestApp.SendAsync(new SaveInvitationCountCommand { InvitationCount = 18 });
+        await TestApp.SendAsync(new SaveDepartmentCommand { Name = "Comunicare", Responsibilities = "Informări" });
+        var schoolClass = new SchoolClass
+        {
+            Name = "Concurrent configuration test",
+            StartDate = new DateOnly(2025, 9, 1),
+            EndDate = new DateOnly(2026, 6, 1)
+        };
+        await TestApp.AddAsync(schoolClass);
+
+        var results = await Task.WhenAll(Enumerable.Range(0, 4).Select(_ =>
+            TestApp.SendAsync(new InitializeSchoolClassConfigurationCommand { SchoolClassId = schoolClass.Id })));
+
+        results.Count(r => r.IsSuccess).ShouldBe(1);
+        results.Where(r => r.IsFailed).ShouldAllBe(r =>
+            r.Errors.Any(e => e.Message.Contains("already has its initial configuration")));
+        var details = await TestApp.SendAsync(new GetSchoolClassByIdQuery { Id = schoolClass.Id });
+        details.Value.Departments.Count.ShouldBe(1);
+    }
+
     [Test]
     public async Task UpdateResponsiblePerson_ChangesOnlyTheSelectedClassDepartment()
     {
