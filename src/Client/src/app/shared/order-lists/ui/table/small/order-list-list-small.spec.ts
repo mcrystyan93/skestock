@@ -1,4 +1,6 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { CLASS_READ_ONLY } from '@ske/shared/school-classes';
 import { GetAllOrderListsRequest, OrderListListItemDto } from '@ske/models';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
@@ -41,6 +43,17 @@ describe('OrderListListSmall', () => {
     const fixture = createFixture();
 
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('Nu există comenzi');
+    fixture.destroy();
+  });
+
+  it('offers no status change when the class is closed', () => {
+    TestBed.configureTestingModule({ providers: [{ provide: CLASS_READ_ONLY, useValue: signal(true) }] });
+    const order = createOrder({ status: 'Draft' });
+    const fixture = createFixture([order]);
+
+    expect(fixture.componentInstance.availableActions(order.status)).toEqual([]);
+    expect((fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('button[aria-label^="Schimbă statusul"]')!.disabled).toBe(true);
     fixture.destroy();
   });
 

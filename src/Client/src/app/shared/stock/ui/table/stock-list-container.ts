@@ -13,6 +13,7 @@ import { StockCategoryItemsSmall } from './stock-category-items-small';
 import { LayoutBreakpoint } from '@ske/shared/directives';
 import { Events } from '@ngrx/signals/events';
 import { StockEvents } from '../../services/stock.events';
+import { injectClassReadOnly } from '@ske/shared/school-classes';
 
 @Component({
   imports: [
@@ -30,6 +31,7 @@ import { StockEvents } from '../../services/stock.events';
 })
 export class StockListContainer {
   public readonly store = inject(StockStore);
+  private readonly _readOnly = injectClassReadOnly();
 
   private readonly _nzModalService = inject(NzModalService);
   private readonly _destroyRef = inject(DestroyRef);
@@ -42,7 +44,13 @@ export class StockListContainer {
       this.addStock({ id: category?.id });
     });
 
+  private readonly _refreshEvents = this._events.on(StockEvents.refresh)
+    .pipe(takeUntilDestroyed(this._destroyRef))
+    .subscribe(() => this.store.load(this.store.filter()));
+
   public onAdjust(item: StockItemDto) {
+    if (this._readOnly()) return;
+
     const classId = this.store.filter().classId;
 
     const modalRef = this._nzModalService.create<StockAdjustmentModal, StockAdjustmentModalData>({
@@ -61,6 +69,8 @@ export class StockListContainer {
   }
 
   public onMove(item: StockItemDto) {
+    if (this._readOnly()) return;
+
     const classId = this.store.filter().classId;
 
     const modalRef = this._nzModalService.create<StockMoveModal, StockMoveModalData>({
@@ -79,6 +89,8 @@ export class StockListContainer {
   }
 
   public onAddToOrder(item: StockItemDto): void {
+    if (this._readOnly()) return;
+
     this._nzModalService.create<StockAddToOrderModal, StockAddToOrderModalData>({
       nzContent: StockAddToOrderModal,
       nzData: { classId: this.store.filter().classId, item },
@@ -89,6 +101,8 @@ export class StockListContainer {
   }
 
   public onExtendExpiry(item: StockItemDto): void {
+    if (this._readOnly()) return;
+
     const classId = this.store.filter().classId;
 
     const modalRef = this._nzModalService.create<StockExtendExpiryModal, StockExtendExpiryModalData, number>({
@@ -114,6 +128,8 @@ export class StockListContainer {
   }
 
   public onRemoveExpired(item: StockItemDto): void {
+    if (this._readOnly()) return;
+
     const classId = this.store.filter().classId;
 
     this.store.removeExpiredStock({
@@ -127,6 +143,8 @@ export class StockListContainer {
   }
 
   public addStock(category: Partial<CategoryDto> | null = null) {
+    if (this._readOnly()) return;
+
     const classId = this.store.filter().classId;
     const location = getDropdownFilterValue(this.store.filter().filters, 'locationId');
 
@@ -146,6 +164,8 @@ export class StockListContainer {
   }
 
   public onVisibilityChange(item: StockItemDto): void {
+    if (this._readOnly()) return;
+
     const classId = this.store.filter().classId;
     const hideWhenZeroStock = !item.hideWhenZeroStock;
 

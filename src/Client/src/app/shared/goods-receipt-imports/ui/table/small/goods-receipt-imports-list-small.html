@@ -23,11 +23,11 @@
     @for (importDto of items(); track importDto.id) {
       <nz-card nzSize="small"
                class="relative min-w-0"
-               [nzHoverable]="importDto.status === 'pendingReview'"
-               [class.cursor-pointer]="importDto.status === 'pendingReview'"
+               [nzHoverable]="canReview(importDto)"
+               [class.cursor-pointer]="canReview(importDto)"
                role="listitem">
         <div class="flex min-w-0 items-center justify-between gap-2">
-          @if (importDto.status === 'pendingReview') {
+          @if (canReview(importDto)) {
             <button type="button"
                     class="min-w-0 cursor-pointer truncate overflow-hidden! border-0 bg-transparent p-0 text-start text-base! font-semibold [color:inherit] outline-none after:absolute after:inset-0 after:content-[''] focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-primary-600"
                     [attr.aria-label]="'Revizuiește importul ' + fileName(importDto)"

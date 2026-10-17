@@ -5,7 +5,7 @@
     @for (department of store.schoolClass().departments ?? []; track department.id) {
       <ske-class-department-card [department]="department"
                                  [saving]="store.savingDepartmentId() === department.id"
-                                 [disabled]="store.departmentsLoading()"
+                                 [disabled]="store.departmentsLoading() || store.isClosed()"
                                  (edited)="store.clearDepartmentsFeedback()"
                                  (save)="store.saveResponsiblePerson({ departmentId: department.id, responsiblePerson: $event })" />
     }

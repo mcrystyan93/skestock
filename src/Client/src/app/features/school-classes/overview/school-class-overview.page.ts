@@ -11,6 +11,7 @@ import {ClassStock} from '@ske/shared/stock';
 import {realtimeGroups, SignalRGroupManagerStore} from '@ske/signalr';
 import {ErrorAlert} from '@ske/shared/errors';
 import {QueryParamState} from '@ske/routes';
+import {CLASS_READ_ONLY} from '@ske/shared/school-classes';
 import {ClassDepartmentsTab} from './tabs/departments/class-departments-tab';
 import {ClassInvitationsTab} from './tabs/invitations/class-invitations-tab';
 
@@ -31,7 +32,11 @@ import {ClassInvitationsTab} from './tabs/invitations/class-invitations-tab';
   selector: 'ske-school-class-overview-page',
   styles: ``,
   templateUrl: './school-class-overview.page.html',
-  providers: [SchoolClassOverviewStore, QueryParamState],
+  providers: [
+    SchoolClassOverviewStore,
+    QueryParamState,
+    {provide: CLASS_READ_ONLY, useFactory: () => inject(SchoolClassOverviewStore).isClosed}
+  ],
   host: {
     class: 'flex min-w-0 flex-col grow overflow-x-hidden'
   }

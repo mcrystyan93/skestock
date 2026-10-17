@@ -1,3 +1,4 @@
+import { injectClassReadOnly } from '@ske/shared/school-classes';
 import { Component, input, output } from '@angular/core';
 import { BaseList } from '@ske/shared/tables';
 import {
@@ -84,8 +85,10 @@ export class OrderListListSmall extends BaseList<OrderListListItemDto, GetAllOrd
     return ORDER_LIST_STATUS_COLORS[status];
   }
 
+  private readonly _readOnly = injectClassReadOnly();
+
   public availableActions(status: OrderListStatus): OrderListStatusAction[] {
-    return ACTIONS_BY_STATUS[status];
+    return this._readOnly() ? [] : ACTIONS_BY_STATUS[status];
   }
 
   public actionLabel(action: OrderListStatusAction): string {

@@ -32,8 +32,8 @@
   <tbody>
   <ng-template nz-virtual-scroll
                let-goodsReceiptImport>
-    <tr (click)="goodsReceiptImport.status === 'pendingReview' ? review.emit(goodsReceiptImport) : null"
-        class="cursor-pointer">
+    <tr (click)="canReview(goodsReceiptImport) ? review.emit(goodsReceiptImport) : null"
+        [class.cursor-pointer]="canReview(goodsReceiptImport)">
       <td>
         <nz-badge [nzStatus]="statusColor(goodsReceiptImport.status)"
                   [nzText]="statusLabel(goodsReceiptImport.status)" />
@@ -50,7 +50,7 @@
         </div>
       </td>
       <td nzRight>
-        @if (goodsReceiptImport.status === 'pendingReview') {
+        @if (canReview(goodsReceiptImport)) {
           <button type="button"
                   nz-button
                   nzType="primary"

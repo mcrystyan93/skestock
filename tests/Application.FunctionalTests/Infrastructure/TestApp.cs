@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Hybrid;
 using skestock.Domain.Constants;
 using skestock.Infrastructure.Data;
 using skestock.Infrastructure.Identity;
@@ -84,6 +85,12 @@ public static class TestApp
         if (FunctionalTestSetup.DbResetter is not null)
         {
             await FunctionalTestSetup.DbResetter.ResetAsync();
+        }
+
+        // Cached query results outlive the database reset; "*" is HybridCache's invalidate-everything tag.
+        using (var scope = FunctionalTestSetup.ScopeFactory.CreateScope())
+        {
+            await scope.ServiceProvider.GetRequiredService<HybridCache>().RemoveByTagAsync("*");
         }
 
         _userId = null;

@@ -1,3 +1,4 @@
+using skestock.Application.Common.Behaviours;
 using skestock.Application.Common.Caching;
 using skestock.Application.Common.Security;
 using skestock.Application.Features.StockBatches.Models;
@@ -9,8 +10,10 @@ namespace skestock.Application.Features.StockBatches.Commands.CreateStockBatch;
 // field distinct from the CreatedBy audit column, same rationale as
 // CreateGoodsReceiptCommand/AdjustStockCommand.
 [Authorize]
-public class CreateStockBatchCommand : IRequest<Result<StockBatchListItemDto>>, ICacheInvalidation
+public class CreateStockBatchCommand : IRequest<Result<StockBatchListItemDto>>, ICacheInvalidation, IRequiresOpenClass
 {
+    Guid? IRequiresOpenClass.ClassId => ReceivedClassId;
+
     public Guid ItemId { get; init; }
     public Guid LocationId { get; init; }
     public Guid ReceivedClassId { get; init; }

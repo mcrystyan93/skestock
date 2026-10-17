@@ -43,6 +43,10 @@ export class SchoolClassesHttp {
     );
   }
 
+  public close(id: string, targetClassId: string) {
+    return this._httpClient.post<void>(`/api/SchoolClasses/${id}/close`, {targetClassId});
+  }
+
   public initializeConfiguration(classId: string) {
     return this._httpClient.post<void>(`/api/SchoolClasses/${classId}/initialize-configuration`, {});
   }

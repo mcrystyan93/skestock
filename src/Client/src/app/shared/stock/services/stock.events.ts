@@ -5,6 +5,7 @@ export const StockEvents = eventGroup({
   source: 'Stock API',
   events: {
     adjustSuccess: type<void>(),
-    addProduct: type<void>()
+    addProduct: type<void>(),
+    refresh: type<void>()
   }
 });

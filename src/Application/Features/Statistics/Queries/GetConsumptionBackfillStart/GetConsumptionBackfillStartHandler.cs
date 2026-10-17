@@ -15,7 +15,9 @@ public sealed class GetConsumptionBackfillStartHandler(IApplicationDbContext dbC
         // Same predicate as MaterializeDailyConsumptionCommandHandler.
         var earliestConsumptionAt = await dbContext.StockTransactions
             .AsNoTracking()
-            .Where(t => t.QuantityChange < 0 && t.Type != StockTransactionType.Transfer)
+            .Where(t => t.QuantityChange < 0
+                && t.Type != StockTransactionType.Transfer
+                && t.Type != StockTransactionType.Rollover)
             .MinAsync(t => (DateTimeOffset?)t.CreatedAt, cancellationToken);
 
         if (earliestConsumptionAt is null)

@@ -1,3 +1,4 @@
+import { injectClassReadOnly } from '@ske/shared/school-classes';
 import { Component, input, output } from '@angular/core';
 import { BaseTableWithFilter } from '@ske/shared/tables';
 import {
@@ -36,6 +37,13 @@ import { StopClick } from '@ske/shared/directives';
   }
 })
 export class Table extends BaseTableWithFilter<GoodsReceiptImportListItemDto, GetAllGoodsReceiptImportsRequest> {
+  private readonly _readOnly = injectClassReadOnly();
+
+  // Reviewing confirms the import into stock, so a closed class can only download the files.
+  public canReview(importDto: GoodsReceiptImportListItemDto): boolean {
+    return importDto.status === 'pendingReview' && !this._readOnly();
+  }
+
   public readonly loading = input.required<boolean>();
 
   public readonly downloadFile = output<GoodsReceiptImportListItemDto>();

@@ -500,3 +500,6 @@ graphify-out/
 
 # Playwright MCP artifacts
 .playwright-mcp/
+
+# Angular CLI cache
+.angular/

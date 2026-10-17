@@ -69,6 +69,16 @@ public class GetConsumptionBackfillStartHandlerTests
     }
 
     [Test]
+    public async Task Ignores_rollover_transactions()
+    {
+        await using var context = CreateContext();
+        await SeedTransactionsAsync(context,
+            (new DateTimeOffset(2026, 3, 2, 10, 0, 0, TimeSpan.Zero), -5, StockTransactionType.Rollover));
+
+        (await HandleAsync(context)).ShouldBeNull();
+    }
+
+    [Test]
     public async Task Returns_the_local_date_of_the_earliest_consumption_when_nothing_is_materialized()
     {
         await using var context = CreateContext();

@@ -1,8 +1,8 @@
-import { patchState, signalStore, withMethods, withProps, withState } from '@ngrx/signals';
-import { SchoolClassDto } from '@ske/models';
+import { patchState, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
+import { ClassStatus, SchoolClassDto } from '@ske/models';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
-import { inject } from '@angular/core';
+import { computed, inject } from '@angular/core';
 import { SchoolClassesHttp } from '@ske/shared/school-classes';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, filter, finalize, pipe, switchMap, tap } from 'rxjs';
@@ -51,6 +51,10 @@ export const SchoolClassOverviewStore = signalStore(
     parse: (raw) => raw ?? null,
     serialize: (value) => value ?? ''
   }),
+  withComputed((store) => ({
+    // A closed class is read-only: no tab or header action may change it.
+    isClosed: computed(() => store.schoolClass().status === ClassStatus.Closed)
+  })),
   withProps(() => ({
     schoolClassHttp: inject(SchoolClassesHttp)
   })),
@@ -89,7 +93,7 @@ export const SchoolClassOverviewStore = signalStore(
 
     const initializeConfiguration = rxMethod<void>(
       pipe(
-        filter(() => !!store.schoolClass().id && !store.departmentsLoading()),
+        filter(() => !!store.schoolClass().id && !store.departmentsLoading() && !store.isClosed()),
         exhaustMap(() => {
           const classId = store.schoolClass().id!;
           store.clearDepartmentsErrors();
@@ -118,7 +122,7 @@ export const SchoolClassOverviewStore = signalStore(
 
     const saveResponsiblePerson = rxMethod<{ departmentId: string; responsiblePerson: string }>(
       pipe(
-        filter(() => !!store.schoolClass().id && !store.departmentsLoading()),
+        filter(() => !!store.schoolClass().id && !store.departmentsLoading() && !store.isClosed()),
         exhaustMap(({ departmentId, responsiblePerson }) => {
           const classId = store.schoolClass().id!;
           const value = responsiblePerson.trim();

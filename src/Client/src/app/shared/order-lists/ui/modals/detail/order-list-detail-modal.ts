@@ -1,3 +1,4 @@
+import { injectClassReadOnly } from '@ske/shared/school-classes';
 import { Component, computed, DestroyRef, effect, inject, signal, viewChild } from '@angular/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
@@ -92,13 +93,19 @@ export class OrderListDetailModal {
     !this.isWizard() || this.wizard.step() === 'edit'
   );
 
+  private readonly _readOnly = injectClassReadOnly();
+
   public readonly editable = computed(() => {
+    if (this._readOnly())
+      return false;
+
     const status = this.store.orderList().status;
     return isNil(status) || status === 'Draft';
   });
 
   public readonly canShowApproval = computed(() =>
-    !this.isWizard()
+    !this._readOnly()
+    && !this.isWizard()
     && this.onEditorStep()
     && this.store.orderList().status === 'Draft'
   );
