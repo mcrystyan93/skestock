@@ -31,76 +31,12 @@ public class AdjustStockCommandHandler(IApplicationDbContext dbContext, IUser us
             .ToListAsync(cancellationToken);
 
         var currentTotal = batches.Sum(b => b.Quantity);
-        var delta = request.ActualQuantity - currentTotal;
-        
         // delta == 0 is rejected by the validator (NoAdjustmentNeeded) before the handler runs,
-        // so only the shortfall/surplus branches below are ever reached here.
-        if (delta < 0)
-        {
-            var remainingToConsume = -delta;
-
-            // Walk the oldest-expiry-first batches, taking as much as available from each one
-            // until the full deficit is accounted for. ActualQuantity >= 0 combined with
-            // currentTotal being the sum of these same (Quantity > 0) batches guarantees
-            // remainingToConsume can never exceed the total available, so the loop always
-            // fully resolves the deficit.
-            foreach (var batch in batches)
-            {
-                if (remainingToConsume <= 0)
-                    break;
-
-                var takenFromBatch = Math.Min(batch.Quantity, remainingToConsume);
-                batch.Quantity -= takenFromBatch;
-                remainingToConsume -= takenFromBatch;
-
-                dbContext.StockTransactions.Add(new StockTransaction
-                {
-                    ItemId = request.ItemId,
-                    LocationId = request.LocationId,
-                    Batch = batch,
-                    ClassId = request.ClassId,
-                    UserId = identityId,
-                    Type = StockTransactionType.Adjustment,
-                    QuantityChange = -takenFromBatch,
-                    Reason = request.Reason.ToString()
-                });
-            }
-
-            batches[0].AddDomainEvent(new StockAdjustedEvent(request.ClassId, request.LocationId));
-        }
-        else
-        {
-            // Surplus: nobody logged this stock before, so there's no existing batch to
-            // attribute it to - create a new one instead. Price/expiry are genuinely unknown for
-            // stock discovered this way, so they're set to their simplest defaults rather than
-            // guessed at (unlike a GoodsReceipt line, which requires a real expiry/price).
-            var surplusBatch = new StockBatch
-            {
-                ItemId = request.ItemId,
-                LocationId = request.LocationId,
-                ReceivedClassId = request.ClassId,
-                Quantity = delta,
-                ExpiryDate = null,
-                ReceivedDate = DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime),
-                UnitPrice = 0,
-                GoodsReceiptId = null
-            };
-
-            surplusBatch.AddDomainEvent(new StockAdjustedEvent(request.ClassId, request.LocationId));
-            dbContext.StockBatches.Add(surplusBatch);
-
-            dbContext.StockTransactions.Add(new StockTransaction
-            {
-                ItemId = request.ItemId,
-                LocationId = request.LocationId,
-                Batch = surplusBatch,
-                ClassId = request.ClassId,
-                UserId = identityId,
-                Type = StockTransactionType.Adjustment,
-                QuantityChange = delta,
-                Reason = request.Reason.ToString()
-            });
-        }
+        // so the helper always touches a batch here.
+        var anchor = StockAdjuster.Apply(
+            dbContext, batches, request.ClassId, request.ItemId, request.LocationId,
+            request.ActualQuantity, request.Reason, identityId);
+        anchor?.AddDomainEvent(new StockAdjustedEvent(request.ClassId, request.LocationId));
 
         // A single SaveChangesAsync wraps every batch update + new transaction row in one
         // implicit DB transaction - if anything fails, nothing partially saves. The StockBatch

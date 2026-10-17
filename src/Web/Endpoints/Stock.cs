@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using skestock.Application.Features.Stock.Commands.AdjustStock;
+using skestock.Application.Features.Stock.Commands.BulkAdjustStock;
 using skestock.Application.Features.Stock.Commands.ExtendExpiredStockExpiry;
 using skestock.Application.Features.Stock.Commands.MoveStock;
 using skestock.Application.Features.Stock.Commands.RemoveExpiredStock;
@@ -17,6 +18,7 @@ public class Stock : IEndpointGroup
         groupBuilder.MapPost(GetClassLocationStock, "class/{classId}");
         groupBuilder.MapGet(GetLowStockItems, "class/{classId}/low-stock");
         groupBuilder.MapPost(AdjustStock, "adjust");
+        groupBuilder.MapPost(BulkAdjustStock, "class/{classId}/bulk-adjust");
         groupBuilder.MapPost(RemoveExpiredStock, "remove-expired");
         groupBuilder.MapPost(ExtendExpiredStockExpiry, "extend-expiry");
         groupBuilder.MapPost(MoveStock, "move");
@@ -97,6 +99,28 @@ public class Stock : IEndpointGroup
             LocationId = request.LocationId,
             ActualQuantity = request.ActualQuantity,
             Reason = request.Reason
+        };
+
+        var result = await sender.Send(command, cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Adjust stock for many items after a physical recount, atomically")]
+    [EndpointDescription("Reconciles the counted quantity of every (item, location) line against " +
+                          "the current stock total of the class, using the same oldest-expiry-first " +
+                          "draw-down and surplus-batch rules as the single adjustment. Lines whose " +
+                          "count already matches are skipped. Either every line is saved or none is.")]
+    public static async Task<Results<Ok, ProblemHttpResult>> BulkAdjustStock(
+        ISender sender, Guid classId, BulkAdjustStockRequest request, CancellationToken cancellationToken)
+    {
+        var command = new BulkAdjustStockCommand
+        {
+            ClassId = classId,
+            Reason = request.Reason,
+            Lines = request.Lines
+                .Select(l => new BulkAdjustStockCommand.Line(l.ItemId, l.LocationId, l.ActualQuantity))
+                .ToList()
         };
 
         var result = await sender.Send(command, cancellationToken);

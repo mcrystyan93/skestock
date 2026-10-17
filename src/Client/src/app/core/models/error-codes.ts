@@ -52,6 +52,7 @@ export const ErrorCodes = {
   stock: {
     insufficientQuantity: 'stock.insufficient_quantity',
     concurrencyConflict: 'stock.concurrency_conflict',
+    bulkConcurrencyConflict: 'stock.bulk_concurrency_conflict',
   },
 
   // ── Validation errors ────────────────────────────────────────────────────

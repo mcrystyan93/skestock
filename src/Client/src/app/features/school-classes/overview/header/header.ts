@@ -62,6 +62,7 @@ export class Header {
   public onAddGoodsReceipt = output<void>();
   public onOrderCreate = output<void>();
   public onAddStock = output<void>();
+  public onStockCount = output<void>();
   public onClose = output<void>();
   public onCloseClass = output<void>();
 
@@ -83,6 +84,7 @@ export class Header {
   ];
 
   public readonly isClosed = computed(() => this.schoolClass().status === ClassStatus.Closed);
+  public readonly canCountStock = computed(() => this.selectedTabIndex() === 0 && !this.isClosed());
   public readonly canCloseClass = computed(() => !!this.schoolClass().id && !this.isClosed());
 
   protected readonly action = computed<HeaderAction | null>(() => {

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import {
   AdjustStockRequest,
+  BulkAdjustStockRequest,
   GetClassLocationStockRequest,
   LowStockItemDto,
   MoveStockRequest,
@@ -31,6 +32,10 @@ export class StockHttp {
 
   public adjustStock(request: AdjustStockRequest) {
     return this._httpClient.post<StockItemDto>('/api/Stock/adjust', request);
+  }
+
+  public bulkAdjustStock(classId: string, request: BulkAdjustStockRequest) {
+    return this._httpClient.post<void>(`/api/Stock/class/${classId}/bulk-adjust`, request);
   }
 
   public removeExpiredStock(request: RemoveExpiredStockRequest) {

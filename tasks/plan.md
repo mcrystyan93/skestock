@@ -1,143 +1,166 @@
-# Implementation Plan: Goods receipt snapshot expansion
+# Implementation Plan: Stock count wizard
 
-Status: Complete — 2026-10-14; existing baseline limitations recorded in verification.
+Status: Implemented 2026-10-17; see [verification](../.scratch/stock-count-wizard/verification.md)
 
 ## Objective
 
-Implement the [approved spec](../.scratch/goods-receipt-snapshot-expansion/spec.md).
-The completed previous plan is preserved in
-[goods-receipt-import-snapshots-plan.md](goods-receipt-import-snapshots-plan.md).
+Implement the [approved spec](../.scratch/stock-count-wizard/spec.md). The previous plan is
+preserved in [goods-receipt-snapshot-expansion-plan.md](goods-receipt-snapshot-expansion-plan.md).
 
 ## Decisions and dependencies
 
-Existing schema → snapshot DTO/query → endpoint → client HTTP → receipt-scoped
-store and presentation → expansion integration → verification.
+Shared FIFO helper → bulk command/validator/handler → endpoint → client HTTP/model → store →
+modal → header button → verification.
 
-- No migration or backfill. Check receipt existence, then project saved lines from
-  confirmed imports linked by ResultingGoodsReceiptId. Missing receipt returns
-  404; existing receipt without snapshots returns an empty array.
-- Return all rows ordered by CreatedDate, then Id. Use RawItemText as the label,
-  nullable current location names, and totals derived from saved scalars.
-- Scaffold the query with ca-usecase from src/Application using the approved
-  template version. Complete validator and caching manually.
-- Cache key includes receipt ID and an import-lines suffix. Use randomized
-  five-minute sliding expiration. Tags include GoodsReceiptListTag, a new
-  helper-generated receipt-specific tag, and Locations.CacheConstants.LocationListTag.
-  Confirmation already invalidates GoodsReceiptListTag; location updates already
-  invalidate LocationListTag. Both cover this query without changing commands.
-  Test distinct keys and shared invalidation tags.
-- Add GET /api/GoodsReceipts/{id:guid}/import-lines to the existing endpoint group,
-  retaining authentication, cancellation and ToOk () result mapping.
-- Extend the client model and GoodsReceiptsHttp with a dedicated typed method.
-- Provide a new store per snapshot container. Compose existing loading and
-  problem-details features; use patchState, rxMethod and mapResponse. Receipt
-  changes clear old rows/errors and cancel stale requests. Retry uses current ID.
-- Presentation receives inputs and supports desktop table/mobile cards. Container
-  owns HTTP/store coordination and error/retry UI. Full arrays need no pagination.
-- Replace both stock-batch expansion containers in their deferred blocks. Preserve
-  controls, downloads, dimensions and formatting. Collapse/re-expand may reuse
-  mounted data; errors remain retryable. Operational batch views stay independent.
+- **Helper first, with no behavior change.** Move the draw-down/surplus body of
+  `AdjustStockCommandHandler` into an `internal static` helper in the `AdjustStock` folder
+  (e.g. `StockAdjuster.Apply(dbContext, batches, classId, itemId, locationId, actualQuantity,
+  reason, identityId)`). The single-item handler keeps its query, SaveChanges, error mapping and
+  DTO building. Existing `AdjustStock*` tests are the safety net, so this ships alone.
+- **Bulk handler** loads every `Quantity > 0` batch for the class whose (item, location) is in the
+  lines with one query (filter by the item ids and location ids, then group in memory by
+  (item, location)), orders each group oldest expiry first, skips no-op lines, calls the helper
+  per line, and saves once. On `DbUpdateConcurrencyException` it returns
+  `StockErrors.BulkConcurrencyConflict`; the client maps that error code to a Romanian message
+  the same way it does for `ConcurrencyConflict`.
+- **No migration, no change to `GetClassLocationStock`.** The wizard filters the existing report
+  client-side.
+- **Client store** is provided by the modal, so every opening starts clean. Row key =
+  `${itemId}:${locationId}`. `counts` holds only edited values; a missing key means unchanged.
+- **Modal:** one component with three `@switch` blocks; split into child components only if the
+  template passes about 150 lines. Footer buttons change per step.
+- **Refresh (verified by exploration):** `StockEvents.adjustSuccess` only drives the single-item
+  modal, and `StockStore` is component-scoped. So the modal closes with `true` on success and
+  `HeaderContainer` dispatches `StockEvents.refresh` in `afterClose` (as `closeClass` does). The
+  header summary refreshes via SignalR `stockAdjusted`, so the bulk handler raises
+  `StockAdjustedEvent` once per touched location.
+- **Endpoint returns 200 empty (`Results<Ok, ProblemHttpResult>` + `ToOk()`),** the Stock.cs
+  convention, not 204.
 
-## Proposed task sequence
+## Tasks
 
-Task issues are drafted in the repository Markdown tracker at
-`.scratch/goods-receipt-snapshot-expansion/issues/`, with acceptance criteria,
-commands, dependencies and file lists. These approved slices are implemented.
+- [ ] **1. Extract the shared FIFO helper**
+  - Acceptance: `AdjustStockCommandHandler` calls the helper and its behavior is unchanged.
+  - Verify: `dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~AdjustStock"`
+    is green with the existing tests untouched; `dotnet build`.
+  - Files: `AdjustStock/AdjustStockCommandHandler.cs`, new `AdjustStock/StockAdjuster.cs`.
 
-| Issue | Deliverable                                                  | Depends on | Expected files                  |
-|-------|--------------------------------------------------------------|------------|---------------------------------|
-| 01    | Query test context and failing snapshot tests                | —          | 2 test files                    |
-| 02    | DTO, query, validator, handler and cache helpers             | 01         | 5 source files                  |
-| 03    | Endpoint and HTTP/SQL/cache contract tests                   | 02         | Endpoint and up to 3 test files |
-| 04    | Client DTO, HTTP method and request tests                    | 03         | 3 files                         |
-| 05    | Receipt-scoped store and lifecycle/error/retry tests         | 04         | 2 files                         |
-| 06    | Responsive snapshot presentation and tests                   | 04         | Up to 3 files                   |
-| 07    | Snapshot container, loading/error/retry UI and tests         | 05, 06     | Up to 3 files                   |
-| 08    | Desktop/mobile expansion integration and export              | 07         | Up to 5 files                   |
-| 09    | Expansion regressions, browser verification and final review | 08         | Up to 3 test/verification files |
+- [ ] **2. Bulk command, validator, error (tests first)**
+  - Acceptance: scaffolded with `dotnet new ca-usecase -n BulkAdjustStock -fn Stock -ut command
+    -rt Result` from `src/Application`; command shape and tags as in the spec; the validator
+    covers empty lines, more than 1000 lines, duplicate (item, location), negative quantity, bad
+    enum and missing class/items/locations, with one query per entity set.
+  - Verify: new validator tests green.
+  - Files: `BulkAdjustStock/BulkAdjustStockCommand.cs`, `…Validator.cs`, `StockRequests.cs`
+    (request + line), `StockErrors.cs`, validator test file.
 
-Split any slice that exceeds approximately five files during task drafting.
-Task 01 is intentionally red until 02; subsequent integration boundaries must
-build and preserve existing behavior. Store and presentation are independently
-implementable after the DTO is fixed, but execution will be sequential.
+- [ ] **3. Bulk handler (tests first)**
+  - Acceptance: FIFO decrease across batches, a surplus batch on increase, no-op lines skipped,
+    mixed locations, one transaction row per touched batch, a single SaveChanges, and the
+    concurrency failure mapped to `BulkConcurrencyConflict`.
+  - Verify: `dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~BulkAdjustStock"`.
+  - Files: `BulkAdjustStock/BulkAdjustStockCommandHandler.cs`, handler test file.
 
-## Verification checkpoints
+- [ ] **4. Endpoint + functional tests**
+  - Acceptance: `POST /api/Stock/class/{classId:guid}/bulk-adjust` returns 200 and persists every
+    line; a closed class is rejected; an invalid line saves nothing.
+  - Verify: `./run-functional-tests.sh --filter "FullyQualifiedName~BulkAdjustStock|FullyQualifiedName~ClosedClassRejectsChanges"`.
+  - Files: `src/Web/Endpoints/Stock.cs`, new `tests/Application.FunctionalTests/Features/Stock/BulkAdjustStockTests.cs`,
+    `ClosedClassRejectsChangesTests.cs`.
 
-- After 02: NUnit tests verify missing/empty receipts, isolation, splits, nullable
-  references, deterministic ordering, validator and cache keys. Stock quantity,
-  price and expiry edits and catalog item-name changes do not change snapshot
-  scalar values or labels. Backend builds.
-- After 03: real SQL and authenticated HTTP tests establish projection, 404,
-  empty arrays, authentication rejection and serialization. Assert query tags
-  overlap confirmation/location invalidation tags and keys isolate receipts.
-- After 07: client tests establish URL, input changes, independent store instances,
-  cancellation, retry and distinct loading/error/empty states; client builds.
-- After 09: browser checks desktop/mobile, concurrent expansions, collapse/reopen,
-  long labels, keyboard access, layout and downloads. Expanded rows request no
-  stock-batch endpoint. Review every approved success criterion and update graphify.
+  **Checkpoint A:** `dotnet build` and all Application unit tests green; the backend is complete.
 
-From repository root:
+- [ ] **5. Client contract**
+  - Acceptance: `BulkAdjustStockRequest`/line types in `core/models/stock.ts`;
+    `StockHttp.bulkAdjustStock(classId, request)`; error code mapped in `error-messages.ro.ts`.
+  - Verify: `npm run build`.
+  - Files: `core/models/stock.ts`, `shared/stock/services/stock.http.ts`,
+    `shared/errors/services/error-messages.ro.ts`, `core/models/error-codes.ts` if codes are listed there.
 
-```bash
-dotnet test tests/Application.UnitTests --filter FullyQualifiedName~GetGoodsReceiptImportLines
-./run-functional-tests.sh --filter FullyQualifiedName~GoodsReceipts
-dotnet test tests/Application.UnitTests
-dotnet build
-dotnet run --project src/AppHost
-graphify update .
-```
+- [ ] **6. `StockCountState` store (tests first)**
+  - Acceptance: loads the report (`includeHidden: true`) and keeps rows with `quantity > 0`;
+    `locations` derived from rows; `selectedLocationIds`, `reason`, `counts`, `currentIndex`,
+    `step`; computed `rowsInScope` (ordered by location, category, item), `currentRow`,
+    `changes`; methods `next`/`previous`/`jumpToSummary`/`goToRow`/`setCount`/`submit`.
+    `counts` survive location changes; `submit` exposes success so the modal can close with `true`.
+  - Verify: `npm test -- --watch=false stock-count`.
+  - Files: `shared/stock/services/stock-count.store.ts` + `.spec.ts`.
 
-From src/Client:
+- [ ] **7. `StockCountModal`**
+  - Acceptance: `nz-steps` with three steps per the spec: step 1 location checkboxes with
+    select-all + reason select; step 2 the item card, input, warning/success alert,
+    Înapoi/Următorul/Sari la rezumat; step 3 the changed-rows table (row click → item), the
+    unchanged count, Finalizează disabled with no changes, an inline error alert, and a close
+    confirm when there are unsaved changes. Exported from `@ske/shared/stock`.
+    Responsive per spec story 9: the steps are small with vertical labels below `md`; the step 2
+    quantities stack below `sm`; the footer wraps; tap targets are at least 40 px on mobile;
+    the step 3 table becomes cards below `md` (reuse the stock list's small-cards pattern); long
+    names wrap. Breakpoints come from `NzBreakpointService` (as in `Header`) or Tailwind
+    prefixes, with no hand-written media queries.
+  - Verify: `npm run build`; a manual pass at a mobile width and a desktop width.
+  - Files: `shared/stock/ui/modals/count/stock-count-modal.ts` + `.html`, `shared/stock/index.ts`.
 
-```bash
-npm run build
-npm test -- --watch=false
-```
+- [ ] **8. Header button**
+  - Acceptance: "Inventar stoc" is visible only when `selectedTabIndex() === 0 && !isClosed()`,
+    as a compact icon button with tooltip or a full button; it opens the modal (centered,
+    `modal-100 modal-lg-75`, not mask-closable).
+  - Verify: header spec (visible only on tab 0 of an open class); `npm run build`.
+  - Files: `overview/header/header.ts`, `header.html`, `header-container.ts`,
+    `header-container.html`, header spec.
 
-Use npm ci when clean installation is needed. Record environment-blocked checks.
+- [ ] **9. Playwright flow tests**
+  - Acceptance: `e2e/specs/stock-count-wizard.spec.ts` covers spec E2E cases 1–7 with the API
+    mocked through `page.route('**/api/**')`, reusing the `goods-receipt-snapshot-expansion.spec.ts`
+    setup (user info, class, summary, stock report fixtures across two locations, one closed-class
+    variant). It asserts the bulk-adjust request body and that exactly one request was sent. It
+    runs in both the `chromium` and `mobile` projects.
+  - Verify: `npm run e2e -- stock-count-wizard` (app served via AppHost).
+  - Files: `e2e/specs/stock-count-wizard.spec.ts`.
+
+- [ ] **10. Playwright responsive tests**
+  - Acceptance: in the same spec file, a `describe` that runs only in the `chromium` project and
+    loops over widths 360/576/768/992/1280/1600 at height 800. It walks all three steps with long
+    names and asserts: no page or modal-body horizontal overflow; footer buttons inside the
+    viewport; step titles not clipped; the header button is icon-only below 992 and has text
+    from 992; the summary shows a table at ≥ 768 and cards below. It attaches a full-page
+    screenshot per step and width to the report. Any layout bug found goes back into the
+    Task 7/8 files.
+  - Verify: `npm run e2e -- stock-count-wizard --project=chromium`; review the screenshots in
+    `npm run e2e:report`.
+  - Files: `e2e/specs/stock-count-wizard.spec.ts`, plus fixes in the modal/header files if needed.
+
+  **Checkpoint B:** `npm run build`, `npm test -- --watch=false`, and the full
+  `npm run e2e -- stock-count-wizard` green.
+
+- [ ] **11. Verification**
+  - Acceptance: every spec success criterion checked; full app run (`dotnet run --project
+    src/AppHost`) with a count over two locations that includes a decrease, an increase and the
+    jump; the list and summary refresh; screenshots reviewed; `graphify update .`.
+  - Files: `.scratch/stock-count-wizard/verification.md`.
+
+Tasks 5–8 depend on 4 only for the endpoint shape, so 5–7 can start after Task 2 fixes the
+contract. Tasks 9–10 need 7–8. Execution stays sequential.
 
 ## Risks and mitigations
 
-| Risk                                           | Mitigation                                                            |
-|------------------------------------------------|-----------------------------------------------------------------------|
-| Old/manual receipts have no snapshots          | Explicit empty state, no fallback or reconstruction                   |
-| SQL projection differs from in-memory provider | Functional test through real SQL and HTTP                             |
-| Catalog labels appear historical               | Saved raw item text; document current location labels                 |
-| Concurrent expansion overwrites rows           | Container-local stores and stale-request cancellation tests           |
-| Errors appear as empty success                 | Separate problem details and retry controls                           |
-| Nested responsive layout clips rows            | Desktop/mobile browser checks, long labels and multiple expansions    |
-| Confirmation leaves stale cached empty lines   | Existing confirmation collection tag covers each snapshot cache entry |
+| Risk | Mitigation |
+|---|---|
+| Extracting the helper changes single-item behavior | Task 1 ships alone; existing tests stay untouched |
+| A large count makes a heavy validator/handler | Set-based queries, a 1000-line cap |
+| Stock changes while the wizard is open | The count is absolute; the rowversion conflict fails the whole save and the values are kept for retry |
+| The class lock is held for a long save | One SaveChanges, no per-line round-trips |
+| List/summary do not refresh after a bulk save | `refresh` after modal close + per-location `StockAdjustedEvent` for SignalR; verified in Task 11 |
+| E2E mocks drift from the real API | The fixtures use the TS model types; functional tests (Task 4) cover the real contract |
+| Flaky layout checks (fonts, animations) | Assert geometry with tolerances after the modal animation settles; no pixel baselines |
+| Responsive bugs found late | Task 7 builds against the breakpoints; Task 10 is the gate, and its fixes stay in scope |
 
-## Review gates and open questions
+## Commands
 
-No unresolved product questions remain. The plan is approved and issue files
-are drafted; tasks were approved before implementation, following the invoked
-spec-driven-development skill. Implementation is complete.
-
-## Task issue index
-
-- [01: Specify snapshot query regressions](../.scratch/goods-receipt-snapshot-expansion/issues/01-query-regressions.md)
-- [02: Implement the cached snapshot query](../.scratch/goods-receipt-snapshot-expansion/issues/02-snapshot-query.md)
-- [03: Expose and verify the snapshot endpoint](../.scratch/goods-receipt-snapshot-expansion/issues/03-snapshot-endpoint.md)
-- [04: Add the typed snapshot HTTP contract](../.scratch/goods-receipt-snapshot-expansion/issues/04-client-http.md)
-- [05: Isolate snapshot loading per receipt](../.scratch/goods-receipt-snapshot-expansion/issues/05-snapshot-store.md)
-- [06: Render responsive snapshot rows](../.scratch/goods-receipt-snapshot-expansion/issues/06-snapshot-presentation.md)
-- [07: Wire the snapshot container and retry](../.scratch/goods-receipt-snapshot-expansion/issues/07-snapshot-container.md)
-- [08: Switch receipt expansion to snapshots](../.scratch/goods-receipt-snapshot-expansion/issues/08-expansion-integration.md)
-- [09: Verify the complete expansion flow](../.scratch/goods-receipt-snapshot-expansion/issues/09-expansion-verification.md)
-
-## Checkpoint checklist
-
-- [x] After 02: focused query tests and backend build pass.
-- [x] After 03: authenticated HTTP/SQL and cache contracts verified.
-- [x] After 07: HTTP/store/presentation/container tests and client build pass.
-- [x] After 09: complete regression suite, browser verification, final review and graph update recorded.
-
-## Verification results
-
-See [verification](../.scratch/goods-receipt-snapshot-expansion/verification.md):
-786 Application unit tests, 17 receipt functional tests, 17 focused client tests
-and 6 desktop/mobile browser cases passed. Solution and Angular builds passed.
-Snapshot AXE scans have no violations. Full client suite retains two unrelated
-room-section failures; the broader desktop receipt scan retains existing header
-metadata contrast issues. Graphify update completed.
+```bash
+dotnet build
+dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~AdjustStock"
+./run-functional-tests.sh --filter "FullyQualifiedName~BulkAdjustStock"
+cd src/Client && npm run build && npm test -- --watch=false
+cd src/Client && npm run e2e -- stock-count-wizard        # app served via dotnet run --project src/AppHost
+graphify update .
+```

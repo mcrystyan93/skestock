@@ -186,6 +186,32 @@
         }
       }
 
+      @if (canCountStock()) {
+        @if (compact) {
+          <button type="button"
+                  *nzSpaceItem
+                  nz-button
+                  nzType="default"
+                  nzShape="circle"
+                  nz-tooltip
+                  nzTooltipTitle="Inventar stoc"
+                  aria-label="Inventar stoc"
+                  class="h-10! min-h-10! w-10! min-w-10! p-0!"
+                  (click)="onStockCount.emit()">
+            <nz-icon nzType="icons:clipboard-list-check"></nz-icon>
+          </button>
+        } @else {
+          <button type="button"
+                  *nzSpaceItem
+                  nz-button
+                  nzType="default"
+                  (click)="onStockCount.emit()">
+            <nz-icon nzType="icons:clipboard-list-check"></nz-icon>
+            Inventar stoc
+          </button>
+        }
+      }
+
       @if (selectedAction) {
         @if (compact) {
           <button *nzSpaceItem
