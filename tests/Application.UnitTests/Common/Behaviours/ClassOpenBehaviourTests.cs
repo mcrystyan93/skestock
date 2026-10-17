@@ -24,6 +24,8 @@ using skestock.Application.Features.Stock.Commands.RemoveExpiredStock;
 using skestock.Application.Features.Stock.Commands.SetClassItemStockVisibility;
 using skestock.Application.Features.StockBatches.Commands.CreateStockBatch;
 using skestock.Application.UnitTests.Features.GoodsReceipts.Commands.CreateGoodsReceipt;
+using skestock.Application.UnitTests.Features.OrderLists;
+using skestock.Domain.Entities.OrderLists;
 using skestock.Domain.Entities.SchoolClasses;
 using skestock.Domain.Enums;
 
@@ -45,11 +47,18 @@ public class ClassOpenBehaviourTests
         _context = new GoodsReceiptTestDbContext(new DbContextOptionsBuilder<GoodsReceiptTestDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options);
+        _orderListContext = new OrderListTestDbContext(new DbContextOptionsBuilder<OrderListTestDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options);
         _handlerRan = false;
     }
 
     [TearDown]
-    public async Task TearDown() => await _context.DisposeAsync();
+    public async Task TearDown()
+    {
+        await _context.DisposeAsync();
+        await _orderListContext.DisposeAsync();
+    }
 
     private async Task<SchoolClass> AddClassAsync(ClassStatus status)
     {
@@ -109,6 +118,61 @@ public class ClassOpenBehaviourTests
     {
         (await HandleAsync(null)).IsSuccess.ShouldBeTrue();
         _handlerRan.ShouldBeTrue();
+    }
+
+    private sealed record OrderListTestCommand(Guid ListId) : IRequest<Result>, IRequiresOpenClass
+    {
+        Guid? IRequiresOpenClass.OrderListId => ListId;
+    }
+
+    private OrderListTestDbContext _orderListContext = null!;
+
+    private ValueTask<Result> HandleOrderListAsync(OrderListTestCommand command) =>
+        new ClassOpenBehaviour<OrderListTestCommand, Result>(_orderListContext).Handle(
+            command, (_, _) => ValueTask.FromResult(Result.Ok()), CancellationToken.None);
+
+    private async Task<SchoolClass> AddOrderListClassAsync(ClassStatus status)
+    {
+        var schoolClass = new SchoolClass
+        {
+            Name = "Class", StartDate = new DateOnly(2026, 1, 1), EndDate = new DateOnly(2026, 12, 31), Status = status
+        };
+        _orderListContext.SchoolClasses.Add(schoolClass);
+        await _orderListContext.SaveChangesAsync(CancellationToken.None);
+        return schoolClass;
+    }
+
+    [Test]
+    public async Task Handle_ResolvesTheClassOfAnOrderListOncePerRequest()
+    {
+        var open = await AddOrderListClassAsync(ClassStatus.Active);
+        var closed = await AddOrderListClassAsync(ClassStatus.Closed);
+        var list = OrderList.Create(open.Id, null, null);
+        _orderListContext.OrderLists.Add(list);
+        await _orderListContext.SaveChangesAsync(CancellationToken.None);
+        var command = new OrderListTestCommand(list.Id);
+
+        (await HandleOrderListAsync(command)).IsSuccess.ShouldBeTrue();
+
+        // A second lookup would now find the closed class; the remembered answer proves there is none.
+        list.ClassId = closed.Id;
+        await _orderListContext.SaveChangesAsync(CancellationToken.None);
+        (await HandleOrderListAsync(command)).IsSuccess.ShouldBeTrue();
+        (await HandleOrderListAsync(new OrderListTestCommand(list.Id))).IsFailed.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task Handle_DoesNotRememberAnUnknownOrderList()
+    {
+        var closed = await AddOrderListClassAsync(ClassStatus.Closed);
+        var list = OrderList.Create(closed.Id, null, null);
+        var command = new OrderListTestCommand(list.Id);
+
+        (await HandleOrderListAsync(command)).IsSuccess.ShouldBeTrue();
+
+        _orderListContext.OrderLists.Add(list);
+        await _orderListContext.SaveChangesAsync(CancellationToken.None);
+        (await HandleOrderListAsync(command)).IsFailed.ShouldBeTrue();
     }
 
     private sealed record AmbiguousTestCommand : IRequest<Result>, IRequiresOpenClass
