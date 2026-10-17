@@ -2,13 +2,17 @@ import { Component, computed, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdjustmentReason, ADJUSTMENT_REASON_OPTIONS } from '@ske/models';
 import { NzAlertComponent } from 'ng-zorro-antd/alert';
-import { NzCheckboxComponent } from 'ng-zorro-antd/checkbox';
 import { NzFormControlComponent, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
+import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
+import { CHECKABLE_CARD_CLASSES } from '../../../../order-lists/ui/modals/wizard/steps/card-classes';
 
 export type StockCountLocation = {
   id: string;
   name: string;
+  /** Rows with stock at this location. */
+  itemCount: number;
 };
 
 /** Step 1: adjustment reason for the whole count and the locations to walk through. */
@@ -16,7 +20,8 @@ export type StockCountLocation = {
   imports: [
     FormsModule,
     NzAlertComponent,
-    NzCheckboxComponent,
+    NzButtonComponent,
+    NzIconDirective,
     NzFormItemComponent,
     NzFormLabelComponent,
     NzFormControlComponent,
@@ -37,14 +42,14 @@ export class LocationsStep {
   public readonly selectedLocationIdsChange = output<string[]>();
 
   protected readonly reasonOptions = ADJUSTMENT_REASON_OPTIONS;
+  protected readonly cardClasses = CHECKABLE_CARD_CLASSES;
 
   protected readonly allSelected = computed(
     () => this.locations().length > 0 && this.selectedLocationIds().length === this.locations().length
   );
-  protected readonly someSelected = computed(() => this.selectedLocationIds().length > 0 && !this.allSelected());
 
-  protected toggleAll(checked: boolean) {
-    this.selectedLocationIdsChange.emit(checked ? this.locations().map((l) => l.id) : []);
+  protected toggleAll() {
+    this.selectedLocationIdsChange.emit(this.allSelected() ? [] : this.locations().map((l) => l.id));
   }
 
   protected toggleLocation(id: string, checked: boolean) {

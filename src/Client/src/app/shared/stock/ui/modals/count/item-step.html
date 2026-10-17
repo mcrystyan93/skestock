@@ -1,7 +1,7 @@
 @let item = row();
 @let counted = count();
 
-<div class="mb-3 flex items-start justify-between gap-3">
+<div class="mb-4 flex items-start justify-between gap-3">
   <div class="min-w-0">
     <h4 nz-typography
         class="mb-0! wrap-anywhere">{{ item.itemName }}</h4>
@@ -15,24 +15,44 @@
           aria-label="Poziție">{{ position() }} / {{ total() }}</strong>
 </div>
 
-<div class="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-  <div>
-    <div nz-typography
-         nzType="secondary">Cantitate curentă</div>
-    <strong>{{ item.quantity | number:'1.0-2' }} {{ item.unit }}</strong>
-  </div>
-  <div>
-    <label for="count-quantity"
-           class="block"
-           nz-typography
-           nzType="secondary">Cantitate numărată</label>
-    <nz-input-number nzId="count-quantity"
-                     class="w-full!"
-                     [nzMin]="0"
-                     [nzPrecision]="0"
-                     [ngModel]="counted"
-                     (ngModelChange)="countChange.emit($event)" />
-  </div>
+<div class="mb-4 rounded-lg border border-solid border-gray-300 p-3 dark:border-gray-700">
+  <div nz-typography
+       nzType="secondary">Cantitate curentă</div>
+  <strong class="text-xl">{{ item.quantity | number:'1.0-2' }} {{ item.unit }}</strong>
+</div>
+
+<label for="count-quantity"
+       class="mb-2 block"
+       nz-typography
+       nzType="secondary">Cantitate numărată</label>
+<div class="mb-4 flex items-center gap-3">
+  <button type="button"
+          nz-button
+          nzSize="large"
+          nzShape="circle"
+          class="h-14! w-14! min-w-14! shrink-0 p-0! text-xl!"
+          aria-label="Scade cantitatea"
+          [disabled]="counted <= 0"
+          (click)="step(-1)">
+    <nz-icon nzType="icons:minus" />
+  </button>
+  <nz-input-number nzId="count-quantity"
+                   nzSize="large"
+                   class="min-w-0 grow [&_.ant-input-number-handler-wrap]:hidden! [&_input]:h-14! [&_input]:text-center! [&_input]:text-2xl! [&_input]:font-semibold!"
+                   [nzMin]="0"
+                   [nzPrecision]="0"
+                   [ngModel]="counted"
+                   (ngModelChange)="countChange.emit($event)" />
+  <button type="button"
+          nz-button
+          nzType="primary"
+          nzSize="large"
+          nzShape="circle"
+          class="h-14! w-14! min-w-14! shrink-0 p-0! text-xl!"
+          aria-label="Crește cantitatea"
+          (click)="step(1)">
+    <nz-icon nzType="icons:plus" />
+  </button>
 </div>
 
 @if (counted < item.quantity) {

@@ -63,9 +63,14 @@ export const StockCountState = signalStore(
   })),
   withComputed((store) => {
     const locations = computed(() => {
-      const byId = new Map<string, string>();
-      store.rows().forEach((row) => byId.set(row.locationId, row.locationName));
-      return [...byId].map(([id, name]) => ({ id, name })).sort((a, b) => compare(a.name, b.name));
+      const byId = new Map<string, { name: string; itemCount: number }>();
+      store.rows().forEach((row) => {
+        const entry = byId.get(row.locationId) ?? { name: row.locationName, itemCount: 0 };
+        byId.set(row.locationId, { ...entry, itemCount: entry.itemCount + 1 });
+      });
+      return [...byId]
+        .map(([id, { name, itemCount }]) => ({ id, name, itemCount }))
+        .sort((a, b) => compare(a.name, b.name));
     });
 
     const rowsInScope = computed(() => {
@@ -111,7 +116,7 @@ export const StockCountState = signalStore(
               classId,
               filters: [],
               searchTerm: null,
-              includeHidden: true,
+              includeHidden: false,
               lowStockOnly: false,
               expiredOnly: false
             })
