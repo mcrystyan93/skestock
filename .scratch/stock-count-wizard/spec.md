@@ -98,7 +98,7 @@ in one atomic request.
 ## Frontend
 
 - **Data for the wizard:** reuse `StockHttp.getClassLocationStock` with no location filter
-  (`includeHidden: true`, no other filters) and filter client-side to `quantity > 0`. This also
+  (`includeHidden: false`, no other filters) and filter client-side to `quantity > 0`. This also
   gives step 1 its location list, so no location API call and no query change are needed.
 - `StockHttp.bulkAdjustStock(classId, request)` + `BulkAdjustStockRequest` model in
   `core/models/stock.ts`.
@@ -235,7 +235,7 @@ public class BulkAdjustStockCommand : IRequest<Result>, ICacheInvalidation, IReq
 2. One adjustment reason for the whole count, picked in step 1, default **Ajustare**.
 3. Items with zero stock are not in the walk (as you said: quantity > 0), so stock "found" for an
    item at 0 still goes through the existing add/adjust flows.
-4. Hidden (`hideWhenZeroStock`) items with stock are included.
+4. Hidden (`hideWhenZeroStock`) rows only exist at zero stock, so they never appear. The report is requested with `includeHidden: false`, because the API returns only hidden rows for `true`.
 5. Expired quantity is not shown separately; the count is the total, FIFO consumes
    oldest-expiry batches first, as single adjust does today.
 6. Wizard state is in-memory only; closing the modal loses it (with a confirm if there are

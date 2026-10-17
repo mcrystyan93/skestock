@@ -7,7 +7,7 @@ import { StockCountStep } from '../../../services/stock-count.store';
   imports: [NzButtonComponent],
   selector: 'ske-stock-count-footer',
   templateUrl: './stock-count-footer.html',
-  host: { class: 'flex flex-wrap justify-end gap-2' }
+  host: { class: 'flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between' }
 })
 export class StockCountFooter {
   public readonly step = input.required<StockCountStep>();

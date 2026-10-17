@@ -63,13 +63,22 @@ export class HeaderContainer {
       nzWrapClassName: 'modal-100 modal-lg-75',
       nzCentered: true,
       nzMaskClosable: false,
-      nzClosable: false
+      nzClosable: true,
+      // Route the X through the modal's own close() so unsaved counts get the discard confirmation.
+      nzOnCancel: (instance) => {
+        instance.close();
+        return false;
+      }
     });
 
     modalRef.afterClose.pipe(
       filter((saved) => saved === true),
       takeUntilDestroyed(this._destroyRef)
-    ).subscribe(() => this._stockDispatcher.refresh());
+    ).subscribe(() => {
+      this._stockDispatcher.refresh();
+      // The summary also refreshes from the SignalR stockAdjusted event, but not when that connection is down.
+      this.store.loadSummary(classId);
+    });
   }
 
   public createOrderList() {

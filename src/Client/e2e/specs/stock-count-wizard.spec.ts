@@ -248,6 +248,70 @@ test.describe('stock count wizard', () => {
     expect(bulkBodies).toEqual([]);
   });
 
+  test('locations are selectable boxes with an item count and scope the walk', async ({ page }) => {
+    await openStockTab(page);
+    await openWizard(page);
+    const next = modal(page).getByRole('button', { name: 'Următorul' });
+    await expect(next).toBeDisabled();
+
+    const boxA = modal(page).locator('label', { hasText: 'Depozit A' });
+    await expect(boxA).toContainText('2 articole');
+    await boxA.click();
+    await expect(boxA.getByRole('checkbox')).toBeChecked();
+    await expect(modal(page).getByRole('button', { name: 'Selectează toate' })).toBeVisible();
+
+    await next.click();
+    await expect(modal(page).getByLabel('Poziție')).toHaveText('1 / 2');
+
+    await modal(page).getByRole('button', { name: 'Înapoi' }).click();
+    await boxA.click();
+    await expect(boxA.getByRole('checkbox')).not.toBeChecked();
+    await expect(next).toBeDisabled();
+  });
+
+  test('the +/- buttons change the counted quantity and the alert', async ({ page }) => {
+    await openStockTab(page);
+    await openWizard(page);
+    await toItems(page);
+    await expect(quantity(page)).toHaveValue('10');
+
+    const plus = modal(page).getByRole('button', { name: 'Crește cantitatea' });
+    const minus = modal(page).getByRole('button', { name: 'Scade cantitatea' });
+    await plus.click();
+    await expect(quantity(page)).toHaveValue('11');
+    await expect(modal(page).getByText('Cantitatea va fi crescută cu 1')).toBeVisible();
+
+    await minus.click();
+    await minus.click();
+    await expect(quantity(page)).toHaveValue('9');
+    await expect(modal(page).getByText('Cantitatea va fi redusă cu 1')).toBeVisible();
+
+    await setCount(page, 0);
+    await expect(minus).toBeDisabled();
+    for (const button of [plus, minus]) {
+      const box = await button.boundingBox();
+      expect(box!.width, 'tap target width').toBeGreaterThanOrEqual(44);
+      expect(box!.height, 'tap target height').toBeGreaterThanOrEqual(44);
+    }
+  });
+
+  test('the X closes the modal directly, or asks for confirmation when counts are unsaved', async ({ page }) => {
+    await openStockTab(page);
+    await openWizard(page);
+    const x = modal(page).locator('.ant-modal-close');
+    await x.click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+
+    await openWizard(page);
+    await toItems(page);
+    await setCount(page, 3);
+    await x.click();
+    const confirmation = page.locator('.ant-modal-confirm');
+    await expect(confirmation).toContainText('Renunțați la modificări?');
+    await confirmation.getByRole('button', { name: 'Renunță' }).click();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+  });
+
   test('clicking a summary row returns to that item', async ({ page }) => {
     await openStockTab(page);
     await openWizard(page);

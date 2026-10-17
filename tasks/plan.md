@@ -78,7 +78,7 @@ modal → header button → verification.
     `shared/errors/services/error-messages.ro.ts`, `core/models/error-codes.ts` if codes are listed there.
 
 - [ ] **6. `StockCountState` store (tests first)**
-  - Acceptance: loads the report (`includeHidden: true`) and keeps rows with `quantity > 0`;
+  - Acceptance: loads the report (`includeHidden: false`; the API returns only hidden zero-stock rows for `true`) and keeps rows with `quantity > 0`;
     `locations` derived from rows; `selectedLocationIds`, `reason`, `counts`, `currentIndex`,
     `step`; computed `rowsInScope` (ordered by location, category, item), `currentRow`,
     `changes`; methods `next`/`previous`/`jumpToSummary`/`goToRow`/`setCount`/`submit`.

@@ -44,6 +44,11 @@ describe('StockCountState', () => {
     expect(store.reason()).toBe(AdjustmentReason.Adjustment);
   });
 
+  it('requests the visible report, because the API returns only hidden zero-stock rows for includeHidden: true', () => {
+    create();
+    expect(http.getClassLocationStock).toHaveBeenCalledWith(expect.objectContaining({ includeHidden: false }));
+  });
+
   it('orders rows by location, category, then item', () => {
     const store = create();
     store.setSelectedLocationIds(['a', 'b']);
