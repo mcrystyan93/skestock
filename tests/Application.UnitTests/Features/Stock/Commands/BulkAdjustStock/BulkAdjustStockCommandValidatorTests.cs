@@ -64,7 +64,7 @@ public class BulkAdjustStockCommandValidatorTests
         var result = await ValidateAsync(d, lines:
             [new(d.Rice.Id, d.Pantry.Id, 1), new(d.Rice.Id, d.Pantry.Id, 2)]);
 
-        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.DuplicateReceiptLine);
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.DuplicateCountLine);
     }
 
     [Test]
@@ -76,6 +76,17 @@ public class BulkAdjustStockCommandValidatorTests
         var result = await ValidateAsync(d, lines: [new(d.Rice.Id, d.Pantry.Id, -1)]);
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.GreaterThanOrEqualTo);
+    }
+
+    [Test]
+    public async Task ShouldRejectReasonsThatDoNotDescribeARecount()
+    {
+        var d = await BulkAdjustStockTestData.CreateAsync();
+        await using var _ = d.Context;
+
+        var result = await ValidateAsync(d, reason: AdjustmentReason.Found, lines: [new(d.Rice.Id, d.Pantry.Id, 1)]);
+
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.InvalidEnum);
     }
 
     [Test]

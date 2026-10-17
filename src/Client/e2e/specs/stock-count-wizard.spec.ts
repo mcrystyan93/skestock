@@ -37,7 +37,7 @@ const stockItems = [
 type Options = { status?: 'active' | 'closed'; bulkStatuses?: number[]; tab?: number };
 
 async function openStockTab(page: Page, options: Options = {}) {
-  const bulkBodies: Array<{ reason: number; lines: Array<{ itemId: string; locationId: string; actualQuantity: number }> }> = [];
+  const bulkBodies: Array<{ reason: number; lines: Array<{ itemId: string; locationId: string; actualQuantity: number; expectedQuantity: number }> }> = [];
   const stat = { stockLoads: 0 };
   const bulkStatuses = [...(options.bulkStatuses ?? [])];
 
@@ -145,7 +145,7 @@ test.describe('stock count wizard', () => {
     const loadsBeforeSave = stat.stockLoads;
 
     await modal(page).locator('nz-select').click();
-    await page.locator('.ant-select-item-option').filter({ hasText: 'Deteriorat' }).click();
+    await page.locator('.ant-select-item-option').filter({ hasText: 'Numărătoare greșită' }).click();
     await toItems(page);
 
     // 1: Creioane 10 -> 7 (warning)
@@ -182,10 +182,10 @@ test.describe('stock count wizard', () => {
     await expect.poll(() => stat.stockLoads).toBeGreaterThan(loadsBeforeSave);
     expect(bulkBodies).toEqual([
       {
-        reason: 2,
+        reason: 1,
         lines: [
-          { itemId: 'i-creioane', locationId: 'loc-a', actualQuantity: 7 },
-          { itemId: 'i-hartie', locationId: 'loc-a', actualQuantity: 9 },
+          { itemId: 'i-creioane', locationId: 'loc-a', actualQuantity: 7, expectedQuantity: 10 },
+          { itemId: 'i-hartie', locationId: 'loc-a', actualQuantity: 9, expectedQuantity: 5 },
         ],
       },
     ]);

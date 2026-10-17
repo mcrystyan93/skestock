@@ -1,6 +1,7 @@
 using FluentValidation.Results;
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
+using skestock.Domain.Enums;
 
 namespace skestock.Application.Features.Stock.Commands.BulkAdjustStock;
 
@@ -15,7 +16,7 @@ public class BulkAdjustStockCommandValidator : AbstractValidator<BulkAdjustStock
             .WithErrorCode(ValidationErrorCodes.Required);
 
         RuleFor(x => x.Reason)
-            .IsInEnum()
+            .Must(reason => reason is AdjustmentReason.Adjustment or AdjustmentReason.Miscount)
             .WithErrorCode(ValidationErrorCodes.InvalidEnum);
 
         RuleFor(x => x.Lines)
@@ -34,6 +35,10 @@ public class BulkAdjustStockCommandValidator : AbstractValidator<BulkAdjustStock
                     line.RuleFor(l => l.LocationId).NotEmpty().WithErrorCode(ValidationErrorCodes.Required);
                     line.RuleFor(l => l.ActualQuantity)
                         .GreaterThanOrEqualTo(0)
+                        .WithErrorCode(ValidationErrorCodes.GreaterThanOrEqualTo);
+                    line.RuleFor(l => l.ExpectedQuantity)
+                        .GreaterThanOrEqualTo(0)
+                        .When(l => l.ExpectedQuantity.HasValue)
                         .WithErrorCode(ValidationErrorCodes.GreaterThanOrEqualTo);
                 });
             });
@@ -62,7 +67,7 @@ public class BulkAdjustStockCommandValidator : AbstractValidator<BulkAdjustStock
                 context.AddFailure(new ValidationFailure(nameof(command.Lines),
                     "Duplicate line: the same item and location already appear in this count")
                 {
-                    ErrorCode = ValidationErrorCodes.DuplicateReceiptLine
+                    ErrorCode = ValidationErrorCodes.DuplicateCountLine
                 });
                 break;
             }

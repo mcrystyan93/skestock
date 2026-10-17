@@ -41,7 +41,10 @@ export class LocationsStep {
   public readonly reasonChange = output<AdjustmentReason>();
   public readonly selectedLocationIdsChange = output<string[]>();
 
-  protected readonly reasonOptions = ADJUSTMENT_REASON_OPTIONS;
+  // A count only reconciles totals, so the damage/expiry/found reasons would mislabel its lines.
+  protected readonly reasonOptions = ADJUSTMENT_REASON_OPTIONS.filter(
+    (o) => o.value === AdjustmentReason.Adjustment || o.value === AdjustmentReason.Miscount
+  );
   protected readonly cardClasses = CHECKABLE_CARD_CLASSES;
 
   protected readonly allSelected = computed(

@@ -30,7 +30,7 @@ export class ItemStep {
   public readonly total = input.required<number>();
   public readonly count = input.required<number>();
 
-  public readonly countChange = output<number | null>();
+  public readonly countChange = output<number>();
 
   protected step(delta: number) {
     this.countChange.emit(Math.max(0, this.count() + delta));

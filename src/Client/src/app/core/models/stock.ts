@@ -97,6 +97,8 @@ export type BulkAdjustStockLine = {
   itemId: string;
   locationId: string;
   actualQuantity: number;
+  /** Stock total shown to the counter; the server rejects the count if it changed since. */
+  expectedQuantity?: number;
 };
 
 /** Body of `POST /api/Stock/class/{classId}/bulk-adjust` (BulkAdjustStockRequest). */
