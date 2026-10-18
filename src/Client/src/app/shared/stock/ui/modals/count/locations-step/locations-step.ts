@@ -6,7 +6,7 @@ import { NzFormControlComponent, NzFormItemComponent, NzFormLabelComponent } fro
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
-import { CHECKABLE_CARD_CLASSES } from '../../../../order-lists/ui/modals/wizard/steps/card-classes';
+import { CHECKABLE_CARD_CLASSES } from '../../../../../order-lists/ui/modals/wizard/steps/card-classes';
 
 export type StockCountLocation = {
   id: string;

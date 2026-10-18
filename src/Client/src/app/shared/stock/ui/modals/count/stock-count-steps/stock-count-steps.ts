@@ -1,6 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 import { NzStepComponent, NzStepsComponent } from 'ng-zorro-antd/steps';
-import { StockCountStep } from '../../../services/stock-count.store';
+import { StockCountStep } from '../../../../services/stock-count.store';
 
 const STEP_ORDER: readonly StockCountStep[] = ['locations', 'items', 'summary'];
 

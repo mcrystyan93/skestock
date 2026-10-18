@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { LayoutBreakpoint } from '@ske/shared/directives';
 import { NzAlertComponent } from 'ng-zorro-antd/alert';
-import { StockCountChange } from '../../../services/stock-count.store';
+import { StockCountChange } from '../../../../services/stock-count.store';
 import { ChangesCards } from './changes-cards';
 import { ChangesTable } from './changes-table';
 

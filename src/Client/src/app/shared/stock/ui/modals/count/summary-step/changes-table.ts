@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { StockCountChange } from '../../../services/stock-count.store';
+import { StockCountChange } from '../../../../services/stock-count.store';
 
 /** Desktop (>= md) rendering of the changed rows of the stock count. */
 @Component({
