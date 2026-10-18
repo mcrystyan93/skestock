@@ -7,6 +7,8 @@ import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
 import { NzOptionComponent, NzSelectComponent } from 'ng-zorro-antd/select';
 import { NzAlertComponent } from 'ng-zorro-antd/alert';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
+import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { NzIconDirective } from 'ng-zorro-antd/icon';
 
 @Component({
   imports: [
@@ -21,7 +23,9 @@ import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
     NzOptionComponent,
     NzAlertComponent,
     NzSpaceComponent,
-    NzSpaceItemDirective
+    NzSpaceItemDirective,
+    NzButtonComponent,
+    NzIconDirective
   ],
   selector: 'ske-stock-adjustment-form',
   styles: ``,
@@ -52,6 +56,15 @@ export class Form {
       message: 'Motivul ajustării este obligatoriu.'
     });
   });
+
+  protected step(delta: number) {
+    const actualQuantity = this.stockAdjustmentForm.actualQuantity().value;
+    actualQuantity.set(Math.max(0, actualQuantity() + delta));
+  }
+
+  protected setToZero() {
+    this.stockAdjustmentForm.actualQuantity().value.set(0);
+  }
 
   public async submit(): Promise<StockAdjustmentFormSubmit> {
     let formData: StockAdjustmentFormModel | null = null;
