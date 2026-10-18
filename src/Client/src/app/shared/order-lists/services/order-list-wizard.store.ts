@@ -11,6 +11,8 @@ import { isNil } from 'lodash-es';
 import { EMPTY, expand, forkJoin, Observable, of, pipe, reduce, switchMap, tap } from 'rxjs';
 import {
   groupLowStockItems,
+  MAX_ORDER_LIST_NAME_LENGTH,
+  MAX_ORDER_LIST_NOTE_LENGTH,
   SuggestedItem,
   suggestionsToLines,
   supplyListsToLines,
@@ -19,7 +21,7 @@ import {
 
 export type OrderListSource = 'new' | 'supplyList';
 
-export const ORDER_LIST_WIZARD_STEPS = ['source', 'selection', 'edit'] as const;
+export const ORDER_LIST_WIZARD_STEPS = ['source', 'selection', 'details', 'edit'] as const;
 export type OrderListWizardStep = typeof ORDER_LIST_WIZARD_STEPS[number];
 
 type OrderListWizardState = {
@@ -32,6 +34,10 @@ type OrderListWizardState = {
   supplyListsLoaded: boolean;
   supplyListIds: string[];
   selectedSupplyLists: SupplyListDto[];
+  name: string;
+  note: string;
+  /** The selection the name and note were last pre-filled from, so going back and forth keeps what was typed. */
+  seededKey: string | null;
   loadedPrefillKey: string | null;
   loadFailed: boolean;
 };
@@ -46,6 +52,9 @@ const initialState: OrderListWizardState = {
   supplyListsLoaded: false,
   supplyListIds: [],
   selectedSupplyLists: [],
+  name: '',
+  note: '',
+  seededKey: null,
   loadedPrefillKey: null,
   loadFailed: false
 };
@@ -129,6 +138,10 @@ export const OrderListWizardStore = signalStore(
               && !store.selectedSupplyListsLoading();
 
           return !store.suggestionsLoading() && !store.loadFailed();
+        case 'details':
+          return store.name().trim().length > 0
+            && store.name().length <= MAX_ORDER_LIST_NAME_LENGTH
+            && store.note().length <= MAX_ORDER_LIST_NOTE_LENGTH;
         case 'edit':
           return false;
       }
@@ -208,6 +221,9 @@ export const OrderListWizardStore = signalStore(
       setSelectedItemIds(selectedItemIds: string[]) {
         patchState(store, { selectedItemIds });
       },
+      setDetails({ name, note }: { name: string; note: string }) {
+        patchState(store, { name, note });
+      },
       selectSupplyLists(supplyListIds: string[]) {
         patchState(store, { supplyListIds });
         loadSelectedSupplyLists(supplyListIds);
@@ -223,6 +239,18 @@ export const OrderListWizardStore = signalStore(
 
           if (store.fromSupplyList() && !store.supplyListsLoaded())
             loadSupplyLists();
+        }
+
+        if (store.step() === 'selection' && store.seededKey() !== store.prefillKey()) {
+          const lists = store.selectedSupplyLists();
+
+          patchState(store, store.fromSupplyList()
+            ? {
+              name: supplyListsToName(lists) ?? '',
+              note: lists.length === 1 ? lists[0].note ?? '' : '',
+              seededKey: store.prefillKey()
+            }
+            : { seededKey: store.prefillKey() });
         }
 
         patchState(store, { step: ORDER_LIST_WIZARD_STEPS[store.stepIndex() + 1] });
@@ -252,17 +280,11 @@ export const OrderListWizardStore = signalStore(
       },
       /** The order-list fields the editor is pre-filled with when the last step opens. */
       buildPrefill(): Partial<OrderListDto> {
-        if (store.fromSupplyList()) {
-          const lists = store.selectedSupplyLists();
+        const lines = store.fromSupplyList()
+          ? supplyListsToLines(store.selectedSupplyLists())
+          : suggestionsToLines(store.suggestions(), store.selectedItemIds());
 
-          return {
-            name: supplyListsToName(lists),
-            note: lists.length === 1 ? lists[0].note ?? null : null,
-            lines: supplyListsToLines(lists)
-          };
-        }
-
-        return { lines: suggestionsToLines(store.suggestions(), store.selectedItemIds()) };
+        return { name: store.name().trim(), note: store.note(), lines };
       }
     };
   })
