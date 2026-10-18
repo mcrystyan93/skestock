@@ -28,7 +28,8 @@
                      [validationErrors]="store.orderListValidationErrors()" />
 
   <ske-order-list-detail-form [loading]="busy()"
-                              [orderList]="store.orderList()" />
+                              [orderList]="store.orderList()"
+                              [showDetails]="!isWizard()" />
 </div>
 
 <div *nzModalFooter>
