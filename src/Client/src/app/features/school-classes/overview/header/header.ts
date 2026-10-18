@@ -23,6 +23,8 @@ import {HeaderTabOption, HeaderTabs} from '@ske/shared/header-tabs';
 import {NzBreakpointService, gridResponsiveMap} from 'ng-zorro-antd/core/services';
 import {NzTooltipDirective} from 'ng-zorro-antd/tooltip';
 import {NzTagComponent} from 'ng-zorro-antd/tag';
+import {NzDropdownDirective, NzDropdownMenuComponent} from 'ng-zorro-antd/dropdown';
+import {NzMenuDirective, NzMenuItemComponent} from 'ng-zorro-antd/menu';
 
 @Component({
   imports: [
@@ -47,7 +49,11 @@ import {NzTagComponent} from 'ng-zorro-antd/tag';
     MenuToggle,
     HeaderTabs,
     NzTooltipDirective,
-    NzTagComponent
+    NzTagComponent,
+    NzDropdownDirective,
+    NzDropdownMenuComponent,
+    NzMenuDirective,
+    NzMenuItemComponent
   ],
   selector: 'ske-school-class-overview-header',
   styles: ``,
