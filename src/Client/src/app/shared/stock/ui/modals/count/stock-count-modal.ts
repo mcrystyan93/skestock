@@ -8,11 +8,11 @@ import { NzSpinComponent } from 'ng-zorro-antd/spin';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { filter } from 'rxjs';
 import { StockCountState, stockCountApiEvents, stockCountRowKey } from '../../../services/stock-count.store';
-import { ItemStep } from './item-step';
-import { LocationsStep } from './locations-step';
-import { StockCountFooter } from './stock-count-footer';
-import { StockCountSteps } from './stock-count-steps';
-import { SummaryStep } from './summary-step';
+import { ItemStep } from './item-step/item-step';
+import { LocationsStep } from './locations-step/locations-step';
+import { StockCountFooter } from './stock-count-footer/stock-count-footer';
+import { StockCountSteps } from './stock-count-steps/stock-count-steps';
+import { SummaryStep } from './summary-step/summary-step';
 
 export type StockCountModalData = {
   classId: string;

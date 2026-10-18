@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { StockCountStep } from '../../../services/stock-count.store';
+import { StockCountStep } from '../../../../services/stock-count.store';
 
 /** Step-dependent action buttons of the stock count wizard. */
 @Component({

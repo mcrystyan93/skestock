@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { StockCountChange } from '../../../services/stock-count.store';
+import { StockCountChange } from '../../../../services/stock-count.store';
 
 /** Mobile (< md) rendering of the changed rows of the stock count. */
 @Component({
