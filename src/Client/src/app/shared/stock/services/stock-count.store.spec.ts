@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideDispatcher } from '@ngrx/signals/events';
-import { AdjustmentReason, type StockItemDto } from '@ske/models';
+import { AdjustmentReason, ErrorCodes, type StockItemDto } from '@ske/models';
 import { of, throwError } from 'rxjs';
 import { StockCountState } from './stock-count.store';
 import { StockHttp } from './stock.http';
@@ -16,12 +16,21 @@ const row = (itemName: string, locationId: string, quantity: number, categoryNam
   }) as StockItemDto;
 
 describe('StockCountState', () => {
-  let http: { getClassLocationStock: ReturnType<typeof vi.fn>; bulkAdjustStock: ReturnType<typeof vi.fn> };
+  let http: {
+    getClassLocationStock: ReturnType<typeof vi.fn>;
+    bulkAdjustStock: ReturnType<typeof vi.fn>;
+  };
 
   const create = () => {
     http.getClassLocationStock.mockReturnValue(
       of({
-        items: [row('B', 'b', 5), row('A', 'b', 3), row('Z', 'a', 2, 'Zcat'), row('Y', 'a', 4, 'Acat'), row('Zero', 'a', 0)],
+        items: [
+          row('B', 'b', 5),
+          row('A', 'b', 3),
+          row('Z', 'a', 2, 'Zcat'),
+          row('Y', 'a', 4, 'Acat'),
+          row('Zero', 'a', 0)
+        ],
         hasExpiredItems: false
       })
     );
@@ -140,5 +149,39 @@ describe('StockCountState', () => {
     expect(store.stockCountProblemDetail()).toEqual({ status: 409, title: 'Conflict' });
     expect(store.changes().length).toBe(1);
     expect(store.stockCountLoading()).toBe(false);
+  });
+
+  it('reloads rows after a concurrency conflict and reconciles the counts', () => {
+    const conflict = {
+      status: 409,
+      title: 'Conflict',
+      error: { code: ErrorCodes.stock.bulkConcurrencyConflict }
+    };
+    http.bulkAdjustStock.mockReturnValue(throwError(() => conflict));
+    const store = create();
+    store.setSelectedLocationIds(['a', 'b']);
+    const [y, z, a, b] = store.rowsInScope();
+    store.setCount(y, 9);
+    store.setCount(z, 1);
+    store.setCount(a, 1);
+    store.setCount(b, 1);
+
+    // Y changed server-side, Z now equals the count, B vanished
+    http.getClassLocationStock.mockClear();
+    http.getClassLocationStock.mockReturnValue(
+      of({
+        items: [row('Y', 'a', 6, 'Acat'), row('Z', 'a', 1, 'Zcat'), row('A', 'b', 3)],
+        hasExpiredItems: false
+      })
+    );
+    store.submit();
+
+    expect(http.getClassLocationStock).toHaveBeenCalledTimes(1);
+    expect(store.rows().find((r) => r.itemName === 'Y')?.quantity).toBe(6);
+    expect(store.counts()).toEqual({ 'i-Y:a': 9, 'i-A:b': 1 });
+    expect(store.stockCountProblemDetail()).toEqual(conflict);
+    expect(store.completed()).toBe(false);
+    expect(store.stockCountLoading()).toBe(false);
+    expect(store.currentIndex()).toBe(0);
   });
 });
