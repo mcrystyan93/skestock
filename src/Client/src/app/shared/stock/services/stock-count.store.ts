@@ -3,8 +3,8 @@ import { mapResponse } from '@ngrx/operators';
 import { patchState, signalStore, type, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { eventGroup, injectDispatch } from '@ngrx/signals/events';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { pipe, switchMap, tap } from 'rxjs';
-import { AdjustmentReason, StockItemDto } from '@ske/models';
+import { map, pipe, switchMap, tap } from 'rxjs';
+import { AdjustmentReason, ErrorCodes, StockItemDto } from '@ske/models';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { StockHttp } from './stock.http';
@@ -103,6 +103,18 @@ export const StockCountState = signalStore(
     };
   }),
   withMethods((store) => {
+    const fetchRows = (classId: string) =>
+      store.stockHttp
+        .getClassLocationStock({
+          classId,
+          filters: [],
+          searchTerm: null,
+          includeHidden: false,
+          lowStockOnly: false,
+          expiredOnly: false
+        })
+        .pipe(map((report) => report.items.filter((item) => item.quantity > 0)));
+
     const load = rxMethod<string>(
       pipe(
         tap((classId) => {
@@ -111,27 +123,47 @@ export const StockCountState = signalStore(
           store.clearStockCountErrors();
         }),
         switchMap((classId) =>
-          store.stockHttp
-            .getClassLocationStock({
-              classId,
-              filters: [],
-              searchTerm: null,
-              includeHidden: false,
-              lowStockOnly: false,
-              expiredOnly: false
+          fetchRows(classId).pipe(
+            mapResponse({
+              next: (rows) => {
+                patchState(store, { rows });
+                store.setStockCountLoaded();
+              },
+              error: (error) => {
+                store.handleStockCountError(error);
+                store.setStockCountLoaded();
+              }
             })
-            .pipe(
-              mapResponse({
-                next: (report) => {
-                  patchState(store, { rows: report.items.filter((item) => item.quantity > 0) });
-                  store.setStockCountLoaded();
-                },
-                error: (error) => {
-                  store.handleStockCountError(error);
-                  store.setStockCountLoaded();
-                }
-              })
-            )
+          )
+        )
+      )
+    );
+
+    // Keeps the error shown and the user's counts, but refreshes rows so the next submit sends current expectedQuantity.
+    const reloadAfterConflict = rxMethod<void>(
+      pipe(
+        switchMap(() =>
+          fetchRows(store.classId()!).pipe(
+            mapResponse({
+              next: (rows) => {
+                const quantities = new Map(rows.map((row) => [stockCountRowKey(row), row.quantity]));
+                patchState(store, (state) => ({
+                  rows,
+                  counts: Object.fromEntries(
+                    Object.entries(state.counts).filter(([key, value]) => {
+                      const quantity = quantities.get(key);
+                      return quantity !== undefined && quantity !== value;
+                    })
+                  )
+                }));
+                patchState(store, {
+                  currentIndex: Math.min(store.currentIndex(), Math.max(store.rowsInScope().length - 1, 0))
+                });
+                store.setStockCountLoaded();
+              },
+              error: () => store.setStockCountLoaded()
+            })
+          )
         )
       )
     );
@@ -162,7 +194,9 @@ export const StockCountState = signalStore(
                 },
                 error: (error) => {
                   store.handleStockCountError(error);
-                  store.setStockCountLoaded();
+                  if (store.stockCountProblemDetail()?.error?.code === ErrorCodes.stock.bulkConcurrencyConflict)
+                    reloadAfterConflict();
+                  else store.setStockCountLoaded();
                 }
               })
             )
@@ -195,7 +229,10 @@ export const StockCountState = signalStore(
       },
       previous: () => {
         if (store.step() === 'summary') {
-          patchState(store, { step: 'items', currentIndex: Math.max(store.rowsInScope().length - 1, 0) });
+          patchState(store, {
+            step: 'items',
+            currentIndex: Math.max(store.rowsInScope().length - 1, 0)
+          });
         } else if (store.step() === 'items') {
           if (store.currentIndex() > 0) patchState(store, { currentIndex: store.currentIndex() - 1 });
           else patchState(store, { step: 'locations' });
