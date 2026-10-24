@@ -54,7 +54,8 @@ export function suggestionsToLines(items: SuggestedItem[], selectedIds: readonly
     }));
 }
 
-const MAX_ORDER_LIST_NAME_LENGTH = 200;
+export const MAX_ORDER_LIST_NAME_LENGTH = 200;
+export const MAX_ORDER_LIST_NOTE_LENGTH = 1000;
 const MAX_LINE_NOTES_LENGTH = 1000;
 
 const NOTES_SEPARATOR = ' · ';

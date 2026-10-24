@@ -109,22 +109,46 @@ describe('OrderListWizardStore', () => {
 
     store.selectSupplyLists(['list-1']);
     expect(store.canGoNext()).toBe(true);
+    store.advance('class-1');
+    expect(store.step()).toBe('details');
     expect(store.buildPrefill().note).toBe('Notă');
+    store.back();
 
     store.selectSupplyLists(['list-1', 'list-2']);
     expect(store.distinctSelectedItemCount()).toBe(2);
+    store.advance('class-1');
 
     expect(store.buildPrefill()).toEqual({
       name: 'Lista lunară + Lista anuală',
-      note: null,
+      note: '',
       lines: [
         { id: null, itemId: 'i1', productName: 'Creioane', quantity: 15, unit: 'set', notes: 'colorate · ascuțite' },
         { id: null, itemId: 'i2', productName: 'Riglă', quantity: 4, unit: 'buc', notes: '' }
       ]
     });
 
+    store.back();
     store.selectSupplyLists([]);
     expect(store.canGoNext()).toBe(false);
+  });
+
+  it('needs a name on the details step and keeps what was typed when the selection is unchanged', () => {
+    stockHttp.getLowStockItems.mockReturnValue(of([]));
+    const store = TestBed.inject(OrderListWizardStore);
+
+    store.setSource('new');
+    store.advance('class-1');
+    store.advance('class-1');
+    expect(store.step()).toBe('details');
+    expect(store.canGoNext()).toBe(false);
+
+    store.setDetails({ name: ' Comandă ', note: 'urgent' });
+    expect(store.canGoNext()).toBe(true);
+    expect(store.buildPrefill()).toEqual({ name: 'Comandă', note: 'urgent', lines: [] });
+
+    store.back();
+    store.advance('class-1');
+    expect(store.name()).toBe(' Comandă ');
   });
 
   it('reads every page of active supply lists using the API page size', () => {
@@ -149,8 +173,11 @@ describe('OrderListWizardStore', () => {
     stockHttp.getLowStockItems.mockReturnValue(of([]));
     store.advance('class-1');
     store.advance('class-1');
+    store.setDetails({ name: 'Comandă', note: '' });
+    store.advance('class-1');
     expect(store.step()).toBe('edit');
 
+    store.back();
     store.back();
     store.back();
     store.back();

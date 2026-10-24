@@ -23,6 +23,8 @@ import {HeaderTabOption, HeaderTabs} from '@ske/shared/header-tabs';
 import {NzBreakpointService, gridResponsiveMap} from 'ng-zorro-antd/core/services';
 import {NzTooltipDirective} from 'ng-zorro-antd/tooltip';
 import {NzTagComponent} from 'ng-zorro-antd/tag';
+import {NzDropdownDirective, NzDropdownMenuComponent} from 'ng-zorro-antd/dropdown';
+import {NzMenuDirective, NzMenuItemComponent} from 'ng-zorro-antd/menu';
 
 @Component({
   imports: [
@@ -47,7 +49,11 @@ import {NzTagComponent} from 'ng-zorro-antd/tag';
     MenuToggle,
     HeaderTabs,
     NzTooltipDirective,
-    NzTagComponent
+    NzTagComponent,
+    NzDropdownDirective,
+    NzDropdownMenuComponent,
+    NzMenuDirective,
+    NzMenuItemComponent
   ],
   selector: 'ske-school-class-overview-header',
   styles: ``,
@@ -62,6 +68,7 @@ export class Header {
   public onAddGoodsReceipt = output<void>();
   public onOrderCreate = output<void>();
   public onAddStock = output<void>();
+  public onStockCount = output<void>();
   public onClose = output<void>();
   public onCloseClass = output<void>();
 
@@ -83,6 +90,7 @@ export class Header {
   ];
 
   public readonly isClosed = computed(() => this.schoolClass().status === ClassStatus.Closed);
+  public readonly canCountStock = computed(() => this.selectedTabIndex() === 0 && !this.isClosed());
   public readonly canCloseClass = computed(() => !!this.schoolClass().id && !this.isClosed());
 
   protected readonly action = computed<HeaderAction | null>(() => {

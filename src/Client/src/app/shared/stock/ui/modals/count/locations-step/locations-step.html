@@ -1,0 +1,59 @@
+<nz-form-item class="mb-4!">
+  <nz-form-label nzFor="count-reason">Motiv ajustare</nz-form-label>
+  <nz-form-control>
+    <nz-select nzId="count-reason"
+               class="w-full"
+               [ngModel]="reason()"
+               (ngModelChange)="reasonChange.emit($event)">
+      @for (option of reasonOptions; track option.value) {
+        <nz-option [nzValue]="option.value"
+                   [nzLabel]="option.label" />
+      }
+    </nz-select>
+  </nz-form-control>
+</nz-form-item>
+
+@if (locations().length === 0) {
+  @if (!loading()) {
+    <nz-alert nzType="info"
+              nzShowIcon
+              nzMessage="Nu există articole cu stoc în această clasă." />
+  }
+} @else {
+  <fieldset class="m-0 border-0 p-0"
+            aria-labelledby="count-locations-title">
+    <div class="mb-3 flex items-center justify-between gap-3">
+      <span id="count-locations-title"
+            class="text-base font-medium">Alege locațiile</span>
+      <button type="button"
+              nz-button
+              nzType="link"
+              class="h-auto! shrink-0 p-0!"
+              (click)="toggleAll()">
+        {{ allSelected() ? 'Deselectează toate' : 'Selectează toate' }}
+      </button>
+    </div>
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      @for (location of locations(); track location.id) {
+        <label class="group flex min-h-16 items-center gap-3 p-4"
+               [class]="cardClasses">
+          <input #checkbox
+                 type="checkbox"
+                 class="sr-only"
+                 [checked]="selectedLocationIds().includes(location.id)"
+                 (change)="toggleLocation(location.id, checkbox.checked)">
+          <nz-icon nzType="icons:boxes-stacked"
+                   class="text-2xl"
+                   aria-hidden="true" />
+          <span class="flex min-w-0 flex-col">
+            <span class="font-medium wrap-anywhere">{{ location.name }}</span>
+            <span class="text-sm opacity-70">{{ location.itemCount }} {{ location.itemCount === 1 ? 'articol' : 'articole' }}</span>
+          </span>
+          <nz-icon nzType="icons:circle-check"
+                   class="invisible ml-auto shrink-0 text-xl text-primary-600 group-has-checked:visible dark:text-primary-400"
+                   aria-hidden="true" />
+        </label>
+      }
+    </div>
+  </fieldset>
+}

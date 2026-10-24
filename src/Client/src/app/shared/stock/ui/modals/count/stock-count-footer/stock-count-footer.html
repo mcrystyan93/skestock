@@ -1,0 +1,67 @@
+<div class="flex gap-2">
+  <button nz-button
+          type="button"
+          class="h-11! flex-1 sm:h-10! sm:flex-none"
+          [disabled]="loading()"
+          (click)="close.emit()">
+    Închide
+  </button>
+
+  @if (step() === 'items') {
+    <button nz-button
+            nzType="link"
+            type="button"
+            class="h-11! flex-1 sm:h-10! sm:flex-none"
+            (click)="jumpToSummary.emit()">
+      Sari la rezumat
+    </button>
+  }
+</div>
+
+<div class="flex gap-2">
+  @switch (step()) {
+    @case ('locations') {
+      <button nz-button
+              nzType="primary"
+              type="button"
+              class="h-11! flex-1 sm:h-10! sm:flex-none"
+              [disabled]="!canStart()"
+              (click)="next.emit()">
+        Următorul
+      </button>
+    }
+    @case ('items') {
+      <button nz-button
+              type="button"
+              class="h-11! flex-1 sm:h-10! sm:flex-none"
+              (click)="previous.emit()">
+        Înapoi
+      </button>
+      <button nz-button
+              nzType="primary"
+              type="button"
+              class="h-11! flex-1 sm:h-10! sm:flex-none"
+              (click)="next.emit()">
+        Următorul
+      </button>
+    }
+    @case ('summary') {
+      <button nz-button
+              type="button"
+              class="h-11! flex-1 sm:h-10! sm:flex-none"
+              [disabled]="loading()"
+              (click)="previous.emit()">
+        Înapoi
+      </button>
+      <button nz-button
+              nzType="primary"
+              type="button"
+              class="h-11! flex-1 sm:h-10! sm:flex-none"
+              [nzLoading]="loading()"
+              [disabled]="!canSubmit()"
+              (click)="submit.emit()">
+        Finalizează
+      </button>
+    }
+  }
+</div>

@@ -5,6 +5,7 @@ using skestock.Application.Features.OrderLists.Commands.SubmitOrderList;
 using skestock.Application.Features.SchoolClasses.Commands.UpdateClassDepartmentResponsiblePerson;
 using skestock.Application.Features.SchoolClasses.Commands.UpdateSchoolClass;
 using skestock.Application.Features.Stock.Commands.AdjustStock;
+using skestock.Application.Features.Stock.Commands.BulkAdjustStock;
 using skestock.Domain.Entities.GoodsReceipts;
 using skestock.Domain.Entities.OrderLists;
 using skestock.Domain.Entities.SchoolClasses;
@@ -42,6 +43,17 @@ public class ClosedClassRejectsChangesTests : TestBase
         var closed = await AddClassAsync(ClassStatus.Closed);
 
         var result = await TestApp.SendAsync(new AdjustStockCommand { ClassId = closed.Id });
+
+        result.Errors.ShouldContain(e => e is SchoolClassErrors.SchoolClassClosed);
+    }
+
+    [Test]
+    public async Task BulkAdjustStock_OnClosedClass_IsRejected()
+    {
+        await RunAsAdministratorWithProfileAsync();
+        var closed = await AddClassAsync(ClassStatus.Closed);
+
+        var result = await TestApp.SendAsync(new BulkAdjustStockCommand { ClassId = closed.Id });
 
         result.Errors.ShouldContain(e => e is SchoolClassErrors.SchoolClassClosed);
     }
