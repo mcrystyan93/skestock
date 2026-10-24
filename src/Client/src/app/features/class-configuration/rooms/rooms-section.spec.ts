@@ -1,7 +1,9 @@
 import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { RoomConfigurationDto } from '@ske/models';
 import { ConfigurationStore } from '../services/configuration.store';
+import { RoomsCard } from './rooms-card';
 import { RoomsSection } from './rooms-section';
 
 describe('RoomsSection', () => {
@@ -30,21 +32,24 @@ describe('RoomsSection', () => {
     fixture.detectChanges();
   });
 
-  it('submits all three values through the configuration store', async () => {
-    const inputs = fixture.nativeElement.querySelectorAll(
-      'input[type="number"]',
-    ) as NodeListOf<HTMLInputElement>;
-    inputs[0].value = '100';
-    inputs[0].dispatchEvent(new Event('input'));
-    inputs[1].value = '20';
-    inputs[1].dispatchEvent(new Event('input'));
-    inputs[2].value = '30';
-    inputs[2].dispatchEvent(new Event('input'));
-    fixture.detectChanges();
+  const card = () =>
+    fixture.debugElement.query(By.directive(RoomsCard)).componentInstance as RoomsCard;
+
+  const submitCardForm = async () => {
     fixture.nativeElement
       .querySelector('form')
       .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await fixture.whenStable();
+  };
+
+  it('submits all three values through the configuration store', async () => {
+    const form = card().roomsForm;
+    form.room4SeatCount().value.set(100);
+    form.room2SeatCount().value.set(20);
+    form.room6SeatCount().value.set(30);
+    fixture.detectChanges();
+
+    await submitCardForm();
 
     expect(store.saveRooms).toHaveBeenCalledWith({
       room4SeatCount: 100,
@@ -54,14 +59,10 @@ describe('RoomsSection', () => {
   });
 
   it('does not send an invalid configuration to the store', async () => {
-    const input = fixture.nativeElement.querySelector('#room-4-seat-count') as HTMLInputElement;
-    input.value = '201';
-    input.dispatchEvent(new Event('input'));
+    card().roomsForm.room4SeatCount().value.set(201);
     fixture.detectChanges();
-    fixture.nativeElement
-      .querySelector('form')
-      .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    await fixture.whenStable();
+
+    await submitCardForm();
 
     expect(store.saveRooms).not.toHaveBeenCalled();
   });

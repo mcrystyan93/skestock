@@ -13,12 +13,12 @@ import {
   validate
 } from '@angular/forms/signals';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
-import { NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
-import { NzInputDirective, NzInputWrapperComponent, NzTextareaCountComponent } from 'ng-zorro-antd/input';
+import { NzFormControlComponent, NzFormDirective, NzFormItemComponent } from 'ng-zorro-antd/form';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { ItemAutocomplete } from '@ske/shared/items';
 import { NzDividerComponent } from 'ng-zorro-antd/divider';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { OrderListDetailsFields, validateOrderListDetails } from './details/order-list-details-fields';
 import { OrderListLinesContainer } from './lines/order-list-lines-container';
 import { isNil } from 'lodash-es';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
@@ -29,15 +29,12 @@ import type { OrderListLineFormModel } from './lines/order-list-line';
   imports: [
     NzRowDirective,
     NzColDirective,
-    NzFormLabelComponent,
     FormField,
-    NzInputDirective,
     NzFormControlComponent,
-    NzInputWrapperComponent,
     NzIconDirective,
     NzFormDirective,
     NzFormItemComponent,
-    NzTextareaCountComponent,
+    OrderListDetailsFields,
     ItemAutocomplete,
     NzDividerComponent,
     OrderListLinesContainer,
@@ -53,6 +50,8 @@ import type { OrderListLineFormModel } from './lines/order-list-line';
 export class OrderListDetailForm {
   public readonly loading = input.required<boolean>();
   public readonly orderList = input.required<Partial<OrderListDto>>();
+  /** The wizard collects the name and note in its own step, so the editor hides them until the order is saved. */
+  public readonly showDetails = input(true);
   private readonly _readOnly = injectClassReadOnly();
   public readonly editable = computed(() => {
     if (this._readOnly())
@@ -136,20 +135,12 @@ export class OrderListDetailForm {
   });
 
   public readonly orderListForm = form(this._formModel, (schemaPath) => {
-    required(schemaPath.name, {
-      message: 'Numele listei de comenzi este obligatoriu.'
-    });
-    maxLength(schemaPath.name, 200, {
-      message: 'Numele listei de comenzi nu poate depăși 200 de caractere.'
-    });
+    validateOrderListDetails(schemaPath);
     disabled(schemaPath.name, {
       when: () => this.loading() || !this.editable()
     });
     disabled(schemaPath.note, {
       when: () => this.loading() || !this.editable()
-    });
-    maxLength(schemaPath.note, 1000, {
-      message: 'Nota listei de comenzi nu poate depăși 1000 de caractere.'
     });
     disabled(schemaPath.lineItem, {
       when: () => this.loading() || !this.editable()

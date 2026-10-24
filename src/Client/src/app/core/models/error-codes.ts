@@ -52,6 +52,7 @@ export const ErrorCodes = {
   stock: {
     insufficientQuantity: 'stock.insufficient_quantity',
     concurrencyConflict: 'stock.concurrency_conflict',
+    bulkConcurrencyConflict: 'stock.bulk_concurrency_conflict',
   },
 
   // ── Validation errors ────────────────────────────────────────────────────
@@ -95,6 +96,7 @@ export const ErrorCodes = {
     // Goods receipt codes
     emptyLines: 'validation.empty_lines',
     duplicateReceiptLine: 'validation.duplicate_receipt_line',
+    duplicateCountLine: 'validation.duplicate_count_line',
     expiryDateRequired: 'validation.expiry_date_required',
     expiryDateNotAllowed: 'validation.expiry_date_not_allowed',
     splitQuantityMismatch: 'validation.split_quantity_mismatch',

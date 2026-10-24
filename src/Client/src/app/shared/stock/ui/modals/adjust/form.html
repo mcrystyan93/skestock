@@ -10,9 +10,41 @@
         Cantitate numărată
       </nz-form-label>
       <nz-form-control [nzErrorTip]="actualQuantityErrorTemplate">
-        <nz-input-number [formField]="stockAdjustmentForm.actualQuantity"
-                         class="w-full!"
-                         [nzMin]="0" />
+        <div class="mb-4 flex items-center gap-3">
+          <button type="button"
+                  nz-button
+                  nzSize="large"
+                  nzShape="circle"
+                  class="h-14! w-14! min-w-14! shrink-0 p-0! text-xl!"
+                  aria-label="Scade cantitatea"
+                  [disabled]="stockAdjustmentForm.actualQuantity().value() <= 0"
+                  (click)="step(-1)">
+            <nz-icon nzType="icons:minus" />
+          </button>
+          <nz-input-number [formField]="stockAdjustmentForm.actualQuantity"
+                           nzSize="large"
+                           class="min-w-0 grow [&_.ant-input-number-handler-wrap]:hidden! [&_input]:h-14! [&_input]:text-center! [&_input]:text-2xl! [&_input]:font-semibold!"
+                           [nzMin]="0"
+                           [nzPrecision]="0" />
+          <button type="button"
+                  nz-button
+                  nzType="primary"
+                  nzSize="large"
+                  nzShape="circle"
+                  class="h-14! w-14! min-w-14! shrink-0 p-0! text-xl!"
+                  aria-label="Crește cantitatea"
+                  (click)="step(1)">
+            <nz-icon nzType="icons:plus" />
+          </button>
+        </div>
+
+        <button type="button"
+                nz-button
+                nzBlock
+                nzSize="large"
+                class="mb-4"
+                [disabled]="stockAdjustmentForm.actualQuantity().value() <= 0"
+                (click)="setToZero()">Setează la 0</button>
 
         <ng-template #actualQuantityErrorTemplate>
           @if (stockAdjustmentForm.actualQuantity().errors(); as errors) {

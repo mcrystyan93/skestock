@@ -178,8 +178,10 @@ export class OrderListDetailModal {
   public next() {
     const wizard = this.wizard;
 
-    if (wizard.step() !== 'selection' || wizard.prefillKey() === wizard.loadedPrefillKey()) {
-      wizard.advance(this.modalData().classId);
+    if (wizard.step() !== 'details' || wizard.prefillKey() === wizard.loadedPrefillKey()) {
+      if (wizard.advance(this.modalData().classId) && wizard.step() === 'edit')
+        this.syncDetails();
+
       return;
     }
 
@@ -204,6 +206,14 @@ export class OrderListDetailModal {
 
   public back() {
     this.wizard.back();
+  }
+
+  /** The editor keeps its lines when the selection is unchanged, so only the name and note are carried over. */
+  private syncDetails() {
+    const orderListForm = this._formComponent()?.orderListForm;
+
+    orderListForm?.name().value.set(this.wizard.name());
+    orderListForm?.note().value.set(this.wizard.note());
   }
 
   private openEditorWithPrefill() {

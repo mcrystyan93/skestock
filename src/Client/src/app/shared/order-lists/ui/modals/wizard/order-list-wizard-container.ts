@@ -5,6 +5,7 @@ import { OrderListWizardStore } from '@ske/shared/order-lists/services';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { gridResponsiveMap, NzBreakpointService } from 'ng-zorro-antd/core/services';
 import { NzStepComponent, NzStepsComponent } from 'ng-zorro-antd/steps';
+import { OrderListDetailsStep } from './steps/details-step';
 import { OrderListSourceStep } from './steps/source-step';
 import { OrderListSuggestionsStep } from './steps/suggestions-step';
 import { OrderListSupplyListStep } from './steps/supply-list-step';
@@ -16,6 +17,7 @@ import { OrderListSupplyListStep } from './steps/supply-list-step';
     NzButtonComponent,
     NzStepsComponent,
     NzStepComponent,
+    OrderListDetailsStep,
     OrderListSourceStep,
     OrderListSuggestionsStep,
     OrderListSupplyListStep
@@ -29,6 +31,7 @@ import { OrderListSupplyListStep } from './steps/supply-list-step';
               [nzLabelPlacement]="direction() === 'horizontal' ? 'vertical' : 'horizontal'">
       <nz-step nzTitle="Sursă" />
       <nz-step [nzTitle]="wizard.fromSupplyList() ? 'Listă predefinită' : 'Articole sugerate'" />
+      <nz-step nzTitle="Detalii" />
       <nz-step nzTitle="Articole comandă" />
     </nz-steps>
 
@@ -62,6 +65,10 @@ import { OrderListSupplyListStep } from './steps/supply-list-step';
                                          [loading]="wizard.suggestionsLoading()"
                                          (selectedIdsChange)="wizard.setSelectedItemIds($event)" />
       }
+    } @else if (wizard.step() === 'details') {
+      <ske-order-list-details-step [name]="wizard.name()"
+                                   [note]="wizard.note()"
+                                   (detailsChange)="wizard.setDetails($event)" />
     }
   `
 })

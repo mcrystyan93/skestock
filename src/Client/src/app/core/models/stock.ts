@@ -92,6 +92,21 @@ export type AdjustStockRequest = {
   reason: AdjustmentReason;
 };
 
+/** Mirrors src/Application/Features/Stock/Models/StockRequests.cs (BulkAdjustStockLine). */
+export type BulkAdjustStockLine = {
+  itemId: string;
+  locationId: string;
+  actualQuantity: number;
+  /** Stock total shown to the counter; the server rejects the count if it changed since. */
+  expectedQuantity?: number;
+};
+
+/** Body of `POST /api/Stock/class/{classId}/bulk-adjust` (BulkAdjustStockRequest). */
+export type BulkAdjustStockRequest = {
+  reason: AdjustmentReason;
+  lines: BulkAdjustStockLine[];
+};
+
 /** Mirrors src/Application/Features/Stock/Models/StockRequests.cs (RemoveExpiredStockRequest). */
 export type RemoveExpiredStockRequest = {
   classId: string;

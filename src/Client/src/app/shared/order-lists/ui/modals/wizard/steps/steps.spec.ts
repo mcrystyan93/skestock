@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
+import { OrderListDetailsStep } from './details-step';
 import { OrderListSourceStep } from './source-step';
 import { OrderListSuggestionsStep } from './suggestions-step';
 import { OrderListSupplyListStep } from './supply-list-step';
@@ -71,5 +72,19 @@ describe('order list wizard steps', () => {
     fixture.detectChanges();
 
     expect(emitted.at(-1)).toEqual(['a', 'b']);
+  });
+
+  it('emits the typed name and note', () => {
+    const fixture = TestBed.createComponent(OrderListDetailsStep);
+    const emitted: { name: string; note: string }[] = [];
+    fixture.componentInstance.detailsChange.subscribe((value) => emitted.push(value));
+    fixture.detectChanges();
+
+    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+    input.value = 'Comandă nouă';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(emitted.at(-1)).toEqual({ name: 'Comandă nouă', note: '' });
   });
 });

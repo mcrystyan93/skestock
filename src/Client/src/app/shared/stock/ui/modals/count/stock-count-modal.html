@@ -1,0 +1,49 @@
+<div *nzModalTitle>
+  <h4 nz-typography
+      class="mb-0!">Inventar stoc</h4>
+</div>
+
+<ske-stock-count-steps [step]="store.step()" />
+
+<ske-error-display [problemDetail]="store.stockCountProblemDetail()"
+                   [validationErrors]="store.stockCountValidationErrors()" />
+
+<nz-spin [nzSpinning]="store.stockCountLoading()">
+  <div class="min-w-0 wrap-anywhere">
+    @switch (store.step()) {
+      @case ('locations') {
+        <ske-stock-count-locations-step [locations]="store.locations()"
+                                        [selectedLocationIds]="store.selectedLocationIds()"
+                                        [reason]="store.reason()"
+                                        [loading]="store.stockCountLoading()"
+                                        (reasonChange)="store.setReason($event)"
+                                        (selectedLocationIdsChange)="store.setSelectedLocationIds($event)" />
+      }
+      @case ('items') {
+        @if (store.currentRow(); as row) {
+          <ske-stock-count-item-step [row]="row"
+                                     [position]="store.currentIndex() + 1"
+                                     [total]="store.rowsInScope().length"
+                                     [count]="currentCount()"
+                                     (countChange)="store.setCount(row, $event)" />
+        }
+      }
+      @case ('summary') {
+        <ske-stock-count-summary-step [changes]="store.changes()"
+                                      [unchangedCount]="store.unchangedCount()"
+                                      (changeSelect)="store.goToRow($event)" />
+      }
+    }
+  </div>
+</nz-spin>
+
+<ske-stock-count-footer *nzModalFooter
+                        [step]="store.step()"
+                        [loading]="store.stockCountLoading()"
+                        [canStart]="store.rowsInScope().length > 0"
+                        [canSubmit]="store.changes().length > 0"
+                        (close)="close()"
+                        (previous)="store.previous()"
+                        (next)="store.next()"
+                        (jumpToSummary)="store.jumpToSummary()"
+                        (submit)="store.submit()" />

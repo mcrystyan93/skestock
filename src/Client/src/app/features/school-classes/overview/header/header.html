@@ -158,34 +158,6 @@
         </button>
       }
 
-      @if (canCloseClass()) {
-        @if (compact) {
-          <button type="button"
-                  *nzSpaceItem
-                  nz-button
-                  nzType="default"
-                  nzDanger
-                  nzShape="circle"
-                  nz-tooltip
-                  nzTooltipTitle="Închide clasa"
-                  aria-label="Închide clasa"
-                  class="h-10! min-h-10! w-10! min-w-10! p-0!"
-                  (click)="onCloseClass.emit()">
-            <nz-icon nzType="icons:lock"></nz-icon>
-          </button>
-        } @else {
-          <button type="button"
-                  *nzSpaceItem
-                  nz-button
-                  nzType="default"
-                  nzDanger
-                  (click)="onCloseClass.emit()">
-            <nz-icon nzType="icons:lock"></nz-icon>
-            Închide clasa
-          </button>
-        }
-      }
-
       @if (selectedAction) {
         @if (compact) {
           <button *nzSpaceItem
@@ -211,6 +183,43 @@
             {{ selectedAction.text }}
           </button>
         }
+      }
+
+      @if (canCountStock() || canCloseClass()) {
+        <button *nzSpaceItem
+                nz-button
+                nzType="default"
+                nzShape="circle"
+                nz-dropdown
+                nzTrigger="click"
+                nzPlacement="bottomRight"
+                [nzDropdownMenu]="moreMenu"
+                nz-tooltip
+                nzTooltipTitle="Mai multe acțiuni"
+                aria-label="Mai multe acțiuni"
+                class="h-10! min-h-10! w-10! min-w-10! p-0!"
+                type="button">
+          <nz-icon nzType="icons:ellipsis-vertical"></nz-icon>
+        </button>
+        <nz-dropdown-menu #moreMenu="nzDropdownMenu">
+          <ul nz-menu>
+            @if (canCountStock()) {
+              <li nz-menu-item
+                  (click)="onStockCount.emit()">
+                <nz-icon nzType="icons:clipboard-list-check"></nz-icon>
+                Inventar stoc
+              </li>
+            }
+            @if (canCloseClass()) {
+              <li nz-menu-item
+                  class="text-red-600! dark:text-red-400!"
+                  (click)="onCloseClass.emit()">
+                <nz-icon nzType="icons:lock"></nz-icon>
+                Închide clasa
+              </li>
+            }
+          </ul>
+        </nz-dropdown-menu>
       }
     </nz-space>
   </nz-page-header-extra>
