@@ -9,7 +9,9 @@ import { NzSpaceCompactComponent, NzSpaceComponent, NzSpaceItemDirective } from 
 import { BehaviorSubject, filter, switchMap, tap } from 'rxjs';
 import { stockBatchApiEvents, StockBatchStore } from '../../services/stock-batch.store';
 import { isNil } from 'lodash-es';
-import { CategoryDto, CreateStockBatchRequest, LocationDto, toDateOnlyString } from '@ske/models';
+import { CategoryDto, CreateStockBatchRequest, LocationDto, StockBatchSource, toDateOnlyString } from '@ske/models';
+import { NzStepComponent, NzStepsComponent } from 'ng-zorro-antd/steps';
+import { StockBatchSourceStep } from './steps/source-step';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Events } from '@ngrx/signals/events';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -27,7 +29,10 @@ import { NzMessageService } from 'ng-zorro-antd/message';
     NzMenuItemComponent,
     NzSpaceCompactComponent,
     NzSpaceComponent,
-    NzSpaceItemDirective
+    NzSpaceItemDirective,
+    NzStepsComponent,
+    NzStepComponent,
+    StockBatchSourceStep
   ],
   selector: 'ske-add-stock-batch-modal',
   styles: ``,
@@ -37,6 +42,9 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 export class AddStockBatchModal {
   public readonly modalData = signal<AddStockBatchModalData>(inject(NZ_MODAL_DATA));
   public readonly store = inject(StockBatchStore);
+
+  protected readonly step = signal<'source' | 'details'>('source');
+  protected readonly source = signal<StockBatchSource>('order');
 
   private readonly _close$ = new BehaviorSubject(false);
   private readonly _formComponent = viewChild(Form);
@@ -54,6 +62,14 @@ export class AddStockBatchModal {
       tap(() => this.close())
     )
     .subscribe();
+
+  protected next() {
+    this.step.set('details');
+  }
+
+  protected back() {
+    this.step.set('source');
+  }
 
   public close() {
     this._nzModalRef.close();
@@ -84,6 +100,7 @@ export class AddStockBatchModal {
       receivedClassId: this.modalData().schoolClassId,
       receivedDate: toDateOnlyString(formData.receivedDate)!,
       unitPrice: formData.unitPrice,
+      source: this.source(),
       expiryDate: toDateOnlyString(formData.expiryDate ?? null)
     };
   }

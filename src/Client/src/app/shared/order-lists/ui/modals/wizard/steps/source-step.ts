@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { CHECKABLE_CARD_CLASSES } from './card-classes';
+import { CHECKABLE_CARD_CLASSES } from '../../../../../ui/card-classes';
 import type { OrderListSource } from '@ske/shared/order-lists/services';
 
 type SourceOption = {

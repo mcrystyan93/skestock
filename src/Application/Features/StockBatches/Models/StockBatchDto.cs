@@ -1,3 +1,5 @@
+using skestock.Domain.Enums;
+
 namespace skestock.Application.Features.StockBatches.Models;
 
 /// <summary>
@@ -18,4 +20,5 @@ public record StockBatchListItemDto
     public DateOnly? ExpiryDate { get; init; }
     public DateOnly ReceivedDate { get; init; }
     public DateTimeOffset CreatedDate { get; init; }
+    public StockBatchSource Source { get; init; }
 }

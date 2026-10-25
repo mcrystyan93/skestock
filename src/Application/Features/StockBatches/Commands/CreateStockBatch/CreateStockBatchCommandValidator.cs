@@ -24,6 +24,10 @@ public class CreateStockBatchCommandValidator : AbstractValidator<CreateStockBat
             .GreaterThan(0)
             .WithErrorCode(ValidationErrorCodes.GreaterThan);
 
+        RuleFor(x => x.Source)
+            .IsInEnum()
+            .WithErrorCode(ValidationErrorCodes.InvalidEnum);
+
         // Zero is allowed (e.g. donated/free items); negative prices are rejected. Matches
         // CreateGoodsReceiptCommandValidator's per-line UnitPrice rule.
         RuleFor(x => x.UnitPrice)
