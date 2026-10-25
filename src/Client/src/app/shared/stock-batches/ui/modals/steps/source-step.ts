@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import type { StockBatchSource } from '@ske/models';
-import { CHECKABLE_CARD_CLASSES } from '../../../../order-lists/ui/modals/wizard/steps/card-classes';
+import { CHECKABLE_CARD_CLASSES } from '../../../../ui/card-classes';
 
 type SourceOption = {
   value: StockBatchSource;
