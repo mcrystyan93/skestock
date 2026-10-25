@@ -44,7 +44,7 @@ export class AddStockBatchModal {
   public readonly store = inject(StockBatchStore);
 
   protected readonly step = signal<'source' | 'details'>('source');
-  protected readonly source = signal<StockBatchSource | null>('order');
+  protected readonly source = signal<StockBatchSource>('order');
 
   private readonly _close$ = new BehaviorSubject(false);
   private readonly _formComponent = viewChild(Form);
@@ -64,8 +64,7 @@ export class AddStockBatchModal {
     .subscribe();
 
   protected next() {
-    if (this.source())
-      this.step.set('details');
+    this.step.set('details');
   }
 
   protected back() {
@@ -101,7 +100,7 @@ export class AddStockBatchModal {
       receivedClassId: this.modalData().schoolClassId,
       receivedDate: toDateOnlyString(formData.receivedDate)!,
       unitPrice: formData.unitPrice,
-      source: this.source()!,
+      source: this.source(),
       expiryDate: toDateOnlyString(formData.expiryDate ?? null)
     };
   }
