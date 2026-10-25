@@ -46,7 +46,8 @@ public class StockBatches : IEndpointGroup
             Quantity = request.Quantity,
             ExpiryDate = request.ExpiryDate,
             ReceivedDate = request.ReceivedDate,
-            UnitPrice = request.UnitPrice
+            UnitPrice = request.UnitPrice,
+            Source = request.Source
         };
 
         var result = await sender.Send(command, cancellationToken);

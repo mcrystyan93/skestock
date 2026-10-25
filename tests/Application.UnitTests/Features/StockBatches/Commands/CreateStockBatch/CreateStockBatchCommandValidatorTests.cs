@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Errors;
 using skestock.Application.Features.StockBatches.Commands.CreateStockBatch;
 using skestock.Domain.Entities;
+using skestock.Domain.Enums;
 using NUnit.Framework;
 using Shouldly;
 using skestock.Domain.Entities.Categories;
@@ -64,6 +65,28 @@ public class CreateStockBatchCommandValidatorTests
         var result = await validator.ValidateAsync(command);
 
         result.IsValid.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldHaveInvalidEnumErrorWhenSourceIsUndefined()
+    {
+        var (context, item, _, location, schoolClass) = await CreateContextAsync();
+        await using var _ = context;
+        var validator = new CreateStockBatchCommandValidator(context);
+
+        var result = await validator.ValidateAsync(new CreateStockBatchCommand
+        {
+            ItemId = item.Id,
+            LocationId = location.Id,
+            ReceivedClassId = schoolClass.Id,
+            Quantity = 10,
+            ReceivedDate = new DateOnly(2026, 9, 5),
+            UnitPrice = 2.5m,
+            Source = (StockBatchSource)99
+        });
+
+        result.Errors.ShouldContain(e =>
+            e.PropertyName == nameof(CreateStockBatchCommand.Source) && e.ErrorCode == ValidationErrorCodes.InvalidEnum);
     }
 
     [Test]

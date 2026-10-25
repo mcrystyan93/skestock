@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using skestock.Domain.Entities;
 using skestock.Domain.Entities.Stock;
+using skestock.Domain.Enums;
 
 namespace skestock.Infrastructure.Data.Configurations;
 
@@ -42,6 +43,8 @@ public class StockBatchConfiguration : IEntityTypeConfiguration<StockBatch>
             .OnDelete(DeleteBehavior.Restrict);
         
         builder.Property(b => b.UnitPrice).HasColumnType("decimal(10,2)");
+
+        builder.Property(b => b.Source).HasConversion<string>().HasMaxLength(20).IsRequired().HasDefaultValue(StockBatchSource.Order);
 
         // The stock report always scopes by class, optionally by location, groups by item/location,
         // and reads Quantity plus ExpiryDate for its aggregates.

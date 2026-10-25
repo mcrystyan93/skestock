@@ -1,6 +1,8 @@
 import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
 import { PAGINATION_PAGE_SIZE } from './category';
 
+export type StockBatchSource = 'order' | 'donation';
+
 /**
  * Row shape for the paginated stock-batch list. Mirrors
  * src/Application/Features/StockBatches/Models/StockBatchDto.cs (StockBatchListItemDto).
@@ -18,6 +20,7 @@ export type StockBatchListItemDto = {
   expiryDate?: string | null;
   receivedDate: string;
   createdDate: string;
+  source: StockBatchSource;
 };
 
 /** Mirrors src/Application/Features/StockBatches/Models/StockBatchRequests.cs. */
@@ -34,6 +37,7 @@ export type CreateStockBatchRequest = {
   expiryDate?: string | null;
   receivedDate: string;
   unitPrice: number;
+  source: StockBatchSource;
 };
 
 export type StockBatchTableColumn =

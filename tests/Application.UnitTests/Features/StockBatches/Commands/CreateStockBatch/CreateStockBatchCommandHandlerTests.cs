@@ -109,6 +109,31 @@ public class CreateStockBatchCommandHandlerTests
         stockBatchCreatedEvent.LocationId.ShouldBe(location.Id);
     }
 
+    [TestCase(StockBatchSource.Order, StockTransactionType.Order)]
+    [TestCase(StockBatchSource.Donation, StockTransactionType.Donation)]
+    public async Task Handle_PersistsSourceAndMatchingTransactionType(StockBatchSource source, StockTransactionType type)
+    {
+        var (context, item, _, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        var handler = new CreateStockBatchCommandHandler(context, new FakeUser(userProfile.IdentityId));
+
+        var result = await handler.Handle(new CreateStockBatchCommand
+        {
+            ItemId = item.Id,
+            LocationId = location.Id,
+            ReceivedClassId = schoolClass.Id,
+            Quantity = 5,
+            ReceivedDate = new DateOnly(2026, 9, 5),
+            UnitPrice = 1m,
+            Source = source
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Source.ShouldBe(source);
+        (await context.StockBatches.SingleAsync(CancellationToken.None)).Source.ShouldBe(source);
+        (await context.StockTransactions.SingleAsync(CancellationToken.None)).Type.ShouldBe(type);
+    }
+
     [Test]
     public async Task Handle_WithPerishableItemAndExpiryDate_PersistsExpiryDate()
     {
