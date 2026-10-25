@@ -1,9 +1,21 @@
 <div *nzModalTitle>
-  Adauga stoc pentru un produs
+  Adaugă stoc pentru un produs
 </div>
 
-<ske-add-stock-batch-form [category]="modalData().category"
-                          [location]="modalData().location" />
+<nz-steps nzSize="small" class="mb-4" [nzCurrent]="step() === 'source' ? 0 : 1">
+  <nz-step nzTitle="Sursă" />
+  <nz-step nzTitle="Detalii" />
+</nz-steps>
+
+@if (step() === 'source') {
+  <ske-stock-batch-source-step [source]="source()"
+                               (sourceChange)="source.set($event)" />
+}
+
+<div [hidden]="step() === 'source'" data-testid="details-step">
+  <ske-add-stock-batch-form [category]="modalData().category"
+                            [location]="modalData().location" />
+</div>
 
 <div *nzModalFooter>
   <nz-space>
@@ -13,33 +25,52 @@
             type="button"
             (click)="close()"
             [nzLoading]="store.stockBatchLoading()">
-      Inchide
+      Închide
     </button>
 
-    <nz-space-compact *nzSpaceItem >
+    @if (step() === 'source') {
       <button nz-button
+              *nzSpaceItem
               nzType="primary"
               type="button"
-              (click)="save()"
-              [nzLoading]="store.stockBatchLoading()">
-        Salveaza si inchide
+              [disabled]="!source()"
+              (click)="next()">
+        Următorul
       </button>
+    } @else {
       <button nz-button
-              nzType="primary"
+              *nzSpaceItem
+              nzType="default"
               type="button"
-              nz-dropdown
-              [nzDropdownMenu]="menu">
-        <nz-icon nzType="icons:chevron-down"></nz-icon>
+              (click)="back()">
+        Înapoi
       </button>
 
-      <nz-dropdown-menu #menu="nzDropdownMenu">
-        <ul nz-menu>
-          <li nz-menu-item
-              (click)="save(false)">
-            Salveaza
-          </li>
-        </ul>
-      </nz-dropdown-menu>
-    </nz-space-compact>
+      <nz-space-compact *nzSpaceItem>
+        <button nz-button
+                nzType="primary"
+                type="button"
+                (click)="save()"
+                [nzLoading]="store.stockBatchLoading()">
+          Salvează și închide
+        </button>
+        <button nz-button
+                nzType="primary"
+                type="button"
+                nz-dropdown
+                [nzDropdownMenu]="menu">
+          <nz-icon nzType="icons:chevron-down"></nz-icon>
+        </button>
+
+        <nz-dropdown-menu #menu="nzDropdownMenu">
+          <ul nz-menu>
+            <li nz-menu-item
+                (click)="save(false)">
+              Salvează
+            </li>
+          </ul>
+        </nz-dropdown-menu>
+      </nz-space-compact>
+    }
   </nz-space>
 </div>

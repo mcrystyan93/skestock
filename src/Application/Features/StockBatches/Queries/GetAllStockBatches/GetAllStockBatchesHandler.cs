@@ -70,7 +70,8 @@ public class GetAllStockBatchesHandler(IApplicationDbContext dbContext)
                     LineTotal = b.Quantity * b.UnitPrice,
                     ExpiryDate = b.ExpiryDate,
                     ReceivedDate = b.ReceivedDate,
-                    CreatedDate = b.CreatedDate
+                    CreatedDate = b.CreatedDate,
+                    Source = b.Source
                 }
             })
             .Take(pageSize + 1)

@@ -7,6 +7,7 @@ public enum StockTransactionType
     Adjustment,     // manual correction
     Transfer,       // moved between locations
     ExpiryWriteoff, // system-generated, batch expired
-    Rollover        // system-generated, closing -> opening copy
+    Rollover,       // system-generated, closing -> opening copy
+    Donation        // new batch arrives as a donation
 
 }

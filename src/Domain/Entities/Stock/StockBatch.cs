@@ -2,6 +2,7 @@ using skestock.Domain.Entities.GoodsReceipts;
 using skestock.Domain.Entities.Items;
 using skestock.Domain.Entities.Locations;
 using skestock.Domain.Entities.SchoolClasses;
+using skestock.Domain.Enums;
 
 namespace skestock.Domain.Entities.Stock;
 
@@ -20,6 +21,7 @@ public class StockBatch: BaseAuditableEntity, IKeysetEntity
     public DateOnly? ExpiryDate { get; set; }   // null when Item.IsPerishable == false
     public DateOnly ReceivedDate { get; set; }
     public decimal UnitPrice { get; set; }      // price paid per unit for THIS delivery
+    public StockBatchSource Source { get; set; } = StockBatchSource.Order;
     // Convenience only - not mapped to a column, always derived from Quantity * UnitPrice
     [System.ComponentModel.DataAnnotations.Schema.NotMapped]
     public decimal LineTotal => Quantity * UnitPrice;

@@ -1,5 +1,6 @@
 using skestock.Application.Common.Filtering;
 using skestock.Application.Common.Models;
+using skestock.Domain.Enums;
 
 namespace skestock.Application.Features.StockBatches.Models;
 
@@ -19,5 +20,6 @@ public static class StockBatchRequests
         public DateOnly? ExpiryDate { get; init; }
         public DateOnly ReceivedDate { get; init; }
         public decimal UnitPrice { get; init; }
+        public StockBatchSource Source { get; init; } = StockBatchSource.Order;
     }
 }

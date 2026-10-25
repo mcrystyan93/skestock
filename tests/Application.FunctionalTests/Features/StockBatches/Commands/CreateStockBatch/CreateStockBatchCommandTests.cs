@@ -1,5 +1,6 @@
 using skestock.Application.Common.Exceptions;
 using skestock.Application.Features.StockBatches.Commands.CreateStockBatch;
+using skestock.Application.Features.StockBatches.Queries.GetAllStockBatches;
 using skestock.Domain.Entities;
 using skestock.Domain.Entities.Categories;
 using skestock.Domain.Entities.Items;
@@ -83,18 +84,52 @@ public class CreateStockBatchCommandTests : TestBase
         result.Value.UnitPrice.ShouldBe(4.25m);
         result.Value.LineTotal.ShouldBe(85m);
         result.Value.GoodsReceiptId.ShouldBeNull();
+        result.Value.Source.ShouldBe(StockBatchSource.Order);
         result.Value.Id.ShouldNotBe(Guid.Empty);
 
         var persistedBatch = await TestApp.FindAsync<StockBatch>(result.Value.Id);
         persistedBatch.ShouldNotBeNull();
         persistedBatch.ReceivedClassId.ShouldBe(schoolClass.Id);
         persistedBatch.GoodsReceiptId.ShouldBeNull();
+        persistedBatch.Source.ShouldBe(StockBatchSource.Order);
 
         var transaction = await TestApp.SingleOrDefaultAsync<StockTransaction>(t => t.BatchId == result.Value.Id);
         transaction.ShouldNotBeNull();
         transaction.Type.ShouldBe(StockTransactionType.Order);
         transaction.QuantityChange.ShouldBe(20);
         transaction.GoodsReceiptId.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task Handle_WithDonationSource_PersistsDonationBatchAndTransactionAndListsIt()
+    {
+        var (_, item, _, location, schoolClass) = await SeedPrerequisitesAsync();
+        await RunAsUserWithProfileAsync();
+
+        var result = await TestApp.SendAsync(new CreateStockBatchCommand
+        {
+            ItemId = item.Id,
+            LocationId = location.Id,
+            ReceivedClassId = schoolClass.Id,
+            Quantity = 7,
+            ReceivedDate = new DateOnly(2024, 2, 1),
+            Source = StockBatchSource.Donation
+        });
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Source.ShouldBe(StockBatchSource.Donation);
+
+        var persistedBatch = await TestApp.FindAsync<StockBatch>(result.Value.Id);
+        persistedBatch.ShouldNotBeNull();
+        persistedBatch.Source.ShouldBe(StockBatchSource.Donation);
+
+        var transaction = await TestApp.SingleOrDefaultAsync<StockTransaction>(t => t.BatchId == result.Value.Id);
+        transaction.ShouldNotBeNull();
+        transaction.Type.ShouldBe(StockTransactionType.Donation);
+
+        var list = await TestApp.SendAsync(new GetAllStockBatchesQuery { SearchTerm = _prefix });
+        list.IsSuccess.ShouldBeTrue();
+        list.Value.Data.Single(b => b.Id == result.Value.Id).Source.ShouldBe(StockBatchSource.Donation);
     }
 
     [Test]
