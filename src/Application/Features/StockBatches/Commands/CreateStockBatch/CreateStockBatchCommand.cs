@@ -2,6 +2,7 @@ using skestock.Application.Common.Behaviours;
 using skestock.Application.Common.Caching;
 using skestock.Application.Common.Security;
 using skestock.Application.Features.StockBatches.Models;
+using skestock.Domain.Enums;
 using StockCacheConstants = skestock.Application.Features.Stock.CacheConstants;
 
 namespace skestock.Application.Features.StockBatches.Commands.CreateStockBatch;
@@ -21,6 +22,7 @@ public class CreateStockBatchCommand : IRequest<Result<StockBatchListItemDto>>, 
     public DateOnly? ExpiryDate { get; init; }
     public DateOnly ReceivedDate { get; init; }
     public decimal UnitPrice { get; init; }
+    public StockBatchSource Source { get; init; } = StockBatchSource.Order;
 
     // Invalidate every cached GetAllStockBatches page/filter/sort combination (this batch can
     // appear in any of them), plus the current-stock report for this exact (class, location)

@@ -5,7 +5,7 @@ import { NzCheckboxComponent } from 'ng-zorro-antd/checkbox';
 import { NzEmptyComponent } from 'ng-zorro-antd/empty';
 import { NzSkeletonComponent } from 'ng-zorro-antd/skeleton';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
-import { CHECKABLE_CARD_CLASSES } from './card-classes';
+import { CHECKABLE_CARD_CLASSES } from '../../../../../ui/card-classes';
 import { formatArticleCount, formatListCount } from './counts';
 import { checkedRowsModel, emitCheckedIdsOnChange } from './checked-rows';
 

@@ -29,7 +29,8 @@ public class CreateStockBatchCommandHandler(IApplicationDbContext dbContext, IUs
             ExpiryDate = request.ExpiryDate,
             ReceivedDate = request.ReceivedDate,
             UnitPrice = request.UnitPrice,
-            GoodsReceiptId = null
+            GoodsReceiptId = null,
+            Source = request.Source
         };
 
         var transaction = new StockTransaction
@@ -39,7 +40,7 @@ public class CreateStockBatchCommandHandler(IApplicationDbContext dbContext, IUs
             Batch = batch,
             ClassId = request.ReceivedClassId,
             UserId = identityId,
-            Type = StockTransactionType.Order,
+            Type = request.Source == StockBatchSource.Donation ? StockTransactionType.Donation : StockTransactionType.Order,
             QuantityChange = request.Quantity,
             GoodsReceiptId = null
         };
@@ -72,7 +73,8 @@ public class CreateStockBatchCommandHandler(IApplicationDbContext dbContext, IUs
                 LineTotal = b.Quantity * b.UnitPrice,
                 ExpiryDate = b.ExpiryDate,
                 ReceivedDate = b.ReceivedDate,
-                CreatedDate = b.CreatedDate
+                CreatedDate = b.CreatedDate,
+                Source = b.Source
             })
             .SingleAsync(cancellationToken);
 

@@ -18,7 +18,7 @@ namespace skestock.Infrastructure.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("Romanian_100_CI_AI")
-                .HasAnnotation("ProductVersion", "10.0.11")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -1236,6 +1236,13 @@ namespace skestock.Infrastructure.Data.Migrations
 
                     b.Property<DateOnly>("ReceivedDate")
                         .HasColumnType("date");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Order");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(10,2)");
