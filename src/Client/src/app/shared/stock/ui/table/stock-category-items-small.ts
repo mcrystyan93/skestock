@@ -15,8 +15,11 @@ import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { TimeAgoPipe } from '@ske/shared/pipes';
 import { StopClick } from '@ske/shared/directives';
 
+import { ItemThumbnail } from '@ske/shared/items';
+
 @Component({
   imports: [
+    ItemThumbnail,
     NzButtonComponent,
     NzCardComponent,
     NzEmptyComponent,

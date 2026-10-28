@@ -104,7 +104,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
         var itemsQuery = filteredItemsQuery.Where(i => itemIds.Contains(i.Id));
 
         var items = await itemsQuery
-            .Select(i => new { i.Id, i.Name, i.Sku, i.Unit, i.IsPerishable, i.MinThreshold, i.CategoryId })
+            .Select(i => new { i.Id, i.Name, i.Sku, i.Unit, i.IsPerishable, i.MinThreshold, i.CategoryId, i.ImageFileId })
             .ToDictionaryAsync(i => i.Id, cancellationToken);
 
         // Items excluded by the search term filter above must also be excluded from the stock
@@ -206,6 +206,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
                     ItemId = x.ItemId,
                     ItemName = item.Name,
                     Sku = item.Sku,
+                    ImageFileId = item.ImageFileId,
                     CategoryId = category.Id,
                     CategoryName = category.Name,
                     CategoryIcon = category.Icon,

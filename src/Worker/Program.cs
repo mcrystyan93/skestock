@@ -67,6 +67,7 @@ builder.Services
 builder.Services.AddHostedService<GoodsReceiptImportQueueProcessingService>();
 builder.Services.AddHostedService<CategoryImportBatchQueueProcessingService>();
 builder.Services.AddHostedService<ItemImportQueueProcessingService>();
+builder.Services.AddHostedService<ItemImageThumbnailQueueProcessingService>();
 builder.Services.AddHostedService<DailyStatisticsService>();
 
 var host = builder.Build();

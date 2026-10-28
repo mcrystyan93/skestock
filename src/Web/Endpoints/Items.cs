@@ -7,6 +7,8 @@ using skestock.Application.Features.Items.Commands.EnableItem;
 using skestock.Application.Features.Items.Models;
 using skestock.Application.Features.Items.Queries.GetAllItems;
 using skestock.Application.Features.Items.Queries.GetItemById;
+using skestock.Application.Features.Items.Queries.GetItemImage;
+using Microsoft.Net.Http.Headers;
 
 namespace skestock.Web.Endpoints;
 
@@ -16,6 +18,7 @@ public class Items : IEndpointGroup
     {
         groupBuilder.MapPost(GetAllItems, "get-all");
         groupBuilder.MapGet(GetItemById, "{id}");
+        groupBuilder.MapGet(GetItemImage, "{id}/image");
         groupBuilder.MapPost(CreateItem, "");
         groupBuilder.MapPut(EditItem, "{id}");
         groupBuilder.MapPatch(EnableItem, "{id}/enable");
@@ -51,6 +54,31 @@ public class Items : IEndpointGroup
         return result.ToOk();
     }
 
+    [EndpointSummary("Get an item's image")]
+    [EndpointDescription("Streams the item's image: size=thumb (WebP thumbnail, falls back to the original until generated) or size=full. Use ?v=<imageFileId> to bust caches.")]
+    public static async Task<Results<FileStreamHttpResult, ProblemHttpResult>> GetItemImage(
+        ISender sender, HttpContext httpContext, Guid id, CancellationToken cancellationToken,
+        string? size = null)
+    {
+        // Minimal-API enum binding is case-sensitive; the documented contract is lowercase thumb|full.
+        var parsedSize = ItemImageSize.Thumb;
+        if (size is not null && (!Enum.TryParse(size, ignoreCase: true, out parsedSize) || !Enum.IsDefined(parsedSize)))
+            return TypedResults.Problem(statusCode: StatusCodes.Status400BadRequest, title: "Invalid image size", detail: "size must be 'thumb' or 'full'.");
+
+        var result = await sender.Send(new GetItemImageQuery(id, parsedSize), cancellationToken);
+
+        if (result.IsFailed)
+            return result.ToProblemHttpResult();
+
+        var image = result.Value;
+        var headers = httpContext.Response.Headers;
+        // The thumbnail is served from the original until the Worker produces it, so the fallback must not be pinned.
+        headers.CacheControl = image.IsFallback ? "no-cache" : "private, max-age=31536000, immutable";
+        headers[HeaderNames.XContentTypeOptions] = "nosniff";
+
+        return TypedResults.Stream(image.Content, image.ContentType);
+    }
+
     [EndpointSummary("Create a new item")]
     [EndpointDescription("Creates a new item in the database.")]
     public static async Task<Results<Created<ItemDto>, ProblemHttpResult>> CreateItem(
@@ -65,7 +93,8 @@ public class Items : IEndpointGroup
             MinThreshold = request.MinThreshold,
             IsPerishable = request.IsPerishable,
             ShelfLifeDays = request.ShelfLifeDays,
-            CategoryId = request.CategoryId
+            CategoryId = request.CategoryId,
+            ImageFileId = request.ImageFileId
         };
 
         var result = await sender.Send(command, cancellationToken);
@@ -88,7 +117,8 @@ public class Items : IEndpointGroup
             MinThreshold = request.MinThreshold,
             IsPerishable = request.IsPerishable,
             ShelfLifeDays = request.ShelfLifeDays,
-            CategoryId = request.CategoryId
+            CategoryId = request.CategoryId,
+            ImageFileId = request.ImageFileId
         };
 
         var result = await sender.Send(command, cancellationToken);

@@ -1,3 +1,4 @@
+using skestock.Application.UnitTests.Features.Items.Images;
 using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Errors;
 using skestock.Application.Features.Items.Commands.EditItem;
@@ -34,7 +35,7 @@ public class EditItemCommandValidatorTests
     {
         var (context, category, item) = await CreateContextAsync();
         await using var _ = context;
-        var validator = new EditItemCommandValidator(context);
+        var validator = new EditItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var result = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "New Name", Unit = "unit", CategoryId = category.Id });
 
@@ -46,7 +47,7 @@ public class EditItemCommandValidatorTests
     {
         var (context, category, _) = await CreateContextAsync();
         await using var _disposable = context;
-        var validator = new EditItemCommandValidator(context);
+        var validator = new EditItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var result = await validator.ValidateAsync(new EditItemCommand { Id = Guid.Empty, Name = "Pencil", Unit = "unit", CategoryId = category.Id });
 
@@ -61,7 +62,7 @@ public class EditItemCommandValidatorTests
         item.Sku = "SKU-1";
         await context.SaveChangesAsync(CancellationToken.None);
 
-        var validator = new EditItemCommandValidator(context);
+        var validator = new EditItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
         var result = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Sku = "SKU-1", Unit = "unit", CategoryId = category.Id });
 
         result.Errors.ShouldNotContain(e => e.ErrorCode == ValidationErrorCodes.DuplicateSku);
@@ -76,7 +77,7 @@ public class EditItemCommandValidatorTests
         context.Items.Add(otherItem);
         await context.SaveChangesAsync(CancellationToken.None);
 
-        var validator = new EditItemCommandValidator(context);
+        var validator = new EditItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
         var result = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Sku = "SKU-2", Unit = "unit", CategoryId = category.Id });
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.DuplicateSku);
@@ -87,7 +88,7 @@ public class EditItemCommandValidatorTests
     {
         var (context, _, item) = await CreateContextAsync();
         await using var _disposable = context;
-        var validator = new EditItemCommandValidator(context);
+        var validator = new EditItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var result = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", CategoryId = Guid.NewGuid() });
 
@@ -99,7 +100,7 @@ public class EditItemCommandValidatorTests
     {
         var (context, category, item) = await CreateContextAsync();
         await using var _ = context;
-        var validator = new EditItemCommandValidator(context);
+        var validator = new EditItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var result = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", MinThreshold = -5, CategoryId = category.Id });
 
@@ -111,7 +112,7 @@ public class EditItemCommandValidatorTests
     {
         var (context, category, item) = await CreateContextAsync();
         await using var _ = context;
-        var validator = new EditItemCommandValidator(context);
+        var validator = new EditItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var nullResult = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", ShelfLifeDays = null, CategoryId = category.Id });
         var positiveResult = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", ShelfLifeDays = 14, CategoryId = category.Id });
@@ -125,7 +126,7 @@ public class EditItemCommandValidatorTests
     {
         var (context, category, item) = await CreateContextAsync();
         await using var _ = context;
-        var validator = new EditItemCommandValidator(context);
+        var validator = new EditItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var zeroResult = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", ShelfLifeDays = 0, CategoryId = category.Id });
         var negativeResult = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", ShelfLifeDays = -3, CategoryId = category.Id });

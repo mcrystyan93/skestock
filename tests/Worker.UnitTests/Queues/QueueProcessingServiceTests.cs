@@ -9,6 +9,7 @@ using Shouldly;
 using skestock.Application.Common.Exceptions;
 using skestock.Application.Features.Categories.Commands.ProcessCategoryImportBatch;
 using skestock.Application.Features.GoodsReceipts.Commands.ProcessGoodsReceiptImport;
+using skestock.Application.Features.Items.Commands.GenerateItemThumbnail;
 using skestock.Application.Features.Items.Commands.ProcessItemImportBatch;
 using Worker.Queues;
 using Worker.Services;
@@ -21,6 +22,7 @@ public sealed class QueueProcessingServiceTests
     [TestCase(QueueProcessorKind.Category)]
     [TestCase(QueueProcessorKind.GoodsReceipt)]
     [TestCase(QueueProcessorKind.Item)]
+    [TestCase(QueueProcessorKind.ItemImageThumbnail)]
     public async Task Successful_message_is_dispatched_audited_and_deleted(QueueProcessorKind kind)
     {
         var messageId = Guid.NewGuid();
@@ -52,6 +54,7 @@ public sealed class QueueProcessingServiceTests
     [TestCase(QueueProcessorKind.Category)]
     [TestCase(QueueProcessorKind.GoodsReceipt)]
     [TestCase(QueueProcessorKind.Item)]
+    [TestCase(QueueProcessorKind.ItemImageThumbnail)]
     public async Task Handler_side_effect_is_rolled_back_when_dispatch_fails(QueueProcessorKind kind)
     {
         var messageId = Guid.NewGuid();
@@ -71,6 +74,7 @@ public sealed class QueueProcessingServiceTests
     [TestCase(QueueProcessorKind.Category)]
     [TestCase(QueueProcessorKind.GoodsReceipt)]
     [TestCase(QueueProcessorKind.Item)]
+    [TestCase(QueueProcessorKind.ItemImageThumbnail)]
     public async Task Duplicate_message_is_deleted_without_dispatch(QueueProcessorKind kind)
     {
         var messageId = Guid.NewGuid();
@@ -88,6 +92,7 @@ public sealed class QueueProcessingServiceTests
     [TestCase(QueueProcessorKind.Category)]
     [TestCase(QueueProcessorKind.GoodsReceipt)]
     [TestCase(QueueProcessorKind.Item)]
+    [TestCase(QueueProcessorKind.ItemImageThumbnail)]
     public async Task Failed_result_is_poisoned_and_deleted(QueueProcessorKind kind)
     {
         var messageId = Guid.NewGuid();
@@ -109,6 +114,7 @@ public sealed class QueueProcessingServiceTests
     [TestCase(QueueProcessorKind.Category)]
     [TestCase(QueueProcessorKind.GoodsReceipt)]
     [TestCase(QueueProcessorKind.Item)]
+    [TestCase(QueueProcessorKind.ItemImageThumbnail)]
     public async Task Permanent_exception_is_poisoned_without_retry(QueueProcessorKind kind)
     {
         var messageId = Guid.NewGuid();
@@ -127,6 +133,7 @@ public sealed class QueueProcessingServiceTests
     [TestCase(QueueProcessorKind.Category)]
     [TestCase(QueueProcessorKind.GoodsReceipt)]
     [TestCase(QueueProcessorKind.Item)]
+    [TestCase(QueueProcessorKind.ItemImageThumbnail)]
     public async Task Transient_exception_with_retries_remaining_keeps_source_message(QueueProcessorKind kind)
     {
         var messageId = Guid.NewGuid();
@@ -148,6 +155,7 @@ public sealed class QueueProcessingServiceTests
     [TestCase(QueueProcessorKind.Category)]
     [TestCase(QueueProcessorKind.GoodsReceipt)]
     [TestCase(QueueProcessorKind.Item)]
+    [TestCase(QueueProcessorKind.ItemImageThumbnail)]
     public async Task Transient_exception_at_retry_limit_is_poisoned_and_deleted(QueueProcessorKind kind)
     {
         var messageId = Guid.NewGuid();
@@ -165,6 +173,7 @@ public sealed class QueueProcessingServiceTests
     [TestCase(QueueProcessorKind.Category)]
     [TestCase(QueueProcessorKind.GoodsReceipt)]
     [TestCase(QueueProcessorKind.Item)]
+    [TestCase(QueueProcessorKind.ItemImageThumbnail)]
     public async Task Malformed_message_is_preserved_in_raw_poison_queue(QueueProcessorKind kind)
     {
         using var harness = CreateHarnessWithRawText(kind, "not-base64");
@@ -180,6 +189,7 @@ public sealed class QueueProcessingServiceTests
     [TestCase(QueueProcessorKind.Category)]
     [TestCase(QueueProcessorKind.GoodsReceipt)]
     [TestCase(QueueProcessorKind.Item)]
+    [TestCase(QueueProcessorKind.ItemImageThumbnail)]
     public async Task Unknown_message_type_at_retry_limit_is_poisoned_and_deleted(QueueProcessorKind kind)
     {
         var envelope = new skestock.Domain.Queues.MessageEnvelope
@@ -200,6 +210,7 @@ public sealed class QueueProcessingServiceTests
     [TestCase(QueueProcessorKind.Category)]
     [TestCase(QueueProcessorKind.GoodsReceipt)]
     [TestCase(QueueProcessorKind.Item)]
+    [TestCase(QueueProcessorKind.ItemImageThumbnail)]
     public async Task Non_mediator_message_type_is_poisoned_without_retry(QueueProcessorKind kind)
     {
         var envelope = new skestock.Domain.Queues.MessageEnvelope
@@ -219,6 +230,7 @@ public sealed class QueueProcessingServiceTests
 
     [TestCase(QueueProcessorKind.Category)]
     [TestCase(QueueProcessorKind.Item)]
+    [TestCase(QueueProcessorKind.ItemImageThumbnail)]
     public async Task Import_already_in_progress_is_acknowledged_without_poisoning(QueueProcessorKind kind)
     {
         var messageId = Guid.NewGuid();
@@ -269,6 +281,13 @@ public sealed class QueueProcessingServiceTests
                     harness.ScopeFactory,
                     new WorkerHeartbeat(TimeProvider.System)).RunAsync(harness.StopToken);
                 break;
+            case QueueProcessorKind.ItemImageThumbnail:
+                await new TestableItemImageThumbnailProcessor(
+                    harness.QueueServiceClient.Object,
+                    NullLogger<ItemImageThumbnailQueueProcessingService>.Instance,
+                    harness.ScopeFactory,
+                    new WorkerHeartbeat(TimeProvider.System)).RunAsync(harness.StopToken);
+                break;
             case QueueProcessorKind.Item:
                 await new TestableItemProcessor(
                     harness.QueueServiceClient.Object,
@@ -287,13 +306,17 @@ public sealed class QueueProcessingServiceTests
             QueueProcessorKind.Category => typeof(ProcessCategoryImportBatchCommand),
             QueueProcessorKind.GoodsReceipt => typeof(ProcessGoodsReceiptImportCommand),
             QueueProcessorKind.Item => typeof(ProcessItemImportBatchCommand),
+            QueueProcessorKind.ItemImageThumbnail => typeof(GenerateItemThumbnailCommand),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
         };
 
     private static TimeSpan GetExpectedVisibilityTimeout(QueueProcessorKind kind) =>
-        kind == QueueProcessorKind.GoodsReceipt
-            ? TimeSpan.FromSeconds(30)
-            : TimeSpan.FromSeconds(1200);
+        kind switch
+        {
+            QueueProcessorKind.GoodsReceipt => TimeSpan.FromSeconds(30),
+            QueueProcessorKind.ItemImageThumbnail => TimeSpan.FromSeconds(120),
+            _ => TimeSpan.FromSeconds(1200)
+        };
 
     private static async ValueTask<object?> SaveEffectAndReturnSuccessAsync(
         QueueProcessingTestHarness harness,
@@ -352,6 +375,16 @@ public sealed class QueueProcessingServiceTests
         IServiceScopeFactory scopeFactory,
         WorkerHeartbeat heartbeat)
         : ItemImportQueueProcessingService(queueServiceClient, logger, scopeFactory, heartbeat)
+    {
+        public Task RunAsync(CancellationToken cancellationToken) => ExecuteAsync(cancellationToken);
+    }
+
+    private sealed class TestableItemImageThumbnailProcessor(
+        QueueServiceClient queueServiceClient,
+        ILogger<ItemImageThumbnailQueueProcessingService> logger,
+        IServiceScopeFactory scopeFactory,
+        WorkerHeartbeat heartbeat)
+        : ItemImageThumbnailQueueProcessingService(queueServiceClient, logger, scopeFactory, heartbeat)
     {
         public Task RunAsync(CancellationToken cancellationToken) => ExecuteAsync(cancellationToken);
     }

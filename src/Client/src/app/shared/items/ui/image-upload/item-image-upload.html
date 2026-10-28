@@ -1,0 +1,15 @@
+<nz-upload
+  nzListType="picture-card"
+  nzAccept="image/jpeg,image/png,image/webp,image/gif"
+  [nzLimit]="1"
+  [nzShowButton]="fileList().length === 0"
+  [nzShowUploadList]="{ showPreviewIcon: false }"
+  [nzBeforeUpload]="beforeUpload"
+  [nzRemove]="remove"
+  [nzFileList]="fileList()"
+>
+  <div>
+    <nz-icon nzType="icons:plus" />
+    <div class="mt-2">Încarcă</div>
+  </div>
+</nz-upload>

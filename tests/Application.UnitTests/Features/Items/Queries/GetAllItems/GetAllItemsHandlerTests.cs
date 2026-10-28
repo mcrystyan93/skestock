@@ -331,4 +331,18 @@ public class GetAllItemsHandlerTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.Data.Count().ShouldBe(3);
     }
+
+    [Test]
+    public async Task Handle_ReturnsImageFileId()
+    {
+        var fileId = Guid.NewGuid();
+        await using var context = await SeedAsync(1, (i, category) => new Item
+        {
+            Name = "Pencil", Unit = "unit", CategoryId = category.Id, ImageFileId = fileId
+        });
+
+        var result = await CreateHandler(context).Handle(new GetAllItemsQuery(), CancellationToken.None);
+
+        result.Value.Data.Single().ImageFileId.ShouldBe(fileId);
+    }
 }
