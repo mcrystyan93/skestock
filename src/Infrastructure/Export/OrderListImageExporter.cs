@@ -11,7 +11,7 @@ namespace skestock.Infrastructure.Export;
 // Fonts are embedded because the runtime image ships none.
 public class OrderListImageExporter : IOrderListImageExporter
 {
-    private const float Scale = 2f;
+    private const float Scale = 3f;
     private const float Width = 1000f;
     private const float Margin = 24f;
     private const float CellPadding = 8f;
@@ -34,9 +34,9 @@ public class OrderListImageExporter : IOrderListImageExporter
         for (var i = 1; i < columnX.Length; i++)
             columnX[i] = columnX[i - 1] + columnWidths[i - 1];
 
-        using var regular = new SKFont(Regular.Value, FontSize);
-        using var bold = new SKFont(Bold.Value, FontSize);
-        using var title = new SKFont(Bold.Value, TitleSize);
+        using var regular = new SKFont(Regular.Value, FontSize) { Subpixel = true, Hinting = SKFontHinting.None };
+        using var bold = new SKFont(Bold.Value, FontSize) { Subpixel = true, Hinting = SKFontHinting.None };
+        using var title = new SKFont(Bold.Value, TitleSize) { Subpixel = true, Hinting = SKFontHinting.None };
 
         var rows = new List<Row>();
 
