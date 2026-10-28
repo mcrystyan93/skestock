@@ -1,7 +1,7 @@
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzUploadFile } from 'ng-zorro-antd/upload';
 import { StorageHttp } from '@ske/shared/storage';
@@ -66,6 +66,37 @@ describe('ItemImageUpload', () => {
 
     (f.componentInstance as unknown as { remove: () => boolean }).remove();
 
+    expect(f.componentInstance.value()).toBeNull();
+  });
+
+  it('reports uploading while in flight and clears it when done', () => {
+    const pending = new Subject<object>();
+    http.uploadViaSasUri.mockReturnValueOnce(pending);
+    const f = setup();
+    run(f, file('image/png', 100));
+    f.detectChanges();
+
+    expect(f.componentInstance.uploading()).toBe(true);
+    expect(f.componentInstance.value()).toBeNull();
+
+    pending.next({});
+    pending.complete();
+    f.detectChanges();
+
+    expect(f.componentInstance.uploading()).toBe(false);
+    expect(f.componentInstance.value()).toBe('f1');
+  });
+
+  it('shows one error toast when the upload fails and leaves the value null', () => {
+    http.uploadViaSasUri.mockReturnValueOnce(throwError(() => new Error('boom')));
+    const f = setup();
+    run(f, file('image/png', 100));
+    f.detectChanges();
+    f.detectChanges();
+
+    expect(message.error).toHaveBeenCalledTimes(1);
+    expect(message.error).toHaveBeenCalledWith('Încărcarea imaginii a eșuat');
+    expect(f.componentInstance.uploading()).toBe(false);
     expect(f.componentInstance.value()).toBeNull();
   });
 });

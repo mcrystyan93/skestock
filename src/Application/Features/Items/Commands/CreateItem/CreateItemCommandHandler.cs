@@ -1,12 +1,8 @@
-using System.Text.Json;
 using skestock.Application.Common.Interfaces;
-using skestock.Application.Features.Items.Commands.GenerateItemThumbnail;
 using skestock.Application.Features.Items.Models;
 using skestock.Domain.Entities;
 using skestock.Domain.Entities.Items;
 using skestock.Domain.Events.Items;
-using skestock.Domain.Queues;
-using skestock.Shared;
 
 namespace skestock.Application.Features.Items.Commands.CreateItem;
 
@@ -34,13 +30,7 @@ public class CreateItemCommandHandler(IApplicationDbContext dbContext, IUser use
         item.AddDomainEvent(new ItemCreatedEvent(item));
         if (request.ImageFileId is { } imageFileId)
         {
-            dbContext.OutboxMessages.Add(new OutboxMessage
-            {
-                Type = typeof(GenerateItemThumbnailCommand).AssemblyQualifiedName!,
-                Payload = JsonSerializer.Serialize(new GenerateItemThumbnailCommand(item.Id, imageFileId)),
-                QueueName = Services.ItemImageThumbnailQueue,
-                UserId = user.Id
-            });
+            dbContext.OutboxMessages.Add(ItemImageOutbox.ThumbnailMessage(item.Id, imageFileId, user.Id));
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);

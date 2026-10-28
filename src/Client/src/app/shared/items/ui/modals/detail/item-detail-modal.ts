@@ -1,4 +1,4 @@
-import { Component, DestroyRef, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, signal, viewChild } from '@angular/core';
 import { itemApiEvents, ItemDetailState, NEW_ITEM_ROUTE_ID } from '../../../services/item-detail.store';
 import { CreateItemRequest, EditItemRequest, ItemDto } from '@ske/models';
 import { NZ_MODAL_DATA, NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zorro-antd/modal';
@@ -47,6 +47,7 @@ export class ItemDetailModal {
   private readonly _nzModalRef = inject(NzModalRef);
   private readonly _storeEvents = inject(Events);
   private readonly _formComponent = viewChild(Form);
+  protected readonly imageUploading = computed(() => this._formComponent()?.imageUploading() ?? false);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _nzMessageService = inject(NzMessageService);
   private readonly _close$ = new BehaviorSubject(false);

@@ -38,7 +38,7 @@
               nzType="primary"
               type="button"
               (click)="save()"
-              [nzLoading]="store.itemLoading()">
+              [nzLoading]="store.itemLoading() || imageUploading()">
         Salveaza si inchide
       </button>
       <button nz-button
