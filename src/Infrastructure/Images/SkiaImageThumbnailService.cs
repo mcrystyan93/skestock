@@ -21,8 +21,11 @@ public class SkiaImageThumbnailService : IImageThumbnailService
         // Decoding through the codec yields the first frame of a GIF.
         using var codec = SKCodec.Create(NonOwning(image))
             ?? throw new InvalidDataException("The stream is not a decodable image.");
-        using var source = SKBitmap.Decode(codec)
+        using var decoded = SKBitmap.Decode(codec)
             ?? throw new InvalidDataException("The image could not be decoded.");
+        // Browsers honor EXIF orientation on the full image, so the thumbnail must match.
+        using var oriented = ApplyOrigin(decoded, codec.EncodedOrigin);
+        var source = oriented ?? decoded;
 
         var scale = Math.Min(1d, (double)MaxEdge / Math.Max(source.Width, source.Height));
         var width = Math.Max(1, (int)Math.Round(source.Width * scale));
@@ -34,6 +37,31 @@ public class SkiaImageThumbnailService : IImageThumbnailService
         using var skImage = SKImage.FromBitmap(resized);
         using var data = skImage.Encode(SKEncodedImageFormat.Webp, WebpQuality);
         return data.ToArray();
+    }
+
+    // Returns null when no transform is needed.
+    private static SKBitmap? ApplyOrigin(SKBitmap source, SKEncodedOrigin origin)
+    {
+        float w = source.Width, h = source.Height;
+        var (matrix, swap) = origin switch
+        {
+            SKEncodedOrigin.TopRight => (new SKMatrix(-1, 0, w, 0, 1, 0, 0, 0, 1), false),
+            SKEncodedOrigin.BottomRight => (new SKMatrix(-1, 0, w, 0, -1, h, 0, 0, 1), false),
+            SKEncodedOrigin.BottomLeft => (new SKMatrix(1, 0, 0, 0, -1, h, 0, 0, 1), false),
+            SKEncodedOrigin.LeftTop => (new SKMatrix(0, 1, 0, 1, 0, 0, 0, 0, 1), true),
+            SKEncodedOrigin.RightTop => (new SKMatrix(0, -1, h, 1, 0, 0, 0, 0, 1), true),
+            SKEncodedOrigin.RightBottom => (new SKMatrix(0, -1, h, -1, 0, w, 0, 0, 1), true),
+            SKEncodedOrigin.LeftBottom => (new SKMatrix(0, 1, 0, -1, 0, w, 0, 0, 1), true),
+            _ => (SKMatrix.Identity, false)
+        };
+        if (matrix.IsIdentity)
+            return null;
+
+        var target = new SKBitmap(swap ? source.Height : source.Width, swap ? source.Width : source.Height);
+        using var canvas = new SKCanvas(target);
+        canvas.SetMatrix(matrix);
+        canvas.DrawBitmap(source, 0, 0, new SKSamplingOptions(SKFilterMode.Nearest));
+        return target;
     }
 
     // SKCodec.Create(Stream) takes ownership and disposes the stream; callers keep theirs.
