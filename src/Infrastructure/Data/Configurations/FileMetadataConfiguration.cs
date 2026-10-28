@@ -15,6 +15,8 @@ public class FileMetadataConfiguration : IEntityTypeConfiguration<FileMetadata>
         builder.Property(f => f.ContentType).HasMaxLength(200).IsRequired();
         builder.Property(f => f.ETag).HasMaxLength(100);
 
+        builder.HasIndex(f => f.FileId).IsUnique();
+
         builder.HasOne(u => u.CreatedBy)
             .WithMany()
             .HasForeignKey(u => u.CreatedById)

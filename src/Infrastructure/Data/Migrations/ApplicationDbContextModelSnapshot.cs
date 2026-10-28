@@ -1410,6 +1410,9 @@ namespace skestock.Infrastructure.Data.Migrations
 
                     b.HasIndex("CreatedById");
 
+                    b.HasIndex("FileId")
+                        .IsUnique();
+
                     b.HasIndex("LastModifiedById");
 
                     b.ToTable("FileMetadata");
