@@ -7,6 +7,7 @@ import { OrderListDetailForm } from './order-list-detail-form';
 import { OrderListDetailState } from '../../../../services/order-list-detail.store';
 import { OrderListsHttp } from '../../../../services/order-lists.http';
 import { provideDispatcher } from '@ngrx/signals/events';
+import { NzModalService } from 'ng-zorro-antd/modal';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
 
@@ -26,9 +27,11 @@ describe('OrderListDetailForm', () => {
           createTestIcon('icons:magnifying-glass'),
           createTestIcon('icons:plus'),
           createTestIcon('icons:minus'),
-          createTestIcon('icons:pencil')
+          createTestIcon('icons:pencil'),
+          createTestIcon('icons:clipboard-list')
         ]),
         OrderListDetailState,
+        { provide: NzModalService, useValue: { create: vi.fn() } },
         {
           provide: ItemsHttp,
           useValue: {
@@ -90,6 +93,30 @@ describe('OrderListDetailForm', () => {
 
     expect(fixture.componentInstance.orderListForm.lines().value()).toHaveLength(1);
     expect(fixture.componentInstance.orderListForm.lineItem().value()).toBeNull();
+  });
+
+  it('maps loaded lines with null fields to empty form values', () => {
+    fixture.componentRef.setInput('orderList', {
+      id: 'o1',
+      status: 'Draft',
+      lines: [{ id: 'l1', itemId: 'a', productName: 'A', quantity: 1, unit: 'buc', notes: null }]
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.orderListForm.lines().value()[0].notes).toBe('');
+  });
+
+  it('merges predefined list lines by item, adding quantities of items already listed', () => {
+    const form = fixture.componentInstance;
+    const line = (itemId: string, quantity: number) =>
+      ({ id: null, itemId, productName: itemId, quantity, unit: 'buc', notes: '' });
+    const addLines = (lines: ReturnType<typeof line>[]) =>
+      (form as unknown as { addLines(l: unknown[]): void }).addLines(lines);
+
+    addLines([line('a', 2)]);
+    addLines([line('a', 3), line('b', 1)]);
+
+    expect(form.orderListForm.lines().value().map((l) => [l.itemId, l.quantity])).toEqual([['b', 1], ['a', 5]]);
   });
 
   it('shows the collection validation message when no lines are present', async () => {

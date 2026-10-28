@@ -1,5 +1,5 @@
 import { injectClassReadOnly } from '@ske/shared/school-classes';
-import { Component, computed, effect, inject, input, linkedSignal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, linkedSignal, signal, untracked } from '@angular/core';
 import { ItemAutocompleteValue, ORDER_LIST_STATUS_LABELS, OrderListDto, OrderListLineDto } from '@ske/models';
 import {
   applyEach,
@@ -18,6 +18,13 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { ItemAutocomplete } from '@ske/shared/items';
 import { NzDividerComponent } from 'ng-zorro-antd/divider';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzModalService } from 'ng-zorro-antd/modal';
+import { NzButtonComponent } from 'ng-zorro-antd/button';
+import {
+  OrderListAddSupplyListsModal,
+  OrderListAddSupplyListsModalData,
+  OrderListAddSupplyListsResult
+} from '../../add-supply-lists/order-list-add-supply-lists-modal';
 import { OrderListDetailsFields, validateOrderListDetails } from './details/order-list-details-fields';
 import { OrderListLinesContainer } from './lines/order-list-lines-container';
 import { isNil } from 'lodash-es';
@@ -27,6 +34,7 @@ import type { OrderListLineFormModel } from './lines/order-list-line';
 
 @Component({
   imports: [
+    NzButtonComponent,
     NzRowDirective,
     NzColDirective,
     FormField,
@@ -62,7 +70,10 @@ export class OrderListDetailForm {
   });
 
   private readonly _nzMessageService = inject(NzMessageService);
+  private readonly _nzModalService = inject(NzModalService);
   private _lineKeySequence = 0;
+  /** Supply lists already merged into this order, so adding them again cannot double the quantities. */
+  private readonly _addedSupplyListIds = signal<string[]>([]);
 
   private readonly _formModel = linkedSignal({
     source: () => this.orderList(),
@@ -202,6 +213,58 @@ export class OrderListDetailForm {
     const lines = this.orderListForm.lines().value();
 
     this.orderListForm.lines().value.set(lines.filter((l) => l.clientKey !== line.clientKey));
+  }
+
+  protected openAddSupplyLists() {
+    const modalRef = this._nzModalService.create<
+      OrderListAddSupplyListsModal,
+      OrderListAddSupplyListsModalData,
+      OrderListAddSupplyListsResult
+    >({
+      nzContent: OrderListAddSupplyListsModal,
+      nzData: { addedIds: this._addedSupplyListIds() },
+      nzWidth: 'min(95vw, 36rem)',
+      nzCentered: true,
+      nzMaskClosable: false
+    });
+
+    modalRef.afterClose.subscribe((result) => {
+      if (!result)
+        return;
+
+      this._addedSupplyListIds.update((ids) => [...ids, ...result.listIds]);
+      this.addLines(result.lines);
+    });
+  }
+
+  /** Lines for items already on the order add to its quantity; the rest go on top. */
+  private addLines(incoming: OrderListLineDto[]) {
+    this.orderListForm.lines().value.update((lines) => {
+      const merged = lines.map((line) => ({ ...line }));
+      const added: OrderListLineFormModel[] = [];
+
+      for (const line of incoming) {
+        const existing = merged.find((l) => l.itemId === line.itemId);
+
+        if (existing) {
+          existing.quantity += line.quantity;
+          continue;
+        }
+
+        added.push({
+          id: null,
+          itemId: line.itemId ?? null,
+          productName: line.productName,
+          quantity: line.quantity,
+          unit: line.unit,
+          notes: line.notes,
+          clientKey: this.createLineKey()
+        });
+      }
+
+      return [...added, ...merged];
+    });
+    this.orderListForm.lines().markAsDirty();
   }
 
   public async submit(): Promise<OrderListDetailFormSubmit> {

@@ -2,13 +2,13 @@ import { computed, inject } from '@angular/core';
 import { mapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { OrderListDto, PAGINATION_PAGE_SIZE, SupplyListDto, SupplyListListItemDto } from '@ske/models';
+import { OrderListDto, SupplyListDto, SupplyListListItemDto } from '@ske/models';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { StockHttp } from '@ske/shared/stock';
 import { SupplyListsHttp } from '@ske/shared/supply-lists';
 import { isNil } from 'lodash-es';
-import { EMPTY, expand, forkJoin, Observable, of, pipe, reduce, switchMap, tap } from 'rxjs';
+import { forkJoin, Observable, of, pipe, switchMap, tap } from 'rxjs';
 import {
   groupLowStockItems,
   MAX_ORDER_LIST_NAME_LENGTH,
@@ -58,21 +58,6 @@ const initialState: OrderListWizardState = {
   loadedPrefillKey: null,
   loadFailed: false
 };
-
-// The API caps the page size, so the whole active set is read by following the cursor.
-function fetchAllActiveSupplyLists(http: SupplyListsHttp) {
-  const page = (cursor: string | null) => http.getAll({
-    pageSize: PAGINATION_PAGE_SIZE,
-    cursor,
-    filters: [{ field: 'isActive', operator: 'equals', value: true, fieldType: 'boolean' }],
-    sort: [{ key: 'name', value: 'ascend' }]
-  });
-
-  return page(null).pipe(
-    expand((response) => response.hasNextPage && response.nextCursor ? page(response.nextCursor) : EMPTY),
-    reduce((all, response) => [...all, ...response.data], [] as SupplyListListItemDto[])
-  );
-}
 
 type LoadSlice = {
   start: () => void;
@@ -197,7 +182,7 @@ export const OrderListWizardStore = signalStore(
 
     const loadSupplyLists = loadInto(
       slice(store.setSupplyListsLoading, store.clearSupplyListsErrors, store.setSupplyListsLoaded, store.handleSupplyListsError),
-      (_: void) => fetchAllActiveSupplyLists(store.supplyListsHttp),
+      (_: void) => store.supplyListsHttp.getAllActive(),
       (supplyLists) => patchState(store, { supplyLists, supplyListsLoaded: true })
     );
 
