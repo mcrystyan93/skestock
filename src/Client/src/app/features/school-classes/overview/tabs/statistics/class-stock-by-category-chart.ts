@@ -146,7 +146,7 @@ export class ClassStockByCategoryChart {
   public readonly tooltip = computed<ApexOptions['tooltip']>(() => ({
     shared: false,
     intersect: true,
-    y: {formatter: (value) => QUANTITY_FORMATTER.format(value)}
+    y: {formatter: (value) => QUANTITY_FORMATTER.format(value ?? 0)}
   }));
 
   public readonly colors = computed<ApexOptions['colors']>(() => CATEGORY_COLORS);
