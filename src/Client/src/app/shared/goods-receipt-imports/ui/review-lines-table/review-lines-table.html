@@ -28,7 +28,7 @@
     </tr>
     </thead>
     <tbody>
-    @for (lineField of linesForm.lines; track $index) {
+    @for (lineField of linesForm.lines; track lineField().value().rowId) {
       @let line = lineField().value();
       <tr ske-goods-import-review-line-row
           [lineForm]="lineField"
@@ -58,7 +58,7 @@
     <div class="flex flex-col gap-3"
          role="list"
          aria-label="Linii din avizul importat">
-      @for (lineField of linesForm.lines; track $index) {
+      @for (lineField of linesForm.lines; track lineField().value().rowId) {
         @let line = lineField().value();
         <ske-goods-import-review-line-small [lineForm]="lineField"
                                             [line]="line"
