@@ -32,7 +32,6 @@ describe('ReviewLineSmall', () => {
 
     fixture.componentRef.setInput('line', line);
     fixture.componentRef.setInput('lineForm', lineForm);
-    fixture.componentRef.setInput('canRemove', true);
     fixture.detectChanges();
 
     component.split();

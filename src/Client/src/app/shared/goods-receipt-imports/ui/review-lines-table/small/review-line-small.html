@@ -36,18 +36,16 @@
               (click)="split()">
         <nz-icon nzType="icons:split" />
       </button>
-      @if (canRemove()) {
-        <button nz-button
-                nzType="text"
-                type="button"
-                nz-tooltip
-                nzTooltipTitle="Șterge rândul"
-                [attr.aria-label]="'Șterge rândul pentru ' + productName"
-                class="h-10! min-h-10! w-10! min-w-10! p-0!"
-                (click)="remove()">
-          <nz-icon nzType="icons:trash-can" />
-        </button>
-      }
+      <button nz-button
+              nzType="text"
+              type="button"
+              nz-tooltip
+              nzTooltipTitle="Șterge rândul"
+              [attr.aria-label]="'Șterge rândul pentru ' + productName"
+              class="h-10! min-h-10! w-10! min-w-10! p-0!"
+              (click)="remove()">
+        <nz-icon nzType="icons:trash-can" />
+      </button>
     </div>
   </div>
 
