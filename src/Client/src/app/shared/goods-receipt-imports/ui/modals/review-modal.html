@@ -25,7 +25,7 @@
             nzType="primary"
             type="button"
             [nzLoading]="store.reviewConfirmLoading()"
-            [disabled]="store.reviewLoading() || store.review()?.status !== 'pendingReview'"
+            [disabled]="store.reviewLoading() || store.review()?.status !== 'pendingReview' || !store.lines().length"
             (click)="save()">
       Confirma si creeaza receptia
     </button>
