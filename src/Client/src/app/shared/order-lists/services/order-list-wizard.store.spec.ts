@@ -38,11 +38,19 @@ const secondSupplyList: SupplyListDto = {
 
 describe('OrderListWizardStore', () => {
   let stockHttp: { getLowStockItems: ReturnType<typeof vi.fn> };
-  let supplyListsHttp: { getAll: ReturnType<typeof vi.fn>; getById: ReturnType<typeof vi.fn> };
+  let supplyListsHttp: {
+    getAll: ReturnType<typeof vi.fn>;
+    getById: ReturnType<typeof vi.fn>;
+    getAllActive: () => unknown;
+  };
 
   beforeEach(() => {
     stockHttp = { getLowStockItems: vi.fn() };
-    supplyListsHttp = { getAll: vi.fn(), getById: vi.fn() };
+    supplyListsHttp = {
+      getAll: vi.fn(),
+      getById: vi.fn(),
+      getAllActive: () => SupplyListsHttp.prototype.getAllActive.call(supplyListsHttp)
+    };
 
     TestBed.configureTestingModule({
       providers: [
