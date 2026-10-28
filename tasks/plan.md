@@ -1,64 +1,46 @@
-# Implementation Plan: Stock batch source (Order / Donation)
+# Plan: Item images (thumbnail generated in the Worker)
 
-Implements the approved [SPEC.md](../SPEC.md). Tasks with acceptance criteria live in
-[todo.md](todo.md). (The previous plan in this file, the stock count wizard, is in git history:
-`git show d1baf3a:tasks/plan.md`.)
+Source: `SPEC.md` (approved) + opus planner review of the outbox → queue → Worker path.
 
-## Components
+## Existing path (facts)
+- Handlers enqueue by adding an `OutboxMessage { Type = typeof(Cmd).AssemblyQualifiedName, Payload = JSON, QueueName = Services.X, UserId }` in the same `SaveChanges` (reference: `CreateItemImportBatchCommandHandler`). `OutboxPublisherService` and `AzureQueueSender` are generic (queues auto-created).
+- Worker: `QueueMessageProcessor` dedupes via `ProcessedMessage`, runs the Mediator request in a DB transaction; a failed `Result` = permanent → poison queue. Each queue is a ~20-line `QueueProcessingService<T>` subclass registered in `src/Worker/Program.cs`. Worker already has Infrastructure services (DbContext, blob storage, SkiaSharp).
+- AppHost registers `storage.AddQueues(...)` only; no per-queue change.
+- Stock cache: `ItemCreated/UpdatedEventHandler` already clear the coarse stock tag, so a new `ImageFileId` in `StockItemDto` shows after create/edit. Matches your "stock unaffected" decision at no cost.
 
-| Layer | What changes | Files (verified) |
-|-------|--------------|------------------|
-| Domain | New enum `StockBatchSource { Order, Donation }`; `StockBatch.Source` (init `Order`); `StockTransactionType.Donation` appended last | `src/Domain/Enums/StockBatchSource.cs` (new), `src/Domain/Entities/Stock/StockBatch.cs`, `src/Domain/Enums/StockTransactionType.cs` |
-| Infrastructure | `Source` as string, max 20, required, default `Order`; migration `AddStockBatchSource` | `src/Infrastructure/Data/Configurations/StockBatchConfiguration.cs`, `src/Infrastructure/Data/Migrations/<ts>_AddStockBatchSource.cs` (+ generated Designer/snapshot) |
-| Application | `Source` on request, command, list DTO, both DTO projections; validator `IsInEnum`; handler sets batch source + transaction type | `Models/StockBatchRequests.cs`, `Models/StockBatchDto.cs`, `Commands/CreateStockBatch/{CreateStockBatchCommand,CreateStockBatchCommandValidator,CreateStockBatchCommandHandler}.cs`, `Queries/GetAllStockBatches/GetAllStockBatchesHandler.cs` (all under `src/Application/Features/StockBatches/`) |
-| Web | Endpoint maps `request.Source` into the command (it copies fields by hand, so it must be edited) | `src/Web/Endpoints/StockBatches.cs` |
-| Client | `StockBatchSource` type + fields; new source-step component; modal becomes 2-step wizard | `src/Client/src/app/core/models/stock-batch.ts`, `src/Client/src/app/shared/stock-batches/ui/modals/steps/source-step.ts` (new), `src/Client/src/app/shared/stock-batches/ui/modals/add-stock-batch-modal.{ts,html}` |
-| Tests | Validator + handler unit tests, functional command test, client spec | `tests/Application.UnitTests/Features/StockBatches/Commands/CreateStockBatch/*Tests.cs`, `tests/Application.FunctionalTests/Features/StockBatches/Commands/CreateStockBatch/CreateStockBatchCommandTests.cs`, `src/Client/src/app/shared/stock-batches/ui/modals/add-stock-batch-modal.spec.ts` (new) |
+## Design decisions
+1. **New queue `item-image-thumbnail`** (2 min visibility). `item-import` has a 20 min timeout and slow AI batches; thumbnails would wait behind them.
+2. **Message** `GenerateItemThumbnailCommand(ItemId, ImageFileId)`; no validator (stale = no-op, not poison).
+3. **Fixed thumbnail path** `thumbnails/{ImageFileId}.webp` in the original's container (`ItemImagePaths.Thumbnail`). Worker never writes to the DB → idempotent; a stale job can only leave an orphan blob. "Ready" = blob exists. *(D1)*
+4. **Worker steps:** load item (no-tracking); if missing or `ImageFileId` ≠ message → `Ok` no-op; load `FileMetadata` (missing → `Ok`); `TryDownloadAsync` original (null → `Ok`); decode failure → `Result.Fail(ItemErrors.InvalidImage)` (poison); upload WebP; `Ok`.
+5. **`thumb` endpoint falls back to the original** until the thumbnail exists. Real thumb/full: `Cache-Control: private, max-age=31536000, immutable`; fallback: `no-cache` (else browser pins the full image under `?v=`).
+6. **Old blobs deleted in the Web Edit handler**, after the commit, best effort (try/catch + log); old `FileMetadata.Status = Deleted` in the same save.
+7. **Server validation** in Create/Edit validators via static `ItemImageRules` (`CustomAsync`): file exists + `Completed`, owned by current user, content-type allowlist, ≤ 5 MB, not used by another item, then (only if the above pass) decode check via `IImageThumbnailService.CanDecode`. → 400 through `ValidationException`. *(D4)*
+8. **Unique filtered index** on `Items.ImageFileId`. *(D2)*
+9. No new `app-files` literal (container comes from `FileMetadata.BlobContainer`).
 
-## Verified facts the tasks rely on
+## Deviations from SPEC.md — need your OK
+- **D1** Only `Item.ImageFileId` column (no `ImageBlobPath`/`ThumbnailBlobPath`); original path from `FileMetadata`, thumbnail at the fixed path. Costs one extra blob lookup on `thumb` requests (immutable caching keeps it low).
+- **D2** Unique filtered index on `ImageFileId` + "not used by another item" rule (spec said no index). Prevents one item's replace from deleting another item's shared image.
+- **D3** New queue instead of reusing `item-import`.
+- **D4** Image errors are `ValidationErrorCodes.InvalidImage` (400); `ItemErrors.InvalidImage` only for the Worker failure.
 
-- **Endpoint maps request -> command field by field** (`StockBatches.CreateStockBatch` builds `new CreateStockBatchCommand { ... }`), so `Source = request.Source` must be added there.
-- **`StockBatchListItemDto` is projected in two places**: `CreateStockBatchCommandHandler` (follow-up projection) and `GetAllStockBatchesHandler` (`Data = new StockBatchListItemDto { ... }`). Both need `Source = b.Source`; otherwise the list returns `Order` for every row.
-- **API enums are camelCase strings** (`JsonStringEnumConverter(JsonNamingPolicy.CamelCase)` in `src/Web/DependencyInjection.cs`). The client type is `'order' | 'donation'`, not `'Order'`.
-- `StockTransactionType` has no explicit `HasConversion`, so it is stored as int. Appending `Donation` (= 6) is safe; inserting it elsewhere would corrupt data.
-- The string-enum config pattern is `OrderListConfiguration`: `.HasConversion<string>().HasMaxLength(20).IsRequired()`.
-- The unit-test `CreateStockBatchTestDbContext` is a minimal model with no `StockBatchConfiguration`, so string conversion is not exercised there; the functional test covers the real mapping.
-- `CHECKABLE_CARD_CLASSES` is already imported across features by relative path (`shared/stock/ui/modals/count/locations-step/locations-step.ts`). Do the same and don't move it.
-- Icons `icons:cart-shopping` and `icons:gift` exist in `src/Client/src/assets/icons/`.
-- Client tests run on Vitest through `ng test`; the step spec pattern is `order-lists/ui/modals/wizard/steps/steps.spec.ts`.
+## Phases
+0. **Setup:** branch `feature/item-images`.
+1. **Foundations:** schema (T1), blob `UploadAsync`/`TryDownloadAsync` (T2), thumbnail service (T3). → Checkpoint A
+2. **Worker job:** command + handler (T4), queue wiring (T5). → Checkpoint B
+3. **Write path:** validation (T6), DTO + Create (T7), Edit set/replace/remove (T8), stock DTO (T9a). → Checkpoint C
+4. **Read endpoint:** `GET /api/Items/{id}/image` (T9), functional tests (T10). → Checkpoint D
+5. **Frontend:** models + `ske-item-thumbnail` (T11), show in 4 places (T12), upload component (T13), form + modal (T14).
+6. **Verify & PR:** full build/tests, manual smoke via AppHost, `graphify update .`, haiku review, PR.
 
-## Dependency order
+Backend tasks are test-first (red → green). Implementation by sonnet, exploration by haiku, per your instruction. Task details and acceptance criteria: `tasks/todo.md`.
 
-```
-T1 Domain + EF config + migration
- └─ T2 Application: request/command/validator/handler/DTO/query projection + endpoint + unit tests
-     └─ T3 Functional test (needs migration + T2)
-T4 Client model + source-step component (needs only the API contract, not T1-T3)
- └─ T5 Modal wizard + client spec
-T6 Final verification
-```
-
-## Parallel vs sequential
-
-- Sequential: T1 -> T2 -> T3 (each one compiles against the previous one).
-- Parallel: T4/T5 can run alongside T1-T3 once the contract is fixed (`source: 'order' | 'donation'` on the create request and list DTO). Do T5 after T4.
-- T6 last.
-
-## Risks and mitigations
-
-| Risk | Mitigation |
-|------|------------|
-| Migration fails to backfill existing rows | The column must be non-null with `defaultValue: "Order"`. Inspect the generated `Up()`; if the scaffold emitted `defaultValue: ""`, fix it in the config (`HasDefaultValue(StockBatchSource.Order)`) and regenerate. Never edit the Designer/snapshot. |
-| `Source` not flowing because one copy point was missed (endpoint, command, two projections) | T2 acceptance lists every copy point. The functional test asserts the round trip through the list query. |
-| Old clients omitting `source` | Request and command properties default to `StockBatchSource.Order` (0). The functional test sends a command without `Source`. |
-| Losing form values when going back from Detalii to Sursă | Keep `<ske-add-stock-batch-form>` always rendered and hide it on the source step (`[class.hidden]`). Do **not** wrap it in `@if`, which would destroy its signal form. |
-| Donation transactions drop out of purchase statistics (`MaterializePurchaseStatisticsCommandHandler` filters `Type == Order`) | Intended: donations aren't purchases. No change, but call it out in the PR. |
-| Other batch creators (goods receipt, rollover, move, seeding) | They keep the CLR default `Order`; no code change (spec assumption 5). |
-
-## Verification checkpoints
-
-1. After T1: `dotnet build` passes; the migration `Up()` adds `Source nvarchar(20) NOT NULL DEFAULT 'Order'` to `StockBatches`.
-2. After T2: `dotnet build` and `dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~StockBatch"` pass.
-3. After T3: `./run-functional-tests.sh --filter "FullyQualifiedName~StockBatch"` passes.
-4. After T5: `cd src/Client && npm run build && npm test` pass.
-5. T6: full `dotnet build`, all of the above, and a manual or `/run` check of the success criteria in SPEC.md (Sursă -> Detalii, Comandă preselected, Înapoi keeps values).
+## Risks
+- Wrong `Cache-Control` on fallback → thumbnails never appear (explicit tests in T9/T10).
+- Blob can be swapped within the 10 min SAS window after confirm; size/decode checks see it once. Non-image swapped in → Worker poison, endpoint serves the original. Low risk (authenticated staff); `X-Content-Type-Options: nosniff` on the image response closes it (user approved adding nosniff on the image response).
+- A user could point an item at one of their own image import-source files; replacing would delete that blob. Minor.
+- Orphan blobs (cancelled uploads, stale jobs). Accepted.
+- Functional tests run the real Worker against Azurite while Web uses the fake blob store; the Worker finds no blob and returns `Ok`. Expected.
+- Migration reaches production on deploy; review the SQL before merge.
+- `?size=thumb` enum binding case-insensitivity unverified (covered by T10).
