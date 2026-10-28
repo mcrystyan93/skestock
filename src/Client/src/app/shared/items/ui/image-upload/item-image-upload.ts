@@ -18,6 +18,7 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 export class ItemImageUpload implements FormValueControl<string | null> {
   public readonly value = model<string | null>(null);
   public readonly itemId = input<string | null>(null);
+  public readonly uploading = model(false);
 
   protected readonly storage = inject(FileStorageState);
 
@@ -52,6 +53,14 @@ export class ItemImageUpload implements FormValueControl<string | null> {
           },
         ]
       : [];
+  });
+
+  private readonly _syncUploadingRef = effect(() =>
+    this.uploading.set(this.storage.uploadLoading()),
+  );
+
+  private readonly _notifyFailureRef = effect(() => {
+    if (this.storage.hasUploadFailures()) this._message.error('Încărcarea imaginii a eșuat');
   });
 
   private readonly _emitUploadedRef = effect(() => {

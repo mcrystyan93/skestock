@@ -1,15 +1,11 @@
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Items.Models;
-using skestock.Application.Features.Items.Commands.GenerateItemThumbnail;
 using skestock.Application.Storage.DTOs;
 using skestock.Application.Storage.Interfaces;
 using skestock.Domain.Enums;
 using skestock.Domain.Events.Items;
-using skestock.Domain.Queues;
-using skestock.Shared;
 
 namespace skestock.Application.Features.Items.Commands.EditItem;
 
@@ -46,13 +42,7 @@ public class EditItemCommandHandler(
 
             if (request.ImageFileId is { } newFileId)
             {
-                dbContext.OutboxMessages.Add(new OutboxMessage
-                {
-                    Type = typeof(GenerateItemThumbnailCommand).AssemblyQualifiedName!,
-                    Payload = JsonSerializer.Serialize(new GenerateItemThumbnailCommand(item.Id, newFileId)),
-                    QueueName = Services.ItemImageThumbnailQueue,
-                    UserId = user.Id
-                });
+                dbContext.OutboxMessages.Add(ItemImageOutbox.ThumbnailMessage(item.Id, newFileId, user.Id));
             }
 
             if (previousFileId is { } oldFileId)

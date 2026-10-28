@@ -45,4 +45,19 @@ describe('Item Form imageFileId', () => {
 
     expect(formData?.imageFileId).toBeNull();
   });
+
+  it('blocks submit while an image upload is in flight and allows it afterwards', async () => {
+    const form = create(null);
+    const state = form as unknown as { imageUploading: { set: (v: boolean) => void } };
+
+    state.imageUploading.set(true);
+    expect((await form.submit()).isValid).toBe(false);
+
+    state.imageUploading.set(false);
+    form.itemForm.imageFileId().value.set('f2');
+    const { isValid, formData } = await form.submit();
+
+    expect(isValid).toBe(true);
+    expect(formData?.imageFileId).toBe('f2');
+  });
 });

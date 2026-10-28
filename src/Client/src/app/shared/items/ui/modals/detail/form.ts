@@ -1,6 +1,6 @@
-import { Component, input, linkedSignal } from '@angular/core';
+import { Component, input, linkedSignal, signal } from '@angular/core';
 import { CategoryDropdownValue, ItemDto } from '@ske/models';
-import { applyWhen, form, FormField, hidden, maxLength, min, required, submit } from '@angular/forms/signals';
+import { applyWhen, form, FormField, hidden, maxLength, min, required, submit, validate } from '@angular/forms/signals';
 import { NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
 import { SkeletonInputLoaderDirective } from '@ske/shared/loader';
 import {
@@ -41,6 +41,8 @@ import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 export class Form {
   public readonly loading = input.required<boolean>();
   public readonly item = input.required<Partial<ItemDto>>();
+
+  public readonly imageUploading = signal(false);
 
   private readonly _formModel = linkedSignal({
     source: () => this.item(),
@@ -96,6 +98,11 @@ export class Form {
           message: 'Termenul de valabilitate trebuie să fie de cel puțin o zi.'
         });
       }
+    );
+    validate(schemaPath.imageFileId, () =>
+      this.imageUploading()
+        ? { kind: 'imageUploading', message: 'Așteaptă finalizarea încărcării imaginii.' }
+        : undefined
     );
     required(schemaPath.category, {
       message: 'Categoria este obligatorie.'

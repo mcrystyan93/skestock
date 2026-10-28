@@ -8,9 +8,18 @@
         <nz-form-label>
           Imagine articol
         </nz-form-label>
-        <nz-form-control>
+        <nz-form-control [nzErrorTip]="imageErrorTemplate">
           <ske-item-image-upload [formField]="itemForm.imageFileId"
-                                 [itemId]="itemForm.id().value()" />
+                                 [itemId]="itemForm.id().value()"
+                                 [(uploading)]="imageUploading" />
+
+          <ng-template #imageErrorTemplate>
+            @for (error of itemForm.imageFileId().errors(); track $index) {
+              <div class="ant-form-item-explain-error">
+                {{ error.message }}
+              </div>
+            }
+          </ng-template>
         </nz-form-control>
       </nz-form-item>
     </nz-col>
