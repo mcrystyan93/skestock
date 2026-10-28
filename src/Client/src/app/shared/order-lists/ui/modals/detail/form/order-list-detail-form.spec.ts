@@ -95,6 +95,17 @@ describe('OrderListDetailForm', () => {
     expect(fixture.componentInstance.orderListForm.lineItem().value()).toBeNull();
   });
 
+  it('maps loaded lines with null fields to empty form values', () => {
+    fixture.componentRef.setInput('orderList', {
+      id: 'o1',
+      status: 'Draft',
+      lines: [{ id: 'l1', itemId: 'a', productName: 'A', quantity: 1, unit: 'buc', notes: null }]
+    });
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.orderListForm.lines().value()[0].notes).toBe('');
+  });
+
   it('merges predefined list lines by item, adding quantities of items already listed', () => {
     const form = fixture.componentInstance;
     const line = (itemId: string, quantity: number) =>

@@ -281,10 +281,10 @@ export class OrderListDetailForm {
     return {
       id: line.id ?? null,
       itemId: line.itemId ?? null,
-      productName: line.productName,
-      quantity: line.quantity,
+      productName: line.productName ?? '',
+      quantity: line.quantity ?? 0,
       unit: line.unit ?? '',
-      notes: line.notes,
+      notes: line.notes ?? '',
       clientKey: line.id ?? `loaded-${index}`
     };
   }
