@@ -28,13 +28,12 @@
     </tr>
     </thead>
     <tbody>
-    @for (lineField of linesForm.lines; track $index) {
+    @for (lineField of linesForm.lines; track lineField().value().rowId) {
       @let line = lineField().value();
       <tr ske-goods-import-review-line-row
           [lineForm]="lineField"
           [line]="line"
           [groupTotal]="groupTotals().get(line.sourceLineIndex)"
-          [canRemove]="canRemoveMap().get(line.sourceLineIndex)"
           (splitLine)="splitLine.emit({rowId:$event.rowId})"
           (removeLine)="removeLine.emit({rowId:$event.rowId})"></tr>
     }
@@ -59,12 +58,11 @@
     <div class="flex flex-col gap-3"
          role="list"
          aria-label="Linii din avizul importat">
-      @for (lineField of linesForm.lines; track $index) {
+      @for (lineField of linesForm.lines; track lineField().value().rowId) {
         @let line = lineField().value();
         <ske-goods-import-review-line-small [lineForm]="lineField"
                                             [line]="line"
                                             [groupTotal]="groupTotals().get(line.sourceLineIndex)"
-                                            [canRemove]="canRemoveMap().get(line.sourceLineIndex)"
                                             role="listitem"
                                             (splitLine)="splitLine.emit({rowId:$event.rowId})"
                                             (removeLine)="removeLine.emit({rowId:$event.rowId})" />

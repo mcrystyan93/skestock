@@ -48,7 +48,6 @@ export class ReviewLine {
   public readonly lineForm = input.required<FieldTree<ReviewEditableLine>>();
   public readonly line = input.required<ReviewEditableLine>();
   public readonly groupTotal = input<{ quantity: number, originalQuantity: number }>();
-  public readonly canRemove = input<boolean>();
 
   public readonly splitLine = output<ReviewEditableLine>();
   public readonly removeLine = output<ReviewEditableLine>();

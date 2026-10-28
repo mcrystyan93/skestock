@@ -43,11 +43,7 @@ export type GoodsReceiptImportReviewTarget = {
   importId: string;
 };
 
-/**
- * Payload emitted by the review lines table for a structural mutation (split/remove). It carries
- * the table's current *edited* working copy so the store applies the change on top of unsaved edits
- * rather than its own stale `state.lines`.
- */
+/** Payload emitted by the review lines table for a structural mutation (split/remove). */
 export type LineMutationEvent = {
   rowId: string;
 };
@@ -191,19 +187,9 @@ export const ReviewStore = signalStore(
       patchState(store, { lines: next });
     };
 
-    /** Remove a split row - never the last remaining row of a source-line group. */
+    /** Remove a row; dropping a source line's last row means it is not imported. */
     const removeLine = ({ rowId }: LineMutationEvent) => {
-      const storeLines = store.lines();
-      const line = storeLines.find((l) => l.rowId === rowId);
-
-      if (!line)
-        return;
-
-      const groupSize = storeLines.filter((l) => l.sourceLineIndex === line.sourceLineIndex).length;
-      if (groupSize <= 1)
-        return;
-
-      patchState(store, { lines: storeLines.filter((l) => l.rowId !== rowId) });
+      patchState(store, { lines: store.lines().filter((l) => l.rowId !== rowId) });
     };
 
     const confirm = rxMethod<ConfirmGoodsReceiptImportRequest>(

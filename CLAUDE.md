@@ -118,7 +118,7 @@ Never run `dotnet run --project src/Web` directly; use AppHost.
 
 **Safety and verification**
 - Run `dotnet build` and the relevant tests after changes (client changes: `npm run build` and `npm test -- --watch=false`) and report results, including failures.
-- After modifying code, run `graphify update .`.
+- After modifying code, run `graphify update .` from the repo root (running it elsewhere, e.g. `src/`, rewrites the tracked `src/graphify-out/`, which probably shouldn't be tracked).
 - Create a branch for every new feature and open a PR when finished (never commit to `master` directly). The only automated workflow is the manual deploy, so run build and tests yourself before the PR.
 - Ask before destructive actions: deleting files, dropping data, force-pushing, changing applied migrations.
 - Never commit secrets; use user-secrets or environment variables.

@@ -41,7 +41,6 @@ export class ReviewLineSmall {
   public readonly lineForm = input.required<FieldTree<ReviewEditableLine>>();
   public readonly line = input.required<ReviewEditableLine>();
   public readonly groupTotal = input<{ quantity: number; originalQuantity: number }>();
-  public readonly canRemove = input<boolean>();
 
   public readonly splitLine = output<ReviewEditableLine>();
   public readonly removeLine = output<ReviewEditableLine>();
@@ -92,9 +91,7 @@ export class ReviewLineSmall {
   }
 
   public remove(): void {
-    if (this.canRemove()) {
-      this.removeLine.emit(this.line());
-    }
+    this.removeLine.emit(this.line());
   }
 
   public get itemPlaceholder(): string {
