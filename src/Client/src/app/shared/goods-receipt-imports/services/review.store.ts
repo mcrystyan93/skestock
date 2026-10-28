@@ -43,11 +43,7 @@ export type GoodsReceiptImportReviewTarget = {
   importId: string;
 };
 
-/**
- * Payload emitted by the review lines table for a structural mutation (split/remove). It carries
- * the table's current *edited* working copy so the store applies the change on top of unsaved edits
- * rather than its own stale `state.lines`.
- */
+/** Payload emitted by the review lines table for a structural mutation (split/remove). */
 export type LineMutationEvent = {
   rowId: string;
 };
