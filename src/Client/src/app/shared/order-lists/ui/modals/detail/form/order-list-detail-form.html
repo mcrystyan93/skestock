@@ -11,13 +11,25 @@
   <nz-row [nzGutter]="[16, 0]">
     <nz-col [nzLg]="24"
             [nzXs]="24">
-      <nz-form-item *skeletonInputLoader="loading()"
-                    class="mb-2!">
-        <nz-form-control>
-          <ske-item-autocomplete [formField]="orderListForm.lineItem"
-                                 placeholder="Cauta si adauga un articol" />
-        </nz-form-control>
-      </nz-form-item>
+      <div class="flex flex-wrap items-start gap-2">
+        <nz-form-item *skeletonInputLoader="loading()"
+                      class="mb-2! min-w-60 grow basis-60">
+          <nz-form-control>
+            <ske-item-autocomplete [formField]="orderListForm.lineItem"
+                                   placeholder="Cauta si adauga un articol" />
+          </nz-form-control>
+        </nz-form-item>
+        @if (editable()) {
+          <button nz-button
+                  type="button"
+                  class="max-sm:w-full"
+                  [disabled]="loading()"
+                  (click)="openAddSupplyLists()">
+            <nz-icon nzType="icons:clipboard-list"></nz-icon>
+            Adaugă liste predefinite
+          </button>
+        }
+      </div>
     </nz-col>
   </nz-row>
 

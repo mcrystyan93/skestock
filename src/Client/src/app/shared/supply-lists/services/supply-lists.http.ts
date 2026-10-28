@@ -1,8 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
+import { EMPTY, expand, reduce } from 'rxjs';
 import {
   CreateSupplyListRequest,
   GetAllSupplyListsRequest,
+  PAGINATION_PAGE_SIZE,
   PaginatedResponse,
   SupplyListDto,
   SupplyListListItemDto,
@@ -18,6 +20,21 @@ export class SupplyListsHttp {
 
   public getAll(request: GetAllSupplyListsRequest | Partial<GetAllSupplyListsRequest>) {
     return this._httpClient.post<PaginatedResponse<SupplyListListItemDto>>('/api/SupplyLists/get-all', request);
+  }
+
+  // The API caps the page size, so the whole active set is read by following the cursor.
+  public getAllActive() {
+    const page = (cursor: string | null) => this.getAll({
+      pageSize: PAGINATION_PAGE_SIZE,
+      cursor,
+      filters: [{ field: 'isActive', operator: 'equals', value: true, fieldType: 'boolean' }],
+      sort: [{ key: 'name', value: 'ascend' }]
+    });
+
+    return page(null).pipe(
+      expand((response) => response.hasNextPage && response.nextCursor ? page(response.nextCursor) : EMPTY),
+      reduce((all, response) => [...all, ...response.data], [] as SupplyListListItemDto[])
+    );
   }
 
   public getById(id: string) {
