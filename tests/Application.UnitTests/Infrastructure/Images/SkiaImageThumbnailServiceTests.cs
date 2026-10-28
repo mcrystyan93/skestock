@@ -20,6 +20,37 @@ public class SkiaImageThumbnailServiceTests
 
     private static SKCodec Decode(byte[] bytes) => SKCodec.Create(new MemoryStream(bytes))!;
 
+    // Inserts a minimal big-endian EXIF APP1 segment carrying only the Orientation tag right after SOI.
+    private static MemoryStream WithExifOrientation(MemoryStream jpeg, byte orientation)
+    {
+        byte[] app1 =
+        [
+            0xFF, 0xE1, 0x00, 0x22,
+            0x45, 0x78, 0x69, 0x66, 0x00, 0x00,
+            0x4D, 0x4D, 0x00, 0x2A, 0x00, 0x00, 0x00, 0x08,
+            0x00, 0x01,
+            0x01, 0x12, 0x00, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00, orientation, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00
+        ];
+        var original = jpeg.ToArray();
+        return new MemoryStream([.. original[..2], .. app1, .. original[2..]]);
+    }
+
+    [TestCase((byte)6, 128, 256)]
+    [TestCase((byte)8, 128, 256)]
+    [TestCase((byte)3, 256, 128)]
+    [TestCase((byte)1, 256, 128)]
+    public void CreateThumbnail_AppliesExifOrientation(byte orientation, int expectedWidth, int expectedHeight)
+    {
+        using var source = WithExifOrientation(Encode(600, 300, SKEncodedImageFormat.Jpeg), orientation);
+
+        var bytes = _service.CreateThumbnail(source);
+
+        using var codec = Decode(bytes);
+        codec.Info.Width.ShouldBe(expectedWidth);
+        codec.Info.Height.ShouldBe(expectedHeight);
+    }
+
     [Test]
     public void CanDecode_ExcessivePixelCount_ReturnsFalse()
     {
