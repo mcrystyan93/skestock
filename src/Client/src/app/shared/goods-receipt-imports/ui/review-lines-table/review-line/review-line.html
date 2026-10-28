@@ -80,16 +80,14 @@
           (click)="splitLine.emit(line())">
     <nz-icon nzType="icons:split" />
   </button>
-  @if (canRemove()) {
-    <button nz-button
-            nzType="text"
-            type="button"
-            nz-tooltip
-            [nzTooltipTitle]="'Sterge randul'"
-            (click)="removeLine.emit(line())">
-      <nz-icon nzType="icons:trash" />
-    </button>
-  }
+  <button nz-button
+          nzType="text"
+          type="button"
+          nz-tooltip
+          [nzTooltipTitle]="'Sterge randul'"
+          (click)="removeLine.emit(line())">
+    <nz-icon nzType="icons:trash" />
+  </button>
 </td>
 
 

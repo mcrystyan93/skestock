@@ -191,19 +191,9 @@ export const ReviewStore = signalStore(
       patchState(store, { lines: next });
     };
 
-    /** Remove a split row - never the last remaining row of a source-line group. */
+    /** Remove a row; dropping a source line's last row means it is not imported. */
     const removeLine = ({ rowId }: LineMutationEvent) => {
-      const storeLines = store.lines();
-      const line = storeLines.find((l) => l.rowId === rowId);
-
-      if (!line)
-        return;
-
-      const groupSize = storeLines.filter((l) => l.sourceLineIndex === line.sourceLineIndex).length;
-      if (groupSize <= 1)
-        return;
-
-      patchState(store, { lines: storeLines.filter((l) => l.rowId !== rowId) });
+      patchState(store, { lines: store.lines().filter((l) => l.rowId !== rowId) });
     };
 
     const confirm = rxMethod<ConfirmGoodsReceiptImportRequest>(

@@ -98,18 +98,6 @@ export class ReviewLinesTable {
     return totals;
   });
 
-  public canRemoveMap = computed(() => {
-    const removeMap = new Map<number, boolean>();
-    const lines = this._linesModel().lines;
-
-    for (const line of lines) {
-      const count = lines.filter((l) => l.sourceLineIndex === line.sourceLineIndex).length;
-      removeMap.set(line.sourceLineIndex, count > 1);
-    }
-
-    return removeMap;
-  });
-
   public readonly alertMessage = computed<{ text: string, type: NzAlertType }>(() => {
     const lines = this.linesForm().value()?.lines;
 
