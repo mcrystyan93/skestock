@@ -34,7 +34,6 @@
           [lineForm]="lineField"
           [line]="line"
           [groupTotal]="groupTotals().get(line.sourceLineIndex)"
-          [canRemove]="canRemoveMap().get(line.sourceLineIndex)"
           (splitLine)="splitLine.emit({rowId:$event.rowId})"
           (removeLine)="removeLine.emit({rowId:$event.rowId})"></tr>
     }
@@ -64,7 +63,6 @@
         <ske-goods-import-review-line-small [lineForm]="lineField"
                                             [line]="line"
                                             [groupTotal]="groupTotals().get(line.sourceLineIndex)"
-                                            [canRemove]="canRemoveMap().get(line.sourceLineIndex)"
                                             role="listitem"
                                             (splitLine)="splitLine.emit({rowId:$event.rowId})"
                                             (removeLine)="removeLine.emit({rowId:$event.rowId})" />
