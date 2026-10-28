@@ -138,7 +138,7 @@ export class ClassDailyConsumptionChart {
       y: {
         formatter: (value, options) => {
           const point = points[options?.dataPointIndex ?? -1];
-          const quantity = QUANTITY_FORMATTER.format(value);
+          const quantity = QUANTITY_FORMATTER.format(value ?? 0);
           return point ? `${quantity} (${CURRENCY_FORMATTER.format(point.value)})` : quantity;
         }
       }
