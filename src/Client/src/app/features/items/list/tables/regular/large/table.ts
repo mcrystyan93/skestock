@@ -5,9 +5,10 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { TimeAgoPipe } from '@ske/shared/pipes';
+import { ItemThumbnail } from '@ske/shared/items';
 
 @Component({
-  imports: [NzTableModule, NzTypographyComponent, NzIconDirective, TimeAgoPipe],
+  imports: [ItemThumbnail, NzTableModule, NzTypographyComponent, NzIconDirective, TimeAgoPipe],
   selector: 'ske-item-table',
   styles: ``,
   templateUrl: './table.html',

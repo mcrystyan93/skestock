@@ -24,6 +24,11 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
             .IsUnique()
             .HasFilter("[Sku] IS NOT NULL");
 
+        // One image file per item; also backs the "not used by another item" validation lookup.
+        builder.HasIndex(i => i.ImageFileId)
+            .IsUnique()
+            .HasFilter("[ImageFileId] IS NOT NULL");
+
         // Default keyset sort: (CreatedDate DESC, Id DESC).
         builder.HasIndex(i => new { i.CreatedDate, i.Id })
             .HasDatabaseName("IX_Items_CreatedDate_Id")

@@ -1,18 +1,23 @@
+using System.Text.Json;
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Features.Items.Commands.GenerateItemThumbnail;
 using skestock.Application.Features.Items.Models;
 using skestock.Domain.Entities;
 using skestock.Domain.Entities.Items;
 using skestock.Domain.Events.Items;
+using skestock.Domain.Queues;
+using skestock.Shared;
 
 namespace skestock.Application.Features.Items.Commands.CreateItem;
 
-public class CreateItemCommandHandler(IApplicationDbContext dbContext)
+public class CreateItemCommandHandler(IApplicationDbContext dbContext, IUser user)
     : IRequestHandler<CreateItemCommand, Result<ItemDto>>
 {
     public async ValueTask<Result<ItemDto>> Handle(CreateItemCommand request, CancellationToken cancellationToken)
     {
         var item = new Item
         {
+            Id = Guid.CreateVersion7(), // known before save: the thumbnail job message carries it
             Sku = string.IsNullOrWhiteSpace(request.Sku) ? null : request.Sku.Trim(),
             Name = request.Name.Trim(),
             Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
@@ -21,11 +26,23 @@ public class CreateItemCommandHandler(IApplicationDbContext dbContext)
             IsPerishable = request.IsPerishable,
             ShelfLifeDays = request.ShelfLifeDays,
             CategoryId = request.CategoryId,
+            ImageFileId = request.ImageFileId,
             IsActive = true
         };
 
         dbContext.Items.Add(item);
         item.AddDomainEvent(new ItemCreatedEvent(item));
+        if (request.ImageFileId is { } imageFileId)
+        {
+            dbContext.OutboxMessages.Add(new OutboxMessage
+            {
+                Type = typeof(GenerateItemThumbnailCommand).AssemblyQualifiedName!,
+                Payload = JsonSerializer.Serialize(new GenerateItemThumbnailCommand(item.Id, imageFileId)),
+                QueueName = Services.ItemImageThumbnailQueue,
+                UserId = user.Id
+            });
+        }
+
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Ok(await ItemDtoMapper.FromTrackedItemAsync(dbContext, item, cancellationToken));

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using skestock.Application.Storage.DTOs;
 using skestock.Application.Storage.Interfaces;
 using skestock.Application.Storage.Models;
@@ -12,6 +13,8 @@ namespace skestock.Application.FunctionalTests.Infrastructure;
 /// </summary>
 public class FakeBlobStorageService : IBlobStorageService
 {
+    private readonly ConcurrentDictionary<(string Container, string Path), (byte[] Bytes, string ContentType)> _blobs = new();
+
     public const string BaseUrl = "https://fake.blob.local";
 
     public Task<Uri> GenerateUploadSasUriAsync(GenerateUploadSasUriDto dto, CancellationToken cancellationToken) =>
@@ -23,8 +26,28 @@ public class FakeBlobStorageService : IBlobStorageService
     public Task<BlobInfo?> GetBlobInfoAsync(GetBlobInfoDto dto, CancellationToken cancellationToken) =>
         Task.FromResult<BlobInfo?>(new BlobInfo(0, "\"0xFAKE\"", "application/octet-stream"));
 
-    public Task DeleteAsync(DeleteDto dto, CancellationToken cancellationToken) => Task.CompletedTask;
+    public Task DeleteAsync(DeleteDto dto, CancellationToken cancellationToken)
+    {
+        _blobs.TryRemove((dto.ContainerName, dto.BlobPath), out _);
+        return Task.CompletedTask;
+    }
 
     public Task<Stream> DownloadAsync(DownloadDto dto, CancellationToken cancellationToken) =>
-        Task.FromResult<Stream>(new MemoryStream());
+        Task.FromResult<Stream>(_blobs.TryGetValue((dto.ContainerName, dto.BlobPath), out var blob)
+            ? new MemoryStream(blob.Bytes)
+            : new MemoryStream());
+
+    public async Task UploadAsync(UploadDto dto, CancellationToken cancellationToken)
+    {
+        using var buffer = new MemoryStream();
+        await dto.Content.CopyToAsync(buffer, cancellationToken);
+        _blobs[(dto.ContainerName, dto.BlobPath)] = (buffer.ToArray(), dto.ContentType);
+    }
+
+    public Task<BlobContent?> TryDownloadAsync(DownloadDto dto, CancellationToken cancellationToken) =>
+        Task.FromResult(_blobs.TryGetValue((dto.ContainerName, dto.BlobPath), out var blob)
+            ? new BlobContent(new MemoryStream(blob.Bytes), blob.ContentType)
+            : null);
+
+    public bool Exists(string container, string path) => _blobs.ContainsKey((container, path));
 }

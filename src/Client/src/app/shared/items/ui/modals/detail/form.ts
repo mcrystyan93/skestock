@@ -12,6 +12,7 @@ import {
 import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
 import { CategoryDropdown } from '@ske/shared/categories';
 import { NzSwitchComponent } from 'ng-zorro-antd/switch';
+import { ItemImageUpload } from '../../image-upload/item-image-upload';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 
 @Component({
@@ -30,7 +31,8 @@ import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
     NzColDirective,
     NzRowDirective,
     NzTextareaCountComponent,
-    NzInputAddonAfterDirective
+    NzInputAddonAfterDirective,
+    ItemImageUpload
   ],
   selector: 'ske-item-form',
   styles: ``,
@@ -51,6 +53,7 @@ export class Form {
       minThreshold: item.minThreshold ?? 0,
       isPerishable: item.isPerishable ?? false,
       shelfLifeDays: item.shelfLifeDays ?? null,
+      imageFileId: item.imageFileId ?? null,
       category: !item.categoryId ? null : { id: item.categoryId, name: item.categoryName ?? '' }
     })
   });
@@ -118,6 +121,7 @@ export type ItemFormModel = {
   minThreshold: number;
   isPerishable: boolean;
   shelfLifeDays: number | null;
+  imageFileId: string | null;
   category: CategoryDropdownValue;
 };
 export type ItemFormSubmit = {

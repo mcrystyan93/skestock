@@ -17,6 +17,9 @@ public class Item: BaseAuditableEntity, IKeysetEntity
     public int? ShelfLifeDays { get; set; }
     public bool IsActive { get; set; } = true;
 
+    // Confirmed FileMetadata.FileId of the item's single image; the thumbnail lives at a path derived from it.
+    public Guid? ImageFileId { get; set; }
+
     public Guid CategoryId { get; set; }
     public Category Category { get; set; } = null!;
 

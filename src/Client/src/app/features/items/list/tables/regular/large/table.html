@@ -38,13 +38,19 @@
         class="cursor-pointer">
 
       <td>
-        <strong nz-typography
-                class="mb-0!">
-          {{ item.name }}
-        </strong>
-        <div nz-typography
-             nzType="secondary"
-             class="mb-0!">{{ item.sku }}
+        <div class="flex items-center gap-3">
+          <ske-item-thumbnail [itemId]="item.id"
+                              [imageFileId]="item.imageFileId" />
+          <div class="min-w-0">
+            <strong nz-typography
+                    class="mb-0!">
+              {{ item.name }}
+            </strong>
+            <div nz-typography
+                 nzType="secondary"
+                 class="mb-0!">{{ item.sku }}
+            </div>
+          </div>
         </div>
       </td>
       <td>

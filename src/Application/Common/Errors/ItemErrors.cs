@@ -17,6 +17,32 @@ public static class ItemErrors
             Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object> { ["itemId"] = itemId });
         }
     }
+
+    public sealed class ImageNotFound : Error
+    {
+        public const string ErrorCode = "items.image_not_found";
+
+        public ImageNotFound(Guid itemId) : base($"Item with id '{itemId}' has no image.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status404NotFound);
+            Metadata.Add(ErrorMetadataKeys.Title, "Item image not found");
+            Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
+            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object> { ["itemId"] = itemId });
+        }
+    }
+
+    public sealed class InvalidImage : Error
+    {
+        public const string ErrorCode = "items.invalid_image";
+
+        public InvalidImage(Guid imageFileId) : base($"File '{imageFileId}' is not a decodable image.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status400BadRequest);
+            Metadata.Add(ErrorMetadataKeys.Title, "Invalid item image");
+            Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
+            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object> { ["imageFileId"] = imageFileId });
+        }
+    }
 }
 
 public static class ItemImportBatchErrors

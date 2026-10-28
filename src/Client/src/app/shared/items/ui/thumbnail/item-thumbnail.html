@@ -1,0 +1,5 @@
+@if (url(); as src) {
+  <img [src]="src" loading="lazy" alt="Imagine articol" class="h-full w-full object-cover" />
+} @else {
+  <nz-icon nzType="icons:box" aria-hidden="true" class="text-xl" />
+}

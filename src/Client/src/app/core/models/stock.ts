@@ -19,6 +19,7 @@ export type StockItemDto = {
   quantity: number;
   isLowStock: boolean;
   hideWhenZeroStock: boolean;
+  imageFileId?: string | null;
 };
 
 /** Mirrors src/Application/Features/Stock/Models/StockDto.cs (StockReportDto). */

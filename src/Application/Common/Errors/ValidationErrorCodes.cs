@@ -72,6 +72,10 @@ public class ValidationErrorCodes
     /// <summary>The estimated base64/provider payload exceeds <c>ImportBatchOptions.MaxEncodedPayloadBytes</c>.</summary>
     public const string EncodedPayloadTooLarge = "validation.encoded_payload_too_large";
 
+    // ── Item image codes ───────────────────────────────────────────────────
+    /// <summary>A referenced item image file could not be decoded as an image.</summary>
+    public const string InvalidImage = "validation.invalid_image";
+
     // ── Fallback ───────────────────────────────────────────────────────────
     public const string Unknown = "validation.unknown";
 }

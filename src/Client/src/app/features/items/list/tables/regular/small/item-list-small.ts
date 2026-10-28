@@ -13,8 +13,11 @@ import {
   CdkVirtualScrollViewport,
 } from '@angular/cdk/scrolling';
 
+import { ItemThumbnail } from '@ske/shared/items';
+
 @Component({
   imports: [
+    ItemThumbnail,
     NzCardComponent,
     NzEmptyComponent,
     NzSkeletonComponent,
