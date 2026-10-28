@@ -101,7 +101,7 @@ export class ClassItemStockEvolutionChart {
 
   public readonly tooltip = computed<ApexOptions['tooltip']>(() => ({
     x: { format: 'dd MMM yyyy' },
-    y: { formatter: (value) => QUANTITY_FORMATTER.format(value) }
+    y: { formatter: (value) => QUANTITY_FORMATTER.format(value ?? 0) }
   }));
 
   public readonly colors = computed<ApexOptions['colors']>(() => [STOCK_COLOR]);
