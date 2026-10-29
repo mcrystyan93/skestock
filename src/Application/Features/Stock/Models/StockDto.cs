@@ -22,6 +22,7 @@ public record StockItemDto
     public Guid ItemId { get; init; }
     public string ItemName { get; init; } = string.Empty;
     public string? Sku { get; init; }
+    public Guid? ImageFileId { get; init; }
     public Guid CategoryId { get; init; }
     public string CategoryName { get; init; } = string.Empty;
     public CategoryIconDto? CategoryIcon { get; init; }

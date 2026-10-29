@@ -1,0 +1,13 @@
+@if (url(); as src) {
+  <button
+    type="button"
+    class="h-full w-full cursor-zoom-in"
+    aria-label="Deschide imaginea"
+    (click)="open($event)"
+    (keydown)="$event.stopPropagation()"
+  >
+    <img [src]="src" loading="lazy" alt="Imagine articol" class="h-full w-full object-cover" />
+  </button>
+} @else {
+  <nz-icon nzType="icons:box" aria-hidden="true" class="text-xl" />
+}

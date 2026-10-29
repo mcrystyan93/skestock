@@ -1,3 +1,4 @@
+using skestock.Application.UnitTests.Features.Items.Images;
 using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Errors;
 using skestock.Application.Features.Items.Commands.CreateItem;
@@ -30,7 +31,7 @@ public class CreateItemCommandValidatorTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var validator = new CreateItemCommandValidator(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", CategoryId = category.Id });
 
@@ -42,7 +43,7 @@ public class CreateItemCommandValidatorTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var validator = new CreateItemCommandValidator(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var result = await validator.ValidateAsync(new CreateItemCommand { Name = "", Unit = "unit", CategoryId = category.Id });
 
@@ -54,7 +55,7 @@ public class CreateItemCommandValidatorTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var validator = new CreateItemCommandValidator(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "", CategoryId = category.Id });
 
@@ -66,7 +67,7 @@ public class CreateItemCommandValidatorTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var validator = new CreateItemCommandValidator(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", MinThreshold = -1, CategoryId = category.Id });
 
@@ -78,7 +79,7 @@ public class CreateItemCommandValidatorTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var validator = new CreateItemCommandValidator(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", MinThreshold = 0, CategoryId = category.Id });
 
@@ -90,7 +91,7 @@ public class CreateItemCommandValidatorTests
     {
         var (context, _) = await CreateContextAsync();
         await using var __ = context;
-        var validator = new CreateItemCommandValidator(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", CategoryId = Guid.Empty });
 
@@ -102,7 +103,7 @@ public class CreateItemCommandValidatorTests
     {
         var (context, _) = await CreateContextAsync();
         await using var __ = context;
-        var validator = new CreateItemCommandValidator(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", CategoryId = Guid.NewGuid() });
 
@@ -117,7 +118,7 @@ public class CreateItemCommandValidatorTests
         context.Items.Add(new Item { Name = "Pencil", Unit = "unit", Sku = "SKU-1", CategoryId = category.Id });
         await context.SaveChangesAsync(CancellationToken.None);
 
-        var validator = new CreateItemCommandValidator(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
         var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Other", Unit = "unit", Sku = "SKU-1", CategoryId = category.Id });
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.DuplicateSku);
@@ -131,7 +132,7 @@ public class CreateItemCommandValidatorTests
         context.Items.Add(new Item { Name = "Pencil", Unit = "unit", Sku = "SKU-1", CategoryId = category.Id });
         await context.SaveChangesAsync(CancellationToken.None);
 
-        var validator = new CreateItemCommandValidator(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
         var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Other", Unit = "unit", Sku = "  sku-1  ", CategoryId = category.Id });
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.DuplicateSku);
@@ -145,7 +146,7 @@ public class CreateItemCommandValidatorTests
         context.Items.Add(new Item { Name = "Pencil", Unit = "unit", Sku = null, CategoryId = category.Id });
         await context.SaveChangesAsync(CancellationToken.None);
 
-        var validator = new CreateItemCommandValidator(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
         var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Other", Unit = "unit", CategoryId = category.Id });
 
         result.Errors.ShouldNotContain(e => e.ErrorCode == ValidationErrorCodes.DuplicateSku);
@@ -156,7 +157,7 @@ public class CreateItemCommandValidatorTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var validator = new CreateItemCommandValidator(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", ShelfLifeDays = null, CategoryId = category.Id });
 
@@ -168,7 +169,7 @@ public class CreateItemCommandValidatorTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var validator = new CreateItemCommandValidator(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", ShelfLifeDays = 30, CategoryId = category.Id });
 
@@ -180,7 +181,7 @@ public class CreateItemCommandValidatorTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var validator = new CreateItemCommandValidator(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", ShelfLifeDays = 0, CategoryId = category.Id });
 
@@ -192,7 +193,7 @@ public class CreateItemCommandValidatorTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var validator = new CreateItemCommandValidator(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
         var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", ShelfLifeDays = -5, CategoryId = category.Id });
 

@@ -1,6 +1,6 @@
-import { Component, input, linkedSignal } from '@angular/core';
+import { Component, input, linkedSignal, signal } from '@angular/core';
 import { CategoryDropdownValue, ItemDto } from '@ske/models';
-import { applyWhen, form, FormField, hidden, maxLength, min, required, submit } from '@angular/forms/signals';
+import { applyWhen, form, FormField, hidden, maxLength, min, required, submit, validate } from '@angular/forms/signals';
 import { NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
 import { SkeletonInputLoaderDirective } from '@ske/shared/loader';
 import {
@@ -12,6 +12,7 @@ import {
 import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
 import { CategoryDropdown } from '@ske/shared/categories';
 import { NzSwitchComponent } from 'ng-zorro-antd/switch';
+import { ItemImageUpload } from '../../image-upload/item-image-upload';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 
 @Component({
@@ -30,7 +31,8 @@ import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
     NzColDirective,
     NzRowDirective,
     NzTextareaCountComponent,
-    NzInputAddonAfterDirective
+    NzInputAddonAfterDirective,
+    ItemImageUpload
   ],
   selector: 'ske-item-form',
   styles: ``,
@@ -39,6 +41,8 @@ import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 export class Form {
   public readonly loading = input.required<boolean>();
   public readonly item = input.required<Partial<ItemDto>>();
+
+  public readonly imageUploading = signal(false);
 
   private readonly _formModel = linkedSignal({
     source: () => this.item(),
@@ -51,6 +55,7 @@ export class Form {
       minThreshold: item.minThreshold ?? 0,
       isPerishable: item.isPerishable ?? false,
       shelfLifeDays: item.shelfLifeDays ?? null,
+      imageFileId: item.imageFileId ?? null,
       category: !item.categoryId ? null : { id: item.categoryId, name: item.categoryName ?? '' }
     })
   });
@@ -94,6 +99,11 @@ export class Form {
         });
       }
     );
+    validate(schemaPath.imageFileId, () =>
+      this.imageUploading()
+        ? { kind: 'imageUploading', message: 'Așteaptă finalizarea încărcării imaginii.' }
+        : undefined
+    );
     required(schemaPath.category, {
       message: 'Categoria este obligatorie.'
     });
@@ -118,6 +128,7 @@ export type ItemFormModel = {
   minThreshold: number;
   isPerishable: boolean;
   shelfLifeDays: number | null;
+  imageFileId: string | null;
   category: CategoryDropdownValue;
 };
 export type ItemFormSubmit = {

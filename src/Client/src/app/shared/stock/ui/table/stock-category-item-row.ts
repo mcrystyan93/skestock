@@ -13,8 +13,11 @@ import { StockItemDto } from '@ske/models';
 import { StopClick } from '@ske/shared/directives';
 import { TimeAgoPipe } from '@ske/shared/pipes';
 
+import { ItemThumbnail } from '@ske/shared/items';
+
 @Component({
   imports: [
+    ItemThumbnail,
     NzButtonComponent,
     NzDropdownDirective,
     NzDropdownMenuComponent,

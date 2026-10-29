@@ -31,20 +31,26 @@
                (click)="onEdit.emit(item)"
                (keydown.enter)="onEdit.emit(item)"
                (keydown.space)="onSpace($event, item)">
-        <div class="flex min-w-0 items-center justify-between gap-2">
-          <strong nz-typography
-                  class="mb-0! min-w-0 truncate"
-                  [nzType]="item.isActive ? undefined : 'secondary'"
-                  [attr.title]="item.name">{{ item.name }}</strong>
-          <nz-tag class="me-0! shrink-0"
-                  [nzColor]="item.isActive ? 'success' : 'default'">
-            {{ item.isActive ? 'Activ' : 'Inactiv' }}
-          </nz-tag>
+        <div class="flex min-w-0 items-center gap-3">
+          <ske-item-thumbnail [itemId]="item.id"
+                              [imageFileId]="item.imageFileId" />
+          <div class="min-w-0 grow">
+            <div class="flex min-w-0 items-center justify-between gap-2">
+              <strong nz-typography
+                      class="mb-0! min-w-0 truncate"
+                      [nzType]="item.isActive ? undefined : 'secondary'"
+                      [attr.title]="item.name">{{ item.name }}</strong>
+              <nz-tag class="me-0! shrink-0"
+                      [nzColor]="item.isActive ? 'success' : 'default'">
+                {{ item.isActive ? 'Activ' : 'Inactiv' }}
+              </nz-tag>
+            </div>
+            <div nz-typography
+                 nzType="secondary"
+                 class="mb-0! mt-1 truncate"
+                 [attr.title]="subtitle(item)">{{ subtitle(item) }}</div>
+          </div>
         </div>
-        <div nz-typography
-             nzType="secondary"
-             class="mb-0! mt-1 truncate"
-             [attr.title]="subtitle(item)">{{ subtitle(item) }}</div>
       </nz-card>
     </div>
   </cdk-virtual-scroll-viewport>

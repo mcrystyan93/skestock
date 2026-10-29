@@ -73,6 +73,9 @@
                      class="relative min-w-0"
                      [class]="cardToneClass(item)">
               <div class="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-x-2 gap-y-1">
+                <div class="flex min-w-0 items-center gap-3">
+                  <ske-item-thumbnail [itemId]="item.itemId"
+                                      [imageFileId]="item.imageFileId" />
                 <div class="min-w-0">
                   <button type="button"
                           class="after:absolute after:inset-0 block max-w-full overflow-hidden text-left font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
@@ -92,6 +95,7 @@
                              aria-hidden="true" />
                     {{ item.lastUpdatedAt ? (item.lastUpdatedAt | timeAgo) : '—' }}
                   </div>
+                </div>
                 </div>
 
                 <div class="relative z-10 flex shrink-0 flex-col items-end">

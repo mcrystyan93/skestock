@@ -1,64 +1,90 @@
-# Spec: Stock batch source (Order / Donation) in the Add Stock wizard
+# Spec: Item images
 
 ## Objective
-When adding stock, the user first picks where the item comes from (**Comandă** / Order or **Donație** / Donation), then fills the existing form. The choice is persisted on the batch.
+Staff can attach one image to an item. The image shows as a thumbnail in the items table (desktop) and list (mobile), and in the stock page rows/cards. Create/Edit item form gets an `nz-upload` area (picture-card) to add, replace, remove the image.
 
-Success: a batch created via the modal stores its source; every pre-existing batch reads as `Order`; Donation batches get a `Donation` stock transaction.
+Success: upload an image in the item modal → thumbnail appears in items list and stock page; replace/remove works; invalid files are rejected on client and server.
 
-## Assumptions
-1. "Order modal" = the order-list wizard (`shared/order-lists/ui/modals/wizard`), not the stock-count wizard. Reuse `CHECKABLE_CARD_CLASSES` (`steps/card-classes.ts`) and the radio-card pattern from `steps/source-step.ts`.
-2. Wizard has 2 steps: `source` → `details`. Footer: Înapoi (details only), Închide, Următorul (source) / Salvează și închide + Salvează (details).
-3. Step state kept in the modal component with a signal (a store like `OrderListWizardStore` is overkill for 2 steps).
-4. Enum persisted as **string** (`HasConversion<string>()`), matching most enums here.
-5. Other batch creators (goods receipt create/import, class rollover, move, adjust surplus, demo seeding) default to `Order` via the column default; no behaviour change.
-6. Unit price stays required for Donation (user decision). No table column/filter for source yet (user decision).
-7. `StockTransactionType.Donation` is **appended** at the end (that enum is stored as int).
-8. Existing backfill: migration column `defaultValue: "Order"` is the backfill ("on first run" = on migration; no startup code).
+## Decisions (confirmed by user)
+1. **Upload path:** reuse existing SAS flow (`request-upload` → PUT to blob → `confirm-upload`). Create/Edit item request carries `imageFileId` (a confirmed `FileMetadata.FileId`). No multipart.
+2. **Thumbnail:** generated server-side (SkiaSharp, already a dependency) and stored as a second blob.
+3. **Serving:** `GET /api/Items/{id}/image?size=thumb|full` streams the blob with cache headers. DTOs carry only `imageFileId` (doubles as cache-bust version).
+4. **Rules:** 1 image per item, ≤ 5 MB, `image/jpeg|png|webp|gif`.
 
-## Tech Stack
-.NET 10, EF Core (SQL Server), Mediator + FluentValidation; Angular signal forms + NG-ZORRO + Tailwind (`src/Client`).
+## Assumptions (correct me or I proceed)
+- **Thumbnail generated in the Worker** (user decision): Create/Edit handler sets `ImageFileId` and raises an outbox event → queue → Worker downloads original, resizes, uploads thumbnail, sets `ThumbnailBlobPath`. Consumer must be idempotent (at-least-once). Until the thumbnail exists, the `thumb` endpoint falls back to the original image. Output: WebP, max edge 256 px; GIF → first frame.
+- **Stock cache not invalidated by image changes** (user decision): stock query keeps its normal expiry; thumbnails appear when it expires. No stock tag changes.
+- Server validates by decoding with SkiaSharp (not trusting client content type); undecodable → validation error.
+- Replacing/removing an image deletes the old original + thumbnail blobs (best effort; leftover blobs are not a correctness issue).
+- Item import flows (CSV/AI) are untouched; imported items have no image.
+- Item autocomplete/dropdown and goods-receipt/batch tables are out of scope (no thumbnail there).
+- Disabled items keep their image.
+- Endpoint auth = same cookie auth as other endpoints; `<img src="/api/Items/{id}/image…">` works same-origin via the `/api` proxy.
+
+## Tech stack
+.NET 10 minimal APIs, Mediator, FluentValidation, FluentResults, EF Core 10/SQL Server, Azure Blob (Azurite), SkiaSharp; Angular 22 signals + Signal Forms, NG-ZORRO 22 `nz-upload`, `@ngrx/signals`, Vitest.
 
 ## Commands
 ```
 dotnet build
-dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~StockBatch"
-./run-functional-tests.sh --filter "FullyQualifiedName~StockBatch"
-cd src/Client && npm run build && npm test
-dotnet ef migrations add AddStockBatchSource --project src/Infrastructure --startup-project src/Web --output-dir Data/Migrations
+dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~Items"
+dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~Storage"
+./run-functional-tests.sh --filter "FullyQualifiedName~Items"
+dotnet ef migrations add AddItemImage --project src/Infrastructure --startup-project src/Web --context ApplicationDbContext --output-dir Data/Migrations
+dotnet ef migrations has-pending-model-changes --project src/Infrastructure --startup-project src/Web --context ApplicationDbContext
+cd src/Client && npm run build && npm test -- --watch=false
+cd src/Client && npx prettier --write <files>
 ```
 
-## Project Structure / files touched
-- Domain: new `Domain/Enums/StockBatchSource.cs` (`Order`, `Donation`); `StockBatch.Source` (default `Order`); `StockTransactionType.Donation` appended.
-- Infrastructure: `StockBatchConfiguration` (string conversion, max length, default `Order`); new migration (never hand-edit designer/snapshot).
-- Application: `CreateStockBatchRequest` + `CreateStockBatchCommand` get `Source`; validator `IsInEnum`; handler sets `Source` and transaction type (Donation → `Donation`, else `Order`); `StockBatchListItemDto` exposes `Source`.
-- Client: `core/models/stock-batch.ts` (`StockBatchSource` type, request + list DTO field); new `stock-batches/ui/modals/steps/source-step.ts`; `add-stock-batch-modal.{ts,html}` wizard (nz-steps); `mapSaveRequest` sends `source`.
-- Tests: validator + handler unit tests, functional create test, client spec for the source step/modal.
+## Project structure (touch points)
+Backend
+- `src/Domain/Entities/Items/Item.cs` — add `Guid? ImageFileId`, `string? ImageBlobPath`, `string? ThumbnailBlobPath` (container is the existing `app-files`).
+- `src/Infrastructure/Data/Configurations/ItemConfiguration.cs` + new migration (nullable columns, backward safe; optional FK/index on `ImageFileId` not needed).
+- `src/Application/Common/Interfaces/IImageThumbnailService.cs` (new) + `src/Infrastructure/...` SkiaSharp impl, registered in `Infrastructure/DependencyInjection.cs`.
+- `IBlobStorageService`: add `UploadAsync(container, path, stream, contentType, ct)` (needed to write the thumbnail); impl in `AzureBlobStorageService`; update `FakeBlobStorageService` in functional tests.
+- `Features/Items`: `CreateItemCommand`/`EditItemCommand`(+requests, validators, handlers) gain `ImageFileId`; `ItemDto` + `ItemDtoMapper` gain `ImageFileId`; new query `GetItemImage` (returns stream + content type; cacheable? no — streamed, so not an `ICacheableQuery`).
+- `src/Web/Endpoints/Items.cs` — `GET {id}/image`.
+- Stock: `StockItemDto` gains `ImageFileId`; `GetClassLocationStockHandler` already loads items — add the field.
+- Shared constant for container name `app-files` is currently hard-coded in 4 places; reuse, do not add a 5th literal (move to `skestock.Shared.Services` only if trivially in scope — otherwise ask).
 
-## Code Style
-Match `source-step.ts`: standalone component, `CHECKABLE_CARD_CLASSES`, `sr-only` radio inputs, Romanian UI copy. Backend: file-scoped namespaces, `Result` for failures.
+Frontend (`src/Client/src/app`)
+- `core/models/item.ts`, `core/models/stock.ts` — add `imageFileId?`; `CreateItemRequest/EditItemRequest` add `imageFileId?: string | null`.
+- `shared/items/ui/modals/detail/form.ts|html` — new `imageFileId` form field + picture-card `nz-upload` (new small component, e.g. `shared/items/ui/image-upload`), reusing `FileStorageState.uploadFiles` / `StorageHttp`.
+- `shared/items/ui/item-thumbnail` (new, `ske-item-thumbnail`: `itemId`, `imageFileId`, `size`; shows `<img loading="lazy">` or placeholder icon) used in:
+  - `features/items/list/tables/regular/large/table.html` (new narrow first column or inside Articol cell)
+  - `features/items/list/tables/regular/small/item-list-small.html`
+  - `shared/stock/ui/table/stock-category-item-row.html` and `stock-category-items-small.html`
+- `shared/items/ui/modals/detail/item-detail-modal.ts` `mapSaveRequest` passes `imageFileId`.
+- Export new pieces via `@ske/...` barrels.
 
-## Testing Strategy
-- Unit: validator rejects undefined enum value; handler persists `Source` and writes `Donation` / `Order` transaction.
-- Functional: POST with each source round-trips; omitted source (old clients) → `Order`.
-- Client: modal starts on source step, Următorul advances, selected source ends up in the save request.
-- Migration check: existing rows read `Order` after applying.
+## Code style
+Follow CLAUDE.md §6: file-scoped namespaces, `Guard.Against`, `Result`/typed errors in `Application/Common/Errors` (add `ItemErrors.InvalidImage`), UTC `DateTimeOffset`; TS strict, `inject()`, `input()`, signals, native control flow, Romanian UI copy ("Imagine articol", "Încarcă imagine", "Format neacceptat", "Imaginea depășește 5 MB").
+
+## Testing strategy
+Backend is TDD (red → green per slice), NUnit + Shouldly + Moq, mirroring `tests/Application.UnitTests/Features/Items/**`:
+- Validators: `ImageFileId` must reference a completed `FileMetadata`, size ≤ 5 MB, content type allowlist; null allowed.
+- Handlers: create/edit with image → thumbnail generated + paths set; replace → old blobs deleted; null on edit → image removed; undecodable image → failure result; duplicate/idempotent edit with same fileId → no regeneration.
+- `GetItemImage` handler: thumb/full, not-found item, item without image → typed not-found error.
+- Thumbnail service: resizes ≥256 px down, leaves smaller as-is, GIF/PNG/JPEG/WebP decode, corrupt bytes throw/fail.
+- `AzureBlobStorageServiceTests` for `UploadAsync`.
+- Functional test: edit item with image → `GET /image` returns bytes (via `FakeBlobStorageService`); stock query returns `imageFileId`.
+- Frontend (Vitest, colocated): image-upload component (rejects wrong type / >5 MB, emits fileId, remove clears), item-thumbnail (placeholder vs img URL with `?v=`), form model mapping.
 
 ## Boundaries
-- Always: central names/constants per `skestock.Shared`; run build + the tests above.
-- Ask first: adding a source column/filter to the table; touching other creators' behaviour.
-- Never: hand-edit migration designer/snapshot; reorder existing `StockTransactionType` values.
+- Always: validate on server (not only client); keep Mediator pipeline order; commands keep `ICacheInvalidation` (item tag + list tag); run build + tests; `graphify update .` after code changes; feature branch + PR.
+- Ask first: moving the `app-files` literal to `Services`; adding any NuGet/npm dependency; changing the stock cache tags; request size limits.
+- Never: edit applied migrations or the snapshot by hand; serve blobs with long-lived SAS in DTOs; commit secrets; reorder persisted enums.
 
-## Success Criteria
-1. Opening Add Stock shows steps "Sursă" → "Detalii"; the first step has two selectable cards (Comandă, Donație), Comandă preselected.
-2. Next is disabled until a source is chosen; Înapoi returns without losing form values.
-3. Saved batch has the chosen `Source`; `StockBatchListItemDto.Source` returned.
-4. Migration adds non-null `Source` with default `Order`; all existing batches = `Order`.
-5. Donation creates a `Donation` StockTransaction; Order unchanged.
-6. `dotnet build` (warnings-as-errors), unit, functional and client tests pass.
+## Success criteria
+1. Create and Edit item accept `imageFileId`; invalid (missing/unconfirmed/too big/wrong type/undecodable) → 400 with typed error.
+2. `GET /api/Items/{id}/image?size=thumb` returns WebP ≤256 px; `size=full` returns original; 404 when no image; responses carry `Cache-Control` and work with `?v=<imageFileId>` busting.
+3. Replace/remove updates item and deletes old blobs.
+4. Item list (desktop + mobile) and stock page (desktop + mobile) show the thumbnail or a placeholder.
+5. Item modal shows picture-card upload with preview, client-side type/size checks, remove button.
+6. `dotnet build`, backend unit + functional tests, `npm run build`, `npm test` all pass; migration `has-pending-model-changes` clean.
 
-## Open Questions
-1. Card labels/descriptions copy (proposed: "Comandă — articole achiziționate printr-o comandă", "Donație — articole primite gratuit")? OK?
-2. Should "Salvează" (save without closing) reset to the source step for the next item, or stay on the form with the same source? Proposed: stay on the form.
-
-## Execution plan (per your instructions)
-Haiku explored (done). After you approve this spec: **Opus** writes the plan/tasks (`tasks/plan.md`, `tasks/todo.md`), then **Sonnet** implements.
+## Open questions / risks
+- **Stock cache:** the stock query is cached; editing an item's image must invalidate it, or thumbnails lag until expiry. Need to check current stock tags vs `ItemTag` (Ask-first item above).
+- **Antiforgery** is currently off; the image GET is safe either way, but the SAS `confirm-upload` POST depends on it later (already true today).
+- **Orphaned uploads:** user uploads an image in the modal then cancels → `FileMetadata` + blob remain unreferenced. Accept for now (same as existing imports) unless you want cleanup.
+- GIF animation is dropped in thumbnails; `size=full` keeps the original.

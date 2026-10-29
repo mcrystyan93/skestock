@@ -505,6 +505,9 @@ namespace skestock.Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<Guid?>("ImageFileId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -542,6 +545,10 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedById");
+
+                    b.HasIndex("ImageFileId")
+                        .IsUnique()
+                        .HasFilter("[ImageFileId] IS NOT NULL");
 
                     b.HasIndex("LastModifiedById");
 
@@ -1402,6 +1409,9 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedById");
+
+                    b.HasIndex("FileId")
+                        .IsUnique();
 
                     b.HasIndex("LastModifiedById");
 

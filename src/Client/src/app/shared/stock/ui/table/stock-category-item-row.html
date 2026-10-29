@@ -1,6 +1,9 @@
 @let stockItem = item();
 
 <td nzRight>
+  <div class="flex items-center gap-3">
+    <ske-item-thumbnail [itemId]="stockItem.itemId"
+                        [imageFileId]="stockItem.imageFileId" />
   <div class="flex flex-col">
     <strong>{{ stockItem.itemName }}</strong>
     <div>
@@ -14,6 +17,7 @@
         {{ stockItem.lastUpdatedAt ? (stockItem.lastUpdatedAt | timeAgo) : '-' }}
       </strong>
     </div>
+  </div>
   </div>
 </td>
 <td class="text-right!">
