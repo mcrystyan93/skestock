@@ -10,7 +10,7 @@ import { ItemImageUpload } from './item-image-upload';
 describe('ItemImageUpload', () => {
   const http = {
     requestUpload: vi.fn(() => of({ fileId: 'f1', uploadUrl: 'http://blob' })),
-    uploadViaSasUri: vi.fn(() => of({})),
+    uploadViaSasUri: vi.fn((_file: unknown, _uploadResult: unknown) => of({})),
     confirmUpload: vi.fn(() => of({ fileId: 'f1' })),
   };
   const message = { error: vi.fn() };
@@ -22,6 +22,8 @@ describe('ItemImageUpload', () => {
         provideNzIcons([
           { name: 'picture-twotone', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:plus', icon: '<svg viewBox="0 0 24 24"></svg>' },
+          // Shown as the placeholder while ng-zorro builds a preview from originFileObj.
+          { name: 'file-twotone', icon: '<svg viewBox="0 0 24 24"></svg>' },
         ]),
         { provide: StorageHttp, useValue: http },
         { provide: NzMessageService, useValue: message },
@@ -85,6 +87,36 @@ describe('ItemImageUpload', () => {
 
     expect(f.componentInstance.uploading()).toBe(false);
     expect(f.componentInstance.value()).toBe('f1');
+  });
+
+  it('replaces an existing image with the picked file', () => {
+    const f = setup();
+    run(f, file('image/png', 100));
+    f.detectChanges();
+    f.componentInstance.value.set('old');
+    http.requestUpload.mockClear();
+
+    const input = { files: [new File(['x'], 'new.png', { type: 'image/png' })], value: 'x' };
+    (f.componentInstance as unknown as { replace: (e: Event) => void }).replace({
+      target: input,
+    } as unknown as Event);
+    f.detectChanges();
+
+    expect(input.value).toBe('');
+    expect(http.requestUpload).toHaveBeenCalledWith({
+      fileName: 'new.png',
+      contentType: 'image/png',
+    });
+    expect(http.uploadViaSasUri).toHaveBeenLastCalledWith(expect.any(File), {
+      fileId: 'f1',
+      uploadUrl: 'http://blob',
+    });
+    expect(f.componentInstance.value()).toBe('f1');
+
+    const [listed] = (
+      f.componentInstance as unknown as { fileList: () => NzUploadFile[] }
+    ).fileList();
+    expect(listed).toMatchObject({ name: 'new.png', type: 'image/png' });
   });
 
   it('shows one error toast when the upload fails and leaves the value null', () => {
