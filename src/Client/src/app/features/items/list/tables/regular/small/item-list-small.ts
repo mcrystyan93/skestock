@@ -37,6 +37,7 @@ import { ItemThumbnail } from '@ske/shared/items';
 export class ItemListSmall extends BaseList<ItemDto, GetAllItemsRequest> {
   public readonly loading = input.required<boolean>();
   public readonly onEdit = output<ItemDto>();
+  public readonly onImageUploaded = output<{ item: ItemDto; fileId: string }>();
 
   protected readonly cardRowHeight = 84;
   protected readonly skeletonPlaceholders = [0, 1, 2, 3];

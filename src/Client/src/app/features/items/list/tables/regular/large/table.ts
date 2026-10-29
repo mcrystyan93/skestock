@@ -22,6 +22,7 @@ export class Table extends BaseTableWithFilter<ItemDto, GetAllItemsRequest> {
 
   public readonly onEdit = output<ItemDto>();
   public readonly onToggleActive = output<ItemDto>();
+  public readonly onImageUploaded = output<{ item: ItemDto; fileId: string }>();
   public readonly columns = ITEM_TABLE_COLUMNS;
 
   constructor() {
