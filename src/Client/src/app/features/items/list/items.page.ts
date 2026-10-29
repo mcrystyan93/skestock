@@ -51,6 +51,10 @@ export class ItemsPage implements OnInit, OnDestroy {
     this.openItemModal(item);
   }
 
+  public onImageUploaded(event: { item: ItemDto; fileId: string }) {
+    this.listStore.setItemImage(event);
+  }
+
   public onAdd() {
     this.openItemModal();
   }

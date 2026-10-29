@@ -8,6 +8,27 @@
   >
     <img [src]="src" loading="lazy" alt="Imagine articol" class="h-full w-full object-cover" />
   </button>
+} @else if (uploadable()) {
+  <button
+    type="button"
+    class="flex h-full w-full cursor-pointer items-center justify-center hover:text-primary-600 focus-visible:outline-2 focus-visible:outline-primary-600"
+    aria-label="Încarcă imaginea"
+    [attr.aria-busy]="storage.uploadLoading()"
+    [disabled]="storage.uploadLoading()"
+    (click)="pick($event, picker)"
+    (keydown)="$event.stopPropagation()"
+  >
+    <nz-icon nzType="icons:box" aria-hidden="true" class="text-xl" />
+  </button>
+  <!-- The picker's own click is dispatched programmatically and would otherwise bubble to the row. -->
+  <input
+    #picker
+    hidden
+    type="file"
+    [accept]="accept"
+    (click)="$event.stopPropagation()"
+    (change)="upload($event)"
+  />
 } @else {
   <nz-icon nzType="icons:box" aria-hidden="true" class="text-xl" />
 }

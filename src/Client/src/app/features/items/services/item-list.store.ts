@@ -3,7 +3,7 @@ import { Events, withEventHandlers } from '@ngrx/signals/events';
 import { withItemCollection } from '@ske/shared/items';
 import { ItemDto } from '@ske/models';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { pipe, switchMap, tap } from 'rxjs';
+import { mergeMap, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
 import { inject } from '@angular/core';
 import { ItemsHttp } from '@ske/shared/items';
@@ -53,7 +53,39 @@ export const ItemListState = signalStore(
       )
     );
 
-    return { reload, toggleActive };
+    // The edit endpoint replaces the whole item, so the row's current fields are sent back unchanged.
+    // mergeMap, not switchMap: saves for different rows must not cancel each other.
+    const setItemImage = rxMethod<{ item: ItemDto; fileId: string }>(
+      pipe(
+        tap(() => store.clearItemsErrors()),
+        mergeMap(({ item, fileId }) =>
+          itemHttp.edit(item.id, {
+            sku: item.sku,
+            name: item.name,
+            description: item.description,
+            unit: item.unit,
+            minThreshold: item.minThreshold,
+            isPerishable: item.isPerishable,
+            shelfLifeDays: item.shelfLifeDays,
+            categoryId: item.categoryId,
+            imageFileId: fileId
+          }).pipe(
+            mapResponse({
+              next: (updatedItem) => {
+                patchState(store, {
+                  items: store.items().map((i) => i.id === updatedItem.id ? updatedItem : i)
+                });
+              },
+              error: (error) => {
+                store.handleItemsError(error);
+              }
+            })
+          )
+        )
+      )
+    );
+
+    return { reload, toggleActive, setItemImage };
   }),
   withEventHandlers((store, events = inject(Events)) => ({
     itemChanges: events.on(

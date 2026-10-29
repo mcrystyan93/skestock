@@ -18,7 +18,8 @@
                        (onFilterChange)="onFilterChange($event)"
                        (onLoadMore)="onLoadMore()"
                        (onEdit)="onEdit($event)"
-                       (onToggleActive)="onToggleActive($event)" />
+                       (onToggleActive)="onToggleActive($event)"
+      (onImageUploaded)="onImageUploaded($event)" />
   </nz-tab>
   <nz-tab>
     <ske-supply-list-tab (open)="openSupplyListModal($event.id)"
