@@ -20,6 +20,7 @@ public static class ItemRequests
         public bool IsPerishable { get; init; }
         public int? ShelfLifeDays { get; init; }
         public Guid CategoryId { get; init; }
+        public Guid? ImageFileId { get; init; }
     }
 
     public class EditItemRequest
@@ -32,5 +33,6 @@ public static class ItemRequests
         public bool IsPerishable { get; init; }
         public int? ShelfLifeDays { get; init; }
         public Guid CategoryId { get; init; }
+        public Guid? ImageFileId { get; init; }
     }
 }

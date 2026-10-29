@@ -13,6 +13,7 @@ public class CreateItemCommand : IRequest<Result<ItemDto>>, ICacheInvalidation
     public bool IsPerishable { get; init; }
     public int? ShelfLifeDays { get; init; }
     public Guid CategoryId { get; init; }
+    public Guid? ImageFileId { get; init; }
 
     // Invalidate every cached GetAllItems page/filter/sort combination - a new item can affect
     // any of them (default sort, search matches, filters, etc.).

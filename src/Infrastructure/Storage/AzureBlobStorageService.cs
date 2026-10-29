@@ -1,4 +1,7 @@
+using Azure;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using BlobInfo = skestock.Application.Storage.Models.BlobInfo;
 using Azure.Storage.Sas;
 using Microsoft.Extensions.Configuration;
 using skestock.Application.Storage.DTOs;
@@ -71,6 +74,31 @@ public class AzureBlobStorageService(
 
         var response = await blob.DownloadStreamingAsync(cancellationToken: cancellationToken);
         return response.Value.Content;
+    }
+
+    public async Task UploadAsync(UploadDto dto, CancellationToken cancellationToken)
+    {
+        var blob = blobServiceClient.GetBlobContainerClient(dto.ContainerName).GetBlobClient(dto.BlobPath);
+
+        await blob.UploadAsync(
+            dto.Content,
+            new BlobUploadOptions { HttpHeaders = new BlobHttpHeaders { ContentType = dto.ContentType } },
+            cancellationToken);
+    }
+
+    public async Task<BlobContent?> TryDownloadAsync(DownloadDto dto, CancellationToken cancellationToken)
+    {
+        var blob = blobServiceClient.GetBlobContainerClient(dto.ContainerName).GetBlobClient(dto.BlobPath);
+
+        try
+        {
+            var response = await blob.DownloadStreamingAsync(cancellationToken: cancellationToken);
+            return new BlobContent(response.Value.Content, response.Value.Details.ContentType);
+        }
+        catch (RequestFailedException ex) when (ex.Status == 404)
+        {
+            return null;
+        }
     }
 
     private Uri ToPublicBlobUri(Uri sasUri)

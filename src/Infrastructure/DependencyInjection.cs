@@ -25,6 +25,7 @@ using skestock.Infrastructure.Data;
 using skestock.Infrastructure.Data.Interceptors;
 using skestock.Infrastructure.Distributed;
 using skestock.Infrastructure.Export;
+using skestock.Infrastructure.Images;
 using skestock.Infrastructure.Identity;
 using skestock.Infrastructure.Queues;
 using skestock.Infrastructure.Storage;
@@ -154,6 +155,7 @@ public static class DependencyInjection
 
         builder.Services.AddSingleton<IOrderListExcelExporter, OrderListExcelExporter>();
         builder.Services.AddSingleton<IOrderListImageExporter, OrderListImageExporter>();
+        builder.Services.AddSingleton<IImageThumbnailService, SkiaImageThumbnailService>();
     }
 
     private static void AddOpenAiExtraction(IHostApplicationBuilder builder)

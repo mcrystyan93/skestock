@@ -14,6 +14,7 @@ export type ItemDto = {
   isActive: boolean;
   categoryId: string;
   categoryName?: string | null;
+  imageFileId?: string | null;
   createdByName?: string | null;
   lastModifiedByName?: string | null;
   createdDate: string;
@@ -35,6 +36,7 @@ export type CreateItemRequest = {
   isPerishable: boolean;
   shelfLifeDays?: number | null;
   categoryId: string;
+  imageFileId?: string | null;
 };
 
 /** Mirrors src/Application/Features/Items/Models/ItemRequests.cs. */
@@ -47,6 +49,7 @@ export type EditItemRequest = {
   isPerishable: boolean;
   shelfLifeDays?: number | null;
   categoryId: string;
+  imageFileId?: string | null;
 };
 
 export type ItemTableColumn =

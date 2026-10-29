@@ -1,5 +1,6 @@
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
+using skestock.Application.Storage.Interfaces;
 
 namespace skestock.Application.Features.Items.Commands.EditItem;
 
@@ -12,7 +13,11 @@ public class EditItemCommandValidator : AbstractValidator<EditItemCommand>
     private const int SkuMaxLength = 50;
     private const int UnitMaxLength = 20;
 
-    public EditItemCommandValidator(IApplicationDbContext dbContext)
+    public EditItemCommandValidator(
+        IApplicationDbContext dbContext,
+        IBlobStorageService blobStorage,
+        IImageThumbnailService thumbnailService,
+        IUser user)
     {
         RuleFor(x => x.Id)
             .NotEmpty()
@@ -58,6 +63,11 @@ public class EditItemCommandValidator : AbstractValidator<EditItemCommand>
                     .WithMessage("An item with this SKU already exists")
                     .WithErrorCode(ValidationErrorCodes.DuplicateSku);
             });
+
+        RuleFor(x => x.ImageFileId)
+            .CustomAsync((fileId, context, cancellationToken) => ItemImageRules.ValidateAsync(
+                dbContext, blobStorage, thumbnailService, user, context.InstanceToValidate.Id, fileId!.Value, context, cancellationToken))
+            .When(x => x.ImageFileId.HasValue);
 
         RuleFor(x => x.CategoryId)
             .NotEmpty()

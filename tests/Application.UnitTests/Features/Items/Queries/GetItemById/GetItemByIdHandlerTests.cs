@@ -166,4 +166,21 @@ public class GetItemByIdHandlerTests
 
         result.IsFailed.ShouldBeTrue();
     }
+
+    [Test]
+    public async Task Handle_ReturnsImageFileId()
+    {
+        await using var context = CreateContext();
+        var category = new Category { Name = "Stationery" };
+        context.Categories.Add(category);
+        await context.SaveChangesAsync(CancellationToken.None);
+        var fileId = Guid.NewGuid();
+        var item = new Item { Name = "Pencil", Unit = "unit", CategoryId = category.Id, ImageFileId = fileId };
+        context.Items.Add(item);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new GetItemByIdHandler(context).Handle(new GetItemByIdQuery { Id = item.Id }, CancellationToken.None);
+
+        result.Value.ImageFileId.ShouldBe(fileId);
+    }
 }

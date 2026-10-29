@@ -104,3 +104,9 @@ a, button, [role='button'], input, select, textarea, label {
     font-size: 16px !important;
   }
 }
+
+
+/* Tailwind preflight makes img display:block, which breaks the preview's inline text-align centering. */
+.ant-image-preview-img {
+  display: inline-block;
+}

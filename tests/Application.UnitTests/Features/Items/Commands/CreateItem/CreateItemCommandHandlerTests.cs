@@ -1,6 +1,11 @@
 ﻿using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Interfaces;
+using skestock.Application.UnitTests.Features.Items.Images;
+using skestock.Application.Features.Items;
+using skestock.Application.Features.Items.Commands.GenerateItemThumbnail;
+using System.Text.Json;
+using skestock.Shared;
 using skestock.Application.Features.Items.Commands.CreateItem;
 using skestock.Domain.Entities;
 using skestock.Domain.Queues;
@@ -73,7 +78,11 @@ public class ItemTestDbContext(DbContextOptions<ItemTestDbContext> options)
         builder.Ignore<GoodsReceiptImport>();
         builder.Ignore<GoodsReceiptImportLine>();
 
-        builder.Ignore<FileMetadata>();
+        builder.Entity<FileMetadata>(b =>
+        {
+            b.Ignore(f => f.CreatedBy);
+            b.Ignore(f => f.LastModifiedBy);
+        });
 
         builder.Entity<UserProfile>(b =>
         {
@@ -128,7 +137,7 @@ public class CreateItemCommandHandlerTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var handler = new CreateItemCommandHandler(context);
+        var handler = new CreateItemCommandHandler(context, ItemImageTestSupport.User());
 
         var result = await handler.Handle(new CreateItemCommand
         {
@@ -157,7 +166,7 @@ public class CreateItemCommandHandlerTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var handler = new CreateItemCommandHandler(context);
+        var handler = new CreateItemCommandHandler(context, ItemImageTestSupport.User());
 
         var result = await handler.Handle(new CreateItemCommand
         {
@@ -180,7 +189,7 @@ public class CreateItemCommandHandlerTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var handler = new CreateItemCommandHandler(context);
+        var handler = new CreateItemCommandHandler(context, ItemImageTestSupport.User());
 
         var result = await handler.Handle(new CreateItemCommand
         {
@@ -199,7 +208,7 @@ public class CreateItemCommandHandlerTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var handler = new CreateItemCommandHandler(context);
+        var handler = new CreateItemCommandHandler(context, ItemImageTestSupport.User());
 
         var first = await handler.Handle(new CreateItemCommand { Name = "Pen", Unit = "unit", CategoryId = category.Id }, CancellationToken.None);
         var second = await handler.Handle(new CreateItemCommand { Name = "Marker", Unit = "unit", CategoryId = category.Id }, CancellationToken.None);
@@ -213,7 +222,7 @@ public class CreateItemCommandHandlerTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var handler = new CreateItemCommandHandler(context);
+        var handler = new CreateItemCommandHandler(context, ItemImageTestSupport.User());
 
         var result = await handler.Handle(new CreateItemCommand
         {
@@ -237,7 +246,7 @@ public class CreateItemCommandHandlerTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var handler = new CreateItemCommandHandler(context);
+        var handler = new CreateItemCommandHandler(context, ItemImageTestSupport.User());
 
         var result = await handler.Handle(new CreateItemCommand
         {
@@ -251,5 +260,48 @@ public class CreateItemCommandHandlerTests
 
         var persisted = await context.Items.SingleAsync(CancellationToken.None);
         persisted.ShelfLifeDays.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task Handle_WithImage_SetsImageFileIdAndEnqueuesThumbnailJob()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        var userId = Guid.NewGuid();
+        var fileId = Guid.NewGuid();
+        var handler = new CreateItemCommandHandler(context, ItemImageTestSupport.User(userId));
+
+        var result = await handler.Handle(new CreateItemCommand
+        {
+            Name = "Pencil", Unit = "unit", CategoryId = category.Id, ImageFileId = fileId
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ImageFileId.ShouldBe(fileId);
+        (await context.Items.SingleAsync(CancellationToken.None)).ImageFileId.ShouldBe(fileId);
+
+        var outbox = await context.OutboxMessages.SingleAsync(CancellationToken.None);
+        outbox.QueueName.ShouldBe(Services.ItemImageThumbnailQueue);
+        outbox.Type.ShouldBe(typeof(GenerateItemThumbnailCommand).AssemblyQualifiedName);
+        outbox.UserId.ShouldBe(userId);
+        var payload = JsonSerializer.Deserialize<GenerateItemThumbnailCommand>(outbox.Payload)!;
+        payload.ItemId.ShouldBe(result.Value.Id);
+        payload.ImageFileId.ShouldBe(fileId);
+    }
+
+    [Test]
+    public async Task Handle_WithoutImage_EnqueuesNothing()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        var handler = new CreateItemCommandHandler(context, ItemImageTestSupport.User());
+
+        var result = await handler.Handle(new CreateItemCommand
+        {
+            Name = "Pencil", Unit = "unit", CategoryId = category.Id
+        }, CancellationToken.None);
+
+        result.Value.ImageFileId.ShouldBeNull();
+        context.OutboxMessages.ShouldBeEmpty();
     }
 }

@@ -11,4 +11,8 @@ public interface IBlobStorageService
     Task<BlobInfo?> GetBlobInfoAsync(GetBlobInfoDto dto, CancellationToken cancellationToken);
     Task DeleteAsync(DeleteDto dto, CancellationToken cancellationToken);
     Task<Stream> DownloadAsync(DownloadDto dto, CancellationToken cancellationToken);
+    /// <summary>Overwrites any existing blob at the path.</summary>
+    Task UploadAsync(UploadDto dto, CancellationToken cancellationToken);
+    /// <summary>Returns null when the blob does not exist.</summary>
+    Task<BlobContent?> TryDownloadAsync(DownloadDto dto, CancellationToken cancellationToken);
 }

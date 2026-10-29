@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using skestock.Application.Features.Stock.Queries.GetClassLocationStock;
 using skestock.Application.Features.Stock.Commands.SetClassItemStockVisibility;
 using skestock.Application.Common.Filtering;
@@ -290,5 +292,29 @@ public class GetClassLocationStockQueryTests : TestBase
         hiddenResult.IsSuccess.ShouldBeTrue();
         hiddenResult.Value.Items.Single().ItemId.ShouldBe(item.Id);
         hiddenResult.Value.Items.Single().HideWhenZeroStock.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task Handle_ItemWithImage_ReturnsImageFileId()
+    {
+        var item = await SeedItemAsync("Flour");
+        var fileId = Guid.NewGuid();
+        await using (var scope = FunctionalTestSetup.ScopeFactory.CreateAsyncScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<skestock.Infrastructure.Data.ApplicationDbContext>();
+            await context.Items.Where(i => i.Id == item.Id)
+                .ExecuteUpdateAsync(set => set.SetProperty(i => i.ImageFileId, fileId));
+        }
+        var receipt = await SeedGoodsReceiptAsync();
+        await SeedBatchAsync(item, receipt, 10);
+
+        var result = await TestApp.SendAsync(new GetClassLocationStockQuery
+        {
+            ClassId = _schoolClass.Id,
+            Filters = [EqualsFilter("locationId", _location.Id)],
+            SearchTerm = $"{_prefix}-Flour"
+        });
+
+        result.Value.Items.Single().ImageFileId.ShouldBe(fileId);
     }
 }

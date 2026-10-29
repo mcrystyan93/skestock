@@ -1,6 +1,14 @@
 ﻿using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Interfaces;
+using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
+using skestock.Application.Features.Items.Commands.GenerateItemThumbnail;
+using skestock.Application.Storage.DTOs;
+using skestock.Application.Storage.Interfaces;
+using skestock.Application.UnitTests.Features.Items.Images;
+using skestock.Domain.Enums;
+using skestock.Shared;
 using skestock.Application.Features.Items.Commands.EditItem;
 using skestock.Domain.Entities;
 using skestock.Domain.Queues;
@@ -70,7 +78,11 @@ public class ItemTestDbContext(DbContextOptions<ItemTestDbContext> options)
         builder.Ignore<GoodsReceiptImport>();
         builder.Ignore<GoodsReceiptImportLine>();
 
-        builder.Ignore<FileMetadata>();
+        builder.Entity<FileMetadata>(b =>
+        {
+            b.Ignore(f => f.CreatedBy);
+            b.Ignore(f => f.LastModifiedBy);
+        });
 
         builder.Entity<UserProfile>(b =>
         {
@@ -129,7 +141,7 @@ public class EditItemCommandHandlerTests
         context.Items.Add(item);
         await context.SaveChangesAsync(CancellationToken.None);
 
-        var handler = new EditItemCommandHandler(context);
+        var handler = new EditItemCommandHandler(context, ItemImageTestSupport.User(), ItemImageTestSupport.Blobs(), NullLogger<EditItemCommandHandler>.Instance);
         var result = await handler.Handle(new EditItemCommand
         {
             Id = item.Id,
@@ -159,7 +171,7 @@ public class EditItemCommandHandlerTests
         context.Items.Add(item);
         await context.SaveChangesAsync(CancellationToken.None);
 
-        var handler = new EditItemCommandHandler(context);
+        var handler = new EditItemCommandHandler(context, ItemImageTestSupport.User(), ItemImageTestSupport.Blobs(), NullLogger<EditItemCommandHandler>.Instance);
         var result = await handler.Handle(new EditItemCommand
         {
             Id = item.Id,
@@ -185,7 +197,7 @@ public class EditItemCommandHandlerTests
         context.Items.Add(item);
         await context.SaveChangesAsync(CancellationToken.None);
 
-        var handler = new EditItemCommandHandler(context);
+        var handler = new EditItemCommandHandler(context, ItemImageTestSupport.User(), ItemImageTestSupport.Blobs(), NullLogger<EditItemCommandHandler>.Instance);
         var result = await handler.Handle(new EditItemCommand
         {
             Id = item.Id,
@@ -204,7 +216,7 @@ public class EditItemCommandHandlerTests
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
-        var handler = new EditItemCommandHandler(context);
+        var handler = new EditItemCommandHandler(context, ItemImageTestSupport.User(), ItemImageTestSupport.Blobs(), NullLogger<EditItemCommandHandler>.Instance);
 
         var result = await handler.Handle(new EditItemCommand
         {
@@ -216,5 +228,128 @@ public class EditItemCommandHandlerTests
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is skestock.Application.Common.Errors.ItemErrors.ItemNotFound);
+    }
+
+    private sealed class ImageHarness
+    {
+        public required ItemTestDbContext Context { get; init; }
+        public required Category Category { get; init; }
+        public required Item Item { get; init; }
+        public Guid? OldFileId { get; init; }
+        public Mock<IBlobStorageService> Blobs { get; } = new();
+        public List<DeleteDto> Deleted { get; } = [];
+
+        public EditItemCommandHandler Handler => new(
+            Context, ItemImageTestSupport.User(), Blobs.Object, NullLogger<EditItemCommandHandler>.Instance);
+
+        public EditItemCommand Edit(Guid? fileId) => new()
+        {
+            Id = Item.Id, Name = "Pencil", Unit = "unit", CategoryId = Category.Id, ImageFileId = fileId
+        };
+    }
+
+    private static async Task<ImageHarness> CreateImageHarnessAsync(bool hasImage)
+    {
+        var (context, category) = await CreateContextAsync();
+        Guid? oldFileId = hasImage ? Guid.NewGuid() : null;
+        if (oldFileId is { } id)
+        {
+            context.FileMetadata.Add(new FileMetadata
+            {
+                FileId = id, OriginalName = "a.png", BlobContainer = "app-files", BlobPath = "2026/10/a.png",
+                ContentType = "image/png", SizeBytes = 1, Status = FileStatus.Completed
+            });
+        }
+        var item = new Item { Name = "Pencil", Unit = "unit", CategoryId = category.Id, ImageFileId = oldFileId };
+        context.Items.Add(item);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var harness = new ImageHarness { Context = context, Category = category, Item = item, OldFileId = oldFileId };
+        harness.Blobs.Setup(b => b.DeleteAsync(It.IsAny<DeleteDto>(), It.IsAny<CancellationToken>()))
+            .Callback<DeleteDto, CancellationToken>((dto, _) => harness.Deleted.Add(dto))
+            .Returns(Task.CompletedTask);
+        return harness;
+    }
+
+    [Test]
+    public async Task Handle_SameImageFileId_DoesNothingWithImages()
+    {
+        var h = await CreateImageHarnessAsync(hasImage: true);
+        await using var _ = h.Context;
+
+        var result = await h.Handler.Handle(h.Edit(h.OldFileId), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ImageFileId.ShouldBe(h.OldFileId);
+        h.Context.OutboxMessages.ShouldBeEmpty();
+        h.Deleted.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task Handle_AddingImage_SetsItAndEnqueuesThumbnailJob()
+    {
+        var h = await CreateImageHarnessAsync(hasImage: false);
+        await using var _ = h.Context;
+        var fileId = Guid.NewGuid();
+
+        var result = await h.Handler.Handle(h.Edit(fileId), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ImageFileId.ShouldBe(fileId);
+        var outbox = await h.Context.OutboxMessages.SingleAsync(CancellationToken.None);
+        outbox.QueueName.ShouldBe(Services.ItemImageThumbnailQueue);
+        var payload = System.Text.Json.JsonSerializer.Deserialize<GenerateItemThumbnailCommand>(outbox.Payload)!;
+        payload.ItemId.ShouldBe(h.Item.Id);
+        payload.ImageFileId.ShouldBe(fileId);
+        h.Deleted.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task Handle_ReplacingImage_EnqueuesNewAndDeletesOldBlobsAfterSave()
+    {
+        var h = await CreateImageHarnessAsync(hasImage: true);
+        await using var _ = h.Context;
+        var newFileId = Guid.NewGuid();
+
+        var result = await h.Handler.Handle(h.Edit(newFileId), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ImageFileId.ShouldBe(newFileId);
+        var payload = System.Text.Json.JsonSerializer.Deserialize<GenerateItemThumbnailCommand>(
+            (await h.Context.OutboxMessages.SingleAsync(CancellationToken.None)).Payload)!;
+        payload.ImageFileId.ShouldBe(newFileId);
+        (await h.Context.FileMetadata.SingleAsync(f => f.FileId == h.OldFileId, CancellationToken.None))
+            .Status.ShouldBe(FileStatus.Deleted);
+        h.Deleted.ShouldContain(new DeleteDto("app-files", "2026/10/a.png"));
+        h.Deleted.ShouldContain(new DeleteDto("app-files", $"thumbnails/{h.OldFileId}.webp"));
+    }
+
+    [Test]
+    public async Task Handle_RemovingImage_ClearsItAndDeletesOldBlobs()
+    {
+        var h = await CreateImageHarnessAsync(hasImage: true);
+        await using var _ = h.Context;
+
+        var result = await h.Handler.Handle(h.Edit(null), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ImageFileId.ShouldBeNull();
+        (await h.Context.Items.SingleAsync(CancellationToken.None)).ImageFileId.ShouldBeNull();
+        h.Context.OutboxMessages.ShouldBeEmpty();
+        h.Deleted.Count.ShouldBe(2);
+    }
+
+    [Test]
+    public async Task Handle_WhenBlobDeleteThrows_StillSucceeds()
+    {
+        var h = await CreateImageHarnessAsync(hasImage: true);
+        await using var _ = h.Context;
+        h.Blobs.Setup(b => b.DeleteAsync(It.IsAny<DeleteDto>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("storage down"));
+
+        var result = await h.Handler.Handle(h.Edit(null), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        (await h.Context.Items.SingleAsync(CancellationToken.None)).ImageFileId.ShouldBeNull();
     }
 }

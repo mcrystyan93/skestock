@@ -2,6 +2,27 @@
       nzNoColon
       nzLayout="vertical">
   <nz-row [nzGutter]="[16, 0]">
+    <nz-col nzSpan="24">
+      <!--   imageFileId   -->
+      <nz-form-item *skeletonInputLoader="loading()">
+        <nz-form-label>
+          Imagine articol
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="imageErrorTemplate">
+          <ske-item-image-upload [formField]="itemForm.imageFileId"
+                                 [itemId]="itemForm.id().value()"
+                                 [(uploading)]="imageUploading" />
+
+          <ng-template #imageErrorTemplate>
+            @for (error of itemForm.imageFileId().errors(); track $index) {
+              <div class="ant-form-item-explain-error">
+                {{ error.message }}
+              </div>
+            }
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
     <nz-col nzSpan="12">
       <!--   sku   -->
       <nz-form-item *skeletonInputLoader="loading()">

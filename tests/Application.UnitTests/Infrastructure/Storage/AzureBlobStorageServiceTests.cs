@@ -174,4 +174,56 @@ public class AzureBlobStorageServiceTests
             b => b.DownloadStreamingAsync(It.IsAny<BlobDownloadOptions>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
+    [Test]
+    public async Task UploadAsync_UploadsContentWithContentType()
+    {
+        var harness = CreateHarness();
+        BlobUploadOptions? captured = null;
+        harness.Blob.Setup(b => b.UploadAsync(
+                It.IsAny<Stream>(), It.IsAny<BlobUploadOptions>(), It.IsAny<CancellationToken>()))
+            .Callback<Stream, BlobUploadOptions, CancellationToken>((_, o, _) => captured = o)
+            .ReturnsAsync(Response.FromValue(
+                BlobsModelFactory.BlobContentInfo(new ETag("\"1\""), DateTimeOffset.UtcNow, null, null, 0),
+                Mock.Of<Response>()));
+        using var content = new MemoryStream([1, 2, 3]);
+
+        await harness.Service.UploadAsync(new UploadDto(Container, BlobPath, content, "image/webp"), CancellationToken.None);
+
+        captured.ShouldNotBeNull();
+        captured!.HttpHeaders.ContentType.ShouldBe("image/webp");
+        harness.Container.Verify(c => c.GetBlobClient(BlobPath), Times.Once);
+        harness.Blob.Verify(b => b.UploadAsync(content, It.IsAny<BlobUploadOptions>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Test]
+    public async Task TryDownloadAsync_WhenBlobExists_ReturnsContentAndContentType()
+    {
+        var harness = CreateHarness();
+        var expectedContent = new MemoryStream("blob-bytes"u8.ToArray());
+        var streamingResult = BlobsModelFactory.BlobDownloadStreamingResult(
+            content: expectedContent,
+            details: BlobsModelFactory.BlobDownloadDetails(contentType: "image/png"));
+        harness.Blob.Setup(b => b.DownloadStreamingAsync(
+                It.IsAny<BlobDownloadOptions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Response.FromValue(streamingResult, Mock.Of<Response>()));
+
+        var blob = await harness.Service.TryDownloadAsync(new DownloadDto(BlobPath, Container), CancellationToken.None);
+
+        blob.ShouldNotBeNull();
+        blob!.Content.ShouldBeSameAs(expectedContent);
+        blob.ContentType.ShouldBe("image/png");
+    }
+
+    [Test]
+    public async Task TryDownloadAsync_WhenBlobMissing_ReturnsNull()
+    {
+        var harness = CreateHarness();
+        harness.Blob.Setup(b => b.DownloadStreamingAsync(
+                It.IsAny<BlobDownloadOptions>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new RequestFailedException(404, "missing", "BlobNotFound", null));
+
+        var blob = await harness.Service.TryDownloadAsync(new DownloadDto(BlobPath, Container), CancellationToken.None);
+
+        blob.ShouldBeNull();
+    }
 }

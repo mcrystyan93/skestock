@@ -32,7 +32,8 @@ public enum QueueProcessorKind
 {
     Category,
     GoodsReceipt,
-    Item
+    Item,
+    ItemImageThumbnail
 }
 
 internal sealed class QueueProcessingTestHarness : IDisposable
@@ -48,6 +49,7 @@ internal sealed class QueueProcessingTestHarness : IDisposable
             QueueProcessorKind.Category => skestock.Shared.Services.CategoryImportQueue,
             QueueProcessorKind.GoodsReceipt => skestock.Shared.Services.GoodsReceiptImportQueue,
             QueueProcessorKind.Item => skestock.Shared.Services.ItemImportQueue,
+            QueueProcessorKind.ItemImageThumbnail => skestock.Shared.Services.ItemImageThumbnailQueue,
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
         };
         PoisonQueueName = $"{QueueName}-poison";
@@ -213,6 +215,11 @@ internal static class QueueMessageFactory
             {
                 ItemImportBatchId = Guid.NewGuid()
             },
+            QueueProcessorKind.ItemImageThumbnail => new
+            {
+                ItemId = Guid.NewGuid(),
+                ImageFileId = Guid.NewGuid()
+            },
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
         };
 
@@ -224,6 +231,8 @@ internal static class QueueMessageFactory
                 typeof(skestock.Application.Features.GoodsReceipts.Commands.ProcessGoodsReceiptImport.ProcessGoodsReceiptImportCommand),
             QueueProcessorKind.Item =>
                 typeof(skestock.Application.Features.Items.Commands.ProcessItemImportBatch.ProcessItemImportBatchCommand),
+            QueueProcessorKind.ItemImageThumbnail =>
+                typeof(skestock.Application.Features.Items.Commands.GenerateItemThumbnail.GenerateItemThumbnailCommand),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
         };
 

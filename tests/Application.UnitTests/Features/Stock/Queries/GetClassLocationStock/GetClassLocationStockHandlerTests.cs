@@ -1000,4 +1000,19 @@ public class GetClassLocationStockHandlerTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.Items.Single().LastUpdatedAt.ShouldBeNull();
     }
+
+    [Test]
+    public async Task Handle_ReturnsItemImageFileId()
+    {
+        await using var context = CreateContext();
+        var (item, location, schoolClass) = await SeedBaseData(context);
+        item.ImageFileId = Guid.NewGuid();
+        context.StockBatches.Add(new StockBatch { Item = item, Location = location, ReceivedClass = schoolClass, Quantity = 3, ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow) });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new GetClassLocationStockHandler(context).Handle(
+            new GetClassLocationStockQuery { ClassId = schoolClass.Id }, CancellationToken.None);
+
+        result.Value.Items.Single().ImageFileId.ShouldBe(item.ImageFileId);
+    }
 }
