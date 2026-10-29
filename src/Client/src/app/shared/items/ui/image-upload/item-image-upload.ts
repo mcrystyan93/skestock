@@ -1,5 +1,6 @@
 import { Component, computed, effect, inject, input, model, signal } from '@angular/core';
 import type { FormValueControl } from '@angular/forms/signals';
+import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzUploadComponent, NzUploadFile } from 'ng-zorro-antd/upload';
@@ -9,7 +10,7 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
 @Component({
-  imports: [NzUploadComponent, NzIconDirective],
+  imports: [NzUploadComponent, NzIconDirective, NzButtonComponent],
   selector: 'ske-item-image-upload',
   templateUrl: './item-image-upload.html',
   // Own state so the global uploadSuccess event (used by import modals) is never relied on.
@@ -31,7 +32,11 @@ export class ItemImageUpload implements FormValueControl<string | null> {
     if (local)
       return [
         {
+          // Spreading a File drops its name, size and type (prototype getters), so copy them explicitly.
           ...local,
+          name: local.name,
+          size: local.size,
+          type: local.type,
           status: this.storage.uploadLoading()
             ? 'uploading'
             : this.storage.hasUploadFailures()
@@ -84,6 +89,19 @@ export class ItemImageUpload implements FormValueControl<string | null> {
     this.storage.uploadFiles([file]);
 
     return false;
+  };
+
+  protected readonly replace = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    input.value = '';
+
+    // The File itself must reach the upload: HttpClient would serialize a plain object as JSON.
+    if (file)
+      this.beforeUpload(
+        Object.assign(file, { uid: file.name, originFileObj: file }) as unknown as NzUploadFile,
+      );
   };
 
   protected readonly remove = () => {
