@@ -699,6 +699,31 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("ItemImportBatchFiles");
                 });
 
+            modelBuilder.Entity("skestock.Domain.Entities.Items.ItemLocationThreshold", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("MinThreshold")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("ItemId", "LocationId")
+                        .IsUnique();
+
+                    b.ToTable("ItemLocationThresholds");
+                });
+
             modelBuilder.Entity("skestock.Domain.Entities.Locations.Location", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2153,6 +2178,21 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("FileMetadata");
 
                     b.Navigation("LastModifiedBy");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.Items.ItemLocationThreshold", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.Items.Item", null)
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("skestock.Domain.Entities.Locations.Location", null)
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("skestock.Domain.Entities.Locations.Location", b =>

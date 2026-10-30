@@ -6,7 +6,9 @@ using skestock.Domain.Entities;
 using NUnit.Framework;
 using Shouldly;
 using skestock.Domain.Entities.Categories;
+using skestock.Application.Features.Items.Models;
 using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Locations;
 
 namespace skestock.Application.UnitTests.Features.Items.Commands.CreateItem;
 
@@ -62,28 +64,69 @@ public class CreateItemCommandValidatorTests
         result.Errors.ShouldContain(e => e.PropertyName == nameof(CreateItemCommand.Unit) && e.ErrorCode == ValidationErrorCodes.Required);
     }
 
+    private static async Task<Guid> AddLocationAsync(ItemTestDbContext context)
+    {
+        var location = new Location { Name = Guid.NewGuid().ToString(), Type = "Kitchen" };
+        context.Locations.Add(location);
+        await context.SaveChangesAsync(CancellationToken.None);
+        return location.Id;
+    }
+
+    private static CreateItemCommand WithThresholds(Guid categoryId, params ItemLocationThresholdDto[] thresholds) => new()
+    {
+        Name = "Pencil", Unit = "unit", CategoryId = categoryId, LocationThresholds = [.. thresholds]
+    };
+
     [Test]
-    public async Task ShouldHaveErrorWhenMinThresholdIsNegative()
+    public async Task ShouldHaveErrorWhenLocationThresholdIsNegative()
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
+        var locationId = await AddLocationAsync(context);
         var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
-        var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", MinThreshold = -1, CategoryId = category.Id });
+        var result = await validator.ValidateAsync(WithThresholds(category.Id, new ItemLocationThresholdDto { LocationId = locationId, MinThreshold = -1 }));
 
-        result.Errors.ShouldContain(e => e.PropertyName == nameof(CreateItemCommand.MinThreshold) && e.ErrorCode == ValidationErrorCodes.GreaterThanOrEqualTo);
+        result.Errors.ShouldContain(e => e.PropertyName == nameof(CreateItemCommand.LocationThresholds) && e.ErrorCode == ValidationErrorCodes.GreaterThanOrEqualTo);
     }
 
     [Test]
-    public async Task ShouldNotHaveErrorWhenMinThresholdIsZero()
+    public async Task ShouldNotHaveErrorWhenLocationThresholdsAreEmptyOrZero()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        var locationId = await AddLocationAsync(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
+
+        (await validator.ValidateAsync(WithThresholds(category.Id))).IsValid.ShouldBeTrue();
+        (await validator.ValidateAsync(WithThresholds(category.Id, new ItemLocationThresholdDto { LocationId = locationId, MinThreshold = 0 }))).IsValid.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldHaveDuplicateLocationErrorWhenLocationRepeats()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        var locationId = await AddLocationAsync(context);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
+
+        var result = await validator.ValidateAsync(WithThresholds(category.Id,
+            new ItemLocationThresholdDto { LocationId = locationId, MinThreshold = 1 },
+            new ItemLocationThresholdDto { LocationId = locationId, MinThreshold = 2 }));
+
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.DuplicateLocation);
+    }
+
+    [Test]
+    public async Task ShouldHaveInvalidReferenceErrorWhenLocationDoesNotExist()
     {
         var (context, category) = await CreateContextAsync();
         await using var _ = context;
         var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
 
-        var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", MinThreshold = 0, CategoryId = category.Id });
+        var result = await validator.ValidateAsync(WithThresholds(category.Id, new ItemLocationThresholdDto { LocationId = Guid.NewGuid(), MinThreshold = 1 }));
 
-        result.Errors.ShouldNotContain(e => e.PropertyName == nameof(CreateItemCommand.MinThreshold));
+        result.Errors.ShouldContain(e => e.PropertyName == nameof(CreateItemCommand.LocationThresholds) && e.ErrorCode == ValidationErrorCodes.InvalidReference);
     }
 
     [Test]

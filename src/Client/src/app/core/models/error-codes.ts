@@ -86,6 +86,7 @@ export const ErrorCodes = {
     // Domain-specific uniqueness codes
     duplicateName: 'validation.duplicate_name',
     duplicateSku: 'validation.duplicate_sku',
+    duplicateLocation: 'validation.duplicate_location',
 
     // Domain-specific reference codes
     invalidReference: 'validation.invalid_reference',
@@ -128,8 +129,4 @@ export type ValidationErrorCode = ValueOf<typeof ErrorCodes.validation>;
 
 /** Union of every known backend error code. */
 export type ErrorCode =
-  | CommonErrorCode
-  | AuthErrorCode
-  | ResourceErrorCode
-  | StockErrorCode
-  | ValidationErrorCode;
+  CommonErrorCode | AuthErrorCode | ResourceErrorCode | StockErrorCode | ValidationErrorCode;

@@ -40,7 +40,8 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
     'Clasa sau stocul ei a fost modificat în timpul operației. Reîncărcați pagina și încercați din nou.',
   [ErrorCodes.stock.bulkConcurrencyConflict]:
     'Stocul a fost modificat în timpul inventarierii. Reîncărcați și încercați din nou.',
-  [ErrorCodes.resource.schoolClassTargetNotOpen]: 'Clasa selectată este închisă și nu poate primi stoc.',
+  [ErrorCodes.resource.schoolClassTargetNotOpen]:
+    'Clasa selectată este închisă și nu poate primi stoc.',
   [ErrorCodes.resource.schoolClassStatusChangeNotAllowed]:
     'Clasa nu poate fi închisă sau redeschisă din editare. Folosiți acțiunea „Închide clasa”.',
   [ErrorCodes.resource.goodsReceiptNotFound]: 'Recepția de marfă nu a fost găsită.',
@@ -66,8 +67,7 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
   [ErrorCodes.resource.blobNotFound]: 'Încărcarea fișierului nu a fost finalizată.',
 
   // ── Stock errors ──────────────────────────────────────────────────────────
-  [ErrorCodes.stock.insufficientQuantity]:
-    'Stocul disponibil nu este suficient pentru transfer.',
+  [ErrorCodes.stock.insufficientQuantity]: 'Stocul disponibil nu este suficient pentru transfer.',
   [ErrorCodes.stock.concurrencyConflict]:
     'Stocul a fost modificat în timpul operației. Reîncărcați pagina și încercați din nou.',
 
@@ -97,9 +97,7 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
   [ErrorCodes.validation.invalidEnum]: 'Valoarea selectată nu este validă.',
   [ErrorCodes.validation.greaterThan]: (params) => {
     const value = p(params, 'comparisonValue');
-    return value
-      ? `Valoarea trebuie să fie mai mare decât ${value}.`
-      : 'Valoarea este prea mică.';
+    return value ? `Valoarea trebuie să fie mai mare decât ${value}.` : 'Valoarea este prea mică.';
   },
   [ErrorCodes.validation.greaterThanOrEqualTo]: (params) => {
     const value = p(params, 'comparisonValue');
@@ -109,9 +107,7 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
   },
   [ErrorCodes.validation.lessThan]: (params) => {
     const value = p(params, 'comparisonValue');
-    return value
-      ? `Valoarea trebuie să fie mai mică decât ${value}.`
-      : 'Valoarea este prea mare.';
+    return value ? `Valoarea trebuie să fie mai mică decât ${value}.` : 'Valoarea este prea mare.';
   },
   [ErrorCodes.validation.lessThanOrEqualTo]: (params) => {
     const value = p(params, 'comparisonValue');
@@ -137,6 +133,7 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
   // ── Validation: domain-specific uniqueness codes ─────────────────────────
   [ErrorCodes.validation.duplicateName]: 'Există deja o înregistrare cu acest nume.',
   [ErrorCodes.validation.duplicateSku]: 'Există deja un articol cu acest cod SKU.',
+  [ErrorCodes.validation.duplicateLocation]: 'Aceeași locație apare de mai multe ori în praguri.',
 
   // ── Validation: domain-specific reference codes ──────────────────────────
   [ErrorCodes.validation.invalidReference]: 'Referința selectată nu există.',
@@ -150,7 +147,8 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
   [ErrorCodes.validation.emptyLines]: 'Recepția trebuie să conțină cel puțin o linie.',
   [ErrorCodes.validation.duplicateReceiptLine]:
     'Există linii duplicate pentru aceeași combinație de articol, locație și dată de expirare.',
-  [ErrorCodes.validation.duplicateCountLine]: 'Același articol și aceeași locație apar de mai multe ori în inventar.',
+  [ErrorCodes.validation.duplicateCountLine]:
+    'Același articol și aceeași locație apar de mai multe ori în inventar.',
   [ErrorCodes.validation.expiryDateRequired]:
     'Data de expirare este obligatorie pentru articolele perisabile.',
   [ErrorCodes.validation.expiryDateNotAllowed]:

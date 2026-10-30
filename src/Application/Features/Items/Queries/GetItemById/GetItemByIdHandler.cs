@@ -19,7 +19,6 @@ public class GetItemByIdHandler(IApplicationDbContext dbContext)
                 Name = item.Name,
                 Description = item.Description,
                 Unit = item.Unit,
-                MinThreshold = item.MinThreshold,
                 IsPerishable = item.IsPerishable,
                 ShelfLifeDays = item.ShelfLifeDays,
                 IsActive = item.IsActive,
@@ -36,6 +35,12 @@ public class GetItemByIdHandler(IApplicationDbContext dbContext)
         if (itemDto is null)
             return Result.Fail(new ItemErrors.ItemNotFound(request.Id));
 
-        return Result.Ok(itemDto);
+        var thresholds = await dbContext.ItemLocationThresholds
+            .AsNoTracking()
+            .Where(t => t.ItemId == request.Id)
+            .Select(t => new ItemLocationThresholdDto { LocationId = t.LocationId, MinThreshold = t.MinThreshold })
+            .ToListAsync(cancellationToken);
+
+        return Result.Ok(itemDto with { LocationThresholds = thresholds });
     }
 }

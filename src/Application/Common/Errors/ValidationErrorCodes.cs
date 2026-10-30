@@ -24,6 +24,8 @@ public class ValidationErrorCodes
     public const string DuplicateName = "validation.duplicate_name";
     /// <summary>A SKU (stock keeping unit) value already exists on another item.</summary>
     public const string DuplicateSku = "validation.duplicate_sku";
+    /// <summary>The same location appears more than once in a list that allows each location once.</summary>
+    public const string DuplicateLocation = "validation.duplicate_location";
 
     // ── Domain-specific reference codes ────────────────────────────────────
     /// <summary>A referenced foreign-key id (e.g. ParentLocationId) does not exist.</summary>

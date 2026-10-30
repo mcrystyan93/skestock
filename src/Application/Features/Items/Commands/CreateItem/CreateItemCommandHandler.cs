@@ -18,7 +18,6 @@ public class CreateItemCommandHandler(IApplicationDbContext dbContext, IUser use
             Name = request.Name.Trim(),
             Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
             Unit = request.Unit.Trim(),
-            MinThreshold = request.MinThreshold,
             IsPerishable = request.IsPerishable,
             ShelfLifeDays = request.ShelfLifeDays,
             CategoryId = request.CategoryId,
@@ -27,6 +26,12 @@ public class CreateItemCommandHandler(IApplicationDbContext dbContext, IUser use
         };
 
         dbContext.Items.Add(item);
+        dbContext.ItemLocationThresholds.AddRange(request.LocationThresholds.Select(t => new ItemLocationThreshold
+        {
+            ItemId = item.Id,
+            LocationId = t.LocationId,
+            MinThreshold = t.MinThreshold
+        }));
         item.AddDomainEvent(new ItemCreatedEvent(item));
         if (request.ImageFileId is { } imageFileId)
         {

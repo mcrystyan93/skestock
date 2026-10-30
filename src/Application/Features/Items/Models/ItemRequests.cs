@@ -16,7 +16,7 @@ public static class ItemRequests
         public string Name { get; init; } = string.Empty;
         public string? Description { get; init; }
         public string Unit { get; init; } = "unit";
-        public int MinThreshold { get; init; }
+        public List<ItemLocationThresholdDto> LocationThresholds { get; init; } = [];
         public bool IsPerishable { get; init; }
         public int? ShelfLifeDays { get; init; }
         public Guid CategoryId { get; init; }
@@ -29,7 +29,7 @@ public static class ItemRequests
         public string Name { get; init; } = string.Empty;
         public string? Description { get; init; }
         public string Unit { get; init; } = "unit";
-        public int MinThreshold { get; init; }
+        public List<ItemLocationThresholdDto> LocationThresholds { get; init; } = [];
         public bool IsPerishable { get; init; }
         public int? ShelfLifeDays { get; init; }
         public Guid CategoryId { get; init; }

@@ -220,6 +220,34 @@ public class AdjustStockCommandHandlerTests
         surplusTransaction.Reason.ShouldBe(nameof(AdjustmentReason.Found));
     }
 
+    [TestCase(10, true)]
+    [TestCase(5, false)]
+    [TestCase(null, false)]
+    public async Task Handle_FlagsLowStockAgainstTheRequestLocationsThreshold(int? threshold, bool expectedLow)
+    {
+        var (context, item, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        context.StockBatches.Add(CreateBatch(item, location, schoolClass, quantity: 20, expiryDate: null));
+        // Another location's threshold for the same item must not influence the result.
+        context.ItemLocationThresholds.Add(new ItemLocationThreshold { ItemId = item.Id, LocationId = Guid.NewGuid(), MinThreshold = 1000 });
+        if (threshold is { } value)
+            context.ItemLocationThresholds.Add(new ItemLocationThreshold { ItemId = item.Id, LocationId = location.Id, MinThreshold = value });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new AdjustStockCommandHandler(context, new FakeUser(userProfile.IdentityId)).Handle(
+            new AdjustStockCommand
+            {
+                ClassId = schoolClass.Id,
+                ItemId = item.Id,
+                LocationId = location.Id,
+                ActualQuantity = 8,
+                Reason = AdjustmentReason.Miscount
+            }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.IsLowStock.ShouldBe(expectedLow);
+    }
+
     [Test]
     public async Task Handle_WhenSaveHitsConcurrencyConflict_ReturnsTypedConflict()
     {

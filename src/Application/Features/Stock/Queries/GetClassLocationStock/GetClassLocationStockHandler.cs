@@ -104,7 +104,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
         var itemsQuery = filteredItemsQuery.Where(i => itemIds.Contains(i.Id));
 
         var items = await itemsQuery
-            .Select(i => new { i.Id, i.Name, i.Sku, i.Unit, i.IsPerishable, i.MinThreshold, i.CategoryId, i.ImageFileId })
+            .Select(i => new { i.Id, i.Name, i.Sku, i.Unit, i.IsPerishable, i.CategoryId, i.ImageFileId })
             .ToDictionaryAsync(i => i.Id, cancellationToken);
 
         // Items excluded by the search term filter above must also be excluded from the stock
@@ -146,6 +146,16 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
                 _ => true,
                 cancellationToken);
 
+        // A missing row means no threshold: such an item/location is never low.
+        var thresholdByItemLocation = await dbContext.ItemLocationThresholds
+            .AsNoTracking()
+            .Where(t => visibleItemIds.Contains(t.ItemId) && visibleLocationIds.Contains(t.LocationId))
+            .Select(t => new { t.ItemId, t.LocationId, t.MinThreshold })
+            .ToDictionaryAsync(
+                t => (t.ItemId, t.LocationId),
+                t => (int?)t.MinThreshold,
+                cancellationToken);
+
         stockByItemLocation = stockByItemLocation
             .Where(x =>
             {
@@ -157,7 +167,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
 
         if (request.LowStockOnly)
             stockByItemLocation = stockByItemLocation
-                .Where(x => x.Quantity < items[x.ItemId].MinThreshold)
+                .Where(x => x.Quantity < thresholdByItemLocation.GetValueOrDefault((x.ItemId, x.LocationId)))
                 .ToList();
 
         if (request.ExpiredOnly)
@@ -218,7 +228,7 @@ public class GetClassLocationStockHandler(IApplicationDbContext dbContext)
                     IsExpired = item.IsPerishable && x.ExpiredQuantity > 0,
                     ExpiredQuantity = item.IsPerishable ? x.ExpiredQuantity : 0,
                     Quantity = x.Quantity,
-                    IsLowStock = x.Quantity < item.MinThreshold,
+                    IsLowStock = x.Quantity < thresholdByItemLocation.GetValueOrDefault((x.ItemId, x.LocationId)),
                     HideWhenZeroStock = hideWhenZeroStock
                 };
             })
