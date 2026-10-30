@@ -119,8 +119,16 @@ export class ItemsPage implements OnInit, OnDestroy {
 
     modalRef.afterClose.pipe(
       takeUntilDestroyed(this._destroyRef)
-    ).subscribe(() => {
-      this.listStore.reload();
+    ).subscribe((saved?: Partial<ItemDto> | null) => {
+      // Cancelling changes nothing, and an edit only touches its own row: a reload would empty the
+      // list and lose the scroll position. A new item's place depends on sort/filter, so it reloads.
+      if (!saved)
+        return;
+
+      if (item)
+        this.listStore.patchItem(item.id);
+      else
+        this.listStore.reload();
     });
   }
 
