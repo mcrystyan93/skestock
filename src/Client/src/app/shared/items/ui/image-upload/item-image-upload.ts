@@ -5,9 +5,7 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzUploadComponent, NzUploadFile } from 'ng-zorro-antd/upload';
 import { FileStorageState } from '@ske/shared/storage';
-
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+import { imageFileError, toUploadFile } from './item-image-file';
 
 @Component({
   imports: [NzUploadComponent, NzIconDirective, NzButtonComponent],
@@ -75,13 +73,10 @@ export class ItemImageUpload implements FormValueControl<string | null> {
   });
 
   protected readonly beforeUpload = (file: NzUploadFile) => {
-    if (!ALLOWED_TYPES.includes(file.type ?? '')) {
-      this._message.error('Format neacceptat');
-      return false;
-    }
+    const error = imageFileError(file);
 
-    if ((file.size ?? 0) > MAX_IMAGE_BYTES) {
-      this._message.error('Imaginea depășește 5 MB');
+    if (error) {
+      this._message.error(error);
       return false;
     }
 
@@ -97,11 +92,7 @@ export class ItemImageUpload implements FormValueControl<string | null> {
 
     input.value = '';
 
-    // The File itself must reach the upload: HttpClient would serialize a plain object as JSON.
-    if (file)
-      this.beforeUpload(
-        Object.assign(file, { uid: file.name, originFileObj: file }) as unknown as NzUploadFile,
-      );
+    if (file) this.beforeUpload(toUploadFile(file));
   };
 
   protected readonly remove = () => {
