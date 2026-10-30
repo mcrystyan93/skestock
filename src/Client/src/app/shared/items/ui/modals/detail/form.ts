@@ -3,30 +3,14 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { catchError, of } from 'rxjs';
 import { CategoryDropdownValue, ItemDto, ItemLocationThreshold, LocationDto } from '@ske/models';
 import { LocationsHttp } from '@ske/shared/locations';
-import {
-  applyWhen,
-  applyEach,
-  form,
-  FormField,
-  hidden,
-  maxLength,
-  min,
-  required,
-  submit,
-  validate,
-} from '@angular/forms/signals';
-import {
-  NzFormControlComponent,
-  NzFormDirective,
-  NzFormItemComponent,
-  NzFormLabelComponent,
-} from 'ng-zorro-antd/form';
+import { applyEach, applyWhen, form, FormField, hidden, maxLength, min, required, submit, validate } from '@angular/forms/signals';
+import { NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
 import { SkeletonInputLoaderDirective } from '@ske/shared/loader';
 import {
   NzInputAddonAfterDirective,
   NzInputDirective,
   NzInputWrapperComponent,
-  NzTextareaCountComponent,
+  NzTextareaCountComponent
 } from 'ng-zorro-antd/input';
 import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
 import { CategoryDropdown } from '@ske/shared/categories';
@@ -57,7 +41,7 @@ import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
   ],
   selector: 'ske-item-form',
   styles: ``,
-  templateUrl: './form.html',
+  templateUrl: './form.html'
 })
 export class Form {
   public readonly loading = input.required<boolean>();
@@ -103,22 +87,22 @@ export class Form {
 
   public readonly itemForm = form(this._formModel, (schemaPath) => {
     maxLength(schemaPath.sku, 50, {
-      message: 'Codul produsului nu poate depăși 50 de caractere.',
+      message: 'Codul produsului nu poate depăși 50 de caractere.'
     });
     required(schemaPath.name, {
-      message: 'Numele produsului este obligatoriu.',
+      message: 'Numele produsului este obligatoriu.'
     });
     maxLength(schemaPath.name, 100, {
-      message: 'Numele produsului nu poate depăși 100 de caractere.',
+      message: 'Numele produsului nu poate depăși 100 de caractere.'
     });
     maxLength(schemaPath.description, 500, {
-      message: 'Descrierea nu poate depăși 500 de caractere.',
+      message: 'Descrierea nu poate depăși 500 de caractere.'
     });
     required(schemaPath.unit, {
-      message: 'Unitatea de măsură este obligatorie.',
+      message: 'Unitatea de măsură este obligatorie.'
     });
     maxLength(schemaPath.unit, 20, {
-      message: 'Unitatea de măsură nu poate depăși 20 de caractere.',
+      message: 'Unitatea de măsură nu poate depăși 20 de caractere.'
     });
     applyEach(schemaPath.locationThresholds, (rowPath) => {
       required(rowPath.minThreshold, {
@@ -131,25 +115,24 @@ export class Form {
     // Shelf life is only relevant for perishable items: hide it otherwise, and only require a
     // positive value when it is both visible (perishable) and filled in.
     hidden(schemaPath.shelfLifeDays, {
-      when: ({ valueOf }) => !valueOf(schemaPath.isPerishable),
+      when: ({ valueOf }) => !valueOf(schemaPath.isPerishable)
     });
     applyWhen(
       schemaPath.shelfLifeDays,
-      ({ valueOf }) =>
-        valueOf(schemaPath.isPerishable) && valueOf(schemaPath.shelfLifeDays) != null,
+      ({ valueOf }) => valueOf(schemaPath.isPerishable) && valueOf(schemaPath.shelfLifeDays) != null,
       (shelfLifePath) => {
         min(shelfLifePath, 1, {
-          message: 'Termenul de valabilitate trebuie să fie de cel puțin o zi.',
+          message: 'Termenul de valabilitate trebuie să fie de cel puțin o zi.'
         });
-      },
+      }
     );
     validate(schemaPath.imageFileId, () =>
       this.imageUploading()
         ? { kind: 'imageUploading', message: 'Așteaptă finalizarea încărcării imaginii.' }
-        : undefined,
+        : undefined
     );
     required(schemaPath.category, {
-      message: 'Categoria este obligatorie.',
+      message: 'Categoria este obligatorie.'
     });
   });
 

@@ -1,9 +1,4 @@
-import {
-  BasePaginationFilter,
-  ColumnFilter,
-  prioritizeSort,
-  TableColumnDefinition,
-} from './pagination';
+import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
 import { PAGINATION_PAGE_SIZE } from './category';
 
 /** Mirrors src/Application/Features/Items/Models/ItemLocationThresholdDto.cs. */
@@ -80,58 +75,58 @@ export const ITEM_TABLE_COLUMNS: TableColumnDefinition<ItemTableColumn> = {
   sku: {
     label: 'Cod',
     value: 'sku',
-    fieldType: 'string',
+    fieldType: 'string'
   },
   name: {
     label: 'Articol',
     value: 'name',
-    fieldType: 'string',
+    fieldType: 'string'
   },
   unit: {
     label: 'Unitate',
     value: 'unit',
-    fieldType: 'string',
+    fieldType: 'string'
   },
   isPerishable: {
     label: 'Perisabil',
     value: 'isPerishable',
-    fieldType: 'boolean',
+    fieldType: 'boolean'
   },
   shelfLifeDays: {
     label: 'Valabilitate',
     value: 'shelfLifeDays',
-    fieldType: 'number',
+    fieldType: 'number'
   },
   categoryName: {
     label: 'Categorie',
     value: 'categoryName',
-    fieldType: 'string',
+    fieldType: 'string'
   },
   isActive: {
     label: 'Activ',
     value: 'isActive',
-    fieldType: 'boolean',
+    fieldType: 'boolean'
   },
   createdDate: {
     label: 'Data creare',
     value: 'createdDate',
-    fieldType: 'date',
+    fieldType: 'date'
   },
   lastModifiedDate: {
     label: 'Data modificare',
     value: 'lastModifiedDate',
-    fieldType: 'date',
+    fieldType: 'date'
   },
   createdByName: {
     label: 'Creat de',
     value: 'createdByName',
-    fieldType: 'string',
+    fieldType: 'string'
   },
   lastModifiedByName: {
     label: 'Modificat de',
     value: 'lastModifiedByName',
-    fieldType: 'string',
-  },
+    fieldType: 'string'
+  }
 };
 
 export type ItemDropdownOption = Partial<ItemDto> & Pick<ItemDto, 'id'>;
@@ -144,13 +139,13 @@ export type ItemAutocompleteValue = ItemDto | ItemDropdownOption | ItemDraft | n
 
 export function buildItemListFilter(
   currentFilter: GetAllItemsRequest,
-  partialFilter: Partial<GetAllItemsRequest>,
+  partialFilter: Partial<GetAllItemsRequest>
 ): GetAllItemsRequest {
   return {
     ...currentFilter,
     ...partialFilter,
     cursor: null,
     pageSize: partialFilter.pageSize ?? currentFilter.pageSize ?? PAGINATION_PAGE_SIZE,
-    sort: prioritizeSort(currentFilter.sort ?? [], partialFilter.sort ?? []),
+    sort: prioritizeSort(currentFilter.sort ?? [], partialFilter.sort ?? [])
   };
 }

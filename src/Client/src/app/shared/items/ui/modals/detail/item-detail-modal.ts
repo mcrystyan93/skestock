@@ -1,21 +1,8 @@
 import { Component, computed, DestroyRef, effect, inject, signal, viewChild } from '@angular/core';
-import {
-  itemApiEvents,
-  ItemDetailState,
-  NEW_ITEM_ROUTE_ID,
-} from '../../../services/item-detail.store';
+import { itemApiEvents, ItemDetailState, NEW_ITEM_ROUTE_ID } from '../../../services/item-detail.store';
 import { CreateItemRequest, EditItemRequest, ItemDto } from '@ske/models';
-import {
-  NZ_MODAL_DATA,
-  NzModalFooterDirective,
-  NzModalRef,
-  NzModalTitleDirective,
-} from 'ng-zorro-antd/modal';
-import {
-  NzSpaceCompactComponent,
-  NzSpaceComponent,
-  NzSpaceItemDirective,
-} from 'ng-zorro-antd/space';
+import { NZ_MODAL_DATA, NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zorro-antd/modal';
+import { NzSpaceCompactComponent, NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { Form, ItemFormModel } from './form';
 import { isNil } from 'lodash-es';
@@ -44,12 +31,12 @@ import { NzTypographyComponent } from 'ng-zorro-antd/typography';
     NzIconDirective,
     NzDropdownDirective,
     ErrorAlert,
-    NzTypographyComponent,
+    NzTypographyComponent
   ],
   selector: 'ske-item-detail-modal',
   styles: ``,
   templateUrl: './item-detail-modal.html',
-  providers: [ItemDetailState],
+  providers: [ItemDetailState]
 })
 export class ItemDetailModal {
   public readonly modalData = signal<ItemDetailModalData>(inject(NZ_MODAL_DATA));
@@ -60,15 +47,14 @@ export class ItemDetailModal {
   private readonly _nzModalRef = inject(NzModalRef);
   private readonly _storeEvents = inject(Events);
   private readonly _formComponent = viewChild(Form);
-  protected readonly imageUploading = computed(
-    () => this._formComponent()?.imageUploading() ?? false,
-  );
+  protected readonly imageUploading = computed(() => this._formComponent()?.imageUploading() ?? false);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _nzMessageService = inject(NzMessageService);
   private readonly _close$ = new BehaviorSubject(false);
 
   private readonly _initialLoadEffectRef = effect(() => {
-    if (this.initialLoad) return;
+    if (this.initialLoad)
+      return;
 
     const { item, prefill } = this.modalData();
 
@@ -76,16 +62,16 @@ export class ItemDetailModal {
     this.initialLoad = true;
   });
 
-  private readonly _saveSuccessRef = this._storeEvents
-    .on(itemApiEvents.saveSuccess)
+  private readonly _saveSuccessRef = this._storeEvents.on(itemApiEvents.saveSuccess)
     .pipe(
       takeUntilDestroyed(this._destroyRef),
       tap(() => this._nzMessageService.success('Articolul a fost salvat cu succes!')),
       switchMap(() => this._close$),
       filter((shouldClose) => shouldClose),
-      tap(() => this.close(this.store.item())),
+      tap(() => this.close(this.store.item()))
     )
     .subscribe();
+
 
   public close(savedItem: Partial<ItemDto> | null = null) {
     this._nzModalRef.close(savedItem);
@@ -94,15 +80,18 @@ export class ItemDetailModal {
   public async save(shouldClose: boolean = true) {
     const formComponent = this._formComponent();
 
-    if (isNil(formComponent)) return;
+    if (isNil(formComponent))
+      return;
 
     const { isValid, formData } = await formComponent.submit();
 
-    if (!isValid || isNil(formData)) return;
+    if (!isValid || isNil(formData))
+      return;
 
     this.store.saveItem(this.mapSaveRequest(formData));
 
-    if (shouldClose) this._close$.next(true);
+    if(shouldClose)
+      this._close$.next(true);
   }
 
   private mapSaveRequest(formData: ItemFormModel): CreateItemRequest | EditItemRequest {
@@ -119,7 +108,7 @@ export class ItemDetailModal {
       isPerishable: formData.isPerishable,
       shelfLifeDays: formData.isPerishable ? (formData.shelfLifeDays ?? null) : null,
       categoryId: formData.category?.id as string,
-      imageFileId: formData.imageFileId,
+      imageFileId: formData.imageFileId
     };
   }
 }
@@ -127,4 +116,4 @@ export class ItemDetailModal {
 type ItemDetailModalData = {
   item: ItemDto | null;
   prefill?: Partial<ItemDto> | null;
-};
+}

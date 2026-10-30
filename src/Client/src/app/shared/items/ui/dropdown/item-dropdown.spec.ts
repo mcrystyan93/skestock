@@ -20,7 +20,7 @@ describe('ItemDropdown', () => {
     createdByName: null,
     lastModifiedByName: null,
     createdDate: '2026-01-01T00:00:00Z',
-    lastModifiedDate: '2026-01-01T00:00:00Z',
+    lastModifiedDate: '2026-01-01T00:00:00Z'
   };
 
   let http: {
@@ -31,12 +31,12 @@ describe('ItemDropdown', () => {
   beforeEach(() => {
     http = {
       getAll: vi.fn(),
-      getByIdCached: vi.fn(),
+      getByIdCached: vi.fn()
     };
 
     TestBed.configureTestingModule({
       imports: [ItemDropdown],
-      providers: [{ provide: ItemsHttp, useValue: http }],
+      providers: [{ provide: ItemsHttp, useValue: http }]
     });
   });
 
@@ -94,14 +94,12 @@ describe('ItemDropdown', () => {
   });
 
   it('filters available items by the supplied ids with the in operator', async () => {
-    http.getAll.mockReturnValue(
-      of({
-        data: [],
-        hasNextPage: false,
-        nextCursor: null,
-        sort: [],
-      }),
-    );
+    http.getAll.mockReturnValue(of({
+      data: [],
+      hasNextPage: false,
+      nextCursor: null,
+      sort: []
+    }));
 
     const fixture = TestBed.createComponent(ItemDropdown);
     fixture.componentRef.setInput('allowEdit', false);
@@ -111,17 +109,15 @@ describe('ItemDropdown', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(http.getAll).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filters: expect.arrayContaining([
-          expect.objectContaining({
-            field: 'id',
-            operator: 'in',
-            value: [item.id, 'item-2'],
-          }),
-        ]),
-      }),
-    );
+    expect(http.getAll).toHaveBeenCalledWith(expect.objectContaining({
+      filters: expect.arrayContaining([
+        expect.objectContaining({
+          field: 'id',
+          operator: 'in',
+          value: [item.id, 'item-2']
+        })
+      ])
+    }));
     fixture.destroy();
   });
 

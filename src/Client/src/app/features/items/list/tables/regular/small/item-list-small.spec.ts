@@ -55,9 +55,7 @@ describe('ItemListSmall', () => {
     const fixture = createFixture();
     const component = fixture.componentInstance as unknown as { subtitle(item: ItemDto): string };
 
-    expect(component.subtitle(createItem({ sku: 'SKU-1', categoryName: 'Papetărie' }))).toBe(
-      'SKU-1 · Papetărie',
-    );
+    expect(component.subtitle(createItem({ sku: 'SKU-1', categoryName: 'Papetărie' }))).toBe('SKU-1 · Papetărie');
     expect(component.subtitle(createItem({ sku: null, categoryName: null }))).toBe('—');
     fixture.destroy();
   });
