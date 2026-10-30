@@ -32,6 +32,7 @@ import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
 import { CategoryDropdown } from '@ske/shared/categories';
 import { NzSwitchComponent } from 'ng-zorro-antd/switch';
 import { ItemImageUpload } from '../../image-upload/item-image-upload';
+import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 
 @Component({
@@ -52,6 +53,7 @@ import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
     NzTextareaCountComponent,
     NzInputAddonAfterDirective,
     ItemImageUpload,
+    NzButtonComponent,
   ],
   selector: 'ske-item-form',
   styles: ``,
@@ -150,6 +152,15 @@ export class Form {
       message: 'Categoria este obligatorie.',
     });
   });
+
+  public readonly bulkForm = form(signal<{ value: number | null }>({ value: 0 }));
+
+  public applyToAll() {
+    const value = this.bulkForm.value().value() ?? 0;
+    for (const row of this.itemForm.locationThresholds) {
+      row.minThreshold().value.set(value);
+    }
+  }
 
   public locationName(locationId: string) {
     return this._locationNames().get(locationId) ?? locationId;
