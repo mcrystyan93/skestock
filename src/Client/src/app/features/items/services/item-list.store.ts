@@ -3,7 +3,7 @@ import { Events, withEventHandlers } from '@ngrx/signals/events';
 import { withItemCollection } from '@ske/shared/items';
 import { ItemDto } from '@ske/models';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { mergeMap, pipe, switchMap, tap } from 'rxjs';
+import { filter, groupBy, mergeMap, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
 import { inject } from '@angular/core';
 import { ItemsHttp } from '@ske/shared/items';
@@ -85,15 +85,44 @@ export const ItemListState = signalStore(
       )
     );
 
-    return { reload, toggleActive, setItemImage };
+    // Realtime row events replace just that row, so the list keeps its loaded pages and scroll position.
+    // A row that was edited out of its sort position or filter is corrected on the next load.
+    const patchItem = rxMethod<string>(
+      pipe(
+        filter((id) => store.items().some((i) => i.id === id)),
+        // Per row, a newer event cancels the older fetch so a late response cannot overwrite fresher data;
+        // rows do not cancel each other.
+        groupBy((id) => id),
+        mergeMap((row$) =>
+          row$.pipe(
+            switchMap((id) =>
+              itemHttp.getById(id).pipe(
+                mapResponse({
+                  next: (updatedItem) => {
+                    patchState(store, {
+                      items: store.items().map((i) => i.id === updatedItem.id ? updatedItem : i)
+                    });
+                  },
+                  error: () => reload()
+                })
+              )
+            )
+          )
+        )
+      )
+    );
+
+    return { reload, toggleActive, setItemImage, patchItem };
   }),
   withEventHandlers((store, events = inject(Events)) => ({
-    itemChanges: events.on(
+    itemListChanges: events.on(
       realtimeEvents.itemCreated,
+      realtimeEvents.itemImportBatchConfirmed
+    ).pipe(tap(() => store.reload())),
+    itemRowChanges: events.on(
       realtimeEvents.itemUpdated,
       realtimeEvents.itemDisabled,
-      realtimeEvents.itemEnabled,
-      realtimeEvents.itemImportBatchConfirmed
-    ).pipe(tap(() => store.reload()))
+      realtimeEvents.itemEnabled
+    ).pipe(tap(({ payload }) => store.patchItem(payload.itemId)))
   }))
 );
