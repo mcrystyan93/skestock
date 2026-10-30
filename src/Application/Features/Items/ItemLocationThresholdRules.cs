@@ -13,7 +13,10 @@ internal static class ItemLocationThresholdRules
         IApplicationDbContext dbContext)
     {
         validator.RuleFor(thresholds)
+            .Cascade(CascadeMode.Stop)
             .NotNull()
+            .WithErrorCode(ValidationErrorCodes.Required)
+            .Must(list => list.All(t => t is not null))
             .WithErrorCode(ValidationErrorCodes.Required)
             .DependentRules(() =>
             {

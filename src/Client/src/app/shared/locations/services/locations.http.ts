@@ -8,6 +8,7 @@ import {
   LocationDto,
   PaginatedResponse,
   UpdateLocationRequest,
+  PAGINATION_PAGE_SIZE,
 } from '@ske/models';
 
 /**
@@ -22,7 +23,7 @@ export class LocationsHttp {
   }
 
   /** Fetches every page; used where all locations are needed at once (e.g. the per-location threshold form). */
-  public getAllPages(pageSize = 100) {
+  public getAllPages(pageSize = PAGINATION_PAGE_SIZE) {
     const fetchPage = (cursor: string | null) => this.getAll({ filters: [], pageSize, cursor });
 
     return fetchPage(null).pipe(
