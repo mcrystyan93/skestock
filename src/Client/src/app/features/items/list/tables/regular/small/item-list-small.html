@@ -33,7 +33,9 @@
                (keydown.space)="onSpace($event, item)">
         <div class="flex min-w-0 items-center gap-3">
           <ske-item-thumbnail [itemId]="item.id"
-                              [imageFileId]="item.imageFileId" />
+                              [imageFileId]="item.imageFileId"
+                              [uploadable]="true"
+                              (imageUploaded)="onImageUploaded.emit({ item, fileId: $event })" />
           <div class="min-w-0 grow">
             <div class="flex min-w-0 items-center justify-between gap-2">
               <strong nz-typography

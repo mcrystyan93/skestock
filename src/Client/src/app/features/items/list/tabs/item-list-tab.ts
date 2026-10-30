@@ -26,6 +26,7 @@ import { LayoutBreakpoint } from '@ske/shared/directives';
           (onLoadMore)="onLoadMore.emit()"
           (onEdit)="onEdit.emit($event)"
           (onToggleActive)="onToggleActive.emit($event)"
+          (onImageUploaded)="onImageUploaded.emit($event)"
           [togglingItemId]="togglingItemId()"
         />
       </ng-container>
@@ -39,6 +40,7 @@ import { LayoutBreakpoint } from '@ske/shared/directives';
           (onFilterChange)="onFilterChange.emit($event)"
           (onLoadMore)="onLoadMore.emit()"
           (onEdit)="onEdit.emit($event)"
+          (onImageUploaded)="onImageUploaded.emit($event)"
         />
       </ng-template>
     </div>
@@ -61,4 +63,5 @@ export class ItemListTab {
   public readonly onLoadMore = output<void>();
   public readonly onEdit = output<ItemDto>();
   public readonly onToggleActive = output<ItemDto>();
+  public readonly onImageUploaded = output<{ item: ItemDto; fileId: string }>();
 }
