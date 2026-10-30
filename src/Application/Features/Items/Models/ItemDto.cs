@@ -7,7 +7,7 @@ public record ItemDto
     public string Name { get; init; } = string.Empty;
     public string? Description { get; init; }
     public string Unit { get; init; } = string.Empty;
-    public int MinThreshold { get; init; }
+    public List<ItemLocationThresholdDto> LocationThresholds { get; init; } = [];
     public bool IsPerishable { get; init; }
     public int? ShelfLifeDays { get; init; }
     public bool IsActive { get; init; }

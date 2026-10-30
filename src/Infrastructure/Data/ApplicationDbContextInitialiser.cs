@@ -475,6 +475,7 @@ public class ApplicationDbContextInitialiser
             var isPerishable = random.Next(2) == 0;
             var item = new Domain.Entities.Items.Item
             {
+                Id = Guid.CreateVersion7(), // thresholds below reference it before the save
                 Sku = $"DEMO-{n:00}",
                 Name = $"Demo item {n:00}",
                 Unit = units[random.Next(units.Length)],
@@ -488,6 +489,11 @@ public class ApplicationDbContextInitialiser
         }
 
         _context.Items.AddRange(items.Select(i => i.Item));
+        _context.ItemLocationThresholds.AddRange(items.SelectMany(
+            i => locationIds.Select(l => new ItemLocationThreshold
+            {
+                ItemId = i.Item.Id, LocationId = l, MinThreshold = i.Item.MinThreshold
+            })));
 
         var batches = new List<StockBatch>();
         var transactions = new List<StockTransaction>();
@@ -706,6 +712,7 @@ public class ApplicationDbContextInitialiser
             var isPerishable = random.Next(2) == 0;
             var item = new Item
             {
+                Id = Guid.CreateVersion7(), // thresholds below reference it before the save
                 Sku = $"PUR-{n:00}",
                 Name = $"Achiziție demo {n:00}",
                 Unit = units[random.Next(units.Length)],
@@ -719,6 +726,11 @@ public class ApplicationDbContextInitialiser
         }
 
         _context.Items.AddRange(items.Select(i => i.Item));
+        _context.ItemLocationThresholds.AddRange(items.SelectMany(
+            i => locationIds.Select(l => new ItemLocationThreshold
+            {
+                ItemId = i.Item.Id, LocationId = l, MinThreshold = i.Item.MinThreshold
+            })));
 
         var receipts = new List<GoodsReceipt>();
         var batches = new List<StockBatch>();

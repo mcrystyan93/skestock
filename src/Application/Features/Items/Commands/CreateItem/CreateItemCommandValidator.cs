@@ -35,9 +35,7 @@ public class CreateItemCommandValidator : AbstractValidator<CreateItemCommand>
             .MaximumLength(UnitMaxLength)
             .WithErrorCode(ValidationErrorCodes.MaxLength);
 
-        RuleFor(x => x.MinThreshold)
-            .GreaterThanOrEqualTo(0)
-            .WithErrorCode(ValidationErrorCodes.GreaterThanOrEqualTo);
+        ItemLocationThresholdRules.Add(this, x => x.LocationThresholds, dbContext);
 
         // Optional shelf life; only meaningful for perishable items. When supplied it must be a
         // positive number of days (auto-calc: ReceivedDate + ShelfLifeDays).

@@ -38,6 +38,7 @@ public class ItemTestDbContext(DbContextOptions<ItemTestDbContext> options)
     public DbSet<DailyItemConsumption> DailyItemConsumptions => Set<DailyItemConsumption>();
     public DbSet<ItemPurchaseStatistic> ItemPurchaseStatistics => Set<ItemPurchaseStatistic>();
     public DbSet<Item> Items => Set<Item>();
+    public DbSet<ItemLocationThreshold> ItemLocationThresholds => Set<ItemLocationThreshold>();
     public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();
     public DbSet<ItemImportBatchFile> ItemImportBatchFiles => Set<ItemImportBatchFile>();
     public DbSet<Location> Locations => Set<Location>();
@@ -97,7 +98,15 @@ public class ItemTestDbContext(DbContextOptions<ItemTestDbContext> options)
             b.Ignore(i => i.ClassBalances);
         });
 
-        builder.Ignore<Location>();
+        builder.Entity<Location>(b =>
+        {
+            b.HasOne(l => l.CreatedBy).WithMany().HasForeignKey(l => l.CreatedById);
+            b.HasOne(l => l.LastModifiedBy).WithMany().HasForeignKey(l => l.LastModifiedById);
+            b.HasOne(l => l.ParentLocation).WithMany(l => l.ChildLocations).HasForeignKey(l => l.ParentLocationId);
+            b.Ignore(l => l.Batches);
+            b.Ignore(l => l.Transactions);
+            b.Ignore(l => l.ClassBalances);
+        });
         builder.Ignore<SchoolClass>();
         builder.Ignore<StockBatch>();
         builder.Ignore<StockTransaction>();
@@ -182,5 +191,31 @@ public class GetItemByIdHandlerTests
         var result = await new GetItemByIdHandler(context).Handle(new GetItemByIdQuery { Id = item.Id }, CancellationToken.None);
 
         result.Value.ImageFileId.ShouldBe(fileId);
+    }
+
+    [Test]
+    public async Task Handle_ReturnsLocationThresholdsOfTheItemOnly()
+    {
+        await using var context = CreateContext();
+        var category = new Category { Name = "Stationery" };
+        context.Categories.Add(category);
+        await context.SaveChangesAsync(CancellationToken.None);
+        var item = new Item { Name = "Pencil", Unit = "unit", CategoryId = category.Id };
+        var other = new Item { Name = "Pen", Unit = "unit", CategoryId = category.Id };
+        context.Items.AddRange(item, other);
+        await context.SaveChangesAsync(CancellationToken.None);
+        var locationA = Guid.NewGuid();
+        var locationB = Guid.NewGuid();
+        context.ItemLocationThresholds.AddRange(
+            new ItemLocationThreshold { ItemId = item.Id, LocationId = locationA, MinThreshold = 10 },
+            new ItemLocationThreshold { ItemId = item.Id, LocationId = locationB, MinThreshold = 1 },
+            new ItemLocationThreshold { ItemId = other.Id, LocationId = locationA, MinThreshold = 99 });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new GetItemByIdHandler(context).Handle(new GetItemByIdQuery { Id = item.Id }, CancellationToken.None);
+
+        result.Value.LocationThresholds.Count.ShouldBe(2);
+        result.Value.LocationThresholds.Single(t => t.LocationId == locationA).MinThreshold.ShouldBe(10);
+        result.Value.LocationThresholds.Single(t => t.LocationId == locationB).MinThreshold.ShouldBe(1);
     }
 }

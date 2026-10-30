@@ -34,6 +34,9 @@ public interface IApplicationDbContext
     DbSet<Location> Locations { get; }
     DbSet<SchoolClass> SchoolClasses { get; }
 
+    DbSet<ItemLocationThreshold> ItemLocationThresholds =>
+        throw new NotSupportedException("This test context does not support item location thresholds.");
+
     DbSet<SharedClassConfiguration> SharedClassConfigurations =>
         throw new NotSupportedException("This test context does not support shared class configuration.");
 

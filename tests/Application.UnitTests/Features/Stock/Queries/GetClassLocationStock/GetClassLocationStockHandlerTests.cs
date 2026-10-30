@@ -63,8 +63,17 @@ public class GetClassLocationStockHandlerTests
         context.SchoolClasses.Add(schoolClass);
 
         await context.SaveChangesAsync(CancellationToken.None);
+        await AddThresholdAsync(context, item, location, minThreshold);
 
         return (item, location, schoolClass);
+    }
+
+    private static async Task AddThresholdAsync(
+        GoodsReceiptTestDbContext context, Item item, Location location, int minThreshold)
+    {
+        context.ItemLocationThresholds.Add(
+            new ItemLocationThreshold { ItemId = item.Id, LocationId = location.Id, MinThreshold = minThreshold });
+        await context.SaveChangesAsync(CancellationToken.None);
     }
 
     private static ColumnFilter EqualsFilter(string field, Guid value) =>
@@ -247,6 +256,48 @@ public class GetClassLocationStockHandlerTests
     }
 
     [Test]
+    public async Task Handle_SameItemInTwoLocations_UsesEachLocationsThreshold()
+    {
+        await using var context = CreateContext();
+        var (item, locationA, schoolClass) = await SeedBaseData(context, minThreshold: 10);
+        var locationB = new Location { Name = "Pantry", Type = "StorageRoom" };
+        context.Locations.Add(locationB);
+        await context.SaveChangesAsync(CancellationToken.None);
+        await AddThresholdAsync(context, item, locationB, 1);
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        context.StockBatches.AddRange(
+            new StockBatch { Item = item, Location = locationA, ReceivedClass = schoolClass, Quantity = 5, ReceivedDate = today },
+            new StockBatch { Item = item, Location = locationB, ReceivedClass = schoolClass, Quantity = 5, ReceivedDate = today });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var all = await new GetClassLocationStockHandler(context).Handle(
+            new GetClassLocationStockQuery { ClassId = schoolClass.Id }, CancellationToken.None);
+        var lowOnly = await new GetClassLocationStockHandler(context).Handle(
+            new GetClassLocationStockQuery { ClassId = schoolClass.Id, LowStockOnly = true }, CancellationToken.None);
+
+        all.Value.Items.Single(x => x.LocationId == locationA.Id).IsLowStock.ShouldBeTrue();
+        all.Value.Items.Single(x => x.LocationId == locationB.Id).IsLowStock.ShouldBeFalse();
+        lowOnly.Value.Items.Single().LocationId.ShouldBe(locationA.Id);
+    }
+
+    [Test]
+    public async Task Handle_NoThresholdRow_IsNeverLowStock()
+    {
+        await using var context = CreateContext();
+        var (item, location, schoolClass) = await SeedBaseData(context, minThreshold: 10);
+        context.ItemLocationThresholds.RemoveRange(context.ItemLocationThresholds);
+        context.StockBatches.Add(
+            new StockBatch { Item = item, Location = location, ReceivedClass = schoolClass, Quantity = -3, ReceivedDate = DateOnly.FromDateTime(DateTime.UtcNow) });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new GetClassLocationStockHandler(context).Handle(
+            new GetClassLocationStockQuery { ClassId = schoolClass.Id, LowStockOnly = true }, CancellationToken.None);
+
+        result.Value.Items.ShouldBeEmpty();
+    }
+
+    [Test]
     public async Task Handle_LowStockOnly_ReturnsOnlyRowsBelowThreshold()
     {
         await using var context = CreateContext();
@@ -260,6 +311,7 @@ public class GetClassLocationStockHandlerTests
         };
         context.Items.Add(regularItem);
         await context.SaveChangesAsync(CancellationToken.None);
+        await AddThresholdAsync(context, regularItem, location, 10);
 
         context.StockBatches.AddRange(
             new StockBatch
@@ -377,6 +429,8 @@ public class GetClassLocationStockHandlerTests
         };
         context.Items.AddRange(lowOnlyItem, expiredOnlyItem);
         await context.SaveChangesAsync(CancellationToken.None);
+        await AddThresholdAsync(context, lowOnlyItem, location, 10);
+        await AddThresholdAsync(context, expiredOnlyItem, location, 5);
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         context.StockBatches.AddRange(

@@ -123,32 +123,6 @@
       </nz-form-item>
     </nz-col>
     <nz-col nzSpan="12">
-      <!--   minThreshold   -->
-      <nz-form-item *skeletonInputLoader="loading()">
-        <nz-form-label nzRequired>
-          Prag minim
-        </nz-form-label>
-        <nz-form-control [nzErrorTip]="minThresholdErrorTemplate">
-          <nz-input-number [formField]="itemForm.minThreshold"
-                           class="w-full!"
-                           [nzMin]="0">
-            <div nzInputAddonAfter>
-              {{ itemForm.unit()?.value() ?? '' }}
-            </div>
-          </nz-input-number>
-          <ng-template #minThresholdErrorTemplate>
-            @if (itemForm.minThreshold().errors(); as errors) {
-              @for (error of errors; track $index) {
-                <div class="ant-form-item-explain-error">
-                  {{ error.message }}
-                </div>
-              }
-            }
-          </ng-template>
-        </nz-form-control>
-      </nz-form-item>
-    </nz-col>
-    <nz-col nzSpan="12">
       <!--   isPerishable   -->
       <nz-form-item *skeletonInputLoader="loading()">
         <nz-form-label class="grow!"
@@ -195,6 +169,50 @@
           </nz-form-control>
         </nz-form-item>
       }
+    </nz-col>
+    <nz-col nzSpan="24">
+      <!--   locationThresholds   -->
+      <nz-form-item *skeletonInputLoader="loading() || locationsLoading()">
+        <nz-form-label>
+          Prag minim pe locație
+        </nz-form-label>
+        <nz-form-control>
+          @if (locationsFailed()) {
+            <span class="ant-form-item-explain-error">
+              Locațiile nu au putut fi încărcate. Pragurile existente rămân neschimbate.
+            </span>
+          }
+          <nz-row [nzGutter]="[16, 0]">
+            @for (row of itemForm.locationThresholds; track row.locationId().value()) {
+              <nz-col nzXs="24"
+                      nzSm="12">
+                <nz-form-item>
+                  <nz-form-label [nzFor]="'threshold-' + row.locationId().value()">
+                    {{ locationName(row.locationId().value()) }}
+                  </nz-form-label>
+                  <nz-form-control [nzErrorTip]="thresholdErrorTemplate">
+                    <nz-input-number [formField]="row.minThreshold"
+                                     [nzId]="'threshold-' + row.locationId().value()"
+                                     class="w-full!"
+                                     [nzMin]="0">
+                      <div nzInputAddonAfter>
+                        {{ itemForm.unit().value() }}
+                      </div>
+                    </nz-input-number>
+                    <ng-template #thresholdErrorTemplate>
+                      @for (error of row.minThreshold().errors(); track $index) {
+                        <div class="ant-form-item-explain-error">
+                          {{ error.message }}
+                        </div>
+                      }
+                    </ng-template>
+                  </nz-form-control>
+                </nz-form-item>
+              </nz-col>
+            }
+          </nz-row>
+        </nz-form-control>
+      </nz-form-item>
     </nz-col>
     <nz-col nzSpan="24">
       <!--   description   -->

@@ -13,7 +13,7 @@ type ItemListState = {
   togglingItemId: string | null;
 };
 const initialState: ItemListState = {
-  togglingItemId: null
+  togglingItemId: null,
 };
 
 export const ItemListState = signalStore(
@@ -39,18 +39,18 @@ export const ItemListState = signalStore(
             mapResponse({
               next: (updatedItem) => {
                 patchState(store, {
-                  items: store.items().map((i) => i.id === updatedItem.id ? updatedItem : i),
-                  togglingItemId: null
+                  items: store.items().map((i) => (i.id === updatedItem.id ? updatedItem : i)),
+                  togglingItemId: null,
                 });
               },
               error: (error) => {
                 store.handleItemsError(error);
                 patchState(store, { togglingItemId: null });
-              }
-            })
+              },
+            }),
           );
-        })
-      )
+        }),
+      ),
     );
 
     // The edit endpoint replaces the whole item, so the row's current fields are sent back unchanged.
@@ -59,30 +59,32 @@ export const ItemListState = signalStore(
       pipe(
         tap(() => store.clearItemsErrors()),
         mergeMap(({ item, fileId }) =>
-          itemHttp.edit(item.id, {
-            sku: item.sku,
-            name: item.name,
-            description: item.description,
-            unit: item.unit,
-            minThreshold: item.minThreshold,
-            isPerishable: item.isPerishable,
-            shelfLifeDays: item.shelfLifeDays,
-            categoryId: item.categoryId,
-            imageFileId: fileId
-          }).pipe(
-            mapResponse({
-              next: (updatedItem) => {
-                patchState(store, {
-                  items: store.items().map((i) => i.id === updatedItem.id ? updatedItem : i)
-                });
-              },
-              error: (error) => {
-                store.handleItemsError(error);
-              }
+          itemHttp
+            .edit(item.id, {
+              sku: item.sku,
+              name: item.name,
+              description: item.description,
+              unit: item.unit,
+              locationThresholds: [],
+              isPerishable: item.isPerishable,
+              shelfLifeDays: item.shelfLifeDays,
+              categoryId: item.categoryId,
+              imageFileId: fileId,
             })
-          )
-        )
-      )
+            .pipe(
+              mapResponse({
+                next: (updatedItem) => {
+                  patchState(store, {
+                    items: store.items().map((i) => (i.id === updatedItem.id ? updatedItem : i)),
+                  });
+                },
+                error: (error) => {
+                  store.handleItemsError(error);
+                },
+              }),
+            ),
+        ),
+      ),
     );
 
     // Realtime row events replace just that row, so the list keeps its loaded pages and scroll position.
@@ -100,29 +102,26 @@ export const ItemListState = signalStore(
                 mapResponse({
                   next: (updatedItem) => {
                     patchState(store, {
-                      items: store.items().map((i) => i.id === updatedItem.id ? updatedItem : i)
+                      items: store.items().map((i) => (i.id === updatedItem.id ? updatedItem : i)),
                     });
                   },
-                  error: () => reload()
-                })
-              )
-            )
-          )
-        )
-      )
+                  error: () => reload(),
+                }),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
 
     return { reload, toggleActive, setItemImage, patchItem };
   }),
   withEventHandlers((store, events = inject(Events)) => ({
-    itemListChanges: events.on(
-      realtimeEvents.itemCreated,
-      realtimeEvents.itemImportBatchConfirmed
-    ).pipe(tap(() => store.reload())),
-    itemRowChanges: events.on(
-      realtimeEvents.itemUpdated,
-      realtimeEvents.itemDisabled,
-      realtimeEvents.itemEnabled
-    ).pipe(tap(({ payload }) => store.patchItem(payload.itemId)))
-  }))
+    itemListChanges: events
+      .on(realtimeEvents.itemCreated, realtimeEvents.itemImportBatchConfirmed)
+      .pipe(tap(() => store.reload())),
+    itemRowChanges: events
+      .on(realtimeEvents.itemUpdated, realtimeEvents.itemDisabled, realtimeEvents.itemEnabled)
+      .pipe(tap(({ payload }) => store.patchItem(payload.itemId))),
+  })),
 );

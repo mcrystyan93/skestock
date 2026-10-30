@@ -16,6 +16,12 @@ internal static class ItemDtoMapper
             .Select(category => category.Name)
             .SingleOrDefaultAsync(cancellationToken);
 
+        var thresholds = await dbContext.ItemLocationThresholds
+            .AsNoTracking()
+            .Where(t => t.ItemId == item.Id)
+            .Select(t => new ItemLocationThresholdDto { LocationId = t.LocationId, MinThreshold = t.MinThreshold })
+            .ToListAsync(cancellationToken);
+
         return new ItemDto
         {
             Id = item.Id,
@@ -23,7 +29,7 @@ internal static class ItemDtoMapper
             Name = item.Name,
             Description = item.Description,
             Unit = item.Unit,
-            MinThreshold = item.MinThreshold,
+            LocationThresholds = thresholds,
             IsPerishable = item.IsPerishable,
             ShelfLifeDays = item.ShelfLifeDays,
             IsActive = item.IsActive,

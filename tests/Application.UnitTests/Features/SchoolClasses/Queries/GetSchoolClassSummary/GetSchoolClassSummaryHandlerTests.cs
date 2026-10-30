@@ -38,6 +38,7 @@ public class SchoolClassSummaryTestDbContext(DbContextOptions<SchoolClassSummary
     public DbSet<DailyItemConsumption> DailyItemConsumptions => Set<DailyItemConsumption>();
     public DbSet<ItemPurchaseStatistic> ItemPurchaseStatistics => Set<ItemPurchaseStatistic>();
     public DbSet<Item> Items => Set<Item>();
+    public DbSet<ItemLocationThreshold> ItemLocationThresholds => Set<ItemLocationThreshold>();
     public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();
     public DbSet<ItemImportBatchFile> ItemImportBatchFiles => Set<ItemImportBatchFile>();
     public DbSet<Location> Locations => Set<Location>();
@@ -187,6 +188,13 @@ public class GetSchoolClassSummaryHandlerTests
         Category = category
     };
 
+    private static ItemLocationThreshold CreateThreshold(Item item, Location location, int minThreshold) => new()
+    {
+        ItemId = item.Id,
+        LocationId = location.Id,
+        MinThreshold = minThreshold
+    };
+
     private static StockBatch CreateBatch(
         Item item,
         Location location,
@@ -309,6 +317,7 @@ public class GetSchoolClassSummaryHandlerTests
         context.AddRange(schoolClass, category, location, item);
         await context.SaveChangesAsync(CancellationToken.None);
 
+        context.ItemLocationThresholds.Add(CreateThreshold(item, location, 10));
         context.StockBatches.Add(CreateBatch(item, location, schoolClass, quantity: 5));
         await context.SaveChangesAsync(CancellationToken.None);
 
@@ -441,6 +450,7 @@ public class GetSchoolClassSummaryHandlerTests
         context.AddRange(schoolClass, category, location, item);
         await context.SaveChangesAsync(CancellationToken.None);
 
+        context.ItemLocationThresholds.Add(CreateThreshold(item, location, 10));
         context.StockBatches.Add(CreateBatch(item, location, schoolClass, quantity: 10));
         await context.SaveChangesAsync(CancellationToken.None);
 
@@ -463,6 +473,7 @@ public class GetSchoolClassSummaryHandlerTests
         context.AddRange(schoolClass, category, locationA, locationB, item);
         await context.SaveChangesAsync(CancellationToken.None);
 
+        context.ItemLocationThresholds.AddRange(CreateThreshold(item, locationA, 10), CreateThreshold(item, locationB, 10));
         // Each location has 6, which is below the threshold. The item should still be counted
         // only once even though it is low stock in both locations.
         context.StockBatches.AddRange(
@@ -474,6 +485,33 @@ public class GetSchoolClassSummaryHandlerTests
         var result = await handler.Handle(new GetSchoolClassSummaryQuery { Id = schoolClass.Id }, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
+        result.Value.LowStockItemsCount.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Handle_UsesEachLocationsThreshold()
+    {
+        await using var context = CreateContext();
+        var schoolClass = CreateSchoolClass();
+        var category = CreateCategory();
+        var locationA = CreateLocation("Kitchen");
+        var locationB = CreateLocation("Storage Room");
+        var itemA = CreateItem(category, minThreshold: 0, name: "Rice");
+        var itemB = CreateItem(category, minThreshold: 0, name: "Beans");
+        context.AddRange(schoolClass, category, locationA, locationB, itemA, itemB);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        // Rice is 5 everywhere: low only where its threshold is 10. Beans has no threshold row.
+        context.ItemLocationThresholds.AddRange(CreateThreshold(itemA, locationA, 10), CreateThreshold(itemA, locationB, 1));
+        context.StockBatches.AddRange(
+            CreateBatch(itemA, locationA, schoolClass, quantity: 5),
+            CreateBatch(itemA, locationB, schoolClass, quantity: 5),
+            CreateBatch(itemB, locationA, schoolClass, quantity: 5));
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new GetSchoolClassSummaryHandler(context).Handle(
+            new GetSchoolClassSummaryQuery { Id = schoolClass.Id }, CancellationToken.None);
+
         result.Value.LowStockItemsCount.ShouldBe(1);
     }
 }

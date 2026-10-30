@@ -9,6 +9,7 @@ public class Item: BaseAuditableEntity, IKeysetEntity
     public string Name { get; set; } = null!;
     public string? Description { get; set; }
     public string Unit { get; set; } = "unit"; // e.g. "unit", "kg", "box"
+    // shortcut: no longer read (thresholds live in ItemLocationThreshold); drop the column in a later migration
     public int MinThreshold { get; set; }
     public bool IsPerishable { get; set; }
 

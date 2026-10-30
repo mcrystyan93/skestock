@@ -11,7 +11,7 @@ describe('ItemDropdownStore', () => {
     sku: 'CR-1',
     description: null,
     unit: 'bucată',
-    minThreshold: 1,
+    locationThresholds: [],
     isPerishable: false,
     shelfLifeDays: null,
     isActive: true,
@@ -20,7 +20,7 @@ describe('ItemDropdownStore', () => {
     createdByName: null,
     lastModifiedByName: null,
     createdDate: '2026-01-01T00:00:00Z',
-    lastModifiedDate: '2026-01-01T00:00:00Z'
+    lastModifiedDate: '2026-01-01T00:00:00Z',
   };
 
   let http: {
@@ -31,14 +31,11 @@ describe('ItemDropdownStore', () => {
   beforeEach(() => {
     http = {
       getAll: vi.fn(),
-      getByIdCached: vi.fn()
+      getByIdCached: vi.fn(),
     };
 
     TestBed.configureTestingModule({
-      providers: [
-        ItemDropdownStore,
-        { provide: ItemsHttp, useValue: http }
-      ]
+      providers: [ItemDropdownStore, { provide: ItemsHttp, useValue: http }],
     });
   });
 
@@ -56,12 +53,14 @@ describe('ItemDropdownStore', () => {
 
   it('keeps the resolved selected item separate from the collection', () => {
     http.getByIdCached.mockReturnValue(of(item));
-    http.getAll.mockReturnValue(of({
-      data: [],
-      hasNextPage: false,
-      nextCursor: null,
-      sort: []
-    }));
+    http.getAll.mockReturnValue(
+      of({
+        data: [],
+        hasNextPage: false,
+        nextCursor: null,
+        sort: [],
+      }),
+    );
 
     const store = TestBed.inject(ItemDropdownStore);
     store.resolveSelectedItem({ id: item.id });
@@ -70,7 +69,7 @@ describe('ItemDropdownStore', () => {
       filters: [],
       sort: [],
       cursor: null,
-      pageSize: 10
+      pageSize: 10,
     });
 
     expect(store.items()).toEqual([]);

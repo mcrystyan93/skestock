@@ -20,9 +20,6 @@
     <th nzWidth="300px">
       {{ columns.categoryName.label }}
     </th>
-    <th nzWidth="100px">
-      {{ columns.minThreshold.label }}
-    </th>
     <th nzWidth="130px">
       {{ columns.shelfLifeDays.label }}
     </th>
@@ -61,11 +58,6 @@
              class="mb-0!">
           {{ item.categoryName }}
         </div>
-      </td>
-      <td>
-        {{ item.minThreshold }} <span nz-typography
-                                      nzType="secondary"
-                                      class="mb-0!">{{ item.unit }}</span>
       </td>
       <td>
         @if (item.isPerishable && !!item.shelfLifeDays) {
