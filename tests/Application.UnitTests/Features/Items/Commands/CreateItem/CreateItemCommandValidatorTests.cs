@@ -103,6 +103,18 @@ public class CreateItemCommandValidatorTests
     }
 
     [Test]
+    public async Task ShouldReturnRequiredErrorInsteadOfThrowingWhenThresholdEntryIsNull()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
+
+        var result = await validator.ValidateAsync(WithThresholds(category.Id, new ItemLocationThresholdDto[] { null! }));
+
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.Required);
+    }
+
+    [Test]
     public async Task ShouldHaveDuplicateLocationErrorWhenLocationRepeats()
     {
         var (context, category) = await CreateContextAsync();
