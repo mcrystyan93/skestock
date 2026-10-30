@@ -142,6 +142,18 @@ describe('Item Form location thresholds', () => {
     ]);
   });
 
+  it('applies one value to every location', async () => {
+    const fixture = create();
+    fixture.componentInstance.bulkForm.value().value.set(7);
+    fixture.componentInstance.applyToAll();
+    const { formData } = await fixture.componentInstance.submit();
+
+    expect(plain(formData?.locationThresholds)).toEqual([
+      { locationId: 'a', minThreshold: 7 },
+      { locationId: 'b', minThreshold: 7 },
+    ]);
+  });
+
   it('submits an empty list when locations fail to load', async () => {
     locations$ = throwError(() => new Error('boom'));
     const fixture = create();
