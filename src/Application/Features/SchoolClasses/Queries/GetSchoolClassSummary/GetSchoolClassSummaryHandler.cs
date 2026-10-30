@@ -43,7 +43,8 @@ public class GetSchoolClassSummaryHandler(IApplicationDbContext dbContext)
             .CountAsync(cancellationToken);
 
         // Low stock = sum of StockBatch.Quantity per item and location for this class is less
-        // than the item's threshold for that location (no threshold row = never low). Each item is counted once if any location is low.
+        // than the item's threshold for that location (no threshold row = never low). Each item is
+        // counted once if any location is low.
         // Items with no batches for this class are excluded (mirrors
         // GetClassLocationStockHandler's "no batches -> doesn't appear" behaviour).
         var lowStockItemsCount = await dbContext.StockBatches

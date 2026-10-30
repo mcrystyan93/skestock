@@ -17,16 +17,18 @@ describe('ItemListState', () => {
     http = { getAll: vi.fn(), edit: vi.fn(), getById: vi.fn() };
 
     TestBed.configureTestingModule({
-      providers: [provideDispatcher(), ItemListState, { provide: ItemsHttp, useValue: http }],
+      providers: [
+        provideDispatcher(),
+        ItemListState,
+        { provide: ItemsHttp, useValue: http },
+      ],
     });
   });
 
   it('saves the picked image with the current row fields and replaces only that row', () => {
     const item = createItem('item-1');
     const other = createItem('item-2');
-    http.getAll.mockReturnValue(
-      of({ data: [item, other], hasNextPage: false, nextCursor: null, sort: [] }),
-    );
+    http.getAll.mockReturnValue(of({ data: [item, other], hasNextPage: false, nextCursor: null, sort: [] }));
     http.edit.mockReturnValue(of({ ...item, imageFileId: 'file-1' }));
     const store = TestBed.inject(ItemListState);
 
@@ -55,9 +57,7 @@ describe('ItemListState', () => {
     const second = createItem('item-2');
     const firstSave = new Subject<ItemDto>();
     const secondSave = new Subject<ItemDto>();
-    http.getAll.mockReturnValue(
-      of({ data: [first, second], hasNextPage: false, nextCursor: null, sort: [] }),
-    );
+    http.getAll.mockReturnValue(of({ data: [first, second], hasNextPage: false, nextCursor: null, sort: [] }));
     http.edit.mockReturnValueOnce(firstSave).mockReturnValueOnce(secondSave);
     const store = TestBed.inject(ItemListState);
 
@@ -77,9 +77,7 @@ describe('ItemListState', () => {
 
   it('keeps the row unchanged and reports the problem when the save fails', () => {
     const item = createItem('item-1');
-    http.getAll.mockReturnValue(
-      of({ data: [item], hasNextPage: false, nextCursor: null, sort: [] }),
-    );
+    http.getAll.mockReturnValue(of({ data: [item], hasNextPage: false, nextCursor: null, sort: [] }));
     http.edit.mockReturnValue(throwError(() => ({ status: 500 })));
     const store = TestBed.inject(ItemListState);
 
