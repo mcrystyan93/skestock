@@ -1,4 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { PurchaseStatisticDto } from '@ske/models';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { NzCardComponent } from 'ng-zorro-antd/card';
@@ -73,13 +73,14 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
               <button nz-button
                       nzType="default"
                       type="button"
+                      class="max-md:h-11! max-md:w-11!"
                       [disabled]="disabled()"
                       (click)="decreaseQuantity()"
                       [attr.aria-label]="'Scade cantitatea pentru ' + productName">
                 <nz-icon nzType="icons:minus"></nz-icon>
               </button>
               <nz-input-number [formField]="lineForm.quantity"
-                               class="min-w-0 flex-1 grow"
+                               class="min-w-0 flex-1 grow max-md:[&_input]:h-11!"
                                nzPlaceHolder="Cantitate"
                                [nzMin]="0"
                                [nzStep]="0.01"
@@ -89,6 +90,7 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
               <button nz-button
                       nzType="default"
                       type="button"
+                      class="max-md:h-11! max-md:w-11!"
                       [disabled]="disabled()"
                       (click)="increaseQuantity()"
                       [attr.aria-label]="'Crește cantitatea pentru ' + productName">
@@ -98,7 +100,7 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
                      type="text"
                      placeholder="U.M."
                      [formField]="lineForm.unit"
-                     class="w-24! shrink-0"
+                     class="w-24! shrink-0 max-md:h-11!"
                      [attr.aria-label]="'Unitate de măsură pentru ' + productName" />
             </nz-space-compact>
             @if (lineForm.quantity().touched() && lineForm.quantity().errors(); as errors) {
@@ -122,7 +124,20 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
           </nz-form-control>
         </nz-form-item>
 
-        <nz-form-item class="mb-0!">
+        @if (!notesVisible()) {
+          <button nz-button
+                  nzType="link"
+                  nzSize="small"
+                  type="button"
+                  class="self-start px-0! md:hidden! max-md:h-11!"
+                  [disabled]="disabled()"
+                  (click)="showNotes.set(true)">
+            <nz-icon nzType="icons:pencil"></nz-icon>
+            Adaugă notiță
+          </button>
+        }
+        <nz-form-item class="mb-0!"
+                      [class.max-md:hidden]="!notesVisible()">
           <nz-form-control [nzErrorTip]="notesErrorTemplate"
                            nzSpan="24">
             <nz-input-wrapper>
@@ -156,6 +171,11 @@ export class OrderListLine {
   public readonly remove = output<void>();
   // Last-365-days purchase history of the line's catalog item; null for free-text lines.
   public readonly history = input<PurchaseStatisticDto | null>(null);
+
+  protected readonly showNotes = signal(false);
+  protected readonly notesVisible = computed(
+    () => this.showNotes() || !!this.line().notes().value()
+  );
 
   public readonly historyHint = computed(() => {
     const history = this.history();
