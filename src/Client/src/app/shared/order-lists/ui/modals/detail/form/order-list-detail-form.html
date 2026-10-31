@@ -3,10 +3,31 @@
       nzLayout="vertical"
       class="grow flex flex-col -mt-2!">
   @if (showDetails()) {
-    <ske-order-list-details-fields [name]="orderListForm.name"
-                                   [note]="orderListForm.note"
-                                   [loading]="loading()" />
-    <nz-divider nzSize="small"></nz-divider>
+    <ng-template #detailsFields>
+      <ske-order-list-details-fields [name]="orderListForm.name"
+                                     [note]="orderListForm.note"
+                                     [loading]="loading()" />
+    </ng-template>
+    <ng-container *skeLayoutBreakpoint="'md'; else collapsedDetails">
+      <ng-container [ngTemplateOutlet]="detailsFields" />
+      <nz-divider nzSize="small"></nz-divider>
+    </ng-container>
+    <ng-template #collapsedDetails>
+      <nz-collapse class="mb-2"
+                   nzSize="small">
+        <nz-collapse-panel [nzHeader]="detailsHeader"
+                           [nzActive]="detailsOpen() || detailsInvalid()"
+                           (nzActiveChange)="detailsOpen.set($event)">
+          <ng-container [ngTemplateOutlet]="detailsFields" />
+        </nz-collapse-panel>
+      </nz-collapse>
+    </ng-template>
+    <ng-template #detailsHeader>
+      <span class="flex min-w-0 items-center gap-2">
+        <span class="shrink-0 font-medium">Nume și notă</span>
+        <span class="truncate text-sm opacity-60">{{ orderListForm.name().value() }}</span>
+      </span>
+    </ng-template>
   }
   <nz-row [nzGutter]="[16, 0]">
     <nz-col [nzLg]="24"
@@ -22,7 +43,7 @@
         @if (editable()) {
           <button nz-button
                   type="button"
-                  class="max-md:mb-2 max-md:self-start"
+                  class="max-md:mb-4 max-md:self-start"
                   [disabled]="loading()"
                   (click)="openAddSupplyLists()">
             <nz-icon nzType="icons:clipboard-list"></nz-icon>
