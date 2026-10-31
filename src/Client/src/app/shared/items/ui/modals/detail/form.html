@@ -4,7 +4,7 @@
   <nz-row [nzGutter]="[16, 0]">
     <nz-col nzSpan="24">
       <!--   imageFileId   -->
-      <nz-form-item *skeletonInputLoader="loading()">
+      <nz-form-item *skeletonInputLoader="loading() || locationsLoading()">
         <nz-form-label>
           Imagine articol
         </nz-form-label>
@@ -25,7 +25,7 @@
     </nz-col>
     <nz-col nzSpan="12">
       <!--   sku   -->
-      <nz-form-item *skeletonInputLoader="loading()">
+      <nz-form-item *skeletonInputLoader="loading() || locationsLoading()">
         <nz-form-label>
           Cod
         </nz-form-label>
@@ -51,7 +51,7 @@
     </nz-col>
     <nz-col nzSpan="12">
       <!--   name   -->
-      <nz-form-item *skeletonInputLoader="loading()">
+      <nz-form-item *skeletonInputLoader="loading() || locationsLoading()">
         <nz-form-label nzRequired>
           Nume
         </nz-form-label>
@@ -77,7 +77,7 @@
     </nz-col>
     <nz-col nzSpan="24">
       <!--   category   -->
-      <nz-form-item *skeletonInputLoader="loading()">
+      <nz-form-item *skeletonInputLoader="loading() || locationsLoading()">
         <nz-form-label nzRequired>
           Categorie
         </nz-form-label>
@@ -98,7 +98,7 @@
     </nz-col>
     <nz-col nzSpan="12">
       <!--   unit   -->
-      <nz-form-item *skeletonInputLoader="loading()">
+      <nz-form-item *skeletonInputLoader="loading() || locationsLoading()">
         <nz-form-label nzRequired>
           Unitate de măsură
         </nz-form-label>
@@ -122,35 +122,66 @@
         </nz-form-control>
       </nz-form-item>
     </nz-col>
-    <nz-col nzSpan="12">
-      <!--   minThreshold   -->
-      <nz-form-item *skeletonInputLoader="loading()">
-        <nz-form-label nzRequired>
-          Prag minim
-        </nz-form-label>
-        <nz-form-control [nzErrorTip]="minThresholdErrorTemplate">
-          <nz-input-number [formField]="itemForm.minThreshold"
-                           class="w-full!"
-                           [nzMin]="0">
-            <div nzInputAddonAfter>
-              {{ itemForm.unit()?.value() ?? '' }}
+    <nz-col nzSpan="24">
+      <!--   locationThresholds   -->
+      <nz-form-item *skeletonInputLoader="loading() || locationsLoading()">
+        <nz-form-label> Prag minim pe locație </nz-form-label>
+        <nz-form-control>
+          <p class="mb-2 text-gray-500">
+            Articolul apare ca „stoc redus” când cantitatea dintr-o locație scade sub pragul ei. Locațiile fără prag (de exemplu cele adăugate
+            ulterior) nu declanșează alerta, deci setează un prag după ce adaugi o locație.
+          </p>
+          @if (locationsFailed()) {
+            <span class="ant-form-item-explain-error">
+              Locațiile nu au putut fi încărcate. Pragurile existente rămân neschimbate.
+            </span>
+          } @else if (itemForm.locationThresholds.length > 1) {
+            <div class="mb-3 flex items-center gap-2">
+              <nz-input-number
+                class="w-32!"
+                [nzMin]="0"
+                [formField]="bulkForm.value"
+                aria-label="Prag pentru toate locațiile"
+              />
+              <button nz-button type="button" (click)="applyToAll()">Aplică la toate</button>
             </div>
-          </nz-input-number>
-          <ng-template #minThresholdErrorTemplate>
-            @if (itemForm.minThreshold().errors(); as errors) {
-              @for (error of errors; track $index) {
-                <div class="ant-form-item-explain-error">
-                  {{ error.message }}
+          }
+          <nz-row [nzGutter]="[12, 12]">
+            @for (row of itemForm.locationThresholds; track row.locationId().value()) {
+              <nz-col nzXs="24" nzSm="12">
+                <div class="rounded border border-gray-200 p-3 dark:border-gray-700">
+                  <label
+                    class="mb-2 block font-medium"
+                    [for]="'threshold-' + row.locationId().value()"
+                  >
+                    {{ locationName(row.locationId().value()) }}
+                  </label>
+                  <nz-input-number
+                    [formField]="row.minThreshold"
+                    [nzId]="'threshold-' + row.locationId().value()"
+                    class="w-full!"
+                    [nzMin]="0"
+                    nzPlaceHolder="0"
+                  >
+                    <div nzInputAddonAfter>
+                      {{ itemForm.unit().value() || 'buc' }}
+                    </div>
+                  </nz-input-number>
+                  @for (error of row.minThreshold().errors(); track $index) {
+                    <div class="ant-form-item-explain-error mt-1">
+                      {{ error.message }}
+                    </div>
+                  }
                 </div>
-              }
+              </nz-col>
             }
-          </ng-template>
+          </nz-row>
         </nz-form-control>
       </nz-form-item>
     </nz-col>
     <nz-col nzSpan="12">
       <!--   isPerishable   -->
-      <nz-form-item *skeletonInputLoader="loading()">
+      <nz-form-item *skeletonInputLoader="loading() || locationsLoading()">
         <nz-form-label class="grow!"
                        nzFor="itemIsPerishable">
           Perisabil
@@ -170,7 +201,7 @@
     <nz-col nzSpan="12">
       <!--   shelfLifeDays   -->
       @if (!itemForm.shelfLifeDays().hidden()) {
-        <nz-form-item *skeletonInputLoader="loading()">
+        <nz-form-item *skeletonInputLoader="loading() || locationsLoading()">
           <nz-form-label>
             Termen de valabilitate
           </nz-form-label>
@@ -198,7 +229,7 @@
     </nz-col>
     <nz-col nzSpan="24">
       <!--   description   -->
-      <nz-form-item *skeletonInputLoader="loading()">
+      <nz-form-item *skeletonInputLoader="loading() || locationsLoading()">
         <nz-form-label>
           Descriere
         </nz-form-label>

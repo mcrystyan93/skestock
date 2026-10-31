@@ -1,9 +1,12 @@
 using skestock.Application.Common.Exceptions;
 using skestock.Application.Features.Items.Commands.CreateItem;
+using skestock.Application.Features.Items.Models;
 using skestock.Application.Features.Items.Queries.GetAllItems;
+using skestock.Application.Features.Items.Queries.GetItemById;
 using skestock.Domain.Entities;
 using skestock.Domain.Entities.Categories;
 using skestock.Domain.Entities.Items;
+using skestock.Domain.Entities.Locations;
 
 namespace skestock.Application.FunctionalTests.Features.Items.Commands.CreateItem;
 
@@ -24,6 +27,13 @@ public class CreateItemCommandTests : TestBase
         return category;
     }
 
+    private async Task<Location> SeedLocationAsync()
+    {
+        var location = new Location { Name = $"{_prefix}-Loc-{Guid.NewGuid():N}"[..30], Type = "Kitchen" };
+        await TestApp.AddAsync(location);
+        return location;
+    }
+
     [Test]
     public async Task Handle_WithValidData_PersistsItemAndReturnsDto()
     {
@@ -35,7 +45,6 @@ public class CreateItemCommandTests : TestBase
             Name = name,
             Sku = $"{_prefix}-SKU",
             Unit = "box",
-            MinThreshold = 5,
             IsPerishable = false,
             CategoryId = category.Id
         });
@@ -104,20 +113,47 @@ public class CreateItemCommandTests : TestBase
     }
 
     [Test]
-    public async Task Handle_WithNegativeMinThreshold_ThrowsValidationException()
+    public async Task Handle_WithNegativeLocationThreshold_ThrowsValidationException()
     {
         var category = await SeedCategoryAsync();
+        var location = await SeedLocationAsync();
 
         var act = async () => await TestApp.SendAsync(new CreateItemCommand
         {
             Name = $"{_prefix}-X",
             Unit = "unit",
-            MinThreshold = -1,
-            CategoryId = category.Id
+            CategoryId = category.Id,
+            LocationThresholds = [new ItemLocationThresholdDto { LocationId = location.Id, MinThreshold = -1 }]
         });
 
         var exception = await act.ShouldThrowAsync<ValidationException>();
-        exception.Errors.ShouldContainKey(nameof(CreateItemCommand.MinThreshold));
+        exception.Errors.ShouldContainKey(nameof(CreateItemCommand.LocationThresholds));
+    }
+
+    [Test]
+    public async Task Handle_WithLocationThresholds_PersistsRowsAndReturnsThemInDto()
+    {
+        var category = await SeedCategoryAsync();
+        var locationA = await SeedLocationAsync();
+        var locationB = await SeedLocationAsync();
+
+        var result = await TestApp.SendAsync(new CreateItemCommand
+        {
+            Name = $"{_prefix}-Rice",
+            Unit = "kg",
+            CategoryId = category.Id,
+            LocationThresholds =
+            [
+                new ItemLocationThresholdDto { LocationId = locationA.Id, MinThreshold = 10 },
+                new ItemLocationThresholdDto { LocationId = locationB.Id, MinThreshold = 2 }
+            ]
+        });
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.LocationThresholds.Count.ShouldBe(2);
+        var fetched = await TestApp.SendAsync(new GetItemByIdQuery { Id = result.Value.Id });
+        fetched.Value.LocationThresholds.Single(t => t.LocationId == locationA.Id).MinThreshold.ShouldBe(10);
+        fetched.Value.LocationThresholds.Single(t => t.LocationId == locationB.Id).MinThreshold.ShouldBe(2);
     }
 
     [Test]

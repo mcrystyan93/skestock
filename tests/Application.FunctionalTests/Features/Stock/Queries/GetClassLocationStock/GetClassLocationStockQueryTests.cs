@@ -61,6 +61,12 @@ public class GetClassLocationStockQueryTests : TestBase
             CategoryId = _category.Id
         };
         await TestApp.AddAsync(item);
+        await TestApp.AddAsync(new ItemLocationThreshold
+        {
+            ItemId = item.Id,
+            LocationId = _location.Id,
+            MinThreshold = minThreshold
+        });
         return item;
     }
 
@@ -292,6 +298,28 @@ public class GetClassLocationStockQueryTests : TestBase
         hiddenResult.IsSuccess.ShouldBeTrue();
         hiddenResult.Value.Items.Single().ItemId.ShouldBe(item.Id);
         hiddenResult.Value.Items.Single().HideWhenZeroStock.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task Handle_LowStockOnly_UsesEachLocationsThreshold()
+    {
+        var flour = await SeedItemAsync("Flour", minThreshold: 10);
+        var otherLocation = new Location { Name = $"{_prefix}-OtherLocation", Type = "Storage" };
+        await TestApp.AddAsync(otherLocation);
+        await TestApp.AddAsync(new ItemLocationThreshold { ItemId = flour.Id, LocationId = otherLocation.Id, MinThreshold = 1 });
+        var receipt = await SeedGoodsReceiptAsync();
+        await SeedBatchAsync(flour, receipt, _location.Id, 5);
+        await SeedBatchAsync(flour, receipt, otherLocation.Id, 5);
+
+        var result = await TestApp.SendAsync(new GetClassLocationStockQuery
+        {
+            ClassId = _schoolClass.Id,
+            LowStockOnly = true,
+            SearchTerm = $"{_prefix}-Flour"
+        });
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Items.Single().LocationId.ShouldBe(_location.Id);
     }
 
     [Test]

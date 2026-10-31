@@ -81,7 +81,7 @@ function createItem(overrides: Partial<ItemDto> = {}): ItemDto {
     sku: 'SKU-1',
     name: 'Caiet dictando',
     unit: 'buc',
-    minThreshold: 5,
+    locationThresholds: [],
     isPerishable: false,
     isActive: true,
     categoryId: 'category-1',

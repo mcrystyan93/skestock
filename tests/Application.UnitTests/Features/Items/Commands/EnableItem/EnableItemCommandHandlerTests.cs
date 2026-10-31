@@ -36,6 +36,7 @@ public class ItemTestDbContext(DbContextOptions<ItemTestDbContext> options)
     public DbSet<DailyItemConsumption> DailyItemConsumptions => Set<DailyItemConsumption>();
     public DbSet<ItemPurchaseStatistic> ItemPurchaseStatistics => Set<ItemPurchaseStatistic>();
     public DbSet<Item> Items => Set<Item>();
+    public DbSet<ItemLocationThreshold> ItemLocationThresholds => Set<ItemLocationThreshold>();
     public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();
     public DbSet<ItemImportBatchFile> ItemImportBatchFiles => Set<ItemImportBatchFile>();
     public DbSet<Location> Locations => Set<Location>();
@@ -163,5 +164,21 @@ public class EnableItemCommandHandlerTests
         var result = await handler.Handle(new EnableItemCommand { Id = Guid.NewGuid() }, CancellationToken.None);
 
         result.IsFailed.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task Handle_ReturnsLocationThresholdsInDto()
+    {
+        var (context, item) = await CreateContextWithItemAsync(isActive: false);
+        await using var _ = context;
+        var locationId = Guid.NewGuid();
+        context.ItemLocationThresholds.Add(new ItemLocationThreshold { ItemId = item.Id, LocationId = locationId, MinThreshold = 4 });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new EnableItemCommandHandler(context).Handle(new EnableItemCommand { Id = item.Id }, CancellationToken.None);
+
+        var threshold = result.Value.LocationThresholds.ShouldHaveSingleItem();
+        threshold.LocationId.ShouldBe(locationId);
+        threshold.MinThreshold.ShouldBe(4);
     }
 }

@@ -7,6 +7,7 @@ using skestock.Application.Features.Items.Commands.GenerateItemThumbnail;
 using System.Text.Json;
 using skestock.Shared;
 using skestock.Application.Features.Items.Commands.CreateItem;
+using skestock.Application.Features.Items.Models;
 using skestock.Domain.Entities;
 using skestock.Domain.Queues;
 using NUnit.Framework;
@@ -44,6 +45,7 @@ public class ItemTestDbContext(DbContextOptions<ItemTestDbContext> options)
     public DbSet<DailyItemConsumption> DailyItemConsumptions => Set<DailyItemConsumption>();
     public DbSet<ItemPurchaseStatistic> ItemPurchaseStatistics => Set<ItemPurchaseStatistic>();
     public DbSet<Item> Items => Set<Item>();
+    public DbSet<ItemLocationThreshold> ItemLocationThresholds => Set<ItemLocationThreshold>();
     public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();
     public DbSet<ItemImportBatchFile> ItemImportBatchFiles => Set<ItemImportBatchFile>();
     public DbSet<Location> Locations => Set<Location>();
@@ -107,7 +109,15 @@ public class ItemTestDbContext(DbContextOptions<ItemTestDbContext> options)
             b.Ignore(i => i.ClassBalances);
         });
 
-        builder.Ignore<Location>();
+        builder.Entity<Location>(b =>
+        {
+            b.HasOne(l => l.CreatedBy).WithMany().HasForeignKey(l => l.CreatedById);
+            b.HasOne(l => l.LastModifiedBy).WithMany().HasForeignKey(l => l.LastModifiedById);
+            b.HasOne(l => l.ParentLocation).WithMany(l => l.ChildLocations).HasForeignKey(l => l.ParentLocationId);
+            b.Ignore(l => l.Batches);
+            b.Ignore(l => l.Transactions);
+            b.Ignore(l => l.ClassBalances);
+        });
         builder.Ignore<SchoolClass>();
         builder.Ignore<StockBatch>();
         builder.Ignore<StockTransaction>();
@@ -143,14 +153,12 @@ public class CreateItemCommandHandlerTests
         {
             Name = "Pencil",
             Unit = "box",
-            MinThreshold = 5,
             CategoryId = category.Id
         }, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
         result.Value.Name.ShouldBe("Pencil");
         result.Value.Unit.ShouldBe("box");
-        result.Value.MinThreshold.ShouldBe(5);
         result.Value.IsActive.ShouldBeTrue();
         result.Value.CategoryId.ShouldBe(category.Id);
         result.Value.CategoryName.ShouldBe("Stationery");
@@ -303,5 +311,47 @@ public class CreateItemCommandHandlerTests
 
         result.Value.ImageFileId.ShouldBeNull();
         context.OutboxMessages.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task Handle_WithLocationThresholds_PersistsRowsAndReturnsThemInDto()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        var locationA = Guid.NewGuid();
+        var locationB = Guid.NewGuid();
+        var handler = new CreateItemCommandHandler(context, ItemImageTestSupport.User());
+
+        var result = await handler.Handle(new CreateItemCommand
+        {
+            Name = "Pencil",
+            Unit = "box",
+            CategoryId = category.Id,
+            LocationThresholds =
+            [
+                new ItemLocationThresholdDto { LocationId = locationA, MinThreshold = 10 },
+                new ItemLocationThresholdDto { LocationId = locationB, MinThreshold = 1 }
+            ]
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.LocationThresholds.Count.ShouldBe(2);
+        var rows = await context.ItemLocationThresholds.ToListAsync(CancellationToken.None);
+        rows.ShouldAllBe(r => r.ItemId == result.Value.Id);
+        rows.Single(r => r.LocationId == locationA).MinThreshold.ShouldBe(10);
+        rows.Single(r => r.LocationId == locationB).MinThreshold.ShouldBe(1);
+    }
+
+    [Test]
+    public async Task Handle_WithoutLocationThresholds_PersistsNoRows()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        var handler = new CreateItemCommandHandler(context, ItemImageTestSupport.User());
+
+        var result = await handler.Handle(new CreateItemCommand { Name = "Pencil", Unit = "box", CategoryId = category.Id }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        (await context.ItemLocationThresholds.CountAsync(CancellationToken.None)).ShouldBe(0);
     }
 }

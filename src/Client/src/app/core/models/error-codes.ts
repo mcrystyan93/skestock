@@ -86,6 +86,7 @@ export const ErrorCodes = {
     // Domain-specific uniqueness codes
     duplicateName: 'validation.duplicate_name',
     duplicateSku: 'validation.duplicate_sku',
+    duplicateLocation: 'validation.duplicate_location',
 
     // Domain-specific reference codes
     invalidReference: 'validation.invalid_reference',

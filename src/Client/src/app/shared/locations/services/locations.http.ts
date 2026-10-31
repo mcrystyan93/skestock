@@ -1,12 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
+import { EMPTY, expand, reduce } from 'rxjs';
 import {
   CreateLocationRequest,
   DefaultLocationDto,
   GetAllLocationsRequest,
   LocationDto,
   PaginatedResponse,
-  UpdateLocationRequest
+  UpdateLocationRequest,
+  PAGINATION_PAGE_SIZE,
 } from '@ske/models';
 
 /**
@@ -18,6 +20,16 @@ export class LocationsHttp {
 
   public getAll(request: GetAllLocationsRequest) {
     return this._httpClient.post<PaginatedResponse<LocationDto>>('/api/Locations/get-all', request);
+  }
+
+  /** Fetches every page; used where all locations are needed at once (e.g. the per-location threshold form). */
+  public getAllPages(pageSize = PAGINATION_PAGE_SIZE) {
+    const fetchPage = (cursor: string | null) => this.getAll({ filters: [], pageSize, cursor });
+
+    return fetchPage(null).pipe(
+      expand((page) => (page.hasNextPage && page.nextCursor ? fetchPage(page.nextCursor) : EMPTY)),
+      reduce((all, page) => [...all, ...page.data], [] as LocationDto[]),
+    );
   }
 
   public getById(id: string) {

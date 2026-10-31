@@ -100,7 +100,11 @@ export class ItemDetailModal {
       name: formData.name,
       description: formData.description || null,
       unit: formData.unit,
-      minThreshold: formData.minThreshold,
+      // Signal Forms tags array rows with a tracking symbol; send plain objects.
+      locationThresholds: formData.locationThresholds.map(({ locationId, minThreshold }) => ({
+        locationId,
+        minThreshold,
+      })),
       isPerishable: formData.isPerishable,
       shelfLifeDays: formData.isPerishable ? (formData.shelfLifeDays ?? null) : null,
       categoryId: formData.category?.id as string,

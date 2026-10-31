@@ -36,6 +36,7 @@ public class ItemTestDbContext(DbContextOptions<ItemTestDbContext> options)
     public DbSet<DailyItemConsumption> DailyItemConsumptions => Set<DailyItemConsumption>();
     public DbSet<ItemPurchaseStatistic> ItemPurchaseStatistics => Set<ItemPurchaseStatistic>();
     public DbSet<Item> Items => Set<Item>();
+    public DbSet<ItemLocationThreshold> ItemLocationThresholds => Set<ItemLocationThreshold>();
     public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();
     public DbSet<ItemImportBatchFile> ItemImportBatchFiles => Set<ItemImportBatchFile>();
     public DbSet<Location> Locations => Set<Location>();

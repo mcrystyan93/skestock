@@ -1,6 +1,12 @@
 import { BasePaginationFilter, ColumnFilter, prioritizeSort, TableColumnDefinition } from './pagination';
 import { PAGINATION_PAGE_SIZE } from './category';
 
+/** Mirrors src/Application/Features/Items/Models/ItemLocationThresholdDto.cs. */
+export type ItemLocationThreshold = {
+  locationId: string;
+  minThreshold: number;
+};
+
 /** Mirrors src/Application/Features/Items/Models/ItemDto.cs. */
 export type ItemDto = {
   id: string;
@@ -8,7 +14,7 @@ export type ItemDto = {
   name: string;
   description?: string | null;
   unit: string;
-  minThreshold: number;
+  locationThresholds: ItemLocationThreshold[];
   isPerishable: boolean;
   shelfLifeDays?: number | null;
   isActive: boolean;
@@ -32,7 +38,7 @@ export type CreateItemRequest = {
   name: string;
   description?: string | null;
   unit: string;
-  minThreshold: number;
+  locationThresholds: ItemLocationThreshold[];
   isPerishable: boolean;
   shelfLifeDays?: number | null;
   categoryId: string;
@@ -45,7 +51,7 @@ export type EditItemRequest = {
   name: string;
   description?: string | null;
   unit: string;
-  minThreshold: number;
+  locationThresholds: ItemLocationThreshold[];
   isPerishable: boolean;
   shelfLifeDays?: number | null;
   categoryId: string;
@@ -56,7 +62,6 @@ export type ItemTableColumn =
   | 'sku'
   | 'name'
   | 'unit'
-  | 'minThreshold'
   | 'isPerishable'
   | 'shelfLifeDays'
   | 'categoryName'
@@ -81,11 +86,6 @@ export const ITEM_TABLE_COLUMNS: TableColumnDefinition<ItemTableColumn> = {
     label: 'Unitate',
     value: 'unit',
     fieldType: 'string'
-  },
-  minThreshold: {
-    label: 'Prag minim',
-    value: 'minThreshold',
-    fieldType: 'number'
   },
   isPerishable: {
     label: 'Perisabil',

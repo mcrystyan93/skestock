@@ -4,6 +4,7 @@ using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.Items.Models;
 using skestock.Application.Storage.DTOs;
 using skestock.Application.Storage.Interfaces;
+using skestock.Domain.Entities.Items;
 using skestock.Domain.Enums;
 using skestock.Domain.Events.Items;
 
@@ -28,11 +29,30 @@ public class EditItemCommandHandler(
         item.Name = request.Name.Trim();
         item.Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim();
         item.Unit = request.Unit.Trim();
-        item.MinThreshold = request.MinThreshold;
         item.IsPerishable = request.IsPerishable;
         item.ShelfLifeDays = request.ShelfLifeDays;
         item.CategoryId = request.CategoryId;
         item.AddDomainEvent(new ItemUpdatedEvent(item));
+
+        // Add/update only: locations not sent keep their value (list rows carry no thresholds).
+        if (request.LocationThresholds.Count > 0)
+        {
+            var existing = await dbContext.ItemLocationThresholds
+                .Where(t => t.ItemId == item.Id)
+                .ToDictionaryAsync(t => t.LocationId, cancellationToken);
+            foreach (var requested in request.LocationThresholds)
+            {
+                if (existing.TryGetValue(requested.LocationId, out var row))
+                    row.MinThreshold = requested.MinThreshold;
+                else
+                    dbContext.ItemLocationThresholds.Add(new ItemLocationThreshold
+                    {
+                        ItemId = item.Id,
+                        LocationId = requested.LocationId,
+                        MinThreshold = requested.MinThreshold
+                    });
+            }
+        }
 
         var previousFileId = item.ImageFileId;
         string? replacedContainer = null, replacedPath = null;
