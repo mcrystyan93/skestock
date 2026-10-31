@@ -17,6 +17,7 @@
                    nzSize="small">
         <nz-collapse-panel [nzHeader]="detailsHeader"
                            [nzActive]="detailsOpen() || detailsInvalid()"
+                           [nzCollapsible]="detailsInvalid() ? 'disabled' : undefined"
                            (nzActiveChange)="detailsOpen.set($event)">
           <ng-container [ngTemplateOutlet]="detailsFields" />
         </nz-collapse-panel>
