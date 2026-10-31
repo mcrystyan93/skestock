@@ -22,7 +22,7 @@ public class CreateCongregationCommandValidator : AbstractValidator<CreateCongre
             .DependentRules(() =>
             {
                 RuleFor(x => x.Name)
-                    .MustAsync((name, cancellationToken) => IsNameUniqueAsync(dbContext, name, cancellationToken))
+                    .MustAsync(async (name, cancellationToken) => !await CongregationNameValidation.IsNameTakenAsync(dbContext, null, name, cancellationToken))
                     .WithMessage("A congregation with this name already exists")
                     .WithErrorCode(ValidationErrorCodes.DuplicateName);
             });
@@ -40,17 +40,5 @@ public class CreateCongregationCommandValidator : AbstractValidator<CreateCongre
         RuleFor(x => x.CoordinatorPhone).MaximumLength(PhoneMaxLength).WithErrorCode(ValidationErrorCodes.MaxLength);
         RuleFor(x => x.DessertContactPhone).MaximumLength(PhoneMaxLength).WithErrorCode(ValidationErrorCodes.MaxLength);
         RuleFor(x => x.Message).MaximumLength(MessageMaxLength).WithErrorCode(ValidationErrorCodes.MaxLength);
-    }
-
-    // Soft-deleted rows are excluded by the entity's global query filter.
-    private static async Task<bool> IsNameUniqueAsync(IApplicationDbContext dbContext, string name, CancellationToken cancellationToken)
-    {
-        var normalized = name.Trim().ToLower();
-        var query = dbContext.Congregations.AsNoTracking().AsQueryable();
-        query = TextSearchCollation.IsSqlServer(dbContext.Database)
-            ? query.Where(c =>
-                EF.Functions.Collate(c.Name.Trim(), TextSearchCollation.AccentInsensitive) == normalized)
-            : query.Where(c => c.Name.Trim().ToLower() == normalized);
-        return !await query.AnyAsync(cancellationToken);
     }
 }

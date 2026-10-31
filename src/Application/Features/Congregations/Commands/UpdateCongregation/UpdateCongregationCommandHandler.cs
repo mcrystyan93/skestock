@@ -28,7 +28,7 @@ public class UpdateCongregationCommandHandler(IApplicationDbContext dbContext)
         congregation.Message = request.Message?.Trim();
 
         congregation.AddDomainEvent(new CongregationUpdatedEvent(congregation));
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await CongregationCommandSupport.SaveAsync(dbContext, congregation, cancellationToken);
 
         return Result.Ok(CongregationMutationDto.From(congregation));
     }
