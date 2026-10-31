@@ -26,7 +26,7 @@ public class UpdateCongregationCommandValidator : AbstractValidator<UpdateCongre
             .DependentRules(() =>
             {
                 RuleFor(x => x)
-                    .MustAsync((command, cancellationToken) => IsNameUniqueAsync(dbContext, command.Id, command.Name, cancellationToken))
+                    .MustAsync(async (command, cancellationToken) => !await CongregationNameValidation.IsNameTakenAsync(dbContext, command.Id, command.Name, cancellationToken))
                     .WithName(nameof(UpdateCongregationCommand.Name))
                     .WithMessage("A congregation with this name already exists")
                     .WithErrorCode(ValidationErrorCodes.DuplicateName);
@@ -48,14 +48,4 @@ public class UpdateCongregationCommandValidator : AbstractValidator<UpdateCongre
     }
 
     // Soft-deleted rows are excluded by the entity's global query filter.
-    private static async Task<bool> IsNameUniqueAsync(IApplicationDbContext dbContext, Guid id, string name, CancellationToken cancellationToken)
-    {
-        var normalized = name.Trim().ToLower();
-        var query = dbContext.Congregations.AsNoTracking().AsQueryable();
-        query = TextSearchCollation.IsSqlServer(dbContext.Database)
-            ? query.Where(c => c.Id != id &&
-                EF.Functions.Collate(c.Name.Trim(), TextSearchCollation.AccentInsensitive) == normalized)
-            : query.Where(c => c.Id != id && c.Name.Trim().ToLower() == normalized);
-        return !await query.AnyAsync(cancellationToken);
-    }
 }
