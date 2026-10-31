@@ -106,6 +106,9 @@ export function withCongregationCollection() {
               .pipe(
                 mapResponse({
                   next: (result) => {
+                    // A newer load() replaced the filter while this page was in flight; its rows are stale.
+                    if (store.filter() !== filter) return;
+
                     patchState(store, {
                       congregations: [...store.congregations(), ...result.data],
                       paginationData: result,
@@ -115,6 +118,8 @@ export function withCongregationCollection() {
                     store.setCongregationsLoaded();
                   },
                   error: (error) => {
+                    if (store.filter() !== filter) return;
+
                     store.handleCongregationsError(error);
                     patchState(store, { isLoadingMore: false });
                   }
