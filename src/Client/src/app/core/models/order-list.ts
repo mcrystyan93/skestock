@@ -5,6 +5,7 @@ import { PAGINATION_PAGE_SIZE } from './category';
 export type OrderListLineDto = {
   id: string | null;
   itemId?: string | null;
+  itemImageFileId?: string | null;
   productName: string;
   quantity: number;
   unit: string;

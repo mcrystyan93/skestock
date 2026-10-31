@@ -3,17 +3,39 @@
       nzLayout="vertical"
       class="grow flex flex-col -mt-2!">
   @if (showDetails()) {
-    <ske-order-list-details-fields [name]="orderListForm.name"
-                                   [note]="orderListForm.note"
-                                   [loading]="loading()" />
-    <nz-divider nzSize="small"></nz-divider>
+    <ng-template #detailsFields>
+      <ske-order-list-details-fields [name]="orderListForm.name"
+                                     [note]="orderListForm.note"
+                                     [loading]="loading()" />
+    </ng-template>
+    <ng-container *skeLayoutBreakpoint="'md'; else collapsedDetails">
+      <ng-container [ngTemplateOutlet]="detailsFields" />
+      <nz-divider nzSize="small"></nz-divider>
+    </ng-container>
+    <ng-template #collapsedDetails>
+      <nz-collapse class="mb-4!"
+                   nzSize="small">
+        <nz-collapse-panel [nzHeader]="detailsHeader"
+                           [nzActive]="detailsOpen() || detailsInvalid()"
+                           [nzCollapsible]="detailsInvalid() ? 'disabled' : undefined"
+                           (nzActiveChange)="detailsOpen.set($event)">
+          <ng-container [ngTemplateOutlet]="detailsFields" />
+        </nz-collapse-panel>
+      </nz-collapse>
+    </ng-template>
+    <ng-template #detailsHeader>
+      <span class="flex min-w-0 items-center gap-2">
+        <span class="shrink-0 font-medium">Nume și notă</span>
+        <span class="truncate text-sm opacity-60">{{ orderListForm.name().value() }}</span>
+      </span>
+    </ng-template>
   }
   <nz-row [nzGutter]="[16, 0]">
     <nz-col [nzLg]="24"
             [nzXs]="24">
-      <div class="flex flex-wrap items-start gap-2">
+      <div class="flex flex-col items-stretch gap-1 md:flex-row md:flex-wrap md:items-start md:gap-2">
         <nz-form-item *skeletonInputLoader="loading()"
-                      class="mb-2! min-w-60 grow basis-60">
+                      class="mb-1! md:mb-2! md:min-w-60 md:grow md:basis-60">
           <nz-form-control>
             <ske-item-autocomplete [formField]="orderListForm.lineItem"
                                    placeholder="Cauta si adauga un articol" />
@@ -22,11 +44,11 @@
         @if (editable()) {
           <button nz-button
                   type="button"
-                  class="max-sm:w-full"
+                  class="max-md:mb-4! max-md:self-start"
                   [disabled]="loading()"
                   (click)="openAddSupplyLists()">
             <nz-icon nzType="icons:clipboard-list"></nz-icon>
-            Adaugă liste predefinite
+            <span class="ms-2 max-md:hidden!">Adaugă liste predefinite</span><span class="ms-2 md:hidden!">Liste predefinite</span>
           </button>
         }
       </div>

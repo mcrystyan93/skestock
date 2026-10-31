@@ -29,6 +29,7 @@ internal static class SupplyListProjection
                     {
                         Id = x.Id,
                         ItemId = x.ItemId,
+                        ItemImageFileId = x.Item.ImageFileId,
                         ItemName = x.Item.Name,
                         ItemSku = x.Item.Sku,
                         CategoryName = x.Item.Category.Name,
