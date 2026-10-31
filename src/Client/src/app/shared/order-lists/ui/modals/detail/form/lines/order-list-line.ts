@@ -80,11 +80,12 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
                 <nz-icon nzType="icons:minus"></nz-icon>
               </button>
               <nz-input-number [formField]="lineForm.quantity"
-                               class="min-w-0 flex-1 grow max-md:[&_input]:h-11!"
+                               class="min-w-0 flex-1 grow max-md:h-11! max-md:[&_input]:h-11!"
                                nzPlaceHolder="Cantitate"
                                [nzMin]="0"
                                [nzStep]="0.01"
                                [nzControls]="false"
+                               [nzChangeOnWheel]="false"
                                [attr.aria-label]="'Cantitate pentru ' + productName">
               </nz-input-number>
               <button nz-button
