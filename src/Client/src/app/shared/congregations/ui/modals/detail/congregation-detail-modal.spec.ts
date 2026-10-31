@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { type CongregationDto } from '@ske/models';
 import { CongregationDetailModal } from './congregation-detail-modal';
 // noinspection ES6PreferShortImport
@@ -64,5 +64,20 @@ describe('CongregationDetailModal', () => {
       expect.objectContaining({ name: 'Central', email: 'central@example.com' })
     );
     expect(modalRef.close).toHaveBeenCalledWith(expect.objectContaining({ id: existing.id, name: 'Renamed' }));
+  });
+
+  it('keeps the modal open on a plain save after a failed "save and close"', async () => {
+    const fixture = setup({ congregation: existing });
+    http.update.mockReturnValueOnce(throwError(() => ({ status: 400 })));
+    fixture.detectChanges();
+
+    await fixture.componentInstance.save(true);
+    expect(modalRef.close).not.toHaveBeenCalled();
+
+    http.update.mockReturnValueOnce(of({ ...existing, name: 'Fixed' }));
+    await fixture.componentInstance.save(false);
+
+    expect(http.update).toHaveBeenCalledTimes(2);
+    expect(modalRef.close).not.toHaveBeenCalled();
   });
 });

@@ -85,10 +85,9 @@ export class CongregationDetailModal {
     if (!isValid || isNil(formData))
       return;
 
+    // Set on every save so a previous "save and close" that failed cannot close a later plain "save".
+    this._close$.next(shouldClose);
     this.store.saveCongregation(this.mapSaveRequest(formData));
-
-    if(shouldClose)
-      this._close$.next(true);
   }
 
   private mapSaveRequest(formData: CongregationFormModel): CreateCongregationRequest | UpdateCongregationRequest {

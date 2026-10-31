@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { signalStore } from '@ngrx/signals';
 import { Dispatcher } from '@ngrx/signals/events';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { type CongregationDto } from '@ske/models';
 import { realtimeEvents } from '@ske/signalr';
 import { withCongregationCollection } from './congregation-collection.feature';
@@ -59,5 +59,26 @@ describe('withCongregationCollection', () => {
     TestBed.inject(Dispatcher).dispatch(realtimeEvents.congregationCreated({ congregationId: 'x' }));
 
     expect(http.getAll).not.toHaveBeenCalled();
+  });
+
+  it('ignores a load-more response that arrives after the filter changed', () => {
+    const store = TestBed.inject(CollectionStore);
+    const firstPage = { data: [congregation], hasNextPage: true, nextCursor: 'cursor-1', sort: [] };
+    http.getAll.mockReturnValue(of(firstPage));
+    store.load({ searchTerm: null, filters: [], sort: [], cursor: null, pageSize: 10 });
+
+    const pendingPage = new Subject<typeof page>();
+    http.getAll.mockReturnValue(pendingPage);
+    store.loadMore();
+
+    const newPage = { data: [{ ...congregation, id: 'new-filter-row' }], hasNextPage: false, nextCursor: null, sort: [] };
+    http.getAll.mockReturnValue(of(newPage));
+    store.load({ searchTerm: 'new', filters: [], sort: [], cursor: null, pageSize: 10 });
+
+    pendingPage.next({ ...page, data: [{ ...congregation, id: 'stale-row' }] });
+
+    expect(store.congregations().map((c) => c.id)).toEqual(['new-filter-row']);
+    expect(store.filter().searchTerm).toBe('new');
+    expect(store.hasNextPage()).toBe(false);
   });
 });
