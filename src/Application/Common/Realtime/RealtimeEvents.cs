@@ -4,6 +4,9 @@ public static class RealtimeEvents
 {
     public const string CategoryCreated = "CategoryCreated";
     public const string CategoryUpdated = "CategoryUpdated";
+    public const string CongregationCreated = "CongregationCreated";
+    public const string CongregationUpdated = "CongregationUpdated";
+    public const string CongregationDeleted = "CongregationDeleted";
     public const string CategoryImportBatchCreated = "CategoryImportBatchCreated";
     public const string CategoryImportBatchProcessed = "CategoryImportBatchProcessed";
     public const string CategoryImportBatchConfirmed = "CategoryImportBatchConfirmed";

@@ -121,6 +121,7 @@ Never run `dotnet run --project src/Web` directly; use AppHost.
 - Run `dotnet build` and the relevant tests after changes (client changes: `npm run build` and `npm test -- --watch=false`) and report results, including failures.
 - After modifying code, run `graphify update .` from the repo root.
 - Create a branch for every new feature and open a PR when finished (never commit to `master` directly). The only automated workflow is the manual deploy, so run build and tests yourself before the PR.
+- Before writing to `tasks/` or `docs/`, check whether the file already exists; if it does, use a feature-prefixed name instead of overwriting.
 - Ask before destructive actions: deleting files, dropping data, force-pushing, changing applied migrations.
 - Never commit secrets; use user-secrets or environment variables.
 
