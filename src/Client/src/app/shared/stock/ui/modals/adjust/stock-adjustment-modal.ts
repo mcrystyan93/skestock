@@ -16,7 +16,7 @@ import { DecimalPipe } from '@angular/common';
 import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
-import { NzAvatarComponent } from 'ng-zorro-antd/avatar';
+import { ItemHero } from '@ske/shared/items';
 import { StockEvents } from '../../../services/stock.events';
 
 @Component({
@@ -36,7 +36,7 @@ import { StockEvents } from '../../../services/stock.events';
     NzIconDirective,
     NzMenuDirective,
     NzMenuItemComponent,
-    NzAvatarComponent
+    ItemHero
   ],
   selector: 'ske-stock-adjustment-modal',
   styles: ``,
