@@ -76,6 +76,7 @@ public class Stock : IEndpointGroup
                 ItemId = item.ItemId,
                 ItemName = item.ItemName,
                 Sku = item.Sku,
+                ImageFileId = item.ImageFileId,
                 Unit = item.Unit,
                 LocationName = item.LocationName
             })

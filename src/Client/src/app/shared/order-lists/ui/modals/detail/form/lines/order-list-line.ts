@@ -1,4 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
+import { afterNextRender, Component, computed, ElementRef, inject, Injector, input, output, signal, viewChild } from '@angular/core';
 import { PurchaseStatisticDto } from '@ske/models';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import { NzCardComponent } from 'ng-zorro-antd/card';
@@ -11,6 +11,7 @@ import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
 import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
 import { NzColDirective } from 'ng-zorro-antd/grid';
+import { ItemThumbnail } from '@ske/shared/items';
 
 const QUANTITY_FORMATTER = new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 2 });
 const CURRENCY_FORMATTER = new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' });
@@ -31,7 +32,8 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
     FormField,
     NzSpaceCompactComponent,
     NzInputNumberComponent,
-    NzColDirective
+    NzColDirective,
+    ItemThumbnail
   ],
   selector: 'ske-order-list-line',
   styles: ``,
@@ -42,16 +44,22 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
              [nzExtra]="extraTemplate"
              nzSize="small">
       <ng-template #titleTemplate>
-        <div>{{ productName }}</div>
-        @if (historyHint(); as hint) {
-          <span class="text-xs"
-                nz-typography
-                nzType="secondary"
-                tabindex="0"
-                nz-tooltip
-                [nzTooltipTitle]="historyTooltip()"
-                [attr.aria-label]="historyTooltip()">{{ hint }}</span>
-        }
+        <div class="flex min-w-0 items-center gap-3">
+          <ske-item-thumbnail [itemId]="lineForm.itemId().value() ?? ''"
+                              [imageFileId]="lineForm.itemImageFileId().value()" />
+          <div class="min-w-0">
+            <div class="truncate">{{ productName }}</div>
+            @if (historyHint(); as hint) {
+              <span class="text-xs"
+                    nz-typography
+                    nzType="secondary"
+                    tabindex="0"
+                    nz-tooltip
+                    [nzTooltipTitle]="historyTooltip()"
+                    [attr.aria-label]="historyTooltip()">{{ hint }}</span>
+            }
+          </div>
+        </div>
       </ng-template>
       <ng-template #extraTemplate>
         <button type="button"
@@ -73,22 +81,25 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
               <button nz-button
                       nzType="default"
                       type="button"
+                      class="max-md:h-11! max-md:w-11!"
                       [disabled]="disabled()"
                       (click)="decreaseQuantity()"
                       [attr.aria-label]="'Scade cantitatea pentru ' + productName">
                 <nz-icon nzType="icons:minus"></nz-icon>
               </button>
               <nz-input-number [formField]="lineForm.quantity"
-                               class="min-w-0 flex-1 grow"
+                               class="min-w-0 flex-1 grow max-md:h-11! max-md:[&_input]:h-11!"
                                nzPlaceHolder="Cantitate"
                                [nzMin]="0"
                                [nzStep]="0.01"
                                [nzControls]="false"
+                               [nzChangeOnWheel]="false"
                                [attr.aria-label]="'Cantitate pentru ' + productName">
               </nz-input-number>
               <button nz-button
                       nzType="default"
                       type="button"
+                      class="max-md:h-11! max-md:w-11!"
                       [disabled]="disabled()"
                       (click)="increaseQuantity()"
                       [attr.aria-label]="'Crește cantitatea pentru ' + productName">
@@ -98,7 +109,7 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
                      type="text"
                      placeholder="U.M."
                      [formField]="lineForm.unit"
-                     class="w-24! shrink-0"
+                     class="w-24! shrink-0 max-md:h-11!"
                      [attr.aria-label]="'Unitate de măsură pentru ' + productName" />
             </nz-space-compact>
             @if (lineForm.quantity().touched() && lineForm.quantity().errors(); as errors) {
@@ -122,7 +133,20 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
           </nz-form-control>
         </nz-form-item>
 
-        <nz-form-item class="mb-0!">
+        @if (!notesVisible()) {
+          <button nz-button
+                  nzType="link"
+                  nzSize="small"
+                  type="button"
+                  class="self-start px-0! md:hidden! max-md:h-11!"
+                  [disabled]="disabled()"
+                  (click)="revealNotes()">
+            <nz-icon nzType="icons:pencil"></nz-icon>
+            Adaugă notiță
+          </button>
+        }
+        <nz-form-item class="mb-0!"
+                      [class.max-md:hidden]="!notesVisible()">
           <nz-form-control [nzErrorTip]="notesErrorTemplate"
                            nzSpan="24">
             <nz-input-wrapper>
@@ -130,6 +154,7 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
                        nzType="icons:pencil"></nz-icon>
               <input type="text"
                      nz-input
+                     #notesInput
                      placeholder="Adaugă notițe"
                      [formField]="lineForm.notes"
                      [attr.aria-label]="'Notițe pentru ' + productName" />
@@ -157,6 +182,14 @@ export class OrderListLine {
   // Last-365-days purchase history of the line's catalog item; null for free-text lines.
   public readonly history = input<PurchaseStatisticDto | null>(null);
 
+  private readonly _notesInput = viewChild<ElementRef<HTMLInputElement>>('notesInput');
+  private readonly _injector = inject(Injector);
+
+  protected readonly showNotes = signal(false);
+  protected readonly notesVisible = computed(
+    () => this.showNotes() || !!this.line().notes().value()
+  );
+
   public readonly historyHint = computed(() => {
     const history = this.history();
     if (!history) {
@@ -181,6 +214,12 @@ export class OrderListLine {
       `Ultima achiziție: ${LONG_DATE_FORMATTER.format(new Date(history.lastPurchasedAt))}.`;
   });
 
+  // The toggle button leaves the DOM on click, so focus moves to the revealed input.
+  protected revealNotes() {
+    this.showNotes.set(true);
+    afterNextRender(() => this._notesInput()?.nativeElement.focus(), { injector: this._injector });
+  }
+
   public increaseQuantity() {
     this.line().quantity().value.update(qty => qty + 1);
   }
@@ -193,6 +232,7 @@ export class OrderListLine {
 export type OrderListLineFormModel = {
   id: string | null;
   itemId: string | null;
+  itemImageFileId: string | null;
   productName: string;
   quantity: number;
   unit: string;

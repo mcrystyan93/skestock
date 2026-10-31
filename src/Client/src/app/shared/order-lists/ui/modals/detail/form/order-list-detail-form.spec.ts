@@ -1,3 +1,4 @@
+import { EnvironmentProviders, Provider } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { type ItemAutocompleteValue } from '@ske/models';
 import { By } from '@angular/platform-browser';
@@ -10,6 +11,43 @@ import { provideDispatcher } from '@ngrx/signals/events';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
+import { NzBreakpointService } from 'ng-zorro-antd/core/services';
+import { of } from 'rxjs';
+
+function providers(): (Provider | EnvironmentProviders)[] {
+  return [
+    provideDispatcher(),
+    provideNzIconsTesting(),
+    provideNzIcons([
+      createTestIcon('icons:trash-can'),
+      createTestIcon('icons:circle-exclamation'),
+      createTestIcon('icons:circle-check'),
+      createTestIcon('icons:magnifying-glass'),
+      createTestIcon('icons:plus'),
+      createTestIcon('icons:minus'),
+      createTestIcon('icons:pencil'),
+      createTestIcon('icons:clipboard-list'),
+      createTestIcon('icons:box')
+    ]),
+    OrderListDetailState,
+    { provide: NzModalService, useValue: { create: vi.fn() } },
+    {
+      provide: ItemsHttp,
+      useValue: {
+        getAll: vi.fn(),
+        getByIdCached: vi.fn()
+      }
+    },
+    {
+      provide: OrderListsHttp,
+      useValue: {
+        getById: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn()
+      }
+    }
+  ];
+}
 
 describe('OrderListDetailForm', () => {
   let fixture: ComponentFixture<OrderListDetailForm>;
@@ -17,37 +55,7 @@ describe('OrderListDetailForm', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [OrderListDetailForm],
-      providers: [
-        provideDispatcher(),
-        provideNzIconsTesting(),
-        provideNzIcons([
-          createTestIcon('icons:trash-can'),
-          createTestIcon('icons:circle-exclamation'),
-          createTestIcon('icons:circle-check'),
-          createTestIcon('icons:magnifying-glass'),
-          createTestIcon('icons:plus'),
-          createTestIcon('icons:minus'),
-          createTestIcon('icons:pencil'),
-          createTestIcon('icons:clipboard-list')
-        ]),
-        OrderListDetailState,
-        { provide: NzModalService, useValue: { create: vi.fn() } },
-        {
-          provide: ItemsHttp,
-          useValue: {
-            getAll: vi.fn(),
-            getByIdCached: vi.fn()
-          }
-        },
-        {
-          provide: OrderListsHttp,
-          useValue: {
-            getById: vi.fn(),
-            create: vi.fn(),
-            update: vi.fn()
-          }
-        }
-      ]
+      providers: providers()
     });
 
     fixture = TestBed.createComponent(OrderListDetailForm);
@@ -72,12 +80,25 @@ describe('OrderListDetailForm', () => {
     TestBed.tick();
 
     expect(fixture.componentInstance.orderListForm.lines().value()).toHaveLength(1);
+    expect(fixture.componentInstance.orderListForm.lines().value()[0].itemImageFileId).toBeNull();
     expect(fixture.componentInstance.orderListForm.lineItem().value()).toBeNull();
     expect(fixture.componentInstance.orderListForm.lineItem().controlValue()).toBeNull();
     expect(autocomplete.value()).toBeNull();
     expect(
       fixture.nativeElement.querySelector('input[placeholder="Cauta si adauga un articol"]').value
     ).toBe('');
+  });
+
+  it('keeps the catalog item image on the added line', () => {
+    const item = { id: 'item-1', name: 'Creion', sku: null, unit: 'buc', imageFileId: 'img-1' } as unknown as ItemAutocompleteValue;
+    const autocomplete = fixture.debugElement.query(
+      By.directive(ItemAutocomplete)
+    ).componentInstance as ItemAutocomplete;
+
+    autocomplete.value.set(item);
+    TestBed.tick();
+
+    expect(fixture.componentInstance.orderListForm.lines().value()[0].itemImageFileId).toBe('img-1');
   });
 
   it('does not add an item that is already in the list', () => {
@@ -99,11 +120,12 @@ describe('OrderListDetailForm', () => {
     fixture.componentRef.setInput('orderList', {
       id: 'o1',
       status: 'Draft',
-      lines: [{ id: 'l1', itemId: 'a', productName: 'A', quantity: 1, unit: 'buc', notes: null }]
+      lines: [{ id: 'l1', itemId: 'a', itemImageFileId: 'img-a', productName: 'A', quantity: 1, unit: 'buc', notes: null }]
     });
     fixture.detectChanges();
 
     expect(fixture.componentInstance.orderListForm.lines().value()[0].notes).toBe('');
+    expect(fixture.componentInstance.orderListForm.lines().value()[0].itemImageFileId).toBe('img-a');
   });
 
   it('merges predefined list lines by item, adding quantities of items already listed', () => {
@@ -194,10 +216,60 @@ describe('OrderListDetailForm', () => {
   });
 });
 
+describe('OrderListDetailForm collapsible details', () => {
+  function create(md: boolean, name = 'Lista de test') {
+    TestBed.configureTestingModule({
+      imports: [OrderListDetailForm],
+      providers: [...providers(), { provide: NzBreakpointService, useValue: { subscribe: () => of({ md }) } }]
+    });
+    const fixture = TestBed.createComponent(OrderListDetailForm);
+    fixture.componentRef.setInput('loading', false);
+    fixture.componentRef.setInput('orderList', { id: null, name, note: null, status: 'Draft', lines: [] });
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  const header = (root: HTMLElement) => root.querySelector<HTMLElement>('.ant-collapse-header');
+  const panel = (root: HTMLElement) => root.querySelector('.ant-collapse-item');
+
+  it('renders the fields directly from md up', () => {
+    const root = create(true).nativeElement as HTMLElement;
+
+    expect(root.querySelector('nz-collapse')).toBeNull();
+    expect(root.querySelector('input[placeholder="Numele comenzii"]')).not.toBeNull();
+  });
+
+  it('collapses the fields below md, showing the name in the header, and opens on click', () => {
+    const fixture = create(false);
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(header(root)?.textContent).toContain('Lista de test');
+    expect(panel(root)?.classList.contains('ant-collapse-item-active')).toBe(false);
+
+    header(root)?.click();
+    fixture.detectChanges();
+
+    expect(panel(root)?.classList.contains('ant-collapse-item-active')).toBe(true);
+  });
+
+  it('stays open while the name is invalid', () => {
+    const fixture = create(false, '');
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(panel(root)?.classList.contains('ant-collapse-item-active')).toBe(true);
+
+    header(root)?.click();
+    fixture.detectChanges();
+
+    expect(panel(root)?.classList.contains('ant-collapse-item-active')).toBe(true);
+  });
+});
+
 function createLine() {
   return {
     id: null,
     itemId: 'item-1',
+    itemImageFileId: null,
     productName: 'Creion',
     quantity: 1,
     unit: 'buc',

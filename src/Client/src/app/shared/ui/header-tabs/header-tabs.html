@@ -1,6 +1,6 @@
 @if (compact()) {
-  <div class="px-1 pb-2">
-    <nz-segmented nzBlock
+  <div class="overflow-x-auto px-1 pb-2">
+    <nz-segmented class="w-max whitespace-nowrap"
                   [attr.aria-label]="ariaLabel()"
                   [nzOptions]="segmentOptions()"
                   [ngModel]="selectedIndex()"

@@ -1,4 +1,5 @@
 import { injectClassReadOnly } from '@ske/shared/school-classes';
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, effect, inject, input, linkedSignal, signal, untracked } from '@angular/core';
 import { ItemAutocompleteValue, ORDER_LIST_STATUS_LABELS, OrderListDto, OrderListLineDto } from '@ske/models';
 import {
@@ -29,6 +30,8 @@ import { OrderListDetailsFields, validateOrderListDetails } from './details/orde
 import { OrderListLinesContainer } from './lines/order-list-lines-container';
 import { isNil } from 'lodash-es';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+import { NzCollapseComponent, NzCollapsePanelComponent } from 'ng-zorro-antd/collapse';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 import { SkeletonInputLoaderDirective } from '@ske/shared/loader';
 import type { OrderListLineFormModel } from './lines/order-list-line';
 
@@ -47,7 +50,11 @@ import type { OrderListLineFormModel } from './lines/order-list-line';
     NzDividerComponent,
     OrderListLinesContainer,
     NzTypographyComponent,
-    SkeletonInputLoaderDirective
+    SkeletonInputLoaderDirective,
+    NzCollapseComponent,
+    NzCollapsePanelComponent,
+    LayoutBreakpoint,
+    NgTemplateOutlet
   ],
   selector: 'ske-order-list-detail-form',
   host:{
@@ -60,6 +67,7 @@ export class OrderListDetailForm {
   public readonly orderList = input.required<Partial<OrderListDto>>();
   /** The wizard collects the name and note in its own step, so the editor hides them until the order is saved. */
   public readonly showDetails = input(true);
+  protected readonly detailsOpen = signal(false);
   private readonly _readOnly = injectClassReadOnly();
   public readonly editable = computed(() => {
     if (this._readOnly())
@@ -170,6 +178,11 @@ export class OrderListDetailForm {
     });
   });
 
+  // Keeps the collapsed name/note panel open while it holds an error the user must fix.
+  protected readonly detailsInvalid = computed(
+    () => this.orderListForm.name().invalid() || this.orderListForm.note().invalid()
+  );
+
   private readonly lineItemChangeRef = effect(() => {
     const lineItem = this.orderListForm.lineItem().value();
 
@@ -179,11 +192,13 @@ export class OrderListDetailForm {
     const line = 'id' in lineItem
       ? {
         itemId: lineItem.id,
+        itemImageFileId: lineItem.imageFileId ?? null,
         productName: lineItem.sku ? `(${lineItem.sku}) ${lineItem.name ?? ''}` : lineItem.name ?? '',
         unit: lineItem.unit ?? 'buc'
       }
       : {
         itemId: null,
+        itemImageFileId: null,
         productName: lineItem.name,
         unit: 'buc'
       };
@@ -254,6 +269,7 @@ export class OrderListDetailForm {
         added.push({
           id: null,
           itemId: line.itemId ?? null,
+          itemImageFileId: line.itemImageFileId ?? null,
           productName: line.productName,
           quantity: line.quantity,
           unit: line.unit,
@@ -281,6 +297,7 @@ export class OrderListDetailForm {
     return {
       id: line.id ?? null,
       itemId: line.itemId ?? null,
+      itemImageFileId: line.itemImageFileId ?? null,
       productName: line.productName ?? '',
       quantity: line.quantity ?? 0,
       unit: line.unit ?? '',

@@ -4,6 +4,7 @@ import { ErrorAlert } from '@ske/shared/errors';
 import { OrderListWizardStore } from '@ske/shared/order-lists/services';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { gridResponsiveMap, NzBreakpointService } from 'ng-zorro-antd/core/services';
+import { NzProgressComponent } from 'ng-zorro-antd/progress';
 import { NzStepComponent, NzStepsComponent } from 'ng-zorro-antd/steps';
 import { OrderListDetailsStep } from './steps/details-step';
 import { OrderListSourceStep } from './steps/source-step';
@@ -15,6 +16,7 @@ import { OrderListSupplyListStep } from './steps/supply-list-step';
   imports: [
     ErrorAlert,
     NzButtonComponent,
+    NzProgressComponent,
     NzStepsComponent,
     NzStepComponent,
     OrderListDetailsStep,
@@ -24,16 +26,26 @@ import { OrderListSupplyListStep } from './steps/supply-list-step';
   ],
   selector: 'ske-order-list-wizard-container',
   template: `
-    <nz-steps class="mb-4"
-              nzSize="small"
-              [nzCurrent]="wizard.stepIndex()"
-              [nzDirection]="direction()"
-              [nzLabelPlacement]="direction() === 'horizontal' ? 'vertical' : 'horizontal'">
-      <nz-step nzTitle="Sursă" />
-      <nz-step [nzTitle]="wizard.fromSupplyList() ? 'Listă predefinită' : 'Articole sugerate'" />
-      <nz-step nzTitle="Detalii" />
-      <nz-step nzTitle="Articole comandă" />
-    </nz-steps>
+    @if (direction() === 'horizontal') {
+      <nz-steps class="mb-4"
+                nzSize="small"
+                [nzCurrent]="wizard.stepIndex()"
+                nzLabelPlacement="vertical">
+        @for (title of titles(); track $index) {
+          <nz-step [nzTitle]="title" />
+        }
+      </nz-steps>
+    } @else {
+      <div class="mb-3"
+           role="status">
+        <div class="text-sm font-medium">
+          Pasul {{ wizard.stepIndex() + 1 }} din {{ titles().length }} · {{ titles()[wizard.stepIndex()] }}
+        </div>
+        <nz-progress [nzPercent]="(wizard.stepIndex() + 1) / titles().length * 100"
+                     [nzShowInfo]="false"
+                     nzSize="small" />
+      </div>
+    }
 
     @if (wizard.step() === 'source') {
       <ske-order-list-source-step [source]="wizard.source()"
@@ -81,6 +93,13 @@ export class OrderListWizardContainer {
     inject(NzBreakpointService).subscribe(gridResponsiveMap, true),
     { initialValue: null }
   );
+
+  protected readonly titles = computed(() => [
+    'Sursă',
+    this.wizard.fromSupplyList() ? 'Listă predefinită' : 'Articole sugerate',
+    'Detalii',
+    'Articole comandă'
+  ]);
 
   protected readonly direction = computed(() => this._breakpoints()?.md ?? true ? 'horizontal' : 'vertical');
 }
