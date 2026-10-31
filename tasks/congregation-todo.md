@@ -92,7 +92,7 @@ Backend is TDD: write the failing test, implement, refactor. Tick a box only aft
 
 ## Wrap-up
 
-- [ ] W1 Independent haiku review of the diff; fix real findings
-- [ ] W2 `graphify update .`
-- [ ] W3 Push branch, open PR (never commit to `master`)
-- [ ] W4 Phase 5: check every AC in the spec and report met / not met
+- [x] W1 Independent haiku review of the diff; fix real findings
+- [x] W2 `graphify update .`
+- [x] W3 Push branch, open PR (never commit to `master`)
+- [x] W4 Phase 5: check every AC in the spec and report met / not met
