@@ -1,10 +1,10 @@
 services:
   env-dashboard:
-    image: "mcr.microsoft.com/dotnet/nightly/aspire-dashboard:13.5"
+    image: "mcr.microsoft.com/dotnet/nightly/aspire-dashboard:13.6"
     environment:
       ASPIRE_DASHBOARD_FORWARDEDHEADERS_ENABLED: "true"
     ports:
-      - "18080:18888"
+      - "127.0.0.1:18080:18888"
     expose:
       - "18889"
       - "18890"
@@ -37,7 +37,9 @@ services:
     environment:
       REDIS_PASSWORD: "${REDIS_PASSWORD}"
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
+    expose:
+      - "6379"
     volumes:
       - type: "volume"
         target: "/data"
@@ -58,6 +60,7 @@ services:
       OpenApiSettings__ApiKey: "${OPENAPISETTINGSAPIKEY}"
       OpenApiSettings__Model: "${OPENAPISETTINGSMODEL}"
       ConnectionStrings__skestock-cache: "skestock-cache:6379,password=${REDIS_PASSWORD}"
+      ConnectionStrings__skestock_cache: "skestock-cache:6379,password=${REDIS_PASSWORD}"
       SKESTOCK_CACHE_HOST: "skestock-cache"
       SKESTOCK_CACHE_PORT: "6379"
       SKESTOCK_CACHE_PASSWORD: "${REDIS_PASSWORD}"
@@ -65,8 +68,8 @@ services:
       ASPNETCORE_ENVIRONMENT: "Production"
       ConnectionStrings__skestockDb: "Server=dbserver,1433;User ID=skestock_app;Password=${SQL_APP_PASSWORD};Encrypt=True;TrustServerCertificate=True;Initial Catalog=skestockDb"
       DataProtection__KeysDirectory: "/var/lib/skestock/data-protection-keys"
-      ConnectionStrings__blobservice: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://storage:10000/devstoreaccount1"
-      ConnectionStrings__queues: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://storage:10001/devstoreaccount1"
+      ConnectionStrings__blobservice: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=${AZURITE_ACCOUNT_KEY};BlobEndpoint=http://storage:10000/devstoreaccount1"
+      ConnectionStrings__queues: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=${AZURITE_ACCOUNT_KEY};QueueEndpoint=http://storage:10001/devstoreaccount1"
       Storage__PublicBlobEndpoint: "https://blob.cristian-cloud.com"
       Cors__AllowedOrigins__0: "https://ske.cristian-cloud.com"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://env-dashboard:18889"
@@ -112,13 +115,14 @@ services:
       OpenApiSettings__ApiKey: "${OPENAPISETTINGSAPIKEY}"
       OpenApiSettings__Model: "${OPENAPISETTINGSMODEL}"
       ConnectionStrings__skestock-cache: "skestock-cache:6379,password=${REDIS_PASSWORD}"
+      ConnectionStrings__skestock_cache: "skestock-cache:6379,password=${REDIS_PASSWORD}"
       SKESTOCK_CACHE_HOST: "skestock-cache"
       SKESTOCK_CACHE_PORT: "6379"
       SKESTOCK_CACHE_PASSWORD: "${REDIS_PASSWORD}"
       SKESTOCK_CACHE_URI: "redis://:${REDIS_PASSWORD}@skestock-cache:6379"
       ConnectionStrings__skestockDb: "Server=dbserver,1433;User ID=skestock_app;Password=${SQL_APP_PASSWORD};Encrypt=True;TrustServerCertificate=True;Initial Catalog=skestockDb"
-      ConnectionStrings__blobservice: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://storage:10000/devstoreaccount1"
-      ConnectionStrings__queues: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;QueueEndpoint=http://storage:10001/devstoreaccount1"
+      ConnectionStrings__blobservice: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=${AZURITE_ACCOUNT_KEY};BlobEndpoint=http://storage:10000/devstoreaccount1"
+      ConnectionStrings__queues: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=${AZURITE_ACCOUNT_KEY};QueueEndpoint=http://storage:10001/devstoreaccount1"
       Storage__PublicBlobEndpoint: "https://blob.cristian-cloud.com"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://env-dashboard:18889"
       OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
@@ -190,10 +194,12 @@ services:
       - "--tableHost"
       - "0.0.0.0"
       - "--skipApiVersionCheck"
+    environment:
+      AZURITE_ACCOUNTS: "devstoreaccount1:${AZURITE_ACCOUNT_KEY}"
     ports:
       - "10000:10000"
-      - "10001:10001"
-      - "10002:10002"
+      - "127.0.0.1:10001:10001"
+      - "127.0.0.1:10002:10002"
     volumes:
       - type: "volume"
         target: "/data"
@@ -206,7 +212,7 @@ services:
     environment:
       REDIS_HOSTS: "local:skestock-cache:6379:0:${REDIS_PASSWORD}"
     ports:
-      - "8081:8081"
+      - "127.0.0.1:8081:8081"
     depends_on:
       skestock-cache:
         condition: "service_started"
