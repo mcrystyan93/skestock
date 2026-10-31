@@ -3,6 +3,7 @@ namespace skestock.Application.Common.Realtime;
 public static class RealtimeGroups
 {
     public const string CategoriesList = "categories-list";
+    public const string CongregationsList = "congregations-list";
     public const string CategoryImportBatchesList = "category-import-batches-list";
     public const string GoodsReceiptImportsList = "goods-receipts-import-list";
     public const string ItemsList = "items-list";

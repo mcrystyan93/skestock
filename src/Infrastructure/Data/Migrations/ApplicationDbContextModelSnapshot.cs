@@ -310,6 +310,87 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("CategoryImportBatchFiles");
                 });
 
+            modelBuilder.Entity("skestock.Domain.Entities.Congregations.Congregation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("CanReceiveStudents")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Coordinator")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("CoordinatorPhone")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DessertContactPerson")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("DessertContactPhone")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsSmallCongregation")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("LastModifiedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .UseCollation("Latin1_General_100_CI_AI");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("LastModifiedById");
+
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Congregations_Name")
+                        .HasFilter("[DeletedDate] IS NULL");
+
+                    b.HasIndex("CreatedDate", "Id")
+                        .HasDatabaseName("IX_Congregations_CreatedDate_Id");
+
+                    b.HasIndex("LastModifiedDate", "Id")
+                        .HasDatabaseName("IX_Congregations_LastModifiedDate_Id");
+
+                    b.HasIndex("Name", "Id")
+                        .HasDatabaseName("IX_Congregations_Name_Id");
+
+                    b.ToTable("Congregations");
+                });
+
             modelBuilder.Entity("skestock.Domain.Entities.GoodsReceipts.GoodsReceipt", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1926,6 +2007,25 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("CreatedBy");
 
                     b.Navigation("FileMetadata");
+
+                    b.Navigation("LastModifiedBy");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.Congregations.Congregation", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("LastModifiedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedBy");
 
                     b.Navigation("LastModifiedBy");
                 });
