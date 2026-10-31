@@ -1,0 +1,13 @@
+<ske-item-thumbnail size="full"
+                    class="rounded-lg!"
+                    [itemId]="itemId()"
+                    [imageFileId]="imageFileId()" />
+<div class="min-w-0">
+  <h4 nz-typography
+      class="mb-0! wrap-anywhere">{{ name() }}</h4>
+  @if (subtitle(); as subtitle) {
+    <div nz-typography
+         nzType="secondary"
+         class="wrap-anywhere">{{ subtitle }}</div>
+  }
+</div>

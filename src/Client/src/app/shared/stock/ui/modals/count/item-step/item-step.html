@@ -1,16 +1,12 @@
 @let item = row();
 @let counted = count();
 
-<div class="mb-4 flex items-start justify-between gap-3">
-  <div class="min-w-0">
-    <h4 nz-typography
-        class="mb-0! wrap-anywhere">{{ item.itemName }}</h4>
-    <div nz-typography
-         nzType="secondary"
-         class="wrap-anywhere">
-      {{ item.categoryName }} &middot; {{ item.locationName }}
-    </div>
-  </div>
+<div class="mb-4 flex flex-col items-center gap-2 sm:flex-row sm:items-start sm:justify-between">
+  <ske-item-hero class="min-w-0"
+                 [itemId]="item.itemId"
+                 [imageFileId]="item.imageFileId"
+                 [name]="item.itemName"
+                 [subtitle]="item.categoryName + ' · ' + item.locationName" />
   <strong class="shrink-0"
           aria-label="Poziție">{{ position() }} / {{ total() }}</strong>
 </div>

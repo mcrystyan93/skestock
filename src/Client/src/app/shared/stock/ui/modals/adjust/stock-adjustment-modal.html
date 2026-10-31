@@ -1,23 +1,15 @@
 <div *nzModalTitle>
   <h4 nz-typography>Ajustează stoc</h4>
-  <div class="flex flex-row gap-2 items-center">
-    @if (store.adjustedItem()?.categoryIcon; as categoryIcon) {
-      <nz-avatar [nzIcon]="'icons:' + categoryIcon.fileName"
-                 [nzSize]="64"></nz-avatar>
-    } @else {
-      <nz-avatar nzIcon="icons:shelves"
-                 [nzSize]="64"></nz-avatar>
-    }
-    <div nz-typography
-         nzType="secondary"
-         class="mb-0!">{{ modalData().item.itemName }}
-    </div>
-
-  </div>
 </div>
 
 <nz-space nzDirection="vertical"
           class="w-full">
+  <ske-item-hero *nzSpaceItem
+                 [itemId]="modalData().item.itemId"
+                 [imageFileId]="modalData().item.imageFileId"
+                 [name]="modalData().item.itemName"
+                 [subtitle]="modalData().item.categoryName + ' · ' + modalData().item.locationName" />
+
   <nz-card nzSize="small"
            *nzSpaceItem>
     <div class="flex items-center justify-between">
