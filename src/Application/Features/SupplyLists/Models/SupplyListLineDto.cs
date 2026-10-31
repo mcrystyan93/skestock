@@ -4,6 +4,7 @@ public record SupplyListLineDto
 {
     public Guid Id { get; init; }
     public Guid ItemId { get; init; }
+    public Guid? ItemImageFileId { get; init; }
     public string ItemName { get; init; } = string.Empty;
     public string? ItemSku { get; init; }
     public string? CategoryName { get; init; }

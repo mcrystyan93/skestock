@@ -46,6 +46,7 @@ export function formatSupplyListFrequency(
 export type SupplyListLineDto = {
   id: string;
   itemId: string;
+  itemImageFileId?: string | null;
   itemName: string;
   itemSku?: string | null;
   categoryName?: string | null;

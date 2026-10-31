@@ -18,7 +18,7 @@ import { NzEmptyComponent } from 'ng-zorro-antd/empty';
   },
   template: `
     <div class="absolute inset-0 overflow-y-auto">
-      <div class="p-2 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 xxxl:grid-cols-4 gap-2">
+      <div class="p-3 md:p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 xxxl:grid-cols-4 gap-3 md:gap-4">
         @let history = purchaseHistory.value();
         @for (line of lines(); track $index; let index = $index) {
           @let itemId = line.itemId().value();

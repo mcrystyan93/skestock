@@ -192,11 +192,13 @@ export class OrderListDetailForm {
     const line = 'id' in lineItem
       ? {
         itemId: lineItem.id,
+        itemImageFileId: lineItem.imageFileId ?? null,
         productName: lineItem.sku ? `(${lineItem.sku}) ${lineItem.name ?? ''}` : lineItem.name ?? '',
         unit: lineItem.unit ?? 'buc'
       }
       : {
         itemId: null,
+        itemImageFileId: null,
         productName: lineItem.name,
         unit: 'buc'
       };
@@ -267,6 +269,7 @@ export class OrderListDetailForm {
         added.push({
           id: null,
           itemId: line.itemId ?? null,
+          itemImageFileId: line.itemImageFileId ?? null,
           productName: line.productName,
           quantity: line.quantity,
           unit: line.unit,
@@ -294,6 +297,7 @@ export class OrderListDetailForm {
     return {
       id: line.id ?? null,
       itemId: line.itemId ?? null,
+      itemImageFileId: line.itemImageFileId ?? null,
       productName: line.productName ?? '',
       quantity: line.quantity ?? 0,
       unit: line.unit ?? '',
