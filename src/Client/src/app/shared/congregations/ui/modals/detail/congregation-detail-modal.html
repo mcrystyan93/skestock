@@ -11,10 +11,11 @@
 </div>
 
 <ske-error-display [problemDetail]="store.congregationProblemDetail()"
-                 [validationErrors]="store.congregationValidationErrors()"/>
+                 [validationErrors]="alertValidationErrors()"/>
 
 <ske-congregation-form [loading]="store.congregationLoading()"
-          [congregation]="store.congregation()"/>
+          [congregation]="store.congregation()"
+          [serverErrors]="fieldErrors()"/>
 
 <div *nzModalFooter>
   <nz-space>
