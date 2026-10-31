@@ -1,4 +1,4 @@
-import { Component, computed, input, model } from '@angular/core';
+import { afterRenderEffect, Component, computed, ElementRef, inject, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NzSegmentedComponent } from 'ng-zorro-antd/segmented';
 import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
@@ -18,6 +18,17 @@ export class HeaderTabs {
   public readonly compact = input(false);
   public readonly ariaLabel = input('Secțiuni');
   public readonly selectedIndex = model(0);
+
+  private readonly _host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  // The compact strip scrolls horizontally, so keep the active segment in view (e.g. when opened with ?tab=6).
+  private readonly _scrollSelectedIntoView = afterRenderEffect(() => {
+    const index = this.selectedIndex();
+    this.compact();
+    this._host.nativeElement
+      .querySelectorAll('.ant-segmented-item')[index]
+      ?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+  });
 
   protected readonly segmentOptions = computed(() =>
     this.options().map((option, index) => ({ label: option.compactLabel ?? option.label, value: index }))
