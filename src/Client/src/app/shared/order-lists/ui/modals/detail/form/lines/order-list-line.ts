@@ -11,6 +11,7 @@ import { NzInputDirective, NzInputWrapperComponent } from 'ng-zorro-antd/input';
 import { NzSpaceCompactComponent } from 'ng-zorro-antd/space';
 import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
 import { NzColDirective } from 'ng-zorro-antd/grid';
+import { ItemThumbnail } from '@ske/shared/items';
 
 const QUANTITY_FORMATTER = new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 2 });
 const CURRENCY_FORMATTER = new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' });
@@ -31,7 +32,8 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
     FormField,
     NzSpaceCompactComponent,
     NzInputNumberComponent,
-    NzColDirective
+    NzColDirective,
+    ItemThumbnail
   ],
   selector: 'ske-order-list-line',
   styles: ``,
@@ -42,16 +44,22 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
              [nzExtra]="extraTemplate"
              nzSize="small">
       <ng-template #titleTemplate>
-        <div>{{ productName }}</div>
-        @if (historyHint(); as hint) {
-          <span class="text-xs"
-                nz-typography
-                nzType="secondary"
-                tabindex="0"
-                nz-tooltip
-                [nzTooltipTitle]="historyTooltip()"
-                [attr.aria-label]="historyTooltip()">{{ hint }}</span>
-        }
+        <div class="flex min-w-0 items-center gap-3">
+          <ske-item-thumbnail [itemId]="lineForm.itemId().value() ?? ''"
+                              [imageFileId]="lineForm.itemImageFileId().value()" />
+          <div class="min-w-0">
+            <div class="truncate">{{ productName }}</div>
+            @if (historyHint(); as hint) {
+              <span class="text-xs"
+                    nz-typography
+                    nzType="secondary"
+                    tabindex="0"
+                    nz-tooltip
+                    [nzTooltipTitle]="historyTooltip()"
+                    [attr.aria-label]="historyTooltip()">{{ hint }}</span>
+            }
+          </div>
+        </div>
       </ng-template>
       <ng-template #extraTemplate>
         <button type="button"
@@ -214,6 +222,7 @@ export class OrderListLine {
 export type OrderListLineFormModel = {
   id: string | null;
   itemId: string | null;
+  itemImageFileId: string | null;
   productName: string;
   quantity: number;
   unit: string;

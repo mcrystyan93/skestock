@@ -10,6 +10,7 @@ const lowStock = (itemId: string, locationName: string): LowStockItemDto => ({
   itemId,
   itemName: `Item ${itemId}`,
   sku: `SKU-${itemId}`,
+  imageFileId: `img-${itemId}`,
   unit: 'buc',
   locationName
 });
@@ -20,7 +21,7 @@ const supplyList: SupplyListDto = {
   note: 'Notă',
   frequency: 'Monthly',
   isActive: true,
-  lines: [{ id: 'l1', itemId: 'i1', itemName: 'Creioane', itemSku: null, quantity: 12, unit: 'set', notes: 'colorate' }],
+  lines: [{ id: 'l1', itemId: 'i1', itemImageFileId: 'img-i1', itemName: 'Creioane', itemSku: null, quantity: 12, unit: 'set', notes: 'colorate' }],
   createdDate: '',
   lastModifiedDate: ''
 };
@@ -31,8 +32,8 @@ const secondSupplyList: SupplyListDto = {
   name: 'Lista anuală',
   note: null,
   lines: [
-    { id: 'm1', itemId: 'i1', itemName: 'Creioane', itemSku: null, quantity: 3, unit: 'set', notes: 'ascuțite' },
-    { id: 'm2', itemId: 'i2', itemName: 'Riglă', itemSku: null, quantity: 4, unit: 'buc', notes: null }
+    { id: 'm1', itemId: 'i1', itemImageFileId: 'img-i1', itemName: 'Creioane', itemSku: null, quantity: 3, unit: 'set', notes: 'ascuțite' },
+    { id: 'm2', itemId: 'i2', itemImageFileId: null, itemName: 'Riglă', itemSku: null, quantity: 4, unit: 'buc', notes: null }
   ]
 };
 
@@ -100,7 +101,7 @@ describe('OrderListWizardStore', () => {
 
     const { lines } = store.buildPrefill();
     expect(lines).toEqual([
-      { id: null, itemId: '2', productName: '(SKU-2) Item 2', quantity: 1, unit: 'buc', notes: '' }
+      { id: null, itemId: '2', itemImageFileId: 'img-2', productName: '(SKU-2) Item 2', quantity: 1, unit: 'buc', notes: '' }
     ]);
   });
 
@@ -130,8 +131,8 @@ describe('OrderListWizardStore', () => {
       name: 'Lista lunară + Lista anuală',
       note: '',
       lines: [
-        { id: null, itemId: 'i1', productName: 'Creioane', quantity: 15, unit: 'set', notes: 'colorate · ascuțite' },
-        { id: null, itemId: 'i2', productName: 'Riglă', quantity: 4, unit: 'buc', notes: '' }
+        { id: null, itemId: 'i1', itemImageFileId: 'img-i1', productName: 'Creioane', quantity: 15, unit: 'set', notes: 'colorate · ascuțite' },
+        { id: null, itemId: 'i2', itemImageFileId: null, productName: 'Riglă', quantity: 4, unit: 'buc', notes: '' }
       ]
     });
 

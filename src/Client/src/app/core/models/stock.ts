@@ -33,6 +33,7 @@ export type LowStockItemDto = {
   itemId: string;
   itemName: string;
   sku?: string | null;
+  imageFileId?: string | null;
   unit: string;
   locationName: string;
 };

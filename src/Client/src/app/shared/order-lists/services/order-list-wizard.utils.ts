@@ -4,6 +4,7 @@ export type SuggestedItem = {
   itemId: string;
   itemName: string;
   sku: string | null;
+  imageFileId: string | null;
   unit: string;
   locations: string[];
 };
@@ -20,6 +21,7 @@ export function groupLowStockItems(items: LowStockItemDto[]): SuggestedItem[] {
         itemId: item.itemId,
         itemName: item.itemName,
         sku: item.sku ?? null,
+        imageFileId: item.imageFileId ?? null,
         unit: item.unit,
         locations: [item.locationName]
       });
@@ -47,6 +49,7 @@ export function suggestionsToLines(items: SuggestedItem[], selectedIds: readonly
     .map((item) => ({
       id: null,
       itemId: item.itemId,
+      itemImageFileId: item.imageFileId,
       productName: toProductName(item.itemName, item.sku),
       quantity: 1,
       unit: item.unit || DEFAULT_UNIT,
@@ -90,6 +93,7 @@ export function supplyListsToLines(supplyLists: SupplyListDto[]): OrderListLineD
           line: {
             id: null,
             itemId: line.itemId,
+            itemImageFileId: line.itemImageFileId ?? null,
             productName: toProductName(line.itemName, line.itemSku),
             quantity: line.quantity,
             unit: line.unit || DEFAULT_UNIT,

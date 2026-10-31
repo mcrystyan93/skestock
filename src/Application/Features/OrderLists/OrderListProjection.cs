@@ -30,6 +30,7 @@ internal static class OrderListProjection
                     {
                         Id = l.Id,
                         ItemId = l.ItemId,
+                        ItemImageFileId = l.Item != null ? l.Item.ImageFileId : null,
                         ProductName = l.ProductName,
                         Quantity = l.Quantity,
                         Unit = l.Unit,

@@ -13,6 +13,7 @@ public record LowStockItemDto
     public Guid ItemId { get; init; }
     public string ItemName { get; init; } = string.Empty;
     public string? Sku { get; init; }
+    public Guid? ImageFileId { get; init; }
     public string Unit { get; init; } = string.Empty;
     public string LocationName { get; init; } = string.Empty;
 }

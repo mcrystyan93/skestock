@@ -28,7 +28,8 @@ describe('OrderListDetailForm', () => {
           createTestIcon('icons:plus'),
           createTestIcon('icons:minus'),
           createTestIcon('icons:pencil'),
-          createTestIcon('icons:clipboard-list')
+          createTestIcon('icons:clipboard-list'),
+          createTestIcon('icons:box')
         ]),
         OrderListDetailState,
         { provide: NzModalService, useValue: { create: vi.fn() } },
@@ -72,12 +73,25 @@ describe('OrderListDetailForm', () => {
     TestBed.tick();
 
     expect(fixture.componentInstance.orderListForm.lines().value()).toHaveLength(1);
+    expect(fixture.componentInstance.orderListForm.lines().value()[0].itemImageFileId).toBeNull();
     expect(fixture.componentInstance.orderListForm.lineItem().value()).toBeNull();
     expect(fixture.componentInstance.orderListForm.lineItem().controlValue()).toBeNull();
     expect(autocomplete.value()).toBeNull();
     expect(
       fixture.nativeElement.querySelector('input[placeholder="Cauta si adauga un articol"]').value
     ).toBe('');
+  });
+
+  it('keeps the catalog item image on the added line', () => {
+    const item = { id: 'item-1', name: 'Creion', sku: null, unit: 'buc', imageFileId: 'img-1' } as unknown as ItemAutocompleteValue;
+    const autocomplete = fixture.debugElement.query(
+      By.directive(ItemAutocomplete)
+    ).componentInstance as ItemAutocomplete;
+
+    autocomplete.value.set(item);
+    TestBed.tick();
+
+    expect(fixture.componentInstance.orderListForm.lines().value()[0].itemImageFileId).toBe('img-1');
   });
 
   it('does not add an item that is already in the list', () => {
@@ -99,11 +113,12 @@ describe('OrderListDetailForm', () => {
     fixture.componentRef.setInput('orderList', {
       id: 'o1',
       status: 'Draft',
-      lines: [{ id: 'l1', itemId: 'a', productName: 'A', quantity: 1, unit: 'buc', notes: null }]
+      lines: [{ id: 'l1', itemId: 'a', itemImageFileId: 'img-a', productName: 'A', quantity: 1, unit: 'buc', notes: null }]
     });
     fixture.detectChanges();
 
     expect(fixture.componentInstance.orderListForm.lines().value()[0].notes).toBe('');
+    expect(fixture.componentInstance.orderListForm.lines().value()[0].itemImageFileId).toBe('img-a');
   });
 
   it('merges predefined list lines by item, adding quantities of items already listed', () => {
@@ -198,6 +213,7 @@ function createLine() {
   return {
     id: null,
     itemId: 'item-1',
+    itemImageFileId: null,
     productName: 'Creion',
     quantity: 1,
     unit: 'buc',
