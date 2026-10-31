@@ -25,6 +25,12 @@ var compose = builder.AddDockerComposeEnvironment("env")
     });
 compose.ConfigureComposeFile(file =>
 {
+    // Dashboard has no auth in compose: bind to loopback and reach it through an SSH tunnel.
+    foreach (var service in file.Services.Values.Where(x => x.Ports.Any(p => p.StartsWith("18080:"))))
+    {
+        service.Ports = service.Ports.Select(p => p.StartsWith("18080:") ? $"127.0.0.1:{p}" : p).ToList();
+    }
+
     file.Volumes[Services.DataProtectionKeysVolume] =
         new Aspire.Hosting.Docker.Resources.ServiceNodes.Volume
         {
@@ -65,11 +71,16 @@ var cache = builder
     .PublishAsDockerComposeService((resource, service) =>
     {
         service.Name = Services.Cache;
+        // Loopback only: Web and Worker reach it over the compose network.
+        service.Ports.Add("127.0.0.1:6379:6379");
     })
     .WithComputeEnvironment(compose)
     .WithPassword(redisPassword)
-    .WithDataVolume(Services.CacheVolumes)
-    .WithEndpoint(targetPort: 6379, port: 6379, name: "tcp", isExternal: true);
+    .WithDataVolume(Services.CacheVolumes);
+if (builder.ExecutionContext.IsRunMode)
+{
+    cache.WithEndpoint(targetPort: 6379, port: 6379, name: "tcp", isExternal: true);
+}
 
 var openAiApiKey = builder.AddParameter($"{Services.OpenApiSettings}{Services.OpenApiKey}", secret:true);
 var openAiModel = builder.AddParameter($"{Services.OpenApiSettings}{Services.OpenApiModel}", "gpt-5.6-luna");
@@ -206,13 +217,23 @@ if (builder.ExecutionContext.IsPublishMode)
             $"{Services.DataProtection}__{Services.DataProtectionKeysDirectory}",
             Services.DataProtectionKeysPath);
 
+    // Never the Azurite well-known dev key: blob is reachable from the internet. Must be base64
+    // (e.g. `openssl rand -base64 64`).
+    const string accountName = "devstoreaccount1";
+    var azuriteAccountKey = builder.AddParameter("azurite-account-key", secret: true);
+
     var azurite = builder
         .AddContainer(Services.Storage, "mcr.microsoft.com/azure-storage/azurite:3.35.0")
         .PublishAsDockerComposeService((resource, service) =>
         {
             service.Name = Services.Storage;
+            // Only blob is public (browsers use SAS URLs through the tunnel); queue/table stay on loopback.
+            service.Ports.Add("10000:10000");
+            service.Ports.Add("127.0.0.1:10001:10001");
+            service.Ports.Add("127.0.0.1:10002:10002");
         })
         .WithComputeEnvironment(compose)
+        .WithEnvironment("AZURITE_ACCOUNTS", ReferenceExpression.Create($"{accountName}:{azuriteAccountKey}"))
         .WithArgs(
             "azurite",
             "--location", "/data",
@@ -220,31 +241,23 @@ if (builder.ExecutionContext.IsPublishMode)
             "--queueHost", "0.0.0.0",
             "--tableHost", "0.0.0.0",
             "--skipApiVersionCheck")
-        .WithVolume(Services.StorageVolumes, "/data")
-        .WithEndpoint(targetPort: 10000, port: 10000, name: "blob", isExternal: true)
-        .WithEndpoint(targetPort: 10001, port: 10001, name: "queue", isExternal: true)
-        .WithEndpoint(targetPort: 10002, port: 10002, name: "table", isExternal: true);
+        .WithVolume(Services.StorageVolumes, "/data");
 
     builder
         .AddContainer(Services.CacheCommander, "docker.io/rediscommander/redis-commander:latest")
         .PublishAsDockerComposeService((resource, service) =>
         {
             service.Name = Services.CacheCommander;
+            service.Ports.Add("127.0.0.1:8081:8081");
         })
         .WithComputeEnvironment(compose)
         .WithEnvironment("REDIS_HOSTS", $"local:{Services.Cache}:6379:0:{redisPassword}")
-        .WithEndpoint(targetPort: 8081, port: 8081, name: "http", isExternal: true)
         .WaitFor(cache);
 
-    const string accountName = "devstoreaccount1";
-    const string accountKey =
-        "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
-    var blobConnectionString =
-        $"DefaultEndpointsProtocol=http;AccountName={accountName};AccountKey={accountKey};" +
-        $"BlobEndpoint=http://{Services.Storage}:10000/{accountName}";
-    var queueConnectionString =
-        $"DefaultEndpointsProtocol=http;AccountName={accountName};AccountKey={accountKey};" +
-        $"QueueEndpoint=http://{Services.Storage}:10001/{accountName}";
+    var blobConnectionString = ReferenceExpression.Create(
+        $"DefaultEndpointsProtocol=http;AccountName={accountName};AccountKey={azuriteAccountKey};BlobEndpoint=http://{Services.Storage}:10000/{accountName}");
+    var queueConnectionString = ReferenceExpression.Create(
+        $"DefaultEndpointsProtocol=http;AccountName={accountName};AccountKey={azuriteAccountKey};QueueEndpoint=http://{Services.Storage}:10001/{accountName}");
 
     web
         .WithEnvironment($"ConnectionStrings__{Services.BlobService}", blobConnectionString)
