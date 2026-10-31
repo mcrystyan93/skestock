@@ -1,4 +1,4 @@
-import { Component, DestroyRef, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, signal, viewChild } from '@angular/core';
 import { congregationApiEvents, CongregationDetailState, NEW_CONGREGATION_ROUTE_ID } from '../../../services/congregation-detail.store';
 import { CongregationDto, CreateCongregationRequest, UpdateCongregationRequest } from '@ske/models';
 import { NZ_MODAL_DATA, NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zorro-antd/modal';
@@ -13,7 +13,7 @@ import { BehaviorSubject, filter, switchMap, tap } from 'rxjs';
 import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { ErrorAlert } from '@ske/shared/errors';
+import { ErrorAlert, ErrorMessageService } from '@ske/shared/errors';
 
 @Component({
   imports: [
@@ -40,6 +40,33 @@ export class CongregationDetailModal {
   public readonly modalData = signal<CongregationDetailModalData>(inject(NZ_MODAL_DATA));
   public readonly store = inject(CongregationDetailState);
 
+  // Server errors for these form fields are shown under the field; everything else stays in the alert.
+  private static readonly FIELD_ERROR_NAMES = ['name', 'email'];
+
+  public readonly fieldErrors = computed(() => {
+    const result: Record<string, string[]> = {};
+
+    for (const item of this.store.congregationValidationErrors()?.error?.errors ?? []) {
+      const field = item.field?.toLowerCase();
+
+      if (field && CongregationDetailModal.FIELD_ERROR_NAMES.includes(field))
+        (result[field] ??= []).push(this._errorMessages.resolveItem(item));
+    }
+
+    return result;
+  });
+
+  public readonly alertValidationErrors = computed(() => {
+    const validationErrors = this.store.congregationValidationErrors();
+    const remaining = (validationErrors?.error.errors ?? []).filter(
+      (item) => !CongregationDetailModal.FIELD_ERROR_NAMES.includes(item.field?.toLowerCase() ?? '')
+    );
+
+    return validationErrors && remaining.length > 0
+      ? { ...validationErrors, error: { ...validationErrors.error, errors: remaining } }
+      : null;
+  });
+
   private initialLoad = false;
 
   private readonly _nzModalRef = inject(NzModalRef);
@@ -47,6 +74,7 @@ export class CongregationDetailModal {
   private readonly _formComponent = viewChild(CongregationForm);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _nzMessageService = inject(NzMessageService);
+  private readonly _errorMessages = inject(ErrorMessageService);
   private readonly _close$ = new BehaviorSubject(false);
 
   private readonly _initialLoadEffectRef = effect(() => {

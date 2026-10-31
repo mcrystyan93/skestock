@@ -15,6 +15,10 @@
                    nz-input
                    [formField]="congregationForm.name" />
           </nz-input-wrapper>
+          @for (message of serverErrors()['name']; track $index) {
+            <div class="ant-form-item-explain-error"
+                 role="alert">{{ message }}</div>
+          }
 
           <ng-template #nameErrorTemplate>
             @if (congregationForm.name().errors(); as errors) {
@@ -41,6 +45,10 @@
                    nz-input
                    [formField]="congregationForm.email" />
           </nz-input-wrapper>
+          @for (message of serverErrors()['email']; track $index) {
+            <div class="ant-form-item-explain-error"
+                 role="alert">{{ message }}</div>
+          }
 
           <ng-template #emailErrorTemplate>
             @if (congregationForm.email().errors(); as errors) {

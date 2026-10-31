@@ -80,4 +80,53 @@ describe('CongregationDetailModal', () => {
     expect(http.update).toHaveBeenCalledTimes(2);
     expect(modalRef.close).not.toHaveBeenCalled();
   });
+
+  describe('server validation errors', () => {
+    const duplicateName = {
+      status: 400,
+      error: { code: 'validation', errors: [{ field: 'Name', code: 'validation.duplicate_name' }] }
+    };
+
+    async function saveWith(error: unknown) {
+      const fixture = setup({ congregation: existing });
+      http.update.mockReturnValue(throwError(() => error));
+      fixture.detectChanges();
+      await fixture.componentInstance.save();
+      fixture.detectChanges();
+      return fixture.nativeElement as HTMLElement;
+    }
+
+    it('shows a duplicate-name error under the Name field and not in the alert', async () => {
+      const element = await saveWith(duplicateName);
+
+      const form = element.querySelector('ske-congregation-form')!;
+      expect(form.textContent).toContain('Există deja o înregistrare cu acest nume.');
+      expect(element.querySelector('ske-validation-problem-detail-alert')).toBeNull();
+    });
+
+    it('keeps errors that belong to no field in the alert', async () => {
+      const element = await saveWith({
+        status: 400,
+        error: { code: 'validation', errors: [{ field: 'Other', code: 'validation.required' }] }
+      });
+
+      expect(element.querySelector('ske-validation-problem-detail-alert')).not.toBeNull();
+    });
+
+    it('splits mixed errors between the field and the alert', async () => {
+      const element = await saveWith({
+        status: 400,
+        error: {
+          code: 'validation',
+          errors: [
+            { field: 'name', code: 'validation.duplicate_name' },
+            { field: 'Other', code: 'validation.required' }
+          ]
+        }
+      });
+
+      expect(element.querySelector('ske-congregation-form')!.textContent).toContain('Există deja o înregistrare');
+      expect(element.querySelector('ske-validation-problem-detail-alert')).not.toBeNull();
+    });
+  });
 });

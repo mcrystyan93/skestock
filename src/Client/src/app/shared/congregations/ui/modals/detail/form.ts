@@ -29,6 +29,8 @@ import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
 export class CongregationForm {
   public readonly loading = input.required<boolean>();
   public readonly congregation = input.required<Partial<CongregationDto>>();
+  /** Messages returned by the server for a field (keyed by the camelCase form field name), shown under it. */
+  public readonly serverErrors = input<Record<string, string[]>>({});
 
   private readonly _formModel = linkedSignal({
     source: () => this.congregation(),
