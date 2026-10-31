@@ -11,7 +11,7 @@ describe('ItemDropdownStore', () => {
     sku: 'CR-1',
     description: null,
     unit: 'bucată',
-    minThreshold: 1,
+    locationThresholds: [],
     isPerishable: false,
     shelfLifeDays: null,
     isActive: true,

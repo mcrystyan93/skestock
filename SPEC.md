@@ -1,90 +1,72 @@
-# Spec: Item images
+# Spec: Per-location low-stock threshold
 
 ## Objective
-Staff can attach one image to an item. The image shows as a thumbnail in the items table (desktop) and list (mobile), and in the stock page rows/cards. Create/Edit item form gets an `nz-upload` area (picture-card) to add, replace, remove the image.
+Low stock is currently one number per item (`Item.MinThreshold`). Make it one number per (item, location). In the item create/edit form, below the existing fields, show one numeric box per location to set that location's threshold. Existing item values are copied to every existing location by the migration.
 
-Success: upload an image in the item modal → thumbnail appears in items list and stock page; replace/remove works; invalid files are rejected on client and server.
+Success = staff set different thresholds per location; "stoc redus" badges/filters/KPIs/order-list wizard use the threshold of the location being evaluated.
 
-## Decisions (confirmed by user)
-1. **Upload path:** reuse existing SAS flow (`request-upload` → PUT to blob → `confirm-upload`). Create/Edit item request carries `imageFileId` (a confirmed `FileMetadata.FileId`). No multipart.
-2. **Thumbnail:** generated server-side (SkiaSharp, already a dependency) and stored as a second blob.
-3. **Serving:** `GET /api/Items/{id}/image?size=thumb|full` streams the blob with cache headers. DTOs carry only `imageFileId` (doubles as cache-bust version).
-4. **Rules:** 1 image per item, ≤ 5 MB, `image/jpeg|png|webp|gif`.
+## Findings (from exploration)
+- `Item.MinThreshold` (int, `src/Domain/Entities/Items/Item.cs:12`), column since InitialCreate. Read/written in: Create/EditItem command+validator+handler, `ItemRequests`, `ItemDto`/`ItemDtoMapper`, `GetAllItems`/`GetItemById` handlers, `Endpoints/Items.cs`.
+- Low-stock evaluation already happens per (item, location) row: `GetClassLocationStockHandler` (:107, :158-161, :221), `AdjustStockCommandHandler` (:61, :90), `GetSchoolClassSummaryHandler` (:45-56). Only the threshold source changes.
+- Locations: global (not class-scoped), hierarchical (`ParentLocationId`), no active flag. Listing: `POST /api/Locations/get-all` (paginated).
+- Client: `core/models/item.ts`, `shared/items/ui/modals/detail/{form.ts,form.html,item-detail-modal.ts}`, `features/items/services/item-list.store.ts`, item list table column "Prag minim".
+- Seed (`ApplicationDbContextInitialiser.cs:481,712,557`) uses `MinThreshold`. AI extraction schema prompt mentions it (`ItemExtractionSchemaFactory.cs:21`; mapping back to item unverified).
+- ~40 test files reference `MinThreshold`.
 
-## Assumptions (correct me or I proceed)
-- **Thumbnail generated in the Worker** (user decision): Create/Edit handler sets `ImageFileId` and raises an outbox event → queue → Worker downloads original, resizes, uploads thumbnail, sets `ThumbnailBlobPath`. Consumer must be idempotent (at-least-once). Until the thumbnail exists, the `thumb` endpoint falls back to the original image. Output: WebP, max edge 256 px; GIF → first frame.
-- **Stock cache not invalidated by image changes** (user decision): stock query keeps its normal expiry; thumbnails appear when it expires. No stock tag changes.
-- Server validates by decoding with SkiaSharp (not trusting client content type); undecodable → validation error.
-- Replacing/removing an image deletes the old original + thumbnail blobs (best effort; leftover blobs are not a correctness issue).
-- Item import flows (CSV/AI) are untouched; imported items have no image.
-- Item autocomplete/dropdown and goods-receipt/batch tables are out of scope (no thumbnail there).
-- Disabled items keep their image.
-- Endpoint auth = same cookie auth as other endpoints; `<img src="/api/Items/{id}/image…">` works same-origin via the `/api` proxy.
+## Design
+**Data**: new entity `ItemLocationThreshold { ItemId, LocationId, MinThreshold }`, composite PK (ItemId, LocationId), FKs to Item/Location, index on LocationId. Missing row = threshold 0 (never low).
 
-## Tech stack
-.NET 10 minimal APIs, Mediator, FluentValidation, FluentResults, EF Core 10/SQL Server, Azure Blob (Azurite), SkiaSharp; Angular 22 signals + Signal Forms, NG-ZORRO 22 `nz-upload`, `@ngrx/signals`, Vitest.
+**Migration** (via `dotnet ef migrations add AddItemLocationThresholds`, backward-safe, expand step): create table; `INSERT ... SELECT i.Id, l.Id, i.MinThreshold FROM Items i CROSS JOIN Locations l`. `Item.MinThreshold` column is kept for this release (see Open Question 2).
+
+**Backend**
+- Create/Edit item: replace `int MinThreshold` with `LocationThresholds: [{ locationId, minThreshold }]`; validator: each >= 0, locationIds exist and are unique. Edit replaces the set (upsert/delete).
+- `ItemDto`: return `LocationThresholds`.
+- Stock handlers: join `ItemLocationThresholds` on (ItemId, LocationId) instead of `Item.MinThreshold`.
+- Cache: item commands already invalidate item tags; ensure stock/summary tags are also invalidated on threshold change (check `CacheConstants.cs`).
+
+**Frontend** (NG-ZORRO, signals, Romanian copy)
+- Item form: new section "Prag minim pe locație" under the form with one `nz-input-number` (min 0) per location, labelled with location name, responsive grid. Locations loaded via existing `locations.http.ts`. Signal Forms per AGENTS.md.
+- `item.ts` models, `item-list.store.ts`, list column "Prag minim" updated (see Open Question 4).
+- Update colocated specs.
 
 ## Commands
 ```
 dotnet build
-dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~Items"
-dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~Storage"
-./run-functional-tests.sh --filter "FullyQualifiedName~Items"
-dotnet ef migrations add AddItemImage --project src/Infrastructure --startup-project src/Web --context ApplicationDbContext --output-dir Data/Migrations
+dotnet test tests/Application.UnitTests
+./run-functional-tests.sh
+dotnet ef migrations add AddItemLocationThresholds --project src/Infrastructure --startup-project src/Web --context ApplicationDbContext --output-dir Data/Migrations
 dotnet ef migrations has-pending-model-changes --project src/Infrastructure --startup-project src/Web --context ApplicationDbContext
-cd src/Client && npm run build && npm test -- --watch=false
-cd src/Client && npx prettier --write <files>
+cd src/Client && npm run build && npm test -- --watch=false && npx prettier --write <files>
 ```
+After code changes: `graphify update .`. Work on a feature branch, open PR, run Haiku reviewer on the diff.
 
-## Project structure (touch points)
-Backend
-- `src/Domain/Entities/Items/Item.cs` — add `Guid? ImageFileId`, `string? ImageBlobPath`, `string? ThumbnailBlobPath` (container is the existing `app-files`).
-- `src/Infrastructure/Data/Configurations/ItemConfiguration.cs` + new migration (nullable columns, backward safe; optional FK/index on `ImageFileId` not needed).
-- `src/Application/Common/Interfaces/IImageThumbnailService.cs` (new) + `src/Infrastructure/...` SkiaSharp impl, registered in `Infrastructure/DependencyInjection.cs`.
-- `IBlobStorageService`: add `UploadAsync(container, path, stream, contentType, ct)` (needed to write the thumbnail); impl in `AzureBlobStorageService`; update `FakeBlobStorageService` in functional tests.
-- `Features/Items`: `CreateItemCommand`/`EditItemCommand`(+requests, validators, handlers) gain `ImageFileId`; `ItemDto` + `ItemDtoMapper` gain `ImageFileId`; new query `GetItemImage` (returns stream + content type; cacheable? no — streamed, so not an `ICacheableQuery`).
-- `src/Web/Endpoints/Items.cs` — `GET {id}/image`.
-- Stock: `StockItemDto` gains `ImageFileId`; `GetClassLocationStockHandler` already loads items — add the field.
-- Shared constant for container name `app-files` is currently hard-coded in 4 places; reuse, do not add a 5th literal (move to `skestock.Shared.Services` only if trivially in scope — otherwise ask).
-
-Frontend (`src/Client/src/app`)
-- `core/models/item.ts`, `core/models/stock.ts` — add `imageFileId?`; `CreateItemRequest/EditItemRequest` add `imageFileId?: string | null`.
-- `shared/items/ui/modals/detail/form.ts|html` — new `imageFileId` form field + picture-card `nz-upload` (new small component, e.g. `shared/items/ui/image-upload`), reusing `FileStorageState.uploadFiles` / `StorageHttp`.
-- `shared/items/ui/item-thumbnail` (new, `ske-item-thumbnail`: `itemId`, `imageFileId`, `size`; shows `<img loading="lazy">` or placeholder icon) used in:
-  - `features/items/list/tables/regular/large/table.html` (new narrow first column or inside Articol cell)
-  - `features/items/list/tables/regular/small/item-list-small.html`
-  - `shared/stock/ui/table/stock-category-item-row.html` and `stock-category-items-small.html`
-- `shared/items/ui/modals/detail/item-detail-modal.ts` `mapSaveRequest` passes `imageFileId`.
-- Export new pieces via `@ske/...` barrels.
-
-## Code style
-Follow CLAUDE.md §6: file-scoped namespaces, `Guard.Against`, `Result`/typed errors in `Application/Common/Errors` (add `ItemErrors.InvalidImage`), UTC `DateTimeOffset`; TS strict, `inject()`, `input()`, signals, native control flow, Romanian UI copy ("Imagine articol", "Încarcă imagine", "Format neacceptat", "Imaginea depășește 5 MB").
-
-## Testing strategy
-Backend is TDD (red → green per slice), NUnit + Shouldly + Moq, mirroring `tests/Application.UnitTests/Features/Items/**`:
-- Validators: `ImageFileId` must reference a completed `FileMetadata`, size ≤ 5 MB, content type allowlist; null allowed.
-- Handlers: create/edit with image → thumbnail generated + paths set; replace → old blobs deleted; null on edit → image removed; undecodable image → failure result; duplicate/idempotent edit with same fileId → no regeneration.
-- `GetItemImage` handler: thumb/full, not-found item, item without image → typed not-found error.
-- Thumbnail service: resizes ≥256 px down, leaves smaller as-is, GIF/PNG/JPEG/WebP decode, corrupt bytes throw/fail.
-- `AzureBlobStorageServiceTests` for `UploadAsync`.
-- Functional test: edit item with image → `GET /image` returns bytes (via `FakeBlobStorageService`); stock query returns `imageFileId`.
-- Frontend (Vitest, colocated): image-upload component (rejects wrong type / >5 MB, emits fileId, remove clears), item-thumbnail (placeholder vs img URL with `?v=`), form model mapping.
+## Testing
+- Unit: validators (negative, duplicate/unknown location), Create/Edit handlers (upsert/delete), stock + summary handlers using per-location thresholds (location A low, B not).
+- Functional: item create/edit endpoint with thresholds; low-stock query.
+- Migration: verify on a DB with existing items that every item × location row gets the old value.
+- Client: form spec (renders a box per location, submits thresholds), store spec.
 
 ## Boundaries
-- Always: validate on server (not only client); keep Mediator pipeline order; commands keep `ICacheInvalidation` (item tag + list tag); run build + tests; `graphify update .` after code changes; feature branch + PR.
-- Ask first: moving the `app-files` literal to `Services`; adding any NuGet/npm dependency; changing the stock cache tags; request size limits.
-- Never: edit applied migrations or the snapshot by hand; serve blobs with long-lived SAS in DTOs; commit secrets; reorder persisted enums.
+- Always: follow CLAUDE.md patterns, EF migration generated (never hand-edit snapshot), UTC/ints append-only rules, Romanian UI.
+- Ask first: dropping `Item.MinThreshold`, changing AI extraction behavior, any new dependency.
+- Never: edit applied migrations, run migrations against production.
 
-## Success criteria
-1. Create and Edit item accept `imageFileId`; invalid (missing/unconfirmed/too big/wrong type/undecodable) → 400 with typed error.
-2. `GET /api/Items/{id}/image?size=thumb` returns WebP ≤256 px; `size=full` returns original; 404 when no image; responses carry `Cache-Control` and work with `?v=<imageFileId>` busting.
-3. Replace/remove updates item and deletes old blobs.
-4. Item list (desktop + mobile) and stock page (desktop + mobile) show the thumbnail or a placeholder.
-5. Item modal shows picture-card upload with preview, client-side type/size checks, remove button.
-6. `dotnet build`, backend unit + functional tests, `npm run build`, `npm test` all pass; migration `has-pending-model-changes` clean.
+## Success Criteria
+1. After migration every existing item has a threshold row per existing location equal to its old `MinThreshold`.
+2. Item form shows one box per location; save/reload round-trips values.
+3. Low-stock flags/counts/filter/order wizard match per-location thresholds.
+4. `dotnet build`, unit + functional tests, client build + tests all pass.
 
-## Open questions / risks
-- **Stock cache:** the stock query is cached; editing an item's image must invalidate it, or thumbnails lag until expiry. Need to check current stock tags vs `ItemTag` (Ask-first item above).
-- **Antiforgery** is currently off; the image GET is safe either way, but the SAS `confirm-upload` POST depends on it later (already true today).
-- **Orphaned uploads:** user uploads an image in the modal then cancels → `FileMetadata` + blob remain unreferenced. Accept for now (same as existing imports) unless you want cleanup.
-- GIF animation is dropped in thumbnails; `size=full` keeps the original.
+## Assumptions
+1. Locations created after this change default to threshold 0 until set.
+2. Whole-row evaluation stays per (item, location); no cross-location aggregation.
+3. Plan authored on Opus, implementation on Sonnet, exploration on Haiku (as requested).
+
+## Decisions (answered)
+1. Form shows all locations, flat (parent name in label for children).
+2. `Item.MinThreshold` column kept this release (mark obsolete, no longer read); dropped by a later migration.
+3. AI import: extracted value applied to all locations. Seed: same value on every location.
+4. Item list "Prag minim" column removed.
+
+## Open Questions
+None blocking. Note: with the column kept but unread, new items still need a value written to `Item.MinThreshold` (non-null int); handlers will write 0.

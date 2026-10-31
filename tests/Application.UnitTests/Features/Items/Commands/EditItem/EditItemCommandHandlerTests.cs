@@ -10,6 +10,7 @@ using skestock.Application.UnitTests.Features.Items.Images;
 using skestock.Domain.Enums;
 using skestock.Shared;
 using skestock.Application.Features.Items.Commands.EditItem;
+using skestock.Application.Features.Items.Models;
 using skestock.Domain.Entities;
 using skestock.Domain.Queues;
 using NUnit.Framework;
@@ -44,6 +45,7 @@ public class ItemTestDbContext(DbContextOptions<ItemTestDbContext> options)
     public DbSet<DailyItemConsumption> DailyItemConsumptions => Set<DailyItemConsumption>();
     public DbSet<ItemPurchaseStatistic> ItemPurchaseStatistics => Set<ItemPurchaseStatistic>();
     public DbSet<Item> Items => Set<Item>();
+    public DbSet<ItemLocationThreshold> ItemLocationThresholds => Set<ItemLocationThreshold>();
     public DbSet<ItemImportBatch> ItemImportBatches => Set<ItemImportBatch>();
     public DbSet<ItemImportBatchFile> ItemImportBatchFiles => Set<ItemImportBatchFile>();
     public DbSet<Location> Locations => Set<Location>();
@@ -107,7 +109,15 @@ public class ItemTestDbContext(DbContextOptions<ItemTestDbContext> options)
             b.Ignore(i => i.ClassBalances);
         });
 
-        builder.Ignore<Location>();
+        builder.Entity<Location>(b =>
+        {
+            b.HasOne(l => l.CreatedBy).WithMany().HasForeignKey(l => l.CreatedById);
+            b.HasOne(l => l.LastModifiedBy).WithMany().HasForeignKey(l => l.LastModifiedById);
+            b.HasOne(l => l.ParentLocation).WithMany(l => l.ChildLocations).HasForeignKey(l => l.ParentLocationId);
+            b.Ignore(l => l.Batches);
+            b.Ignore(l => l.Transactions);
+            b.Ignore(l => l.ClassBalances);
+        });
         builder.Ignore<SchoolClass>();
         builder.Ignore<StockBatch>();
         builder.Ignore<StockTransaction>();
@@ -147,7 +157,6 @@ public class EditItemCommandHandlerTests
             Id = item.Id,
             Name = "New Name",
             Unit = "box",
-            MinThreshold = 10,
             IsPerishable = true,
             CategoryId = category.Id
         }, CancellationToken.None);
@@ -155,7 +164,6 @@ public class EditItemCommandHandlerTests
         result.IsSuccess.ShouldBeTrue();
         result.Value.Name.ShouldBe("New Name");
         result.Value.Unit.ShouldBe("box");
-        result.Value.MinThreshold.ShouldBe(10);
         result.Value.IsPerishable.ShouldBeTrue();
 
         var persisted = await context.Items.SingleAsync(i => i.Id == item.Id, CancellationToken.None);
@@ -228,6 +236,66 @@ public class EditItemCommandHandlerTests
 
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is skestock.Application.Common.Errors.ItemErrors.ItemNotFound);
+    }
+
+    private static async Task<(ItemTestDbContext Context, Item Item, Guid CategoryId)> CreateItemWithThresholdsAsync(
+        Guid locationA, int thresholdA)
+    {
+        var (context, category) = await CreateContextAsync();
+        var item = new Item { Name = "Pencil", Unit = "unit", CategoryId = category.Id };
+        context.Items.Add(item);
+        await context.SaveChangesAsync(CancellationToken.None);
+        context.ItemLocationThresholds.Add(new ItemLocationThreshold { ItemId = item.Id, LocationId = locationA, MinThreshold = thresholdA });
+        await context.SaveChangesAsync(CancellationToken.None);
+        return (context, item, category.Id);
+    }
+
+    private static EditItemCommandHandler HandlerFor(ItemTestDbContext context) =>
+        new(context, ItemImageTestSupport.User(), ItemImageTestSupport.Blobs(), NullLogger<EditItemCommandHandler>.Instance);
+
+    [Test]
+    public async Task Handle_WithThresholds_UpdatesExistingInsertsNewAndLeavesOmittedUnchanged()
+    {
+        var (locationA, locationB, locationC) = (Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+        var (context, item, categoryId) = await CreateItemWithThresholdsAsync(locationA, 5);
+        await using var _ = context;
+        context.ItemLocationThresholds.Add(new ItemLocationThreshold { ItemId = item.Id, LocationId = locationC, MinThreshold = 7 });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await HandlerFor(context).Handle(new EditItemCommand
+        {
+            Id = item.Id, Name = "Pencil", Unit = "unit", CategoryId = categoryId,
+            LocationThresholds =
+            [
+                new ItemLocationThresholdDto { LocationId = locationA, MinThreshold = 12 },
+                new ItemLocationThresholdDto { LocationId = locationB, MinThreshold = 3 }
+            ]
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        var rows = await context.ItemLocationThresholds.ToListAsync(CancellationToken.None);
+        rows.Count.ShouldBe(3);
+        rows.Single(r => r.LocationId == locationA).MinThreshold.ShouldBe(12);
+        rows.Single(r => r.LocationId == locationB).MinThreshold.ShouldBe(3);
+        rows.Single(r => r.LocationId == locationC).MinThreshold.ShouldBe(7);
+        result.Value.LocationThresholds.Count.ShouldBe(3);
+    }
+
+    [Test]
+    public async Task Handle_WithEmptyThresholds_ChangesNothing()
+    {
+        var locationA = Guid.NewGuid();
+        var (context, item, categoryId) = await CreateItemWithThresholdsAsync(locationA, 5);
+        await using var _ = context;
+
+        var result = await HandlerFor(context).Handle(new EditItemCommand
+        {
+            Id = item.Id, Name = "Pencil", Unit = "unit", CategoryId = categoryId
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        var row = await context.ItemLocationThresholds.SingleAsync(CancellationToken.None);
+        row.MinThreshold.ShouldBe(5);
     }
 
     private sealed class ImageHarness

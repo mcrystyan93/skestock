@@ -64,7 +64,7 @@ export const ItemListState = signalStore(
             name: item.name,
             description: item.description,
             unit: item.unit,
-            minThreshold: item.minThreshold,
+            locationThresholds: [],
             isPerishable: item.isPerishable,
             shelfLifeDays: item.shelfLifeDays,
             categoryId: item.categoryId,

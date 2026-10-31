@@ -137,6 +137,7 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
   // ── Validation: domain-specific uniqueness codes ─────────────────────────
   [ErrorCodes.validation.duplicateName]: 'Există deja o înregistrare cu acest nume.',
   [ErrorCodes.validation.duplicateSku]: 'Există deja un articol cu acest cod SKU.',
+  [ErrorCodes.validation.duplicateLocation]: 'Aceeași locație apare de mai multe ori în praguri.',
 
   // ── Validation: domain-specific reference codes ──────────────────────────
   [ErrorCodes.validation.invalidReference]: 'Referința selectată nu există.',

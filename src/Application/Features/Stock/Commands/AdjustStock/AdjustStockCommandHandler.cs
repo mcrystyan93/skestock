@@ -58,8 +58,14 @@ public class AdjustStockCommandHandler(IApplicationDbContext dbContext, IUser us
         var item = await dbContext.Items
             .AsNoTracking()
             .Where(i => i.Id == request.ItemId)
-            .Select(i => new { i.Name, i.Unit, i.IsPerishable, i.MinThreshold })
+            .Select(i => new { i.Name, i.Unit, i.IsPerishable })
             .SingleAsync(cancellationToken);
+
+        var threshold = await dbContext.ItemLocationThresholds
+            .AsNoTracking()
+            .Where(t => t.ItemId == request.ItemId && t.LocationId == request.LocationId)
+            .Select(t => (int?)t.MinThreshold)
+            .SingleOrDefaultAsync(cancellationToken);
 
         var location = await dbContext.Locations
             .AsNoTracking()
@@ -87,7 +93,7 @@ public class AdjustStockCommandHandler(IApplicationDbContext dbContext, IUser us
             IsExpired = expiredQuantity > 0,
             ExpiredQuantity = expiredQuantity,
             Quantity = request.ActualQuantity,
-            IsLowStock = request.ActualQuantity < item.MinThreshold
+            IsLowStock = request.ActualQuantity < threshold
         };
 
         return Result.Ok(dto);
