@@ -1,0 +1,223 @@
+<form nz-form
+      nzNoColon
+      nzLayout="vertical">
+  <nz-row [nzGutter]="[16, 0]">
+    <nz-col nzSpan="12">
+      <!--   name   -->
+      <nz-form-item *skeletonInputLoader="loading()">
+        <nz-form-label nzRequired>
+          Nume
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="nameErrorTemplate">
+          <nz-input-wrapper nzShowCount
+                            [nzCount]="{ max: congregationForm.name()?.maxLength() ?? 100 }">
+            <input type="text"
+                   nz-input
+                   [formField]="congregationForm.name" />
+          </nz-input-wrapper>
+
+          <ng-template #nameErrorTemplate>
+            @if (congregationForm.name().errors(); as errors) {
+              @for (error of errors; track $index) {
+                <div class="ant-form-item-explain-error">
+                  {{ error.message }}
+                </div>
+              }
+            }
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col nzSpan="12">
+      <!--   email   -->
+      <nz-form-item *skeletonInputLoader="loading()">
+        <nz-form-label nzRequired>
+          Email
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="emailErrorTemplate">
+          <nz-input-wrapper nzShowCount
+                            [nzCount]="{ max: congregationForm.email()?.maxLength() ?? 200 }">
+            <input type="email"
+                   nz-input
+                   [formField]="congregationForm.email" />
+          </nz-input-wrapper>
+
+          <ng-template #emailErrorTemplate>
+            @if (congregationForm.email().errors(); as errors) {
+              @for (error of errors; track $index) {
+                <div class="ant-form-item-explain-error">
+                  {{ error.message }}
+                </div>
+              }
+            }
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col nzSpan="12">
+      <!--   coordinator   -->
+      <nz-form-item *skeletonInputLoader="loading()">
+        <nz-form-label>
+          Coordonator
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="coordinatorErrorTemplate">
+          <nz-input-wrapper nzShowCount
+                            [nzCount]="{ max: congregationForm.coordinator()?.maxLength() ?? 100 }">
+            <input type="text"
+                   nz-input
+                   [formField]="congregationForm.coordinator" />
+          </nz-input-wrapper>
+
+          <ng-template #coordinatorErrorTemplate>
+            @if (congregationForm.coordinator().errors(); as errors) {
+              @for (error of errors; track $index) {
+                <div class="ant-form-item-explain-error">
+                  {{ error.message }}
+                </div>
+              }
+            }
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col nzSpan="12">
+      <!--   coordinatorPhone   -->
+      <nz-form-item *skeletonInputLoader="loading()">
+        <nz-form-label>
+          Telefon coordonator
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="coordinatorPhoneErrorTemplate">
+          <nz-input-wrapper nzShowCount
+                            [nzCount]="{ max: congregationForm.coordinatorPhone()?.maxLength() ?? 30 }">
+            <input type="tel"
+                   nz-input
+                   [formField]="congregationForm.coordinatorPhone" />
+          </nz-input-wrapper>
+
+          <ng-template #coordinatorPhoneErrorTemplate>
+            @if (congregationForm.coordinatorPhone().errors(); as errors) {
+              @for (error of errors; track $index) {
+                <div class="ant-form-item-explain-error">
+                  {{ error.message }}
+                </div>
+              }
+            }
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col nzSpan="12">
+      <!--   dessertContactPerson   -->
+      <nz-form-item *skeletonInputLoader="loading()">
+        <nz-form-label>
+          Persoană de contact desert
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="dessertContactPersonErrorTemplate">
+          <nz-input-wrapper nzShowCount
+                            [nzCount]="{ max: congregationForm.dessertContactPerson()?.maxLength() ?? 100 }">
+            <input type="text"
+                   nz-input
+                   [formField]="congregationForm.dessertContactPerson" />
+          </nz-input-wrapper>
+
+          <ng-template #dessertContactPersonErrorTemplate>
+            @if (congregationForm.dessertContactPerson().errors(); as errors) {
+              @for (error of errors; track $index) {
+                <div class="ant-form-item-explain-error">
+                  {{ error.message }}
+                </div>
+              }
+            }
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col nzSpan="12">
+      <!--   dessertContactPhone   -->
+      <nz-form-item *skeletonInputLoader="loading()">
+        <nz-form-label>
+          Telefon contact desert
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="dessertContactPhoneErrorTemplate">
+          <nz-input-wrapper nzShowCount
+                            [nzCount]="{ max: congregationForm.dessertContactPhone()?.maxLength() ?? 30 }">
+            <input type="tel"
+                   nz-input
+                   [formField]="congregationForm.dessertContactPhone" />
+          </nz-input-wrapper>
+
+          <ng-template #dessertContactPhoneErrorTemplate>
+            @if (congregationForm.dessertContactPhone().errors(); as errors) {
+              @for (error of errors; track $index) {
+                <div class="ant-form-item-explain-error">
+                  {{ error.message }}
+                </div>
+              }
+            }
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col nzSpan="12">
+      <!--   canReceiveStudents   -->
+      <nz-form-item *skeletonInputLoader="loading()">
+        <nz-form-label nzFor="congregation-canReceiveStudents">
+          Poate primi cursanți
+        </nz-form-label>
+        <nz-form-control>
+          @if (!congregationForm.canReceiveStudents().value()) {
+            Nu
+          }
+          <nz-switch [formField]="congregationForm.canReceiveStudents"
+                     nzId="congregation-canReceiveStudents" />
+          @if (congregationForm.canReceiveStudents().value()) {
+            Da
+          }
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col nzSpan="12">
+      <!--   isSmallCongregation   -->
+      <nz-form-item *skeletonInputLoader="loading()">
+        <nz-form-label nzFor="congregation-isSmallCongregation">
+          Congregație mică
+        </nz-form-label>
+        <nz-form-control>
+          @if (!congregationForm.isSmallCongregation().value()) {
+            Nu
+          }
+          <nz-switch [formField]="congregationForm.isSmallCongregation"
+                     nzId="congregation-isSmallCongregation" />
+          @if (congregationForm.isSmallCongregation().value()) {
+            Da
+          }
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+    <nz-col nzSpan="24">
+      <!--   message   -->
+      <nz-form-item *skeletonInputLoader="loading()">
+        <nz-form-label>
+          Mesaj
+        </nz-form-label>
+        <nz-form-control [nzErrorTip]="messageErrorTemplate">
+          <nz-textarea-count [nzMaxCharacterCount]="congregationForm.message()?.maxLength() ?? 1000">
+            <textarea nz-input
+                      rows="3"
+                      [formField]="congregationForm.message"></textarea>
+          </nz-textarea-count>
+
+          <ng-template #messageErrorTemplate>
+            @if (congregationForm.message().errors(); as errors) {
+              @for (error of errors; track $index) {
+                <div class="ant-form-item-explain-error">
+                  {{ error.message }}
+                </div>
+              }
+            }
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
+  </nz-row>
+</form>

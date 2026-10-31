@@ -17,6 +17,10 @@ export const fullRoutes: Routes = [
         loadChildren: () => import('@ske/features/categories').then((m) => m.categoriesRoutes)
       },
       {
+        path: 'congregations',
+        loadChildren: () => import('@ske/features/congregations').then((m) => m.congregationsRoutes)
+      },
+      {
         path: 'items',
         loadChildren: () => import('@ske/features/items').then((m) => m.itemsRoutes)
       },
