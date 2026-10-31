@@ -6,12 +6,14 @@ import { NzAlertComponent } from 'ng-zorro-antd/alert';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzInputNumberComponent } from 'ng-zorro-antd/input-number';
+import { ItemHero } from '@ske/shared/items';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 
 /** Step 2: one item of the walk - current quantity, counted-quantity stepper and the increase/decrease alert. */
 @Component({
   imports: [
     FormsModule,
+    ItemHero,
     DecimalPipe,
     NzAlertComponent,
     NzButtonComponent,

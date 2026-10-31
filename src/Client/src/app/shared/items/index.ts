@@ -11,3 +11,4 @@ export * from './ui/dropdown/item-dropdown';
 export * from './ui/autocomplete/item-autocomplete';
 export * from './ui/thumbnail/item-thumbnail';
 export * from './ui/image-upload/item-image-upload';
+export * from './ui/hero/item-hero';

@@ -18,7 +18,7 @@
     (click)="pick($event, picker)"
     (keydown)="$event.stopPropagation()"
   >
-    <nz-icon nzType="icons:box" aria-hidden="true" class="text-xl" />
+    <nz-icon nzType="icons:box" aria-hidden="true" [class]="size() === 'thumb' ? 'text-xl' : 'text-5xl'" />
   </button>
   <!-- The picker's own click is dispatched programmatically and would otherwise bubble to the row. -->
   <input
@@ -30,5 +30,5 @@
     (change)="upload($event)"
   />
 } @else {
-  <nz-icon nzType="icons:box" aria-hidden="true" class="text-xl" />
+  <nz-icon nzType="icons:box" aria-hidden="true" [class]="size() === 'thumb' ? 'text-xl' : 'text-5xl'" />
 }
