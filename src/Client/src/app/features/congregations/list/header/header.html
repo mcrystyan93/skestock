@@ -1,0 +1,46 @@
+@let compact = isCompact();
+
+<nz-page-header [nzGhost]="false">
+  <nz-breadcrumb nz-page-header-breadcrumb
+                 class="hidden! lg:block!"
+                 nzSeparator=">">
+    <nz-breadcrumb-item>Acasă</nz-breadcrumb-item>
+    <nz-breadcrumb-item>Congregații</nz-breadcrumb-item>
+  </nz-breadcrumb>
+  <nz-page-header-title>
+    <span class="flex items-center gap-1">
+      <ske-menu-toggle class="-ms-2" />
+      <span>Congregații</span>
+    </span>
+  </nz-page-header-title>
+  <nz-page-header-content class="pt-0! hidden lg:block">
+    <div nz-typography
+         nzType="secondary">Administrează congregațiile, persoanele de contact și dacă pot primi cursanți.
+    </div>
+  </nz-page-header-content>
+  <nz-page-header-extra>
+    @if (compact) {
+      <button nz-button
+              nzType="primary"
+              nzShape="circle"
+              type="button"
+              nz-tooltip
+              nzTooltipTitle="Adaugă congregație"
+              aria-label="Adaugă congregație"
+              (click)="onAdd.emit()">
+        <nz-icon nzType="icons:plus"></nz-icon>
+      </button>
+    } @else {
+      <button nz-button
+              nzType="primary"
+              type="button"
+              aria-label="Adaugă congregație"
+              (click)="onAdd.emit()">
+        <nz-icon nzType="icons:plus"></nz-icon>
+        Adaugă
+      </button>
+    }
+  </nz-page-header-extra>
+</nz-page-header>
+
+<ske-theme-switcher class="absolute top-1.5 right-4 hidden lg:block" />

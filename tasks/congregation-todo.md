@@ -41,7 +41,7 @@ Backend is TDD: write the failing test, implement, refactor. Tick a box only aft
   - Acceptance: AC-B4 (not found), AC-B5 (deleted not returned)
   - Verify: `--filter "FullyQualifiedName~GetCongregationById"`
   - Files: `Queries/GetCongregationById/*`
-- [ ] B8 Realtime constants (`RealtimeEvents.Congregation*`, `RealtimeGroups.CongregationsList`): done in B3. Event handlers only notify the SignalR group; cache invalidation stays on `ICacheInvalidation` (Congregation has no cross-feature cache tags)
+- [x] B8 Realtime constants (`RealtimeEvents.Congregation*`, `RealtimeGroups.CongregationsList`): done in B3. Event handlers only notify the SignalR group; cache invalidation stays on `ICacheInvalidation` (Congregation has no cross-feature cache tags)
   - Deps: B3
   - Acceptance: AC-B8
   - Verify: `--filter "FullyQualifiedName~Congregation"`
@@ -60,35 +60,35 @@ Backend is TDD: write the failing test, implement, refactor. Tick a box only aft
 
 ## Frontend
 
-- [ ] F1 Models + HTTP: `core/models/congregation.ts`, `congregations.http.ts`
+- [x] F1 Models + HTTP: `core/models/congregation.ts`, `congregations.http.ts`
   - Deps: B10 (contract)
   - Acceptance: types mirror spec 4
   - Verify: `npm run build`
-- [ ] F2 Collection feature + detail store + dropdown store (with working realtime reducers) + specs
+- [x] F2 Collection feature + detail store + dropdown store (with working realtime reducers) + specs
   - Deps: F1
   - Acceptance: AC-F7 (store part), AC-F8
   - Verify: `npm test -- --watch=false`
-- [ ] F3 Modal form (Signal Forms) + modal container + spec
+- [x] F3 Modal form (Signal Forms) + modal container + spec
   - Deps: F2
   - Acceptance: AC-F4, AC-F5
   - Verify: `npm test -- --watch=false`
-- [ ] F4 `ske-congregation-dropdown` incl. `canReceiveStudents` input, inline create/edit + spec
+- [x] F4 `ske-congregation-dropdown` incl. `canReceiveStudents` input, inline create/edit + spec
   - Deps: F2, F3
   - Acceptance: AC-F7
   - Verify: `npm test -- --watch=false`
-- [ ] F5 List store with working delete + realtime + spec
+- [x] F5 List store with working delete + realtime + spec
   - Deps: F2
   - Acceptance: AC-F6 (store part), AC-F8
   - Verify: `npm test -- --watch=false`
-- [ ] F6 Filter form (two `nz-segmented` + search), large table, small list + specs
+- [x] F6 Filter form (two `nz-segmented` + search), large table, small list + specs
   - Deps: F5
   - Acceptance: AC-F2, AC-F3
   - Verify: `npm test -- --watch=false`
-- [ ] F7 Page container, lazy route in `full.routes.ts`, barrels, sidebar item in `full.html`
+- [x] F7 Page container, lazy route in `full.routes.ts`, barrels, sidebar item in `full.html`
   - Deps: F3, F6
   - Acceptance: AC-F1, AC-F6
   - Verify: `npm run build`; manual check through AppHost
-- [ ] F-GATE `npm run build`, `npm test -- --watch=false`, manual walk-through
+- [x] F-GATE `npm run build`, `npm test -- --watch=false`, manual walk-through
 
 ## Wrap-up
 

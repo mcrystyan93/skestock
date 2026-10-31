@@ -1,6 +1,9 @@
 export const realtimeEventNames = {
   categoryCreated: 'CategoryCreated',
   categoryUpdated: 'CategoryUpdated',
+  congregationCreated: 'CongregationCreated',
+  congregationUpdated: 'CongregationUpdated',
+  congregationDeleted: 'CongregationDeleted',
   categoryImportBatchCreated: 'CategoryImportBatchCreated',
   categoryImportBatchProcessed: 'CategoryImportBatchProcessed',
   categoryImportBatchConfirmed: 'CategoryImportBatchConfirmed',

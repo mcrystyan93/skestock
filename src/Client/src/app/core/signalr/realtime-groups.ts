@@ -1,5 +1,6 @@
 export const realtimeGroups = {
   categoriesList: 'categories-list',
+  congregationsList: 'congregations-list',
   categoryImportBatchesList: 'category-import-batches-list',
   itemsList: 'items-list',
   itemImportBatchesList: 'item-import-batches-list',

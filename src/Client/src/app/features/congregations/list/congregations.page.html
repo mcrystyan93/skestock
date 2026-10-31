@@ -1,0 +1,16 @@
+<ske-congregation-header (onAdd)="onAdd()" />
+
+<div class="relative grow">
+  <ske-congregation-list-tab [congregations]="store.congregations()"
+                             [filter]="store.filter()"
+                             [problemDetail]="store.congregationsProblemDetail()"
+                             [validationErrors]="store.congregationsValidationErrors()"
+                             [loading]="store.congregationsLoading()"
+                             [hasNextPage]="store.hasNextPage()"
+                             [isLoadingMore]="store.isLoadingMore()"
+                             [deletingCongregationId]="store.deletingCongregationId()"
+                             (onFilterChange)="onFilterChange($event)"
+                             (onLoadMore)="onLoadMore()"
+                             (onEdit)="onEdit($event)"
+                             (onDelete)="onDelete($event)" />
+</div>

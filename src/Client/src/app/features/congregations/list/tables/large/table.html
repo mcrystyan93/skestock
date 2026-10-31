@@ -1,0 +1,103 @@
+@let dimensions = tableDimensions();
+
+<nz-table #table
+          nzTableLayout="fixed"
+          [nzData]="itemsVirtualData()"
+          [nzVirtualItemSize]="virtualItemSize()"
+          [nzVirtualMinBufferPx]="virtualMinBufferPx()"
+          [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
+          [nzVirtualForTrackBy]="(index, item) => item.id ?? item.index"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          [nzLoading]="loading()"
+          nzSize="small"
+          [nzScroll]="{x:dimensions.width, y:dimensions.height}">
+  <thead>
+  <tr>
+    <th [nzWidth]="columnLayout.name.width">
+      {{ columns.name.label }}
+    </th>
+    <th [nzWidth]="columnLayout.email.width">
+      {{ columns.email.label }}
+    </th>
+    <th [nzWidth]="columnLayout.coordinator.width">
+      {{ columns.coordinator.label }}
+    </th>
+    <th [nzWidth]="columnLayout.canReceiveStudents.width">
+      {{ columns.canReceiveStudents.label }}
+    </th>
+    <th [nzWidth]="columnLayout.isSmallCongregation.width">
+      {{ columns.isSmallCongregation.label }}
+    </th>
+    <th [nzWidth]="columnLayout.lastModifiedDate.width">
+      {{ columns.lastModifiedDate.label }}
+    </th>
+    <th [nzWidth]="columnLayout.actions.width">
+      {{ columns.actions.label }}
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <ng-template nz-virtual-scroll
+               let-congregation>
+    <tr (click)="onEdit.emit(congregation)"
+        class="cursor-pointer">
+      <td>
+        <span class="block truncate"
+              [attr.title]="congregation.name">
+          {{ congregation.name }}
+        </span>
+      </td>
+      <td>
+        <span class="block truncate"
+              [attr.title]="congregation.email">
+          {{ congregation.email }}
+        </span>
+      </td>
+      <td>
+        <span class="block truncate"
+              [attr.title]="congregation.coordinator">
+          {{ congregation.coordinator }}
+        </span>
+      </td>
+      <td>
+        <nz-tag [nzColor]="congregation.canReceiveStudents ? 'success' : 'default'">
+          {{ congregation.canReceiveStudents ? 'Da' : 'Nu' }}
+        </nz-tag>
+      </td>
+      <td>
+        <nz-tag [nzColor]="congregation.isSmallCongregation ? 'warning' : 'default'">
+          {{ congregation.isSmallCongregation ? 'Da' : 'Nu' }}
+        </nz-tag>
+      </td>
+      <td>
+        <div>
+          {{ congregation.lastModifiedDate | timeAgo }}
+        </div>
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0!">
+          {{ congregation.lastModifiedByName }}
+        </div>
+      </td>
+      <td>
+        <button nz-button
+                nzType="text"
+                skeStopClick
+                aria-label="Modifică congregația"
+                (click)="onEdit.emit(congregation)">
+          <nz-icon nzType="icons:pen-to-square"></nz-icon>
+        </button>
+        <button nz-button
+                nzType="text"
+                skeStopClick
+                aria-label="Șterge congregația"
+                [nzLoading]="deletingCongregationId() === congregation.id"
+                (click)="onDelete.emit(congregation)">
+          <nz-icon nzType="icons:trash-can"></nz-icon>
+        </button>
+      </td>
+    </tr>
+  </ng-template>
+  </tbody>
+</nz-table>
