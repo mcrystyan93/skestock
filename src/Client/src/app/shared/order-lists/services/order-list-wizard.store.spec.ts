@@ -119,12 +119,16 @@ describe('OrderListWizardStore', () => {
     store.selectSupplyLists(['list-1']);
     expect(store.canGoNext()).toBe(true);
     store.advance('class-1');
+    expect(store.step()).toBe('products');
+    store.advance('class-1');
     expect(store.step()).toBe('details');
     expect(store.buildPrefill().note).toBe('Notă');
+    store.back();
     store.back();
 
     store.selectSupplyLists(['list-1', 'list-2']);
     expect(store.distinctSelectedItemCount()).toBe(2);
+    store.advance('class-1');
     store.advance('class-1');
 
     expect(store.buildPrefill()).toEqual({
@@ -139,6 +143,64 @@ describe('OrderListWizardStore', () => {
     store.back();
     store.selectSupplyLists([]);
     expect(store.canGoNext()).toBe(false);
+  });
+
+  it('drops unticked products from the prefill, resets them when the lists change and needs one product', () => {
+    supplyListsHttp.getAll.mockReturnValue(of({ data: [{ id: 'list-1' }, { id: 'list-2' }], hasNextPage: false, sort: [] }));
+    supplyListsHttp.getById.mockImplementation((id: string) => of(id === 'list-1' ? supplyList : secondSupplyList));
+    const store = TestBed.inject(OrderListWizardStore);
+
+    store.setSource('supplyList');
+    store.advance('class-1');
+    store.selectSupplyLists(['list-1', 'list-2']);
+    store.advance('class-1');
+    expect(store.step()).toBe('products');
+    expect(store.selectedProductIds()).toEqual(['i1', 'i2']);
+
+    store.setSelectedProductIds(['i2']);
+    expect(store.buildPrefill().lines?.map((line) => line.itemId)).toEqual(['i2']);
+
+    store.setSelectedProductIds([]);
+    expect(store.canGoNext()).toBe(false);
+
+    store.setSelectedProductIds(['i2']);
+    store.advance('class-1');
+    store.back();
+    store.back();
+    expect(store.step()).toBe('selection');
+    store.selectSupplyLists(['list-1']);
+    expect(store.selectedProductIds()).toEqual(['i1']);
+  });
+
+  it('keeps the typed name when only the ticked products change', () => {
+    supplyListsHttp.getAll.mockReturnValue(of({ data: [{ id: 'list-1' }, { id: 'list-2' }], hasNextPage: false, sort: [] }));
+    supplyListsHttp.getById.mockImplementation((id: string) => of(id === 'list-1' ? supplyList : secondSupplyList));
+    const store = TestBed.inject(OrderListWizardStore);
+
+    store.setSource('supplyList');
+    store.advance('class-1');
+    store.selectSupplyLists(['list-1', 'list-2']);
+    store.advance('class-1');
+    store.advance('class-1');
+    store.setDetails({ name: 'Numele meu', note: '' });
+    store.back();
+    store.setSelectedProductIds(['i2']);
+    store.back();
+    store.advance('class-1');
+
+    expect(store.name()).toBe('Numele meu');
+  });
+
+  it('skips the products step for the low-stock source', () => {
+    stockHttp.getLowStockItems.mockReturnValue(of([lowStock('1', 'A')]));
+    const store = TestBed.inject(OrderListWizardStore);
+
+    store.setSource('new');
+    store.advance('class-1');
+    store.advance('class-1');
+
+    expect(store.step()).toBe('details');
+    expect(store.stepIndex()).toBe(2);
   });
 
   it('needs a name on the details step and keeps what was typed when the selection is unchanged', () => {
