@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
 import { OrderListDetailsStep } from './details-step';
+import { OrderListProductsStep } from './products-step';
 import { OrderListSourceStep } from './source-step';
 import { OrderListSuggestionsStep } from './suggestions-step';
 import { OrderListSupplyListStep } from './supply-list-step';
@@ -13,7 +14,7 @@ describe('order list wizard steps', () => {
     TestBed.configureTestingModule({
       providers: [
         provideNzIconsTesting(),
-        provideNzIcons([icon('icons:triangle-exclamation'), icon('icons:clipboard-list'), icon('icons:circle-check')])
+        provideNzIcons([icon('icons:triangle-exclamation'), icon('icons:clipboard-list'), icon('icons:circle-check'), icon('icons:box')])
       ]
     });
   });
@@ -86,5 +87,25 @@ describe('order list wizard steps', () => {
     fixture.detectChanges();
 
     expect(emitted.at(-1)).toEqual({ name: 'Comandă nouă', note: '' });
+  });
+
+  it('shows each product with its lists and emits every id on select-all', () => {
+    const fixture = TestBed.createComponent(OrderListProductsStep);
+    const emitted: string[][] = [];
+    fixture.componentInstance.selectedIdsChange.subscribe((ids) => emitted.push(ids));
+    fixture.componentRef.setInput('products', [
+      { itemId: '1', productName: 'Hârtie', imageFileId: null, quantity: 3, unit: 'top', listNames: ['A', 'B'] },
+      { itemId: '2', productName: 'Creion', imageFileId: null, quantity: 1, unit: 'buc', listNames: ['A'] }
+    ]);
+    fixture.componentRef.setInput('selectedIds', ['1']);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('1 din 2 selectate');
+    expect(fixture.nativeElement.querySelectorAll('ske-item-thumbnail')).toHaveLength(2);
+    expect(fixture.nativeElement.querySelectorAll('nz-tag')).toHaveLength(3);
+
+    (fixture.componentInstance as unknown as { toggleAll(checked: boolean): void }).toggleAll(true);
+    TestBed.tick();
+    expect(emitted).toEqual([['1', '2']]);
   });
 });
