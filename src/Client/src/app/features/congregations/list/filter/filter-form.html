@@ -1,0 +1,53 @@
+<form (ngSubmit)="onSubmit()"
+      nz-form
+      nzNoColon
+      nzLayout="horizontal">
+  <nz-row [nzGutter]="[16, 8]"
+          class="grow">
+    <nz-col nzFlex="auto">
+      <nz-input-wrapper>
+        <nz-icon nzInputPrefix
+                 nzType="icons:magnifying-glass"></nz-icon>
+        <input type="text"
+               nz-input
+               id="searchTerm"
+               placeholder="Cautați..."
+               [formField]="congregationListFilterForm.searchTerm" />
+      </nz-input-wrapper>
+    </nz-col>
+    <nz-col class="flex items-center gap-2">
+      <span id="canReceiveStudentsLabel">Poate primi cursanți</span>
+      <nz-segmented [formField]="congregationListFilterForm.canReceiveStudents"
+                    aria-labelledby="canReceiveStudentsLabel">
+        @for (option of segmentOptions; track option.value) {
+          <label nz-segmented-item
+                 [nzValue]="option.value">
+            {{ option.label }}
+          </label>
+        }
+      </nz-segmented>
+    </nz-col>
+    <nz-col class="flex items-center gap-2">
+      <span id="isSmallCongregationLabel">Congregație mică</span>
+      <nz-segmented [formField]="congregationListFilterForm.isSmallCongregation"
+                    aria-labelledby="isSmallCongregationLabel">
+        @for (option of segmentOptions; track option.value) {
+          <label nz-segmented-item
+                 [nzValue]="option.value">
+            {{ option.label }}
+          </label>
+        }
+      </nz-segmented>
+    </nz-col>
+    <nz-col nzFlex="none"
+            class="hidden lg:block">
+      <button nz-button
+              type="button"
+              nzType="default"
+              [nzLoading]="loading()"
+              (click)="clear()">
+        Resetează
+      </button>
+    </nz-col>
+  </nz-row>
+</form>

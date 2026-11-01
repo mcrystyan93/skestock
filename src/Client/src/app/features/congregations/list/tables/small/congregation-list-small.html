@@ -1,0 +1,74 @@
+@if (items().length === 0) {
+  @if (loading()) {
+    <div class="flex flex-col gap-2 px-4"
+         aria-busy="true"
+         aria-label="Se încarcă congregațiile">
+      @for (placeholder of skeletonPlaceholders; track placeholder) {
+        <nz-card nzSize="small">
+          <nz-skeleton [nzActive]="true"
+                       [nzTitle]="{ width: '60%' }"
+                       [nzParagraph]="{ rows: 1, width: '40%' }" />
+        </nz-card>
+      }
+    </div>
+  } @else {
+    <nz-empty class="mt-8"
+              nzNotFoundContent="Nu există congregații" />
+  }
+} @else {
+  <cdk-virtual-scroll-viewport [itemSize]="cardRowHeight"
+                               class="min-h-0 w-full grow [&_.cdk-virtual-scroll-content-wrapper]:w-full"
+                               (scroll)="onScroll($event)">
+    <div *cdkVirtualFor="let item of items(); trackBy: trackById"
+         class="box-border px-4 pb-2"
+         [style.height.px]="cardRowHeight">
+      <nz-card nzSize="small"
+               [nzHoverable]="true"
+               role="button"
+               tabindex="0"
+               class="h-full cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+               [attr.aria-label]="'Modifică congregația ' + item.name"
+               (click)="onEdit.emit(item)"
+               (keydown.enter)="onEdit.emit(item)"
+               (keydown.space)="onSpace($event, item)">
+        <div class="flex min-w-0 items-center gap-3">
+          <div class="min-w-0 grow">
+            <strong nz-typography
+                    class="mb-0! block truncate"
+                    [attr.title]="item.name">{{ item.name }}</strong>
+            <div nz-typography
+                 nzType="secondary"
+                 class="mb-0! truncate"
+                 [attr.title]="item.email">{{ item.email }}
+            </div>
+            <div class="mt-1">
+              @if (item.canReceiveStudents) {
+                <nz-tag nzColor="success">Poate primi cursanți</nz-tag>
+              }
+              @if (item.isSmallCongregation) {
+                <nz-tag nzColor="warning">Congregație mică</nz-tag>
+              }
+            </div>
+          </div>
+          <button nz-button
+                  nzType="text"
+                  class="shrink-0"
+                  skeStopClick
+                  aria-label="Șterge congregația"
+                  [nzLoading]="deletingCongregationId() === item.id"
+                  (click)="onDelete.emit(item)">
+            <nz-icon nzType="icons:trash-can"></nz-icon>
+          </button>
+        </div>
+      </nz-card>
+    </div>
+  </cdk-virtual-scroll-viewport>
+
+  @if (isLoadingMore()) {
+    <div class="flex justify-center py-2">
+      <nz-spin nzSimple
+               nzSize="small"
+               nzTip="Se încarcă..." />
+    </div>
+  }
+}

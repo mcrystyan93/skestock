@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Filtering;
 using skestock.Domain.Entities;
 using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Congregations;
 using skestock.Domain.Entities.GoodsReceipts;
 using skestock.Domain.Entities.Items;
 using skestock.Domain.Entities.Locations;
@@ -29,6 +30,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         IScheduledJobRunDbContext
 {
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Congregation> Congregations => Set<Congregation>();
     public DbSet<CategoryImportBatch> CategoryImportBatches => Set<CategoryImportBatch>();
     public DbSet<CategoryImportBatchFile> CategoryImportBatchFiles => Set<CategoryImportBatchFile>();
     public DbSet<ClassBalance> ClassBalances => Set<ClassBalance>();

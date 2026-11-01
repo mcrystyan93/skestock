@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using skestock.Domain.Entities;
 using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Congregations;
 using skestock.Domain.Entities.GoodsReceipts;
 using skestock.Domain.Entities.Items;
 using skestock.Domain.Entities.Locations;
@@ -39,6 +40,9 @@ public interface IApplicationDbContext
 
     DbSet<SharedClassConfiguration> SharedClassConfigurations =>
         throw new NotSupportedException("This test context does not support shared class configuration.");
+
+    DbSet<Congregation> Congregations =>
+        throw new NotSupportedException("This test context does not support congregations.");
 
     DbSet<StockBatch> StockBatches { get; }
     DbSet<StockTransaction> StockTransactions { get; }

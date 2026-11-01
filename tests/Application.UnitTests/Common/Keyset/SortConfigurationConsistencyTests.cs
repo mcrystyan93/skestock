@@ -3,6 +3,7 @@ using NUnit.Framework;
 using Shouldly;
 using skestock.Application.Common.Keyset;
 using skestock.Application.Features.Categories;
+using skestock.Application.Features.Congregations;
 using skestock.Application.Features.GoodsReceipts;
 using skestock.Application.Features.Items;
 using skestock.Application.Features.Locations;
@@ -23,6 +24,7 @@ public class SortConfigurationConsistencyTests
     {
         yield return Case(new CategorySortConfiguration(), typeof(CategoryCursor));
         yield return Case(new CategoryImportBatchSortConfiguration(), typeof(CategoryImportBatchCursor));
+        yield return Case(new CongregationSortConfiguration(), typeof(CongregationCursor));
         yield return Case(new GoodsReceiptSortConfiguration(), typeof(GoodsReceiptCursor));
         yield return Case(new GoodsReceiptImportSortConfiguration(), typeof(GoodsReceiptImportCursor));
         yield return Case(new ItemSortConfiguration(), typeof(ItemCursor));
