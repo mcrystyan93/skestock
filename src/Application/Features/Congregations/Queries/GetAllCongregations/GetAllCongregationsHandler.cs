@@ -34,7 +34,7 @@ public class GetAllCongregationsHandler(IApplicationDbContext dbContext)
 
         var pageSize = Math.Clamp(request.PageSize, 1, PaginationConstants.DEFAULT_PAGE_SIZE);
         // Fetch one extra row to determine whether a next page exists without a count query.
-        var categories = await OrderByBuilder<Congregation>.ApplyOrderBy(query, effectiveSort, SortConfiguration)
+        var congregations = await OrderByBuilder<Congregation>.ApplyOrderBy(query, effectiveSort, SortConfiguration)
             .Select(congregation => new
             {
                 Cursor = new CongregationCursor(congregation.Id, congregation.Name, congregation.CreatedDate, congregation.LastModifiedDate),
@@ -59,14 +59,14 @@ public class GetAllCongregationsHandler(IApplicationDbContext dbContext)
             .Take(pageSize + 1)
             .ToListAsync(cancellationToken);
 
-        var hasNextPage = categories.Count > pageSize;
+        var hasNextPage = congregations.Count > pageSize;
         if (hasNextPage)
-            categories.RemoveAt(categories.Count - 1);
+            congregations.RemoveAt(congregations.Count - 1);
 
-        var lastCongregation = categories.LastOrDefault()?.Cursor;
+        var lastCongregation = congregations.LastOrDefault()?.Cursor;
         return Result.Ok(new PaginatedResponse<CongregationDto>
         {
-            Data = categories.Select(congregation => congregation.Data).ToList(),
+            Data = congregations.Select(congregation => congregation.Data).ToList(),
             HasNextPage = hasNextPage,
             NextCursor = lastCongregation is not null
                 ? CursorCodec<Congregation>.Encode(lastCongregation, effectiveSort)

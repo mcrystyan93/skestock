@@ -46,6 +46,4 @@ public class UpdateCongregationCommandValidator : AbstractValidator<UpdateCongre
         RuleFor(x => x.DessertContactPhone).MaximumLength(PhoneMaxLength).WithErrorCode(ValidationErrorCodes.MaxLength);
         RuleFor(x => x.Message).MaximumLength(MessageMaxLength).WithErrorCode(ValidationErrorCodes.MaxLength);
     }
-
-    // Soft-deleted rows are excluded by the entity's global query filter.
 }
