@@ -72,6 +72,9 @@ public static class Services
     public const string OpenApiSettings = "OpenApiSettings";
     public const string OpenApiKey = "ApiKey";
     public const string OpenApiModel = "Model";
+    public const string SeedAdministrator = "SeedAdministrator";
+    public const string SeedAdministratorEmail = "Email";
+    public const string SeedAdministratorPassword = "Password";
 
     public const string ImportBatchSettings = "ImportBatch";
 

@@ -46,13 +46,17 @@ ng test
 
 ## Running end-to-end tests
 
-For end-to-end (e2e) testing, run:
+E2E tests use [Playwright](https://playwright.dev/) (`playwright.config.ts`, specs in `e2e/`). Playwright does not start the app: run `dotnet run --project src/AppHost` from the repo root first.
 
 ```bash
-ng e2e
+npx playwright install --with-deps chromium   # first run only
+npm run e2e                                   # all specs, chromium + mobile
+npm run e2e -- --project=chromium e2e/specs/login.spec.ts
+npm run e2e:ui                                # interactive
+npm run e2e:report                            # last HTML report
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Set `PLAYWRIGHT_BASE_URL` to target another URL. Specs that log in for real (`login`, `room-configuration`, `congregations`) run only when `PLAYWRIGHT_LOGIN_EMAIL` and `PLAYWRIGHT_LOGIN_PASSWORD` are set to an existing administrator.
 
 ## Additional Resources
 
