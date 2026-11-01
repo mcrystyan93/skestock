@@ -16,12 +16,13 @@ import {
   SuggestedItem,
   suggestionsToLines,
   supplyListsToLines,
-  supplyListsToName
+  supplyListsToName,
+  supplyListsToProducts
 } from './order-list-wizard.utils';
 
 export type OrderListSource = 'new' | 'supplyList';
 
-export const ORDER_LIST_WIZARD_STEPS = ['source', 'selection', 'details', 'edit'] as const;
+export const ORDER_LIST_WIZARD_STEPS = ['source', 'selection', 'products', 'details', 'edit'] as const;
 export type OrderListWizardStep = typeof ORDER_LIST_WIZARD_STEPS[number];
 
 type OrderListWizardState = {
@@ -34,6 +35,8 @@ type OrderListWizardState = {
   supplyListsLoaded: boolean;
   supplyListIds: string[];
   selectedSupplyLists: SupplyListDto[];
+  /** Products the user unticked; kept as exclusions so a newly picked list starts fully ticked. */
+  excludedItemIds: string[];
   name: string;
   note: string;
   /** The selection the name and note were last pre-filled from, so going back and forth keeps what was typed. */
@@ -52,6 +55,7 @@ const initialState: OrderListWizardState = {
   supplyListsLoaded: false,
   supplyListIds: [],
   selectedSupplyLists: [],
+  excludedItemIds: [],
   name: '',
   note: '',
   seededKey: null,
@@ -105,11 +109,27 @@ export const OrderListWizardStore = signalStore(
     supplyListsHttp: inject(SupplyListsHttp)
   })),
   withComputed((store) => ({
-    stepIndex: computed(() => ORDER_LIST_WIZARD_STEPS.indexOf(store.step())),
     fromSupplyList: computed(() => store.source() === 'supplyList'),
     distinctSelectedItemCount: computed(() =>
       new Set(store.selectedSupplyLists().flatMap((list) => list.lines.map((line) => line.itemId))).size
     )
+  })),
+  withComputed((store) => ({
+    // Only the supply list source reviews products; the low-stock source already ticks its items in `selection`.
+    steps: computed((): readonly OrderListWizardStep[] =>
+      store.fromSupplyList() ? ORDER_LIST_WIZARD_STEPS : ORDER_LIST_WIZARD_STEPS.filter((step) => step !== 'products')
+    ),
+    products: computed(() => supplyListsToProducts(store.selectedSupplyLists())),
+    /** Identifies the chosen supply lists alone, so ticking products never re-seeds the typed name. */
+    listKey: computed(() => `supplyList:${[...store.supplyListIds()].sort().join(',')}`)
+  })),
+  withComputed((store) => ({
+    stepIndex: computed(() => store.steps().indexOf(store.step())),
+    selectedProductIds: computed(() => {
+      const excluded = new Set(store.excludedItemIds());
+
+      return store.products().map((product) => product.itemId).filter((id) => !excluded.has(id));
+    })
   })),
   withComputed((store) => ({
     canGoNext: computed(() => {
@@ -123,6 +143,8 @@ export const OrderListWizardStore = signalStore(
               && !store.selectedSupplyListsLoading();
 
           return !store.suggestionsLoading() && !store.loadFailed();
+        case 'products':
+          return store.selectedProductIds().length > 0;
         case 'details':
           return store.name().trim().length > 0
             && store.name().length <= MAX_ORDER_LIST_NAME_LENGTH
@@ -142,7 +164,7 @@ export const OrderListWizardStore = signalStore(
     /** Identifies what the editor would be pre-filled with, so unchanged choices never rebuild it. */
     prefillKey: computed(() =>
       store.fromSupplyList()
-        ? `supplyList:${[...store.supplyListIds()].sort().join(',')}`
+        ? `${store.listKey()}|${[...store.excludedItemIds()].sort().join(',')}`
         : `new:${[...store.selectedItemIds()].sort().join(',')}`
     )
   })),
@@ -209,8 +231,15 @@ export const OrderListWizardStore = signalStore(
       setDetails({ name, note }: { name: string; note: string }) {
         patchState(store, { name, note });
       },
+      setSelectedProductIds(selectedIds: string[]) {
+        const selected = new Set(selectedIds);
+
+        patchState(store, {
+          excludedItemIds: store.products().map((product) => product.itemId).filter((id) => !selected.has(id))
+        });
+      },
       selectSupplyLists(supplyListIds: string[]) {
-        patchState(store, { supplyListIds });
+        patchState(store, { supplyListIds, excludedItemIds: [] });
         loadSelectedSupplyLists(supplyListIds);
       },
       /** Moves to the step after the current one and loads the data it needs. Returns whether it moved. */
@@ -226,24 +255,24 @@ export const OrderListWizardStore = signalStore(
             loadSupplyLists();
         }
 
-        if (store.step() === 'selection' && store.seededKey() !== store.prefillKey()) {
+        if (store.step() === 'selection' && store.seededKey() !== (store.fromSupplyList() ? store.listKey() : store.prefillKey())) {
           const lists = store.selectedSupplyLists();
 
           patchState(store, store.fromSupplyList()
             ? {
               name: supplyListsToName(lists) ?? '',
               note: lists.length === 1 ? lists[0].note ?? '' : '',
-              seededKey: store.prefillKey()
+              seededKey: store.listKey()
             }
             : { seededKey: store.prefillKey() });
         }
 
-        patchState(store, { step: ORDER_LIST_WIZARD_STEPS[store.stepIndex() + 1] });
+        patchState(store, { step: store.steps()[store.stepIndex() + 1] });
 
         return true;
       },
       back() {
-        patchState(store, { step: ORDER_LIST_WIZARD_STEPS[Math.max(0, store.stepIndex() - 1)] });
+        patchState(store, { step: store.steps()[Math.max(0, store.stepIndex() - 1)] });
       },
       /** Reloads whatever the current step needs, including the details of the chosen supply lists. */
       retry(classId: string | null) {
@@ -266,7 +295,7 @@ export const OrderListWizardStore = signalStore(
       /** The order-list fields the editor is pre-filled with when the last step opens. */
       buildPrefill(): Partial<OrderListDto> {
         const lines = store.fromSupplyList()
-          ? supplyListsToLines(store.selectedSupplyLists())
+          ? supplyListsToLines(store.selectedSupplyLists()).filter((line) => !store.excludedItemIds().includes(line.itemId ?? ''))
           : suggestionsToLines(store.suggestions(), store.selectedItemIds());
 
         return { name: store.name().trim(), note: store.note(), lines };

@@ -7,6 +7,7 @@ import { gridResponsiveMap, NzBreakpointService } from 'ng-zorro-antd/core/servi
 import { NzProgressComponent } from 'ng-zorro-antd/progress';
 import { NzStepComponent, NzStepsComponent } from 'ng-zorro-antd/steps';
 import { OrderListDetailsStep } from './steps/details-step';
+import { OrderListProductsStep } from './steps/products-step';
 import { OrderListSourceStep } from './steps/source-step';
 import { OrderListSuggestionsStep } from './steps/suggestions-step';
 import { OrderListSupplyListStep } from './steps/supply-list-step';
@@ -20,6 +21,7 @@ import { OrderListSupplyListStep } from './steps/supply-list-step';
     NzStepsComponent,
     NzStepComponent,
     OrderListDetailsStep,
+    OrderListProductsStep,
     OrderListSourceStep,
     OrderListSuggestionsStep,
     OrderListSupplyListStep
@@ -77,6 +79,10 @@ import { OrderListSupplyListStep } from './steps/supply-list-step';
                                          [loading]="wizard.suggestionsLoading()"
                                          (selectedIdsChange)="wizard.setSelectedItemIds($event)" />
       }
+    } @else if (wizard.step() === 'products') {
+      <ske-order-list-products-step [products]="wizard.products()"
+                                   [selectedIds]="wizard.selectedProductIds()"
+                                   (selectedIdsChange)="wizard.setSelectedProductIds($event)" />
     } @else if (wizard.step() === 'details') {
       <ske-order-list-details-step [name]="wizard.name()"
                                    [note]="wizard.note()"
@@ -94,12 +100,9 @@ export class OrderListWizardContainer {
     { initialValue: null }
   );
 
-  protected readonly titles = computed(() => [
-    'Sursă',
-    this.wizard.fromSupplyList() ? 'Listă predefinită' : 'Articole sugerate',
-    'Detalii',
-    'Articole comandă'
-  ]);
+  protected readonly titles = computed(() => this.wizard.fromSupplyList()
+    ? ['Sursă', 'Listă predefinită', 'Produse', 'Detalii', 'Articole comandă']
+    : ['Sursă', 'Articole sugerate', 'Detalii', 'Articole comandă']);
 
   protected readonly direction = computed(() => this._breakpoints()?.md ?? true ? 'horizontal' : 'vertical');
 }
