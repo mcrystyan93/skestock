@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using skestock.Application.Features.Items.Commands.DisableItem;
 using skestock.Application.Features.Statistics.Models;
 using skestock.Domain.Entities;
 using skestock.Domain.Entities.Categories;
@@ -84,12 +85,7 @@ public class PurchaseSegmentsTests : TestBase
             await AddClassStatAsync(perClass, schoolClass);
         }
 
-        var userId = await TestApp.RunAsDefaultUserAsync();
-        await TestApp.AddAsync(new UserProfile { IdentityId = userId!.Value, FirstName = "Staff", LastName = "Member" });
-        using var client = FunctionalTestSetup.Factory.CreateClient();
-        var login = await client.PostAsJsonAsync("/api/Users/login?useCookies=true",
-            new { email = "test@local", password = "Testing1234!" });
-        login.StatusCode.ShouldBe(HttpStatusCode.OK);
+        using var client = await LoginAsync();
 
         var response = await client.GetAsync(Url);
 
@@ -101,5 +97,35 @@ public class PurchaseSegmentsTests : TestBase
         dto.OncePerClass.Select(i => i.ItemId).ShouldBe([perClass.Id]);
         dto.Weekly[0].AverageQuantity.ShouldBe(4m);
         dto.Weekly[0].PurchaseCount.ShouldBe(6);
+    }
+
+    [Test]
+    public async Task Disabling_an_item_removes_it_from_the_cached_segments()
+    {
+        var prefix = $"FT{Guid.NewGuid():N}"[..10];
+        var category = new Category { Name = $"{prefix}-Cat" };
+        await TestApp.AddAsync(category);
+        var weekly = await AddItemAsync($"{prefix}-Weekly", category.Id);
+        await AddYearAsync(weekly, 7m);
+        using var client = await LoginAsync();
+
+        var before = (await client.GetFromJsonAsync<PurchaseSegmentsDto>(Url))!;
+        before.Weekly.Select(i => i.ItemId).ShouldContain(weekly.Id);
+
+        (await TestApp.SendAsync(new DisableItemCommand { Id = weekly.Id })).IsSuccess.ShouldBeTrue();
+
+        var after = (await client.GetFromJsonAsync<PurchaseSegmentsDto>(Url))!;
+        after.Weekly.Select(i => i.ItemId).ShouldNotContain(weekly.Id);
+    }
+
+    private static async Task<HttpClient> LoginAsync()
+    {
+        var userId = await TestApp.RunAsDefaultUserAsync();
+        await TestApp.AddAsync(new UserProfile { IdentityId = userId!.Value, FirstName = "Staff", LastName = "Member" });
+        var client = FunctionalTestSetup.Factory.CreateClient();
+        var login = await client.PostAsJsonAsync("/api/Users/login?useCookies=true",
+            new { email = "test@local", password = "Testing1234!" });
+        login.StatusCode.ShouldBe(HttpStatusCode.OK);
+        return client;
     }
 }
