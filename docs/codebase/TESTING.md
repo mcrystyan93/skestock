@@ -37,7 +37,7 @@ cd src/Client && npm ci && npm test
 | Infrastructure integration | Present | `ApplicationDbContext`, outbox claims, exporters, data protection | Requires containerized dependencies |
 | Worker integration | Partial | Worker processor unit tests; test Aspire host provisions Worker and Azurite | HTTP functional setup waits for database/cache/queues, not Worker health; inspect individual tests before assuming every queue path is covered |
 | Domain unit | Missing | `tests/Domain.UnitTests` | Add when domain invariants/behavior grow |
-| Browser E2E | Not configured | — | No dedicated Playwright/Cypress project found |
+| Browser E2E | Present | Angular UI via Playwright (`src/Client/e2e`, `src/Client/playwright.config.ts`) | Not started by Playwright: run AppHost first; most specs mock the API with `page.route`, specs that log in for real need `PLAYWRIGHT_LOGIN_EMAIL`/`PLAYWRIGHT_LOGIN_PASSWORD` |
 
 ### 4) Mocking and Isolation
 
@@ -50,9 +50,9 @@ cd src/Client && npm ci && npm test
 
 - Coverlet is available, but no coverage threshold/gate was found.
 - The only GitHub Actions workflow is manually triggered production deployment; it validates build/unit/client tests during deployment but is not a push/PR gate.
-- `src/Client/README.md` mentions `ng e2e`, but `src/Client/angular.json` defines only build, serve, and test targets; there is no configured browser E2E runner.
+- Browser E2E runs with `cd src/Client && npm run e2e` (Playwright, not an `ng e2e` target); it is not part of the deploy workflow.
 - Functional/integration tiers are environment-sensitive because they require Docker/Podman and Aspire resource health.
-- Domain behavior and browser-level behavior are the clearest coverage gaps.
+- Domain behavior is the clearest coverage gap; browser E2E covers only a few flows.
 
 ### 6) Evidence
 
