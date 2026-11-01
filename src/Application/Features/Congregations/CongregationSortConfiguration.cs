@@ -1,0 +1,32 @@
+using System.Linq.Expressions;
+using skestock.Application.Common.Keyset;
+using skestock.Domain.Entities;
+using skestock.Domain.Entities.Congregations;
+
+namespace skestock.Application.Features.Congregations;
+
+public sealed class CongregationSortConfiguration : IKeysetSortConfiguration<Congregation>
+{
+    public IReadOnlyDictionary<string, string[]> AllowedSortKeys { get; } =
+        new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["name"] = ["Name", "Id"],
+            ["createdDate"] = ["CreatedDate", "Id"],
+            ["lastModifiedDate"] = ["LastModifiedDate", "Id"],
+            ["id"] = ["Id"]
+        };
+
+    public List<(string Key, string Direction)> DefaultSort { get; } = [("CreatedDate", "desc"), ("Id", "desc")];
+
+    public Expression<Func<Congregation, dynamic>> GetPropertyExpression(string propertyName)
+    {
+        return propertyName switch
+        {
+            "Name" => d => d.Name,
+            "CreatedDate" => d => d.CreatedDate,
+            "LastModifiedDate" => d => d.LastModifiedDate,
+            "Id" => d => d.Id,
+            _ => d => d.Id
+        };
+    }
+}

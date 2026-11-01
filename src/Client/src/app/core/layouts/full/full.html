@@ -75,6 +75,14 @@
     <li nz-menu-item
         [nzMatchRouter]="true"
         (click)="drawer.close()"
+        [routerLink]="['/congregations']">
+      <nz-icon nzType="icons:church"
+               class="text-2xl!"></nz-icon>
+      <span>Congregații</span>
+    </li>
+    <li nz-menu-item
+        [nzMatchRouter]="true"
+        (click)="drawer.close()"
         [routerLink]="['/items']">
       <nz-icon nzType="icons:box-open-full"
                class="text-2xl!"></nz-icon>
