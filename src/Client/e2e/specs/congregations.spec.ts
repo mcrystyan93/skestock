@@ -17,6 +17,11 @@ type FakeCongregation = {
 // The local stack redirects API calls to https and drops the session cookie, so the Congregations API is
 // replaced by an in-memory fake; the backend itself is covered by the .NET functional tests.
 test('congregation lifecycle: menu, create, filter, edit, delete', async ({ page }) => {
+  const email = process.env['PLAYWRIGHT_LOGIN_EMAIL'];
+  const password = process.env['PLAYWRIGHT_LOGIN_PASSWORD'];
+  test.skip(!email || !password, 'Set PLAYWRIGHT_LOGIN_EMAIL and PLAYWRIGHT_LOGIN_PASSWORD.');
+  if (!email || !password) return;
+
   const now = new Date().toISOString();
   const store: FakeCongregation[] = [
     { id: 'seed-1', name: 'Seed Can Receive', email: 'a@example.com', canReceiveStudents: true, isSmallCongregation: false, createdDate: now, lastModifiedDate: now },
@@ -59,12 +64,12 @@ test('congregation lifecycle: menu, create, filter, edit, delete', async ({ page
   });
 
   await page.goto('/login');
-  await page.getByPlaceholder('Email').fill('administrator@localhost');
-  await page.getByPlaceholder('Parola').fill('Administrator1!');
+  await page.getByPlaceholder('Email').fill(email);
+  await page.getByPlaceholder('Parola').fill(password);
   await page.getByRole('button', { name: 'Login' }).click();
   await expect(page).toHaveURL(/school-classes/);
   await page.route('**/api/Users/manage/info', (route) =>
-    route.fulfill({ status: 200, json: { email: 'administrator@localhost', isEmailConfirmed: true } })
+    route.fulfill({ status: 200, json: { email, isEmailConfirmed: true } })
   );
 
   // menu entry opens the page

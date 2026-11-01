@@ -7,6 +7,7 @@ using Mediator;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -47,27 +48,23 @@ public static class InitialiserExtensions
 
 public class ApplicationDbContextInitialiser
 {
-    private static readonly AdministratorSeed[] DefaultAdministrators =
-    [
-        new("administrator@localhost", "Administrator1!", "Administrator", "Administrator"),
-        new("cosmin@local", "Cosmin9!", "Cosmin", "Gherendi")
-    ];
-
     private readonly ILogger<ApplicationDbContextInitialiser> _logger;
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly ISender _sender;
+    private readonly IConfiguration _configuration;
 
     public ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger,
         ApplicationDbContext context, UserManager<ApplicationUser> userManager,
-        RoleManager<IdentityRole<Guid>> roleManager, ISender sender)
+        RoleManager<IdentityRole<Guid>> roleManager, ISender sender, IConfiguration configuration)
     {
         _logger = logger;
         _context = context;
         _userManager = userManager;
         _roleManager = roleManager;
         _sender = sender;
+        _configuration = configuration;
     }
 
     public async Task InitialiseAsync()
@@ -107,12 +104,6 @@ public class ApplicationDbContextInitialiser
 
     public async Task TrySeedAsync()
     {
-        if (DefaultAdministrators.Length == 0)
-        {
-            throw new InvalidOperationException(
-                "At least one administrator must be listed in DefaultAdministrators.");
-        }
-
         if (!await _roleManager.RoleExistsAsync(Roles.Administrator))
         {
             var roleResult = await _roleManager.CreateAsync(
@@ -120,10 +111,25 @@ public class ApplicationDbContextInitialiser
             EnsureIdentityResultSucceeded(roleResult, $"create role '{Roles.Administrator}'");
         }
 
-        var seedAdministrator = await EnsureAdministratorAsync(DefaultAdministrators[0]);
-        foreach (var administrator in DefaultAdministrators.Skip(1))
+        var email = _configuration[$"{Services.SeedAdministrator}:{Services.SeedAdministratorEmail}"];
+        var password = _configuration[$"{Services.SeedAdministrator}:{Services.SeedAdministratorPassword}"];
+
+        ApplicationUser? seedAdministrator;
+        if (!string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(password))
         {
-            await EnsureAdministratorAsync(administrator);
+            seedAdministrator = await EnsureAdministratorAsync(new AdministratorSeed(email, password));
+        }
+        else
+        {
+            seedAdministrator = await FindAdministratorAsync();
+        }
+
+        if (seedAdministrator is null)
+        {
+            _logger.LogWarning(
+                "No administrator exists and {Section} is not configured; skipping seed data.",
+                Services.SeedAdministrator);
+            return;
         }
 
         await SeedCategoriesAsync(seedAdministrator.Id);
@@ -132,6 +138,9 @@ public class ApplicationDbContextInitialiser
         // await SeedItemsAsync(seedAdministrator.Id);
         // await SeedGoodsReceiptAsync(seedAdministrator.Id);
     }
+
+    private async Task<ApplicationUser?> FindAdministratorAsync() =>
+        (await _userManager.GetUsersInRoleAsync(Roles.Administrator)).FirstOrDefault();
 
     private async Task<ApplicationUser> EnsureAdministratorAsync(AdministratorSeed seed)
     {
@@ -162,7 +171,7 @@ public class ApplicationDbContextInitialiser
         {
             administratorProfile = new UserProfile
             {
-                IdentityId = administrator.Id, FirstName = seed.FirstName, LastName = seed.LastName
+                IdentityId = administrator.Id, FirstName = "Administrator", LastName = "Administrator"
             };
             _context.Set<UserProfile>().Add(administratorProfile);
             await _context.SaveChangesAsync(CancellationToken.None);
@@ -182,11 +191,7 @@ public class ApplicationDbContextInitialiser
         throw new InvalidOperationException($"Failed to {operation}. Identity errors: {errors}");
     }
 
-    private sealed record AdministratorSeed(
-        string UserName,
-        string Password,
-        string FirstName,
-        string LastName);
+    private sealed record AdministratorSeed(string UserName, string Password);
 
     private static readonly (string Name, string Type, bool IsDefault)[] DefaultLocations =
     [
@@ -446,7 +451,7 @@ public class ApplicationDbContextInitialiser
             return;
         }
 
-        var administrator = await _userManager.FindByNameAsync(DefaultAdministrators[0].UserName)
+        var administrator = await FindAdministratorAsync()
                             ?? throw new InvalidOperationException("Seed administrator not found.");
         // UserProfile FKs (UserId, CreatedById, ...) reference UserProfiles.IdentityId.
         var profileId = administrator.Id;
@@ -599,7 +604,7 @@ public class ApplicationDbContextInitialiser
     // transactions grouped by local business day, valued at the batch unit price.
     private async Task SeedDemoAnalyticsAsync(Guid classId)
     {
-        var adminId = (await _userManager.FindByNameAsync(DefaultAdministrators[0].UserName))?.Id;
+        var adminId = (await FindAdministratorAsync())?.Id;
 
         // Insert only the item/location pairs that don't have a balance row yet, so re-running this
         // after seeding new demo items (e.g. the goods-receipt seed) backfills the missing pairs
@@ -690,7 +695,7 @@ public class ApplicationDbContextInitialiser
             return;
         }
 
-        var administrator = await _userManager.FindByNameAsync(DefaultAdministrators[0].UserName)
+        var administrator = await FindAdministratorAsync()
                             ?? throw new InvalidOperationException("Seed administrator not found.");
         var profileId = administrator.Id;
 

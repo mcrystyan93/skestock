@@ -96,12 +96,26 @@ async function openStockTab(page: Page, options: Options = {}) {
   return { bulkBodies, stat };
 }
 
-const countButton = (page: Page) => page.getByRole('button', { name: 'Inventar stoc' });
+const moreButton = (page: Page) => page.getByRole('button', { name: 'Mai multe acțiuni' });
+const countItem = (page: Page) => page.locator('li[nz-menu-item]', { hasText: 'Inventar stoc' });
+
+async function openCountItem(page: Page) {
+  await moreButton(page).click();
+  return countItem(page);
+}
+
+// The header only renders the "more" menu when it has an action to offer.
+async function expectNoCountItem(page: Page) {
+  if (await moreButton(page).count()) {
+    await moreButton(page).click();
+  }
+  await expect(countItem(page)).toHaveCount(0);
+}
 const modal = (page: Page) => page.getByRole('dialog').first();
 const quantity = (page: Page) => page.getByLabel('Cantitate numărată');
 
 async function openWizard(page: Page) {
-  await countButton(page).click();
+  await (await openCountItem(page)).click();
   await expect(modal(page).getByText('Selectează toate')).toBeVisible();
 }
 
@@ -119,23 +133,23 @@ async function setCount(page: Page, value: number) {
 const next = (page: Page) => modal(page).getByRole('button', { name: 'Următorul' }).click();
 
 test.describe('stock count wizard', () => {
-  test('button is shown on the Stoc tab', async ({ page }) => {
+  test('menu item is shown on the Stoc tab', async ({ page }) => {
     await openStockTab(page);
-    await expect(countButton(page)).toBeVisible();
+    await expect(await openCountItem(page)).toBeVisible();
   });
 
-  test('button is hidden on other tabs', async ({ page }) => {
+  test('menu item is hidden on other tabs', async ({ page }) => {
     await openStockTab(page, { tab: 1 });
     await expect(page.getByTitle('Clasa E2E')).toBeVisible();
     await page.waitForTimeout(500);
-    await expect(countButton(page)).toHaveCount(0);
+    await expectNoCountItem(page);
   });
 
-  test('button is hidden for a closed class', async ({ page }) => {
+  test('menu item is hidden for a closed class', async ({ page }) => {
     await openStockTab(page, { status: 'closed' });
     await expect(page.getByTitle('Clasa E2E')).toBeVisible();
     await page.waitForTimeout(500);
-    await expect(countButton(page)).toHaveCount(0);
+    await expectNoCountItem(page);
   });
 
   test('happy path over two locations sends one bulk request and reloads the list', async ({ page }) => {
@@ -340,16 +354,12 @@ test.describe('stock count wizard responsive', () => {
     test(`layout holds at ${width}px`, async ({ page }, testInfo) => {
       await page.setViewportSize({ width, height: 800 });
       await openStockTab(page);
-      const compact = width < 992;
 
-      // header button: icon-only below lg, icon + text from lg
-      const button = countButton(page);
-      await expect(button).toBeVisible();
-      const hasText = ((await button.innerText()).trim()).length > 0;
-      expect(hasText, 'header button text').toBe(!compact);
-      await expectInViewport(page, button);
+      // header actions live in the "more" menu at every width
+      await expect(moreButton(page)).toBeVisible();
+      await expectInViewport(page, moreButton(page));
 
-      await button.click();
+      await (await openCountItem(page)).click();
       await expect(modal(page).getByText('Selectează toate')).toBeVisible();
 
       await checkStep(page, testInfo, width, '1-locatii', ['Locații', 'Articole', 'Rezumat']);

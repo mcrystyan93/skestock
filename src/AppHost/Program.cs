@@ -84,6 +84,8 @@ if (builder.ExecutionContext.IsRunMode)
 
 var openAiApiKey = builder.AddParameter($"{Services.OpenApiSettings}{Services.OpenApiKey}", secret:true);
 var openAiModel = builder.AddParameter($"{Services.OpenApiSettings}{Services.OpenApiModel}", "gpt-5.6-luna");
+var seedAdminEmail = builder.AddParameter($"{Services.SeedAdministrator}{Services.SeedAdministratorEmail}");
+var seedAdminPassword = builder.AddParameter($"{Services.SeedAdministrator}{Services.SeedAdministratorPassword}", secret: true);
 var web = builder.AddProject<Projects.Web>(Services.WebApi)
     .PublishAsDockerFile(container =>
         container.WithDockerfile("../..", "src/Web/Dockerfile", "final"))
@@ -120,6 +122,8 @@ var web = builder.AddProject<Projects.Web>(Services.WebApi)
     })
     .WithEnvironment($"{Services.OpenApiSettings}__{Services.OpenApiKey}", openAiApiKey)
     .WithEnvironment($"{Services.OpenApiSettings}__{Services.OpenApiModel}", openAiModel)
+    .WithEnvironment($"{Services.SeedAdministrator}__{Services.SeedAdministratorEmail}", seedAdminEmail)
+    .WithEnvironment($"{Services.SeedAdministrator}__{Services.SeedAdministratorPassword}", seedAdminPassword)
     .WithComputeEnvironment(compose)
     .WaitFor(databaseServer)
     .WithReference(cache)
