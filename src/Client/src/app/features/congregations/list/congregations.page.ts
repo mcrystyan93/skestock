@@ -5,13 +5,21 @@ import { CongregationDto, GetAllCongregationsRequest } from '@ske/models';
 import { CongregationDetailModal } from '@ske/shared/congregations';
 import { realtimeGroups, SignalRGroupManagerStore } from '@ske/signalr';
 import { CongregationListState } from '../services/congregation-list.store';
+import { ErrorAlert } from '@ske/shared/errors';
+import { LayoutBreakpoint } from '@ske/shared/directives';
+import { FilterContainer } from './filter/filter-container';
 import { Header } from './header/header';
-import { CongregationListTab } from './tabs/congregation-list-tab';
+import { Table } from './tables/large/table';
+import { CongregationListSmall } from './tables/small/congregation-list-small';
 
 @Component({
   imports: [
     Header,
-    CongregationListTab
+    ErrorAlert,
+    FilterContainer,
+    Table,
+    LayoutBreakpoint,
+    CongregationListSmall
   ],
   selector: 'ske-congregations-page',
   templateUrl: './congregations.page.html',
