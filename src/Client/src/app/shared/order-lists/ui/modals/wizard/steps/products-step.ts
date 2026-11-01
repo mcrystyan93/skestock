@@ -30,13 +30,14 @@ import { checkedRowsModel, emitCheckedIdsOnChange } from './checked-rows';
         </span>
       </div>
 
-      <ul class="m-0 max-h-[50vh] list-none overflow-auto p-0">
+      <ul class="m-0 list-none p-0">
         @for (row of productsForm.rows; track $index) {
           @let product = products()[$index];
           @if (product) {
             <li class="flex items-center gap-3 py-2">
               <ske-item-thumbnail [itemId]="product.itemId"
-                                  [imageFileId]="product.imageFileId" />
+                                  [imageFileId]="product.imageFileId"
+                                  [large]="true" />
               <label nz-checkbox
                      class="flex! min-w-0 grow cursor-pointer items-center! m-0! [&>span:last-child]:min-w-0 [&>span:last-child]:flex-1 [&>span:last-child]:ps-3 [&>span:last-child]:pe-0"
                      [formField]="row.checked">
