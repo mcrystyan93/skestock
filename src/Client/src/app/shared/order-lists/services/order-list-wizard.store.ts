@@ -2,13 +2,14 @@ import { computed, inject } from '@angular/core';
 import { mapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { OrderListDto, SupplyListDto, SupplyListListItemDto } from '@ske/models';
+import { OrderListDto, PurchaseSegmentsDto, SupplyListDto, SupplyListListItemDto } from '@ske/models';
+import { ClassStatisticsHttp } from '@ske/shared/class-statistics';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { StockHttp } from '@ske/shared/stock';
 import { SupplyListsHttp } from '@ske/shared/supply-lists';
 import { isNil } from 'lodash-es';
-import { forkJoin, Observable, of, pipe, switchMap, tap } from 'rxjs';
+import { catchError, forkJoin, Observable, of, pipe, switchMap, tap } from 'rxjs';
 import {
   groupLowStockItems,
   MAX_ORDER_LIST_NAME_LENGTH,
@@ -30,6 +31,7 @@ type OrderListWizardState = {
   source: OrderListSource | null;
   suggestions: SuggestedItem[];
   suggestionsLoaded: boolean;
+  segments: PurchaseSegmentsDto | null;
   selectedItemIds: string[];
   supplyLists: SupplyListListItemDto[];
   supplyListsLoaded: boolean;
@@ -50,6 +52,7 @@ const initialState: OrderListWizardState = {
   source: null,
   suggestions: [],
   suggestionsLoaded: false,
+  segments: null,
   selectedItemIds: [],
   supplyLists: [],
   supplyListsLoaded: false,
@@ -106,6 +109,7 @@ export const OrderListWizardStore = signalStore(
   withProblemDetailsFeature('selectedSupplyLists'),
   withProps(() => ({
     stockHttp: inject(StockHttp),
+    statisticsHttp: inject(ClassStatisticsHttp),
     supplyListsHttp: inject(SupplyListsHttp)
   })),
   withComputed((store) => ({
@@ -190,12 +194,17 @@ export const OrderListWizardStore = signalStore(
 
     const loadSuggestions = loadInto(
       slice(store.setSuggestionsLoading, store.clearSuggestionsErrors, store.setSuggestionsLoaded, store.handleSuggestionsError),
-      (classId: string) => store.stockHttp.getLowStockItems(classId),
-      (items) => {
-        const suggestions = groupLowStockItems(items);
+      (classId: string) => forkJoin({
+        lowStock: store.stockHttp.getLowStockItems(classId),
+        // Segments are an extra: a failure must not block the low-stock tab.
+        segments: store.statisticsHttp.getPurchaseSegments().pipe(catchError(() => of(null)))
+      }),
+      ({ lowStock, segments }) => {
+        const suggestions = groupLowStockItems(lowStock);
 
         patchState(store, {
           suggestions,
+          segments,
           suggestionsLoaded: true,
           selectedItemIds: suggestions.map((item) => item.itemId)
         });
@@ -296,7 +305,7 @@ export const OrderListWizardStore = signalStore(
       buildPrefill(): Partial<OrderListDto> {
         const lines = store.fromSupplyList()
           ? supplyListsToLines(store.selectedSupplyLists()).filter((line) => !store.excludedItemIds().includes(line.itemId ?? ''))
-          : suggestionsToLines(store.suggestions(), store.selectedItemIds());
+          : suggestionsToLines(store.suggestions(), store.segments(), store.selectedItemIds());
 
         return { name: store.name().trim(), note: store.note(), lines };
       }

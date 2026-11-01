@@ -75,6 +75,7 @@ import { OrderListSupplyListStep } from './steps/supply-list-step';
                                          (selectedIdsChange)="wizard.selectSupplyLists($event)" />
       } @else {
         <ske-order-list-suggestions-step [items]="wizard.suggestions()"
+                                         [segments]="wizard.segments()"
                                          [selectedIds]="wizard.selectedItemIds()"
                                          [loading]="wizard.suggestionsLoading()"
                                          (selectedIdsChange)="wizard.setSelectedItemIds($event)" />
@@ -102,7 +103,7 @@ export class OrderListWizardContainer {
 
   protected readonly titles = computed(() => this.wizard.fromSupplyList()
     ? ['Sursă', 'Listă predefinită', 'Produse', 'Detalii', 'Articole comandă']
-    : ['Sursă', 'Articole sugerate', 'Detalii', 'Articole comandă']);
+    : ['Sursă', 'Produse', 'Detalii', 'Articole comandă']);
 
   protected readonly direction = computed(() => this._breakpoints()?.md ?? true ? 'horizontal' : 'vertical');
 }

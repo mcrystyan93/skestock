@@ -1,4 +1,4 @@
-import { LowStockItemDto, OrderListLineDto, SupplyListDto } from '@ske/models';
+import { LowStockItemDto, OrderListLineDto, PurchaseSegmentItemDto, PurchaseSegmentsDto, SupplyListDto } from '@ske/models';
 
 export type SuggestedItem = {
   itemId: string;
@@ -41,17 +41,34 @@ function toProductName(name: string, sku?: string | null): string {
   return sku ? `(${sku}) ${name}` : name;
 }
 
-export function suggestionsToLines(items: SuggestedItem[], selectedIds: readonly string[]): OrderListLineDto[] {
-  const selected = new Set(selectedIds);
+/** The four purchase segments in display order. */
+export function purchaseSegmentLists(segments: PurchaseSegmentsDto | null): PurchaseSegmentItemDto[][] {
+  return segments ? [segments.weekly, segments.everyTwoWeeks, segments.monthly, segments.oncePerClass] : [];
+}
 
-  return items
-    .filter((item) => selected.has(item.itemId))
-    .map((item) => ({
+/** Order lines for the ticked items; a purchase segment's average quantity wins over the low-stock default of 1. */
+export function suggestionsToLines(
+  items: SuggestedItem[],
+  segments: PurchaseSegmentsDto | null,
+  selectedIds: readonly string[]
+): OrderListLineDto[] {
+  const selected = new Set(selectedIds);
+  const candidates = new Map<string, { name: string; sku: string | null; imageFileId: string | null; unit: string; quantity: number }>();
+
+  for (const item of items)
+    candidates.set(item.itemId, { name: item.itemName, sku: item.sku, imageFileId: item.imageFileId, unit: item.unit, quantity: 1 });
+
+  for (const item of purchaseSegmentLists(segments).flat())
+    candidates.set(item.itemId, { name: item.name, sku: item.sku, imageFileId: item.imageFileId, unit: item.unit, quantity: item.averageQuantity });
+
+  return [...candidates]
+    .filter(([itemId]) => selected.has(itemId))
+    .map(([itemId, item]) => ({
       id: null,
-      itemId: item.itemId,
+      itemId,
       itemImageFileId: item.imageFileId,
-      productName: toProductName(item.itemName, item.sku),
-      quantity: 1,
+      productName: toProductName(item.name, item.sku),
+      quantity: item.quantity,
       unit: item.unit || DEFAULT_UNIT,
       notes: ''
     }));

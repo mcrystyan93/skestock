@@ -24,6 +24,7 @@ public class ItemPurchaseStatisticConfiguration : IEntityTypeConfiguration<ItemP
         builder.Property(s => s.TotalValue).HasColumnType("decimal(18,2)");
         builder.Property(s => s.AverageQuantity).HasColumnType("decimal(18,2)");
         builder.Property(s => s.AverageUnitPrice).HasColumnType("decimal(18,2)");
+        builder.Property(s => s.AverageIntervalDays).HasColumnType("decimal(18,2)");
 
         builder.HasIndex(s => new { s.Scope, s.ClassId, s.ItemId })
             .IsUnique()
