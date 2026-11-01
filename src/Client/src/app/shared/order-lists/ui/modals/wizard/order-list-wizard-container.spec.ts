@@ -38,7 +38,7 @@ describe('OrderListWizardContainer stepper', () => {
   it('names step 2 after the supply list source', () => {
     fromSupplyList.set(true);
 
-    expect(create(false).textContent).toContain('Pasul 2 din 4 · Listă predefinită');
+    expect(create(false).textContent).toContain('Pasul 2 din 5 · Listă predefinită');
   });
 
   it('shows the four-step stepper from md up', () => {

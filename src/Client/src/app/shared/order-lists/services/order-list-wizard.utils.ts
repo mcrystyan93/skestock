@@ -114,6 +114,33 @@ export function supplyListsToLines(supplyLists: SupplyListDto[]): OrderListLineD
   return [...byItem.values()].map(({ line, notes }) => ({ ...line, notes: joinNotes(notes) }));
 }
 
+export type ReviewedProduct = {
+  itemId: string;
+  productName: string;
+  imageFileId: string | null;
+  quantity: number;
+  unit: string;
+  listNames: string[];
+};
+
+/** The merged products the order would get, with the supply lists each one comes from. */
+export function supplyListsToProducts(supplyLists: SupplyListDto[]): ReviewedProduct[] {
+  const listNames = new Map<string, Set<string>>();
+
+  for (const list of supplyLists)
+    for (const line of list.lines)
+      listNames.set(line.itemId, (listNames.get(line.itemId) ?? new Set()).add(list.name));
+
+  return supplyListsToLines(supplyLists).map((line) => ({
+    itemId: line.itemId ?? '',
+    productName: line.productName,
+    imageFileId: line.itemImageFileId ?? null,
+    quantity: line.quantity,
+    unit: line.unit,
+    listNames: [...(listNames.get(line.itemId ?? '') ?? [])]
+  }));
+}
+
 export function supplyListsToName(supplyLists: SupplyListDto[]): string | null {
   if (supplyLists.length === 0)
     return null;
