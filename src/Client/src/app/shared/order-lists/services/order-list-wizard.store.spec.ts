@@ -172,6 +172,25 @@ describe('OrderListWizardStore', () => {
     expect(store.selectedProductIds()).toEqual(['i1']);
   });
 
+  it('keeps the typed name when only the ticked products change', () => {
+    supplyListsHttp.getAll.mockReturnValue(of({ data: [{ id: 'list-1' }, { id: 'list-2' }], hasNextPage: false, sort: [] }));
+    supplyListsHttp.getById.mockImplementation((id: string) => of(id === 'list-1' ? supplyList : secondSupplyList));
+    const store = TestBed.inject(OrderListWizardStore);
+
+    store.setSource('supplyList');
+    store.advance('class-1');
+    store.selectSupplyLists(['list-1', 'list-2']);
+    store.advance('class-1');
+    store.advance('class-1');
+    store.setDetails({ name: 'Numele meu', note: '' });
+    store.back();
+    store.setSelectedProductIds(['i2']);
+    store.back();
+    store.advance('class-1');
+
+    expect(store.name()).toBe('Numele meu');
+  });
+
   it('skips the products step for the low-stock source', () => {
     stockHttp.getLowStockItems.mockReturnValue(of([lowStock('1', 'A')]));
     const store = TestBed.inject(OrderListWizardStore);
