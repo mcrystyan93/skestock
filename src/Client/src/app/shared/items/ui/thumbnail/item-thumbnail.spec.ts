@@ -148,4 +148,18 @@ describe('ItemThumbnail', () => {
     expect(message.error).toHaveBeenCalledWith('Încărcarea imaginii a eșuat');
     expect(uploaded).not.toHaveBeenCalled();
   });
+
+  it('renders a bigger box for the same thumbnail image when large', () => {
+    const fixture = create('img-1');
+    const host = fixture.nativeElement as HTMLElement;
+
+    expect(host.classList).toContain('h-10');
+
+    fixture.componentRef.setInput('large', true);
+    fixture.detectChanges();
+
+    expect(host.classList).toContain('h-16');
+    expect(host.classList).not.toContain('h-10');
+    expect(host.querySelector('img')?.getAttribute('src')).toContain('size=thumb');
+  });
 });

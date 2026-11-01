@@ -32,7 +32,7 @@ import { checkedRowsModel, emitCheckedIdsOnChange } from './checked-rows';
         </span>
       </div>
 
-      <ul class="m-0 max-h-[50vh] list-none overflow-auto p-0">
+      <ul class="m-0 list-none p-0">
         @for (row of suggestionsForm.rows; track $index) {
           @let item = items()[$index];
           @if (item) {
