@@ -35,18 +35,23 @@ import { checkedRowsModel, emitCheckedIdsOnChange } from './checked-rows';
           @let product = products()[$index];
           @if (product) {
             <li class="flex items-center gap-3 py-2">
-              <label nz-checkbox [formField]="row.checked"><span class="sr-only">{{ product.productName }}</span></label>
               <ske-item-thumbnail [itemId]="product.itemId"
                                   [imageFileId]="product.imageFileId" />
-              <span class="flex min-w-0 grow flex-col">
-                <span class="truncate font-medium">{{ product.productName }}</span>
-                <span class="text-sm opacity-70">{{ product.quantity }} {{ product.unit }}</span>
-              </span>
-              <span class="flex flex-wrap justify-end gap-1">
-                @for (name of product.listNames; track name) {
-                  <nz-tag class="m-0">{{ name }}</nz-tag>
-                }
-              </span>
+              <label nz-checkbox
+                     class="flex! min-w-0 grow cursor-pointer items-center! m-0! [&>span:last-child]:min-w-0 [&>span:last-child]:flex-1 [&>span:last-child]:ps-3 [&>span:last-child]:pe-0"
+                     [formField]="row.checked">
+                <span class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                  <span class="flex min-w-0 flex-col">
+                    <span class="truncate font-medium">{{ product.productName }}</span>
+                    <span class="text-sm opacity-70">{{ product.quantity }} {{ product.unit }}</span>
+                  </span>
+                  <span class="flex flex-wrap justify-end gap-1">
+                    @for (name of product.listNames; track name) {
+                      <nz-tag class="m-0">{{ name }}</nz-tag>
+                    }
+                  </span>
+                </span>
+              </label>
             </li>
           }
         }
