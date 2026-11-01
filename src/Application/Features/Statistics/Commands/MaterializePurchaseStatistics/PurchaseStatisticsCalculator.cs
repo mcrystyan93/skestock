@@ -64,8 +64,24 @@ public static class PurchaseStatisticsCalculator
             PurchaseCount = purchaseCount,
             AverageQuantity = Math.Round((decimal)totalQuantity / purchaseCount, 2),
             AverageUnitPrice = totalQuantity == 0 ? 0m : Math.Round(totalValue / totalQuantity, 2),
+            AverageIntervalDays = scope == PurchaseStatisticsScope.Last365Days
+                ? AverageIntervalDays(lines, purchaseCount)
+                : null,
             LastPurchasedAt = lines.Max(line => line.PurchasedAt),
             ComputedAt = computedAt
         };
+    }
+
+    // Receipt date = earliest PurchasedAt per receipt; instants are UTC so DST does not skew the span.
+    private static decimal? AverageIntervalDays(List<PurchaseLine> lines, int receipts)
+    {
+        if (receipts < 3)
+        {
+            return null;
+        }
+
+        var dates = lines.GroupBy(line => line.PurchaseKey).Select(g => g.Min(line => line.PurchasedAt)).ToList();
+        var spanDays = (decimal)(dates.Max() - dates.Min()).TotalDays;
+        return Math.Round(spanDays / (receipts - 1), 2);
     }
 }

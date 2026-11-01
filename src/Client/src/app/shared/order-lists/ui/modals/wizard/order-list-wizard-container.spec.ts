@@ -30,7 +30,7 @@ describe('OrderListWizardContainer stepper', () => {
   it('shows a compact "Pasul N din 4" with a progress bar below md', () => {
     const root = create(false);
 
-    expect(root.textContent).toContain('Pasul 2 din 4 · Articole sugerate');
+    expect(root.textContent).toContain('Pasul 2 din 4 · Produse');
     expect(root.querySelector('nz-progress')).not.toBeNull();
     expect(root.querySelector('nz-steps')).toBeNull();
   });

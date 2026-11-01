@@ -6,6 +6,7 @@ import {
   ClassItemStockEvolutionDto,
   ClassStockByCategoryChartDto,
   GetClassLocationStockRequest,
+  PurchaseSegmentsDto,
   PurchaseStatisticDto,
   StockReportDto,
   TopPurchasesDto,
@@ -72,6 +73,10 @@ export class ClassStatisticsHttp {
     if (filter.top) params = params.set('top', filter.top);
 
     return this._httpClient.get<TopPurchasesDto>('/api/statistics/purchases/top', { params });
+  }
+
+  public getPurchaseSegments() {
+    return this._httpClient.get<PurchaseSegmentsDto>('/api/statistics/purchases/segments');
   }
 
   public getItemsPurchaseHistory(itemIds: string[]) {

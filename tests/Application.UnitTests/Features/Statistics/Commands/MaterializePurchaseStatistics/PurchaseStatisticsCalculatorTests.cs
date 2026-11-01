@@ -20,6 +20,64 @@ public sealed class PurchaseStatisticsCalculatorTests
         Guid item, Guid schoolClass, Guid key, int quantity, decimal price, DateTimeOffset at) =>
         new(item, schoolClass, key, quantity, price, at);
 
+    private static decimal? Interval(PurchaseStatisticsScope scope, params PurchaseLine[] lines) =>
+        PurchaseStatisticsCalculator.Calculate(lines, Today, TimeZone, ComputedAt)
+            .Single(s => s.Scope == scope && s.ClassId == null).AverageIntervalDays;
+
+    private static PurchaseLine On(DateTimeOffset at, Guid? receipt = null) =>
+        Line(ItemA, ClassA, receipt ?? Guid.NewGuid(), 1, 1m, at);
+
+    private static readonly DateTimeOffset Day0 = new(2026, 9, 1, 9, 0, 0, TimeSpan.Zero);
+
+    [Test]
+    public void Interval_is_null_below_three_receipts()
+    {
+        Interval(PurchaseStatisticsScope.Last365Days, On(Day0)).ShouldBeNull();
+        Interval(PurchaseStatisticsScope.Last365Days, On(Day0), On(Day0.AddDays(7))).ShouldBeNull();
+    }
+
+    [Test]
+    public void Interval_is_span_divided_by_receipts_minus_one()
+    {
+        Interval(PurchaseStatisticsScope.Last365Days, On(Day0), On(Day0.AddDays(3)), On(Day0.AddDays(10)))
+            .ShouldBe(5m);
+        Interval(PurchaseStatisticsScope.Last365Days, On(Day0), On(Day0.AddDays(1)), On(Day0.AddDays(3)),
+            On(Day0.AddDays(4))).ShouldBe(1.33m);
+    }
+
+    [Test]
+    public void Interval_counts_lines_on_one_receipt_once()
+    {
+        var shared = Guid.NewGuid();
+        Interval(PurchaseStatisticsScope.Last365Days,
+            On(Day0, shared), On(Day0.AddHours(1), shared), On(Day0.AddDays(5)), On(Day0.AddDays(10)))
+            .ShouldBe(5m);
+    }
+
+    [Test]
+    public void Interval_is_zero_for_same_day_receipts()
+    {
+        Interval(PurchaseStatisticsScope.Last365Days, On(Day0), On(Day0), On(Day0)).ShouldBe(0m);
+    }
+
+    [Test]
+    public void Interval_uses_utc_instants_across_a_dst_change()
+    {
+        // Europe/Bucharest leaves DST on 2026-10-25; 10 UTC days still span exactly 10 days.
+        var start = new DateTimeOffset(2026, 10, 20, 12, 0, 0, TimeSpan.Zero);
+        Interval(PurchaseStatisticsScope.Last365Days, On(start), On(start.AddDays(5)), On(start.AddDays(10)))
+            .ShouldBe(5m);
+    }
+
+    [Test]
+    public void Interval_is_only_set_on_the_365_day_scope()
+    {
+        var lines = new[] { On(Day0), On(Day0.AddDays(3)), On(Day0.AddDays(10)) };
+        Interval(PurchaseStatisticsScope.Last90Days, lines).ShouldBeNull();
+        PurchaseStatisticsCalculator.Calculate(lines, Today, TimeZone, ComputedAt)
+            .Single(s => s.Scope == PurchaseStatisticsScope.Class).AverageIntervalDays.ShouldBeNull();
+    }
+
     [Test]
     public void Lines_on_the_same_receipt_count_as_one_purchase()
     {
