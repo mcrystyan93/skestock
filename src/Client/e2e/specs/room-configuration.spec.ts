@@ -3,6 +3,11 @@ import { expect, test } from '@playwright/test';
 test.use({ ignoreHTTPSErrors: true });
 
 test('administrator validates and saves seat counts for all rooms', async ({ page }) => {
+  const email = process.env['PLAYWRIGHT_LOGIN_EMAIL'];
+  const password = process.env['PLAYWRIGHT_LOGIN_PASSWORD'];
+  test.skip(!email || !password, 'Set PLAYWRIGHT_LOGIN_EMAIL and PLAYWRIGHT_LOGIN_PASSWORD.');
+  if (!email || !password) return;
+
   let savedConfiguration = { room4SeatCount: 12, room2SeatCount: 3, room6SeatCount: 6 };
   const putRequests: Array<typeof savedConfiguration> = [];
   let getRequests = 0;
@@ -19,14 +24,14 @@ test('administrator validates and saves seat counts for all rooms', async ({ pag
   });
 
   await page.goto('/login');
-  await page.getByPlaceholder('Email').fill('administrator@localhost');
-  await page.getByPlaceholder('Parola').fill('Administrator1!');
+  await page.getByPlaceholder('Email').fill(email);
+  await page.getByPlaceholder('Parola').fill(password);
   await page.getByRole('button', { name: 'Login' }).click();
   await expect(page).toHaveURL(/school-classes/);
   await page.route('**/api/Users/manage/info', (route) =>
     route.fulfill({
       status: 200,
-      json: { email: 'administrator@localhost', isEmailConfirmed: true },
+      json: { email, isEmailConfirmed: true },
     }),
   );
 
