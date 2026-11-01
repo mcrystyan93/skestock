@@ -22,7 +22,7 @@ import { checkedRowsModel, emitCheckedIdsOnChange } from './checked-rows';
       } @else if (lists().length === 0) {
         <nz-empty nzNotFoundContent="Nu există liste predefinite active." />
       } @else {
-        <ul class="m-0 flex max-h-[45vh] list-none flex-col gap-2 overflow-auto p-0">
+        <ul class="m-0 flex list-none flex-col gap-2 p-0">
           @for (item of listsForm.rows; track $index) {
             @let list = lists()[$index];
             @if (list) {

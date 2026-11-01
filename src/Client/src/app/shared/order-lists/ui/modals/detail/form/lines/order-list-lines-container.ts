@@ -17,7 +17,7 @@ import { NzEmptyComponent } from 'ng-zorro-antd/empty';
     class: 'grow -mx-6 -mb-6 relative',
   },
   template: `
-    <div class="absolute inset-0 overflow-y-auto">
+    <div class="md:absolute md:inset-0 md:overflow-y-auto">
       <div class="p-3 md:p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 xxxl:grid-cols-4 gap-3 md:gap-4">
         @let history = purchaseHistory.value();
         @for (line of lines(); track line.clientKey().value()) {

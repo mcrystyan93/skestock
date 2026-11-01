@@ -46,7 +46,8 @@ const LONG_DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long'
       <ng-template #titleTemplate>
         <div class="flex min-w-0 items-center gap-3">
           <ske-item-thumbnail [itemId]="lineForm.itemId().value() ?? ''"
-                              [imageFileId]="lineForm.itemImageFileId().value()" />
+                              [imageFileId]="lineForm.itemImageFileId().value()"
+                              [large]="true" />
           <div class="min-w-0">
             <div class="truncate">{{ productName }}</div>
             @if (historyHint(); as hint) {

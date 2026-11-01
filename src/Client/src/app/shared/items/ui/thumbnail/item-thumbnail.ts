@@ -15,8 +15,10 @@ import { IMAGE_ACCEPT, imageFileError, toUploadFile } from '../image-upload/item
   host: {
     class:
       'relative z-10 inline-flex shrink-0 items-center justify-center overflow-hidden rounded bg-slate-100 text-slate-400 dark:bg-slate-800',
-    '[class.h-10]': 'size() === "thumb"',
-    '[class.w-10]': 'size() === "thumb"',
+    '[class.h-10]': 'size() === "thumb" && !large()',
+    '[class.w-10]': 'size() === "thumb" && !large()',
+    '[class.h-16]': 'size() === "thumb" && large()',
+    '[class.w-16]': 'size() === "thumb" && large()',
     '[class.h-40]': 'size() === "full"',
     '[class.w-40]': 'size() === "full"',
   },
@@ -25,6 +27,8 @@ export class ItemThumbnail {
   public readonly itemId = input.required<string>();
   public readonly imageFileId = input<string | null | undefined>();
   public readonly size = input<'thumb' | 'full'>('thumb');
+  // A bigger box for the same thumbnail image, where the picture is part of the decision (the server's thumbnail is 256px).
+  public readonly large = input(false);
   // Without an image, the placeholder becomes a button that uploads one (rows only; stock tables stay read-only).
   public readonly uploadable = input(false);
   public readonly imageUploaded = output<string>();
@@ -36,6 +40,9 @@ export class ItemThumbnail {
   private readonly _message = inject(NzMessageService);
 
   protected readonly url = computed(() => this.buildUrl(this.size()));
+  protected readonly iconClass = computed(() =>
+    this.size() === 'full' ? 'text-5xl' : this.large() ? 'text-3xl' : 'text-xl'
+  );
 
   private readonly _notifyFailureRef = effect(() => {
     if (this.storage.hasUploadFailures()) this._message.error('Încărcarea imaginii a eșuat');
