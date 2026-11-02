@@ -1,5 +1,5 @@
 import { Component, computed, input, output } from '@angular/core';
-import type { PurchaseSegmentsDto } from '@ske/models';
+import type { PurchaseSegmentItemDto, PurchaseSegmentsDto } from '@ske/models';
 import { ItemThumbnail } from '@ske/shared/items';
 import type { SuggestedItem } from '@ske/shared/order-lists/services';
 import { NzCheckboxComponent } from 'ng-zorro-antd/checkbox';
@@ -19,7 +19,9 @@ type SegmentRow = {
 
 type SegmentGroup = { title: string | null; rows: SegmentRow[] };
 
-type SegmentTab = { key: string; title: string; emptyText: string; groups: SegmentGroup[]; ids: string[] };
+type SegmentTabBase = { key: string; title: string; emptyText: string; groups: SegmentGroup[]; ids: string[] };
+
+type SegmentTab = SegmentTabBase & { selectedCount: number };
 
 const EMPTY_PURCHASES = 'Nu există date încă';
 
@@ -47,13 +49,13 @@ const EMPTY_PURCHASES = 'Nu există date încă';
             } @else {
               <div class="mb-2 flex items-center justify-between gap-2 border-0 border-b border-solid border-gray-200 pb-2 dark:border-gray-700">
                 <label nz-checkbox
-                       [nzChecked]="selectedIn(tab) === tab.ids.length"
-                       [nzIndeterminate]="selectedIn(tab) > 0 && selectedIn(tab) < tab.ids.length"
+                       [nzChecked]="tab.selectedCount === tab.ids.length"
+                       [nzIndeterminate]="tab.selectedCount > 0 && tab.selectedCount < tab.ids.length"
                        (nzCheckedChange)="toggleTab(tab, $event)">
                   Selectează tot
                 </label>
                 <span class="text-sm opacity-70" aria-live="polite">
-                  {{ selectedIn(tab) }} din {{ tab.ids.length }} selectate
+                  {{ tab.selectedCount }} din {{ tab.ids.length }} selectate
                 </span>
               </div>
 
@@ -105,7 +107,8 @@ export class OrderListSuggestionsStep {
 
   protected readonly tabs = computed((): SegmentTab[] => {
     const segments = this.segments();
-    const purchaseTab = (key: string, title: string, list: PurchaseSegmentsDto[keyof PurchaseSegmentsDto] | undefined): SegmentTab => {
+    const selected = this.selected();
+    const purchaseTab = (key: string, title: string, list: PurchaseSegmentItemDto[] | undefined): SegmentTabBase => {
       const rows: SegmentRow[] = (list ?? []).map((item) => ({
         itemId: item.itemId,
         name: item.name,
@@ -118,18 +121,16 @@ export class OrderListSuggestionsStep {
       return { key, title, emptyText: EMPTY_PURCHASES, groups: [{ title: null, rows }], ids: rows.map((row) => row.itemId) };
     };
 
-    return [
+    const tabs: SegmentTabBase[] = [
       this._lowStockTab(),
       purchaseTab('weekly', 'Comandate săptămânal', segments?.weekly),
       purchaseTab('everyTwoWeeks', 'La 2 săptămâni', segments?.everyTwoWeeks),
       purchaseTab('monthly', 'Lunar', segments?.monthly),
       purchaseTab('oncePerClass', 'O dată pe clasă', segments?.oncePerClass)
     ];
-  });
 
-  protected selectedIn(tab: SegmentTab): number {
-    return tab.ids.filter((id) => this.selected().has(id)).length;
-  }
+    return tabs.map((tab) => ({ ...tab, selectedCount: tab.ids.filter((id) => selected.has(id)).length }));
+  });
 
   protected toggle(itemId: string, checked: boolean) {
     this._emit(checked ? [...this.selectedIds(), itemId] : this.selectedIds().filter((id) => id !== itemId));
@@ -147,7 +148,7 @@ export class OrderListSuggestionsStep {
   }
 
   /** An item low in two locations shows under both headings, but is one id and ticks together. */
-  private _lowStockTab(): SegmentTab {
+  private _lowStockTab(): SegmentTabBase {
     const byLocation = new Map<string, SegmentRow[]>();
 
     for (const item of this.items()) {

@@ -53,12 +53,13 @@ export function suggestionsToLines(
   selectedIds: readonly string[]
 ): OrderListLineDto[] {
   const selected = new Set(selectedIds);
-  const candidates = new Map<string, { name: string; sku: string | null; imageFileId: string | null; unit: string; quantity: number }>();
+  type Candidate = { name: string; sku: string | null; imageFileId: string | null; unit: string; quantity: number };
+  const candidates = new Map<string, Candidate>();
 
   for (const item of items)
     candidates.set(item.itemId, { name: item.itemName, sku: item.sku, imageFileId: item.imageFileId, unit: item.unit, quantity: 1 });
 
-  // Same item in several segments or in low stock: the last write wins, so the segment quantity replaces the default 1.
+  // An item in several segments or also in low stock is overwritten, so the segment quantity replaces the default 1.
   for (const item of purchaseSegmentLists(segments).flat())
     candidates.set(item.itemId, { name: item.name, sku: item.sku, imageFileId: item.imageFileId, unit: item.unit, quantity: item.averageQuantity });
 
