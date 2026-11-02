@@ -32,23 +32,68 @@ describe('order list wizard steps', () => {
     expect(emitted).toEqual(['supplyList']);
   });
 
-  it('shows the selection count and the location tags, and emits all ids on select-all', () => {
-    const fixture = TestBed.createComponent(OrderListSuggestionsStep);
-    const emitted: string[][] = [];
-    fixture.componentInstance.selectedIdsChange.subscribe((ids) => emitted.push(ids));
-    fixture.componentRef.setInput('items', [
-      { itemId: '1', itemName: 'Hârtie', sku: null, unit: 'top', locations: ['A', 'B'] },
-      { itemId: '2', itemName: 'Creion', sku: null, unit: 'buc', locations: ['A'] }
-    ]);
-    fixture.componentRef.setInput('selectedIds', ['1']);
-    fixture.detectChanges();
+  describe('segments step', () => {
+    const seg = (itemId: string, name: string, averageQuantity: number) => ({
+      itemId, name, sku: null, imageFileId: null, unit: 'buc', averageQuantity, purchaseCount: 5, averageIntervalDays: 7
+    });
 
-    expect(fixture.nativeElement.textContent).toContain('1 din 2 selectate');
-    expect(fixture.nativeElement.querySelectorAll('nz-tag')).toHaveLength(3);
+    function createSegments() {
+      const fixture = TestBed.createComponent(OrderListSuggestionsStep);
+      const emitted: string[][] = [];
+      fixture.componentInstance.selectedIdsChange.subscribe((ids) => emitted.push(ids));
+      fixture.componentRef.setInput('items', [
+        { itemId: '1', itemName: 'Hârtie', sku: null, imageFileId: null, unit: 'top', locations: ['A', 'B'] },
+        { itemId: '2', itemName: 'Creion', sku: null, imageFileId: null, unit: 'buc', locations: ['A'] }
+      ]);
+      fixture.componentRef.setInput('segments', {
+        weekly: [seg('3', 'Lipici', 2.5)],
+        everyTwoWeeks: [],
+        monthly: [seg('4', 'Foarfecă', 1)],
+        oncePerClass: []
+      });
+      fixture.componentRef.setInput('selectedIds', ['1', '4']);
+      fixture.detectChanges();
+      return { fixture, emitted, step: fixture.componentInstance as unknown as { toggleTab(tab: unknown, checked: boolean): void; tabs(): { key: string; ids: string[] }[] } };
+    }
 
-    (fixture.componentInstance as unknown as { toggleAll(checked: boolean): void }).toggleAll(true);
-    TestBed.tick();
-    expect(emitted).toEqual([['1', '2']]);
+    it('renders five tabs with their counts', () => {
+      const { fixture } = createSegments();
+      const titles = [...fixture.nativeElement.querySelectorAll('.ant-tabs-tab')].map((tab) => (tab as HTMLElement).textContent?.replace(/\s+/g, ' ').trim());
+
+      expect(titles).toEqual(['Stoc redus 2', 'Comandate săptămânal 1', 'La 2 săptămâni 0', 'Lunar 1', 'O dată pe clasă 0']);
+    });
+
+    it('groups low stock by location and repeats an item low in two places', () => {
+      const { fixture } = createSegments();
+      const root = fixture.nativeElement as HTMLElement;
+
+      expect([...root.querySelectorAll('h4')].map((h) => h.textContent?.trim())).toEqual(['A', 'B']);
+      expect(root.querySelectorAll('ske-item-thumbnail')).toHaveLength(3);
+      expect(root.textContent).toContain('1 din 2 selectate');
+    });
+
+    it('select-all only touches the tab ids and keeps ticks made in other tabs', () => {
+      const { emitted, step } = createSegments();
+      const [lowStock, weekly] = step.tabs();
+
+      step.toggleTab(weekly, true);
+      expect(emitted.at(-1)).toEqual(['1', '4', '3']);
+
+      step.toggleTab(lowStock, false);
+      expect(emitted.at(-1)).toEqual(['4']);
+    });
+
+    it('shows the quantity of purchase rows and an empty state for tabs without data', () => {
+      const { fixture, step } = createSegments();
+      const root = fixture.nativeElement as HTMLElement;
+
+      // Tabs render lazily; switch to the second one.
+      (root.querySelectorAll('.ant-tabs-tab')[1] as HTMLElement).click();
+      fixture.detectChanges();
+      expect(root.textContent).toContain('2.5 buc');
+
+      expect(step.tabs()[2].ids).toEqual([]);
+    });
   });
 
   it('lists supply lists with their article count and emits every checked list', () => {

@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { LowStockItemDto, SupplyListDto } from '@ske/models';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { LowStockItemDto, PurchaseSegmentsDto, SupplyListDto } from '@ske/models';
+import { ClassStatisticsHttp } from '@ske/shared/class-statistics';
 import { StockHttp } from '@ske/shared/stock';
 import { SupplyListsHttp } from '@ske/shared/supply-lists';
 import { of, throwError } from 'rxjs';
@@ -13,6 +15,19 @@ const lowStock = (itemId: string, locationName: string): LowStockItemDto => ({
   imageFileId: `img-${itemId}`,
   unit: 'buc',
   locationName
+});
+
+const emptySegments: PurchaseSegmentsDto = { weekly: [], everyTwoWeeks: [], monthly: [], oncePerClass: [] };
+
+const segmentItem = (itemId: string, averageQuantity: number) => ({
+  itemId,
+  name: `Item ${itemId}`,
+  sku: `SKU-${itemId}`,
+  imageFileId: `img-${itemId}`,
+  unit: 'set',
+  averageQuantity,
+  purchaseCount: 4,
+  averageIntervalDays: 7
 });
 
 const supplyList: SupplyListDto = {
@@ -39,6 +54,8 @@ const secondSupplyList: SupplyListDto = {
 
 describe('OrderListWizardStore', () => {
   let stockHttp: { getLowStockItems: ReturnType<typeof vi.fn> };
+  let message: { error: ReturnType<typeof vi.fn> };
+  let statisticsHttp: { getPurchaseSegments: ReturnType<typeof vi.fn> };
   let supplyListsHttp: {
     getAll: ReturnType<typeof vi.fn>;
     getById: ReturnType<typeof vi.fn>;
@@ -47,16 +64,21 @@ describe('OrderListWizardStore', () => {
 
   beforeEach(() => {
     stockHttp = { getLowStockItems: vi.fn() };
+    statisticsHttp = { getPurchaseSegments: vi.fn().mockReturnValue(of(emptySegments)) };
     supplyListsHttp = {
       getAll: vi.fn(),
       getById: vi.fn(),
       getAllActive: () => SupplyListsHttp.prototype.getAllActive.call(supplyListsHttp)
     };
 
+    message = { error: vi.fn() };
+
     TestBed.configureTestingModule({
       providers: [
         OrderListWizardStore,
+        { provide: NzMessageService, useValue: message },
         { provide: StockHttp, useValue: stockHttp },
+        { provide: ClassStatisticsHttp, useValue: statisticsHttp },
         { provide: SupplyListsHttp, useValue: supplyListsHttp }
       ]
     });
@@ -103,6 +125,54 @@ describe('OrderListWizardStore', () => {
     expect(lines).toEqual([
       { id: null, itemId: '2', itemImageFileId: 'img-2', productName: '(SKU-2) Item 2', quantity: 1, unit: 'buc', notes: '' }
     ]);
+  });
+
+  it('still loads low stock when the segments request fails', () => {
+    stockHttp.getLowStockItems.mockReturnValue(of([lowStock('1', 'A')]));
+    statisticsHttp.getPurchaseSegments.mockReturnValue(throwError(() => new Error('boom')));
+    const store = TestBed.inject(OrderListWizardStore);
+
+    store.setSource('new');
+    store.advance('class-1');
+
+    expect(store.loadFailed()).toBe(false);
+    expect(store.selectedItemIds()).toEqual(['1']);
+    expect(store.segments()).toBeNull();
+    expect(message.error).toHaveBeenCalledWith('Nu s-au putut încărca grupele de produse.');
+  });
+
+  it('merges low stock and purchase segments into one deduplicated order, segment quantity winning', () => {
+    stockHttp.getLowStockItems.mockReturnValue(of([lowStock('1', 'A'), lowStock('2', 'A')]));
+    statisticsHttp.getPurchaseSegments.mockReturnValue(of({
+      ...emptySegments,
+      weekly: [segmentItem('2', 6)],
+      monthly: [segmentItem('3', 2.5)]
+    }));
+    const store = TestBed.inject(OrderListWizardStore);
+
+    store.setSource('new');
+    store.advance('class-1');
+
+    // Low stock starts ticked, purchase segment items do not.
+    expect(store.selectedItemIds()).toEqual(['1', '2']);
+
+    store.setSelectedItemIds(['1', '2', '3']);
+
+    expect(store.buildPrefill().lines?.map((line) => [line.itemId, line.quantity, line.unit])).toEqual([
+      ['1', 1, 'buc'],
+      ['2', 6, 'set'],
+      ['3', 2.5, 'set']
+    ]);
+  });
+
+  it('does not load segments for the supply list source', () => {
+    supplyListsHttp.getAll.mockReturnValue(of({ data: [], hasNextPage: false, sort: [] }));
+    const store = TestBed.inject(OrderListWizardStore);
+
+    store.setSource('supplyList');
+    store.advance('class-1');
+
+    expect(statisticsHttp.getPurchaseSegments).not.toHaveBeenCalled();
   });
 
   it('requires at least one supply list and merges the selected ones by item', () => {

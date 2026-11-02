@@ -1171,6 +1171,9 @@ namespace skestock.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal?>("AverageIntervalDays")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("AverageQuantity")
                         .HasColumnType("decimal(18,2)");
 
