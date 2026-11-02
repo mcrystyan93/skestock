@@ -59,6 +59,8 @@ services:
       HTTP_PORTS: "8080"
       OpenApiSettings__ApiKey: "${OPENAPISETTINGSAPIKEY}"
       OpenApiSettings__Model: "${OPENAPISETTINGSMODEL}"
+      SeedAdministrator__Email: "${SEEDADMINISTRATOREMAIL}"
+      SeedAdministrator__Password: "${SEEDADMINISTRATORPASSWORD}"
       ConnectionStrings__skestock-cache: "skestock-cache:6379,password=${REDIS_PASSWORD}"
       ConnectionStrings__skestock_cache: "skestock-cache:6379,password=${REDIS_PASSWORD}"
       SKESTOCK_CACHE_HOST: "skestock-cache"
