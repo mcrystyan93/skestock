@@ -9,6 +9,7 @@ import { withLoadingFeature } from '@ske/shared/loader';
 import { StockHttp } from '@ske/shared/stock';
 import { SupplyListsHttp } from '@ske/shared/supply-lists';
 import { isNil } from 'lodash-es';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { catchError, forkJoin, Observable, of, pipe, switchMap, tap } from 'rxjs';
 import {
   groupLowStockItems,
@@ -110,7 +111,8 @@ export const OrderListWizardStore = signalStore(
   withProps(() => ({
     stockHttp: inject(StockHttp),
     statisticsHttp: inject(ClassStatisticsHttp),
-    supplyListsHttp: inject(SupplyListsHttp)
+    supplyListsHttp: inject(SupplyListsHttp),
+    nzMessageService: inject(NzMessageService)
   })),
   withComputed((store) => ({
     fromSupplyList: computed(() => store.source() === 'supplyList'),
@@ -197,7 +199,10 @@ export const OrderListWizardStore = signalStore(
       (classId: string) => forkJoin({
         lowStock: store.stockHttp.getLowStockItems(classId),
         // Segments are an extra: a failure must not block the low-stock tab.
-        segments: store.statisticsHttp.getPurchaseSegments().pipe(catchError(() => of(null)))
+        segments: store.statisticsHttp.getPurchaseSegments().pipe(catchError(() => {
+          store.nzMessageService.error('Nu s-au putut încărca grupele de produse.');
+          return of(null);
+        }))
       }),
       ({ lowStock, segments }) => {
         const suggestions = groupLowStockItems(lowStock);

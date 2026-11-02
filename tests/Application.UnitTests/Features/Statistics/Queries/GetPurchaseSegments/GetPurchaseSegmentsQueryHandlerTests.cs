@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Time.Testing;
 using NUnit.Framework;
 using Shouldly;
 using skestock.Application.Features.Statistics;
@@ -22,23 +23,26 @@ public sealed class GetPurchaseSegmentsQueryHandlerTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options);
 
+    private static readonly FakeTimeProvider Clock = new(new DateTimeOffset(2026, 6, 1, 0, 0, 0, TimeSpan.Zero));
+
     private static readonly Category Category = new() { Name = "Cat" };
 
     private static Item NewItem(string name, bool active = true) =>
         new() { Name = name, Unit = "kg", Category = Category, IsActive = active };
 
-    private static ItemPurchaseStatistic Year(Item item, decimal? interval, decimal quantity = 2m, int count = 5) =>
+    private static ItemPurchaseStatistic Year(Item item, decimal? interval, decimal quantity = 2m, int count = 5, int daysSinceLast = 1) =>
         new()
         {
             Scope = PurchaseStatisticsScope.Last365Days, Item = item, AverageIntervalDays = interval,
-            AverageQuantity = quantity, PurchaseCount = count, ComputedAt = DateTimeOffset.UtcNow
+            AverageQuantity = quantity, PurchaseCount = count, ComputedAt = Clock.GetUtcNow(),
+            LastPurchasedAt = Clock.GetUtcNow().AddDays(-daysSinceLast)
         };
 
     private static ItemPurchaseStatistic InClass(Item item, SchoolClass schoolClass, int count, decimal quantity = 1m) =>
         new()
         {
             Scope = PurchaseStatisticsScope.Class, Item = item, Class = schoolClass,
-            AverageQuantity = quantity, PurchaseCount = count, ComputedAt = DateTimeOffset.UtcNow
+            AverageQuantity = quantity, PurchaseCount = count, ComputedAt = Clock.GetUtcNow()
         };
 
     private static SchoolClass[] Classes(int n) =>
@@ -50,13 +54,13 @@ public sealed class GetPurchaseSegmentsQueryHandlerTests
     private static async Task<PurchaseSegmentsDto> RunAsync(GoodsReceiptTestDbContext context)
     {
         await context.SaveChangesAsync(CancellationToken.None);
-        var result = await new GetPurchaseSegmentsQueryHandler(context)
+        var result = await new GetPurchaseSegmentsQueryHandler(context, Clock)
             .Handle(new GetPurchaseSegmentsQuery(), CancellationToken.None);
         result.IsSuccess.ShouldBeTrue();
         return result.Value;
     }
 
-    [TestCase(0, "Weekly")]
+    [TestCase(0.01, "Weekly")]
     [TestCase(10, "Weekly")]
     [TestCase(10.01, "EveryTwoWeeks")]
     [TestCase(21, "EveryTwoWeeks")]
@@ -67,7 +71,7 @@ public sealed class GetPurchaseSegmentsQueryHandlerTests
     {
         await using var context = CreateContext();
         var item = NewItem("A");
-        context.Add(Year(item, (decimal)days));
+        context.Add(Year(item, (decimal)days, daysSinceLast: 0));
 
         var dto = await RunAsync(context);
 
@@ -78,6 +82,65 @@ public sealed class GetPurchaseSegmentsQueryHandlerTests
         foreach (var (name, list) in lists)
             list.Count.ShouldBe(name == expected ? 1 : 0, name);
         dto.OncePerClass.ShouldBeEmpty();
+    }
+
+    [Test]
+    public async Task Dormant_item_and_zero_interval_item_are_excluded_but_item_within_tolerance_is_kept()
+    {
+        await using var context = CreateContext();
+        context.AddRange(
+            Year(NewItem("Dormant"), 5m, daysSinceLast: 11),
+            Year(NewItem("SameDay"), 0m),
+            Year(NewItem("Tolerated"), 5m, daysSinceLast: 10));
+
+        var dto = await RunAsync(context);
+
+        dto.Weekly.Select(i => i.Name).ShouldBe(["Tolerated"]);
+        (dto.EveryTwoWeeks.Count + dto.Monthly.Count + dto.OncePerClass.Count).ShouldBe(0);
+    }
+
+    [TestCase(14, 28, "EveryTwoWeeks", true)]
+    [TestCase(14, 29, "EveryTwoWeeks", false)]
+    [TestCase(30, 60, "Monthly", true)]
+    [TestCase(30, 61, "Monthly", false)]
+    [TestCase(21, 42, "EveryTwoWeeks", true)]
+    [TestCase(45, 90, "Monthly", true)]
+    public async Task Dormancy_cutoff_is_twice_the_interval(int interval, int daysSinceLast, string segment, bool kept)
+    {
+        await using var context = CreateContext();
+        context.Add(Year(NewItem("A"), interval, daysSinceLast: daysSinceLast));
+
+        var dto = await RunAsync(context);
+
+        var list = segment == "Monthly" ? dto.Monthly : dto.EveryTwoWeeks;
+        list.Count.ShouldBe(kept ? 1 : 0);
+        (dto.Weekly.Count + dto.OncePerClass.Count + (segment == "Monthly" ? dto.EveryTwoWeeks : dto.Monthly).Count).ShouldBe(0);
+    }
+
+    [Test]
+    public async Task Dormant_item_that_qualifies_for_once_per_class_is_still_listed()
+    {
+        await using var context = CreateContext();
+        var item = NewItem("A");
+        var classes = Classes(2);
+        context.AddRange(Year(item, 5m, daysSinceLast: 400), InClass(item, classes[0], 1), InClass(item, classes[1], 1));
+
+        var dto = await RunAsync(context);
+
+        dto.OncePerClass.Select(i => i.Name).ShouldBe(["A"]);
+        dto.Weekly.ShouldBeEmpty();
+    }
+
+    [TestCase(-5)]
+    [TestCase(0)]
+    public async Task Non_positive_interval_lands_in_no_segment(int interval)
+    {
+        await using var context = CreateContext();
+        context.Add(Year(NewItem("A"), interval, daysSinceLast: 0));
+
+        var dto = await RunAsync(context);
+
+        (dto.Weekly.Count + dto.EveryTwoWeeks.Count + dto.Monthly.Count + dto.OncePerClass.Count).ShouldBe(0);
     }
 
     [Test]

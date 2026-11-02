@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { LowStockItemDto, PurchaseSegmentsDto, SupplyListDto } from '@ske/models';
 import { ClassStatisticsHttp } from '@ske/shared/class-statistics';
 import { StockHttp } from '@ske/shared/stock';
@@ -53,6 +54,7 @@ const secondSupplyList: SupplyListDto = {
 
 describe('OrderListWizardStore', () => {
   let stockHttp: { getLowStockItems: ReturnType<typeof vi.fn> };
+  let message: { error: ReturnType<typeof vi.fn> };
   let statisticsHttp: { getPurchaseSegments: ReturnType<typeof vi.fn> };
   let supplyListsHttp: {
     getAll: ReturnType<typeof vi.fn>;
@@ -69,9 +71,12 @@ describe('OrderListWizardStore', () => {
       getAllActive: () => SupplyListsHttp.prototype.getAllActive.call(supplyListsHttp)
     };
 
+    message = { error: vi.fn() };
+
     TestBed.configureTestingModule({
       providers: [
         OrderListWizardStore,
+        { provide: NzMessageService, useValue: message },
         { provide: StockHttp, useValue: stockHttp },
         { provide: ClassStatisticsHttp, useValue: statisticsHttp },
         { provide: SupplyListsHttp, useValue: supplyListsHttp }
@@ -133,6 +138,7 @@ describe('OrderListWizardStore', () => {
     expect(store.loadFailed()).toBe(false);
     expect(store.selectedItemIds()).toEqual(['1']);
     expect(store.segments()).toBeNull();
+    expect(message.error).toHaveBeenCalledWith('Nu s-au putut încărca grupele de produse.');
   });
 
   it('merges low stock and purchase segments into one deduplicated order, segment quantity winning', () => {

@@ -4,7 +4,7 @@ using skestock.Domain.Enums;
 
 namespace skestock.Application.Features.Statistics.Queries.GetPurchaseSegments;
 
-public class GetPurchaseSegmentsQueryHandler(IApplicationDbContext dbContext)
+public class GetPurchaseSegmentsQueryHandler(IApplicationDbContext dbContext, TimeProvider timeProvider)
     : IRequestHandler<GetPurchaseSegmentsQuery, Result<PurchaseSegmentsDto>>
 {
     public async ValueTask<Result<PurchaseSegmentsDto>> Handle(
@@ -25,7 +25,8 @@ public class GetPurchaseSegmentsQueryHandler(IApplicationDbContext dbContext)
                 s.Item.Unit,
                 s.AverageQuantity,
                 s.PurchaseCount,
-                s.AverageIntervalDays
+                s.AverageIntervalDays,
+                s.LastPurchasedAt
             })
             .ToListAsync(cancellationToken);
 
@@ -37,7 +38,8 @@ public class GetPurchaseSegmentsQueryHandler(IApplicationDbContext dbContext)
                 var classRows = group.Where(r => r.Scope == PurchaseStatisticsScope.Class).ToList();
                 var first = group.First();
 
-                // OncePerClass items may have no Last365Days row: fall back to the per-class averages.
+                // Item fields (name, sku, ...) come from `first`; the figures come from `year`.
+                // OncePerClass items may have no Last365Days row, so the figures fall back to per-class averages.
                 var item = new PurchaseSegmentItemDto
                 {
                     ItemId = first.ItemId,
@@ -52,9 +54,10 @@ public class GetPurchaseSegmentsQueryHandler(IApplicationDbContext dbContext)
                     AverageIntervalDays = year?.AverageIntervalDays
                 };
 
-                return new PurchaseSegmentCandidate(item, classRows.Select(r => r.PurchaseCount).ToList());
+                return new PurchaseSegmentCandidate(
+                    item, year?.LastPurchasedAt, classRows.Select(r => r.PurchaseCount).ToList());
             });
 
-        return Result.Ok(PurchaseSegmentClassifier.Classify(candidates));
+        return Result.Ok(PurchaseSegmentClassifier.Classify(candidates, timeProvider.GetUtcNow()));
     }
 }
