@@ -39,3 +39,20 @@ describe('ConfigurationHttp room configuration', () => {
     request.flush(configuration);
   });
 });
+
+describe('ConfigurationHttp purchase statistics', () => {
+  it('posts to the materialize endpoint', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const service = TestBed.inject(ConfigurationHttp);
+    const httpTestingController = TestBed.inject(HttpTestingController);
+
+    service.materializePurchaseStatistics().subscribe();
+
+    const request = httpTestingController.expectOne('/api/statistics/purchases/materialize');
+    expect(request.request.method).toBe('POST');
+    request.flush(42);
+    httpTestingController.verify();
+  });
+});
