@@ -111,3 +111,23 @@ public record TopPurchasesDto
     public List<PurchaseStatisticDto> ByValue { get; init; } = [];
     public List<PurchaseStatisticDto> ByFrequency { get; init; } = [];
 }
+
+public record PurchaseSegmentItemDto
+{
+    public Guid ItemId { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public string? Sku { get; init; }
+    public Guid? ImageFileId { get; init; }
+    public string Unit { get; init; } = string.Empty;
+    public decimal AverageQuantity { get; init; }
+    public int PurchaseCount { get; init; }
+    public decimal? AverageIntervalDays { get; init; }
+}
+
+public record PurchaseSegmentsDto
+{
+    public List<PurchaseSegmentItemDto> Weekly { get; init; } = [];
+    public List<PurchaseSegmentItemDto> EveryTwoWeeks { get; init; } = [];
+    public List<PurchaseSegmentItemDto> Monthly { get; init; } = [];
+    public List<PurchaseSegmentItemDto> OncePerClass { get; init; } = [];
+}
