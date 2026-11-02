@@ -15,6 +15,15 @@
       păstrează configurarea inițială.
     </div>
   </nz-page-header-content>
+  <nz-page-header-extra>
+    <button nz-button
+            type="button"
+            [nzLoading]="recalculating()"
+            (click)="recalculatePurchaseStatistics()">
+      <nz-icon nzType="icons:arrows-rotate" />
+      Recalculează statistici achiziții
+    </button>
+  </nz-page-header-extra>
 </nz-page-header>
 
 <ske-theme-switcher class="absolute top-1.5 right-4 hidden lg:block" />
