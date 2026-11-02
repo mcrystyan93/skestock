@@ -1,3 +1,4 @@
+import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 import {
@@ -49,8 +50,18 @@ export class ConfigurationHeader {
       .pipe(finalize(() => this.recalculating.set(false)))
       .subscribe({
         next: () => this._nzMessageService.success('Statisticile de achiziții au fost recalculate.'),
-        error: () =>
-          this._nzMessageService.error('Statisticile de achiziții nu au putut fi recalculate.'),
+        error: (error: unknown) => this._nzMessageService.error(getRecalculateErrorMessage(error)),
       });
+  }
+}
+
+function getRecalculateErrorMessage(error: unknown) {
+  switch (error instanceof HttpErrorResponse ? error.status : undefined) {
+    case HttpStatusCode.Conflict:
+      return 'Statisticile sunt deja în curs de recalculare. Încercați din nou în scurt timp.';
+    case HttpStatusCode.Forbidden:
+      return 'Doar administratorii pot recalcula statisticile de achiziții.';
+    default:
+      return 'Statisticile de achiziții nu au putut fi recalculate.';
   }
 }
