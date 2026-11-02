@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using skestock.Application.Features.Statistics.Commands.RecalculatePurchaseStatistics;
 using skestock.Application.Features.Statistics.Models;
 using skestock.Application.Features.Statistics.Queries.GetClassGoodsReceiptCosts;
 using skestock.Application.Features.Statistics.Queries.GetClassItemStockEvolution;
@@ -9,6 +10,7 @@ using skestock.Application.Features.Statistics.Queries.GetDailyConsumptionAverag
 using skestock.Application.Features.Statistics.Queries.GetItemsPurchaseHistory;
 using skestock.Application.Features.Statistics.Queries.GetPurchaseSegments;
 using skestock.Application.Features.Statistics.Queries.GetTopPurchases;
+using skestock.Domain.Constants;
 using skestock.Domain.Enums;
 
 namespace skestock.Web.Endpoints;
@@ -32,6 +34,8 @@ public class Statistics : IEndpointGroup
         groupBuilder.MapGet(GetTopPurchases, "purchases/top");
         groupBuilder.MapGet(GetPurchaseSegments, "purchases/segments");
         groupBuilder.MapPost(GetItemsPurchaseHistory, "purchases/items-history");
+        groupBuilder.MapPost(RecalculatePurchaseStatistics, "purchases/materialize")
+            .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
     }
 
     [EndpointSummary("Get current stock grouped by category")]
@@ -196,6 +200,19 @@ public class Statistics : IEndpointGroup
         var result = await sender.Send(
             new GetItemsPurchaseHistoryQuery { ItemIds = request.ItemIds },
             cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Recompute purchase statistics")]
+    [EndpointDescription("Runs the purchase statistics materialization on demand, the same work the daily " +
+                         "statistics job performs, and returns the number of rows written. Administrators only. " +
+                         "Responds 409 while another run is in progress.")]
+    public static async Task<Results<Ok<int>, ProblemHttpResult>> RecalculatePurchaseStatistics(
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new RecalculatePurchaseStatisticsCommand(), cancellationToken);
 
         return result.ToOk();
     }

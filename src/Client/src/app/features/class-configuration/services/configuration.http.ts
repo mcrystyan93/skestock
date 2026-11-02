@@ -10,10 +10,15 @@ import {
 } from '@ske/models';
 
 const CONFIGURATION_ENDPOINT = '/api/ClassConfiguration';
+const PURCHASE_STATISTICS_ENDPOINT = '/api/statistics/purchases/materialize';
 
 @Service()
 export class ConfigurationHttp {
   private readonly _httpClient = inject(HttpClient);
+
+  public materializePurchaseStatistics() {
+    return this._httpClient.post<number>(PURCHASE_STATISTICS_ENDPOINT, null);
+  }
 
   public getDepartments() {
     return this._httpClient.get<DepartmentTemplateDto[]>(`${CONFIGURATION_ENDPOINT}/departments`);
