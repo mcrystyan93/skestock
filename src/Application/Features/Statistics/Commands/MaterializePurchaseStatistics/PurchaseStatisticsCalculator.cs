@@ -19,7 +19,8 @@ public static class PurchaseStatisticsCalculator
         IReadOnlyCollection<PurchaseLine> lines,
         DateOnly today,
         TimeZoneInfo timeZone,
-        DateTimeOffset computedAt)
+        DateTimeOffset computedAt,
+        IReadOnlyCollection<ClassPeriod> classPeriods)
     {
         var statistics = new List<ItemPurchaseStatistic>();
 
@@ -33,12 +34,12 @@ public static class PurchaseStatisticsCalculator
             statistics.AddRange(lines
                 .Where(line => line.PurchasedAt >= windowStartUtc)
                 .GroupBy(line => line.ItemId)
-                .Select(group => Aggregate(group, scope, null, computedAt)));
+                .Select(group => Aggregate(group, scope, null, computedAt, timeZone, classPeriods)));
         }
 
         statistics.AddRange(lines
             .GroupBy(line => new { line.ClassId, line.ItemId })
-            .Select(group => Aggregate(group, PurchaseStatisticsScope.Class, group.Key.ClassId, computedAt)));
+            .Select(group => Aggregate(group, PurchaseStatisticsScope.Class, group.Key.ClassId, computedAt, timeZone, classPeriods)));
 
         return statistics;
     }
@@ -47,7 +48,9 @@ public static class PurchaseStatisticsCalculator
         IEnumerable<PurchaseLine> group,
         PurchaseStatisticsScope scope,
         Guid? classId,
-        DateTimeOffset computedAt)
+        DateTimeOffset computedAt,
+        TimeZoneInfo timeZone,
+        IReadOnlyCollection<ClassPeriod> classPeriods)
     {
         var lines = group.ToList();
         var totalQuantity = lines.Sum(line => line.Quantity);
@@ -65,7 +68,7 @@ public static class PurchaseStatisticsCalculator
             AverageQuantity = Math.Round((decimal)totalQuantity / purchaseCount, 2),
             AverageUnitPrice = totalQuantity == 0 ? 0m : Math.Round(totalValue / totalQuantity, 2),
             AverageIntervalDays = scope == PurchaseStatisticsScope.Last365Days
-                ? AverageIntervalDays(lines, purchaseCount)
+                ? AverageIntervalDays(lines, purchaseCount, timeZone, classPeriods)
                 : null,
             LastPurchasedAt = lines.Max(line => line.PurchasedAt),
             ComputedAt = computedAt
@@ -73,7 +76,12 @@ public static class PurchaseStatisticsCalculator
     }
 
     // Receipt date = earliest PurchasedAt per receipt; instants are UTC so DST does not skew the span.
-    private static decimal? AverageIntervalDays(List<PurchaseLine> lines, int receipts)
+    // Breaks between classes are not purchasing time; receipts inside a break still count as points.
+    private static decimal? AverageIntervalDays(
+        List<PurchaseLine> lines,
+        int receipts,
+        TimeZoneInfo timeZone,
+        IReadOnlyCollection<ClassPeriod> classPeriods)
     {
         if (receipts < 3)
         {
@@ -81,7 +89,9 @@ public static class PurchaseStatisticsCalculator
         }
 
         var dates = lines.GroupBy(line => line.PurchaseKey).Select(g => g.Min(line => line.PurchasedAt)).ToList();
-        var spanDays = (decimal)(dates.Max() - dates.Min()).TotalDays;
+        var first = dates.Min();
+        var last = dates.Max();
+        var spanDays = (decimal)(last - first - ClassBreaks.Between(classPeriods, first, last, timeZone)).TotalDays;
         return Math.Round(spanDays / (receipts - 1), 2);
     }
 }
