@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Shouldly;
+using skestock.Application.Features.Statistics;
 using skestock.Application.Features.Statistics.Commands.MaterializePurchaseStatistics;
 using skestock.Domain.Enums;
 
@@ -21,8 +22,12 @@ public sealed class PurchaseStatisticsCalculatorTests
         new(item, schoolClass, key, quantity, price, at);
 
     private static decimal? Interval(PurchaseStatisticsScope scope, params PurchaseLine[] lines) =>
-        PurchaseStatisticsCalculator.Calculate(lines, Today, TimeZone, ComputedAt)
+        PurchaseStatisticsCalculator.Calculate(lines, Today, TimeZone, ComputedAt, [])
             .Single(s => s.Scope == scope && s.ClassId == null).AverageIntervalDays;
+
+    private static decimal? IntervalWithClasses(ClassPeriod[] periods, params PurchaseLine[] lines) =>
+        PurchaseStatisticsCalculator.Calculate(lines, Today, TimeZone, ComputedAt, periods)
+            .Single(s => s.Scope == PurchaseStatisticsScope.Last365Days && s.ClassId == null).AverageIntervalDays;
 
     private static PurchaseLine On(DateTimeOffset at, Guid? receipt = null) =>
         Line(ItemA, ClassA, receipt ?? Guid.NewGuid(), 1, 1m, at);
@@ -69,12 +74,42 @@ public sealed class PurchaseStatisticsCalculatorTests
             .ShouldBe(5m);
     }
 
+    // Weekly receipts in class A, a 14-day break, then weekly receipts in class B (receipts 21 days apart
+    // across the break, so the A to B step is 7 days of class time).
+    private static readonly ClassPeriod[] TwoClasses =
+    [
+        new(new DateOnly(2026, 1, 1), new DateOnly(2026, 2, 16)),
+        new(new DateOnly(2026, 3, 3), new DateOnly(2026, 4, 30))
+    ];
+
+    private static readonly DateTimeOffset WeeklyStart = new(2026, 1, 5, 9, 0, 0, TimeSpan.Zero);
+
+    private static List<PurchaseLine> WeeklyAcrossBreak() =>
+        Enumerable.Range(0, 7).Select(i => On(WeeklyStart.AddDays(7 * i)))
+            .Concat(Enumerable.Range(0, 7).Select(i => On(WeeklyStart.AddDays(63 + 7 * i))))
+            .ToList();
+
+    [Test]
+    public void Interval_excludes_the_break_between_classes()
+    {
+        IntervalWithClasses(TwoClasses, WeeklyAcrossBreak().ToArray()).ShouldBe(7.0m);
+    }
+
+    [Test]
+    public void Receipt_inside_the_break_still_counts_as_a_point()
+    {
+        var lines = WeeklyAcrossBreak();
+        lines.Add(On(WeeklyStart.AddDays(49)));
+
+        IntervalWithClasses(TwoClasses, lines.ToArray()).ShouldBe(6.5m);
+    }
+
     [Test]
     public void Interval_is_only_set_on_the_365_day_scope()
     {
         var lines = new[] { On(Day0), On(Day0.AddDays(3)), On(Day0.AddDays(10)) };
         Interval(PurchaseStatisticsScope.Last90Days, lines).ShouldBeNull();
-        PurchaseStatisticsCalculator.Calculate(lines, Today, TimeZone, ComputedAt)
+        PurchaseStatisticsCalculator.Calculate(lines, Today, TimeZone, ComputedAt, [])
             .Single(s => s.Scope == PurchaseStatisticsScope.Class).AverageIntervalDays.ShouldBeNull();
     }
 
@@ -90,7 +125,7 @@ public sealed class PurchaseStatisticsCalculatorTests
             Line(ItemA, ClassA, Guid.NewGuid(), 15, 2m, at.AddDays(1))
         };
 
-        var statistic = PurchaseStatisticsCalculator.Calculate(lines, Today, TimeZone, ComputedAt)
+        var statistic = PurchaseStatisticsCalculator.Calculate(lines, Today, TimeZone, ComputedAt, [])
             .Single(s => s.Scope == PurchaseStatisticsScope.Last90Days);
 
         statistic.ItemId.ShouldBe(ItemA);
@@ -116,7 +151,7 @@ public sealed class PurchaseStatisticsCalculatorTests
             Line(ItemA, ClassA, Guid.NewGuid(), 4, 1m, new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero))
         };
 
-        var statistics = PurchaseStatisticsCalculator.Calculate(lines, Today, TimeZone, ComputedAt);
+        var statistics = PurchaseStatisticsCalculator.Calculate(lines, Today, TimeZone, ComputedAt, []);
 
         statistics.Single(s => s.Scope == PurchaseStatisticsScope.Last90Days).TotalQuantity.ShouldBe(1);
         statistics.Single(s => s.Scope == PurchaseStatisticsScope.Last365Days).TotalQuantity.ShouldBe(3);
@@ -134,7 +169,7 @@ public sealed class PurchaseStatisticsCalculatorTests
             Line(ItemB, ClassA, Guid.NewGuid(), 3, 1m, at)
         };
 
-        var statistics = PurchaseStatisticsCalculator.Calculate(lines, Today, TimeZone, ComputedAt);
+        var statistics = PurchaseStatisticsCalculator.Calculate(lines, Today, TimeZone, ComputedAt, []);
 
         var classRows = statistics.Where(s => s.Scope == PurchaseStatisticsScope.Class).ToList();
         classRows.Count.ShouldBe(3);
@@ -146,6 +181,6 @@ public sealed class PurchaseStatisticsCalculatorTests
     [Test]
     public void No_lines_produce_no_rows()
     {
-        PurchaseStatisticsCalculator.Calculate([], Today, TimeZone, ComputedAt).ShouldBeEmpty();
+        PurchaseStatisticsCalculator.Calculate([], Today, TimeZone, ComputedAt, []).ShouldBeEmpty();
     }
 }
