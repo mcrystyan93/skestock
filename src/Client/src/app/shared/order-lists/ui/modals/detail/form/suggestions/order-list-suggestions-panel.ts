@@ -7,7 +7,7 @@ import { ItemThumbnail } from '@ske/shared/items';
 import { groupLowStockItems, purchaseSegmentLists, suggestionsToLines, supplyListsToLines } from '@ske/shared/order-lists/services';
 import { StockHttp } from '@ske/shared/stock';
 import { SupplyListsHttp } from '@ske/shared/supply-lists';
-import { forkJoin, map, of, switchMap } from 'rxjs';
+import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 import { NzAlertComponent } from 'ng-zorro-antd/alert';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzEmptyComponent } from 'ng-zorro-antd/empty';
@@ -149,8 +149,12 @@ export class OrderListSuggestionsPanel {
   // Needs one request per list for its lines, so it waits until the tab is first opened.
   protected readonly supplyLists = rxResource({
     params: () => this.supplyTabOpened() || undefined,
+    // A list that fails to load (e.g. deactivated meanwhile) is skipped instead of failing the whole tab.
     stream: () => this._supplyListsHttp.getAllActive().pipe(
-      switchMap((lists) => lists.length ? forkJoin(lists.map((list) => this._supplyListsHttp.getById(list.id))) : of([]))
+      switchMap((lists) => lists.length
+        ? forkJoin(lists.map((list) => this._supplyListsHttp.getById(list.id).pipe(catchError(() => of(null)))))
+        : of([])),
+      map((lists) => lists.filter((list) => !!list))
     )
   });
 
