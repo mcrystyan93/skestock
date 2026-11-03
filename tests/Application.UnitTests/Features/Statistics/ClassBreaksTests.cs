@@ -75,6 +75,14 @@ public sealed class ClassBreaksTests
     }
 
     [Test]
+    public void Class_contained_in_another_does_not_shorten_the_merged_range()
+    {
+        var inner = new ClassPeriod(new DateOnly(2026, 1, 10), new DateOnly(2026, 1, 15));
+
+        Between([A, inner, B], Utc(1, 1), Utc(3, 31)).ShouldBe(TimeSpan.FromDays(14));
+    }
+
+    [Test]
     public void Adjacent_classes_have_no_break()
     {
         var next = new ClassPeriod(new DateOnly(2026, 2, 1), new DateOnly(2026, 2, 28));
