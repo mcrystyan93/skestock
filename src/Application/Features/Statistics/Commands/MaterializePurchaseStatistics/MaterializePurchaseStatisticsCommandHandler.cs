@@ -32,6 +32,11 @@ public sealed class MaterializePurchaseStatisticsCommandHandler(
                 t.GoodsReceipt.ReceivedAt))
             .ToListAsync(cancellationToken);
 
+        var classPeriods = await dbContext.SchoolClasses
+            .AsNoTracking()
+            .Select(c => new ClassPeriod(c.StartDate, c.EndDate))
+            .ToListAsync(cancellationToken);
+
         var today = LocalCalendarDay.GetDate(computedAt, timeZone);
 
         var strategy = dbContext.Database.CreateExecutionStrategy();
@@ -41,7 +46,7 @@ public sealed class MaterializePurchaseStatisticsCommandHandler(
                 dbContext.ItemPurchaseStatistics.Local.Clear();
 
                 // Calculated per attempt so a retried execution adds fresh, untracked entities.
-                var statistics = PurchaseStatisticsCalculator.Calculate(lines, today, timeZone, computedAt);
+                var statistics = PurchaseStatisticsCalculator.Calculate(lines, today, timeZone, computedAt, classPeriods);
 
                 await using var transaction =
                     await dbContext.Database.BeginTransactionAsync(strategyCancellationToken);
