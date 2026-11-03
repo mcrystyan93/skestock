@@ -12,6 +12,10 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
 import { NzBreakpointService } from 'ng-zorro-antd/core/services';
+import { ClassStatisticsHttp } from '@ske/shared/class-statistics';
+import { StockHttp } from '@ske/shared/stock';
+import { SupplyListsHttp } from '@ske/shared/supply-lists';
+import { OrderListSuggestionsPanel } from './suggestions/order-list-suggestions-panel';
 import { of } from 'rxjs';
 
 function providers(): (Provider | EnvironmentProviders)[] {
@@ -284,3 +288,52 @@ function createTestIcon(name: string) {
     icon: '<svg viewBox="0 0 1 1"><path d="M0 0h1v1H0z"/></svg>'
   };
 }
+
+describe('OrderListDetailForm suggestions panel', () => {
+  function create(options: { lg: boolean; classId: string | null; status?: 'Draft' | 'Submitted' }) {
+    TestBed.configureTestingModule({
+      imports: [OrderListDetailForm],
+      providers: [
+        ...providers(),
+        { provide: NzBreakpointService, useValue: { subscribe: () => of({ md: true, lg: options.lg }) } },
+        { provide: StockHttp, useValue: { getLowStockItems: () => of([]) } },
+        { provide: ClassStatisticsHttp, useValue: { getPurchaseSegments: () => of({ weekly: [], everyTwoWeeks: [], monthly: [], oncePerClass: [] }), getItemsPurchaseHistory: () => of([]) } },
+        { provide: SupplyListsHttp, useValue: { getAllActive: () => of([]), getById: vi.fn() } }
+      ]
+    });
+    const fixture = TestBed.createComponent(OrderListDetailForm);
+    fixture.componentRef.setInput('loading', false);
+    fixture.componentRef.setInput('classId', options.classId);
+    fixture.componentRef.setInput('orderList', { id: null, name: 'Lista', note: null, status: options.status ?? 'Draft', lines: [] });
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  const panel = (fixture: ComponentFixture<OrderListDetailForm>) => fixture.debugElement.query(By.directive(OrderListSuggestionsPanel));
+
+  it('shows the panel from lg up for an editable order of a class', () => {
+    expect(panel(create({ lg: true, classId: 'c1' }))).not.toBeNull();
+  });
+
+  it.each([
+    ['below lg', { lg: false, classId: 'c1' }],
+    ['without a class', { lg: true, classId: null }],
+    ['when the order is not editable', { lg: true, classId: 'c1', status: 'Submitted' as const }]
+  ])('hides the panel %s', (_, options) => {
+    expect(panel(create(options))).toBeNull();
+  });
+
+  it('adds a suggested line once and ignores the same item afterwards', () => {
+    const fixture = create({ lg: true, classId: 'c1' });
+    const line = { id: null, itemId: 'a', productName: 'A', quantity: 4, unit: 'buc', notes: '' };
+    const panelComponent = panel(fixture).componentInstance as OrderListSuggestionsPanel;
+
+    panelComponent.add.emit(line);
+    panelComponent.add.emit(line);
+
+    const lines = fixture.componentInstance.orderListForm.lines().value();
+    expect(lines).toHaveLength(1);
+    expect(lines[0].quantity).toBe(4);
+    expect((fixture.componentInstance as unknown as { addedItemIds(): Set<string> }).addedItemIds().has('a')).toBe(true);
+  });
+});

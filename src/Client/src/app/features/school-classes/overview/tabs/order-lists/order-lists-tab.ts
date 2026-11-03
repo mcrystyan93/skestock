@@ -104,7 +104,7 @@ export class OrderListsTab {
         id: orderList.id,
         classId: orderList.classId
       },
-      nzWrapClassName: 'modal-100 modal-lg-75',
+      nzWrapClassName: 'modal-100',
       nzCentered: true,
       nzMaskClosable: false
     });
