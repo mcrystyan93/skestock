@@ -18,7 +18,8 @@ import { NzEmptyComponent } from 'ng-zorro-antd/empty';
   },
   template: `
     <div class="md:absolute md:inset-0 md:overflow-y-auto">
-      <div class="p-3 md:p-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 xxxl:grid-cols-4 gap-3 md:gap-4">
+      <div class="p-3 md:p-4 grid gap-3 md:gap-4"
+           [class]="gridClass()">
         @let history = purchaseHistory.value();
         @for (line of lines(); track line.clientKey().value()) {
           @let itemId = line.itemId().value();
@@ -48,6 +49,11 @@ import { NzEmptyComponent } from 'ng-zorro-antd/empty';
 export class OrderListLinesContainer {
   public readonly lines = input.required<FieldTree<OrderListLineFormModel[]>>();
   public readonly disabled = input(false);
+  /** Set when the suggestions panel takes a third of the width, so fewer cards fit per row. */
+  public readonly narrow = input(false);
+  protected readonly gridClass = computed(() => this.narrow()
+    ? 'grid-cols-1 md:grid-cols-2 xxl:grid-cols-3'
+    : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3 xxxl:grid-cols-4');
   public readonly remove = output<OrderListLineFormModel>();
 
   private readonly _classStatisticsHttp = inject(ClassStatisticsHttp);
