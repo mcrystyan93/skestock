@@ -169,4 +169,16 @@ describe('OrderListSuggestionsPanel', () => {
 
     expect(text()).toContain('Nu există liste predefinite active.');
   });
+
+  it('skips a supply list that fails to load and still shows the others', async () => {
+    await create(of([]), of(segments({})), [], [supplyList('l1', 'Început de an', [['a', 'Caiet', 3]]), supplyList('l2', 'Ștearsă', [])]);
+    const http = TestBed.inject(SupplyListsHttp) as unknown as { getById: ReturnType<typeof vi.fn> };
+    http.getById.mockImplementation((id: string) =>
+      id === 'l2' ? throwError(() => new Error('404')) : of(supplyList('l1', 'Început de an', [['a', 'Caiet', 3]])));
+
+    await openTab(2);
+
+    expect(text()).toContain('Început de an');
+    expect(text()).not.toContain('Nu am putut încărca listele predefinite.');
+  });
 });
