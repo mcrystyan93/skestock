@@ -45,7 +45,7 @@ const FREQUENCY_TITLES = ['Săptămânal', 'La 2 săptămâni', 'Lunar', 'O dat�
                  let-emptyText="emptyText">
       @for (group of groups; track $index) {
         @if (group.title) {
-          <h4 class="m-0 mt-3 text-sm font-semibold opacity-80">{{ group.title }}</h4>
+          <h4 class="m-0 mt-4 text-base font-semibold opacity-80">{{ group.title }}</h4>
         }
         <ul class="m-0 list-none p-0">
           @for (row of group.rows; track row.itemId) {
@@ -60,6 +60,7 @@ const FREQUENCY_TITLES = ['Săptămânal', 'La 2 săptămâni', 'Lunar', 'O dat�
               <button nz-button
                       nzType="text"
                       nzSize="small"
+                      class="me-2"
                       type="button"
                       [disabled]="added"
                       [attr.aria-label]="added ? null : 'Adaugă ' + row.line.productName"
@@ -68,7 +69,7 @@ const FREQUENCY_TITLES = ['Săptămânal', 'La 2 săptămâni', 'Lunar', 'O dat�
                   <nz-icon nzType="icons:circle-check"></nz-icon>
                   <span>Adăugat</span>
                 } @else {
-                  <nz-icon nzType="icons:plus"></nz-icon>
+                  <nz-icon nzType="icons:chevrons-right"></nz-icon>
                 }
               </button>
             </li>
@@ -167,7 +168,8 @@ export class OrderListSuggestionsPanel {
       ...purchaseSegmentLists(segments).flat().map((item) => item.itemId)
     ]);
 
-    return new Map(lines.map((line) => [line.itemId ?? '', line]));
+    // Average quantities are fractional; order whole units, never below 1.
+    return new Map(lines.map((line) => [line.itemId ?? '', { ...line, quantity: Math.max(1, Math.floor(line.quantity)) }]));
   });
 
   protected readonly lowStockGroups = computed((): SuggestionGroup[] => {
