@@ -66,7 +66,7 @@ describe('OrderListSuggestionsPanel', () => {
       imports: [OrderListSuggestionsPanel],
       providers: [
         provideNzIconsTesting(),
-        provideNzIcons([createIcon('icons:plus'), createIcon('icons:circle-check'), createIcon('icons:box')]),
+        provideNzIcons([createIcon('icons:chevrons-right'), createIcon('icons:circle-check'), createIcon('icons:box')]),
         { provide: StockHttp, useValue: { getLowStockItems: vi.fn(() => lowStock) } },
         {
           provide: SupplyListsHttp,
@@ -115,7 +115,7 @@ describe('OrderListSuggestionsPanel', () => {
   it('groups the frequency tab by segment, hides empty groups and uses the average quantity', async () => {
     await create(
       of([]),
-      of(segments({ weekly: [segmentItem('w', 'Hârtie', 4)], monthly: [segmentItem('m', 'Markere', 2)] }))
+      of(segments({ weekly: [segmentItem('w', 'Hârtie', 4.7)], monthly: [segmentItem('m', 'Markere', 0.4)] }))
     );
     await openTab(1);
 
@@ -123,6 +123,7 @@ describe('OrderListSuggestionsPanel', () => {
     expect(text()).toContain('Lunar');
     expect(text()).not.toContain('La 2 săptămâni');
     expect(text()).toContain('4 cut');
+    expect(text()).toContain('1 cut');
   });
 
   it('disables and marks rows already in the list', async () => {
