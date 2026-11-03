@@ -66,7 +66,7 @@ describe('OrderListSuggestionsPanel', () => {
       imports: [OrderListSuggestionsPanel],
       providers: [
         provideNzIconsTesting(),
-        provideNzIcons([createIcon('icons:chevrons-right'), createIcon('icons:circle-check'), createIcon('icons:box')]),
+        provideNzIcons([createIcon('icons:magnifying-glass'), createIcon('icons:chevrons-right'), createIcon('icons:circle-check'), createIcon('icons:box')]),
         { provide: StockHttp, useValue: { getLowStockItems: vi.fn(() => lowStock) } },
         {
           provide: SupplyListsHttp,
