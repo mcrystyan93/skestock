@@ -19,13 +19,6 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { ItemAutocomplete } from '@ske/shared/items';
 import { NzDividerComponent } from 'ng-zorro-antd/divider';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzModalService } from 'ng-zorro-antd/modal';
-import { NzButtonComponent } from 'ng-zorro-antd/button';
-import {
-  OrderListAddSupplyListsModal,
-  OrderListAddSupplyListsModalData,
-  OrderListAddSupplyListsResult
-} from '../../add-supply-lists/order-list-add-supply-lists-modal';
 import { OrderListDetailsFields, validateOrderListDetails } from './details/order-list-details-fields';
 import { OrderListLinesContainer } from './lines/order-list-lines-container';
 import { OrderListSuggestionsPanel } from './suggestions/order-list-suggestions-panel';
@@ -38,7 +31,6 @@ import type { OrderListLineFormModel } from './lines/order-list-line';
 
 @Component({
   imports: [
-    NzButtonComponent,
     NzRowDirective,
     NzColDirective,
     FormField,
@@ -84,10 +76,7 @@ export class OrderListDetailForm {
   protected readonly withSuggestions = computed(() => this.editable() && !isNil(this.classId()));
 
   private readonly _nzMessageService = inject(NzMessageService);
-  private readonly _nzModalService = inject(NzModalService);
   private _lineKeySequence = 0;
-  /** Supply lists already merged into this order, so adding them again cannot double the quantities. */
-  private readonly _addedSupplyListIds = signal<string[]>([]);
 
   private readonly _formModel = linkedSignal({
     source: () => this.orderList(),
@@ -248,28 +237,6 @@ export class OrderListDetailForm {
     const lines = this.orderListForm.lines().value();
 
     this.orderListForm.lines().value.set(lines.filter((l) => l.clientKey !== line.clientKey));
-  }
-
-  protected openAddSupplyLists() {
-    const modalRef = this._nzModalService.create<
-      OrderListAddSupplyListsModal,
-      OrderListAddSupplyListsModalData,
-      OrderListAddSupplyListsResult
-    >({
-      nzContent: OrderListAddSupplyListsModal,
-      nzData: { addedIds: this._addedSupplyListIds() },
-      nzWrapClassName: 'modal-100',
-      nzCentered: true,
-      nzMaskClosable: false
-    });
-
-    modalRef.afterClose.subscribe((result) => {
-      if (!result)
-        return;
-
-      this._addedSupplyListIds.update((ids) => [...ids, ...result.listIds]);
-      this.addLines(result.lines);
-    });
   }
 
   /** Lines for items already on the order add to its quantity; the rest go on top. */

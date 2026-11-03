@@ -41,16 +41,6 @@
                                    placeholder="Cauta si adauga un articol" />
           </nz-form-control>
         </nz-form-item>
-        @if (editable()) {
-          <button nz-button
-                  type="button"
-                  class="max-md:mb-4! max-md:self-start"
-                  [disabled]="loading()"
-                  (click)="openAddSupplyLists()">
-            <nz-icon nzType="icons:clipboard-list"></nz-icon>
-            <span class="ms-2 max-md:hidden!">Adaugă liste predefinite</span><span class="ms-2 md:hidden!">Liste predefinite</span>
-          </button>
-        }
       </div>
     </nz-col>
   </nz-row>
