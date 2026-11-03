@@ -28,6 +28,7 @@ import {
 } from '../../add-supply-lists/order-list-add-supply-lists-modal';
 import { OrderListDetailsFields, validateOrderListDetails } from './details/order-list-details-fields';
 import { OrderListLinesContainer } from './lines/order-list-lines-container';
+import { OrderListSuggestionsPanel } from './suggestions/order-list-suggestions-panel';
 import { isNil } from 'lodash-es';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { NzCollapseComponent, NzCollapsePanelComponent } from 'ng-zorro-antd/collapse';
@@ -54,7 +55,8 @@ import type { OrderListLineFormModel } from './lines/order-list-line';
     NzCollapseComponent,
     NzCollapsePanelComponent,
     LayoutBreakpoint,
-    NgTemplateOutlet
+    NgTemplateOutlet,
+    OrderListSuggestionsPanel
   ],
   selector: 'ske-order-list-detail-form',
   host:{
@@ -67,6 +69,8 @@ export class OrderListDetailForm {
   public readonly orderList = input.required<Partial<OrderListDto>>();
   /** The wizard collects the name and note in its own step, so the editor hides them until the order is saved. */
   public readonly showDetails = input(true);
+  /** The class whose low stock feeds the suggestions panel; without it the panel is not shown. */
+  public readonly classId = input<string | null>(null);
   protected readonly detailsOpen = signal(false);
   private readonly _readOnly = injectClassReadOnly();
   public readonly editable = computed(() => {
@@ -76,6 +80,8 @@ export class OrderListDetailForm {
     const status = this.orderList().status;
     return isNil(status) || status === 'Draft';
   });
+
+  protected readonly withSuggestions = computed(() => this.editable() && !isNil(this.classId()));
 
   private readonly _nzMessageService = inject(NzMessageService);
   private readonly _nzModalService = inject(NzModalService);
@@ -224,6 +230,20 @@ export class OrderListDetailForm {
     });
   });
 
+  protected readonly addedItemIds = computed(() => new Set(
+    this.orderListForm.lines().value()
+      .map((line) => line.itemId)
+      .filter((itemId): itemId is string => !isNil(itemId))
+  ));
+
+  protected addSuggestion(line: OrderListLineDto) {
+    // The panel disables added rows; this also stops a fast double click from adding the quantity twice.
+    if (!isNil(line.itemId) && this.addedItemIds().has(line.itemId))
+      return;
+
+    this.addLines([line]);
+  }
+
   protected removeLine(line: OrderListLineFormModel) {
     const lines = this.orderListForm.lines().value();
 
@@ -238,7 +258,7 @@ export class OrderListDetailForm {
     >({
       nzContent: OrderListAddSupplyListsModal,
       nzData: { addedIds: this._addedSupplyListIds() },
-      nzWidth: 'min(95vw, 36rem)',
+      nzWrapClassName: 'modal-100',
       nzCentered: true,
       nzMaskClosable: false
     });

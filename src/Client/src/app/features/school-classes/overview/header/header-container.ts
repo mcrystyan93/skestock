@@ -92,7 +92,7 @@ export class HeaderContainer {
     const modalRef = this._nzModalService.create({
       nzContent: OrderListDetailModal,
       nzData: { classId },
-      nzWrapClassName: 'modal-100 modal-lg-75',
+      nzWrapClassName: 'modal-100',
       nzCentered: true,
       nzMaskClosable: false
     });

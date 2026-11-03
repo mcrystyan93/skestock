@@ -4,12 +4,7 @@ import { OrderListLineDto, SupplyListDto, SupplyListListItemDto } from '@ske/mod
 import { NzAlertComponent } from 'ng-zorro-antd/alert';
 import { SupplyListsHttp } from '@ske/shared/supply-lists';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
-import {
-  NZ_MODAL_DATA,
-  NzModalFooterDirective,
-  NzModalRef,
-  NzModalTitleDirective,
-} from 'ng-zorro-antd/modal';
+import { NZ_MODAL_DATA, NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zorro-antd/modal';
 import { forkJoin } from 'rxjs';
 import { supplyListsToLines } from '../../../services/order-list-wizard.utils';
 import { OrderListSupplyListStep } from '../wizard/steps/supply-list-step';
@@ -27,7 +22,10 @@ import { OrderListSupplyListStep } from '../wizard/steps/supply-list-step';
     <div *nzModalTitle>Adaugă liste predefinite</div>
 
     @if (failed()) {
-      <nz-alert nzType="error" nzShowIcon class="mb-3" [nzMessage]="failed()" />
+      <nz-alert nzType="error"
+                nzShowIcon
+                class="mb-3"
+                [nzMessage]="failed()" />
     }
 
     <ske-order-list-supply-list-step
@@ -38,7 +36,10 @@ import { OrderListSupplyListStep } from '../wizard/steps/supply-list-step';
     />
 
     <div *nzModalFooter>
-      <button nz-button type="button" (click)="close()">Renunță</button>
+      <button nz-button
+              type="button"
+              (click)="close()">Renunță
+      </button>
       <button
         nz-button
         nzType="primary"

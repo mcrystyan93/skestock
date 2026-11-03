@@ -64,7 +64,18 @@
       </p>
     }
   }
-  <ske-order-list-lines-container [lines]="orderListForm.lines"
-                                  [disabled]="loading() || !editable()"
-                                  (remove)="removeLine($event)" />
+  <div class="grow flex flex-col"
+       [class]="withSuggestions() ? 'lg:grid lg:grid-cols-3 lg:gap-x-4' : ''">
+    @if (withSuggestions()) {
+      <ske-order-list-suggestions-panel *skeLayoutBreakpoint="'lg'"
+                                        [classId]="classId()!"
+                                        [addedItemIds]="addedItemIds()"
+                                        (add)="addSuggestion($event)" />
+    }
+    <ske-order-list-lines-container class="lg:col-span-2 lg:ms-0!"
+                                    [lines]="orderListForm.lines"
+                                    [disabled]="loading() || !editable()"
+                                    [narrow]="withSuggestions()"
+                                    (remove)="removeLine($event)" />
+  </div>
 </form>
