@@ -29,7 +29,8 @@
 
   <ske-order-list-detail-form [loading]="busy()"
                               [orderList]="store.orderList()"
-                              [showDetails]="!isWizard()" />
+                              [showDetails]="!isWizard()"
+                              [classId]="modalData().classId" />
 </div>
 
 <div *nzModalFooter>
