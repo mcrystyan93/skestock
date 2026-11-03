@@ -1,23 +1,15 @@
-import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import type { OrderListLineDto } from '@ske/models';
 import { ClassStatisticsHttp } from '@ske/shared/class-statistics';
-import { ItemThumbnail } from '@ske/shared/items';
 import { groupLowStockItems, purchaseSegmentLists, suggestionsToLines, supplyListsToLines } from '@ske/shared/order-lists/services';
 import { StockHttp } from '@ske/shared/stock';
 import { SupplyListsHttp } from '@ske/shared/supply-lists';
 import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 import { NzAlertComponent } from 'ng-zorro-antd/alert';
-import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { NzEmptyComponent } from 'ng-zorro-antd/empty';
-import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzSkeletonComponent } from 'ng-zorro-antd/skeleton';
 import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
-
-type SuggestionRow = { itemId: string; line: OrderListLineDto; detail: string };
-
-type SuggestionGroup = { title: string | null; rows: SuggestionRow[] };
+import { OrderListSuggestionGroups, type SuggestionGroup } from './order-list-suggestion-groups';
 
 const SUPPLY_LISTS_TAB_INDEX = 2;
 
@@ -25,61 +17,17 @@ const FREQUENCY_TITLES = ['Săptămânal', 'La 2 săptămâni', 'Lunar', 'O dat�
 
 @Component({
   imports: [
-    ItemThumbnail,
-    NgTemplateOutlet,
     NzAlertComponent,
-    NzButtonComponent,
-    NzEmptyComponent,
-    NzIconDirective,
     NzSkeletonComponent,
     NzTabComponent,
-    NzTabsComponent
+    NzTabsComponent,
+    OrderListSuggestionGroups
   ],
   selector: 'ske-order-list-suggestions-panel',
   host: {
     class: 'relative min-h-0 -mb-6'
   },
   template: `
-    <ng-template #groupList
-                 let-groups
-                 let-emptyText="emptyText">
-      @for (group of groups; track $index) {
-        @if (group.title) {
-          <h4 class="m-0 mt-4 text-base font-semibold opacity-80">{{ group.title }}</h4>
-        }
-        <ul class="m-0 list-none p-0">
-          @for (row of group.rows; track row.itemId) {
-            @let added = addedItemIds().has(row.itemId);
-            <li class="flex items-center gap-3 py-2">
-              <ske-item-thumbnail [itemId]="row.itemId"
-                                  [imageFileId]="row.line.itemImageFileId" />
-              <span class="flex min-w-0 grow flex-col">
-                <span class="truncate font-medium">{{ row.line.productName }}</span>
-                <span class="truncate text-sm opacity-70">{{ row.detail }}</span>
-              </span>
-              <button nz-button
-                      nzType="text"
-                      nzSize="small"
-                      class="me-2"
-                      type="button"
-                      [disabled]="added"
-                      [attr.aria-label]="added ? null : 'Adaugă ' + row.line.productName"
-                      (click)="add.emit(row.line)">
-                @if (added) {
-                  <nz-icon nzType="icons:circle-check"></nz-icon>
-                  <span>Adăugat</span>
-                } @else {
-                  <nz-icon nzType="icons:chevrons-right"></nz-icon>
-                }
-              </button>
-            </li>
-          }
-        </ul>
-      } @empty {
-        <nz-empty [nzNotFoundContent]="emptyText" />
-      }
-    </ng-template>
-
     <div class="absolute inset-0 flex flex-col pb-4">
     <nz-tabs nzSize="small"
              class="h-full [&_.ant-tabs-tab+.ant-tabs-tab]:ml-4! [&_.ant-tabs-content-holder]:min-h-0 [&_.ant-tabs-content-holder]:overflow-y-auto"
@@ -94,7 +42,10 @@ const FREQUENCY_TITLES = ['Săptămânal', 'La 2 săptămâni', 'Lunar', 'O dat�
                     nzShowIcon
                     nzMessage="Nu am putut încărca produsele cu stoc redus." />
         } @else {
-          <ng-container *ngTemplateOutlet="groupList; context: { $implicit: lowStockGroups(), emptyText: 'Nu există articole cu stoc scăzut.' }" />
+          <ske-order-list-suggestion-groups [groups]="lowStockGroups()"
+                                              [addedItemIds]="addedItemIds()"
+                                              emptyText="Nu există articole cu stoc scăzut."
+                                              (add)="add.emit($event)" />
         }
       </nz-tab>
       <nz-tab nzTitle="După frecvență">
@@ -107,7 +58,10 @@ const FREQUENCY_TITLES = ['Săptămânal', 'La 2 săptămâni', 'Lunar', 'O dat�
                     nzShowIcon
                     nzMessage="Nu am putut încărca produsele după frecvență." />
         } @else {
-          <ng-container *ngTemplateOutlet="groupList; context: { $implicit: frequencyGroups(), emptyText: 'Nu există date încă' }" />
+          <ske-order-list-suggestion-groups [groups]="frequencyGroups()"
+                                              [addedItemIds]="addedItemIds()"
+                                              emptyText="Nu există date încă"
+                                              (add)="add.emit($event)" />
         }
       </nz-tab>
       <nz-tab nzTitle="Predefinite">
@@ -120,7 +74,10 @@ const FREQUENCY_TITLES = ['Săptămânal', 'La 2 săptămâni', 'Lunar', 'O dat�
                     nzShowIcon
                     nzMessage="Nu am putut încărca listele predefinite." />
         } @else {
-          <ng-container *ngTemplateOutlet="groupList; context: { $implicit: supplyListGroups(), emptyText: 'Nu există liste predefinite active.' }" />
+          <ske-order-list-suggestion-groups [groups]="supplyListGroups()"
+                                              [addedItemIds]="addedItemIds()"
+                                              emptyText="Nu există liste predefinite active."
+                                              (add)="add.emit($event)" />
         }
       </nz-tab>
     </nz-tabs>
