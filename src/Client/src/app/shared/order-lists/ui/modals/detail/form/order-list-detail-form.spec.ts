@@ -8,7 +8,6 @@ import { OrderListDetailForm } from './order-list-detail-form';
 import { OrderListDetailState } from '../../../../services/order-list-detail.store';
 import { OrderListsHttp } from '../../../../services/order-lists.http';
 import { provideDispatcher } from '@ngrx/signals/events';
-import { NzModalService } from 'ng-zorro-antd/modal';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
 import { NzBreakpointService } from 'ng-zorro-antd/core/services';
@@ -30,11 +29,9 @@ function providers(): (Provider | EnvironmentProviders)[] {
       createTestIcon('icons:plus'),
       createTestIcon('icons:minus'),
       createTestIcon('icons:pencil'),
-      createTestIcon('icons:clipboard-list'),
       createTestIcon('icons:box')
     ]),
     OrderListDetailState,
-    { provide: NzModalService, useValue: { create: vi.fn() } },
     {
       provide: ItemsHttp,
       useValue: {
