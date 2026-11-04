@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, DestroyRef, inject, viewChild } from '@angular/core';
 import { congregationApiEvents, CongregationDetailState, NEW_CONGREGATION_ROUTE_ID } from '../../../services/congregation-detail.store';
 import { CongregationDto, CreateCongregationRequest, UpdateCongregationRequest } from '@ske/models';
 import { NZ_MODAL_DATA, NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zorro-antd/modal';
@@ -9,7 +9,7 @@ import { isNil } from 'lodash-es';
 import { Events } from '@ngrx/signals/events';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { BehaviorSubject, filter, switchMap, tap } from 'rxjs';
+import { tap } from 'rxjs';
 import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
 import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
@@ -32,12 +32,11 @@ import { ErrorAlert, ErrorMessageService } from '@ske/shared/errors';
     ErrorAlert
   ],
   selector: 'ske-congregation-detail-modal',
-  styles: ``,
   templateUrl: './congregation-detail-modal.html',
   providers: [CongregationDetailState]
 })
 export class CongregationDetailModal {
-  public readonly modalData = signal<CongregationDetailModalData>(inject(NZ_MODAL_DATA));
+  public readonly modalData = inject<CongregationDetailModalData>(NZ_MODAL_DATA);
   public readonly store = inject(CongregationDetailState);
 
   // Server errors for these form fields are shown under the field; everything else stays in the alert.
@@ -67,7 +66,7 @@ export class CongregationDetailModal {
       : null;
   });
 
-  private initialLoad = false;
+  private _shouldClose = false;
 
   private readonly _nzModalRef = inject(NzModalRef);
   private readonly _storeEvents = inject(Events);
@@ -75,28 +74,24 @@ export class CongregationDetailModal {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _nzMessageService = inject(NzMessageService);
   private readonly _errorMessages = inject(ErrorMessageService);
-  private readonly _close$ = new BehaviorSubject(false);
-
-  private readonly _initialLoadEffectRef = effect(() => {
-    if (this.initialLoad)
-      return;
-
-    const { congregation, prefill } = this.modalData();
-
-    this.store.loadCongregation({ id: congregation?.id ?? NEW_CONGREGATION_ROUTE_ID, prefill: congregation ? null : prefill });
-    this.initialLoad = true;
-  });
 
   private readonly _saveSuccessRef = this._storeEvents.on(congregationApiEvents.saveSuccess)
     .pipe(
-      takeUntilDestroyed(this._destroyRef),
-      tap(() => this._nzMessageService.success('Congregația a fost salvată cu succes!')),
-      switchMap(() => this._close$),
-      filter((shouldClose) => shouldClose),
-      tap(() => this.close(this.store.congregation()))
+      tap(() => {
+        this._nzMessageService.success('Congregația a fost salvată cu succes!');
+
+        if (this._shouldClose)
+          this.close(this.store.congregation());
+      }),
+      takeUntilDestroyed(this._destroyRef)
     )
     .subscribe();
 
+  constructor() {
+    const { congregation, prefill } = this.modalData;
+
+    this.store.loadCongregation({ id: congregation?.id ?? NEW_CONGREGATION_ROUTE_ID, prefill: congregation ? null : prefill });
+  }
 
   public close(savedCongregation: Partial<CongregationDto> | null = null) {
     this._nzModalRef.close(savedCongregation);
@@ -114,7 +109,7 @@ export class CongregationDetailModal {
       return;
 
     // Set on every save so a previous "save and close" that failed cannot close a later plain "save".
-    this._close$.next(shouldClose);
+    this._shouldClose = shouldClose;
     this.store.saveCongregation(this.mapSaveRequest(formData));
   }
 

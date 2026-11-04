@@ -39,6 +39,18 @@ describe('withCongregationCollection', () => {
     expect(store.hasNextPage()).toBe(false);
   });
 
+  it('marks the collection as loading while the request is pending', () => {
+    const pending = new Subject<typeof page>();
+    http.getAll.mockReturnValue(pending);
+    const store = TestBed.inject(CollectionStore);
+
+    store.load({ searchTerm: null, filters: [], sort: [], cursor: null, pageSize: 10 });
+    expect(store.congregationsLoading()).toBe(true);
+
+    pending.next(page);
+    expect(store.congregationsLoading()).toBe(false);
+  });
+
   it.each([
     ['created', () => realtimeEvents.congregationCreated({ congregationId: 'x' })],
     ['updated', () => realtimeEvents.congregationUpdated({ congregationId: 'x' })],

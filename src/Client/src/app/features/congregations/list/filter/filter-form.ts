@@ -1,7 +1,7 @@
-import { Component, effect, input, linkedSignal, output, untracked } from '@angular/core';
+import { Component, computed, effect, input, linkedSignal, output, untracked } from '@angular/core';
 import { ColumnFilter, GetAllCongregationsRequest, getFilterValue } from '@ske/models';
-import { debounce, form, FormField, submit } from '@angular/forms/signals';
-import { isEqual, isNil } from 'lodash-es';
+import { debounce, form, FormField } from '@angular/forms/signals';
+import { isEqual } from 'lodash-es';
 import { FormsModule } from '@angular/forms';
 import { NzFormDirective } from 'ng-zorro-antd/form';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
@@ -30,7 +30,6 @@ const BOOLEAN_FILTER_FIELDS = ['canReceiveStudents', 'isSmallCongregation'] as c
     NzSegmentedItemComponent
   ],
   selector: 'ske-congregation-filter-form',
-  styles: ``,
   templateUrl: './filter-form.html'
 })
 export class FilterForm {
@@ -45,61 +44,33 @@ export class FilterForm {
     { label: 'Nu', value: 'no' }
   ];
 
-  private _initialFilterEmitted = false;
-  private _initialFormChangeHandled = false;
+  // Only the fields the form edits: a reload replaces the filter object (new cursor/sort), and mirroring
+  // that into the form would reset what the user typed while the request was in flight.
+  private readonly _editableFilter = computed(() => {
+    const filter = this.filter();
 
-  private readonly _formModel = linkedSignal({
-    source: () => this.filter(),
-    computation: (filter) => (<CongregationListFilterModel>{
+    return {
       searchTerm: filter.searchTerm ?? '',
       canReceiveStudents: toSegment(getFilterValue<boolean>(filter.filters, 'canReceiveStudents')),
       isSmallCongregation: toSegment(getFilterValue<boolean>(filter.filters, 'isSmallCongregation'))
-    })
-  });
+    } satisfies CongregationListFilterModel;
+  }, { equal: isEqual });
+
+  private readonly _formModel = linkedSignal<CongregationListFilterModel>(() => ({ ...this._editableFilter() }));
 
   public readonly congregationListFilterForm = form(this._formModel, (schemaPath) => {
     debounce(schemaPath.searchTerm, 300);
   });
 
-  private readonly _initialFilterEffectRef = effect(() => {
-    if (this._initialFilterEmitted)
-      return;
-    // Wait until required inputs are initialized, then trigger the first list load.
-    this.filter();
-
-    this.onFilterChange.emit(this.buildFilterCriteria());
-
-    this._initialFilterEmitted = true;
-  });
-
   private readonly _formChangeEffectRef = effect(() => {
     this.congregationListFilterForm().value();
 
-    if (!this._initialFormChangeHandled) {
-      this._initialFormChangeHandled = true;
-      return;
-    }
-
-    const currentFilter = untracked(() => this.filter());
+    // Also runs once on init, where the form mirrors the filter and nothing is emitted.
     const nextFilter = untracked(() => this.buildFilterCriteria());
 
-    if (isEqual(currentFilter, nextFilter))
-      return;
-
-    untracked(() => this.onSubmit());
+    if (!isEqual(untracked(() => this.filter()), nextFilter))
+      this.onFilterChange.emit(nextFilter);
   });
-
-  public async onSubmit() {
-    let data: CongregationListFilterModel | null = null;
-    const isValid = submit(this.congregationListFilterForm, async () => {
-      data = this.congregationListFilterForm().value();
-    });
-
-    if (!isValid || isNil(data))
-      return;
-
-    this.onFilterChange.emit(this.buildFilterCriteria());
-  }
 
   public clear() {
     this.congregationListFilterForm().reset({
@@ -107,8 +78,6 @@ export class FilterForm {
       canReceiveStudents: 'all',
       isSmallCongregation: 'all'
     });
-
-    this.onSubmit();
   }
 
   private buildFilterCriteria(): GetAllCongregationsRequest {
@@ -116,7 +85,7 @@ export class FilterForm {
 
     return {
       ...this.filter(),
-      searchTerm: criteria.searchTerm,
+      searchTerm: criteria.searchTerm || null,
       filters: [
         ...this.filter().filters.filter((f) => !(BOOLEAN_FILTER_FIELDS as readonly string[]).includes(f.field)),
         ...BOOLEAN_FILTER_FIELDS
