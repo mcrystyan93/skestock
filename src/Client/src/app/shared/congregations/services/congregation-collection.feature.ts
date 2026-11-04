@@ -60,7 +60,7 @@ export function withCongregationCollection() {
           map(data => buildCongregationListFilter(store.filter(), data)),
           tap((filter) => {
             store.clearCongregationsErrors();
-            store.congregationsLoading();
+            store.setCongregationsLoading();
 
             patchState(store, { filter, isLoadingMore: false });
           }),

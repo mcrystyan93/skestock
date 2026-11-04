@@ -1,4 +1,4 @@
-import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { patchState, signalStore, withHooks, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { mapResponse } from '@ngrx/operators';
 import { exhaustMap, pipe, tap } from 'rxjs';
@@ -44,5 +44,9 @@ export const CongregationListState = signalStore(
     );
 
     return { reload, deleteCongregation };
+  }),
+  withHooks({
+    // The filter form only emits real changes, so the first page is loaded here.
+    onInit: (store) => store.load(store.filter())
   })
 );

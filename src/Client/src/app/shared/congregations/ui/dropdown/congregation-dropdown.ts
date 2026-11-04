@@ -53,7 +53,7 @@ import { NgTemplateOutlet } from '@angular/common';
                  [nzAllowClear]="allowClear()"
                  nzServerSearch
                  class="w-full"
-                 [compareWith]="(a, b) => (a && b ? a.id === b.id : a === b)"
+                 [compareWith]="compareCongregations"
                  (nzOnSearch)="onSearch($event)"
                  [nzDropdownMatchSelectWidth]="false"
                  [nzDropdownRender]="loadingMoreTemplate"
@@ -74,8 +74,8 @@ import { NgTemplateOutlet } from '@angular/common';
                 nzType="default"
                 type="button"
                 (click)="onEdit(value())">
-          @if (createButtonTemplate(); as createButtonTemplate) {
-            <ng-container *ngTemplateOutlet="createButtonTemplate"></ng-container>
+          @if (editButtonTemplate(); as editTemplate) {
+            <ng-container *ngTemplateOutlet="editTemplate"></ng-container>
           } @else {
             <nz-icon nzType="icons:pencil"></nz-icon>
           }
@@ -86,8 +86,8 @@ import { NgTemplateOutlet } from '@angular/common';
                 nzType="default"
                 type="button"
                 (click)="onAdd()">
-          @if (createButtonTemplate(); as createButtonTemplate) {
-            <ng-container *ngTemplateOutlet="createButtonTemplate"></ng-container>
+          @if (createButtonTemplate(); as createTemplate) {
+            <ng-container *ngTemplateOutlet="createTemplate"></ng-container>
           } @else {
             <nz-icon nzType="icons:plus"></nz-icon>
           }
@@ -111,10 +111,10 @@ export class CongregationDropdown implements FormValueControl<CongregationDropdo
   public readonly allowCreate = input<boolean>(true);
   public readonly placeholder = input<string>('Selectați o congregație');
   public readonly createPrefill = input<Partial<CongregationDto> | null>(null);
-  public readonly createButtonTemplate = input<TemplateRef<any> | null>(null);
+  public readonly createButtonTemplate = input<TemplateRef<unknown> | null>(null);
   /** When true, only congregations that can receive students are offered. */
   public readonly canReceiveStudents = input<boolean>(false);
-  public readonly editButtonTemplate = input<TemplateRef<any> | null>(null);
+  public readonly editButtonTemplate = input<TemplateRef<unknown> | null>(null);
 
   public readonly store = inject(CongregationDropdownStore);
   private readonly _search$ = new Subject<string>();
@@ -175,6 +175,9 @@ export class CongregationDropdown implements FormValueControl<CongregationDropdo
 
     return congregation.name ? this.congregationLabel(congregation) : 'Se încarcă congregația…';
   });
+
+  public readonly compareCongregations = (a: CongregationDropdownValue, b: CongregationDropdownValue) =>
+    a && b ? a.id === b.id : a === b;
 
   public loadMore() {
     this.store.loadMore();

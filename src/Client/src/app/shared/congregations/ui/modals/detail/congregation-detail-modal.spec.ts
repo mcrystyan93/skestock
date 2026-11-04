@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
-import { of, throwError } from 'rxjs';
+import { NEVER, of, throwError } from 'rxjs';
 import { type CongregationDto } from '@ske/models';
 import { CongregationDetailModal } from './congregation-detail-modal';
 // noinspection ES6PreferShortImport
@@ -78,6 +78,20 @@ describe('CongregationDetailModal', () => {
     await fixture.componentInstance.save(false);
 
     expect(http.update).toHaveBeenCalledTimes(2);
+    expect(modalRef.close).not.toHaveBeenCalled();
+  });
+
+  it('does not close early on "save and close" after an earlier plain save', async () => {
+    const fixture = setup({ congregation: existing });
+    fixture.detectChanges();
+    http.update.mockReturnValueOnce(of({ ...existing, name: 'First' }));
+    await fixture.componentInstance.save(false);
+    expect(modalRef.close).not.toHaveBeenCalled();
+
+    // The request never answers, so the modal must stay open.
+    http.update.mockReturnValueOnce(NEVER);
+    await fixture.componentInstance.save(true);
+
     expect(modalRef.close).not.toHaveBeenCalled();
   });
 

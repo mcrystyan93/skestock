@@ -20,7 +20,6 @@ import { TimeAgoPipe } from '@ske/shared/pipes';
     TimeAgoPipe
   ],
   selector: 'ske-congregation-table',
-  styles: ``,
   templateUrl: './table.html',
   host: {
     class: 'absolute block inset-0'
@@ -42,8 +41,4 @@ export class Table extends BaseTableWithFilter<CongregationDto, GetAllCongregati
     lastModifiedDate: { width: '160px' },
     actions: { width: '90px' }
   } as const;
-
-  constructor() {
-    super();
-  }
 }
