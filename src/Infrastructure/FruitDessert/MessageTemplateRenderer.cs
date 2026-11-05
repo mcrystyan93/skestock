@@ -2,6 +2,7 @@ using FluentResults;
 using System.Text.RegularExpressions;
 using skestock.Application.Common.Errors;
 using skestock.Application.Features.FruitDessertPlans.Abstractions;
+using skestock.Application.Features.FruitDessertTemplates;
 
 namespace skestock.Infrastructure.FruitDessert;
 
@@ -26,9 +27,12 @@ public partial class MessageTemplateRenderer : IMessageTemplateRenderer
             ["{ClassName}"] = values.ClassName
         };
 
-        var unknown = PlaceholderRegex().Matches(template)
+        // Convert first so values substituted afterwards stay verbatim (never re-parsed as HTML/markup).
+        var converted = WhatsAppFormatter.ToWhatsApp(template);
+
+        var unknown = PlaceholderRegex().Matches(converted)
             .Select(m => m.Value)
-            .Where(p => !replacements.ContainsKey(p))
+            .Where(p => !MessagePlaceholders.IsKnown(p))
             .Distinct()
             .ToList();
         if (unknown.Count > 0)
@@ -36,7 +40,7 @@ public partial class MessageTemplateRenderer : IMessageTemplateRenderer
             return Result.Fail(new FruitDessertErrors.UnknownPlaceholder(unknown));
         }
 
-        return Result.Ok(PlaceholderRegex().Replace(template, m => replacements[m.Value]));
+        return Result.Ok(PlaceholderRegex().Replace(converted, m => replacements[m.Value]));
     }
 
     private static string FormatDate(DateOnly date) =>
