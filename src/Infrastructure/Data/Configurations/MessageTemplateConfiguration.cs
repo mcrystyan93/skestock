@@ -14,7 +14,7 @@ public class MessageTemplateConfiguration : IEntityTypeConfiguration<MessageTemp
     {
         builder.Property(t => t.Type).HasConversion<int>();
         builder.Property(t => t.Name).HasMaxLength(100).IsRequired();
-        builder.Property(t => t.Body).HasMaxLength(1000).IsRequired();
+        builder.Property(t => t.Body).HasMaxLength(4000).IsRequired();
 
         // One active template per type; a new template is a new row.
         builder.HasIndex(t => t.Type)

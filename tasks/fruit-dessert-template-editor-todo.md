@@ -20,7 +20,7 @@ Client rules: `AGENTS.md`; no Prettier, match surrounding formatting by hand; Ro
 
 ## Phase 1 — Backend core
 
-- [ ] T2 Placeholder catalog + `WhatsAppFormatter` (tests first) `[Sonnet]`
+- [x] T2 Placeholder catalog + `WhatsAppFormatter` (tests first) `[Sonnet]`
   - Acceptance: `MessagePlaceholders` static catalog with `{ContactPerson}`, `{Date}`, `{Congregation}`, `{ClassName}`, each `(Token, Label RO, Example, MaxLength)`; MaxLength taken from the column limits (read `CongregationConfiguration`, `SchoolClassConfiguration`, `DataSchemaConstants`; date = longest Romanian formatted date). `WhatsAppFormatter.Sanitize(html)` rebuilds output from whitelist `p, br, strong, b, em, i, s, strike, code, ul, ol, li` with no attributes, text HTML-encoded, other tags dropped but their text kept (`script`/`style` content dropped entirely), comments dropped. `ToWhatsApp(html)` per plan mapping, entities decoded, whitespace moved outside markers, empty marks dropped, no-tag input returned unchanged. Tests: each mark, nested marks, paragraphs/br, bullet + ordered list, legacy plain text with newlines, `<script>`, `onerror=`, `javascript:` link, comment, unclosed tag, entities (`&amp;`, `&nbsp;`, `&lt;`).
   - Verify: `dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~FruitDessertTemplates"`
   - Files: `App/MessagePlaceholders.cs`, `App/WhatsAppFormatter.cs`, `UT/WhatsAppFormatterTests.cs`
@@ -28,7 +28,7 @@ Client rules: `AGENTS.md`; no Prettier, match surrounding formatting by hand; Ro
   - Acceptance: `MessageTemplateRenderer.Render` converts with `WhatsAppFormatter.ToWhatsApp` first, then replaces placeholders; known set comes from `MessagePlaceholders` (no duplicated token literals); interface unchanged; unknown placeholder still fails with `UnknownPlaceholder`. New tests: HTML template renders WhatsApp markup with values substituted; values containing `<`/`*` are inserted verbatim; both seeded legacy bodies render exactly as before.
   - Verify: `dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~MessageTemplateRenderer"`
   - Files: `src/Infrastructure/FruitDessert/MessageTemplateRenderer.cs`, `tests/Application.UnitTests/Infrastructure/FruitDessert/MessageTemplateRendererTests.cs`
-- [ ] T4 Migration `WidenMessageTemplateBody` `[Sonnet]` (parallel with T2)
+- [x] T4 Migration `WidenMessageTemplateBody` `[Sonnet]` (parallel with T2)
   - Acceptance: `MessageTemplateConfiguration` Body `HasMaxLength(4000)`; migration generated only by the command; `Up` contains only one `AlterColumn` (1000 -> 4000) and `Down` the reverse; designer/snapshot not hand-edited; no pending model changes.
   - Verify: `dotnet ef migrations add WidenMessageTemplateBody --project src/Infrastructure --startup-project src/Web --context ApplicationDbContext --output-dir Data/Migrations && dotnet ef migrations has-pending-model-changes --project src/Infrastructure --startup-project src/Web --context ApplicationDbContext && dotnet build`
   - Files: `src/Infrastructure/Data/Configurations/MessageTemplateConfiguration.cs`, `src/Infrastructure/Data/Migrations/*_WidenMessageTemplateBody.cs` (+ generated Designer and snapshot)
@@ -54,7 +54,7 @@ Client rules: `AGENTS.md`; no Prettier, match surrounding formatting by hand; Ro
 
 ## Phase 3 — Client
 
-- [ ] T8 Models + http `[Sonnet]` (parallel with Phase 1, contract in plan)
+- [x] T8 Models + http `[Sonnet]` (parallel with Phase 1, contract in plan)
   - Acceptance: types `MessageTemplateDto`, `MessagePlaceholderDto`, `MessageTemplatesDto`, `UpdateMessageTemplateRequest` added to `core/models/fruit-dessert.ts` (reuse `FruitDessertMessageType`), exported via the existing models index if there is one; `FruitDessertTemplatesHttp` with `get()` and `update(type, request)` following `fruit-dessert-plans.http.ts` (base URL, `@Service()`/`inject` as there).
   - Verify: `cd src/Client && npm run build`
   - Files: `src/Client/src/app/core/models/fruit-dessert.ts`, `Svc/fruit-dessert-templates.http.ts`
