@@ -19,7 +19,7 @@ public partial class UpdateMessageTemplateCommandValidator : AbstractValidator<U
 
         RuleFor(x => x.Body)
             .NotEmpty().WithErrorCode(ValidationErrorCodes.Required)
-            .MaximumLength(BodyMaxLength).WithErrorCode(ValidationErrorCodes.MaxLength)
+            .Must(b => WhatsAppFormatter.Sanitize(b).Length <= BodyMaxLength).WithErrorCode(ValidationErrorCodes.MaxLength)
             .DependentRules(() =>
             {
                 RuleFor(x => x.Body)

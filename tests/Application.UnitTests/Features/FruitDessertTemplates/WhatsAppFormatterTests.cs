@@ -33,6 +33,23 @@ public class WhatsAppFormatterTests
         WhatsAppFormatter.ToWhatsApp("<ol><li>a</li><li>b</li></ol>").ShouldBe("1. a\n2. b");
 
     [Test]
+    public void Sanitize_Tagless_RoundTripsUnchanged()
+    {
+        const string text = "Tom & Jerry 5 < 6";
+        var stored = WhatsAppFormatter.Sanitize(text);
+        stored.ShouldBe(text);
+        WhatsAppFormatter.ToWhatsApp(stored).ShouldBe(text);
+    }
+
+    [Test]
+    public void Sanitize_Tagged_EncodesAndToWhatsAppDecodes()
+    {
+        var stored = WhatsAppFormatter.Sanitize("<p>Tom & Jerry</p>");
+        stored.ShouldBe("<p>Tom &amp; Jerry</p>");
+        WhatsAppFormatter.ToWhatsApp(stored).ShouldBe("Tom & Jerry");
+    }
+
+    [Test]
     public void ToWhatsApp_LegacyPlainText_ReturnedUnchanged()
     {
         const string text = "Bună, {ContactPerson}!\nLa revedere & 1 < 2.";

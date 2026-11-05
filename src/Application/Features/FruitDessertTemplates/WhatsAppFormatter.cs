@@ -76,6 +76,12 @@ public static partial class WhatsAppFormatter
 
     public static string Sanitize(string html)
     {
+        // Tagless = legacy plain text, stored raw (ToWhatsApp does not decode it).
+        if (!AnyTagRegex().IsMatch(html))
+        {
+            return html;
+        }
+
         var sb = new StringBuilder();
         foreach (var t in Tokenize(html))
         {
