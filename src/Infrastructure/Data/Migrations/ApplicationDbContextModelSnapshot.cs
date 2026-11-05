@@ -503,8 +503,8 @@ namespace skestock.Infrastructure.Data.Migrations
 
                     b.Property<string>("Body")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<Guid?>("CreatedById")
                         .HasColumnType("uniqueidentifier");
