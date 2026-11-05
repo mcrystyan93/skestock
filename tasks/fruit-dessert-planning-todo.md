@@ -117,7 +117,7 @@ Client rule: no Prettier, match surrounding formatting by hand, Romanian UI, NG-
 
 ## Phase 6 — Review and ship
 
-- [ ] T20 Full verification run `[Sonnet]`
+- [x] T20 Full verification run `[Sonnet]`
   - Acceptance: everything green; results (incl. failures) recorded for the PR
   - Verify: `dotnet build && dotnet test tests/Application.UnitTests && ./run-functional-tests.sh --filter "FullyQualifiedName~FruitDessert" && cd src/Client && npm run build && npm test -- --watch=false`
   - Files: none
