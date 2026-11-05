@@ -1,6 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.FruitDessertPlans.Commands.SendFruitDessertMessage;
 using skestock.Application.Features.FruitDessertPlans.Commands.SetFruitDessertCongregation;
 using skestock.Application.Features.FruitDessertPlans.Queries.GetFruitDessertPlan;
@@ -37,9 +41,21 @@ public class MessageTemplateTests : TestBase
         foreach (var t in _original.Templates)
             await _client.PutAsJsonAsync($"{Url}/{t.Type}", new { t.Name, t.Body });
         _client.Dispose();
+
+        // PUT stamps LastModifiedById with the test user; Respawn deletes that profile, so detach it
+        // (the FK would otherwise block the next reset).
+        using var scope = FunctionalTestSetup.ScopeFactory.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
+        await db.MessageTemplates.ExecuteUpdateAsync(s => s.SetProperty(t => t.LastModifiedById, (Guid?)null));
     }
 
-    private Task<MessageTemplatesDto?> GetAsync() => _client.GetFromJsonAsync<MessageTemplatesDto>(Url);
+    // The API writes enums as camelCase strings (see Web/DependencyInjection.cs).
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
+    {
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+    };
+
+    private Task<MessageTemplatesDto?> GetAsync() => _client.GetFromJsonAsync<MessageTemplatesDto>(Url, JsonOptions);
 
     [Test]
     public async Task Get_ReturnsTwoTemplatesAndFourPlaceholders()
