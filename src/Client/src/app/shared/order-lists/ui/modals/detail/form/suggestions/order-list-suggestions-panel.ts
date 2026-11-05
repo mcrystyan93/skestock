@@ -125,8 +125,7 @@ export class OrderListSuggestionsPanel {
       ...purchaseSegmentLists(segments).flat().map((item) => item.itemId)
     ]);
 
-    // Average quantities are fractional; order whole units, never below 1.
-    return new Map(lines.map((line) => [line.itemId ?? '', { ...line, quantity: Math.max(1, Math.floor(line.quantity)) }]));
+    return new Map(lines.map((line) => [line.itemId ?? '', line]));
   });
 
   protected readonly lowStockGroups = computed((): SuggestionGroup[] => {

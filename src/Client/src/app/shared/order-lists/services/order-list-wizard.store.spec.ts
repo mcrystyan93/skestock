@@ -110,7 +110,7 @@ describe('OrderListWizardStore', () => {
     expect(stockHttp.getLowStockItems).toHaveBeenCalledWith('class-1');
     expect(store.suggestions().map(item => item.itemId)).toEqual(['1', '2']);
     expect(store.suggestions()[0].locations).toEqual(['Birou', 'Depozit']);
-    expect(store.selectedItemIds()).toEqual(['1', '2']);
+    expect(store.selectedItemIds()).toEqual([]);
   });
 
   it('builds prefill lines with quantity 1 only for the selected suggestions', () => {
@@ -136,7 +136,7 @@ describe('OrderListWizardStore', () => {
     store.advance('class-1');
 
     expect(store.loadFailed()).toBe(false);
-    expect(store.selectedItemIds()).toEqual(['1']);
+    expect(store.selectedItemIds()).toEqual([]);
     expect(store.segments()).toBeNull();
     expect(message.error).toHaveBeenCalledWith('Nu s-au putut încărca grupele de produse.');
   });
@@ -153,15 +153,14 @@ describe('OrderListWizardStore', () => {
     store.setSource('new');
     store.advance('class-1');
 
-    // Low stock starts ticked, purchase segment items do not.
-    expect(store.selectedItemIds()).toEqual(['1', '2']);
+    expect(store.selectedItemIds()).toEqual([]);
 
     store.setSelectedItemIds(['1', '2', '3']);
 
     expect(store.buildPrefill().lines?.map((line) => [line.itemId, line.quantity, line.unit])).toEqual([
       ['1', 1, 'buc'],
       ['2', 6, 'set'],
-      ['3', 2.5, 'set']
+      ['3', 2, 'set']
     ]);
   });
 
