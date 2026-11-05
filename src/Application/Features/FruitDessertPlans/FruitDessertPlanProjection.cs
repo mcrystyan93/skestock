@@ -8,36 +8,41 @@ namespace skestock.Application.Features.FruitDessertPlans;
 // Shared by the listing and the commands, so every response carries the same live contact data.
 internal static class FruitDessertPlanProjection
 {
-    internal sealed record Row(
-        Guid Id,
-        Guid SchoolClassId,
-        DateOnly Date,
-        Guid? CongregationId,
-        string? CongregationName,
-        bool CongregationDeleted,
-        string? ContactPerson,
-        string? ContactPhone,
-        bool EmailSent,
-        bool ReminderSent,
-        bool ThanksSent);
+    // Member-initialised (not positional) so EF can translate filters applied after the projection.
+    internal sealed class Row
+    {
+        public Guid Id { get; init; }
+        public Guid SchoolClassId { get; init; }
+        public DateOnly Date { get; init; }
+        public Guid? CongregationId { get; init; }
+        public string? CongregationName { get; init; }
+        public bool CongregationDeleted { get; init; }
+        public string? ContactPerson { get; init; }
+        public string? ContactPhone { get; init; }
+        public bool EmailSent { get; init; }
+        public bool ReminderSent { get; init; }
+        public bool ThanksSent { get; init; }
+    }
 
     // Soft-deleted congregations stay visible: the planning commitment outlives the deletion.
     public static IQueryable<Row> Rows(IApplicationDbContext dbContext) =>
         from e in dbContext.FruitDessertPlanEntries.AsNoTracking()
         join c in dbContext.Congregations.IgnoreQueryFilters() on e.CongregationId equals c.Id into cs
         from c in cs.DefaultIfEmpty()
-        select new Row(
-            e.Id,
-            e.SchoolClassId,
-            e.Date,
-            e.CongregationId,
-            c == null ? null : c.Name,
-            c != null && c.DeletedDate != null,
-            c == null ? null : c.DessertContactPerson,
-            c == null ? null : c.DessertContactPhone,
-            e.EmailSent,
-            e.Messages.Any(m => m.Type == FruitDessertMessageType.Reminder),
-            e.Messages.Any(m => m.Type == FruitDessertMessageType.Thanks));
+        select new Row
+        {
+            Id = e.Id,
+            SchoolClassId = e.SchoolClassId,
+            Date = e.Date,
+            CongregationId = e.CongregationId,
+            CongregationName = c == null ? null : c.Name,
+            CongregationDeleted = c != null && c.DeletedDate != null,
+            ContactPerson = c == null ? null : c.DessertContactPerson,
+            ContactPhone = c == null ? null : c.DessertContactPhone,
+            EmailSent = e.EmailSent,
+            ReminderSent = e.Messages.Any(m => m.Type == FruitDessertMessageType.Reminder),
+            ThanksSent = e.Messages.Any(m => m.Type == FruitDessertMessageType.Thanks)
+        };
 
     public static FruitDessertPlanEntryDto ToDto(Row row, IPhoneNumberNormalizer phoneNumberNormalizer)
     {
