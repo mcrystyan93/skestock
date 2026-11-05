@@ -16,6 +16,7 @@ using skestock.Application.Common.Models.Options;
 using skestock.Application.Documents.Interfaces;
 using skestock.Application.Documents.Models;
 using skestock.Application.Documents.Schemas;
+using skestock.Application.Features.FruitDessertPlans.Abstractions;
 using skestock.Application.Features.GoodsReceipts.Models;
 using skestock.Application.Queues.Interfaces;
 using skestock.Application.Storage.Interfaces;
@@ -25,6 +26,7 @@ using skestock.Infrastructure.Data;
 using skestock.Infrastructure.Data.Interceptors;
 using skestock.Infrastructure.Distributed;
 using skestock.Infrastructure.Export;
+using skestock.Infrastructure.FruitDessert;
 using skestock.Infrastructure.Images;
 using skestock.Infrastructure.Identity;
 using skestock.Infrastructure.Queues;
@@ -156,6 +158,11 @@ public static class DependencyInjection
         builder.Services.AddSingleton<IOrderListExcelExporter, OrderListExcelExporter>();
         builder.Services.AddSingleton<IOrderListImageExporter, OrderListImageExporter>();
         builder.Services.AddSingleton<IImageThumbnailService, SkiaImageThumbnailService>();
+
+        builder.Services.AddSingleton<IWorkingDayProvider, WorkingDayProvider>();
+        builder.Services.AddSingleton<IPhoneNumberNormalizer, PhoneNumberNormalizer>();
+        builder.Services.AddSingleton<IMessageTemplateRenderer, MessageTemplateRenderer>();
+        builder.Services.AddSingleton<IMessageSender, WhatsAppLinkSender>();
     }
 
     private static void AddOpenAiExtraction(IHostApplicationBuilder builder)
