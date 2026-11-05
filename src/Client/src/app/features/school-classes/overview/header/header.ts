@@ -142,7 +142,7 @@ export class Header {
       },
       nzCentered: true,
       nzMaskClosable: false,
-      nzWrapClassName: 'modal-100 modal-lg-75 modal-xl-50'
+      nzWrapClassName: 'modal-w-90 modal-w-md-75 modal-w-xl-50'
     });
   }
 }
