@@ -1,16 +1,18 @@
 import { Component, effect, inject, input, untracked } from '@angular/core';
 import { FruitDessertMessageType } from '@ske/models';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 import { ErrorAlert } from '@ske/shared/errors';
 import { injectClassReadOnly } from '@ske/shared/school-classes';
 import { FruitDessertStore } from '../../../services/fruit-dessert.store';
+import { FruitDessertListSmall } from './list-small/fruit-dessert-list-small';
 import { FruitDessertTable } from './table/fruit-dessert-table';
 
 @Component({
   selector: 'ske-school-class-overview-fruit-dessert-tab',
-  imports: [ErrorAlert, FruitDessertTable],
+  imports: [ErrorAlert, FruitDessertTable, FruitDessertListSmall, LayoutBreakpoint],
   providers: [FruitDessertStore],
   templateUrl: './fruit-dessert-tab.html',
-  host: { class: 'absolute inset-0 flex min-w-0 flex-col gap-4 p-4 md:p-6' }
+  host: { class: 'flex flex-col grow absolute inset-0 gap-2 mt-4' }
 })
 export class FruitDessertTab {
   public readonly classId = input<string | null>(null);

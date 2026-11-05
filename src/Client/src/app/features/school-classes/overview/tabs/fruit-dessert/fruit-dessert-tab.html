@@ -2,13 +2,26 @@
                    [validationErrors]="store.entriesValidationErrors()"/>
 <ske-error-display [problemDetail]="store.actionProblemDetail()"/>
 
-<div class="relative grow">
-  <ske-fruit-dessert-table [entries]="store.entries()"
-                           [loading]="store.entriesLoading()"
-                           [readOnly]="readOnly()"
-                           [sending]="store.sending()"
-                           [fallback]="store.lastDispatchUrl()"
-                           (congregationChange)="store.setCongregation($event)"
-                           (emailSentChange)="store.setEmailSent($event)"
-                           (sendMessage)="send($event.entryId, $event.type)"/>
+<div class="grow relative">
+  <ng-container *skeLayoutBreakpoint="'lg'; else small">
+    <ske-fruit-dessert-table [entries]="store.entries()"
+                             [loading]="store.entriesLoading()"
+                             [readOnly]="readOnly()"
+                             [sending]="store.sending()"
+                             [fallback]="store.lastDispatchUrl()"
+                             (congregationChange)="store.setCongregation($event)"
+                             (emailSentChange)="store.setEmailSent($event)"
+                             (sendMessage)="send($event.entryId, $event.type)"/>
+  </ng-container>
+
+  <ng-template #small>
+    <ske-fruit-dessert-list-small [entries]="store.entries()"
+                                  [loading]="store.entriesLoading()"
+                                  [readOnly]="readOnly()"
+                                  [sending]="store.sending()"
+                                  [fallback]="store.lastDispatchUrl()"
+                                  (congregationChange)="store.setCongregation($event)"
+                                  (emailSentChange)="store.setEmailSent($event)"
+                                  (sendMessage)="send($event.entryId, $event.type)"/>
+  </ng-template>
 </div>
