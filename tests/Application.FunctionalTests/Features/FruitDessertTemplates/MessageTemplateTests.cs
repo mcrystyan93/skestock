@@ -25,13 +25,18 @@ public class MessageTemplateTests : TestBase
     [SetUp]
     public async Task Login()
     {
-        var userId = await TestApp.RunAsDefaultUserAsync();
+        var userId = await TestApp.RunAsAdministratorAsync();
         await TestApp.AddAsync(new UserProfile { IdentityId = userId!.Value, FirstName = "Staff", LastName = "Member" });
-        _client = FunctionalTestSetup.Factory.CreateClient();
-        var login = await _client.PostAsJsonAsync("/api/Users/login?useCookies=true",
-            new { email = "test@local", password = "Testing1234!" });
-        login.StatusCode.ShouldBe(HttpStatusCode.OK);
+        _client = await LoginAsync("administrator@local", "Administrator1234!");
         _original = (await GetAsync())!;
+    }
+
+    private static async Task<HttpClient> LoginAsync(string email, string password)
+    {
+        var client = FunctionalTestSetup.Factory.CreateClient();
+        var login = await client.PostAsJsonAsync("/api/Users/login?useCookies=true", new { email, password });
+        login.StatusCode.ShouldBe(HttpStatusCode.OK);
+        return client;
     }
 
     // MessageTemplates is excluded from Respawn, so put the seeded text back.
@@ -65,6 +70,21 @@ public class MessageTemplateTests : TestBase
         dto.Templates.Select(t => t.Type).ShouldBe([FruitDessertMessageType.Reminder, FruitDessertMessageType.Thanks],
             ignoreOrder: true);
         dto.Placeholders.Count.ShouldBe(4);
+    }
+
+    [Test]
+    public async Task NonAdmin_CanGetButPutIsForbiddenAndLeavesTemplateUnchanged()
+    {
+        await TestApp.RunAsDefaultUserAsync();
+        using var nonAdmin = await LoginAsync("test@local", "Testing1234!");
+
+        var get = await nonAdmin.GetAsync(Url);
+        var put = await nonAdmin.PutAsJsonAsync($"{Url}/Reminder", new { Name = "Hack", Body = "<p>Hack</p>" });
+
+        get.StatusCode.ShouldBe(HttpStatusCode.OK);
+        put.StatusCode.ShouldBe(HttpStatusCode.Forbidden);
+        var after = (await GetAsync())!.Templates.Single(t => t.Type == FruitDessertMessageType.Reminder);
+        after.ShouldBe(_original.Templates.Single(t => t.Type == FruitDessertMessageType.Reminder));
     }
 
     [Test]
