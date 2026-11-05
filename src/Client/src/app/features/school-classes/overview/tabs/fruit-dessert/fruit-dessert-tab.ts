@@ -27,6 +27,9 @@ export class FruitDessertTab {
   });
 
   protected send(entryId: string, type: FruitDessertMessageType) {
+    // The store ignores a send while one is in flight; opening a tab first would leave an orphan blank tab.
+    if (this.store.sending()) return;
+
     // Must open synchronously inside the click: after the awaited POST browsers block the popup. No `noopener` feature
     // string, or window.open returns null and the tab cannot be navigated afterwards.
     const win = window.open('', '_blank');
