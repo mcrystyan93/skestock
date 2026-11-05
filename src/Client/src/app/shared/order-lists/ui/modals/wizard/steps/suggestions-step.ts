@@ -1,7 +1,7 @@
 import { Component, computed, input, output } from '@angular/core';
 import type { PurchaseSegmentItemDto, PurchaseSegmentsDto } from '@ske/models';
 import { ItemThumbnail } from '@ske/shared/items';
-import type { SuggestedItem } from '@ske/shared/order-lists/services';
+import { type SuggestedItem, wholeQuantity } from '@ske/shared/order-lists/services';
 import { NzCheckboxComponent } from 'ng-zorro-antd/checkbox';
 import { NzEmptyComponent } from 'ng-zorro-antd/empty';
 import { NzSkeletonComponent } from 'ng-zorro-antd/skeleton';
@@ -114,7 +114,7 @@ export class OrderListSuggestionsStep {
         name: item.name,
         sku: item.sku,
         imageFileId: item.imageFileId,
-        quantity: item.averageQuantity,
+        quantity: wholeQuantity(item.averageQuantity),
         unit: item.unit
       }));
 
