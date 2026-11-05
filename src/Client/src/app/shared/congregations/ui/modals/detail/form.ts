@@ -23,7 +23,6 @@ import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
     NzColDirective
   ],
   selector: 'ske-congregation-form',
-  styles: ``,
   templateUrl: './form.html'
 })
 export class CongregationForm {

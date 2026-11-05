@@ -34,6 +34,13 @@ describe('CongregationListState', () => {
     });
   });
 
+  it('loads the first page when the store is created', () => {
+    const store = TestBed.inject(CongregationListState);
+
+    expect(http.getAll).toHaveBeenCalledTimes(1);
+    expect(store.congregations()).toEqual([congregation]);
+  });
+
   it('deletes through the API and reloads the list', () => {
     const store = createLoadedStore();
     http.delete.mockReturnValue(of(undefined));

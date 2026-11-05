@@ -27,11 +27,20 @@ describe('FilterForm', () => {
     })
   );
 
-  it('emits the initial filter without boolean filters when everything is "Toate"', () => {
+  it('does not emit on init, since the form mirrors the filter', () => {
     const { emitted } = createFixture();
 
-    expect(emitted).toHaveLength(1);
-    expect(emitted[0].filters).toEqual([]);
+    expect(emitted).toHaveLength(0);
+  });
+
+  it('keeps what the user typed when the same filter fields arrive in a new filter object', () => {
+    const { fixture, form } = createFixture();
+
+    form.congregationListFilterForm.searchTerm().value.set('abc');
+    fixture.componentRef.setInput('filter', { ...baseFilter, cursor: null, sort: [{ key: 'name', value: 'ascend' }] });
+    fixture.detectChanges();
+
+    expect(form.congregationListFilterForm.searchTerm().value()).toBe('abc');
   });
 
   it('builds a boolean equals filter for "Da" and "Nu"', () => {
@@ -58,14 +67,14 @@ describe('FilterForm', () => {
     expect(form.congregationListFilterForm.isSmallCongregation().value()).toBe('no');
   });
 
-  it('emits the selected segments as filters and keeps unrelated filters', async () => {
+  it('emits the selected segments as filters and keeps unrelated filters', () => {
     const other = { field: 'name', operator: 'contains', value: 'x', fieldType: 'string' } as const;
-    const { form, emitted } = createFixture({ ...baseFilter, filters: [other] });
+    const { fixture, form, emitted } = createFixture({ ...baseFilter, filters: [other] });
     emitted.length = 0;
 
     form.congregationListFilterForm.canReceiveStudents().value.set('yes');
     form.congregationListFilterForm.isSmallCongregation().value.set('no');
-    await form.onSubmit();
+    fixture.detectChanges();
 
     expect(emitted.at(-1)!.filters).toEqual([
       other,
@@ -74,8 +83,8 @@ describe('FilterForm', () => {
     ]);
   });
 
-  it('clears the search term and the segments', async () => {
-    const { form, emitted } = createFixture({
+  it('clears the search term and the segments', () => {
+    const { fixture, form, emitted } = createFixture({
       ...baseFilter,
       searchTerm: 'abc',
       filters: [buildBooleanFilter('canReceiveStudents', 'yes')!]
@@ -83,10 +92,10 @@ describe('FilterForm', () => {
     emitted.length = 0;
 
     form.clear();
-    await Promise.resolve();
+    fixture.detectChanges();
 
     expect(form.congregationListFilterForm.searchTerm().value()).toBe('');
     expect(form.congregationListFilterForm.canReceiveStudents().value()).toBe('all');
-    expect(emitted.at(-1)).toMatchObject({ searchTerm: '', filters: [] });
+    expect(emitted.at(-1)).toMatchObject({ searchTerm: null, filters: [] });
   });
 });
