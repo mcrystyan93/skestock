@@ -2,35 +2,13 @@
                    [validationErrors]="store.entriesValidationErrors()"/>
 <ske-error-display [problemDetail]="store.actionProblemDetail()"/>
 
-@if (store.entriesLoading()) {
-  <nz-spin class="block py-8 text-center"/>
-} @else if (store.entries().length === 0 && !store.entriesProblemDetail()) {
-  <nz-empty nzNotFoundContent="Clasa nu are zile în interval"/>
-} @else if (store.entries().length > 0) {
-  <div class="overflow-x-auto">
-    <table class="w-full text-left">
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Congregație</th>
-          <th>Persoană de contact</th>
-          <th>Telefon</th>
-          <th>Email</th>
-          <th>WhatsApp</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (entry of store.entries(); track entry.id) {
-          <tr ske-fruit-dessert-row
-              [entry]="entry"
-              [readOnly]="readOnly()"
-              [sending]="store.sending()"
-              [fallbackUrl]="store.lastDispatchUrl()?.entryId === entry.id ? store.lastDispatchUrl()!.url : null"
-              (congregationChange)="store.setCongregation({ entryId: entry.id, congregationId: $event })"
-              (emailSentChange)="store.setEmailSent({ entryId: entry.id, emailSent: $event })"
-              (sendMessage)="send(entry.id, $event)"></tr>
-        }
-      </tbody>
-    </table>
-  </div>
-}
+<div class="relative grow">
+  <ske-fruit-dessert-table [entries]="store.entries()"
+                           [loading]="store.entriesLoading()"
+                           [readOnly]="readOnly()"
+                           [sending]="store.sending()"
+                           [fallback]="store.lastDispatchUrl()"
+                           (congregationChange)="store.setCongregation($event)"
+                           (emailSentChange)="store.setEmailSent($event)"
+                           (sendMessage)="send($event.entryId, $event.type)"/>
+</div>
