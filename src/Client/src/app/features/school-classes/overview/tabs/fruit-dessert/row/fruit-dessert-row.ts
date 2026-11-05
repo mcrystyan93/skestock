@@ -20,6 +20,7 @@ import { formatPlanDate } from '../format-plan-date';
 export class FruitDessertRow {
   public readonly entry = input.required<FruitDessertPlanEntryDto>();
   public readonly readOnly = input<boolean>(false);
+  public readonly sending = input<boolean>(false);
   /** Set when the popup was blocked, so the user can still open the message. */
   public readonly fallbackUrl = input<string | null>(null);
 

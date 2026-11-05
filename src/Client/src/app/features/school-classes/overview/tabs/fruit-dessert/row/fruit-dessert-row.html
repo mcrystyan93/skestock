@@ -18,7 +18,7 @@
   <div class="flex flex-wrap items-center gap-2">
     <span nz-tooltip [nzTooltipTitle]="canMessage() ? null : 'Congregația nu are un număr de telefon valid'">
       <button nz-button type="button" nzSize="small"
-              [disabled]="readOnly() || !canMessage()"
+              [disabled]="readOnly() || sending() || !canMessage()"
               (click)="sendMessage.emit(MessageType.Reminder)">Aducere aminte</button>
     </span>
     @if (entry().reminderSent) {
@@ -26,7 +26,7 @@
     }
     <span nz-tooltip [nzTooltipTitle]="canMessage() ? null : 'Congregația nu are un număr de telefon valid'">
       <button nz-button type="button" nzSize="small"
-              [disabled]="readOnly() || !canMessage()"
+              [disabled]="readOnly() || sending() || !canMessage()"
               (click)="sendMessage.emit(MessageType.Thanks)">Mulțumire</button>
     </span>
     @if (entry().thanksSent) {
