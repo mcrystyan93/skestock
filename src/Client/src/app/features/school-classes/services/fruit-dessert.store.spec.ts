@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import {
   FruitDessertMessageStatus,
   FruitDessertMessageType,
@@ -145,5 +145,49 @@ describe('FruitDessertStore', () => {
     store.sendMessage({ entryId: 'e1', type: FruitDessertMessageType.Reminder, win: null });
 
     expect(store.lastDispatchUrl()).toEqual({ entryId: 'e1', url: 'https://wa.me/40712345678?text=x' });
+  });
+
+  it('replaces the entry with a new object when a change fails, so the row resets its local value', () => {
+    const store = create();
+    const before = store.entries()[0];
+    http.setEmailSent.mockReturnValue(throwError(() => ({ status: 500 })));
+
+    store.setEmailSent({ entryId: 'e1', emailSent: true });
+
+    expect(store.entries()[0]).not.toBe(before);
+    expect(store.entries()[0]).toEqual(before);
+  });
+
+  it('applies changes of the same kind in order', () => {
+    const store = create();
+    const first = new Subject<FruitDessertPlanEntryDto>();
+    http.setEmailSent.mockReturnValueOnce(first).mockReturnValueOnce(of(entry('e1', { emailSent: false })));
+
+    store.setEmailSent({ entryId: 'e1', emailSent: true });
+    store.setEmailSent({ entryId: 'e1', emailSent: false });
+    expect(http.setEmailSent).toHaveBeenCalledTimes(1);
+
+    first.next(entry('e1', { emailSent: true }));
+    first.complete();
+
+    expect(http.setEmailSent).toHaveBeenCalledTimes(2);
+    expect(store.entries()[0].emailSent).toBe(false);
+  });
+
+  it('ignores a second send while one is in flight', () => {
+    const store = create();
+    const pending = new Subject<ReturnType<typeof dispatch>>();
+    http.sendMessage.mockReturnValue(pending);
+
+    store.sendMessage({ entryId: 'e1', type: FruitDessertMessageType.Reminder, win: null });
+    store.sendMessage({ entryId: 'e1', type: FruitDessertMessageType.Reminder, win: null });
+
+    expect(http.sendMessage).toHaveBeenCalledTimes(1);
+    expect(store.sending()).toBe(true);
+
+    pending.next(dispatch(FruitDessertMessageType.Reminder));
+    pending.complete();
+
+    expect(store.sending()).toBe(false);
   });
 });

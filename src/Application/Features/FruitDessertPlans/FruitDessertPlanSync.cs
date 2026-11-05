@@ -36,11 +36,15 @@ internal static class FruitDessertPlanSync
         {
             await dbContext.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateException)
+        catch (DbUpdateException ex) when (IsUniqueViolation(ex))
         {
             // A concurrent first listing won the (SchoolClassId, Date) unique index and inserted the same days;
             // drop our failed inserts and let the caller read what is there.
             dbContext.ChangeTracker.Clear();
         }
     }
+
+    // shortcut: Application has no SqlClient reference, so read SqlException.Number by name; add the reference if more callers need it.
+    private static bool IsUniqueViolation(DbUpdateException ex) =>
+        ex.InnerException?.GetType().GetProperty("Number")?.GetValue(ex.InnerException) is 2601 or 2627;
 }

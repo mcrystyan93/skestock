@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { patchState, signalStore, withMethods, withProps, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { mapResponse } from '@ngrx/operators';
-import { mergeMap, pipe, switchMap, tap } from 'rxjs';
+import { concatMap, exhaustMap, pipe, switchMap, tap } from 'rxjs';
 import { FruitDessertMessageType, FruitDessertPlanEntryDto } from '@ske/models';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { withLoadingFeature } from '@ske/shared/loader';
@@ -16,10 +16,11 @@ type FruitDessertState = {
   entries: FruitDessertPlanEntryDto[];
   /** Set only when the popup was blocked, so the row can offer a plain link instead. */
   lastDispatchUrl: { entryId: string; url: string } | null;
+  sending: boolean;
 };
 
 export const FruitDessertStore = signalStore(
-  withState<FruitDessertState>({ classId: null, entries: [], lastDispatchUrl: null }),
+  withState<FruitDessertState>({ classId: null, entries: [], lastDispatchUrl: null, sending: false }),
   withLoadingFeature('entries'),
   withProblemDetailsFeature('entries'),
   withProblemDetailsFeature('action'),
@@ -27,6 +28,10 @@ export const FruitDessertStore = signalStore(
   withMethods((store) => {
     const replaceEntry = (updated: FruitDessertPlanEntryDto) =>
       patchState(store, { entries: store.entries().map(e => (e.id === updated.id ? updated : e)) });
+
+    // A failed save leaves the row showing the unsaved value; a new object makes the row's linkedSignal reset.
+    const resetEntry = (entryId: string) =>
+      patchState(store, { entries: store.entries().map(e => (e.id === entryId ? { ...e } : e)) });
 
     const load = rxMethod<string>(
       pipe(
@@ -55,9 +60,15 @@ export const FruitDessertStore = signalStore(
     const setCongregation = rxMethod<{ entryId: string; congregationId: string | null }>(
       pipe(
         tap(() => store.clearActionErrors()),
-        mergeMap(({ entryId, congregationId }) =>
+        concatMap(({ entryId, congregationId }) =>
           store._http.setCongregation(store.classId()!, entryId, congregationId).pipe(
-            mapResponse({ next: replaceEntry, error: (error) => store.handleActionError(error) })
+            mapResponse({
+              next: replaceEntry,
+              error: (error) => {
+                resetEntry(entryId);
+                store.handleActionError(error);
+              }
+            })
           )
         )
       )
@@ -66,9 +77,15 @@ export const FruitDessertStore = signalStore(
     const setEmailSent = rxMethod<{ entryId: string; emailSent: boolean }>(
       pipe(
         tap(() => store.clearActionErrors()),
-        mergeMap(({ entryId, emailSent }) =>
+        concatMap(({ entryId, emailSent }) =>
           store._http.setEmailSent(store.classId()!, entryId, emailSent).pipe(
-            mapResponse({ next: replaceEntry, error: (error) => store.handleActionError(error) })
+            mapResponse({
+              next: replaceEntry,
+              error: (error) => {
+                resetEntry(entryId);
+                store.handleActionError(error);
+              }
+            })
           )
         )
       )
@@ -78,21 +95,23 @@ export const FruitDessertStore = signalStore(
       pipe(
         tap(() => {
           store.clearActionErrors();
-          patchState(store, { lastDispatchUrl: null });
+          patchState(store, { lastDispatchUrl: null, sending: true });
         }),
-        mergeMap(({ entryId, type, win }) =>
+        exhaustMap(({ entryId, type, win }) =>
           store._http.sendMessage(store.classId()!, entryId, type).pipe(
             mapResponse({
               next: (dispatch) => {
                 const flag = type === FruitDessertMessageType.Reminder ? 'reminderSent' : 'thanksSent';
                 patchState(store, {
                   entries: store.entries().map(e => (e.id === entryId ? { ...e, [flag]: true } : e)),
-                  lastDispatchUrl: win ? null : { entryId, url: dispatch.url }
+                  lastDispatchUrl: win ? null : { entryId, url: dispatch.url },
+                  sending: false
                 });
                 win?.location.replace(dispatch.url);
               },
               error: (error) => {
                 win?.close();
+                patchState(store, { sending: false });
                 store.handleActionError(error);
               }
             })
