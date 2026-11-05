@@ -81,6 +81,26 @@ public class MessageTemplateTests : TestBase
         saved.Body.ShouldNotContain("<script");
     }
 
+    [TestCase("reminder", FruitDessertMessageType.Reminder)]
+    [TestCase("thanks", FruitDessertMessageType.Thanks)]
+    public async Task Put_LowercaseRoute_PersistsBody(string route, FruitDessertMessageType type)
+    {
+        var response = await _client.PutAsJsonAsync($"{Url}/{route}", new { Name = "Nou", Body = "<p>Salut</p>" });
+
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        var saved = (await GetAsync())!.Templates.Single(t => t.Type == type);
+        saved.Name.ShouldBe("Nou");
+        saved.Body.ShouldContain("Salut");
+    }
+
+    [Test]
+    public async Task Put_UnknownType_ReturnsBadRequest()
+    {
+        var response = await _client.PutAsJsonAsync($"{Url}/bogus", new { Name = "Nou", Body = "<p>Salut</p>" });
+
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+    }
+
     [Test]
     public async Task Put_UnknownPlaceholder_ReturnsBadRequest()
     {
