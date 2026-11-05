@@ -10,7 +10,8 @@ Client rules: `AGENTS.md`; no Prettier, match surrounding formatting by hand; Ro
 
 ## Phase 0 — Spike
 
-- [ ] T1 Tiptap spike `[Sonnet]`
+- [x] T1 Tiptap spike `[Sonnet]`
+  - Outcome: `@tiptap/core`, `@tiptap/starter-kit`, `@tiptap/pm` all 3.32.2 (Tiptap v3). Direct `Editor`, no wrapper (ngx-tiptap peers accept Angular >=22 but add nothing needed here, so not installed). jsdom works with no mocks: `Editor` + StarterKit, `setContent('<p><strong>a</strong></p>')` -> `getHTML()` returned the same string (spec passed, then deleted). StarterKit v3 bundles bold, italic, strike, code, bulletList, orderedList, listItem, blockquote, codeBlock, heading, horizontalRule, hardBreak, paragraph, link and underline (v3 includes the last two; configure `link: false`/`underline: false` to exclude), plus undo/redo, dropcursor, gapcursor, listKeymap, trailingNode. Build: no warnings. Tests: 93 files / 450 passed.
   - Acceptance: `@tiptap/core`, `@tiptap/starter-kit`, `@tiptap/pm` installed (exact versions pinned by npm in lockfile); check `ngx-tiptap` peer deps for Angular 22 and decide wrapper vs direct `Editor` (default direct); a throwaway spec creates an `Editor` with StarterKit in Vitest/jsdom, sets `<p><strong>a</strong></p>`, reads back `getHTML()`; spec deleted after (or kept only if it becomes T10's spec). Outcome (versions, wrapper or direct, jsdom works or needs mocking, which StarterKit extensions exist in this version) written as a note under this task.
   - Verify: `cd src/Client && npm run build && npm test -- --watch=false`
   - Files: `src/Client/package.json`, `src/Client/package-lock.json`, temporary spec under `Tab/templates-modal/editor/`
