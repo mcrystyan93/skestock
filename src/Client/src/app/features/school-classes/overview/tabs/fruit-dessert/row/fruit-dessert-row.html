@@ -1,0 +1,39 @@
+<td class="whitespace-nowrap">{{ date() }}</td>
+<td class="min-w-56">
+  <ske-congregation-dropdown [formField]="rowForm.congregation"
+                             [allowCreate]="false"
+                             [allowEdit]="false"
+                             [allowClear]="true"
+                             placeholder="Alege congregația"/>
+  @if (entry().congregationDeleted) {
+    <div class="mt-1 text-xs opacity-70">{{ entry().congregationName }} (ștearsă)</div>
+  }
+</td>
+<td>{{ entry().contactPerson ?? '—' }}</td>
+<td class="whitespace-nowrap">{{ entry().contactPhone ?? '—' }}</td>
+<td>
+  <label nz-checkbox [formField]="rowForm.emailSent">Email trimis</label>
+</td>
+<td>
+  <div class="flex flex-wrap items-center gap-2">
+    <span nz-tooltip [nzTooltipTitle]="canMessage() ? null : 'Congregația nu are un număr de telefon valid'">
+      <button nz-button type="button" nzSize="small"
+              [disabled]="readOnly() || !canMessage()"
+              (click)="sendMessage.emit(MessageType.Reminder)">Aducere aminte</button>
+    </span>
+    @if (entry().reminderSent) {
+      <span class="whitespace-nowrap text-xs"><nz-icon nzType="icons:circle-check"/> Trimis</span>
+    }
+    <span nz-tooltip [nzTooltipTitle]="canMessage() ? null : 'Congregația nu are un număr de telefon valid'">
+      <button nz-button type="button" nzSize="small"
+              [disabled]="readOnly() || !canMessage()"
+              (click)="sendMessage.emit(MessageType.Thanks)">Mulțumire</button>
+    </span>
+    @if (entry().thanksSent) {
+      <span class="whitespace-nowrap text-xs"><nz-icon nzType="icons:circle-check"/> Trimis</span>
+    }
+    @if (fallbackUrl(); as url) {
+      <a [href]="url" target="_blank" rel="noopener">Deschide WhatsApp</a>
+    }
+  </div>
+</td>

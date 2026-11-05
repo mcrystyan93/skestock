@@ -86,7 +86,8 @@ export class Header {
     {label: 'Comenzi importate', compactLabel: 'Importuri'},
     {label: 'Statistici', compactLabel: 'Stat.'},
     {label: 'Departamente', compactLabel: 'Dept.'},
-    {label: 'Invitații'}
+    {label: 'Invitații'},
+    {label: 'Fructe și desert', compactLabel: 'Fructe'}
   ];
 
   public readonly isClosed = computed(() => this.schoolClass().status === ClassStatus.Closed);

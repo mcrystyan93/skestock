@@ -100,15 +100,15 @@ Client rule: no Prettier, match surrounding formatting by hand, Romanian UI, NG-
   - Acceptance: T15 green; `@ngrx/signals` with `withLoadingFeature`/`withProblemDetailsFeature` like `school-class-overview.store.ts`; http class uses `@Service()` like `shared/congregations/services/congregations.http.ts`
   - Verify: `cd src/Client && npm test -- --watch=false && npm run build`
   - Files: `Svc/fruit-dessert.store.ts`
-- [ ] T17 Date formatter + row spec `[Sonnet]`
+- [x] T17 Date formatter + row spec `[Sonnet]`
   - Acceptance: failing specs: `formatPlanDate('2026-11-10')` → `Luni, 10 Noiembrie 2026` (timezone-safe, parses `DateOnly` string without UTC shift); row renders date, congregation (with `(ștearsă)` when deleted), contact, phone; shows icon + „Trimis" per type when sent; WhatsApp buttons disabled with tooltip when `normalizedPhone` is null; all controls disabled when read-only; emits `congregationChange`, `emailSentChange`, `sendMessage`
   - Verify: `cd src/Client && npm test -- --watch=false` (red)
   - Files: `Tab/format-plan-date.ts`, `Tab/format-plan-date.spec.ts`, `Tab/row/fruit-dessert-row.spec.ts`
-- [ ] T18 Implement row `tr[ske-fruit-dessert-row]` `[Sonnet]`
+- [x] T18 Implement row `tr[ske-fruit-dessert-row]` `[Sonnet]`
   - Acceptance: T17 green; `input()`/`output()`; reuses `ske-congregation-dropdown` (`allowCreate=false`, `allowEdit=false`, `allowClear=true`) via Signal Forms; `nz-checkbox` for „Email trimis"; buttons „Aducere aminte" / „Mulțumire" with `nz-tooltip`; no `ngClass`/`ngStyle`/`@HostBinding`, no explicit `OnPush`/`standalone`
   - Verify: `cd src/Client && npm test -- --watch=false && npm run build`
   - Files: `Tab/row/fruit-dessert-row.ts`, `Tab/row/fruit-dessert-row.html`
-- [ ] T19 Container tab + wiring `[Sonnet]`
+- [x] T19 Container tab + wiring `[Sonnet]`
   - Acceptance: `ske-school-class-overview-fruit-dessert-tab` with `[classId]`; provides `FruitDessertStore`; loads on classId; native `<table>` inside an `overflow-x-auto` wrapper; loading / empty („Clasa nu are zile în interval") / error (`ske-error-display`) states; read-only from `injectClassReadOnly()`; send click opens blank tab synchronously then calls store (plan §1); link fallback rendered when popup blocked; new header tab `{label: 'Fructe și desert', compactLabel: 'Fructe'}` appended last in `header.ts` and a matching `<nz-tab>` appended last in `school-class-overview.page.html` (indexes stay aligned; statistics `active` index 4 unchanged)
   - Verify: `cd src/Client && npm run build && npm test -- --watch=false`
   - Files: `Tab/fruit-dessert-tab.ts`, `Tab/fruit-dessert-tab.html`, `src/Client/src/app/features/school-classes/overview/header/header.ts`, `src/Client/src/app/features/school-classes/overview/school-class-overview.page.html`, `src/Client/src/app/features/school-classes/overview/school-class-overview.page.ts` (imports)
