@@ -211,7 +211,7 @@ export const OrderListWizardStore = signalStore(
           suggestions,
           segments,
           suggestionsLoaded: true,
-          selectedItemIds: suggestions.map((item) => item.itemId)
+          selectedItemIds: []
         });
       }
     );

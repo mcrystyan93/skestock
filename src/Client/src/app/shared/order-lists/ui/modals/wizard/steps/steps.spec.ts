@@ -90,7 +90,7 @@ describe('order list wizard steps', () => {
       // Tabs render lazily; switch to the second one.
       (root.querySelectorAll('.ant-tabs-tab')[1] as HTMLElement).click();
       fixture.detectChanges();
-      expect(root.textContent).toContain('2.5 buc');
+      expect(root.textContent).toContain('2 buc');
 
       expect(step.tabs()[2].ids).toEqual([]);
     });
