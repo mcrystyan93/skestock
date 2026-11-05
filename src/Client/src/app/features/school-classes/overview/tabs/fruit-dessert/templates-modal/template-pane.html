@@ -1,0 +1,42 @@
+@if (error(); as message) {
+  <nz-alert class="mb-3 block"
+            nzType="error"
+            nzShowIcon
+            [nzMessage]="message" />
+}
+<form nz-form
+      nzLayout="vertical"
+      nzNoColon
+      (submit)="$event.preventDefault()">
+  <nz-form-item>
+    <nz-form-label nzRequired
+                   [nzFor]="'template-name-' + template().type">Nume
+    </nz-form-label>
+    <nz-form-control [nzErrorTip]="nameErrorTemplate">
+      <input nz-input
+             [id]="'template-name-' + template().type"
+             [formField]="templateForm.name"
+             autocomplete="off" />
+      <ng-template #nameErrorTemplate>
+        @for (error of templateForm.name().errors(); track $index) {
+          <div class="ant-form-item-explain-error">{{ error.message }}</div>
+        }
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item>
+    <nz-form-label>Mesaj</nz-form-label>
+    <nz-form-control>
+      <ske-fruit-dessert-template-editor [formField]="templateForm.body"
+                                         [placeholders]="placeholders()" />
+    </nz-form-control>
+  </nz-form-item>
+  <button nz-button
+          nzType="primary"
+          type="button"
+          [nzLoading]="saving()"
+          [disabled]="saving() || templateForm().invalid()"
+          (click)="save()">
+    Salvează
+  </button>
+</form>
