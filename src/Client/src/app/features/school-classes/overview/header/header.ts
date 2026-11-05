@@ -142,7 +142,9 @@ export class Header {
       },
       nzCentered: true,
       nzMaskClosable: false,
-      nzWrapClassName: 'modal-w-90 modal-w-md-75 modal-w-xl-50'
+      nzWrapClassName: 'modal-w-90 modal-w-md-75 modal-w-xl-50',
+      // Long templates scroll inside the body so the footer's Salvează stays on screen.
+      nzBodyStyle: { maxHeight: 'calc(100vh - 220px)', overflowY: 'auto' }
     });
   }
 }

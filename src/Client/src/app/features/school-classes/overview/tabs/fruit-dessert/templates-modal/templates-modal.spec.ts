@@ -1,3 +1,4 @@
+import { ApplicationRef, type EmbeddedViewRef, type TemplateRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of, Subject, throwError } from 'rxjs';
@@ -19,6 +20,7 @@ describe('TemplatesModal', () => {
 
   let http: { get: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> };
   let message: { success: ReturnType<typeof vi.fn> };
+  let modalRef: { close: ReturnType<typeof vi.fn>; updateConfig: ReturnType<typeof vi.fn> };
   let fixture: ComponentFixture<TemplatesModal>;
 
   const create = async () => {
@@ -27,22 +29,37 @@ describe('TemplatesModal', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
+    // nzModalFooter hands its template to the modal via updateConfig({ nzFooter })
+    const { nzFooter } = modalRef.updateConfig.mock.calls.at(-1)![0] as { nzFooter: TemplateRef<unknown> };
+    footer = nzFooter.createEmbeddedView({});
+    TestBed.inject(ApplicationRef).attachView(footer);
   };
 
-  const saveButton = () =>
-    Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>).find(
+  // The footer is a template NzModal normally projects; render it by hand since no modal hosts it here.
+  let footer: EmbeddedViewRef<unknown>;
+  const saveButton = () => {
+    footer.detectChanges();
+    return Array.from(footer.rootNodes[0].querySelectorAll('button') as NodeListOf<HTMLButtonElement>).find(
       (b) => b.textContent?.trim() === 'Salvează'
     )!;
+  };
+  const selectTab = async (index: number) => {
+    const tab = fixture.nativeElement.querySelectorAll('.ant-tabs-tab')[index] as HTMLElement;
+    tab.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+  };
 
   beforeEach(() => {
     http = { get: vi.fn(), update: vi.fn() };
     message = { success: vi.fn() };
+    modalRef = { close: vi.fn(), updateConfig: vi.fn() };
     TestBed.configureTestingModule({
       providers: [
         provideNzIconsTesting(),
         { provide: FruitDessertTemplatesHttp, useValue: http },
         { provide: NzMessageService, useValue: message },
-        { provide: NzModalRef, useValue: { close: vi.fn(), updateConfig: vi.fn() } }
+        { provide: NzModalRef, useValue: modalRef }
       ]
     });
   });
@@ -95,5 +112,16 @@ describe('TemplatesModal', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Mesajul este prea lung.');
     expect(message.success).not.toHaveBeenCalled();
+  });
+
+  it('saves the second tab with that tab type and values', async () => {
+    await create();
+    http.update.mockReturnValue(new Subject<void>());
+
+    await selectTab(1);
+    saveButton().click();
+    await fixture.whenStable();
+
+    expect(http.update).toHaveBeenCalledWith(FruitDessertMessageType.Thanks, { name: 'Mulțumire', body: '<p>b</p>' });
   });
 });

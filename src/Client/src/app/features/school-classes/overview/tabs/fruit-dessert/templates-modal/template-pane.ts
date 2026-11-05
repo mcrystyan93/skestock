@@ -2,7 +2,6 @@ import { Component, computed, input, linkedSignal, output, untracked } from '@an
 import { form, FormField, maxLength, required, submit, validate } from '@angular/forms/signals';
 import { MessagePlaceholderDto, MessageTemplateDto, UpdateMessageTemplateRequest } from '@ske/models';
 import { NzAlertComponent } from 'ng-zorro-antd/alert';
-import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
 import { NzInputDirective } from 'ng-zorro-antd/input';
 import { TemplateEditor } from './editor/template-editor';
@@ -15,7 +14,6 @@ export const MAX_TEMPLATE_NAME_LENGTH = 100;
   imports: [
     FormField,
     NzAlertComponent,
-    NzButtonComponent,
     NzFormDirective,
     NzFormItemComponent,
     NzFormLabelComponent,
@@ -27,7 +25,6 @@ export const MAX_TEMPLATE_NAME_LENGTH = 100;
 export class TemplatePane {
   public readonly template = input.required<MessageTemplateDto>();
   public readonly placeholders = input.required<MessagePlaceholderDto[]>();
-  public readonly saving = input(false);
   public readonly error = input<string | null>(null);
   public readonly saved = output<UpdateMessageTemplateRequest>();
 
@@ -53,7 +50,9 @@ export class TemplatePane {
     );
   });
 
-  protected async save(): Promise<void> {
+  public readonly invalid = computed(() => this.templateForm().invalid());
+
+  public async save(): Promise<void> {
     await submit(this.templateForm, async () => {
       const { name, body } = this.templateForm().value();
       this.saved.emit({ name: name.trim(), body });

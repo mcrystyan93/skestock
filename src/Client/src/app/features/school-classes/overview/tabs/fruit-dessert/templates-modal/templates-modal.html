@@ -4,12 +4,12 @@
   @if (store.templatesProblemDetail(); as problem) {
     <p class="text-red-600 dark:text-red-400">{{ problem.detail ?? 'Șabloanele nu au putut fi încărcate.' }}</p>
   }
-  <nz-tabs>
+  <nz-tabs [nzSelectedIndex]="activeIndex()"
+           (nzSelectedIndexChange)="activeIndex.set($event)">
     @for (template of store.templates(); track template.type) {
       <nz-tab [nzTitle]="titles[template.type]">
         <ske-fruit-dessert-template-pane [template]="template"
                                          [placeholders]="store.placeholders()"
-                                         [saving]="store.saving()"
                                          [error]="savedType() === template.type ? store.saveError() : null"
                                          (saved)="save(template.type, $event)" />
       </nz-tab>
@@ -18,10 +18,22 @@
 </nz-spin>
 
 <div *nzModalFooter>
-  <button nz-button
-          nzType="default"
-          type="button"
-          (click)="close()">
-    Închide
-  </button>
+  <nz-space>
+    <button nz-button
+            *nzSpaceItem
+            nzType="default"
+            type="button"
+            (click)="close()">
+      Închide
+    </button>
+    <button nz-button
+            *nzSpaceItem
+            nzType="primary"
+            type="button"
+            [nzLoading]="store.saving()"
+            [disabled]="store.saving() || (activePane()?.invalid() ?? true)"
+            (click)="activePane()?.save()">
+      Salvează
+    </button>
+  </nz-space>
 </div>
