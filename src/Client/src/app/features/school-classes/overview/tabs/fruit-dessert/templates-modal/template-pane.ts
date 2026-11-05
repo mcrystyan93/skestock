@@ -1,4 +1,4 @@
-import { Component, input, linkedSignal, output } from '@angular/core';
+import { Component, computed, input, linkedSignal, output, untracked } from '@angular/core';
 import { form, FormField, maxLength, required, submit, validate } from '@angular/forms/signals';
 import { MessagePlaceholderDto, MessageTemplateDto, UpdateMessageTemplateRequest } from '@ske/models';
 import { NzAlertComponent } from 'ng-zorro-antd/alert';
@@ -31,9 +31,16 @@ export class TemplatePane {
   public readonly error = input<string | null>(null);
   public readonly saved = output<UpdateMessageTemplateRequest>();
 
-  private readonly _model = linkedSignal<UpdateMessageTemplateRequest>(() => {
-    const { name, body } = this.template();
-    return { name, body };
+  // A computed dedupes: the source only changes when the template identity does.
+  private readonly _type = computed(() => this.template().type);
+
+  private readonly _model = linkedSignal<MessageTemplateDto['type'], UpdateMessageTemplateRequest>({
+    // Keyed on identity so the post-save patch (204, same type) doesn't overwrite edits typed during the PUT.
+    source: this._type,
+    computation: () => {
+      const { name, body } = untracked(this.template);
+      return { name, body };
+    }
   });
 
   protected readonly templateForm = form(this._model, (path) => {

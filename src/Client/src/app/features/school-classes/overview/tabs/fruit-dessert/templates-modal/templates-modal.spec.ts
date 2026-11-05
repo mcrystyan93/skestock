@@ -72,6 +72,17 @@ describe('TemplatesModal', () => {
     expect(message.success).toHaveBeenCalledWith('Șablon salvat');
   });
 
+  it('disables saving while a save is in flight so a second save is not dropped', async () => {
+    await create();
+    http.update.mockReturnValue(new Subject<void>());
+
+    saveButton().click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(saveButton().disabled).toBe(true);
+  });
+
   it('shows the server error in the tab and does not confirm', async () => {
     await create();
     http.update.mockReturnValue(
