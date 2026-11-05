@@ -24,7 +24,7 @@ Client rules: `AGENTS.md`; no Prettier, match surrounding formatting by hand; Ro
   - Acceptance: `MessagePlaceholders` static catalog with `{ContactPerson}`, `{Date}`, `{Congregation}`, `{ClassName}`, each `(Token, Label RO, Example, MaxLength)`; MaxLength taken from the column limits (read `CongregationConfiguration`, `SchoolClassConfiguration`, `DataSchemaConstants`; date = longest Romanian formatted date). `WhatsAppFormatter.Sanitize(html)` rebuilds output from whitelist `p, br, strong, b, em, i, s, strike, code, ul, ol, li` with no attributes, text HTML-encoded, other tags dropped but their text kept (`script`/`style` content dropped entirely), comments dropped. `ToWhatsApp(html)` per plan mapping, entities decoded, whitespace moved outside markers, empty marks dropped, no-tag input returned unchanged. Tests: each mark, nested marks, paragraphs/br, bullet + ordered list, legacy plain text with newlines, `<script>`, `onerror=`, `javascript:` link, comment, unclosed tag, entities (`&amp;`, `&nbsp;`, `&lt;`).
   - Verify: `dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~FruitDessertTemplates"`
   - Files: `App/MessagePlaceholders.cs`, `App/WhatsAppFormatter.cs`, `UT/WhatsAppFormatterTests.cs`
-- [ ] T3 Renderer uses catalog + formatter `[Sonnet]` (after T2)
+- [x] T3 Renderer uses catalog + formatter `[Sonnet]` (after T2)
   - Acceptance: `MessageTemplateRenderer.Render` converts with `WhatsAppFormatter.ToWhatsApp` first, then replaces placeholders; known set comes from `MessagePlaceholders` (no duplicated token literals); interface unchanged; unknown placeholder still fails with `UnknownPlaceholder`. New tests: HTML template renders WhatsApp markup with values substituted; values containing `<`/`*` are inserted verbatim; both seeded legacy bodies render exactly as before.
   - Verify: `dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~MessageTemplateRenderer"`
   - Files: `src/Infrastructure/FruitDessert/MessageTemplateRenderer.cs`, `tests/Application.UnitTests/Infrastructure/FruitDessert/MessageTemplateRendererTests.cs`
@@ -37,15 +37,15 @@ Client rules: `AGENTS.md`; no Prettier, match surrounding formatting by hand; Ro
 
 ## Phase 2 — Backend slice
 
-- [ ] T5 `GetMessageTemplates` query `[Sonnet]` (after T2)
+- [x] T5 `GetMessageTemplates` query `[Sonnet]` (after T2)
   - Acceptance: scaffold with `dotnet new ca-usecase -n GetMessageTemplates -fn FruitDessertTemplates -ut query -rt MessageTemplatesDto` (in `src/Application`); returns active templates ordered by `Type` as `{ type, name, body, lastModified }` plus `placeholders` projected from `MessagePlaceholders` (token, label, example; not MaxLength); `AsNoTracking`; not cached (one-line comment why). Handler test with the existing in-memory test DbContext pattern (`tests/Application.UnitTests/Features/FruitDessertPlans/FruitDessertTestDbContext.cs`): inactive rows excluded, placeholders equal the catalog.
   - Verify: `dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~GetMessageTemplates"`
   - Files: `App/Queries/GetMessageTemplates/*.cs` (query+handler as scaffolded), `App/Models/MessageTemplatesDto.cs`, `UT/Queries/GetMessageTemplatesQueryHandlerTests.cs`
-- [ ] T6 `UpdateMessageTemplate` command + validator `[Sonnet]` (after T2)
+- [x] T6 `UpdateMessageTemplate` command + validator `[Sonnet]` (after T2)
   - Acceptance: command `(FruitDessertMessageType Type, string Name, string Body)`; validator: Type is a defined enum value, Name required <= 100, Body required <= 4000, no unknown placeholder in `ToWhatsApp(Body)` (Romanian message listing tokens), worst-case rendered length (placeholders at MaxLength) <= 2000 (Romanian message with the limit); handler loads the active row of the type (missing -> `ActiveTemplateMissing`), sets `Name` and `Body = WhatsAppFormatter.Sanitize(Body)`, saves; returns `Result`. Tests: validator each rule (boundary 2000 exact passes, 2001 fails), handler sanitizes and updates in place (row count unchanged), missing active -> error.
   - Verify: `dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~UpdateMessageTemplate"`
   - Files: `App/Commands/UpdateMessageTemplate/{UpdateMessageTemplateCommand,UpdateMessageTemplateCommandValidator,UpdateMessageTemplateCommandHandler}.cs`, `UT/Commands/UpdateMessageTemplateCommandValidatorTests.cs`, `UT/Commands/UpdateMessageTemplateCommandHandlerTests.cs`
-- [ ] T7 Endpoint + functional tests `[Sonnet]` (after T3-T6)
+- [ ] T7 Endpoint + functional tests `[Sonnet]` (after T3-T6) — code written, `dotnet build` green; functional run blocked: fixture fails with "Seed administrator not found." (baseline FruitDessertPlanCommandsTests fails too), tests not yet verified
   - Acceptance: `FruitDessertTemplates : IEndpointGroup` with `GET /` and `PUT /{type}` (body `{ name, body }`, 204 on success, failed results via `ToProblemHttpResult()`), same authorization as `FruitDessertPlans.cs`; request record in `App/Models` if the sibling pattern does so. Functional tests: GET returns 2 templates + 4 placeholders; PUT persists sanitized HTML (GET shows it); PUT with `{Foo}` -> 400; PUT with body > 4000 -> 400; send after edit: `SendFruitDessertMessage` on an entry stores a `FruitDessertMessage.Body` with the new text in WhatsApp markup and substituted values (reuse setup from `tests/Application.FunctionalTests/Features/FruitDessertPlans/FruitDessertPlanCommandsTests.cs`).
   - Verify: `dotnet build && ./run-functional-tests.sh --filter "FullyQualifiedName~FruitDessert"`
   - Files: `src/Web/Endpoints/FruitDessertTemplates.cs`, `App/Models/UpdateMessageTemplateRequest.cs` (only if needed), `FT/MessageTemplateTests.cs`
@@ -58,22 +58,22 @@ Client rules: `AGENTS.md`; no Prettier, match surrounding formatting by hand; Ro
   - Acceptance: types `MessageTemplateDto`, `MessagePlaceholderDto`, `MessageTemplatesDto`, `UpdateMessageTemplateRequest` added to `core/models/fruit-dessert.ts` (reuse `FruitDessertMessageType`), exported via the existing models index if there is one; `FruitDessertTemplatesHttp` with `get()` and `update(type, request)` following `fruit-dessert-plans.http.ts` (base URL, `@Service()`/`inject` as there).
   - Verify: `cd src/Client && npm run build`
   - Files: `src/Client/src/app/core/models/fruit-dessert.ts`, `Svc/fruit-dessert-templates.http.ts`
-- [ ] T9 Store + spec `[Sonnet]` (after T8)
+- [x] T9 Store + spec `[Sonnet]` (after T8)
   - Acceptance: `FruitDessertTemplatesStore` (`@ngrx/signals`, pattern of `fruit-dessert.store.ts`), not `providedIn: 'root'` (provided by the modal): `load()`, `save(type, request)` updating the local template on success, `loading`/`saving` signals, server error message exposed (ProblemDetails `errors`/`detail`). Spec: load fills templates + placeholders; save success updates state; save 400 exposes message and keeps state.
   - Verify: `cd src/Client && npm test -- --watch=false`
   - Files: `Svc/fruit-dessert-templates.store.ts`, `Svc/fruit-dessert-templates.store.spec.ts`
-- [ ] T10 Rich text editor component `[Sonnet]` (after T1)
+- [x] T10 Rich text editor component `[Sonnet]` (after T1)
   - Acceptance: standalone component per T1 decision; Signal Forms custom control (`FormValueControl<string>`, `value = model<string>()`); StarterKit limited to the subset in the plan; toolbar `nz-button` group: B, I, S, cod, listă (active state reflects `editor.isActive`, `aria-label` + `nz-tooltip` in Romanian); placeholder dropdown `nz-dropdown` + `nz-menu` from a `placeholders` input (label shown, token inserted at cursor via `insertContent`); counter "≈ N / 2000"; editor destroyed in `DestroyRef.onDestroy`; external `value` changes update content without echo loops. Spec: initial value loads, toolbar toggles bold, placeholder click inserts token at cursor, counter updates (mock `Editor` if T1 found jsdom unusable).
   - Verify: `cd src/Client && npm run build && npm test -- --watch=false`
   - Files: `Tab/templates-modal/editor/template-editor.ts`, `.html`, `.spec.ts`
 
 **Checkpoint 3a:** client build + tests green.
 
-- [ ] T11 Templates modal `[Sonnet]` (after T9, T10)
+- [x] T11 Templates modal `[Sonnet]` (after T9, T10)
   - Acceptance: component opened with `NzModalService.create` (pattern `features/class-configuration/departments/modal/department-modal.ts` + `form.ts`); provides the store; `nz-tabs` "Reminder" / "Mulțumire"; per template a Signal Form with Name (`nz-input`, required, max 100) and the editor; "Salvează" per tab, disabled while saving/invalid; `NzMessageService` success "Șablon salvat"; server validation error shown in the tab (`nz-alert`); loading state with `nz-spin`. Spec: loads and shows both templates; save calls store with form values; server error is displayed.
   - Verify: `cd src/Client && npm run build && npm test -- --watch=false`
   - Files: `Tab/templates-modal/templates-modal.ts`, `.html`, `.spec.ts`
-- [ ] T12 Header button `[Sonnet]` (after T11)
+- [x] T12 Header button `[Sonnet]` (after T11)
   - Acceptance: `case 7` in `action` returns `{text: 'Șabloane mesaje', label: 'Șabloane mesaje', icon: <existing icon from the icon catalog, e.g. a message/edit icon>, run: opens the modal}`; the header template shows text on wide screens and icon only + `nz-tooltip` on narrow screens (extend the existing action button markup, reuse Tailwind breakpoint classes already used in the header); hidden when class is closed (existing rule). Spec in `header.spec.ts`: tab 7 shows the button and clicking it opens the modal (mock `NzModalService`).
   - Verify: `cd src/Client && npm run build && npm test -- --watch=false`
   - Files: `src/Client/src/app/features/school-classes/overview/header/{header.ts,header.html,header.spec.ts}`

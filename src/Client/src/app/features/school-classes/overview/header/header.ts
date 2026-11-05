@@ -1,4 +1,6 @@
-import {Component, computed, inject, input, model, output} from '@angular/core';
+import {Component, computed, inject, input, model, output, ViewContainerRef} from '@angular/core';
+import {NzModalService} from 'ng-zorro-antd/modal';
+import {TemplatesModal} from '../tabs/fruit-dessert/templates-modal/templates-modal';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {
   NzPageHeaderComponent,
@@ -115,10 +117,34 @@ export class Header {
           icon: 'icons:file-import',
           run: () => this.onAddGoodsReceipt.emit()
         };
+      case 7:
+        return {
+          text: 'Șabloane mesaje',
+          label: 'Șabloane mesaje',
+          icon: 'icons:comment-dots',
+          run: () => this.openTemplates()
+        };
       default:
         return null;
     }
   });
+
+  private readonly _modalService = inject(NzModalService);
+  private readonly _viewContainerRef = inject(ViewContainerRef);
+
+  private openTemplates(): void {
+    this._modalService.create<TemplatesModal>({
+      nzContent: TemplatesModal,
+      nzViewContainerRef: this._viewContainerRef,
+      nzOnCancel: (instance) => {
+        instance.close();
+        return false;
+      },
+      nzCentered: true,
+      nzMaskClosable: false,
+      nzWrapClassName: 'modal-100 modal-lg-75 modal-xl-50'
+    });
+  }
 }
 
 type HeaderAction = {

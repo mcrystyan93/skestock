@@ -1,0 +1,27 @@
+<div *nzModalTitle>Șabloane mesaje</div>
+
+<nz-spin [nzSpinning]="store.templatesLoading()">
+  @if (store.templatesProblemDetail(); as problem) {
+    <p class="text-red-600 dark:text-red-400">{{ problem.detail ?? 'Șabloanele nu au putut fi încărcate.' }}</p>
+  }
+  <nz-tabs>
+    @for (template of store.templates(); track template.type) {
+      <nz-tab [nzTitle]="titles[template.type]">
+        <ske-fruit-dessert-template-pane [template]="template"
+                                         [placeholders]="store.placeholders()"
+                                         [saving]="store.saving() && savedType() === template.type"
+                                         [error]="savedType() === template.type ? store.saveError() : null"
+                                         (saved)="save(template.type, $event)" />
+      </nz-tab>
+    }
+  </nz-tabs>
+</nz-spin>
+
+<div *nzModalFooter>
+  <button nz-button
+          nzType="default"
+          type="button"
+          (click)="close()">
+    Închide
+  </button>
+</div>
