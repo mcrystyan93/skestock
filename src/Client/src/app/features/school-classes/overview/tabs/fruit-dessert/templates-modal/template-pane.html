@@ -31,12 +31,4 @@
                                          [placeholders]="placeholders()" />
     </nz-form-control>
   </nz-form-item>
-  <button nz-button
-          nzType="primary"
-          type="button"
-          [nzLoading]="saving()"
-          [disabled]="saving() || templateForm().invalid()"
-          (click)="save()">
-    Salvează
-  </button>
 </form>
