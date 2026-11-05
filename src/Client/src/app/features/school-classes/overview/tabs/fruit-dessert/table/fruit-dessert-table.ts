@@ -25,12 +25,12 @@ export class FruitDessertTable extends BaseTable {
   public readonly sendMessage = output<{ entryId: string; type: FruitDessertMessageType }>();
 
   public readonly columnLayout = {
-    date: { width: '200px' },
-    congregation: { width: '220px' },
-    contactPerson: { width: '160px' },
-    phone: { width: '130px' },
-    email: { width: '100px' },
-    reminder: { width: '130px' },
-    thanks: { width: '140px' }
+    date: { width: '220px' },
+    congregation: { width: '190px' },
+    contactPerson: { width: '135px' },
+    phone: { width: '140px' },
+    email: { width: '90px' },
+    reminder: { width: '110px' },
+    thanks: { width: '115px' }
   } as const;
 }
