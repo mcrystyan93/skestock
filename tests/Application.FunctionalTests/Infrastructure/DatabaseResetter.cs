@@ -20,7 +20,11 @@ internal sealed class DatabaseResetter : IAsyncDisposable
         var connection = new SqlConnection(connectionString);
 
         await connection.OpenAsync();
-        var respawner = await Respawner.CreateAsync(connection);
+        var respawner = await Respawner.CreateAsync(connection, new RespawnerOptions
+        {
+            // Seeded by the AddFruitDessertPlanning migration; wiping it would leave sending without a template.
+            TablesToIgnore = [new Respawn.Graph.Table("MessageTemplates")]
+        });
         await connection.CloseAsync();
         return new DatabaseResetter(connection, respawner);
     }
