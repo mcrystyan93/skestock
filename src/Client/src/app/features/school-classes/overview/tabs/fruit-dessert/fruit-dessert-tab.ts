@@ -1,18 +1,16 @@
 import { Component, effect, inject, input, untracked } from '@angular/core';
-import { NzEmptyComponent } from 'ng-zorro-antd/empty';
-import { NzSpinComponent } from 'ng-zorro-antd/spin';
 import { FruitDessertMessageType } from '@ske/models';
 import { ErrorAlert } from '@ske/shared/errors';
 import { injectClassReadOnly } from '@ske/shared/school-classes';
 import { FruitDessertStore } from '../../../services/fruit-dessert.store';
-import { FruitDessertRow } from './row/fruit-dessert-row';
+import { FruitDessertTable } from './table/fruit-dessert-table';
 
 @Component({
   selector: 'ske-school-class-overview-fruit-dessert-tab',
-  imports: [ErrorAlert, FruitDessertRow, NzSpinComponent, NzEmptyComponent],
+  imports: [ErrorAlert, FruitDessertTable],
   providers: [FruitDessertStore],
   templateUrl: './fruit-dessert-tab.html',
-  host: { class: 'block min-w-0 p-4 md:p-6' }
+  host: { class: 'absolute inset-0 flex min-w-0 flex-col gap-4 p-4 md:p-6' }
 })
 export class FruitDessertTab {
   public readonly classId = input<string | null>(null);
