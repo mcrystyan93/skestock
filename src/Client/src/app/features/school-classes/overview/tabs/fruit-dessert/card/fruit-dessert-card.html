@@ -1,15 +1,5 @@
 <nz-card nzSize="small">
-  <div class="flex min-w-0 items-center justify-between gap-2">
-    <span class="min-w-0 truncate text-base font-semibold"
-          [attr.title]="date()">
-      {{ date() }}
-    </span>
-    <label nz-checkbox
-           class="shrink-0 py-2"
-           [formField]="rowForm.emailSent">
-      Email trimis
-    </label>
-  </div>
+  <div class="text-base font-semibold">{{ date() }}</div>
 
   <div class="mt-2">
     <ske-congregation-dropdown [formField]="rowForm.congregation"
@@ -20,7 +10,7 @@
     @if (entry().congregationDeleted) {
       <div nz-typography
            nzType="secondary"
-           class="mb-0! mt-1 truncate">
+           class="mb-0! mt-1">
         {{ entry().congregationName }} (ștearsă)
       </div>
     }
@@ -28,24 +18,29 @@
 
   <div nz-typography
        nzType="secondary"
-       class="mb-0! mt-2 flex min-w-0 flex-wrap items-center gap-x-2">
+       class="mb-0! mt-2">
     @if (entry().contactPerson || entry().contactPhone) {
-      <span class="min-w-0 truncate">{{ entry().contactPerson ?? '-' }}</span>
-      <span aria-hidden="true">·</span>
+      <div>{{ entry().contactPerson ?? '-' }}</div>
       @if (entry().normalizedPhone) {
         <a [href]="'tel:+' + entry().normalizedPhone">{{ entry().contactPhone }}</a>
       } @else {
-        <span>{{ entry().contactPhone ?? '-' }}</span>
+        <div>{{ entry().contactPhone ?? '-' }}</div>
       }
     } @else {
-      <span>Fără persoană de contact</span>
+      Fără persoană de contact
     }
   </div>
 
-  <div class="mt-3 grid grid-cols-2 gap-2">
+  <label nz-checkbox
+         class="mt-2 py-1"
+         [formField]="rowForm.emailSent">
+    Email trimis
+  </label>
+
+  <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
     @if (entry().reminderSent) {
       <nz-tag nzColor="success"
-              class="me-0! flex! h-10 items-center justify-center">
+              class="me-0! flex! h-10! items-center justify-center">
         <nz-icon nzType="icons:circle-check"/>
         Aducere aminte trimisă
       </nz-tag>
@@ -67,7 +62,7 @@
     }
     @if (entry().thanksSent) {
       <nz-tag nzColor="success"
-              class="me-0! flex! h-10 items-center justify-center">
+              class="me-0! flex! h-10! items-center justify-center">
         <nz-icon nzType="icons:circle-check"/>
         Mulțumire trimisă
       </nz-tag>

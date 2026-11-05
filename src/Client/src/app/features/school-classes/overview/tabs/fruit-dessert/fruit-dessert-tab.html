@@ -3,7 +3,7 @@
 <ske-error-display [problemDetail]="store.actionProblemDetail()"/>
 
 <div class="grow relative">
-  <ng-container *skeLayoutBreakpoint="'lg'; else small">
+  <ng-container *skeLayoutBreakpoint="'xl'; else small">
     <ske-fruit-dessert-table [entries]="store.entries()"
                              [loading]="store.entriesLoading()"
                              [readOnly]="readOnly()"
