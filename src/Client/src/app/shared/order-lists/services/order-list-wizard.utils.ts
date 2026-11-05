@@ -41,6 +41,11 @@ function toProductName(name: string, sku?: string | null): string {
   return sku ? `(${sku}) ${name}` : name;
 }
 
+/** Average quantities are fractional; order whole units, never below 1. */
+export function wholeQuantity(quantity: number): number {
+  return Math.max(1, Math.floor(quantity));
+}
+
 /** The four purchase segments in display order. */
 export function purchaseSegmentLists(segments: PurchaseSegmentsDto | null): PurchaseSegmentItemDto[][] {
   return segments ? [segments.weekly, segments.everyTwoWeeks, segments.monthly, segments.oncePerClass] : [];
@@ -61,7 +66,7 @@ export function suggestionsToLines(
 
   // An item in several segments or also in low stock is overwritten, so the segment quantity replaces the default 1.
   for (const item of purchaseSegmentLists(segments).flat())
-    candidates.set(item.itemId, { name: item.name, sku: item.sku, imageFileId: item.imageFileId, unit: item.unit, quantity: item.averageQuantity });
+    candidates.set(item.itemId, { name: item.name, sku: item.sku, imageFileId: item.imageFileId, unit: item.unit, quantity: wholeQuantity(item.averageQuantity) });
 
   return [...candidates]
     .filter(([itemId]) => selected.has(itemId))
