@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Shouldly;
+using skestock.Application.Common.Errors;
 using skestock.Application.Features.FruitDessertTemplates.Commands.UpdateMessageTemplate;
 using skestock.Domain.Enums;
 
@@ -36,11 +37,21 @@ public class UpdateMessageTemplateCommandValidatorTests
     [Test]
     public void Body_BoundaryIs4000()
     {
-        // Plain text without placeholders: 4000 passes the length rule but is over the 2000 rendered limit.
-        var result = _validator.Validate(Valid(body: new string('a', 4001)));
-        result.Errors.ShouldContain(e => e.PropertyName == "Body");
+        // Asserts on the MaxLength error code only; both bodies also trip the separate 2000 rendered check.
+        _validator.Validate(Valid(body: new string('a', 4001)))
+            .Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.MaxLength);
         _validator.Validate(Valid(body: new string('a', 4000)))
-            .Errors.ShouldNotContain(e => e.ErrorMessage.Contains("4000"));
+            .Errors.ShouldNotContain(e => e.ErrorCode == ValidationErrorCodes.MaxLength);
+    }
+
+    [Test]
+    public void Body_LengthIsMeasuredAfterSanitizing()
+    {
+        // 2000 '&' becomes 10000 chars once encoded.
+        _validator.Validate(Valid(body: "<p>" + new string('&', 2000) + "</p>"))
+            .Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.MaxLength);
+        _validator.Validate(Valid(body: "<p>" + new string('&', 700) + "</p>"))
+            .Errors.ShouldNotContain(e => e.ErrorCode == ValidationErrorCodes.MaxLength);
     }
 
     [Test]
