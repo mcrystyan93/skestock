@@ -1,0 +1,98 @@
+<nz-card nzSize="small">
+  <div class="flex min-w-0 items-center justify-between gap-2">
+    <span class="min-w-0 truncate text-base font-semibold"
+          [attr.title]="date()">
+      {{ date() }}
+    </span>
+    <label nz-checkbox
+           class="shrink-0 py-2"
+           [formField]="rowForm.emailSent">
+      Email trimis
+    </label>
+  </div>
+
+  <div class="mt-2">
+    <ske-congregation-dropdown [formField]="rowForm.congregation"
+                               [allowCreate]="false"
+                               [allowEdit]="false"
+                               [allowClear]="true"
+                               placeholder="Alege congregația"/>
+    @if (entry().congregationDeleted) {
+      <div nz-typography
+           nzType="secondary"
+           class="mb-0! mt-1 truncate">
+        {{ entry().congregationName }} (ștearsă)
+      </div>
+    }
+  </div>
+
+  <div nz-typography
+       nzType="secondary"
+       class="mb-0! mt-2 flex min-w-0 flex-wrap items-center gap-x-2">
+    @if (entry().contactPerson || entry().contactPhone) {
+      <span class="min-w-0 truncate">{{ entry().contactPerson ?? '-' }}</span>
+      <span aria-hidden="true">·</span>
+      @if (entry().normalizedPhone) {
+        <a [href]="'tel:+' + entry().normalizedPhone">{{ entry().contactPhone }}</a>
+      } @else {
+        <span>{{ entry().contactPhone ?? '-' }}</span>
+      }
+    } @else {
+      <span>Fără persoană de contact</span>
+    }
+  </div>
+
+  <div class="mt-3 grid grid-cols-2 gap-2">
+    @if (entry().reminderSent) {
+      <nz-tag nzColor="success"
+              class="me-0! flex! h-10 items-center justify-center">
+        <nz-icon nzType="icons:circle-check"/>
+        Aducere aminte trimisă
+      </nz-tag>
+    } @else {
+      <span nz-tooltip
+            class="block"
+            [nzTooltipTitle]="noPhoneTooltip()">
+        <button nz-button
+                type="button"
+                nzBlock
+                nzSize="large"
+                [disabled]="readOnly() || sending() || !canMessage()"
+                [attr.aria-label]="'Trimite aducere aminte pentru ' + date()"
+                (click)="sendMessage.emit(MessageType.Reminder)">
+          <nz-icon nzType="icons:paper-plane"/>
+          Aducere aminte
+        </button>
+      </span>
+    }
+    @if (entry().thanksSent) {
+      <nz-tag nzColor="success"
+              class="me-0! flex! h-10 items-center justify-center">
+        <nz-icon nzType="icons:circle-check"/>
+        Mulțumire trimisă
+      </nz-tag>
+    } @else {
+      <span nz-tooltip
+            class="block"
+            [nzTooltipTitle]="noPhoneTooltip()">
+        <button nz-button
+                type="button"
+                nzBlock
+                nzSize="large"
+                [disabled]="readOnly() || sending() || !canMessage()"
+                [attr.aria-label]="'Trimite mulțumire pentru ' + date()"
+                (click)="sendMessage.emit(MessageType.Thanks)">
+          <nz-icon nzType="icons:paper-plane"/>
+          Mulțumire
+        </button>
+      </span>
+    }
+  </div>
+
+  @if (fallbackUrl(); as url) {
+    <a class="mt-2 block"
+       [href]="url"
+       target="_blank"
+       rel="noopener">Deschide WhatsApp</a>
+  }
+</nz-card>
