@@ -34,3 +34,27 @@ export type FruitDessertMessageDispatchDto = {
   status: FruitDessertMessageStatus;
   sentAt: string;
 };
+
+/** Mirrors the message template DTOs of GET /api/FruitDessertTemplates. `body` is HTML (WhatsApp-formatted server side). */
+export type MessageTemplateDto = {
+  type: FruitDessertMessageType;
+  name: string;
+  body: string;
+  lastModified: string;
+};
+
+export type MessagePlaceholderDto = {
+  token: string;
+  label: string;
+  example: string;
+};
+
+export type MessageTemplatesDto = {
+  templates: MessageTemplateDto[];
+  placeholders: MessagePlaceholderDto[];
+};
+
+export type UpdateMessageTemplateRequest = {
+  name: string;
+  body: string;
+};
