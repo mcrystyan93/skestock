@@ -76,6 +76,9 @@ public static class Services
     public const string SeedAdministratorEmail = "Email";
     public const string SeedAdministratorPassword = "Password";
 
+    /// <summary>Environment variable that switches AppHost (and Web seeding) into the ephemeral Playwright e2e mode.</summary>
+    public const string E2EMode = "E2E";
+
     public const string ImportBatchSettings = "ImportBatch";
 
     public const string WorkerSettings = "Worker";
