@@ -17,6 +17,10 @@ if (publicOrigins.Length == 0)
     throw new InvalidOperationException("At least one public origin must be configured.");
 }
 
+// Ephemeral run for Playwright (run-e2e.sh): no data volumes, health-gated web, never touches dev volumes.
+var e2eMode = builder.ExecutionContext.IsRunMode
+              && string.Equals(builder.Configuration[Services.E2EMode], "true", StringComparison.OrdinalIgnoreCase);
+
 var compose = builder.AddDockerComposeEnvironment("env")
     .WithDashboard(dashboard =>
     {
@@ -50,8 +54,11 @@ var sqlServer = builder
         service.Ports.Add("127.0.0.1:1433:1433");
     })
     .WithComputeEnvironment(compose)
-    .WithDataVolume(Services.DatabaseVolumes)
     .WithPassword(sqlPassword);
+if (!e2eMode)
+{
+    sqlServer.WithDataVolume(Services.DatabaseVolumes);
+}
 if (builder.ExecutionContext.IsRunMode)
 {
     // Published stacks bind SQL Server to the host's loopback only (see PublishAsDockerComposeService).
@@ -75,8 +82,11 @@ var cache = builder
         service.Ports.Add("127.0.0.1:6379:6379");
     })
     .WithComputeEnvironment(compose)
-    .WithPassword(redisPassword)
-    .WithDataVolume(Services.CacheVolumes);
+    .WithPassword(redisPassword);
+if (!e2eMode)
+{
+    cache.WithDataVolume(Services.CacheVolumes);
+}
 if (builder.ExecutionContext.IsRunMode)
 {
     cache.WithEndpoint(targetPort: 6379, port: 6379, name: "tcp", isExternal: true);
@@ -86,7 +96,9 @@ var openAiApiKey = builder.AddParameter($"{Services.OpenApiSettings}{Services.Op
 var openAiModel = builder.AddParameter($"{Services.OpenApiSettings}{Services.OpenApiModel}", "gpt-5.6-luna");
 var seedAdminEmail = builder.AddParameter($"{Services.SeedAdministrator}{Services.SeedAdministratorEmail}");
 var seedAdminPassword = builder.AddParameter($"{Services.SeedAdministrator}{Services.SeedAdministratorPassword}", secret: true);
-var web = builder.AddProject<Projects.Web>(Services.WebApi)
+// The default "https" launch profile makes UseHttpsRedirection answer the SPA proxy's http calls with a 307 to
+// a self-signed https origin, which breaks cookie login; e2e uses the http-only profile.
+var web = builder.AddProject<Projects.Web>(Services.WebApi, e2eMode ? "http" : null)
     .PublishAsDockerFile(container =>
         container.WithDockerfile("../..", "src/Web/Dockerfile", "final"))
     .PublishAsDockerComposeService((resource, service) =>
@@ -174,6 +186,12 @@ if (builder.ExecutionContext.IsRunMode)
 {
     web.WithReference(databaseServer);
     worker.WithReference(databaseServer);
+}
+
+if (e2eMode)
+{
+    web.WithEnvironment(Services.E2EMode, "true")
+        .WithHttpHealthCheck("/health");
 }
 
 if (builder.ExecutionContext.IsPublishMode)
@@ -288,9 +306,13 @@ else
         .AddAzureStorage(Services.Storage)
         .RunAsEmulator(azurite =>
         {
-            azurite.WithLifetime(ContainerLifetime.Persistent)
-                .WithDataVolume(Services.StorageVolumes)
-                .WithBlobPort(10000)
+            if (!e2eMode)
+            {
+                azurite.WithLifetime(ContainerLifetime.Persistent)
+                    .WithDataVolume(Services.StorageVolumes);
+            }
+
+            azurite.WithBlobPort(10000)
                 .WithQueuePort(10001)
                 .WithTablePort(10002)
                 .WithComputeEnvironment(compose);
@@ -331,6 +353,11 @@ var webfrontend = builder.AddViteApp(Services.WebFrontend, "../Client", "dev")
     .WithNpm()
     .WithHttpEndpoint(port: 7001, env: "PORT")
     .WithExternalHttpEndpoints();
+
+if (e2eMode)
+{
+    webfrontend.WithHttpHealthCheck("/");
+}
 
 for (var index = 0; index < publicOrigins.Length; index++)
 {

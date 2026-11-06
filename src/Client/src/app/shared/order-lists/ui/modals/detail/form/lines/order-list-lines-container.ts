@@ -21,7 +21,9 @@ import { NzEmptyComponent } from 'ng-zorro-antd/empty';
       <div class="p-3 md:p-4 grid gap-3 md:gap-4"
            [class]="gridClass()">
         @let history = purchaseHistory.value();
-        @for (line of lines(); track line.clientKey().value()) {
+        <!-- Tracked by the plain value: the diff re-runs the track expression on the previous items, and reading a replaced array's old field throws. -->
+        @for (value of lines()().value(); track value.clientKey; let index = $index) {
+          @let line = lines()[index];
           @let itemId = line.itemId().value();
           <ske-order-list-line [line]="line"
                                [disabled]="disabled()"

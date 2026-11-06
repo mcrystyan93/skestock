@@ -42,11 +42,13 @@ public static class InitialiserExtensions
         if (app.Environment.IsDevelopment())
         {
             await initialiser.SeedDemoClassAsync();
+            // Self-guarded: does nothing unless the AppHost e2e mode set E2E=true.
+            await initialiser.SeedE2eAsync();
         }
     }
 }
 
-public class ApplicationDbContextInitialiser
+public partial class ApplicationDbContextInitialiser
 {
     private readonly ILogger<ApplicationDbContextInitialiser> _logger;
     private readonly ApplicationDbContext _context;
