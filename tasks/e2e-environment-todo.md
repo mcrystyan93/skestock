@@ -1,0 +1,43 @@
+# Todo: Reliable Playwright e2e environment
+
+Plan: `tasks/e2e-environment-plan.md`. Branch: `feature/e2e-environment`.
+
+- [ ] T1. E2E mode in AppHost
+  - Acceptance: with `E2E=true` SQL/Redis have no data volume, Azurite is session-lifetime w/o volume, web+webfrontend have health checks, web gets `E2E=true`; without the flag the resource graph is unchanged.
+  - Verify: `dotnet build`; `E2E=true aspire start`, `podman volume ls` shows no new/changed `skestock-*`/`storage-data`; `aspire wait webapi` healthy.
+  - Files: `src/Shared/Services.cs`, `src/AppHost/Program.cs`
+- [ ] T2. `run-e2e.sh` (up -> wait -> playwright -> down)
+  - Acceptance: `--keep` and `-- <playwright args>` work; creds never printed; busy ports / wait failures exit non-zero naming the resource; trap always stops the stack; runs chromium + mobile.
+  - Verify: `./run-e2e.sh -- e2e/specs/login.spec.ts` passes; `podman ps -a` clean after; volume list identical before/after; `bash -n`.
+  - Files: `run-e2e.sh`
+- [ ] **Checkpoint A**: lifecycle reliable; dev admin still logs in on the dev stack.
+- [ ] T3. Playwright readiness + shared login
+  - Acceptance: globalSetup fails clearly if frontend/API unreachable; saves storageState on 200; sets stale flag on 401; timeout/workers updated; `skipUnlessLoggedIn` helper.
+  - Verify: `npx playwright test --list`; stack down fails fast with message; tsc passes, no `any`.
+  - Files: `src/Client/playwright.config.ts`, `src/Client/e2e/global-setup.ts`, `src/Client/e2e/auth.ts`
+- [ ] T4. Live specs use the helper (401 = skip)
+  - Acceptance: login, congregations, room-configuration skip on stale/missing creds with a clear message and run under `run-e2e.sh`; mocked specs unchanged.
+  - Verify: `./run-e2e.sh` shows 0 skips for these; wrong password on a live stack yields skips, not failures.
+  - Files: `src/Client/e2e/specs/{login,congregations,room-configuration}.spec.ts`
+- [ ] **Checkpoint B**: success criteria 1, 3, 4 met.
+- [ ] T5. E2E seed scaffold + guard + reference data
+  - Acceptance: class becomes `partial`; `SeedE2eAsync` runs only when Development and `E2E`; seeds Congregations, MessageTemplates, SharedClassConfigurations, ClassItemStockVisibilities; idempotent.
+  - Verify: `dotnet build`; integration test runs seed twice with same counts, 0 rows when flag off.
+  - Files: `ApplicationDbContextInitialiser.cs`, `ApplicationDbContextInitialiser.E2e.cs`, `tests/Infrastructure.IntegrationTests/E2eSeedTests.cs`
+- [ ] T6. Seed workflow tables
+  - Acceptance: OrderLists/Lines, SupplyLists/Lines, FruitDessertPlanEntries/Messages for the demo class; idempotent; audit stamps.
+  - Verify: extend integration test counts.
+  - Files: `ApplicationDbContextInitialiser.E2e.cs`, `E2eSeedTests.cs`
+- [ ] T7. Seed import tables
+  - Acceptance: FileMetadata, Category/ItemImportBatches(+Files), GoodsReceiptImports(+Lines) in terminal statuses only; no Worker reprocessing.
+  - Verify: test counts; Worker log shows no import processing after startup.
+  - Files: `ApplicationDbContextInitialiser.E2e.cs`, `E2eSeedTests.cs`
+- [ ] **Checkpoint C**: `SELECT COUNT(*)` per in-scope table > 0 on a fresh e2e stack; dev DB untouched.
+- [ ] T8. Real-backend spec on seeded data
+  - Acceptance: uses storageState, no `page.route`, opens demo class item list, sees `DEMO-01`.
+  - Verify: `./run-e2e.sh` 3x in a row, 0 failed / 0 flaky.
+  - Files: `src/Client/e2e/specs/seeded-items.spec.ts`
+- [ ] T9. Docs
+  - Acceptance: manual credential-copy text in `CLAUDE.md` §4 and `src/Client/README.md` replaced by `./run-e2e.sh` + one-time `npx playwright install --with-deps chromium`.
+  - Verify: `npm run build`, `npm test -- --watch=false`, `graphify update .`
+  - Files: `CLAUDE.md`, `src/Client/README.md`, `src/Client/playwright.config.ts`
