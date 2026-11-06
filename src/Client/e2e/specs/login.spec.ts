@@ -1,4 +1,5 @@
 import { expect, test, type Request } from '@playwright/test';
+import { skipUnlessLoggedIn } from '../auth';
 
 test.use({ trace: 'off' });
 
@@ -253,10 +254,7 @@ test.describe('live login integration', () => {
   });
 
   test('keeps a successful cookie session after reload', async ({ page }) => {
-    const email = process.env['PLAYWRIGHT_LOGIN_EMAIL'];
-    const password = process.env['PLAYWRIGHT_LOGIN_PASSWORD'];
-    test.skip(!email || !password, 'Set dedicated PLAYWRIGHT_LOGIN_EMAIL and PLAYWRIGHT_LOGIN_PASSWORD.');
-    if (!email || !password) return;
+    const { email, password } = skipUnlessLoggedIn(test);
 
     await page.goto('/login');
     await page.getByPlaceholder('Email').fill(email);

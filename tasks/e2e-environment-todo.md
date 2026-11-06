@@ -2,20 +2,20 @@
 
 Plan: `tasks/e2e-environment-plan.md`. Branch: `feature/e2e-environment`.
 
-- [ ] T1. E2E mode in AppHost
+- [x] T1. E2E mode in AppHost
   - Acceptance: with `E2E=true` SQL/Redis have no data volume, Azurite is session-lifetime w/o volume, web+webfrontend have health checks, web gets `E2E=true`; without the flag the resource graph is unchanged.
   - Verify: `dotnet build`; `E2E=true aspire start`, `podman volume ls` shows no new/changed `skestock-*`/`storage-data`; `aspire wait webapi` healthy.
   - Files: `src/Shared/Services.cs`, `src/AppHost/Program.cs`
-- [ ] T2. `run-e2e.sh` (up -> wait -> playwright -> down)
+- [x] T2. `run-e2e.sh` (up -> wait -> playwright -> down)
   - Acceptance: `--keep` and `-- <playwright args>` work; creds never printed; busy ports / wait failures exit non-zero naming the resource; trap always stops the stack; runs chromium + mobile.
   - Verify: `./run-e2e.sh -- e2e/specs/login.spec.ts` passes; `podman ps -a` clean after; volume list identical before/after; `bash -n`.
   - Files: `run-e2e.sh`
 - [ ] **Checkpoint A**: lifecycle reliable; dev admin still logs in on the dev stack.
-- [ ] T3. Playwright readiness + shared login
+- [x] T3. Playwright readiness + shared login
   - Acceptance: globalSetup fails clearly if frontend/API unreachable; saves storageState on 200; sets stale flag on 401; timeout/workers updated; `skipUnlessLoggedIn` helper.
   - Verify: `npx playwright test --list`; stack down fails fast with message; tsc passes, no `any`.
   - Files: `src/Client/playwright.config.ts`, `src/Client/e2e/global-setup.ts`, `src/Client/e2e/auth.ts`
-- [ ] T4. Live specs use the helper (401 = skip)
+- [x] T4. Live specs use the helper (401 = skip)
   - Acceptance: login, congregations, room-configuration skip on stale/missing creds with a clear message and run under `run-e2e.sh`; mocked specs unchanged.
   - Verify: `./run-e2e.sh` shows 0 skips for these; wrong password on a live stack yields skips, not failures.
   - Files: `src/Client/e2e/specs/{login,congregations,room-configuration}.spec.ts`
