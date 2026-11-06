@@ -1,0 +1,84 @@
+<td>
+  <span class="block truncate"
+        [attr.title]="date()">
+    {{ date() }}
+  </span>
+</td>
+<td>
+  <ske-congregation-dropdown [formField]="rowForm.congregation"
+                             [allowCreate]="false"
+                             [allowEdit]="false"
+                             [allowClear]="true"
+                             placeholder="Alege congregația"/>
+  @if (entry().congregationDeleted) {
+    <div nz-typography
+         nzType="secondary"
+         class="mb-0! mt-1 truncate">
+      {{ entry().congregationName }} (ștearsă)
+    </div>
+  }
+</td>
+<td>
+  <span class="block truncate"
+        [attr.title]="entry().contactPerson ?? ''">
+    {{ entry().contactPerson ?? '-' }}
+  </span>
+</td>
+<td>
+  <span class="block truncate">{{ entry().contactPhone ?? '-' }}</span>
+</td>
+<td>
+  <label nz-checkbox
+         [formField]="rowForm.emailSent">
+    <span class="sr-only">Email trimis pentru {{ date() }}</span>
+  </label>
+</td>
+<td>
+  @if (entry().reminderSent) {
+    <nz-tag nzColor="success">
+      <nz-icon nzType="icons:circle-check"/>
+      Trimis
+    </nz-tag>
+  } @else {
+    <span nz-tooltip
+          [nzTooltipTitle]="noPhoneTooltip()">
+      <button nz-button
+              type="button"
+              nzSize="small"
+              [disabled]="readOnly() || sending() || !canMessage()"
+              [attr.aria-label]="'Trimite aducere aminte pentru ' + date()"
+              (click)="sendMessage.emit(MessageType.Reminder)">
+        <nz-icon nzType="icons:paper-plane"/>
+        Trimite
+      </button>
+    </span>
+  }
+</td>
+<td>
+  <div class="flex flex-wrap items-center gap-2">
+    @if (entry().thanksSent) {
+      <nz-tag nzColor="success">
+        <nz-icon nzType="icons:circle-check"/>
+        Trimis
+      </nz-tag>
+    } @else {
+      <span nz-tooltip
+            [nzTooltipTitle]="noPhoneTooltip()">
+        <button nz-button
+                type="button"
+                nzSize="small"
+                [disabled]="readOnly() || sending() || !canMessage()"
+                [attr.aria-label]="'Trimite mulțumire pentru ' + date()"
+                (click)="sendMessage.emit(MessageType.Thanks)">
+          <nz-icon nzType="icons:paper-plane"/>
+          Trimite
+        </button>
+      </span>
+    }
+    @if (fallbackUrl(); as url) {
+      <a [href]="url"
+         target="_blank"
+         rel="noopener">Deschide WhatsApp</a>
+    }
+  </div>
+</td>

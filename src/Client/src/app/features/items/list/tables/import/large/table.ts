@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 import { BaseTableWithFilter } from '@ske/shared/tables';
 import {
@@ -24,7 +23,6 @@ import { TimeAgoPipe } from '@ske/shared/pipes';
 @Component({
   imports: [
     NzTableModule,
-    DatePipe,
     NzButtonComponent,
     NzDropdownDirective,
     NzDropdownMenuComponent,

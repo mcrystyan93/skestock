@@ -1,0 +1,35 @@
+@let dimensions = tableDimensions();
+
+<nz-table #table
+          nzTableLayout="fixed"
+          [nzTemplateMode]="true"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          [nzLoading]="loading()"
+          nzNoResult="Clasa nu are zile în interval"
+          nzSize="small"
+          [nzScroll]="{x:dimensions.width, y:dimensions.height}">
+  <thead>
+  <tr>
+    <th [nzWidth]="columnLayout.date.width">Data</th>
+    <th [nzWidth]="columnLayout.congregation.width">Congregația</th>
+    <th [nzWidth]="columnLayout.contactPerson.width">Persoana de contact</th>
+    <th [nzWidth]="columnLayout.phone.width">Telefon</th>
+    <th [nzWidth]="columnLayout.email.width">Email trimis</th>
+    <th [nzWidth]="columnLayout.reminder.width">Aducere aminte</th>
+    <th [nzWidth]="columnLayout.thanks.width">Mulțumire</th>
+  </tr>
+  </thead>
+  <tbody>
+    @for (entry of entries(); track entry.id) {
+      <tr ske-fruit-dessert-row
+          [entry]="entry"
+          [readOnly]="readOnly()"
+          [sending]="sending()"
+          [fallbackUrl]="fallback()?.entryId === entry.id ? fallback()!.url : null"
+          (congregationChange)="congregationChange.emit({ entryId: entry.id, congregationId: $event })"
+          (emailSentChange)="emailSentChange.emit({ entryId: entry.id, emailSent: $event })"
+          (sendMessage)="sendMessage.emit({ entryId: entry.id, type: $event })"></tr>
+    }
+  </tbody>
+</nz-table>

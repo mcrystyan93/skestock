@@ -3,7 +3,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import type { OrderListLineDto } from '@ske/models';
 import { ClassStatisticsHttp } from '@ske/shared/class-statistics';
 import { groupLowStockItems, purchaseSegmentLists, suggestionsToLines, supplyListsToLines } from '@ske/shared/order-lists/services';
-import { StockHttp } from '@ske/shared/stock';
+import { StockHttp } from '../../../../../../stock/services/stock.http';
 import { SupplyListsHttp } from '@ske/shared/supply-lists';
 import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 import { NzAlertComponent } from 'ng-zorro-antd/alert';

@@ -1,0 +1,67 @@
+<div class="flex flex-wrap items-center gap-2 mb-2">
+  <div class="flex gap-1">
+    <button nz-button
+            nzSize="small"
+            type="button"
+            nz-tooltip
+            nzTooltipTitle="Îngroșat"
+            aria-label="Îngroșat"
+            [nzType]="isActive('bold') ? 'primary' : 'default'"
+            (click)="toggle('bold')"><strong>B</strong></button>
+    <button nz-button
+            nzSize="small"
+            type="button"
+            nz-tooltip
+            nzTooltipTitle="Cursiv"
+            aria-label="Cursiv"
+            [nzType]="isActive('italic') ? 'primary' : 'default'"
+            (click)="toggle('italic')"><em>I</em></button>
+    <button nz-button
+            nzSize="small"
+            type="button"
+            nz-tooltip
+            nzTooltipTitle="Tăiat"
+            aria-label="Tăiat"
+            [nzType]="isActive('strike') ? 'primary' : 'default'"
+            (click)="toggle('strike')"><s>S</s></button>
+    <button nz-button
+            nzSize="small"
+            type="button"
+            nz-tooltip
+            nzTooltipTitle="Cod"
+            aria-label="Cod"
+            [nzType]="isActive('code') ? 'primary' : 'default'"
+            (click)="toggle('code')">cod</button>
+    <button nz-button
+            nzSize="small"
+            type="button"
+            nz-tooltip
+            nzTooltipTitle="Listă cu buline"
+            aria-label="Listă cu buline"
+            [nzType]="isActive('bulletList') ? 'primary' : 'default'"
+            (click)="toggle('bulletList')">listă</button>
+  </div>
+  <button nz-button
+          nzSize="small"
+          type="button"
+          nz-dropdown
+          [nzDropdownMenu]="placeholderMenu"
+          [disabled]="!placeholders().length"
+          aria-label="Inserează un câmp">Inserează câmp
+  </button>
+  <nz-dropdown-menu #placeholderMenu="nzDropdownMenu">
+    <ul nz-menu>
+      @for (placeholder of placeholders(); track placeholder.token) {
+        <li nz-menu-item
+            (click)="insertPlaceholder(placeholder.token)">{{ placeholder.label }}</li>
+      }
+    </ul>
+  </nz-dropdown-menu>
+</div>
+<div #host
+     class="border border-solid border-(--ant-color-border) rounded-md px-3 py-2
+            [&_.ProseMirror]:min-h-28 [&_.ProseMirror]:outline-none [&_.ProseMirror_p]:my-0
+            [&_.ProseMirror_ul]:list-disc [&_.ProseMirror_ul]:pl-6 [&_.ProseMirror_ul]:my-0
+            [&_.ProseMirror_code]:font-mono"></div>
+<div class="text-right text-xs mt-1"
+     [class.text-red-500]="textLength() > limit">≈ {{ textLength() }} / {{ limit }}</div>

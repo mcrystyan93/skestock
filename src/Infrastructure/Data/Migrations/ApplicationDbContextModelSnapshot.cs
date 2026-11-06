@@ -391,6 +391,180 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.ToTable("Congregations");
                 });
 
+            modelBuilder.Entity("skestock.Domain.Entities.FruitDessert.FruitDessertMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("EntryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("LastModifiedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("RecipientPhone")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTimeOffset>("SentAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TemplateId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("LastModifiedById");
+
+                    b.HasIndex("TemplateId")
+                        .HasDatabaseName("IX_FruitDessertMessages_TemplateId");
+
+                    b.HasIndex("EntryId", "Type")
+                        .HasDatabaseName("IX_FruitDessertMessages_EntryId_Type");
+
+                    b.ToTable("FruitDessertMessages");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.FruitDessert.FruitDessertPlanEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CongregationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("EmailSent")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("LastModifiedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("SchoolClassId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CongregationId")
+                        .HasDatabaseName("IX_FruitDessertPlanEntries_CongregationId");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("LastModifiedById");
+
+                    b.HasIndex("SchoolClassId", "Date")
+                        .IsUnique()
+                        .HasDatabaseName("UX_FruitDessertPlanEntries_SchoolClassId_Date");
+
+                    b.ToTable("FruitDessertPlanEntries");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.FruitDessert.MessageTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("LastModifiedDate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("LastModifiedById");
+
+                    b.HasIndex("Type")
+                        .IsUnique()
+                        .HasDatabaseName("UX_MessageTemplates_Type_Active")
+                        .HasFilter("[IsActive] = 1");
+
+                    b.ToTable("MessageTemplates");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("0197c0de-0000-7000-8000-000000000001"),
+                            Body = "Bună ziua, {ContactPerson}! Vă reamintim că {Date} congregația {Congregation} aduce fructe și desert pentru {ClassName}. Vă mulțumim!",
+                            CreatedDate = new DateTimeOffset(new DateTime(2026, 11, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            LastModifiedDate = new DateTimeOffset(new DateTime(2026, 11, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Reminder fructe și desert",
+                            Type = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("0197c0de-0000-7000-8000-000000000002"),
+                            Body = "Bună ziua, {ContactPerson}! Vă mulțumim că {Date} congregația {Congregation} a adus fructe și desert pentru {ClassName}. Dumnezeu să vă binecuvânteze!",
+                            CreatedDate = new DateTimeOffset(new DateTime(2026, 11, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            LastModifiedDate = new DateTimeOffset(new DateTime(2026, 11, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Mulțumire fructe și desert",
+                            Type = 2
+                        });
+                });
+
             modelBuilder.Entity("skestock.Domain.Entities.GoodsReceipts.GoodsReceipt", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2033,6 +2207,94 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Navigation("LastModifiedBy");
                 });
 
+            modelBuilder.Entity("skestock.Domain.Entities.FruitDessert.FruitDessertMessage", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.FruitDessert.FruitDessertPlanEntry", "Entry")
+                        .WithMany("Messages")
+                        .HasForeignKey("EntryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("LastModifiedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.FruitDessert.MessageTemplate", "Template")
+                        .WithMany()
+                        .HasForeignKey("TemplateId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Entry");
+
+                    b.Navigation("LastModifiedBy");
+
+                    b.Navigation("Template");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.FruitDessert.FruitDessertPlanEntry", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.Congregations.Congregation", "Congregation")
+                        .WithMany()
+                        .HasForeignKey("CongregationId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("LastModifiedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.SchoolClasses.SchoolClass", "SchoolClass")
+                        .WithMany()
+                        .HasForeignKey("SchoolClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Congregation");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("LastModifiedBy");
+
+                    b.Navigation("SchoolClass");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.FruitDessert.MessageTemplate", b =>
+                {
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("skestock.Domain.Entities.Users.UserProfile", "LastModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("LastModifiedById")
+                        .HasPrincipalKey("IdentityId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("LastModifiedBy");
+                });
+
             modelBuilder.Entity("skestock.Domain.Entities.GoodsReceipts.GoodsReceipt", b =>
                 {
                     b.HasOne("skestock.Domain.Entities.SchoolClasses.SchoolClass", "Class")
@@ -2771,6 +3033,11 @@ namespace skestock.Infrastructure.Data.Migrations
             modelBuilder.Entity("skestock.Domain.Entities.Categories.CategoryImportBatch", b =>
                 {
                     b.Navigation("Files");
+                });
+
+            modelBuilder.Entity("skestock.Domain.Entities.FruitDessert.FruitDessertPlanEntry", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("skestock.Domain.Entities.GoodsReceipts.GoodsReceipt", b =>
