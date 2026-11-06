@@ -130,7 +130,7 @@ Never run `dotnet run --project src/Web` directly; use AppHost.
 ## 10. Known pitfalls
 
 - Cookie auth: keep the explicit CORS origin allowlist with credentials; never use `AllowAnyOrigin()`. Antiforgery is scaffolded but commented out (`src/Web/Endpoints/Antiforgery.cs`), so CSRF is not enforced.
-- Public Identity registration exists (`src/Web/Endpoints/Users.cs`) and must be disabled/not relied on; no request uses role-based `[Authorize]`. Antiforgery will be enabled later: don't build features that assume it is absent.
+- Public Identity registration exists (`src/Web/Endpoints/Users.cs`) and must be disabled/not relied on, so "authenticated" does not mean "staff". Admin-only commands carry `[Authorize(Roles = Roles.Administrator)]` (e.g. `SaveDepartment`, `CloseSchoolClass`, `UpdateMessageTemplate`); give every new command that writes global/shared data (not scoped to a class the caller can open) the same attribute. Antiforgery will be enabled later: don't build features that assume it is absent.
 - Functional tests use `TestAppHost` (waits ≤90 s for SQL/Redis/queue). Don't assume a clean DB outside `TestBase`. Use `./run-functional-tests.sh`, not bare `dotnet test`, under Podman.
 - Feature-wide cache tags invalidate many list variants; keep tag changes consistent with `CacheConstants.cs`.
 - Fragile areas: `Application/Common/{Behaviours,Filtering,Keyset,Caching}`, `ApplicationDbContextInitialiser.cs`, the outbox/Worker queue path, `shared/items/ui/autocomplete/item-autocomplete.ts`. Test before refactoring.

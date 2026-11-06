@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@source not '../../e2e';
 
 @theme {
   --breakpoint-*: initial;

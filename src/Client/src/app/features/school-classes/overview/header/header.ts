@@ -1,4 +1,6 @@
-import {Component, computed, inject, input, model, output} from '@angular/core';
+import {Component, computed, inject, input, model, output, ViewContainerRef} from '@angular/core';
+import {NzModalService} from 'ng-zorro-antd/modal';
+import {TemplatesModal} from '../tabs/fruit-dessert/templates-modal/templates-modal';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {
   NzPageHeaderComponent,
@@ -86,7 +88,8 @@ export class Header {
     {label: 'Comenzi importate', compactLabel: 'Importuri'},
     {label: 'Statistici', compactLabel: 'Stat.'},
     {label: 'Departamente', compactLabel: 'Dept.'},
-    {label: 'Invitații'}
+    {label: 'Invitații'},
+    {label: 'Fructe și desert', compactLabel: 'Fructe'}
   ];
 
   public readonly isClosed = computed(() => this.schoolClass().status === ClassStatus.Closed);
@@ -114,10 +117,36 @@ export class Header {
           icon: 'icons:file-import',
           run: () => this.onAddGoodsReceipt.emit()
         };
+      case 7:
+        return {
+          text: 'Șabloane mesaje',
+          label: 'Șabloane mesaje',
+          icon: 'icons:comment-dots',
+          run: () => this.openTemplates()
+        };
       default:
         return null;
     }
   });
+
+  private readonly _modalService = inject(NzModalService);
+  private readonly _viewContainerRef = inject(ViewContainerRef);
+
+  private openTemplates(): void {
+    this._modalService.create<TemplatesModal>({
+      nzContent: TemplatesModal,
+      nzViewContainerRef: this._viewContainerRef,
+      nzOnCancel: (instance) => {
+        instance.close();
+        return false;
+      },
+      nzCentered: true,
+      nzMaskClosable: false,
+      nzWrapClassName: 'modal-w-90 modal-w-md-75 modal-w-xl-50',
+      // Long templates scroll inside the body so the footer's Salvează stays on screen.
+      nzBodyStyle: { maxHeight: 'calc(100vh - 220px)', overflowY: 'auto' }
+    });
+  }
 }
 
 type HeaderAction = {

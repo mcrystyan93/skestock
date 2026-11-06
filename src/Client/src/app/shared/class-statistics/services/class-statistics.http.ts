@@ -12,7 +12,7 @@ import {
   TopPurchasesDto,
   TopPurchasesFilter
 } from '@ske/models';
-import { StockHttp } from '@ske/shared/stock';
+import { StockHttp } from '../../stock/services/stock.http';
 import { map } from 'rxjs';
 
 @Service()

@@ -6,7 +6,7 @@ import { OrderListDto, PurchaseSegmentsDto, SupplyListDto, SupplyListListItemDto
 import { ClassStatisticsHttp } from '@ske/shared/class-statistics';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { withLoadingFeature } from '@ske/shared/loader';
-import { StockHttp } from '@ske/shared/stock';
+import { StockHttp } from '../../stock/services/stock.http';
 import { SupplyListsHttp } from '@ske/shared/supply-lists';
 import { isNil } from 'lodash-es';
 import { NzMessageService } from 'ng-zorro-antd/message';
