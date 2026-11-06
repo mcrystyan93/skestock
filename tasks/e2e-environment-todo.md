@@ -20,24 +20,24 @@ Plan: `tasks/e2e-environment-plan.md`. Branch: `feature/e2e-environment`.
   - Verify: `./run-e2e.sh` shows 0 skips for these; wrong password on a live stack yields skips, not failures.
   - Files: `src/Client/e2e/specs/{login,congregations,room-configuration}.spec.ts`
 - [ ] **Checkpoint B**: success criteria 1, 3, 4 met.
-- [ ] T5. E2E seed scaffold + guard + reference data
+- [x] T5. E2E seed scaffold + guard + reference data
   - Acceptance: class becomes `partial`; `SeedE2eAsync` runs only when Development and `E2E`; seeds Congregations, MessageTemplates, SharedClassConfigurations, ClassItemStockVisibilities; idempotent.
   - Verify: `dotnet build`; integration test runs seed twice with same counts, 0 rows when flag off.
   - Files: `ApplicationDbContextInitialiser.cs`, `ApplicationDbContextInitialiser.E2e.cs`, `tests/Infrastructure.IntegrationTests/E2eSeedTests.cs`
-- [ ] T6. Seed workflow tables
+- [x] T6. Seed workflow tables
   - Acceptance: OrderLists/Lines, SupplyLists/Lines, FruitDessertPlanEntries/Messages for the demo class; idempotent; audit stamps.
   - Verify: extend integration test counts.
   - Files: `ApplicationDbContextInitialiser.E2e.cs`, `E2eSeedTests.cs`
-- [ ] T7. Seed import tables
+- [x] T7. Seed import tables
   - Acceptance: FileMetadata, Category/ItemImportBatches(+Files), GoodsReceiptImports(+Lines) in terminal statuses only; no Worker reprocessing.
   - Verify: test counts; Worker log shows no import processing after startup.
   - Files: `ApplicationDbContextInitialiser.E2e.cs`, `E2eSeedTests.cs`
-- [ ] **Checkpoint C**: `SELECT COUNT(*)` per in-scope table > 0 on a fresh e2e stack; dev DB untouched.
-- [ ] T8. Real-backend spec on seeded data
+- [x] **Checkpoint C**: `SELECT COUNT(*)` per in-scope table > 0 on a fresh e2e stack; dev DB untouched.
+- [x] T8. Real-backend spec on seeded data
   - Acceptance: uses storageState, no `page.route`, opens demo class item list, sees `DEMO-01`.
   - Verify: `./run-e2e.sh` 3x in a row, 0 failed / 0 flaky.
   - Files: `src/Client/e2e/specs/seeded-items.spec.ts`
-- [ ] T9. Docs
+- [x] T9. Docs
   - Acceptance: manual credential-copy text in `CLAUDE.md` §4 and `src/Client/README.md` replaced by `./run-e2e.sh` + one-time `npx playwright install --with-deps chromium`.
   - Verify: `npm run build`, `npm test -- --watch=false`, `graphify update .`
   - Files: `CLAUDE.md`, `src/Client/README.md`, `src/Client/playwright.config.ts`

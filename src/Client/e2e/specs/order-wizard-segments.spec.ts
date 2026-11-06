@@ -84,12 +84,14 @@ for (const viewport of viewports) {
       });
       if (!fullyHidden) return tab(title).dispatchEvent('click');
       const item = page.locator('.ant-tabs-dropdown-menu-item').filter({ hasText: title });
-      // A click that lands while the previous dropdown is still closing leaves it shut, so reopen until the item shows.
+      // The "..." menu opens on mouseenter (a click only toggles it, racing that), so re-enter the button until the item shows.
       await expect(async () => {
-        await nav.locator('.ant-tabs-nav-more').click();
+        await page.mouse.move(0, 0);
+        await nav.locator('.ant-tabs-nav-more').hover();
         await expect(item).toBeVisible({ timeout: 1_000 });
+        // Inside the retry: the menu closes on mouseleave, so the item can vanish between check and click.
+        await item.dispatchEvent('click', undefined, { timeout: 1_000 });
       }).toPass();
-      await item.dispatchEvent('click');
     };
 
     // Every tab is reachable and shows its thumbnails.
