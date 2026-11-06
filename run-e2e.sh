@@ -2,6 +2,7 @@
 # Bring up an ephemeral, seeded stack (no data volumes), run Playwright against it, tear it down.
 # Usage: ./run-e2e.sh [--keep] [-- <playwright args>]
 # Credentials are generated per run, passed only through the environment, never printed or written.
+# Playwright args are relative to src/Client. Random credentials are visible in `podman inspect` while the stack runs.
 # The e2e stack uses the dev ports, so it cannot run next to the dev stack.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
@@ -27,7 +28,7 @@ export DOCKER_HOST="unix://${PODMAN_SOCK}"
 export DOTNET_ASPIRE_CONTAINER_RUNTIME="podman"
 
 for port in 7001 1433 6379 8081 10000 10001 10002; do
-    if ss -ltn "sport = :$port" | grep -q LISTEN; then
+    if [[ -n "$(ss -ltnH "sport = :$port")" ]]; then
         echo "ERROR: port $port is busy (dev stack running?). Stop it first (aspire stop); e2e and dev share fixed ports." >&2
         exit 1
     fi

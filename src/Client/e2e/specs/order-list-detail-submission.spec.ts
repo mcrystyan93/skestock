@@ -270,7 +270,10 @@ async function openOrderList(page: Page, options: OpenOrderListOptions = {}) {
   const nameInput = page.getByPlaceholder('Numele comenzii');
   const collapsedDetails = page.getByText('Nume și notă', { exact: true });
   await expect(nameInput.or(collapsedDetails).first()).toBeVisible();
-  if (await collapsedDetails.isVisible()) await collapsedDetails.click();
+  await expect(async () => {
+    if (!(await nameInput.isVisible())) await collapsedDetails.click();
+    await expect(nameInput).toBeVisible({ timeout: 1_000 });
+  }).toPass();
   await expect(nameInput).toHaveValue(orderListName);
 
   return {
