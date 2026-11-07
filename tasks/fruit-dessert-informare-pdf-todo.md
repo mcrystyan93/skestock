@@ -67,7 +67,7 @@ Plan: `tasks/fruit-dessert-informare-pdf-plan.md`. Test înainte de implementare
   - Verify: `cd src/Client && npm run build && npm test -- --watch=false --include="src/app/features/school-classes/**/*.spec.ts"`
   - Files: `.../card/fruit-dessert-card.html`, `.../card/fruit-dessert-card.ts`, `.../list-small/fruit-dessert-list-small.html`, `.../list-small/fruit-dessert-list-small.ts`, `.../fruit-dessert-tab.html`
 
-- [ ] T14 Verificare responsive la 375, 768, 1024 (card) și 1440 px (tabel), conform planului; PDF deschis manual (diacritice, încadrare, nume fișier) [Sonnet]
+- [x] T14 Verificare responsive la 375, 768, 1024 (card) și 1440 px (tabel), conform planului; PDF deschis manual (diacritice, încadrare, nume fișier) [Sonnet]
   - Acceptance: buton vizibil, fără overflow în card, scroll orizontal doar în containerul tabelului, rânduri neschimbate; buton dezactivat fără congregație; capturi la cele 4 lățimi.
   - Verify: Chrome DevTools (device toolbar sau MCP `resize_page`) la 375/768/1024/1440 px pe tabul „Fructe și desert"
   - Files: niciunul (doar verificare)
