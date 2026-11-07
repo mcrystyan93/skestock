@@ -97,8 +97,9 @@ var openAiModel = builder.AddParameter($"{Services.OpenApiSettings}{Services.Ope
 var seedAdminEmail = builder.AddParameter($"{Services.SeedAdministrator}{Services.SeedAdministratorEmail}");
 var seedAdminPassword = builder.AddParameter($"{Services.SeedAdministrator}{Services.SeedAdministratorPassword}", secret: true);
 // The default "https" launch profile makes UseHttpsRedirection answer the SPA proxy's http calls with a 307 to
-// a self-signed https origin, which breaks cookie login; e2e uses the http-only profile.
-var web = builder.AddProject<Projects.Web>(Services.WebApi, e2eMode ? "http" : null)
+// a self-signed https origin, which breaks cookie login. Always use the http-only profile: webfrontend reads the
+// "http" endpoint, and a non-e2e run without an explicit profile left webapi with no endpoints.
+var web = builder.AddProject<Projects.Web>(Services.WebApi, "http")
     .PublishAsDockerFile(container =>
         container.WithDockerfile("../..", "src/Web/Dockerfile", "final"))
     .PublishAsDockerComposeService((resource, service) =>
