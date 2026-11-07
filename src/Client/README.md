@@ -46,17 +46,16 @@ ng test
 
 ## Running end-to-end tests
 
-E2E tests use [Playwright](https://playwright.dev/) (`playwright.config.ts`, specs in `e2e/`). Playwright does not start the app: run `dotnet run --project src/AppHost` from the repo root first.
+E2E tests use [Playwright](https://playwright.dev/) (`playwright.config.ts`, specs in `e2e/`). From the repo root, `./run-e2e.sh` starts an ephemeral, seeded stack, runs the suite (chromium + mobile) and tears it down; credentials are generated per run. `./run-e2e.sh --keep` leaves the stack running and `./run-e2e.sh -- <playwright args>` forwards arguments (relative to `src/Client`). It uses the dev ports, so stop the dev stack first.
 
 ```bash
-npx playwright install --with-deps chromium   # first run only
-npm run e2e                                   # all specs, chromium + mobile
-npm run e2e -- --project=chromium e2e/specs/login.spec.ts
-npm run e2e:ui                                # interactive
+npx playwright install --with-deps chromium   # one time
+../../run-e2e.sh                              # stack up, all specs, stack down
+../../run-e2e.sh -- --project=chromium e2e/specs/login.spec.ts
 npm run e2e:report                            # last HTML report
 ```
 
-Set `PLAYWRIGHT_BASE_URL` to target another URL. Specs that log in for real (`login`, `room-configuration`, `congregations`) run only when `PLAYWRIGHT_LOGIN_EMAIL` and `PLAYWRIGHT_LOGIN_PASSWORD` are set to an existing administrator.
+Specs that log in for real (`login`, `room-configuration`, `congregations`, `seeded-items`) are skipped, not failed, when credentials are missing or stale; under `./run-e2e.sh` a 401 fails the run instead. To target a stack you started yourself, set `PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_LOGIN_EMAIL` and `PLAYWRIGHT_LOGIN_PASSWORD` and use `npm run e2e` (or `e2e:ui`).
 
 ## Additional Resources
 

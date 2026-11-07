@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { skipUnlessLoggedIn } from '../auth';
 
 test.use({ ignoreHTTPSErrors: true });
 test.skip(({ isMobile }) => isMobile, 'covers the desktop table; the mobile list is covered by component specs');
@@ -17,10 +18,7 @@ type FakeCongregation = {
 // The local stack redirects API calls to https and drops the session cookie, so the Congregations API is
 // replaced by an in-memory fake; the backend itself is covered by the .NET functional tests.
 test('congregation lifecycle: menu, create, filter, edit, delete', async ({ page }) => {
-  const email = process.env['PLAYWRIGHT_LOGIN_EMAIL'];
-  const password = process.env['PLAYWRIGHT_LOGIN_PASSWORD'];
-  test.skip(!email || !password, 'Set PLAYWRIGHT_LOGIN_EMAIL and PLAYWRIGHT_LOGIN_PASSWORD.');
-  if (!email || !password) return;
+  const { email, password } = skipUnlessLoggedIn(test);
 
   const now = new Date().toISOString();
   const store: FakeCongregation[] = [

@@ -9,7 +9,7 @@ namespace skestock.Infrastructure.IntegrationTests;
 /// </summary>
 internal static class InfrastructureHost
 {
-    public static IHost Build(Action<HostApplicationBuilder>? configure = null)
+    public static IHost Build(Action<HostApplicationBuilder>? configure = null, string? databaseConnectionString = null)
     {
         var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
         {
@@ -19,7 +19,7 @@ internal static class InfrastructureHost
 
         builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            [$"ConnectionStrings:{Services.Database}"] = IntegrationTestSetup.DatabaseConnectionString,
+            [$"ConnectionStrings:{Services.Database}"] = databaseConnectionString ?? IntegrationTestSetup.DatabaseConnectionString,
             [$"ConnectionStrings:{Services.Cache}"] = IntegrationTestSetup.CacheConnectionString,
             [$"ConnectionStrings:{Services.BlobService}"] = IntegrationTestSetup.BlobConnectionString,
             [$"ConnectionStrings:{Services.Queues}"] = IntegrationTestSetup.QueueConnectionString,
