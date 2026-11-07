@@ -55,7 +55,7 @@ npx playwright install --with-deps chromium   # one time
 npm run e2e:report                            # last HTML report
 ```
 
-Specs that log in for real (`login`, `room-configuration`, `congregations`, `seeded-items`) are skipped, not failed, when credentials are missing or stale. To target a stack you started yourself, set `PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_LOGIN_EMAIL` and `PLAYWRIGHT_LOGIN_PASSWORD` and use `npm run e2e` (or `e2e:ui`).
+Specs that log in for real (`login`, `room-configuration`, `congregations`, `seeded-items`) are skipped, not failed, when credentials are missing or stale; under `./run-e2e.sh` a 401 fails the run instead. To target a stack you started yourself, set `PLAYWRIGHT_BASE_URL`, `PLAYWRIGHT_LOGIN_EMAIL` and `PLAYWRIGHT_LOGIN_PASSWORD` and use `npm run e2e` (or `e2e:ui`).
 
 ## Additional Resources
 

@@ -25,7 +25,8 @@ export default async function globalSetup(config: FullConfig): Promise<void> {
     if (!email || !password) return;
 
     const login = await api.post('/api/Users/login?useCookies=true', { data: { email, password } });
-    if (login.status() === 401) {
+    // run-e2e.sh seeds a fresh database with this password, so a 401 there is a real login failure, not a stale one.
+    if (login.status() === 401 && !process.env['PLAYWRIGHT_REQUIRE_LOGIN']) {
       process.env['PLAYWRIGHT_LOGIN_STALE'] = '1';
       console.warn('Login returned 401: live specs will be skipped (stale admin password).');
       return;
