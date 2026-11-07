@@ -157,6 +157,7 @@ public static class DependencyInjection
 
         builder.Services.AddSingleton<IOrderListExcelExporter, OrderListExcelExporter>();
         builder.Services.AddSingleton<IOrderListImageExporter, OrderListImageExporter>();
+        builder.Services.AddSingleton<IInformarePdfRenderer, InformarePdfRenderer>();
         builder.Services.AddSingleton<IImageThumbnailService, SkiaImageThumbnailService>();
 
         builder.Services.AddSingleton<IWorkingDayProvider, WorkingDayProvider>();

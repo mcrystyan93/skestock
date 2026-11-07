@@ -8,10 +8,12 @@
                              [loading]="store.entriesLoading()"
                              [readOnly]="readOnly()"
                              [sending]="store.sending()"
+                             [downloading]="store.downloading()"
                              [fallback]="store.lastDispatchUrl()"
                              (congregationChange)="store.setCongregation($event)"
                              (emailSentChange)="store.setEmailSent($event)"
-                             (sendMessage)="send($event.entryId, $event.type)"/>
+                             (sendMessage)="send($event.entryId, $event.type)"
+                             (downloadInformare)="store.downloadInformare($event.entryId)"/>
   </ng-container>
 
   <ng-template #small>
@@ -19,9 +21,11 @@
                                   [loading]="store.entriesLoading()"
                                   [readOnly]="readOnly()"
                                   [sending]="store.sending()"
+                                  [downloading]="store.downloading()"
                                   [fallback]="store.lastDispatchUrl()"
                                   (congregationChange)="store.setCongregation($event)"
                                   (emailSentChange)="store.setEmailSent($event)"
-                                  (sendMessage)="send($event.entryId, $event.type)"/>
+                                  (sendMessage)="send($event.entryId, $event.type)"
+                                  (downloadInformare)="store.downloadInformare($event.entryId)"/>
   </ng-template>
 </div>

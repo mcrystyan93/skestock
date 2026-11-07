@@ -45,6 +45,7 @@
       "@ske/shared/locations": ["./src/app/shared/locations"],
       "@ske/shared/icons": ["./src/app/shared/icons"],
       "@ske/shared/storage": ["./src/app/shared/storage"],
+      "@ske/shared/browser-download": ["./src/app/shared/ui/browser-download.ts"],
       "@ske/shared/directives": ["./src/app/shared/ui/directives"],
       "@ske/shared/header-tabs": ["./src/app/shared/ui/header-tabs"],
       "@ske/shared/pipes": ["./src/app/shared/ui/pipes"],

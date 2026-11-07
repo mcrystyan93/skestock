@@ -109,6 +109,7 @@ public class FruitDessertPlanQueryTests : TestBase
         var templates = await ExecuteAsync(context => context.MessageTemplates.Where(t => t.IsActive).ToListAsync());
 
         templates.Select(t => t.Type).ShouldBe(
-            [FruitDessertMessageType.Reminder, FruitDessertMessageType.Thanks], ignoreOrder: true);
+            [FruitDessertMessageType.Reminder, FruitDessertMessageType.Thanks, FruitDessertMessageType.Informare],
+            ignoreOrder: true);
     }
 }

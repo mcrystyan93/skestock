@@ -22,20 +22,22 @@ describe('FruitDessertRow', () => {
     thanksSent: false
   };
 
-  function create(entry: Partial<FruitDessertPlanEntryDto> = {}, readOnly = false) {
+  function create(entry: Partial<FruitDessertPlanEntryDto> = {}, readOnly = false, downloading = false) {
     TestBed.configureTestingModule({
       providers: [
         { provide: CongregationsHttp, useValue: { getAll: vi.fn(), getById: vi.fn() } },
         provideNzIconsTesting(),
         provideNzIcons([
           { name: 'icons:circle-check', icon: '<svg viewBox="0 0 24 24"></svg>' },
-          { name: 'icons:paper-plane', icon: '<svg viewBox="0 0 24 24"></svg>' }
+          { name: 'icons:paper-plane', icon: '<svg viewBox="0 0 24 24"></svg>' },
+          { name: 'icons:file-pdf', icon: '<svg viewBox="0 0 24 24"></svg>' }
         ])
       ]
     });
     const fixture = TestBed.createComponent(FruitDessertRow);
     fixture.componentRef.setInput('entry', { ...base, ...entry });
     fixture.componentRef.setInput('readOnly', readOnly);
+    fixture.componentRef.setInput('downloading', downloading);
     fixture.detectChanges();
     return fixture;
   }
@@ -43,6 +45,32 @@ describe('FruitDessertRow', () => {
   const text = (el: HTMLElement) => el.textContent?.replace(/\s+/g, ' ') ?? '';
   const buttons = (el: HTMLElement) => Array.from(el.querySelectorAll<HTMLButtonElement>('button'));
   const whatsappButtons = (el: HTMLElement) => buttons(el).filter(b => /aducere aminte|mulțumire/.test(b.getAttribute('aria-label') ?? ''));
+
+  const pdfButton = (el: HTMLElement) =>
+    buttons(el).find(b => /informarea PDF/.test(b.getAttribute('aria-label') ?? ''))!;
+
+  it('offers the Informare PDF, enabled even when read-only', () => {
+    const el = create({}, true).nativeElement as HTMLElement;
+
+    expect(pdfButton(el).textContent).toContain('PDF');
+    expect(pdfButton(el).disabled).toBe(false);
+  });
+
+  it('disables the PDF button without a congregation or while downloading', () => {
+    expect(pdfButton(create({ congregationId: null }).nativeElement).disabled).toBe(true);
+    TestBed.resetTestingModule();
+    expect(pdfButton(create({}, false, true).nativeElement).disabled).toBe(true);
+  });
+
+  it('emits downloadInformare when the PDF button is clicked', () => {
+    const fixture = create();
+    let emitted = 0;
+    fixture.componentInstance.downloadInformare.subscribe(() => emitted++);
+
+    pdfButton(fixture.nativeElement).click();
+
+    expect(emitted).toBe(1);
+  });
 
   it('renders the date, contact person and phone', () => {
     const el = create().nativeElement as HTMLElement;

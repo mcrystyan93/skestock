@@ -56,6 +56,16 @@ public class MessageTemplateConfiguration : IEntityTypeConfiguration<MessageTemp
                 IsActive = true,
                 CreatedDate = SeedInstant,
                 LastModifiedDate = SeedInstant
+            },
+            new MessageTemplate
+            {
+                Id = new Guid("0197c0de-0000-7000-8000-000000000003"),
+                Type = FruitDessertMessageType.Informare,
+                Name = "Informare fructe și desert",
+                Body = "<p>Bună ziua, {ContactPerson}!</p><p>Vă informăm că {Date} congregația {Congregation} aduce fructe și desert pentru {ClassName}.</p><p>Vă mulțumim!</p>",
+                IsActive = true,
+                CreatedDate = SeedInstant,
+                LastModifiedDate = SeedInstant
             });
     }
 }

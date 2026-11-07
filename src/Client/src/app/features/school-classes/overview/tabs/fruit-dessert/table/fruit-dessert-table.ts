@@ -17,12 +17,14 @@ export class FruitDessertTable extends BaseTable {
   public readonly loading = input<boolean>(false);
   public readonly readOnly = input<boolean>(false);
   public readonly sending = input<boolean>(false);
+  public readonly downloading = input<boolean>(false);
   /** Entry whose popup was blocked, with the URL the user can still open. */
   public readonly fallback = input<{ entryId: string; url: string } | null>(null);
 
   public readonly congregationChange = output<{ entryId: string; congregationId: string | null }>();
   public readonly emailSentChange = output<{ entryId: string; emailSent: boolean }>();
   public readonly sendMessage = output<{ entryId: string; type: FruitDessertMessageType }>();
+  public readonly downloadInformare = output<{ entryId: string }>();
 
   public readonly columnLayout = {
     date: { width: '220px' },
@@ -31,6 +33,7 @@ export class FruitDessertTable extends BaseTable {
     phone: { width: '140px' },
     email: { width: '90px' },
     reminder: { width: '110px' },
-    thanks: { width: '115px' }
+    thanks: { width: '115px' },
+    pdf: { width: '90px' }
   } as const;
 }

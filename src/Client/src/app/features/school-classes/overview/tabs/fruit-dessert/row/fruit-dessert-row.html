@@ -82,3 +82,14 @@
     }
   </div>
 </td>
+<td>
+  <button nz-button
+          type="button"
+          nzSize="small"
+          [disabled]="!canDownload()"
+          [attr.aria-label]="'Descarcă informarea PDF pentru ' + date()"
+          (click)="downloadInformare.emit()">
+    <nz-icon nzType="icons:file-pdf"/>
+    PDF
+  </button>
+</td>
