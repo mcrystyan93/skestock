@@ -24,10 +24,12 @@
                               [entry]="entry"
                               [readOnly]="readOnly()"
                               [sending]="sending()"
+                              [downloading]="downloading()"
                               [fallbackUrl]="fallback()?.entryId === entry.id ? fallback()!.url : null"
                               (congregationChange)="congregationChange.emit({ entryId: entry.id, congregationId: $event })"
                               (emailSentChange)="emailSentChange.emit({ entryId: entry.id, emailSent: $event })"
-                              (sendMessage)="sendMessage.emit({ entryId: entry.id, type: $event })"/>
+                              (sendMessage)="sendMessage.emit({ entryId: entry.id, type: $event })"
+                              (downloadInformare)="downloadInformare.emit({ entryId: entry.id })"/>
     }
   </div>
 }

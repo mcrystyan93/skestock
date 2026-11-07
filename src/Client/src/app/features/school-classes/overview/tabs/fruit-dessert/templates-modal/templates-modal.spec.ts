@@ -13,7 +13,8 @@ describe('TemplatesModal', () => {
   const response: MessageTemplatesDto = {
     templates: [
       { type: FruitDessertMessageType.Reminder, name: 'Reminder', body: '<p>a</p>', lastModified: '2026-01-01T00:00:00Z' },
-      { type: FruitDessertMessageType.Thanks, name: 'Mulțumire', body: '<p>b</p>', lastModified: '2026-01-01T00:00:00Z' }
+      { type: FruitDessertMessageType.Thanks, name: 'Mulțumire', body: '<p>b</p>', lastModified: '2026-01-01T00:00:00Z' },
+      { type: FruitDessertMessageType.Informare, name: 'Informare', body: '<p>c</p>', lastModified: '2026-01-01T00:00:00Z' }
     ],
     placeholders: [{ token: '{Date}', label: 'Data', example: '10 noiembrie' }]
   };
@@ -64,13 +65,25 @@ describe('TemplatesModal', () => {
     });
   });
 
-  it('loads and shows both templates as tabs', async () => {
+  it('loads and shows all templates as tabs', async () => {
     await create();
 
-    const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain('Reminder');
-    expect(text).toContain('Mulțumire');
-    expect(fixture.componentInstance.store.templates().length).toBe(2);
+    const tabs = Array.from(fixture.nativeElement.querySelectorAll('.ant-tabs-tab') as NodeListOf<HTMLElement>).map((t) =>
+      t.textContent?.trim()
+    );
+    expect(tabs).toEqual(['Reminder', 'Mulțumire', 'Informare']);
+    expect(fixture.componentInstance.store.templates().length).toBe(3);
+  });
+
+  it('saves the Informare template from its own tab', async () => {
+    await create();
+    http.update.mockReturnValue(of(undefined));
+
+    await selectTab(2);
+    saveButton().click();
+    await fixture.whenStable();
+
+    expect(http.update).toHaveBeenCalledWith(FruitDessertMessageType.Informare, { name: 'Informare', body: '<p>c</p>' });
   });
 
   it('saves the form values of the active template and confirms', async () => {

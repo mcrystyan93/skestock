@@ -63,11 +63,11 @@ public class MessageTemplateTests : TestBase
     private Task<MessageTemplatesDto?> GetAsync() => _client.GetFromJsonAsync<MessageTemplatesDto>(Url, JsonOptions);
 
     [Test]
-    public async Task Get_ReturnsTwoTemplatesAndFourPlaceholders()
+    public async Task Get_ReturnsThreeTemplatesAndFourPlaceholders()
     {
         var dto = (await GetAsync())!;
 
-        dto.Templates.Select(t => t.Type).ShouldBe([FruitDessertMessageType.Reminder, FruitDessertMessageType.Thanks],
+        dto.Templates.Select(t => t.Type).ShouldBe([FruitDessertMessageType.Reminder, FruitDessertMessageType.Thanks, FruitDessertMessageType.Informare],
             ignoreOrder: true);
         dto.Placeholders.Count.ShouldBe(4);
     }

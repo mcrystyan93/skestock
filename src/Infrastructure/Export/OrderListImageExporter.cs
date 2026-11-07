@@ -22,8 +22,8 @@ public class OrderListImageExporter : IOrderListImageExporter
     private static readonly float[] ColumnWeights = [40f, 12f, 10f, 40f];
     private static readonly string[] Headers = ["Produs", "Cantitate", "U.M.", "Observații"];
 
-    private static readonly Lazy<SKTypeface> Regular = new(() => LoadTypeface("LiberationSans-Regular.ttf"));
-    private static readonly Lazy<SKTypeface> Bold = new(() => LoadTypeface("LiberationSans-Bold.ttf"));
+    internal static readonly Lazy<SKTypeface> Regular = new(() => LoadTypeface("LiberationSans-Regular.ttf"));
+    internal static readonly Lazy<SKTypeface> Bold = new(() => LoadTypeface("LiberationSans-Bold.ttf"));
 
     public byte[] Export(OrderListExportModel model)
     {
@@ -124,7 +124,7 @@ public class OrderListImageExporter : IOrderListImageExporter
         }
     }
 
-    private static string[] Wrap(string text, SKFont font, float maxWidth)
+    internal static string[] Wrap(string text, SKFont font, float maxWidth)
     {
         var result = new List<string>();
 

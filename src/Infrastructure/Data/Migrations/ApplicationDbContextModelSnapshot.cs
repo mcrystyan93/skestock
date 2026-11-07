@@ -562,6 +562,16 @@ namespace skestock.Infrastructure.Data.Migrations
                             LastModifiedDate = new DateTimeOffset(new DateTime(2026, 11, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
                             Name = "Mulțumire fructe și desert",
                             Type = 2
+                        },
+                        new
+                        {
+                            Id = new Guid("0197c0de-0000-7000-8000-000000000003"),
+                            Body = "<p>Bună ziua, {ContactPerson}!</p><p>Vă informăm că {Date} congregația {Congregation} aduce fructe și desert pentru {ClassName}.</p><p>Vă mulțumim!</p>",
+                            CreatedDate = new DateTimeOffset(new DateTime(2026, 11, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            IsActive = true,
+                            LastModifiedDate = new DateTimeOffset(new DateTime(2026, 11, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Informare fructe și desert",
+                            Type = 3
                         });
                 });
 

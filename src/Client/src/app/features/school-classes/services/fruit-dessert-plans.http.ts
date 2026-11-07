@@ -27,4 +27,11 @@ export class FruitDessertPlansHttp {
     return this._httpClient.post<FruitDessertMessageDispatchDto>(
       `/api/FruitDessertPlans/${classId}/entries/${entryId}/messages`, { type });
   }
+
+  public downloadInformare(classId: string, entryId: string) {
+    return this._httpClient.get(`/api/FruitDessertPlans/${classId}/entries/${entryId}/informare`, {
+      responseType: 'blob',
+      observe: 'response'
+    });
+  }
 }

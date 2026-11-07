@@ -1,12 +1,25 @@
 import { inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { patchState, signalStore, withMethods, withProps, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { mapResponse } from '@ngrx/operators';
 import { concatMap, exhaustMap, pipe, switchMap, tap } from 'rxjs';
+import { parseContentDispositionFileName, triggerBrowserDownload } from '@ske/shared/browser-download';
 import { FruitDessertMessageType, FruitDessertPlanEntryDto } from '@ske/models';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { FruitDessertPlansHttp } from './fruit-dessert-plans.http';
+
+/** Reads a ProblemDetails body that arrived as a Blob (responseType 'blob'); anything else passes through. */
+async function blobProblemDetails(error: unknown): Promise<unknown> {
+  if (!(error instanceof HttpErrorResponse) || !(error.error instanceof Blob)) return error;
+  try {
+    const parsed: unknown = JSON.parse(await error.error.text());
+    return parsed && typeof parsed === 'object' && 'status' in parsed ? parsed : error;
+  } catch {
+    return error;
+  }
+}
 
 /** The tab opened synchronously on click (plan §1); only what the store needs from a `Window`. */
 export type BlankTab = { location: { replace(url: string): void }; close(): void };
@@ -17,10 +30,11 @@ type FruitDessertState = {
   /** Set only when the popup was blocked, so the row can offer a plain link instead. */
   lastDispatchUrl: { entryId: string; url: string } | null;
   sending: boolean;
+  downloading: boolean;
 };
 
 export const FruitDessertStore = signalStore(
-  withState<FruitDessertState>({ classId: null, entries: [], lastDispatchUrl: null, sending: false }),
+  withState<FruitDessertState>({ classId: null, entries: [], lastDispatchUrl: null, sending: false, downloading: false }),
   withLoadingFeature('entries'),
   withProblemDetailsFeature('entries'),
   withProblemDetailsFeature('action'),
@@ -120,6 +134,32 @@ export const FruitDessertStore = signalStore(
       )
     );
 
-    return { load, setCongregation, setEmailSent, sendMessage };
+    const downloadInformare = rxMethod<string>(
+      pipe(
+        tap(() => {
+          store.clearActionErrors();
+          patchState(store, { downloading: true });
+        }),
+        exhaustMap((entryId) =>
+          store._http.downloadInformare(store.classId()!, entryId).pipe(
+            mapResponse({
+              next: (response) => {
+                patchState(store, { downloading: false });
+                if (response.body)
+                  triggerBrowserDownload(response.body, parseContentDispositionFileName(
+                    response.headers.get('Content-Disposition'), 'Informare-fructe-si-desert.pdf'));
+              },
+              error: (error) => {
+                patchState(store, { downloading: false });
+                // responseType 'blob' leaves the ProblemDetails JSON in a Blob; read it so the server's message survives
+                void blobProblemDetails(error).then((problem) => store.handleActionError(problem));
+              }
+            })
+          )
+        )
+      )
+    );
+
+    return { load, setCongregation, setEmailSent, sendMessage, downloadInformare };
   })
 );

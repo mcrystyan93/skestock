@@ -18,6 +18,7 @@
     <th [nzWidth]="columnLayout.email.width">Email trimis</th>
     <th [nzWidth]="columnLayout.reminder.width">Aducere aminte</th>
     <th [nzWidth]="columnLayout.thanks.width">Mulțumire</th>
+    <th [nzWidth]="columnLayout.pdf.width">Informare</th>
   </tr>
   </thead>
   <tbody>
@@ -26,10 +27,12 @@
           [entry]="entry"
           [readOnly]="readOnly()"
           [sending]="sending()"
+          [downloading]="downloading()"
           [fallbackUrl]="fallback()?.entryId === entry.id ? fallback()!.url : null"
           (congregationChange)="congregationChange.emit({ entryId: entry.id, congregationId: $event })"
           (emailSentChange)="emailSentChange.emit({ entryId: entry.id, emailSent: $event })"
-          (sendMessage)="sendMessage.emit({ entryId: entry.id, type: $event })"></tr>
+          (sendMessage)="sendMessage.emit({ entryId: entry.id, type: $event })"
+          (downloadInformare)="downloadInformare.emit({ entryId: entry.id })"></tr>
     }
   </tbody>
 </nz-table>

@@ -11,7 +11,8 @@ import { TemplatePane } from './template-pane';
 
 const TAB_TITLES: Record<FruitDessertMessageType, string> = {
   [FruitDessertMessageType.Reminder]: 'Reminder',
-  [FruitDessertMessageType.Thanks]: 'Mulțumire'
+  [FruitDessertMessageType.Thanks]: 'Mulțumire',
+  [FruitDessertMessageType.Informare]: 'Informare'
 };
 
 @Component({
