@@ -121,7 +121,7 @@ test('approval is disabled with an explanation for a draft without products', as
 });
 
 type OpenOrderListOptions = {
-  lines?: ReturnType<typeof createLine>[];
+  lines?: TestLine[];
   saveFails?: boolean;
   submitFails?: boolean;
   submitDelayMs?: number;
@@ -246,6 +246,18 @@ async function openOrderList(page: Page, options: OpenOrderListOptions = {}) {
       return;
     }
 
+    if (pathname === `/api/Stock/class/${classId}/low-stock`) {
+      await route.fulfill({ json: [] });
+      return;
+    }
+
+    if (pathname === '/api/statistics/purchases/segments') {
+      await route.fulfill({
+        json: { weekly: [], everyTwoWeeks: [], monthly: [], oncePerClass: [] },
+      });
+      return;
+    }
+
     await route.fulfill({
       json: { data: [], hasNextPage: false, sort: [], id: classId, name: 'Clasa E2E' },
     });
@@ -253,7 +265,16 @@ async function openOrderList(page: Page, options: OpenOrderListOptions = {}) {
 
   await page.goto(`/school-classes/${classId}?tab=1`);
   await page.getByText(orderListName, { exact: true }).click();
-  await expect(page.getByPlaceholder('Numele comenzii')).toHaveValue(orderListName);
+
+  // Below the md breakpoint the name and note sit in a collapsed panel.
+  const nameInput = page.getByPlaceholder('Numele comenzii');
+  const collapsedDetails = page.getByText('Nume și notă', { exact: true });
+  await expect(nameInput.or(collapsedDetails).first()).toBeVisible();
+  await expect(async () => {
+    if (!(await nameInput.isVisible())) await collapsedDetails.click();
+    await expect(nameInput).toBeVisible({ timeout: 1_000 });
+  }).toPass();
+  await expect(nameInput).toHaveValue(orderListName);
 
   return {
     statusRequests,
@@ -262,7 +283,7 @@ async function openOrderList(page: Page, options: OpenOrderListOptions = {}) {
 }
 
 function createOrderList(
-  lines: ReturnType<typeof createLine>[],
+  lines: TestLine[],
   status: 'Draft' | 'Submitted' | 'Cancelled',
 ) {
   return {
@@ -270,9 +291,9 @@ function createOrderList(
     classId,
     className: 'Clasa E2E',
     name: orderListName,
-    note: null,
+    note: null as string | null,
     status,
-    submittedAt: null,
+    submittedAt: null as string | null,
     lines,
     createdByName: 'Test user',
     lastModifiedByName: 'Test user',
@@ -281,7 +302,17 @@ function createOrderList(
   };
 }
 
-function createLine() {
+type TestLine = {
+  id: string;
+  orderListId: string;
+  itemId: string | null;
+  productName: string | null;
+  quantity: number;
+  unit: string | null;
+  notes: string | null;
+};
+
+function createLine(): TestLine {
   return {
     id: 'line-1',
     orderListId,

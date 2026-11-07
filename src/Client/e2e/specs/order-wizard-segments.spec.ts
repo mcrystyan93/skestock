@@ -74,11 +74,24 @@ for (const viewport of viewports) {
     const tab = (title: string) => tabs.filter({ hasText: title });
     // A tab clipped by the narrow tab bar is clicked where it peeks out, or reached through the "..." menu when fully hidden.
     const selectTab = async (title: string) => {
-      const [bar, box] = [await modal.locator('.ant-tabs-nav-wrap').boundingBox(), await tab(title).boundingBox()];
-      const fullyHidden = !bar || !box || box.x >= bar.x + bar.width || box.x + box.width <= bar.x;
+      // Scoped through the tab itself: the modal also holds another tab bar at desktop width.
+      const nav = tab(title).locator('xpath=ancestor::nz-tabs-nav');
+      // Both rects are read in one evaluate so the modal's open animation cannot skew one against the other.
+      const fullyHidden = await tab(title).evaluate((element) => {
+        const bar = element.closest('.ant-tabs-nav-wrap')?.getBoundingClientRect();
+        const box = element.getBoundingClientRect();
+        return !bar || box.left >= bar.right || box.right <= bar.left;
+      });
       if (!fullyHidden) return tab(title).dispatchEvent('click');
-      await modal.locator('.ant-tabs-nav-more').click();
-      await page.locator('.ant-tabs-dropdown-menu-item').filter({ hasText: title }).dispatchEvent('click');
+      const item = page.locator('.ant-tabs-dropdown-menu-item').filter({ hasText: title });
+      // The "..." menu opens on mouseenter (a click only toggles it, racing that), so re-enter the button until the item shows.
+      await expect(async () => {
+        await page.mouse.move(0, 0);
+        await nav.locator('.ant-tabs-nav-more').hover();
+        await expect(item).toBeVisible({ timeout: 1_000 });
+        // Inside the retry: the menu closes on mouseleave, so the item can vanish between check and click.
+        await item.dispatchEvent('click', undefined, { timeout: 1_000 });
+      }).toPass();
     };
 
     // Every tab is reachable and shows its thumbnails.
@@ -93,15 +106,19 @@ for (const viewport of viewports) {
       expect(await noHorizontalScroll(page), `horizontal scroll on ${title}`).toBe(true);
     }
 
-    // Stoc redus: both start ticked; drop Hârtie A4, so only Creioane stays.
+    // Inactive tab panels stay in the DOM (and two overlap mid-slide), so counts and checkboxes are read from the named panel.
+    const panel = (title: string) => modal.getByRole('tabpanel', { name: title });
+
+    // Stoc redus: nothing starts ticked; tick Creioane only.
     await selectTab('Stoc redus');
-    await modal.getByRole('checkbox', { name: /Hârtie A4/ }).uncheck();
-    await expect(modal.getByText('1 din 2 selectate')).toBeVisible();
+    await expect(panel('Stoc redus').getByText('0 din 2 selectate')).toBeVisible();
+    await panel('Stoc redus').getByRole('checkbox', { name: /Creioane/ }).check();
+    await expect(panel('Stoc redus').getByText('1 din 2 selectate')).toBeVisible();
 
     // Lunar: tick Marker only.
     await selectTab('Lunar');
-    await modal.getByRole('checkbox', { name: /Marker/ }).check();
-    await expect(modal.getByText('1 din 2 selectate')).toBeVisible();
+    await panel('Lunar').getByRole('checkbox', { name: /Marker/ }).check();
+    await expect(panel('Lunar').getByText('1 din 2 selectate')).toBeVisible();
     await page.waitForTimeout(600); // let the tab slide animation settle for the screenshot
     await page.screenshot({ path: `${shots}/order-wizard-segments-${viewport.width}.png` });
     expect(await noHorizontalScroll(page)).toBe(true);
@@ -115,8 +132,11 @@ for (const viewport of viewports) {
     await expect(quantities).toHaveCount(2);
     await expect(modal.locator('nz-input-number[aria-label*="Creioane"] input')).toHaveValue('1');
     await expect(modal.locator('nz-input-number[aria-label*="Marker"] input')).toHaveValue('3');
-    await expect(modal.getByText('Hârtie A4')).toHaveCount(0);
-    await expect(modal.getByText('Detergent')).toHaveCount(0);
+    // At desktop width the editor also lists suggestions, so only the order lines are checked.
+    const orderLines = modal.locator('ske-order-list-line');
+    await expect(orderLines).toHaveCount(2);
+    await expect(orderLines.getByText('Hârtie A4')).toHaveCount(0);
+    await expect(orderLines.getByText('Detergent')).toHaveCount(0);
     expect(await noHorizontalScroll(page)).toBe(true);
   });
 }

@@ -1,12 +1,10 @@
 import { expect, test } from '@playwright/test';
+import { skipUnlessLoggedIn } from '../auth';
 
 test.use({ ignoreHTTPSErrors: true });
 
 test('administrator validates and saves seat counts for all rooms', async ({ page }) => {
-  const email = process.env['PLAYWRIGHT_LOGIN_EMAIL'];
-  const password = process.env['PLAYWRIGHT_LOGIN_PASSWORD'];
-  test.skip(!email || !password, 'Set PLAYWRIGHT_LOGIN_EMAIL and PLAYWRIGHT_LOGIN_PASSWORD.');
-  if (!email || !password) return;
+  const { email, password } = skipUnlessLoggedIn(test);
 
   let savedConfiguration = { room4SeatCount: 12, room2SeatCount: 3, room6SeatCount: 6 };
   const putRequests: Array<typeof savedConfiguration> = [];
@@ -51,9 +49,14 @@ test('administrator validates and saves seat counts for all rooms', async ({ pag
   await page.keyboard.press('Tab');
   await expect(room6).toBeFocused();
 
+  // The number input clamps to its maximum on blur, so 201 can never reach the form validator.
   await room4.fill('201');
+  await room4.blur();
+  await expect(room4).toHaveValue('200');
+
+  await room4.fill('');
   await page.getByRole('button', { name: 'Salvează' }).last().click();
-  await expect(page.getByText('Valoarea maximă este 200.')).toBeVisible();
+  await expect(page.getByText('Numărul de locuri este obligatoriu.')).toBeVisible();
   expect(putRequests).toHaveLength(0);
 
   await room4.fill('0');
@@ -67,7 +70,7 @@ test('administrator validates and saves seat counts for all rooms', async ({ pag
   await expect(room2).toHaveValue('200');
   await expect(room6).toHaveValue('42');
 
-  const inputBoxes = await page.locator('input[type="number"]').evaluateAll((inputs) =>
+  const inputBoxes = await page.getByRole('region', { name: 'Numărul de locuri' }).getByRole('spinbutton').evaluateAll((inputs) =>
     inputs.map((input) => {
       const { x, y, width, height } = input.getBoundingClientRect();
       return { x, y, width, height };
