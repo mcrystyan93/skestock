@@ -2,6 +2,7 @@ import { computed, inject, Service, signal } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { finalize } from 'rxjs';
+import { parseContentDispositionFileName, triggerBrowserDownload } from '@ske/shared/browser-download';
 // noinspection ES6PreferShortImport
 import { OrderListExportFormat, OrderListsHttp } from './order-lists.http';
 
@@ -48,7 +49,8 @@ export class OrderListExportService {
       return;
     }
 
-    const fileName = parseContentDispositionFileName(response.headers.get('Content-Disposition'), format);
+    const fileName = parseContentDispositionFileName(
+      response.headers.get('Content-Disposition'), `${FALLBACK_FILE_NAME}.${format}`);
     triggerBrowserDownload(blob, fileName);
   }
 
@@ -62,34 +64,4 @@ export class OrderListExportService {
 
     this._downloadingIds.set(next);
   }
-}
-
-function parseContentDispositionFileName(header: string | null, format: OrderListExportFormat): string {
-  const fallback = `${FALLBACK_FILE_NAME}.${format}`;
-
-  if (!header)
-    return fallback;
-
-  const utf8Match = /filename\*=UTF-8''([^;]+)/i.exec(header);
-
-  if (utf8Match?.[1])
-    return decodeURIComponent(utf8Match[1].trim());
-
-  const asciiMatch = /filename="?([^";]+)"?/i.exec(header);
-
-  if (asciiMatch?.[1])
-    return asciiMatch[1].trim();
-
-  return fallback;
-}
-
-function triggerBrowserDownload(blob: Blob, fileName: string): void {
-  const objectUrl = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = objectUrl;
-  anchor.download = fileName;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
-  URL.revokeObjectURL(objectUrl);
 }

@@ -2,6 +2,7 @@
 export enum FruitDessertMessageType {
   Reminder = 'reminder',
   Thanks = 'thanks',
+  Informare = 'informare',
 }
 
 /** Mirrors src/Domain/Enums/FruitDessertMessageStatus.cs. */

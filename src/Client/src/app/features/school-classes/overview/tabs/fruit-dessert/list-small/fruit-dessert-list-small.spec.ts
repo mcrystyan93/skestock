@@ -27,7 +27,8 @@ describe('FruitDessertListSmall', () => {
         provideNzIconsTesting(),
         provideNzIcons([
           { name: 'icons:circle-check', icon: '<svg viewBox="0 0 24 24"></svg>' },
-          { name: 'icons:paper-plane', icon: '<svg viewBox="0 0 24 24"></svg>' }
+          { name: 'icons:paper-plane', icon: '<svg viewBox="0 0 24 24"></svg>' },
+          { name: 'icons:file-pdf', icon: '<svg viewBox="0 0 24 24"></svg>' }
         ])
       ]
     });

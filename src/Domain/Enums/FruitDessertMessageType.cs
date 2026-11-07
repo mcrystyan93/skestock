@@ -4,5 +4,6 @@ namespace skestock.Domain.Enums;
 public enum FruitDessertMessageType
 {
     Reminder = 1,
-    Thanks = 2
+    Thanks = 2,
+    Informare = 3
 }

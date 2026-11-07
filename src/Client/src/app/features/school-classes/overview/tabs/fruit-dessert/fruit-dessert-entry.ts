@@ -15,16 +15,19 @@ export abstract class FruitDessertEntry {
   public readonly entry = input.required<FruitDessertPlanEntryDto>();
   public readonly readOnly = input<boolean>(false);
   public readonly sending = input<boolean>(false);
+  public readonly downloading = input<boolean>(false);
   /** Set when the popup was blocked, so the user can still open the message. */
   public readonly fallbackUrl = input<string | null>(null);
 
   public readonly congregationChange = output<string | null>();
   public readonly emailSentChange = output<boolean>();
   public readonly sendMessage = output<FruitDessertMessageType>();
+  public readonly downloadInformare = output<void>();
 
   protected readonly MessageType = FruitDessertMessageType;
   protected readonly date = computed(() => formatPlanDate(this.entry().date));
   protected readonly canMessage = computed(() => !!this.entry().normalizedPhone);
+  protected readonly canDownload = computed(() => !!this.entry().congregationId && !this.downloading());
   protected readonly noPhoneTooltip = computed(() =>
     this.canMessage() ? null : 'Congregația nu are un număr de telefon valid'
   );

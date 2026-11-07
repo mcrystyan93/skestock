@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpErrorResponse, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { of, Subject, throwError } from 'rxjs';
 import {
   FruitDessertMessageStatus,
@@ -24,6 +25,7 @@ describe('FruitDessertStore', () => {
     setCongregation: ReturnType<typeof vi.fn>;
     setEmailSent: ReturnType<typeof vi.fn>;
     sendMessage: ReturnType<typeof vi.fn>;
+    downloadInformare: ReturnType<typeof vi.fn>;
   };
 
   const create = (entries = [entry('e1'), entry('e2')]) => {
@@ -41,7 +43,7 @@ describe('FruitDessertStore', () => {
   });
 
   beforeEach(() => {
-    http = { get: vi.fn(), setCongregation: vi.fn(), setEmailSent: vi.fn(), sendMessage: vi.fn() };
+    http = { get: vi.fn(), setCongregation: vi.fn(), setEmailSent: vi.fn(), sendMessage: vi.fn(), downloadInformare: vi.fn() };
     TestBed.configureTestingModule({
       providers: [FruitDessertStore, { provide: FruitDessertPlansHttp, useValue: http }]
     });
@@ -189,5 +191,63 @@ describe('FruitDessertStore', () => {
     pending.complete();
 
     expect(store.sending()).toBe(false);
+  });
+
+  describe('downloadInformare', () => {
+    let anchor: HTMLAnchorElement;
+
+    beforeEach(() => {
+      URL.createObjectURL = vi.fn(() => 'blob:test');
+      URL.revokeObjectURL = vi.fn();
+      anchor = document.createElement('a');
+      vi.spyOn(anchor, 'click').mockImplementation(() => undefined);
+      vi.spyOn(document, 'createElement').mockReturnValue(anchor);
+    });
+
+    it('requests the PDF, flags downloading while in flight and saves it under the server file name', () => {
+      const store = create();
+      const response$ = new Subject<HttpResponse<Blob>>();
+      http.downloadInformare.mockReturnValue(response$);
+
+      store.downloadInformare('e1');
+
+      expect(http.downloadInformare).toHaveBeenCalledWith('class-1', 'e1');
+      expect(store.downloading()).toBe(true);
+
+      response$.next(new HttpResponse({
+        body: new Blob(['%PDF']),
+        headers: new HttpHeaders({ 'Content-Disposition': 'attachment; filename=Informare-fructe-si-desert-2026-11-10.pdf' })
+      }));
+      response$.complete();
+
+      expect(store.downloading()).toBe(false);
+      expect(anchor.download).toBe('Informare-fructe-si-desert-2026-11-10.pdf');
+      expect(anchor.click).toHaveBeenCalled();
+    });
+
+    it('keeps the server message when the blob error body is ProblemDetails JSON', async () => {
+      const store = create();
+      const problem = { status: 409, title: 'Lipsă contact' };
+      http.downloadInformare.mockReturnValue(throwError(() => new HttpErrorResponse({
+        status: 409,
+        error: new Blob([JSON.stringify(problem)], { type: 'application/problem+json' }),
+      })));
+
+      store.downloadInformare('e1');
+      await vi.waitFor(() => expect(store.actionProblemDetail()?.title).toBe('Lipsă contact'));
+
+      expect(store.actionProblemDetail()?.status).toBe(409);
+    });
+
+    it('sets the action problem detail and resets downloading on failure', async () => {
+      const store = create();
+      http.downloadInformare.mockReturnValue(throwError(() => ({ status: 409, title: 'Lipsă contact' })));
+
+      store.downloadInformare('e1');
+
+      expect(store.downloading()).toBe(false);
+      await vi.waitFor(() => expect(store.actionProblemDetail()?.status).toBe(409));
+      expect(anchor.click).not.toHaveBeenCalled();
+    });
   });
 });

@@ -4,6 +4,7 @@ using skestock.Application.Features.FruitDessertPlans.Commands.SetFruitDessertCo
 using skestock.Application.Features.FruitDessertPlans.Commands.SetFruitDessertEmailSent;
 using skestock.Application.Features.FruitDessertPlans.Models;
 using skestock.Application.Features.FruitDessertPlans.Queries.GetFruitDessertPlan;
+using skestock.Application.Features.FruitDessertPlans.Queries.GetInformarePdf;
 
 namespace skestock.Web.Endpoints;
 
@@ -15,6 +16,8 @@ public class FruitDessertPlans : IEndpointGroup
         groupBuilder.MapPut(SetFruitDessertCongregation, "{classId:guid}/entries/{entryId:guid}/congregation");
         groupBuilder.MapPut(SetFruitDessertEmailSent, "{classId:guid}/entries/{entryId:guid}/email-sent");
         groupBuilder.MapPost(SendFruitDessertMessage, "{classId:guid}/entries/{entryId:guid}/messages");
+        // No .pdf suffix: an extension in the path can be intercepted by static files / SPA fallback.
+        groupBuilder.MapGet(GetInformarePdf, "{classId:guid}/entries/{entryId:guid}/informare");
     }
 
     [EndpointSummary("Get the fruit and dessert plan of a class")]
@@ -67,5 +70,15 @@ public class FruitDessertPlans : IEndpointGroup
         }, cancellationToken);
 
         return result.ToOk();
+    }
+
+    [EndpointSummary("Download the Informare PDF of a plan day")]
+    [EndpointDescription("Renders the active Informare template for the day's congregation as a PDF. Read-only: nothing is recorded in the message history.")]
+    public static async Task<Results<FileContentHttpResult, ProblemHttpResult>> GetInformarePdf(
+        ISender sender, Guid classId, Guid entryId, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetInformarePdfQuery { ClassId = classId, EntryId = entryId }, cancellationToken);
+
+        return result.ToFile();
     }
 }
