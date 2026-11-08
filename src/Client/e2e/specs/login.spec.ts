@@ -9,7 +9,7 @@ const shotDir = path.resolve(__dirname, '../../../../screenshot-checks/login');
 
 test.afterEach(async ({ page }, testInfo) => {
   const slug = testInfo.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  await page.screenshot({ path: path.join(shotDir, `${testInfo.project.name}-${slug}.png`), fullPage: true });
+  await page.screenshot({ path: path.join(shotDir, `${testInfo.project.name}-${slug}-r${testInfo.repeatEachIndex}-t${testInfo.retry}.png`), fullPage: true });
 });
 
 test.describe('login form validation', () => {
