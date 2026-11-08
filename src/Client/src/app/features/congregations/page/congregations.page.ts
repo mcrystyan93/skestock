@@ -7,16 +7,16 @@ import { realtimeGroups, SignalRGroupManagerStore } from '@ske/signalr';
 import { CongregationListState } from '../services/congregation-list.store';
 import { ErrorAlert } from '@ske/shared/errors';
 import { LayoutBreakpoint } from '@ske/shared/directives';
-import { FilterContainer } from './filter/filter-container';
+import { FilterForm } from '../list/filter/filter-form';
 import { Header } from './header/header';
-import { Table } from './tables/large/table';
-import { CongregationListSmall } from './tables/small/congregation-list-small';
+import { Table } from '../list/tables/large/table';
+import { CongregationListSmall } from '../list/tables/small/congregation-list-small';
 
 @Component({
   imports: [
     Header,
     ErrorAlert,
-    FilterContainer,
+    FilterForm,
     Table,
     LayoutBreakpoint,
     CongregationListSmall

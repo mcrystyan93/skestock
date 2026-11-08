@@ -2,7 +2,10 @@
 
 <div class="relative grow">
   <div class="flex grow flex-col gap-4 absolute inset-0">
-    <ske-congregation-filter-container />
+    <ske-congregation-filter-form class="px-4"
+                                  [loading]="store.congregationsLoading()"
+                                  [filter]="store.filter()"
+                                  (onFilterChange)="onFilterChange($event)" />
 
     @if (store.congregationsProblemDetail() || store.congregationsValidationErrors()) {
       <ske-error-display [problemDetail]="store.congregationsProblemDetail()"
