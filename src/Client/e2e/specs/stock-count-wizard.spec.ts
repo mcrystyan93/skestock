@@ -1,4 +1,7 @@
 import { expect, test, type Locator, type Page, type TestInfo } from '@playwright/test';
+import { saveScreenshotsAfterEach } from '../screenshots';
+
+saveScreenshotsAfterEach();
 
 const classId = 'class-1';
 const longLocation = 'Depozit B cu o denumire extrem de lungă pentru verificarea împachetării textului';

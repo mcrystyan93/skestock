@@ -1,4 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
+import { saveScreenshotsAfterEach } from '../screenshots';
+
+saveScreenshotsAfterEach();
 
 const receiptIds = ['receipt-1', 'receipt-2', 'receipt-3'];
 const savedLines = [
