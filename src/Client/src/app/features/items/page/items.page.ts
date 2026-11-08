@@ -1,6 +1,15 @@
 import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ItemListState } from '../services/item-list.store';
-import { GetAllItemsRequest, ItemDto, ItemImportBatchListItemDto, SupplyListListItemDto } from '@ske/models';
+import {
+  GetAllItemImportBatchesRequest,
+  GetAllItemsRequest,
+  GetAllSupplyListsRequest,
+  ItemDto,
+  ItemImportBatchFileDto,
+  ItemImportBatchListItemDto,
+  SupplyListListItemDto
+} from '@ske/models';
+import { FileStorageState } from '@ske/shared/storage';
 import { SupplyListDetailModal, SupplyListDetailModalData } from '@ske/shared/supply-lists';
 import { SupplyListListState } from '../services/supply-list-list.store';
 import { SupplyListTab } from './tabs/supply-list-tab';
@@ -24,7 +33,7 @@ import { ItemListTab } from './tabs/item-list-tab';
   ],
   selector: 'ske-items-page',
   templateUrl: './items.page.html',
-  providers: [ItemListState, ItemImportState, SupplyListListState, NzModalService],
+  providers: [ItemListState, ItemImportState, SupplyListListState, NzModalService, FileStorageState],
   host: {
     class: 'flex flex-col grow gap-4'
   }
@@ -38,6 +47,7 @@ export class ItemsPage implements OnInit, OnDestroy {
   private readonly _modalService = inject(NzModalService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _signalRGroupManager = inject(SignalRGroupManagerStore);
+  private readonly _fileStorage = inject(FileStorageState);
 
   public onFilterChange(filter: GetAllItemsRequest) {
     this.listStore.load(filter);
@@ -45,6 +55,26 @@ export class ItemsPage implements OnInit, OnDestroy {
 
   public onLoadMore() {
     this.listStore.loadMore();
+  }
+
+  public onSupplyListFilterChange(filter: GetAllSupplyListsRequest) {
+    this.supplyListStore.load(filter);
+  }
+
+  public onSupplyListLoadMore() {
+    this.supplyListStore.loadMore();
+  }
+
+  public onImportFilterChange(filter: GetAllItemImportBatchesRequest) {
+    this.importStore.load(filter);
+  }
+
+  public onImportLoadMore() {
+    this.importStore.loadMore();
+  }
+
+  public onDownloadImportFile(file: ItemImportBatchFileDto) {
+    this._fileStorage.downloadFile(file.fileMetadataId);
   }
 
   public onEdit(item: ItemDto) {

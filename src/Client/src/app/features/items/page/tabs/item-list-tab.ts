@@ -1,16 +1,19 @@
 import { Component, input, output } from '@angular/core';
 import { ErrorAlert } from '@ske/shared/errors';
-import { FilterContainer } from '../filter/regular/filter-container';
-import { Table } from '../tables/regular/large/table';
-import { ItemListSmall } from '../tables/regular/small/item-list-small';
+import { FilterForm } from '../../list/filter/regular/filter-form';
+import { Table } from '../../list/tables/regular/large/table';
+import { ItemListSmall } from '../../list/tables/regular/small/item-list-small';
 import { GetAllItemsRequest, ItemDto, ProblemDetails, ValidationProblemDetails } from '@ske/models';
 import { LayoutBreakpoint } from '@ske/shared/directives';
 
 @Component({
-  imports: [ErrorAlert, FilterContainer, Table, LayoutBreakpoint, ItemListSmall],
+  imports: [ErrorAlert, FilterForm, Table, LayoutBreakpoint, ItemListSmall],
   selector: 'ske-item-list-tab',
   template: `
-    <ske-item-filter-container />
+    <ske-item-filter-form class="px-4"
+                          [loading]="loading()"
+                          [filter]="filter()"
+                          (onFilterChange)="onFilterChange.emit($event)" />
 
     <ske-error-display [problemDetail]="problemDetail()" [validationErrors]="validationErrors()" />
 
