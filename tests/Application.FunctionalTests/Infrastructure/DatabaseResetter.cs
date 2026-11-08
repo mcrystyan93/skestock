@@ -23,7 +23,9 @@ internal sealed class DatabaseResetter : IAsyncDisposable
         var respawner = await Respawner.CreateAsync(connection, new RespawnerOptions
         {
             // Seeded by the AddFruitDessertPlanning migration; wiping it would leave sending without a template.
-            TablesToIgnore = [new Respawn.Graph.Table("MessageTemplates")]
+            TablesToIgnore = [new Respawn.Graph.Table("MessageTemplates"), new Respawn.Graph.Table("MessageTemplatesHistory")],
+            // Temporal tables cannot be truncated: Respawn switches versioning off, deletes, switches it back on.
+            CheckTemporalTables = true
         });
         await connection.CloseAsync();
         return new DatabaseResetter(connection, respawner);
