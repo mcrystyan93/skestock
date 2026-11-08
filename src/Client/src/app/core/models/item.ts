@@ -58,6 +58,53 @@ export type EditItemRequest = {
   imageFileId?: string | null;
 };
 
+/** Mirrors src/Application/Features/Items/Commands/MergeItems/MergeItemsCommand.cs and GetItemMergePreviewQuery.cs. */
+export type MergeItemsRequest = {
+  primaryItemId: string;
+  /** Includes the primary item. */
+  itemIds: string[];
+};
+
+/** Mirrors ItemMergeKind (serialized camelCase). */
+export type ItemMergeKind =
+  | 'stockBatches'
+  | 'stockTransactions'
+  | 'goodsReceiptImportLines'
+  | 'orderListLines'
+  | 'classItemStockVisibilities'
+  | 'itemLocationThresholds'
+  | 'supplyListLines'
+  | 'dailyItemConsumptions'
+  | 'classBalances'
+  | 'itemPurchaseStatistics';
+
+export const ITEM_MERGE_KIND_LABELS: Record<ItemMergeKind, string> = {
+  stockBatches: 'Loturi de stoc',
+  stockTransactions: 'Tranzacții de stoc',
+  goodsReceiptImportLines: 'Linii din importuri de recepții',
+  orderListLines: 'Linii din liste de comandă',
+  classItemStockVisibilities: 'Vizibilitate stoc pe clasă',
+  itemLocationThresholds: 'Praguri pe locație',
+  supplyListLines: 'Linii din liste de aprovizionare',
+  dailyItemConsumptions: 'Consum zilnic',
+  classBalances: 'Solduri de clasă',
+  itemPurchaseStatistics: 'Statistici de achiziții'
+};
+
+/** Mirrors ItemMergeImpact. */
+export type ItemMergeImpact = {
+  kind: ItemMergeKind;
+  /** Rows moved to the primary item. */
+  relinked: number;
+  /** Rows merged into another row (and deleted) because of a unique key collision. */
+  combined: number;
+};
+
+/** Mirrors ItemMergePreviewDto. */
+export type ItemMergePreviewDto = {
+  impacts: ItemMergeImpact[];
+};
+
 export type ItemTableColumn =
   | 'sku'
   | 'name'
