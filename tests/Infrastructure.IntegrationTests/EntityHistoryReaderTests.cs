@@ -55,7 +55,8 @@ public sealed class EntityHistoryReaderTests
         var failures = new List<string>();
         var checkedTables = new List<string>();
         foreach (var table in dbContext.GetService<IDesignTimeModel>().Model.GetRelationalModel().Tables
-                     .Where(t => t.PrimaryKey is { Columns.Count: 1 }))
+                     .Where(t => t.PrimaryKey is { Columns.Count: 1 } && t.Name != "AspNetUserTokens"
+                                 && t.EntityTypeMappings.Select(m => m.TypeBase).OfType<IEntityType>().Any(e => e.IsTemporal())))
         {
             var id = table.PrimaryKey!.Columns[0].ProviderClrType == typeof(Guid) ? Guid.NewGuid().ToString()
                 : table.PrimaryKey.Columns[0].ProviderClrType == typeof(int) ? "1" : "x";
@@ -64,7 +65,7 @@ public sealed class EntityHistoryReaderTests
                 var result = await new EntityHistoryReader(dbContext).ReadAsync(table.Name, id, 0, 10, CancellationToken.None);
                 if (result.IsSuccess)
                     checkedTables.Add(table.Name);
-                else if (result.Errors[0] is not EntityHistoryErrors.UnknownEntity)
+                else
                     failures.Add($"{table.Name}: {result.Errors[0].Message}");
             }
             catch (Exception ex)
