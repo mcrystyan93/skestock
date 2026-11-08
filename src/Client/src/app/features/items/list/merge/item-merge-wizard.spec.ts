@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { ItemDto } from '@ske/models';
 import { ItemsHttp } from '@ske/shared/items';
-import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
+import { NzModalRef } from 'ng-zorro-antd/modal';
 import { of } from 'rxjs';
 import { ItemListState } from '../../services/item-list.store';
 import { ItemMergeWizard } from './item-merge-wizard';
@@ -27,13 +27,13 @@ describe('ItemMergeWizard', () => {
 
     TestBed.configureTestingModule({
       providers: [
-        { provide: NZ_MODAL_DATA, useValue: { items: [a, b] } },
         { provide: NzModalRef, useValue: modalRef },
         { provide: ItemsHttp, useValue: http },
         {
           provide: ItemListState,
           useValue: {
             ...store,
+            selectedItems: signal([a, b]),
             merging: signal(false),
             mergeProblemDetail: signal(null),
             mergeValidationErrors: signal(null)

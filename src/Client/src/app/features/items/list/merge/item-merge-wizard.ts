@@ -1,21 +1,19 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { ITEM_MERGE_KIND_LABELS, ItemDto, MergeItemsRequest } from '@ske/models';
+import { ITEM_MERGE_KIND_LABELS, MergeItemsRequest } from '@ske/models';
 import { ErrorAlert } from '@ske/shared/errors';
 import { ItemsHttp } from '@ske/shared/items';
 import { NzAlertComponent } from 'ng-zorro-antd/alert';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { NzModalFooterDirective, NzModalRef, NzModalTitleDirective, NZ_MODAL_DATA } from 'ng-zorro-antd/modal';
+import { NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zorro-antd/modal';
 import { NzRadioComponent, NzRadioGroupComponent } from 'ng-zorro-antd/radio';
 import { NzSpinComponent } from 'ng-zorro-antd/spin';
 import { NzStepComponent, NzStepsComponent } from 'ng-zorro-antd/steps';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { CHECKABLE_CARD_CLASSES } from '../../../../shared/ui/card-classes';
 import { ItemListState } from '../../services/item-list.store';
-
-export type ItemMergeWizardData = { items: ItemDto[] };
 
 @Component({
   imports: [
@@ -47,15 +45,17 @@ export type ItemMergeWizardData = { items: ItemDto[] };
 
     @switch (step()) {
       @case (0) {
-        <p nz-typography
+        <p id="merge-primary-label"
+           nz-typography
            nzType="secondary">
           Alege articolul care rămâne. Celelalte vor fi dezactivate, iar datele lor vor fi mutate pe articolul ales.
         </p>
         <nz-radio-group class="flex! flex-col gap-2"
                         nzName="primaryItem"
+                        aria-labelledby="merge-primary-label"
                         [ngModel]="primaryId()"
                         (ngModelChange)="primaryId.set($event)">
-          @for (item of items; track item.id) {
+          @for (item of items(); track item.id) {
             <label nz-radio
                    [class]="cardClasses"
                    [nzValue]="item.id"
@@ -170,24 +170,32 @@ export type ItemMergeWizardData = { items: ItemDto[] };
   `
 })
 export class ItemMergeWizard {
-  protected readonly items = inject<ItemMergeWizardData>(NZ_MODAL_DATA).items;
   protected readonly store = inject(ItemListState);
+  // Read from the store so row updates (e.g. a realtime disable) reach the wizard.
+  protected readonly items = this.store.selectedItems;
   protected readonly cardClasses = `m-0! flex! items-start p-3! ${CHECKABLE_CARD_CLASSES}`;
   protected readonly labels = ITEM_MERGE_KIND_LABELS;
 
   private readonly _modalRef = inject(NzModalRef);
   private readonly _http = inject(ItemsHttp);
 
+  constructor() {
+    // Esc would close the modal mid-request; the mask is already not closable.
+    effect(() => this._modalRef.updateConfig({ nzKeyboard: !this.store.merging() }));
+    // Covers every dismissal path (Esc, close button, cancel, success) so a stale error never shows next time.
+    inject(DestroyRef).onDestroy(() => this.store.clearMergeErrors());
+  }
+
   public readonly step = signal(0);
   public readonly primaryId = signal<string | null>(null);
 
-  protected readonly primary = computed(() => this.items.find((i) => i.id === this.primaryId()) ?? null);
-  protected readonly secondaries = computed(() => this.items.filter((i) => i.id !== this.primaryId()));
+  protected readonly primary = computed(() => this.items().find((i) => i.id === this.primaryId()) ?? null);
+  protected readonly secondaries = computed(() => this.items().filter((i) => i.id !== this.primaryId()));
 
   private readonly _request = computed<MergeItemsRequest | null>(() => {
     const primaryItemId = this.primaryId();
 
-    return primaryItemId ? { primaryItemId, itemIds: this.items.map((i) => i.id) } : null;
+    return primaryItemId ? { primaryItemId, itemIds: this.items().map((i) => i.id) } : null;
   });
 
   // The preview is fetched on entering step 2 and dropped when going back, so it is always exact for the chosen primary.
@@ -229,7 +237,6 @@ export class ItemMergeWizard {
   }
 
   public close() {
-    this.store.clearMergeErrors();
     this._modalRef.close(false);
   }
 }

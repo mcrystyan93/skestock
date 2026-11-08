@@ -12,6 +12,7 @@ describe('ItemListState', () => {
     edit: ReturnType<typeof vi.fn>;
     getById: ReturnType<typeof vi.fn>;
     merge: ReturnType<typeof vi.fn>;
+    disable?: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
@@ -240,6 +241,31 @@ describe('ItemListState', () => {
 
       expect(store.items()).toEqual([]);
       expect(store.selectedItems().map((i) => i.id)).toEqual(['item-1', 'item-2']);
+    });
+
+    it('keeps the selection snapshot in sync when a row is toggled or patched', () => {
+      const store = loadedStore();
+      store.setLoadedSelected(true);
+
+      http.disable = vi.fn().mockReturnValue(of({ ...a, isActive: false }));
+      store.toggleActive(a);
+      expect(store.selected()['item-1'].isActive).toBe(false);
+
+      http.getById.mockReturnValue(of({ ...b, name: 'Nou' }));
+      store.patchItem('item-2');
+      expect(store.selected()['item-2'].name).toBe('Nou');
+    });
+
+    it('ignores a second merge while one is running', () => {
+      const store = loadedStore();
+      const pending = new Subject<void>();
+      http.merge.mockReturnValue(pending);
+      const request = { primaryItemId: 'item-1', itemIds: ['item-1', 'item-2'] };
+
+      store.merge({ request });
+      store.merge({ request });
+
+      expect(http.merge).toHaveBeenCalledTimes(1);
     });
 
     it('clears the selection, reloads and calls back after a successful merge', () => {
