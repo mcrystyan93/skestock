@@ -28,7 +28,7 @@ Tests first: `MergeItemsCommandValidatorTests` (empty ids, 1 id, duplicate ids c
 
 ### T2: Plain re-point mergers — implementer: sonnet
 Tests first (in-memory; reuse the public `ItemTestDbContext` from the DisableItem test namespace, do not copy it again): each merger re-points only secondary rows, leaves other items' rows alone, `PreviewAsync` counts match, `OrderListLine` with null `ItemId` and name snapshots untouched.
-- [ ] `StockBatch`, `StockTransaction` (add `shortcut:` comment per D1), `GoodsReceiptImportLine.MatchedItemId`, `OrderListLine.ItemId` mergers (optional tiny shared generic base, D2).
+- [x] `StockBatch`, `StockTransaction` (add `shortcut:` comment per D1), `GoodsReceiptImportLine.MatchedItemId`, `OrderListLine.ItemId` mergers (optional tiny shared generic base, D2).
 - Files: `.../MergeItems/Mergers/{StockBatch,StockTransaction,GoodsReceiptImportLine,OrderListLine}ItemMerger.cs` (+ base if used), `tests/.../MergeItems/Mergers/PlainItemMergerTests.cs`
 - Verify: `dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~MergeItems"`
 
