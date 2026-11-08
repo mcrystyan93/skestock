@@ -1,6 +1,9 @@
 <ske-school-class-header (onAdd)="onAdd()" />
 
-<ske-school-class-filter-container />
+<ske-school-class-filter-form class="px-4"
+                                [loading]="store.schoolClassesLoading()"
+                                [filter]="store.filter()"
+                                (onFilterChange)="onFilterChange($event)" />
 
 <ske-error-display [problemDetail]="store.schoolClassesProblemDetail()"
                    [validationErrors]="store.schoolClassesValidationErrors()"
