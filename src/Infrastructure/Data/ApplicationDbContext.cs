@@ -92,7 +92,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     // Every table is a SQL Server system-versioned (temporal) table unless excluded here, so new entities
     // get history automatically. Period columns are SQL Server-managed datetime2 in UTC (not DateTimeOffset).
-    // Retention (2 years) is applied by raw SQL in the AddTemporalTables migration: EF has no API for it, and
+    // Retention (2 years) is applied by raw SQL in the SetTemporalRetention migration: EF has no API for it, and
     // a later EF column drop/alter can re-enable versioning without it (TemporalSchemaTests catches that).
     private static readonly HashSet<Type> TemporalExclusions =
     [
