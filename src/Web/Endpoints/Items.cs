@@ -4,10 +4,12 @@ using skestock.Application.Features.Items.Commands.CreateItem;
 using skestock.Application.Features.Items.Commands.DisableItem;
 using skestock.Application.Features.Items.Commands.EditItem;
 using skestock.Application.Features.Items.Commands.EnableItem;
+using skestock.Application.Features.Items.Commands.MergeItems;
 using skestock.Application.Features.Items.Models;
 using skestock.Application.Features.Items.Queries.GetAllItems;
 using skestock.Application.Features.Items.Queries.GetItemById;
 using skestock.Application.Features.Items.Queries.GetItemImage;
+using skestock.Application.Features.Items.Queries.GetItemMergePreview;
 using Microsoft.Net.Http.Headers;
 
 namespace skestock.Web.Endpoints;
@@ -23,6 +25,8 @@ public class Items : IEndpointGroup
         groupBuilder.MapPut(EditItem, "{id}");
         groupBuilder.MapPatch(EnableItem, "{id}/enable");
         groupBuilder.MapPatch(DisableItem, "{id}/disable");
+        groupBuilder.MapPost(MergeItems, "merge");
+        groupBuilder.MapPost(GetItemMergePreview, "merge-preview");
     }
 
     [EndpointSummary("Get all items")]
@@ -142,6 +146,26 @@ public class Items : IEndpointGroup
         ISender sender, Guid id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new DisableItemCommand { Id = id }, cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Merge items")]
+    [EndpointDescription("Administrator only. Re-points everything referencing the secondary items to the primary item and disables the secondaries.")]
+    public static async Task<Results<NoContent, ProblemHttpResult>> MergeItems(
+        ISender sender, MergeItemsCommand command, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(command, cancellationToken);
+
+        return result.ToNoContent();
+    }
+
+    [EndpointSummary("Preview an item merge")]
+    [EndpointDescription("Administrator only. Counts the rows a merge would re-point or combine, without changing anything.")]
+    public static async Task<Results<Ok<ItemMergePreviewDto>, ProblemHttpResult>> GetItemMergePreview(
+        ISender sender, GetItemMergePreviewQuery query, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(query, cancellationToken);
 
         return result.ToOk();
     }
