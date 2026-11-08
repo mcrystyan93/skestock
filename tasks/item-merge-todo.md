@@ -34,7 +34,7 @@ Tests first (in-memory; reuse the public `ItemTestDbContext` from the DisableIte
 
 ### T3: Keep-survivor mergers — implementer: sonnet
 Tests first: no collision -> re-pointed; primary-vs-secondary collision -> primary row kept, secondary deleted; secondary-vs-secondary collision (no primary row) -> one survivor re-pointed, other deleted; preview reports `Combined`.
-- [ ] `ClassItemStockVisibility` (key ClassId, LocationId), `ItemLocationThreshold` (key LocationId) per D3.
+- [x] `ClassItemStockVisibility` (key ClassId, LocationId), `ItemLocationThreshold` (key LocationId) per D3.
 - Files: `.../Mergers/{ClassItemStockVisibility,ItemLocationThreshold}ItemMerger.cs`, `tests/.../Mergers/KeepSurvivorItemMergerTests.cs`
 - Verify: same filter as T2.
 
