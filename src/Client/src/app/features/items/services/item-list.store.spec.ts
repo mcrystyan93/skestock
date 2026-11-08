@@ -11,10 +11,11 @@ describe('ItemListState', () => {
     getAll: ReturnType<typeof vi.fn>;
     edit: ReturnType<typeof vi.fn>;
     getById: ReturnType<typeof vi.fn>;
+    merge: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
-    http = { getAll: vi.fn(), edit: vi.fn(), getById: vi.fn() };
+    http = { getAll: vi.fn(), edit: vi.fn(), getById: vi.fn(), merge: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
@@ -194,6 +195,79 @@ describe('ItemListState', () => {
 
       expect(http.getAll).toHaveBeenCalledTimes(2);
       expect(http.getById).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('selection and merge', () => {
+    const a = createItem('item-1');
+    const b = createItem('item-2');
+    const page = (...data: ItemDto[]) => ({ data, hasNextPage: false, nextCursor: null, sort: [] });
+
+    function loadedStore() {
+      http.getAll.mockReturnValue(of(page(a, b)));
+      const store = TestBed.inject(ItemListState);
+      store.load(store.filter());
+      return store;
+    }
+
+    it('toggles a row and counts the selection', () => {
+      const store = loadedStore();
+
+      store.toggleSelected(a, true);
+      store.toggleSelected(b, true);
+      store.toggleSelected(a, false);
+
+      expect([...store.selectedIds()]).toEqual(['item-2']);
+      expect(store.selectedCount()).toBe(1);
+    });
+
+    it('selects and clears every loaded row', () => {
+      const store = loadedStore();
+
+      store.setLoadedSelected(true);
+      expect(store.selectedCount()).toBe(2);
+
+      store.setLoadedSelected(false);
+      expect(store.selectedCount()).toBe(0);
+    });
+
+    it('keeps the selection when the filter changes and unloads the rows', () => {
+      const store = loadedStore();
+      store.setLoadedSelected(true);
+
+      http.getAll.mockReturnValue(of(page()));
+      store.load({ ...store.filter(), searchTerm: 'xyz' });
+
+      expect(store.items()).toEqual([]);
+      expect(store.selectedItems().map((i) => i.id)).toEqual(['item-1', 'item-2']);
+    });
+
+    it('clears the selection, reloads and calls back after a successful merge', () => {
+      const store = loadedStore();
+      store.setLoadedSelected(true);
+      http.merge.mockReturnValue(of(undefined));
+      const onSuccess = vi.fn();
+
+      store.merge({ request: { primaryItemId: 'item-1', itemIds: ['item-1', 'item-2'] }, onSuccess });
+
+      expect(http.merge).toHaveBeenCalledWith({ primaryItemId: 'item-1', itemIds: ['item-1', 'item-2'] });
+      expect(store.selectedCount()).toBe(0);
+      expect(http.getAll).toHaveBeenCalledTimes(2);
+      expect(onSuccess).toHaveBeenCalledOnce();
+    });
+
+    it('keeps the selection and surfaces the problem when the merge fails', () => {
+      const store = loadedStore();
+      store.setLoadedSelected(true);
+      http.merge.mockReturnValue(throwError(() => ({ status: 403 })));
+      const onSuccess = vi.fn();
+
+      store.merge({ request: { primaryItemId: 'item-1', itemIds: ['item-1', 'item-2'] }, onSuccess });
+
+      expect(store.selectedCount()).toBe(2);
+      expect(store.mergeProblemDetail()).toEqual({ status: 403 });
+      expect(store.merging()).toBe(false);
+      expect(onSuccess).not.toHaveBeenCalled();
     });
   });
 });
