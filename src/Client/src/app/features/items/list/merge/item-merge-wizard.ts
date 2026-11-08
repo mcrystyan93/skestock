@@ -12,6 +12,7 @@ import { NzRadioComponent, NzRadioGroupComponent } from 'ng-zorro-antd/radio';
 import { NzSpinComponent } from 'ng-zorro-antd/spin';
 import { NzStepComponent, NzStepsComponent } from 'ng-zorro-antd/steps';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+import { CHECKABLE_CARD_CLASSES } from '../../../../shared/ui/card-classes';
 import { ItemListState } from '../../services/item-list.store';
 
 export type ItemMergeWizardData = { items: ItemDto[] };
@@ -35,7 +36,7 @@ export type ItemMergeWizardData = { items: ItemDto[] };
   template: `
     <div *nzModalTitle>Unește articole</div>
 
-    <nz-steps class="mb-6"
+    <nz-steps class="mb-6!"
               nzSize="small"
               nzLabelPlacement="vertical"
               [nzCurrent]="step()">
@@ -56,7 +57,7 @@ export type ItemMergeWizardData = { items: ItemDto[] };
                         (ngModelChange)="primaryId.set($event)">
           @for (item of items; track item.id) {
             <label nz-radio
-                   class="m-0! flex! items-start rounded border border-solid border-slate-200 p-3"
+                   [class]="cardClasses"
                    [nzValue]="item.id"
                    [nzDisabled]="!item.isActive">
               <span class="block font-medium">{{ item.name }}</span>
@@ -118,11 +119,11 @@ export type ItemMergeWizardData = { items: ItemDto[] };
                   class="mb-4"
                   nzMessage="Acțiune ireversibilă"
                   nzDescription="Articolele secundare vor fi dezactivate, iar datele lor vor fi mutate definitiv pe articolul principal, în toate clasele." />
-        <p class="mb-1">
+        <p class="m-0! mb-3!">
           Se păstrează: <strong>{{ primary()?.name }}</strong>
         </p>
-        <p class="mb-1">Se dezactivează:</p>
-        <ul class="mb-3 mt-0">
+        <p class="m-0!">Se dezactivează:</p>
+        <ul class="m-0! mb-3! list-disc pl-6">
           @for (item of secondaries(); track item.id) {
             <li>{{ item.name }}</li>
           }
@@ -171,6 +172,7 @@ export type ItemMergeWizardData = { items: ItemDto[] };
 export class ItemMergeWizard {
   protected readonly items = inject<ItemMergeWizardData>(NZ_MODAL_DATA).items;
   protected readonly store = inject(ItemListState);
+  protected readonly cardClasses = `m-0! flex! items-start p-3! ${CHECKABLE_CARD_CLASSES}`;
   protected readonly labels = ITEM_MERGE_KIND_LABELS;
 
   private readonly _modalRef = inject(NzModalRef);
