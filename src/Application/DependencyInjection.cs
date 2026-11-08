@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using skestock.Application.Common.Behaviours;
+using skestock.Application.Features.Items.Commands.MergeItems.Mergers;
 using skestock.Application.Queues;
 using skestock.Application.Queues.Interfaces;
 
@@ -12,6 +13,11 @@ public static class DependencyInjection
     public static void AddApplicationServices(this IHostApplicationBuilder builder)
     {
         builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        // One merger per table holding an ItemId; add a class here when a new table references items.
+        foreach (var merger in typeof(IItemReferenceMerger).Assembly.GetTypes()
+                     .Where(type => type is { IsClass: true, IsAbstract: false } && type.IsAssignableTo(typeof(IItemReferenceMerger))))
+            builder.Services.AddScoped(typeof(IItemReferenceMerger), merger);
+
         builder.Services.AddSingleton<IMessageEnvelopeSerializer, MessageEnvelopeSerializer>();
 
         builder.Services.AddMediator(options =>
