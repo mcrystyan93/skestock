@@ -5,6 +5,7 @@ using skestock.Domain.Common;
 using skestock.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using skestock.Application.Common.Filtering;
 using skestock.Domain.Entities;
 using skestock.Domain.Entities.Categories;
@@ -85,5 +86,46 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .HasValueGenerator<GuidV7ValueGenerator>()
                 .ValueGeneratedOnAdd();
         }
+
+        ConfigureTemporalTables(builder);
     }
+
+    // Every table is a SQL Server system-versioned (temporal) table unless excluded here, so new entities
+    // get history automatically. Period columns are SQL Server-managed datetime2 in UTC (not DateTimeOffset).
+    // Retention (2 years) is applied by raw SQL in the SetTemporalRetention migration: EF has no API for it, and
+    // a later EF column drop/alter can re-enable versioning without it (TemporalSchemaTests catches that).
+    private static readonly HashSet<Type> TemporalExclusions =
+    [
+        typeof(OutboxMessage), // high-churn operational queue, Payload bloat
+        typeof(ProcessedMessage), // idempotency bookkeeping
+        typeof(ScheduledJobRun), // operational job log
+        typeof(DailyItemConsumption), // derived, rebuilt daily: would double-write the table into history
+        typeof(ItemPurchaseStatistic), // derived, rebuilt daily
+        typeof(IdentityUserToken<Guid>), // 2FA authenticator keys and recovery codes: no copies in history
+    ];
+
+    private static void ConfigureTemporalTables(ModelBuilder builder)
+    {
+        foreach (var entityType in builder.Model.GetEntityTypes().ToList())
+        {
+            // JSON-mapped owned types (CategoryIcon) live inside the owner's column, they have no table.
+            if (TemporalExclusions.Contains(entityType.ClrType) || entityType.IsMappedToJson())
+                continue;
+
+            entityType.SetIsTemporal(true);
+
+            // Who changed it: BaseAuditableEntity already has LastModifiedById. Other tables get a shadow column
+            // (no FK on purpose: it would block user deletion and create cycles with the Identity tables).
+            // Table-sharing owned types use the owner's column.
+            if (entityType.FindProperty(LastModifiedById) is null && !IsTableSharingDependent(entityType))
+                entityType.AddProperty(LastModifiedById, typeof(Guid?));
+        }
+    }
+
+    private static bool IsTableSharingDependent(IMutableEntityType entityType) =>
+        entityType.FindOwnership() is { } ownership
+        && ownership.PrincipalEntityType.GetTableName() == entityType.GetTableName()
+        && ownership.PrincipalEntityType.GetSchema() == entityType.GetSchema();
+
+    public const string LastModifiedById = nameof(BaseAuditableEntity.LastModifiedById);
 }
