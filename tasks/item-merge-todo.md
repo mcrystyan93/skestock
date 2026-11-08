@@ -70,7 +70,7 @@ Tests first (`MergeItemsCommandHandlerTests`, in-memory, real mergers from DI li
 
 ### T7: Preview query — implementer: sonnet
 Tests first: counts per kind equal what T6 merge changes for the same seeded data (seed once, preview, merge, compare); zero-count kinds omitted; same validation and `ItemNotFound` as the command; nothing is written.
-- [ ] `GetItemMergePreviewQuery` (+ handler, validator, `ItemMergePreviewDto`) per D7; not cacheable.
+- [x] `GetItemMergePreviewQuery` (+ handler, validator, `ItemMergePreviewDto`) per D7; not cacheable.
 - Files: `src/Application/Features/Items/Queries/GetItemMergePreview/{GetItemMergePreviewQuery,GetItemMergePreviewQueryHandler,GetItemMergePreviewQueryValidator,ItemMergePreviewDto}.cs`, `tests/Application.UnitTests/Features/Items/Queries/GetItemMergePreview/GetItemMergePreviewQueryHandlerTests.cs`
 - Verify: `dotnet test tests/Application.UnitTests --filter "FullyQualifiedName~ItemMerge"`
 
