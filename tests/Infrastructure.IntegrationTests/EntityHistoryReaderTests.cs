@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Design.Internal;
 using skestock.Application.Common.Errors;
 using skestock.Application.Features.EntityHistory.Queries.GetEntityHistory;
 using skestock.Domain.Entities.Locations;
@@ -43,6 +46,35 @@ public sealed class EntityHistoryReaderTests
         var result = await new EntityHistoryReader(dbContext).ReadAsync("Items", "not-a-guid", 0, 10, CancellationToken.None);
 
         result.Errors[0].ShouldBeOfType<EntityHistoryErrors.InvalidEntityId>();
+    }
+
+    [Test]
+    public async Task Every_readable_table_executes_its_history_query()
+    {
+        await using var dbContext = IntegrationTestSetup.CreateDbContext();
+        var failures = new List<string>();
+        var checkedTables = new List<string>();
+        foreach (var table in dbContext.GetService<IDesignTimeModel>().Model.GetRelationalModel().Tables
+                     .Where(t => t.PrimaryKey is { Columns.Count: 1 }))
+        {
+            var id = table.PrimaryKey!.Columns[0].ProviderClrType == typeof(Guid) ? Guid.NewGuid().ToString()
+                : table.PrimaryKey.Columns[0].ProviderClrType == typeof(int) ? "1" : "x";
+            try
+            {
+                var result = await new EntityHistoryReader(dbContext).ReadAsync(table.Name, id, 0, 10, CancellationToken.None);
+                if (result.IsSuccess)
+                    checkedTables.Add(table.Name);
+                else if (result.Errors[0] is not EntityHistoryErrors.UnknownEntity)
+                    failures.Add($"{table.Name}: {result.Errors[0].Message}");
+            }
+            catch (Exception ex)
+            {
+                failures.Add($"{table.Name}: {ex.GetBaseException().Message}");
+            }
+        }
+        failures.ShouldBeEmpty();
+        checkedTables.ShouldContain("StockBatches");
+        checkedTables.ShouldContain("StockTransactions");
     }
 
     [Test]
