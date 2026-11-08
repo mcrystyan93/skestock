@@ -13,7 +13,9 @@ import { LayoutBreakpoint } from '@ske/shared/directives';
     <ske-item-filter-form class="px-4"
                           [loading]="loading()"
                           [filter]="filter()"
-                          (onFilterChange)="onFilterChange.emit($event)" />
+                          [selectedCount]="selectedCount()"
+                          (onFilterChange)="onFilterChange.emit($event)"
+                          (onMerge)="onMerge.emit()" />
 
     <ske-error-display [problemDetail]="problemDetail()" [validationErrors]="validationErrors()" />
 
@@ -31,6 +33,9 @@ import { LayoutBreakpoint } from '@ske/shared/directives';
           (onToggleActive)="onToggleActive.emit($event)"
           (onImageUploaded)="onImageUploaded.emit($event)"
           [togglingItemId]="togglingItemId()"
+          [selectedIds]="selectedIds()"
+          (onToggleSelected)="onToggleSelected.emit($event)"
+          (onToggleAllSelected)="onToggleAllSelected.emit($event)"
         />
       </ng-container>
       <ng-template #smallScreenListTemplate>
@@ -40,6 +45,8 @@ import { LayoutBreakpoint } from '@ske/shared/directives';
           [loading]="loading()"
           [hasNextPage]="hasNextPage()"
           [isLoadingMore]="isLoadingMore()"
+          [selectedIds]="selectedIds()"
+          (onToggleSelected)="onToggleSelected.emit($event)"
           (onFilterChange)="onFilterChange.emit($event)"
           (onLoadMore)="onLoadMore.emit()"
           (onEdit)="onEdit.emit($event)"
@@ -61,9 +68,14 @@ export class ItemListTab {
   public readonly hasNextPage = input.required<boolean>();
   public readonly isLoadingMore = input.required<boolean>();
   public readonly togglingItemId = input.required<string | null>();
+  public readonly selectedIds = input.required<ReadonlySet<string>>();
+  public readonly selectedCount = input.required<number>();
 
   public readonly onFilterChange = output<GetAllItemsRequest>();
   public readonly onLoadMore = output<void>();
+  public readonly onMerge = output<void>();
+  public readonly onToggleSelected = output<{ item: ItemDto; checked: boolean }>();
+  public readonly onToggleAllSelected = output<boolean>();
   public readonly onEdit = output<ItemDto>();
   public readonly onToggleActive = output<ItemDto>();
   public readonly onImageUploaded = output<{ item: ItemDto; fileId: string }>();

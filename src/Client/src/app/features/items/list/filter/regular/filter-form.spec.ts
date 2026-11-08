@@ -67,4 +67,34 @@ describe('FilterForm', () => {
     expect(form.activeFilterCount()).toBe(0);
     expect(emitted.at(-1)?.filters).toEqual([]);
   });
+
+  describe('merge button', () => {
+    const mergeButton = () =>
+      Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button'))
+        .find((button) => button.textContent?.includes('Unește'));
+
+    it('is hidden with zero or one selected item', async () => {
+      for (const count of [0, 1]) {
+        fixture.componentRef.setInput('selectedCount', count);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(mergeButton()).toBeUndefined();
+      }
+    });
+
+    it('shows the count and emits onMerge with two selected items', async () => {
+      const merges: unknown[] = [];
+      fixture.componentInstance.onMerge.subscribe(() => merges.push(true));
+      fixture.componentRef.setInput('selectedCount', 2);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(mergeButton()?.textContent?.trim()).toBe('Unește (2)');
+
+      mergeButton()?.click();
+
+      expect(merges).toHaveLength(1);
+    });
+  });
 });

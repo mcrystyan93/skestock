@@ -28,6 +28,11 @@
           Reseteaza
         </button>
       </nz-col>
+      @if (canMerge()) {
+        <nz-col nzFlex="none">
+          <ng-container *ngTemplateOutlet="mergeButton" />
+        </nz-col>
+      }
     </nz-row>
   </ng-container>
 
@@ -49,6 +54,9 @@
           Filtre
         </button>
       </nz-badge>
+      @if (canMerge()) {
+        <ng-container *ngTemplateOutlet="mergeButton" />
+      }
     </div>
 
     <nz-drawer nzTitle="Filtre"
@@ -84,6 +92,15 @@
         </button>
       </div>
     </ng-template>
+  </ng-template>
+
+  <ng-template #mergeButton>
+    <button nz-button
+            type="button"
+            nzType="primary"
+            (click)="onMerge.emit()">
+      Unește ({{ selectedCount() }})
+    </button>
   </ng-template>
 
   <ng-template #searchInput>

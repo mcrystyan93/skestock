@@ -47,7 +47,10 @@ export class FilterForm {
   public readonly loading = input.required<boolean>();
   public readonly filter = input.required<GetAllItemsRequest>();
 
+  public readonly selectedCount = input(0);
+
   public readonly onFilterChange = output<GetAllItemsRequest>();
+  public readonly onMerge = output<void>();
   private _initialFilterEmitted = false;
   private _initialFormChangeHandled = false;
 
@@ -64,6 +67,7 @@ export class FilterForm {
   });
 
   public readonly filtersOpen = signal(false);
+  public readonly canMerge = computed(() => this.selectedCount() >= 2);
 
   public readonly activeFilterCount = computed(() =>
     this.itemListFilterForm().value().category ? 1 : 0

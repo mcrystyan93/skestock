@@ -32,6 +32,12 @@
                (keydown.enter)="onEdit.emit(item)"
                (keydown.space)="onSpace($event, item)">
         <div class="flex min-w-0 items-center gap-3">
+          <label nz-checkbox
+                 [nzChecked]="selectedIds().has(item.id)"
+                 (nzCheckedChange)="onToggleSelected.emit({ item, checked: $event })"
+                 (click)="$event.stopPropagation()"
+                 (keydown.enter)="$event.stopPropagation()"
+                 (keydown.space)="$event.stopPropagation()"><span class="sr-only">Selectează {{ item.name }}</span></label>
           <ske-item-thumbnail [itemId]="item.id"
                               [imageFileId]="item.imageFileId"
                               [uploadable]="true"
