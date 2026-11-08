@@ -11,7 +11,7 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
-import { ConfigurationHttp } from '../services/configuration.http';
+import { ConfigurationHttp } from '../../services/configuration.http';
 import { MenuToggle } from '@ske/layouts/menu-toggle';
 import { ThemeSwitcher } from '@ske/shared/theme';
 import { NzBreadCrumbComponent, NzBreadCrumbItemComponent } from 'ng-zorro-antd/breadcrumb';

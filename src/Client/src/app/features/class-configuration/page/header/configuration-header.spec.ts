@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { of, Subject, throwError } from 'rxjs';
-import { ConfigurationHttp } from '../services/configuration.http';
+import { ConfigurationHttp } from '../../services/configuration.http';
 import { ConfigurationHeader } from './configuration-header';
 
 describe('ConfigurationHeader', () => {

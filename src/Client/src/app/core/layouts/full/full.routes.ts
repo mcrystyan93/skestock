@@ -10,7 +10,7 @@ export const fullRoutes: Routes = [
       {
         path: 'configuration',
         loadComponent: () =>
-          import('../../../features/class-configuration/configuration.page').then((m) => m.ConfigurationPage)
+          import('../../../features/class-configuration/page/configuration.page').then((m) => m.ConfigurationPage)
       },
       {
         path: 'categories',
