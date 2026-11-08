@@ -1,7 +1,14 @@
 import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CategoryListState } from '../services/category-list.store';
-import { CategoryDto, CategoryImportBatchListItemDto, GetAllCategoriesRequest } from '@ske/models';
+import {
+  CategoryDto,
+  CategoryImportBatchFileDto,
+  CategoryImportBatchListItemDto,
+  GetAllCategoriesRequest,
+  GetAllCategoryImportBatchesRequest
+} from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
+import { FileStorageState } from '@ske/shared/storage';
 import { Header } from './header/header';
 import {
   CategoryDetailModal,
@@ -25,7 +32,7 @@ import { CategoryImportListTab } from './tabs/category-import-list-tab';
   ],
   selector: 'ske-categories-page',
   templateUrl: './categories.page.html',
-  providers: [CategoryListState, CategoryImportState, NzModalService],
+  providers: [CategoryListState, CategoryImportState, NzModalService, FileStorageState],
   host: {
     class: 'flex flex-col grow gap-4'
   }
@@ -38,6 +45,7 @@ export class CategoriesPage implements OnInit, OnDestroy {
   private readonly _modalService = inject(NzModalService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _signalRGroupManager = inject(SignalRGroupManagerStore);
+  private readonly _fileStorage = inject(FileStorageState);
 
   public onFilterChange(filter: GetAllCategoriesRequest) {
     this.store.load(filter);
@@ -45,6 +53,18 @@ export class CategoriesPage implements OnInit, OnDestroy {
 
   public onLoadMore() {
     this.store.loadMore();
+  }
+
+  public onImportFilterChange(filter: GetAllCategoryImportBatchesRequest) {
+    this.importStore.load(filter);
+  }
+
+  public onImportLoadMore() {
+    this.importStore.loadMore();
+  }
+
+  public onDownloadImportFile(file: CategoryImportBatchFileDto) {
+    this._fileStorage.downloadFile(file.fileMetadataId);
   }
 
   public onEdit(category: CategoryDto) {
@@ -108,19 +128,6 @@ export class CategoriesPage implements OnInit, OnDestroy {
       takeUntilDestroyed(this._destroyRef)
     ).subscribe(() => {
       this.store.reload();
-    });
-  }
-
-  public onDelete(category: CategoryDto) {
-    this._modalService.confirm({
-      nzTitle: 'Confirma stergerea categoriei?',
-      nzContent: 'Categoria va fi stearsa definitiv. Sunteti sigur ca doriti sa continuati?',
-      nzOkText: 'Sterge',
-      nzCancelText: 'Nu',
-      nzOkDanger: true,
-      nzCentered: true,
-      nzIconType: 'icons:circle-exclamation',
-      nzOnOk: () => this.store.deleteCategory(category)
     });
   }
 }

@@ -1,0 +1,32 @@
+<ske-category-import-filter-form class="px-4"
+                                 [loading]="loading()"
+                                 [filter]="filter()"
+                                 (onFilterChange)="onFilterChange.emit($event)" />
+
+<ske-error-display [problemDetail]="problemDetail()"
+                   [validationErrors]="validationErrors()" />
+
+<div class="grow relative">
+  <ng-container *skeLayoutBreakpoint="'lg'; else smallScreenListTemplate">
+    <ske-category-import-table [items]="items()"
+                               [filter]="filter()"
+                               [loading]="loading()"
+                               [hasNextPage]="hasNextPage()"
+                               [isLoadingMore]="isLoadingMore()"
+                               (onFilterChange)="onFilterChange.emit($event)"
+                               (onLoadMore)="onLoadMore.emit()"
+                               (downloadFile)="downloadFile.emit($event)"
+                               (review)="review.emit($event)" />
+  </ng-container>
+  <ng-template #smallScreenListTemplate>
+    <ske-category-import-list-small [items]="items()"
+                                    [filter]="filter()"
+                                    [loading]="loading()"
+                                    [hasNextPage]="hasNextPage()"
+                                    [isLoadingMore]="isLoadingMore()"
+                                    (onFilterChange)="onFilterChange.emit($event)"
+                                    (onLoadMore)="onLoadMore.emit()"
+                                    (downloadFile)="downloadFile.emit($event)"
+                                    (review)="review.emit($event)" />
+  </ng-template>
+</div>

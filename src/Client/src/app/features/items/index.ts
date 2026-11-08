@@ -1,1 +1,1 @@
-export * from './list/items.routes';
+export * from './items.routes';

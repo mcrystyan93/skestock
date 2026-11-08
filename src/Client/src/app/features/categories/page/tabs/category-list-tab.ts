@@ -1,15 +1,15 @@
 import { Component, input, output } from '@angular/core';
 import { ErrorAlert } from '@ske/shared/errors';
-import { FilterContainer } from '../filter/regular/filter-container';
-import { Table } from '../tables/regular/large/table';
+import { FilterForm } from '../../list/filter/regular/filter-form';
+import { Table } from '../../list/tables/regular/large/table';
 import { CategoryDto, GetAllCategoriesRequest, ProblemDetails, ValidationProblemDetails } from '@ske/models';
 import { LayoutBreakpoint } from '@ske/shared/directives';
-import { CategoryListSmall } from '../tables/regular/small/category-list-small';
+import { CategoryListSmall } from '../../list/tables/regular/small/category-list-small';
 
 @Component({
   imports: [
     ErrorAlert,
-    FilterContainer,
+    FilterForm,
     Table,
     LayoutBreakpoint,
     CategoryListSmall
@@ -19,7 +19,10 @@ import { CategoryListSmall } from '../tables/regular/small/category-list-small';
     class: 'flex grow flex-col gap-4 absolute inset-0'
   },
   template: `
-    <ske-category-filter-container />
+    <ske-category-filter-form class="px-4"
+                              [loading]="loading()"
+                              [filter]="filter()"
+                              (onFilterChange)="onFilterChange.emit($event)" />
 
     @if (problemDetail() || validationErrors()) {
       <ske-error-display [problemDetail]="problemDetail()"
@@ -35,9 +38,7 @@ import { CategoryListSmall } from '../tables/regular/small/category-list-small';
                             [isLoadingMore]="isLoadingMore()"
                             (onFilterChange)="onFilterChange.emit($event)"
                             (onLoadMore)="onLoadMore.emit()"
-                            (onEdit)="onEdit.emit($event)"
-                            (onDelete)="onDelete.emit($event)"
-                            [deletingCategoryId]="deletingCategoryId()" />
+                            (onEdit)="onEdit.emit($event)" />
       </ng-container>
       <ng-template #smallScreenListTemplate>
         <ske-category-list-small [items]="categories()"
@@ -60,11 +61,8 @@ export class CategoryListTab {
   public readonly loading = input.required<boolean>();
   public readonly hasNextPage = input.required<boolean>();
   public readonly isLoadingMore = input.required<boolean>();
-  public readonly deletingCategoryId = input.required<string | null>();
-
   public readonly onFilterChange = output<GetAllCategoriesRequest>();
   public readonly onLoadMore = output<void>();
   public readonly onEdit = output<CategoryDto>();
-  public readonly onDelete = output<CategoryDto>();
 
 }
