@@ -1,16 +1,9 @@
-import path from 'node:path';
 import { expect, test, type Request } from '@playwright/test';
 import { skipUnlessLoggedIn } from '../auth';
+import { saveScreenshotsAfterEach } from '../screenshots';
 
 test.use({ trace: 'off' });
-
-// Repo-root screenshot-checks/<spec>/ (git-ignored): the e2e cwd is src/Client, so resolve from this file.
-const shotDir = path.resolve(__dirname, '../../../../screenshot-checks/login');
-
-test.afterEach(async ({ page }, testInfo) => {
-  const slug = testInfo.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  await page.screenshot({ path: path.join(shotDir, `${testInfo.project.name}-${slug}-r${testInfo.repeatEachIndex}-t${testInfo.retry}.png`), fullPage: true });
-});
+saveScreenshotsAfterEach();
 
 test.describe('login form validation', () => {
   test.beforeEach(async ({ page }) => {
