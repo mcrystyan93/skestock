@@ -76,15 +76,15 @@ Tests first: counts per kind equal what T6 merge changes for the same seeded dat
 
 ### T8: Endpoints + functional tests — implementer: sonnet
 Tests first (`tests/Application.FunctionalTests/Features/Items/Commands/MergeItems/`, pattern from `DisableItem`): admin success on real SQL Server with collisions in every unique table in one merge (proves EF delete/update ordering, plan risk table); data in a closed class re-pointed; per-class/location stock totals unchanged; non-admin -> 403 for both endpoints; invalid set -> validation problem; atomicity (forced failure leaves data untouched); preview counts match.
-- [ ] `POST /api/Items/merge` (`NoContent` / `ToProblemHttpResult()`), `POST /api/Items/merge-preview` in `src/Web/Endpoints/Items.cs`.
+- [x] `POST /api/Items/merge` (`NoContent` / `ToProblemHttpResult()`), `POST /api/Items/merge-preview` in `src/Web/Endpoints/Items.cs`.
 - Files: `src/Web/Endpoints/Items.cs`, `tests/Application.FunctionalTests/Features/Items/Commands/MergeItems/MergeItemsCommandTests.cs`, `tests/Application.FunctionalTests/Features/Items/Queries/GetItemMergePreview/GetItemMergePreviewQueryTests.cs`
 - Verify: `dotnet build && ./run-functional-tests.sh --filter "FullyQualifiedName~ItemMerge|FullyQualifiedName~MergeItems"` (start AppHost first if "Seed administrator not found").
 
 ### T9: removed per D8 (no roles endpoint)
 
 ### Checkpoint B (after T7-T8)
-- [ ] `dotnet build`; `dotnet test tests/Application.UnitTests`; `./run-functional-tests.sh --filter "FullyQualifiedName~ItemMerge|FullyQualifiedName~MergeItems"` green.
-- [ ] `dotnet ef migrations has-pending-model-changes --project src/Infrastructure --startup-project src/Web --context ApplicationDbContext` reports none.
+- [x] `dotnet build`; `dotnet test tests/Application.UnitTests`; `./run-functional-tests.sh --filter "FullyQualifiedName~ItemMerge|FullyQualifiedName~MergeItems"` green.
+- [x] `dotnet ef migrations has-pending-model-changes --project src/Infrastructure --startup-project src/Web --context ApplicationDbContext` reports none.
 - [ ] Haiku review sub-agent (`model: "haiku"`) with `git diff master...HEAD -- src tests` and the spec goal only; fix real issues, queue the rest.
 - [ ] Report to user before client work.
 
