@@ -33,17 +33,18 @@ internal static class ClassLocking
         });
     }
 
+    // Temporal period columns are HIDDEN, so SELECT * omits them but EF maps them: name them explicitly.
     public static IQueryable<SchoolClass> SharedLock(this IApplicationDbContext dbContext, Guid classId) =>
         dbContext.Database.IsRelational()
             ? dbContext.SchoolClasses.FromSqlInterpolated(
-                $"SELECT * FROM [SchoolClasses] WITH (HOLDLOCK) WHERE [Id] = {classId}")
+                $"SELECT *, [PeriodStart], [PeriodEnd] FROM [SchoolClasses] WITH (HOLDLOCK) WHERE [Id] = {classId}")
             : dbContext.SchoolClasses.Where(c => c.Id == classId);
 
     public static IQueryable<SchoolClass> ExclusiveLock(
         this IApplicationDbContext dbContext, Guid classId, Guid otherClassId) =>
         dbContext.Database.IsRelational()
             ? dbContext.SchoolClasses.FromSqlInterpolated(
-                $"SELECT * FROM [SchoolClasses] WITH (XLOCK, HOLDLOCK) WHERE [Id] = {classId} OR [Id] = {otherClassId}")
+                $"SELECT *, [PeriodStart], [PeriodEnd] FROM [SchoolClasses] WITH (XLOCK, HOLDLOCK) WHERE [Id] = {classId} OR [Id] = {otherClassId}")
             : dbContext.SchoolClasses.Where(c => c.Id == classId || c.Id == otherClassId);
 
     // ClassOpenBehaviour and ClassLockBehaviour both resolve the same request; remember the first answer.

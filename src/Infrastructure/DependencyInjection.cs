@@ -61,6 +61,7 @@ public static class DependencyInjection
 
         builder.EnrichSqlServerDbContext<ApplicationDbContext>();
 
+        builder.Services.AddScoped<IEntityHistoryReader, EntityHistoryReader>();
         builder.Services.AddScoped<IApplicationDbContext>(provider =>
             provider.GetRequiredService<ApplicationDbContext>());
 

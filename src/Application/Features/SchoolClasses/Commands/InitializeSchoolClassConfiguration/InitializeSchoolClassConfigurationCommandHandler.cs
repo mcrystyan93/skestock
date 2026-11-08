@@ -5,7 +5,7 @@ using skestock.Domain.Entities.SchoolClasses;
 
 namespace skestock.Application.Features.SchoolClasses.Commands.InitializeSchoolClassConfiguration;
 
-public sealed class InitializeSchoolClassConfigurationCommandHandler(IApplicationDbContext dbContext)
+public sealed class InitializeSchoolClassConfigurationCommandHandler(IApplicationDbContext dbContext, IUser user, TimeProvider timeProvider)
     : IRequestHandler<InitializeSchoolClassConfigurationCommand, Result>
 {
     public async ValueTask<Result> Handle(InitializeSchoolClassConfigurationCommand request,
@@ -31,7 +31,11 @@ public sealed class InitializeSchoolClassConfigurationCommandHandler(IApplicatio
             var claimed = await dbContext.SchoolClasses
                 .Where(item => item.Id == request.SchoolClassId && item.InvitationCount == null)
                 .ExecuteUpdateAsync(
-                    update => update.SetProperty(item => item.InvitationCount, configuration.InvitationCount),
+                    // ExecuteUpdate bypasses AuditableEntityInterceptor, so stamp the modifier for the history table.
+                    update => update
+                        .SetProperty(item => item.InvitationCount, configuration.InvitationCount)
+                        .SetProperty(item => item.LastModifiedById, user.Id)
+                        .SetProperty(item => item.LastModifiedDate, timeProvider.GetUtcNow()),
                     cancellationToken);
             if (claimed == 0)
                 return Result.Fail(new SchoolClassErrors.ConfigurationAlreadyInitialized(request.SchoolClassId));
