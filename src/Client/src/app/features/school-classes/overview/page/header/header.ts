@@ -1,6 +1,6 @@
 import {Component, computed, inject, input, model, output, ViewContainerRef} from '@angular/core';
 import {NzModalService} from 'ng-zorro-antd/modal';
-import {TemplatesModal} from '../tabs/fruit-dessert/templates-modal/templates-modal';
+import {TemplatesModal} from '../../tabs/fruit-dessert/templates-modal/templates-modal';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {
   NzPageHeaderComponent,
