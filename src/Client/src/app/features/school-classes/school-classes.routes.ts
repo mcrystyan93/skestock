@@ -7,6 +7,6 @@ export const schoolClassesRoutes: Routes = [
   },
   {
     path: ':id',
-    loadComponent: () => import('./overview/school-class-overview.page').then((m) => m.SchoolClassOverviewPage)
+    loadComponent: () => import('./overview/page/school-class-overview.page').then((m) => m.SchoolClassOverviewPage)
   }
 ];

@@ -4,7 +4,7 @@ import { ClassStatus } from '@ske/models';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { TemplatesModal } from '../tabs/fruit-dessert/templates-modal/templates-modal';
+import { TemplatesModal } from '../../tabs/fruit-dessert/templates-modal/templates-modal';
 import { Header } from './header';
 
 describe('Header stock count button', () => {

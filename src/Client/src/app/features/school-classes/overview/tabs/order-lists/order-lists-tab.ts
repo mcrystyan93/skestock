@@ -10,7 +10,7 @@ import {
 } from '@ske/shared/order-lists';
 import { ErrorAlert } from '@ske/shared/errors';
 import { isNil } from 'lodash-es';
-import { FilterContainer } from './filter/filter-container';
+import { FilterForm } from './filter/filter-form';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -19,12 +19,15 @@ import { tap } from 'rxjs';
 import { LayoutBreakpoint } from '@ske/shared/directives';
 
 @Component({
-  imports: [ErrorAlert, FilterContainer, Table, OrderListListSmall, LayoutBreakpoint],
+  imports: [ErrorAlert, FilterForm, Table, OrderListListSmall, LayoutBreakpoint],
   providers: [OrderListListStore, NzModalService],
   selector: 'ske-school-class-overview-order-lists-tab',
   styles: ``,
   template: `
-    <ske-order-list-filter-container />
+    <ske-order-list-filter-form class="px-4"
+                               [loading]="store.orderListsLoading()"
+                               [filter]="store.filter()"
+                               (onFilterChange)="store.load($event)" />
 
     <ske-error-display [problemDetail]="store.orderListsProblemDetail()"
                        [validationErrors]="store.orderListsValidationErrors()" />

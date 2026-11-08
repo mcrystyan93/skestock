@@ -1,5 +1,5 @@
 import { Component, DestroyRef, inject, input, model } from '@angular/core';
-import { SchoolClassOverviewStore } from '../../services/school-class-overview.store';
+import { SchoolClassOverviewStore } from '../../../services/school-class-overview.store';
 import { Header } from './header';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { AddGoodsReceiptModal } from '@ske/shared/goods-receipts';
@@ -11,7 +11,7 @@ import { injectDispatch } from '@ngrx/signals/events';
 import { StockCountModal, StockCountModalData, StockEvents } from '@ske/shared/stock';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
-import { CloseSchoolClassModal, CloseSchoolClassModalData } from '../close-class/close-school-class-modal';
+import { CloseSchoolClassModal, CloseSchoolClassModalData } from '../../close-class/close-school-class-modal';
 
 @Component({
   imports: [
