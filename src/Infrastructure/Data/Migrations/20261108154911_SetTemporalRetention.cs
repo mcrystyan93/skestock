@@ -98,7 +98,45 @@ namespace skestock.Infrastructure.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
+            // IF EXISTS because ExcludeUserTokensFromTemporal drops AspNetUserTokensHistory (and its index) in between.
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_AspNetRoleClaimsHistory_Id] ON [dbo].[AspNetRoleClaimsHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_AspNetRolesHistory_Id] ON [dbo].[AspNetRolesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_AspNetUserClaimsHistory_Id] ON [dbo].[AspNetUserClaimsHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_AspNetUserLoginsHistory_LoginProvider] ON [dbo].[AspNetUserLoginsHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_AspNetUserRolesHistory_UserId] ON [dbo].[AspNetUserRolesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_AspNetUsersHistory_Id] ON [dbo].[AspNetUsersHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_AspNetUserTokensHistory_UserId] ON [dbo].[AspNetUserTokensHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_CategoriesHistory_Id] ON [dbo].[CategoriesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_CategoryImportBatchesHistory_Id] ON [dbo].[CategoryImportBatchesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_CategoryImportBatchFilesHistory_Id] ON [dbo].[CategoryImportBatchFilesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_CategoryImportBatchHistoryHistory_Id] ON [dbo].[CategoryImportBatchHistoryHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_ClassBalancesHistory_Id] ON [dbo].[ClassBalancesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_ClassDepartmentHistory_Id] ON [dbo].[ClassDepartmentHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_ClassItemStockVisibilitiesHistory_Id] ON [dbo].[ClassItemStockVisibilitiesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_CongregationsHistory_Id] ON [dbo].[CongregationsHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_DepartmentTemplateHistory_Id] ON [dbo].[DepartmentTemplateHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_FileMetadataHistory_Id] ON [dbo].[FileMetadataHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_FruitDessertMessagesHistory_Id] ON [dbo].[FruitDessertMessagesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_FruitDessertPlanEntriesHistory_Id] ON [dbo].[FruitDessertPlanEntriesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_GoodsReceiptImportLinesHistory_Id] ON [dbo].[GoodsReceiptImportLinesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_GoodsReceiptImportsHistory_Id] ON [dbo].[GoodsReceiptImportsHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_GoodsReceiptsHistory_Id] ON [dbo].[GoodsReceiptsHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_ItemImportBatchesHistory_Id] ON [dbo].[ItemImportBatchesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_ItemImportBatchFilesHistory_Id] ON [dbo].[ItemImportBatchFilesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_ItemImportBatchHistoryHistory_Id] ON [dbo].[ItemImportBatchHistoryHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_ItemLocationThresholdsHistory_Id] ON [dbo].[ItemLocationThresholdsHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_ItemsHistory_Id] ON [dbo].[ItemsHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_LocationsHistory_Id] ON [dbo].[LocationsHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_MessageTemplatesHistory_Id] ON [dbo].[MessageTemplatesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_OrderListLinesHistory_Id] ON [dbo].[OrderListLinesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_OrderListsHistory_Id] ON [dbo].[OrderListsHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_SchoolClassesHistory_Id] ON [dbo].[SchoolClassesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_SharedClassConfigurationsHistory_Id] ON [dbo].[SharedClassConfigurationsHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_StockBatchesHistory_Id] ON [dbo].[StockBatchesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_StockTransactionsHistory_Id] ON [dbo].[StockTransactionsHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_SupplyListLinesHistory_Id] ON [dbo].[SupplyListLinesHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_SupplyListsHistory_Id] ON [dbo].[SupplyListsHistory];");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS [IX_UserProfilesHistory_Id] ON [dbo].[UserProfilesHistory];");
         }
     }
 }
