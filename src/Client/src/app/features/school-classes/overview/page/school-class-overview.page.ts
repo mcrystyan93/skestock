@@ -1,20 +1,20 @@
 import {Component, effect, inject, input, OnDestroy, OnInit, signal, untracked} from '@angular/core';
 import {HeaderContainer} from './header/header-container';
-import {SchoolClassOverviewStore} from '../services/school-class-overview.store';
+import {SchoolClassOverviewStore} from '../../services/school-class-overview.store';
 import {isNil} from 'lodash-es';
 import {NzTabComponent, NzTabsComponent} from 'ng-zorro-antd/tabs';
-import {GoodsReceiptsTab} from './tabs/goods-receipts/goods-receipts-tab';
-import {GoodsReceiptImportsTab} from './tabs/goods-receipt-imports/goods-receipt-imports-tab';
-import {OrderListsTab} from './tabs/order-lists/order-lists-tab';
-import {StatisticsTab} from './tabs/statistics/statistics-tab';
+import {GoodsReceiptsTab} from '../tabs/goods-receipts/goods-receipts-tab';
+import {GoodsReceiptImportsTab} from '../tabs/goods-receipt-imports/goods-receipt-imports-tab';
+import {OrderListsTab} from '../tabs/order-lists/order-lists-tab';
+import {StatisticsTab} from '../tabs/statistics/statistics-tab';
 import {ClassStock} from '@ske/shared/stock';
 import {realtimeGroups, SignalRGroupManagerStore} from '@ske/signalr';
 import {ErrorAlert} from '@ske/shared/errors';
 import {QueryParamState} from '@ske/routes';
 import {CLASS_READ_ONLY} from '@ske/shared/school-classes';
-import {ClassDepartmentsTab} from './tabs/departments/class-departments-tab';
-import {ClassInvitationsTab} from './tabs/invitations/class-invitations-tab';
-import {FruitDessertTab} from './tabs/fruit-dessert/fruit-dessert-tab';
+import {ClassDepartmentsTab} from '../tabs/departments/class-departments-tab';
+import {ClassInvitationsTab} from '../tabs/invitations/class-invitations-tab';
+import {FruitDessertTab} from '../tabs/fruit-dessert/fruit-dessert-tab';
 
 @Component({
   imports: [
