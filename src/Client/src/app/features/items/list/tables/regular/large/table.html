@@ -14,6 +14,12 @@
           [nzScroll]="{ x: dimensions.width, y: dimensions.height }">
   <thead>
   <tr>
+    <th nzWidth="48px"
+        nzLabel="Selectează toate articolele încărcate"
+        [nzShowCheckbox]="true"
+        [nzChecked]="allSelected()"
+        [nzIndeterminate]="someSelected()"
+        (nzCheckedChange)="onToggleAllSelected.emit($event)"></th>
     <th>
       {{ columns.name.label }}
     </th>
@@ -34,6 +40,11 @@
     <tr (click)="onEdit.emit(item)"
         class="cursor-pointer">
 
+      <td [nzShowCheckbox]="true"
+          [nzLabel]="'Selectează ' + item.name"
+          [nzChecked]="selectedIds().has(item.id)"
+          (nzCheckedChange)="onToggleSelected.emit({ item, checked: $event })"
+          (click)="$event.stopPropagation()"></td>
       <td>
         <div class="flex items-center gap-3">
           <ske-item-thumbnail [itemId]="item.id"

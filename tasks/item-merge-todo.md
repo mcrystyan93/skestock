@@ -95,45 +95,45 @@ Tests first (`tests/Application.FunctionalTests/Features/Items/Commands/MergeIte
 ### T10: removed per D8 (no client role check)
 
 ### T11: Items http + store selection and merge flow — implementer: sonnet
-- [ ] `items.http.ts`: `mergePreview`, `merge` (+ request/response models in the items models file).
-- [ ] `item-list.store.ts` per D9: selection snapshot survives filter changes; `merge` clears selection, reloads list, shows toast (Romanian, e.g. "Itemele au fost unite."); failure keeps selection and surfaces the problem.
-- [ ] Spec: toggle, page select-all, survives filter change, reset after merge success, kept on failure.
+- [x] `items.http.ts`: `mergePreview`, `merge` (+ request/response models in the items models file).
+- [x] `item-list.store.ts` per D9: selection snapshot survives filter changes; `merge` clears selection, reloads list, shows toast (Romanian, e.g. "Itemele au fost unite."); failure keeps selection and surfaces the problem.
+- [x] Spec: toggle, page select-all, survives filter change, reset after merge success, kept on failure.
 - Files: `src/Client/src/app/shared/items/services/items.http.ts`, the items model file, `src/Client/src/app/features/items/services/{item-list.store.ts,item-list.store.spec.ts}`
 - Verify: `cd src/Client && npm run build && npm test -- --watch=false`
 
 ### T12: Row selection in table and mobile list [UI] — implementer: sonnet
 Use skills frontend-ui-engineering and angular-developer; check nz-* APIs in .github/instructions/llms-full.txt; take screenshots (desktop+mobile) to screenshot-checks/item-merge/.
-- [ ] Large table: `nzShowCheckbox` column, header select-all with indeterminate state (pattern `shared/order-lists/ui/modals/wizard/steps/checked-rows.ts`), bound to the store.
-- [ ] Small list: `nz-checkbox` per row with accessible label (item name).
-- [ ] Specs for checkbox -> store toggle.
+- [x] Large table: `nzShowCheckbox` column, header select-all with indeterminate state (pattern `shared/order-lists/ui/modals/wizard/steps/checked-rows.ts`), bound to the store.
+- [x] Small list: `nz-checkbox` per row with accessible label (item name).
+- [x] Specs for checkbox -> store toggle.
 - Files: `src/Client/src/app/features/items/list/tables/regular/large/{table.ts,table.html}`, `.../small/{item-list-small.ts,item-list-small.html}`, one colocated spec
 - Verify: `cd src/Client && npm run build && npm test -- --watch=false`; screenshots reviewed.
 
 ### T13: Merge button in filter bar (admin only) [UI] — implementer: sonnet
 Use skills frontend-ui-engineering and angular-developer; check nz-* APIs in .github/instructions/llms-full.txt; take screenshots (desktop+mobile) to screenshot-checks/item-merge/.
-- [ ] `nz-button` "Unește (N)" shown when `selectedCount() >= 2` (no role check, see D8); emits `merge` output; `item-list-tab.ts` wires it (wizard open lands in T14).
-- [ ] Spec: hidden at 0/1 selected, visible at 2.
+- [x] `nz-button` "Unește (N)" shown when `selectedCount() >= 2` (no role check, see D8); emits `merge` output; `item-list-tab.ts` wires it (wizard open lands in T14).
+- [x] Spec: hidden at 0/1 selected, visible at 2.
 - Files: `src/Client/src/app/features/items/list/filter/regular/{filter-form.ts,filter-form.html,filter-form.spec.ts}`, `src/Client/src/app/features/items/page/tabs/item-list-tab.ts`
 - Verify: `cd src/Client && npm run build && npm test -- --watch=false`; screenshots reviewed.
 
 ### T14: Merge wizard modal, 3 steps [UI] — implementer: sonnet
 Use skills frontend-ui-engineering and angular-developer; check nz-* APIs in .github/instructions/llms-full.txt; take screenshots (desktop+mobile) to screenshot-checks/item-merge/.
-- [ ] `nz-steps` "Alege item principal" (`nz-radio-group`: name, SKU, unit, category) -> "Date afectate" (preview fetched on entry, Romanian label per `ItemMergeKind`, conflict note when `Combined > 0`, `nz-spin` loading, error alert) -> "Confirmare" (warning `nz-alert`, kept vs disabled names, confirm button with loading).
-- [ ] "Înainte" disabled until a primary is chosen; on success modal closes (store handles reload/toast).
-- [ ] Opened from `item-list-tab.ts` via `NzModalService`, following the order-list wizard container pattern.
-- [ ] Spec: exactly 3 steps, cannot advance without primary, preview requested with chosen primary, confirm calls store merge.
+- [x] `nz-steps` "Alege item principal" (`nz-radio-group`: name, SKU, unit, category) -> "Date afectate" (preview fetched on entry, Romanian label per `ItemMergeKind`, conflict note when `Combined > 0`, `nz-spin` loading, error alert) -> "Confirmare" (warning `nz-alert`, kept vs disabled names, confirm button with loading).
+- [x] "Înainte" disabled until a primary is chosen; on success modal closes (store handles reload/toast).
+- [x] Opened from `item-list-tab.ts` via `NzModalService`, following the order-list wizard container pattern.
+- [x] Spec: exactly 3 steps, cannot advance without primary, preview requested with chosen primary, confirm calls store merge.
 - Files: `src/Client/src/app/features/items/list/merge/{item-merge-wizard.ts,item-merge-wizard.spec.ts}`, `src/Client/src/app/features/items/page/tabs/item-list-tab.ts`, `src/Client/src/app/features/items/index.ts` (only if export needed)
 - Verify: `cd src/Client && npm run build && npm test -- --watch=false`; screenshots reviewed.
 
 ### T15: E2E spec + screenshots [UI] — implementer: sonnet
 Use skills frontend-ui-engineering and angular-developer; check nz-* APIs in .github/instructions/llms-full.txt; take screenshots (desktop+mobile) to screenshot-checks/item-merge/.
-- [ ] `src/Client/e2e/specs/item-merge.spec.ts` with `page.route` mocks (items list, merge-preview, merge): select 1 -> no button; select 2 -> button; wizard 3 steps; confirm -> list reloaded, toast; merge returns 403 -> error toast, modal stays open. Screenshot each step, chromium + mobile projects.
+- [x] `src/Client/e2e/specs/item-merge.spec.ts` with `page.route` mocks (items list, merge-preview, merge): select 1 -> no button; select 2 -> button; wizard 3 steps; confirm -> list reloaded, toast; merge returns 403 -> error toast, modal stays open. Screenshot each step, chromium + mobile projects.
 - Files: `src/Client/e2e/specs/item-merge.spec.ts`
 - Verify: `./run-e2e.sh -- --project=chromium e2e/specs/item-merge.spec.ts` and the mobile project; screenshots in `screenshot-checks/item-merge/` reviewed.
 
 ### Checkpoint C (after T11-T15)
-- [ ] `cd src/Client && npm run build && npm test -- --watch=false` green; e2e green on chromium + mobile.
-- [ ] Screenshots reviewed (desktop + mobile, every wizard step).
+- [x] `cd src/Client && npm run build && npm test -- --watch=false` green; e2e green on chromium + mobile.
+- [x] Screenshots reviewed (desktop + mobile, every wizard step).
 
 ---
 
