@@ -21,7 +21,7 @@ import { realtimeGroups, SignalRGroupManagerStore } from '@ske/signalr';
 import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
 import { ItemImportListTab } from './tabs/item-import-list-tab';
 import { ItemListTab } from './tabs/item-list-tab';
-import { ItemMergeWizard, ItemMergeWizardData } from '../list/merge/item-merge-wizard';
+import { ItemMergeWizard } from '../list/merge/item-merge-wizard';
 
 @Component({
   imports: [
@@ -87,9 +87,8 @@ export class ItemsPage implements OnInit, OnDestroy {
   }
 
   public onMerge() {
-    this._modalService.create<ItemMergeWizard, ItemMergeWizardData>({
+    this._modalService.create({
       nzContent: ItemMergeWizard,
-      nzData: { items: this.listStore.selectedItems() },
       nzCentered: true,
       nzMaskClosable: false,
       nzWrapClassName: 'modal-100 modal-lg-75'

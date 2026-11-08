@@ -5,7 +5,7 @@ import { ItemDto, MergeItemsRequest } from '@ske/models';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { filter, groupBy, mergeMap, pipe, switchMap, tap } from 'rxjs';
+import { exhaustMap, filter, groupBy, mergeMap, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
 import { inject } from '@angular/core';
 import { ItemsHttp } from '@ske/shared/items';
@@ -40,6 +40,12 @@ export const ItemListState = signalStore(
       store.load(store.filter());
     };
 
+    // Row updates also refresh the selection snapshot so the merge wizard sees current isActive/name/sku.
+    const replaceRow = (updatedItem: ItemDto) => ({
+      items: store.items().map((i) => i.id === updatedItem.id ? updatedItem : i),
+      selected: updatedItem.id in store.selected() ? { ...store.selected(), [updatedItem.id]: updatedItem } : store.selected()
+    });
+
     const toggleActive = rxMethod<ItemDto>(
       pipe(
         tap((item) => {
@@ -52,10 +58,7 @@ export const ItemListState = signalStore(
           return request$.pipe(
             mapResponse({
               next: (updatedItem) => {
-                patchState(store, {
-                  items: store.items().map((i) => i.id === updatedItem.id ? updatedItem : i),
-                  togglingItemId: null
-                });
+                patchState(store, { ...replaceRow(updatedItem), togglingItemId: null });
               },
               error: (error) => {
                 store.handleItemsError(error);
@@ -86,9 +89,7 @@ export const ItemListState = signalStore(
           }).pipe(
             mapResponse({
               next: (updatedItem) => {
-                patchState(store, {
-                  items: store.items().map((i) => i.id === updatedItem.id ? updatedItem : i)
-                });
+                patchState(store, replaceRow(updatedItem));
               },
               error: (error) => {
                 store.handleItemsError(error);
@@ -113,9 +114,7 @@ export const ItemListState = signalStore(
               itemHttp.getById(id).pipe(
                 mapResponse({
                   next: (updatedItem) => {
-                    patchState(store, {
-                      items: store.items().map((i) => i.id === updatedItem.id ? updatedItem : i)
-                    });
+                    patchState(store, replaceRow(updatedItem));
                   },
                   error: () => reload()
                 })
@@ -146,16 +145,14 @@ export const ItemListState = signalStore(
       patchState(store, { selected });
     };
 
-    const clearSelection = () => patchState(store, { selected: {} });
-
-    // switchMap: a second merge while one runs would double-submit the same ids.
+    // exhaustMap: a second merge while one runs is ignored, so the same ids are never double-submitted.
     const merge = rxMethod<{ request: MergeItemsRequest; onSuccess?: () => void }>(
       pipe(
         tap(() => {
           store.clearMergeErrors();
           patchState(store, { merging: true });
         }),
-        switchMap(({ request, onSuccess }) =>
+        exhaustMap(({ request, onSuccess }) =>
           itemHttp.merge(request).pipe(
             mapResponse({
               next: () => {
@@ -175,7 +172,7 @@ export const ItemListState = signalStore(
       )
     );
 
-    return { reload, toggleActive, setItemImage, patchItem, toggleSelected, setLoadedSelected, clearSelection, merge };
+    return { reload, toggleActive, setItemImage, patchItem, toggleSelected, setLoadedSelected, merge };
   }),
   withEventHandlers((store, events = inject(Events)) => ({
     itemListChanges: events.on(
