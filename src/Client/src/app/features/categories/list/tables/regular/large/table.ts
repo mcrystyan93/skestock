@@ -30,10 +30,7 @@ import { TimeAgoPipe } from '@ske/shared/pipes';
 })
 export class Table extends BaseTableWithFilter<CategoryDto, GetAllCategoriesRequest> {
   public readonly loading = input.required<boolean>();
-  public readonly deletingCategoryId = input<string | null>(null);
-
   public readonly onEdit = output<CategoryDto>();
-  public readonly onDelete = output<CategoryDto>();
   public readonly columns = CATEGORY_TABLE_COLUMNS;
   public readonly columnLayout = {
     name: { width: '300px' },
