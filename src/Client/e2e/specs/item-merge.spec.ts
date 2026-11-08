@@ -90,6 +90,7 @@ test('merge button appears from two selected items and the wizard merges them', 
   await shot(page, testInfo, '2-choose-primary');
 
   await modal.getByText('Creion HB 12 buc').click();
+  await shot(page, testInfo, '2b-primary-selected');
   await modal.getByRole('button', { name: 'Înainte' }).click();
   await expect(modal.getByText('Linii din liste de aprovizionare')).toBeVisible();
   await expect(modal.getByText(/2 se vor combina/)).toBeVisible();
