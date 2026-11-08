@@ -503,3 +503,6 @@ graphify-out/
 
 # Angular CLI cache
 .angular/
+
+# Playwright check screenshots, one folder per spec
+/screenshot-checks/

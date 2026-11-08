@@ -1,6 +1,9 @@
 import { existsSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import { skipUnlessLoggedIn, STORAGE_STATE_PATH } from '../auth';
+import { saveScreenshotsAfterEach } from '../screenshots';
+
+saveScreenshotsAfterEach();
 
 // The file is absent without credentials (or on a stale login); the test then skips instead of failing to open a context.
 // Real backend, no page.route: reuses the session saved by global setup and reads the e2e demo seed.

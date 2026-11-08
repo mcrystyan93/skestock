@@ -1,5 +1,8 @@
 import { expect, test } from '@playwright/test';
 import { skipUnlessLoggedIn } from '../auth';
+import { saveScreenshotsAfterEach } from '../screenshots';
+
+saveScreenshotsAfterEach();
 
 test.use({ ignoreHTTPSErrors: true });
 
