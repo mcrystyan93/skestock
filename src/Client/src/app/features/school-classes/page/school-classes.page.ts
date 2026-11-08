@@ -1,8 +1,8 @@
 import { Component, DestroyRef, inject } from '@angular/core';
 import { SchoolClassListState } from '../services/school-class-list.store';
-import { FilterContainer } from './filter/filter-container';
-import { Table } from './table/large/table';
-import { SchoolClassListSmall } from './table/small/school-class-list-small';
+import { FilterForm } from '../list/filter/filter-form';
+import { Table } from '../list/table/large/table';
+import { SchoolClassListSmall } from '../list/table/small/school-class-list-small';
 import { GetAllSchoolClassesRequest, SchoolClassDto } from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { Header } from './header/header';
@@ -13,7 +13,7 @@ import { ErrorAlert } from '@ske/shared/errors';
 import { LayoutBreakpoint } from '@ske/shared/directives';
 
 @Component({
-  imports: [FilterContainer, Table, SchoolClassListSmall, Header, ErrorAlert, LayoutBreakpoint],
+  imports: [FilterForm, Table, SchoolClassListSmall, Header, ErrorAlert, LayoutBreakpoint],
   selector: 'ske-school-classes-page',
   templateUrl: './school-classes.page.html',
   providers: [SchoolClassListState, NzModalService],
