@@ -1,7 +1,9 @@
 import { expect, test, type Request } from '@playwright/test';
 import { skipUnlessLoggedIn } from '../auth';
+import { saveScreenshotsAfterEach } from '../screenshots';
 
 test.use({ trace: 'off' });
+saveScreenshotsAfterEach();
 
 test.describe('login form validation', () => {
   test.beforeEach(async ({ page }) => {

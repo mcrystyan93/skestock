@@ -1,1 +1,1 @@
-export * from './list/categories.routes';
+export * from './categories.routes';

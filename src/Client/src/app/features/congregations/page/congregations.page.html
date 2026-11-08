@@ -1,0 +1,41 @@
+<ske-congregation-header (onAdd)="onAdd()" />
+
+<div class="relative grow">
+  <div class="flex grow flex-col gap-4 absolute inset-0">
+    <ske-congregation-filter-form class="px-4"
+                                  [loading]="store.congregationsLoading()"
+                                  [filter]="store.filter()"
+                                  (onFilterChange)="onFilterChange($event)" />
+
+    @if (store.congregationsProblemDetail() || store.congregationsValidationErrors()) {
+      <ske-error-display [problemDetail]="store.congregationsProblemDetail()"
+                         [validationErrors]="store.congregationsValidationErrors()" />
+    }
+
+    <div class="grow relative">
+      <ng-container *skeLayoutBreakpoint="'lg';else:smallScreenListTemplate">
+        <ske-congregation-table [items]="store.congregations()"
+                                [filter]="store.filter()"
+                                [loading]="store.congregationsLoading()"
+                                [hasNextPage]="store.hasNextPage()"
+                                [isLoadingMore]="store.isLoadingMore()"
+                                [deletingCongregationId]="store.deletingCongregationId()"
+                                (onFilterChange)="onFilterChange($event)"
+                                (onLoadMore)="onLoadMore()"
+                                (onEdit)="onEdit($event)"
+                                (onDelete)="onDelete($event)" />
+      </ng-container>
+      <ng-template #smallScreenListTemplate>
+        <ske-congregation-list-small [items]="store.congregations()"
+                                     [filter]="store.filter()"
+                                     [loading]="store.congregationsLoading()"
+                                     [hasNextPage]="store.hasNextPage()"
+                                     [isLoadingMore]="store.isLoadingMore()"
+                                     [deletingCongregationId]="store.deletingCongregationId()"
+                                     (onLoadMore)="onLoadMore()"
+                                     (onEdit)="onEdit($event)"
+                                     (onDelete)="onDelete($event)" />
+      </ng-template>
+    </div>
+  </div>
+</div>

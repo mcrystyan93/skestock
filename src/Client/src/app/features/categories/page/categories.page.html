@@ -1,0 +1,33 @@
+<ske-category-header [(selectedTabIndex)]="selectedTabIndex"
+                     (onAdd)="onAdd()"
+                     (onImport)="onImport()" />
+
+<nz-tabs [nzSelectedIndex]="selectedTabIndex()"
+         [nzTabBarStyle]="{ display: 'none' }"
+         class="inner-scroll grow">
+  <nz-tab>
+    <ske-category-list-tab [categories]="store.categories()"
+                           [filter]="store.filter()"
+                           [problemDetail]="store.categoriesProblemDetail()"
+                           [validationErrors]="store.categoriesValidationErrors()"
+                           [loading]="store.categoriesLoading()"
+                           [hasNextPage]="store.hasNextPage()"
+                           [isLoadingMore]="store.isLoadingMore()"
+                           (onFilterChange)="onFilterChange($event)"
+                           (onLoadMore)="onLoadMore()"
+                           (onEdit)="onEdit($event)" />
+  </nz-tab>
+  <nz-tab>
+    <ske-category-import-list-tab [items]="importStore.categoryImportListItems()"
+                                  [filter]="importStore.categoryImportListFilter()"
+                                  [loading]="importStore.categoryImportListLoading()"
+                                  [hasNextPage]="importStore.categoryImportListHasNextPage()"
+                                  [isLoadingMore]="importStore.categoryImportListLoadingMore()"
+                                  [problemDetail]="importStore.categoryImportListProblemDetail()"
+                                  [validationErrors]="importStore.categoryImportListValidationErrors()"
+                                  (onFilterChange)="onImportFilterChange($event)"
+                                  (onLoadMore)="onImportLoadMore()"
+                                  (downloadFile)="onDownloadImportFile($event)"
+                                  (review)="onReview($event)" />
+  </nz-tab>
+</nz-tabs>

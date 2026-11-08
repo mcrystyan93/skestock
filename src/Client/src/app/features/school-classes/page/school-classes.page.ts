@@ -1,0 +1,66 @@
+import { Component, DestroyRef, inject } from '@angular/core';
+import { SchoolClassListState } from '../services/school-class-list.store';
+import { FilterForm } from '../list/filter/filter-form';
+import { Table } from '../list/table/large/table';
+import { SchoolClassListSmall } from '../list/table/small/school-class-list-small';
+import { GetAllSchoolClassesRequest, SchoolClassDto } from '@ske/models';
+import { NzModalService } from 'ng-zorro-antd/modal';
+import { Header } from './header/header';
+import { SchoolClassDetailModal } from '@ske/shared/school-classes';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
+import { ErrorAlert } from '@ske/shared/errors';
+import { LayoutBreakpoint } from '@ske/shared/directives';
+
+@Component({
+  imports: [FilterForm, Table, SchoolClassListSmall, Header, ErrorAlert, LayoutBreakpoint],
+  selector: 'ske-school-classes-page',
+  templateUrl: './school-classes.page.html',
+  providers: [SchoolClassListState, NzModalService],
+  host: {
+    class: 'flex flex-col grow gap-4',
+  },
+})
+export class SchoolClassesPage {
+  public readonly store = inject(SchoolClassListState);
+
+  private readonly _modalService = inject(NzModalService);
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _router = inject(Router);
+
+  public onFilterChange(filter: GetAllSchoolClassesRequest) {
+    this.store.load(filter);
+  }
+
+  public onLoadMore() {
+    this.store.loadMore();
+  }
+
+  public onEdit(schoolClass: SchoolClassDto) {
+    this.openSchoolClassModal(schoolClass);
+  }
+
+  public onView(schoolClass: SchoolClassDto) {
+    this._router.navigate(['/school-classes', schoolClass.id]);
+  }
+
+  public onAdd() {
+    this.openSchoolClassModal();
+  }
+
+  private openSchoolClassModal(schoolClass: SchoolClassDto | null = null) {
+    const modalRef = this._modalService.create({
+      nzContent: SchoolClassDetailModal,
+      nzData: {
+        schoolClass,
+      },
+      nzCentered: true,
+      nzMaskClosable: false,
+      nzWrapClassName: 'modal-100 modal-lg-75'
+    });
+
+    modalRef.afterClose.pipe(takeUntilDestroyed(this._destroyRef)).subscribe(() => {
+      this.store.reload();
+    });
+  }
+}

@@ -1,0 +1,34 @@
+<ske-school-class-header (onAdd)="onAdd()" />
+
+<ske-school-class-filter-form class="px-4"
+                                [loading]="store.schoolClassesLoading()"
+                                [filter]="store.filter()"
+                                (onFilterChange)="onFilterChange($event)" />
+
+<ske-error-display [problemDetail]="store.schoolClassesProblemDetail()"
+                   [validationErrors]="store.schoolClassesValidationErrors()"
+                   class="px-4" />
+<div class="grow relative">
+  <ng-container *skeLayoutBreakpoint="'lg'; else smallScreenListTemplate">
+    <ske-school-class-table [items]="store.schoolClasses()"
+                            [filter]="store.filter()"
+                            [loading]="store.schoolClassesLoading()"
+                            [hasNextPage]="store.hasNextPage()"
+                            [isLoadingMore]="store.isLoadingMore()"
+                            (onFilterChange)="onFilterChange($event)"
+                            (onLoadMore)="onLoadMore()"
+                            (onEdit)="onEdit($event)"
+                            (onView)="onView($event)" />
+  </ng-container>
+  <ng-template #smallScreenListTemplate>
+    <ske-school-class-list-small [items]="store.schoolClasses()"
+                                 [filter]="store.filter()"
+                                 [loading]="store.schoolClassesLoading()"
+                                 [hasNextPage]="store.hasNextPage()"
+                                 [isLoadingMore]="store.isLoadingMore()"
+                                 (onFilterChange)="onFilterChange($event)"
+                                 (onLoadMore)="onLoadMore()"
+                                 (onEdit)="onEdit($event)"
+                                 (onView)="onView($event)" />
+  </ng-template>
+</div>

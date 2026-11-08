@@ -1,4 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
+import { saveScreenshotsAfterEach } from '../screenshots';
+
+saveScreenshotsAfterEach();
 
 const classId = 'class-1';
 const orderListId = 'order-list-1';

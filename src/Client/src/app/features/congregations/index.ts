@@ -1,1 +1,1 @@
-export * from './list/congregations.routes';
+export * from './congregations.routes';

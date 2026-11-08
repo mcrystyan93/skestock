@@ -1,0 +1,51 @@
+<ske-item-header [(selectedTabIndex)]="selectedTabIndex"
+                 (onAdd)="onAdd()"
+                 (onAddSupplyList)="openSupplyListModal()"
+                 (onImport)="onImport()" />
+
+<nz-tabs [nzSelectedIndex]="selectedTabIndex()"
+         [nzTabBarStyle]="{ display: 'none' }"
+         class="inner-scroll grow">
+  <nz-tab>
+    <ske-item-list-tab [items]="listStore.items()"
+                       [filter]="listStore.filter()"
+                       [problemDetail]="listStore.itemsProblemDetail()"
+                       [validationErrors]="listStore.itemsValidationErrors()"
+                       [loading]="listStore.itemsLoading()"
+                       [hasNextPage]="listStore.hasNextPage()"
+                       [isLoadingMore]="listStore.isLoadingMore()"
+                       [togglingItemId]="listStore.togglingItemId()"
+                       (onFilterChange)="onFilterChange($event)"
+                       (onLoadMore)="onLoadMore()"
+                       (onEdit)="onEdit($event)"
+                       (onToggleActive)="onToggleActive($event)"
+                       (onImageUploaded)="onImageUploaded($event)" />
+  </nz-tab>
+  <nz-tab>
+    <ske-supply-list-tab [items]="supplyListStore.supplyLists()"
+                         [filter]="supplyListStore.filter()"
+                         [problemDetail]="supplyListStore.supplyListsProblemDetail()"
+                         [validationErrors]="supplyListStore.supplyListsValidationErrors()"
+                         [loading]="supplyListStore.supplyListsLoading()"
+                         [hasNextPage]="supplyListStore.hasNextPage()"
+                         [isLoadingMore]="supplyListStore.isLoadingMore()"
+                         [togglingId]="supplyListStore.togglingId()"
+                         (onFilterChange)="onSupplyListFilterChange($event)"
+                         (onLoadMore)="onSupplyListLoadMore()"
+                         (open)="openSupplyListModal($event.id)"
+                         (toggleActive)="onToggleSupplyListActive($event)" />
+  </nz-tab>
+  <nz-tab>
+    <ske-item-import-list-tab [items]="importStore.itemImportListItems()"
+                              [filter]="importStore.itemImportListFilter()"
+                              [loading]="importStore.itemImportListLoading()"
+                              [hasNextPage]="importStore.itemImportListHasNextPage()"
+                              [isLoadingMore]="importStore.itemImportListLoadingMore()"
+                              [problemDetail]="importStore.itemImportListProblemDetail()"
+                              [validationErrors]="importStore.itemImportListValidationErrors()"
+                              (onFilterChange)="onImportFilterChange($event)"
+                              (onLoadMore)="onImportLoadMore()"
+                              (downloadFile)="onDownloadImportFile($event)"
+                              (review)="onReview($event)" />
+  </nz-tab>
+</nz-tabs>

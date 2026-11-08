@@ -1,7 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
+import { saveScreenshotsAfterEach, screenshotRoot } from '../screenshots';
+
+saveScreenshotsAfterEach();
 
 const classId = 'class-1';
-const shots = '/tmp/claude-1000/-home-militarucristian-RiderProjects-skestock/a43769f3-b6cd-440c-91b2-1968b05b8c00/scratchpad';
+const shots = `${screenshotRoot}/order-wizard-segments`;
 // 1x1 PNG, enough for a thumbnail <img> to load.
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
 const longName = 'Articol cu un nume extrem de lung fără spații SuperCalifragilisticExpialidociousAbcdefghijklmnopqrstuvwxyz';

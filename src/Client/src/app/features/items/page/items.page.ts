@@ -1,0 +1,222 @@
+import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { ItemListState } from '../services/item-list.store';
+import {
+  GetAllItemImportBatchesRequest,
+  GetAllItemsRequest,
+  GetAllSupplyListsRequest,
+  ItemDto,
+  ItemImportBatchFileDto,
+  ItemImportBatchListItemDto,
+  SupplyListListItemDto
+} from '@ske/models';
+import { FileStorageState } from '@ske/shared/storage';
+import { SupplyListDetailModal, SupplyListDetailModalData } from '@ske/shared/supply-lists';
+import { SupplyListListState } from '../services/supply-list-list.store';
+import { SupplyListTab } from './tabs/supply-list-tab';
+import { NzModalService } from 'ng-zorro-antd/modal';
+import { Header } from './header/header';
+import { ItemDetailModal, ItemImportModal, ItemImportReviewModal, ItemImportState } from '@ske/shared/items';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { realtimeGroups, SignalRGroupManagerStore } from '@ske/signalr';
+import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
+import { ItemImportListTab } from './tabs/item-import-list-tab';
+import { ItemListTab } from './tabs/item-list-tab';
+
+@Component({
+  imports: [
+    Header,
+    NzTabsComponent,
+    NzTabComponent,
+    ItemListTab,
+    ItemImportListTab,
+    SupplyListTab
+  ],
+  selector: 'ske-items-page',
+  templateUrl: './items.page.html',
+  providers: [ItemListState, ItemImportState, SupplyListListState, NzModalService, FileStorageState],
+  host: {
+    class: 'flex flex-col grow gap-4'
+  }
+})
+export class ItemsPage implements OnInit, OnDestroy {
+  public readonly listStore = inject(ItemListState);
+  public readonly importStore = inject(ItemImportState);
+  public readonly supplyListStore = inject(SupplyListListState);
+  public readonly selectedTabIndex = signal(0);
+
+  private readonly _modalService = inject(NzModalService);
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _signalRGroupManager = inject(SignalRGroupManagerStore);
+  private readonly _fileStorage = inject(FileStorageState);
+
+  public onFilterChange(filter: GetAllItemsRequest) {
+    this.listStore.load(filter);
+  }
+
+  public onLoadMore() {
+    this.listStore.loadMore();
+  }
+
+  public onSupplyListFilterChange(filter: GetAllSupplyListsRequest) {
+    this.supplyListStore.load(filter);
+  }
+
+  public onSupplyListLoadMore() {
+    this.supplyListStore.loadMore();
+  }
+
+  public onImportFilterChange(filter: GetAllItemImportBatchesRequest) {
+    this.importStore.load(filter);
+  }
+
+  public onImportLoadMore() {
+    this.importStore.loadMore();
+  }
+
+  public onDownloadImportFile(file: ItemImportBatchFileDto) {
+    this._fileStorage.downloadFile(file.fileMetadataId);
+  }
+
+  public onEdit(item: ItemDto) {
+    this.openItemModal(item);
+  }
+
+  public onImageUploaded(event: { item: ItemDto; fileId: string }) {
+    this.listStore.setItemImage(event);
+  }
+
+  public onAdd() {
+    this.openItemModal();
+  }
+
+  public onImport() {
+    this._modalService.create({
+      nzContent: ItemImportModal,
+      nzCentered: true,
+      nzMaskClosable: false,
+      nzWrapClassName: 'modal-100 modal-lg-75'
+    });
+
+    // modalRef.afterClose.pipe(takeUntilDestroyed(this._destroyRef)).subscribe((result: ItemImportBatchDto | unknown) => {
+    //   this.importStore.reload();
+    //
+    //   if (this.isBatchImportResult(result))
+    //     this.openItemImportReview(result.id);
+    // });
+  }
+
+  public onReview(itemImport: ItemImportBatchListItemDto) {
+    this.openItemImportReview(itemImport.id);
+  }
+
+  private openItemImportReview(importId: string) {
+    const modalRef = this._modalService.create({
+      nzContent: ItemImportReviewModal,
+      nzData: importId,
+      nzWrapClassName: 'modal-100 modal-lg-75',
+      nzCentered: true,
+      nzMaskClosable: false
+    });
+
+    modalRef.afterClose.pipe(takeUntilDestroyed(this._destroyRef)).subscribe(() => {
+      this.listStore.reload();
+      this.importStore.reload();
+    });
+  }
+
+  public ngOnInit() {
+    this._signalRGroupManager.join(realtimeGroups.itemsList);
+    this._signalRGroupManager.join(realtimeGroups.itemImportBatchesList);
+    this._signalRGroupManager.join(realtimeGroups.supplyListsList);
+  }
+
+  public ngOnDestroy() {
+    this._signalRGroupManager.leave(realtimeGroups.itemsList);
+    this._signalRGroupManager.leave(realtimeGroups.itemImportBatchesList);
+    this._signalRGroupManager.leave(realtimeGroups.supplyListsList);
+  }
+
+  private openItemModal(item: ItemDto | null = null) {
+    const modalRef = this._modalService.create({
+      nzContent: ItemDetailModal,
+      nzData: {
+        item
+      },
+      nzCentered: true,
+      nzMaskClosable: false,
+      nzWrapClassName: 'modal-100 modal-lg-75'
+    });
+
+    modalRef.afterClose.pipe(
+      takeUntilDestroyed(this._destroyRef)
+    ).subscribe((saved?: Partial<ItemDto> | null) => {
+      // Cancelling changes nothing, and an edit only touches its own row: a reload would empty the
+      // list and lose the scroll position. A new item's place depends on sort/filter, so it reloads.
+      if (!saved)
+        return;
+
+      if (item)
+        this.listStore.patchItem(item.id);
+      else
+        this.listStore.reload();
+    });
+  }
+
+  public onToggleActive(item: ItemDto) {
+    if (item.isActive) {
+      this._modalService.confirm({
+        nzTitle: 'Confirma dezactivarea articolului?',
+        nzContent: 'Articolul va fi dezactivat. Sunteti sigur ca doriti sa continuati?',
+        nzOkText: 'Dezactiveaza',
+        nzCancelText: 'Nu',
+        nzOkDanger: true,
+        nzCentered: true,
+        nzIconType: 'icons:circle-exclamation',
+        nzOnOk: () => this.listStore.toggleActive(item)
+      });
+      return;
+    }
+
+    this.listStore.toggleActive(item);
+  }
+
+  public openSupplyListModal(id: string | null = null) {
+    const modalRef = this._modalService.create<SupplyListDetailModal, SupplyListDetailModalData, boolean>({
+      nzContent: SupplyListDetailModal,
+      nzData: { id },
+      nzCentered: true,
+      nzMaskClosable: false,
+      nzClosable: true,
+      nzOnCancel: (instance) => {
+        instance.close();
+        return false;
+      },
+      nzWrapClassName: 'modal-100 modal-lg-75'
+    });
+
+    modalRef.afterClose.pipe(
+      takeUntilDestroyed(this._destroyRef)
+    ).subscribe((saved) => {
+      if (saved)
+        this.supplyListStore.reload();
+    });
+  }
+
+  public onToggleSupplyListActive(supplyList: SupplyListListItemDto) {
+    if (supplyList.isActive) {
+      this._modalService.confirm({
+        nzTitle: 'Confirmați dezactivarea listei?',
+        nzContent: `Lista „${supplyList.name}” va fi dezactivată și nu va mai putea fi modificată până la reactivare.`,
+        nzOkText: 'Dezactivează',
+        nzCancelText: 'Nu',
+        nzOkDanger: true,
+        nzCentered: true,
+        nzIconType: 'icons:circle-exclamation',
+        nzOnOk: () => this.supplyListStore.toggleActive(supplyList)
+      });
+      return;
+    }
+
+    this.supplyListStore.toggleActive(supplyList);
+  }
+}
