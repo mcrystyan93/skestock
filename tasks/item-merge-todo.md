@@ -40,7 +40,7 @@ Tests first: no collision -> re-pointed; primary-vs-secondary collision -> prima
 
 ### T4: Combining mergers — implementer: sonnet
 Tests first: same three collision cases as T3, asserting summed values; ClassBalance `ClosingQty` null/non-null combinations; per-(class, location) balance totals unchanged.
-- [ ] `SupplyListLine` (sum Quantity), `DailyItemConsumption` (sum Quantity, TotalValue; max ComputedAt), `ClassBalance` (D3 deviation: sum OpeningQty, ClosingQty).
+- [x] `SupplyListLine` (sum Quantity), `DailyItemConsumption` (sum Quantity, TotalValue; max ComputedAt), `ClassBalance` (D3 deviation: sum OpeningQty, ClosingQty).
 - Files: `.../Mergers/{SupplyListLine,DailyItemConsumption,ClassBalance}ItemMerger.cs`, `tests/.../Mergers/CombiningItemMergerTests.cs`
 - Verify: same filter as T2.
 
