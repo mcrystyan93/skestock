@@ -2,9 +2,9 @@ import { Component, input, output } from '@angular/core';
 import { GetAllSupplyListsRequest, ProblemDetails, SupplyListListItemDto, ValidationProblemDetails } from '@ske/models';
 import { ErrorAlert } from '@ske/shared/errors';
 import { LayoutBreakpoint } from '@ske/shared/directives';
-import { SupplyListFilterForm } from '../../list/filter/supply-lists/supply-list-filter-form';
-import { SupplyListTable } from '../../list/tables/supply-lists/supply-list-table';
-import { SupplyListSmall } from '../../list/tables/supply-lists/small/supply-list-small';
+import { SupplyListFilterForm } from '../../supply-lists/filter/supply-list-filter-form';
+import { SupplyListTable } from '../../supply-lists/tables/supply-list-table';
+import { SupplyListSmall } from '../../supply-lists/tables/small/supply-list-small';
 
 @Component({
   imports: [ErrorAlert, SupplyListFilterForm, SupplyListTable, SupplyListSmall, LayoutBreakpoint],
