@@ -46,7 +46,7 @@ Tests first: same three collision cases as T3, asserting summed values; ClassBal
 
 ### T5: Purchase statistic merger — implementer: sonnet
 Tests first: collision on (Scope, ClassId) incl. null ClassId; sums; averages recomputed with `PurchaseStatisticsCalculator` formulas incl. zero-quantity guard; LastPurchasedAt = max; AverageIntervalDays = survivor's.
-- [ ] `ItemPurchaseStatisticItemMerger` per D3.
+- [x] `ItemPurchaseStatisticItemMerger` per D3.
 - Files: `.../Mergers/ItemPurchaseStatisticItemMerger.cs`, `tests/.../Mergers/ItemPurchaseStatisticItemMergerTests.cs`
 - Verify: same filter as T2.
 
