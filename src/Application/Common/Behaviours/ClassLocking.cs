@@ -47,6 +47,13 @@ internal static class ClassLocking
                 $"SELECT *, [PeriodStart], [PeriodEnd] FROM [SchoolClasses] WITH (XLOCK, HOLDLOCK) WHERE [Id] = {classId} OR [Id] = {otherClassId}")
             : dbContext.SchoolClasses.Where(c => c.Id == classId || c.Id == otherClassId);
 
+    // Waits for every in-flight class-scoped command and blocks new ones until commit (e.g. item merge).
+    public static IQueryable<SchoolClass> ExclusiveLockAllClasses(this IApplicationDbContext dbContext) =>
+        dbContext.Database.IsRelational()
+            ? dbContext.SchoolClasses.FromSqlRaw(
+                "SELECT *, [PeriodStart], [PeriodEnd] FROM [SchoolClasses] WITH (XLOCK, HOLDLOCK)")
+            : dbContext.SchoolClasses;
+
     // ClassOpenBehaviour and ClassLockBehaviour both resolve the same request; remember the first answer.
     // A request's order list / import never changes class, and an unknown target is not remembered.
     private static readonly ConditionalWeakTable<IRequiresOpenClass, object> ResolvedClassIds = new();

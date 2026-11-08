@@ -52,17 +52,17 @@ Tests first: collision on (Scope, ClassId) incl. null ClassId; sums; averages re
 
 ### T6: Handler orchestration, lock, events, DI — implementer: sonnet
 Tests first (`MergeItemsCommandHandlerTests`, in-memory, real mergers from DI list): happy path (every table re-pointed, secondaries inactive, `ItemDisabledEvent` per secondary); unknown id -> `ItemNotFound`; inactive primary -> `MergePrimaryInactive` and nothing changed; already-inactive secondary accepted; idempotent second run succeeds with no changes; `AuthorizationBehaviourTests`-style check that a non-admin is rejected (or assert the attribute is present if that is the existing pattern).
-- [ ] `ClassLocking.ExclusiveLockAllClasses` per D4.
-- [ ] Handler: `InTransactionAsync` -> lock -> load items -> checks -> each merger `MergeAsync` -> disable secondaries + raise events -> one `SaveChangesAsync`.
-- [ ] Register all mergers in `src/Application/DependencyInjection.cs` (do not touch pipeline order).
-- [ ] Verify stock query cache tags (D5) and extend `MergeItemsCommand.Tags` if needed.
+- [x] `ClassLocking.ExclusiveLockAllClasses` per D4.
+- [x] Handler: `InTransactionAsync` -> lock -> load items -> checks -> each merger `MergeAsync` -> disable secondaries + raise events -> one `SaveChangesAsync`.
+- [x] Register all mergers in `src/Application/DependencyInjection.cs` (do not touch pipeline order).
+- [x] Verify stock query cache tags (D5) and extend `MergeItemsCommand.Tags` if needed.
 - Files: `src/Application/Common/Behaviours/ClassLocking.cs`, `.../MergeItems/MergeItemsCommandHandler.cs`, `src/Application/DependencyInjection.cs`, `.../MergeItems/MergeItemsCommand.cs`, `tests/.../MergeItems/MergeItemsCommandHandlerTests.cs`
 - Verify: `dotnet build && dotnet test tests/Application.UnitTests`
 
 ### Checkpoint A (after T1-T6)
-- [ ] `dotnet build` clean (warnings are errors); `dotnet test tests/Application.UnitTests` green.
-- [ ] Every row of the D3 table has a merger and tests, incl. secondary-vs-secondary.
-- [ ] Commit; report status to the user before Phase 2.
+- [x] `dotnet build` clean (warnings are errors); `dotnet test tests/Application.UnitTests` green.
+- [x] Every row of the D3 table has a merger and tests, incl. secondary-vs-secondary.
+- [x] Commit; report status to the user before Phase 2.
 
 ---
 
