@@ -19,6 +19,7 @@ public sealed record MergeItemsCommand(Guid PrimaryItemId, IReadOnlyCollection<G
         OrderLists.CacheConstants.OrderListListTag,
         SupplyLists.CacheConstants.SupplyListListTag,
         GoodsReceipts.CacheConstants.GoodsReceiptImportListTag,
+        GoodsReceipts.CacheConstants.GoodsReceiptListTag,
         Statistics.CacheConstants.PurchaseStatisticsTag,
         Statistics.CacheConstants.DailyConsumptionTag,
         Categories.CacheConstants.CategoryListTag

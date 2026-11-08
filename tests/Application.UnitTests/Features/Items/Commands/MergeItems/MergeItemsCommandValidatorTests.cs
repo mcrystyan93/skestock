@@ -18,6 +18,16 @@ public class MergeItemsCommandValidatorTests
     }
 
     [Test]
+    public async Task ShouldHaveErrorWhenAnIdIsEmptyGuid()
+    {
+        var id = Guid.NewGuid();
+
+        var result = await _validator.ValidateAsync(new MergeItemsCommand(id, [id, Guid.Empty]));
+
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.Required);
+    }
+
+    [Test]
     public async Task ShouldHaveErrorWhenOnlyOneId()
     {
         var id = Guid.NewGuid();
