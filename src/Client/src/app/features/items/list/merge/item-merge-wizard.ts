@@ -104,7 +104,11 @@ import { ItemListState } from '../../services/item-list.store';
                   </div>
                   @if (impact.combined > 0) {
                     <span class="text-sm text-amber-600">
-                      {{ impact.combined }} se vor combina (însumat) cu înregistrările articolului principal.
+                      @if (impact.kind === 'classItemStockVisibilities' || impact.kind === 'itemLocationThresholds') {
+                        {{ impact.combined }} înregistrări duplicate vor fi eliminate. Se păstrează setările articolului principal, dacă există; altfel, ale unei înregistrări secundare.
+                      } @else {
+                        {{ impact.combined }} înregistrări duplicate vor fi eliminate. Cantitățile se însumează în înregistrarea păstrată.
+                      }
                     </span>
                   }
                 </li>

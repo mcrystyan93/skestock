@@ -25,9 +25,9 @@ public class MergeItemsCommandHandler(IApplicationDbContext dbContext, IEnumerab
         var ids = request.ItemIds.Distinct().ToList();
         var items = await dbContext.Items.Where(item => ids.Contains(item.Id)).ToListAsync(cancellationToken);
 
-        var missing = ids.Except(items.Select(item => item.Id)).FirstOrDefault();
-        if (missing != Guid.Empty)
-            return Result.Fail(new ItemErrors.ItemNotFound(missing));
+        var missing = ids.Except(items.Select(item => item.Id)).Select(id => (Guid?)id).FirstOrDefault();
+        if (missing is { } missingId)
+            return Result.Fail(new ItemErrors.ItemNotFound(missingId));
 
         if (!items.Single(item => item.Id == request.PrimaryItemId).IsActive)
             return Result.Fail(new ItemErrors.MergePrimaryInactive(request.PrimaryItemId));
