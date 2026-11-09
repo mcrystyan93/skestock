@@ -3,7 +3,7 @@ import { signal } from '@angular/core';
 import { ItemDto } from '@ske/models';
 import { ItemsHttp } from '@ske/shared/items';
 import { NzModalRef } from 'ng-zorro-antd/modal';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { ItemListState } from '../../services/item-list.store';
 import { ItemMergeWizard } from './item-merge-wizard';
 
@@ -84,6 +84,20 @@ describe('ItemMergeWizard', () => {
     fixture.detectChanges();
 
     expect((fixture.nativeElement as HTMLElement).textContent).toContain(expected);
+  });
+
+  it('shows the error state and blocks advancing when the preview fails', () => {
+    http.mergePreview.mockReturnValue(throwError(() => new Error('boom')));
+    const fixture = create();
+    const wizard = fixture.componentInstance;
+    wizard.primaryId.set('item-1');
+
+    wizard.next();
+    fixture.detectChanges();
+    wizard.next();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Previzualizarea nu a putut fi încărcată');
+    expect(wizard.step()).toBe(1);
   });
 
   it('confirms through the store and closes the modal on success', () => {

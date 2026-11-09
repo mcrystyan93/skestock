@@ -5,7 +5,7 @@ import { ItemMergeImpactStep } from './impact-step';
 import { ItemMergePrimaryStep } from './primary-step';
 
 describe('item merge steps', () => {
-  const item = (id: string, name: string, isActive = true) => ({ id, name, unit: 'buc', isActive }) as ItemDto;
+  const item = (id: string, name: string, isActive = true, unit = 'buc') => ({ id, name, unit, isActive }) as ItemDto;
   const text = (fixture: { nativeElement: unknown }) => (fixture.nativeElement as HTMLElement).textContent ?? '';
 
   describe('ItemMergePrimaryStep', () => {
@@ -59,6 +59,17 @@ describe('item merge steps', () => {
 
       expect(text(fixture)).toContain('Se păstrează: Creion');
       expect(text(fixture)).toContain('Creion HB');
+      expect(text(fixture)).not.toContain('Unități de măsură diferite');
+    });
+
+    it('warns when the units differ', () => {
+      const fixture = TestBed.createComponent(ItemMergeConfirmStep);
+      fixture.componentRef.setInput('primary', item('a', 'Făină', true, 'kg'));
+      fixture.componentRef.setInput('secondaries', [item('b', 'Făină cutie', true, 'cutie')]);
+      fixture.detectChanges();
+
+      expect(text(fixture)).toContain('Unități de măsură diferite');
+      expect(text(fixture)).toContain('kg, cutie');
     });
   });
 });
