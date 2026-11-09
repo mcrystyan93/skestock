@@ -1,34 +1,26 @@
 import { Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
-import { ITEM_MERGE_KIND_LABELS, MergeItemsRequest } from '@ske/models';
-import { ErrorAlert } from '@ske/shared/errors';
+import { MergeItemsRequest } from '@ske/models';
 import { ItemsHttp } from '@ske/shared/items';
-import { NzAlertComponent } from 'ng-zorro-antd/alert';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zorro-antd/modal';
-import { NzRadioComponent, NzRadioGroupComponent } from 'ng-zorro-antd/radio';
-import { NzSpinComponent } from 'ng-zorro-antd/spin';
 import { NzStepComponent, NzStepsComponent } from 'ng-zorro-antd/steps';
-import { NzTypographyComponent } from 'ng-zorro-antd/typography';
-import { CHECKABLE_CARD_CLASSES } from '../../../../shared/ui/card-classes';
 import { ItemListState } from '../../services/item-list.store';
+import { ItemMergeConfirmStep } from './steps/confirm-step';
+import { ItemMergeImpactStep } from './steps/impact-step';
+import { ItemMergePrimaryStep } from './steps/primary-step';
 
 @Component({
   imports: [
-    FormsModule,
-    ErrorAlert,
-    NzAlertComponent,
+    ItemMergeConfirmStep,
+    ItemMergeImpactStep,
+    ItemMergePrimaryStep,
     NzButtonComponent,
     NzModalFooterDirective,
     NzModalTitleDirective,
-    NzRadioComponent,
-    NzRadioGroupComponent,
-    NzSpinComponent,
     NzStepComponent,
-    NzStepsComponent,
-    NzTypographyComponent
+    NzStepsComponent
   ],
   selector: 'ske-item-merge-wizard',
   template: `
@@ -45,98 +37,23 @@ import { ItemListState } from '../../services/item-list.store';
 
     @switch (step()) {
       @case (0) {
-        <p id="merge-primary-label"
-           nz-typography
-           nzType="secondary">
-          Alege articolul care rămâne. Celelalte vor fi dezactivate, iar datele lor vor fi mutate pe articolul ales.
-        </p>
-        <nz-radio-group class="flex! flex-col gap-2"
-                        nzName="primaryItem"
-                        aria-labelledby="merge-primary-label"
-                        [ngModel]="primaryId()"
-                        (ngModelChange)="primaryId.set($event)">
-          @for (item of items(); track item.id) {
-            <label nz-radio
-                   [class]="cardClasses"
-                   [nzValue]="item.id"
-                   [nzDisabled]="!item.isActive">
-              <span class="block font-medium">{{ item.name }}</span>
-              <span class="block text-sm text-slate-500">
-                {{ item.sku || 'fără cod' }} · {{ item.unit }} · {{ item.categoryName || '—' }}
-                @if (!item.isActive) {
-                  · inactiv (nu poate fi principal)
-                }
-              </span>
-            </label>
-          }
-        </nz-radio-group>
+        <ske-item-merge-primary-step [items]="items()"
+                                     [primaryId]="primaryId()"
+                                     (primaryIdChange)="primaryId.set($event)" />
       }
       @case (1) {
-        @if (preview.isLoading()) {
-          <div class="flex justify-center py-8">
-            <nz-spin nzTip="Se calculează datele afectate..." />
-          </div>
-        } @else if (preview.error()) {
-          <nz-alert nzType="error"
-                    nzShowIcon
-                    nzMessage="Previzualizarea nu a putut fi încărcată"
-                    [nzDescription]="previewError()" />
-          <button nz-button
-                  class="mt-3"
-                  type="button"
-                  (click)="preview.reload()">
-            Reîncearcă
-          </button>
-        } @else {
-          @let impacts = preview.value()?.impacts ?? [];
-          @if (impacts.length === 0) {
-            <p nz-typography
-               nzType="secondary">Nu există date de mutat. Articolele secundare vor fi doar dezactivate.</p>
-          } @else {
-            <p nz-typography
-               nzType="secondary">Datele de mai jos vor fi legate de articolul principal.</p>
-            <ul class="m-0 flex list-none flex-col gap-2 p-0">
-              @for (impact of impacts; track impact.kind) {
-                <li class="flex flex-col gap-1 rounded border border-solid border-slate-200 p-3">
-                  <div class="flex items-baseline justify-between gap-3">
-                    <span class="font-medium">{{ labels[impact.kind] }}</span>
-                    <span>{{ impact.relinked }} mutate</span>
-                  </div>
-                  @if (impact.combined > 0) {
-                    <span class="text-sm text-amber-600">
-                      @if (impact.kind === 'classItemStockVisibilities' || impact.kind === 'itemLocationThresholds') {
-                        {{ impact.combined }} înregistrări duplicate vor fi eliminate. Se păstrează setările articolului principal, dacă există; altfel, ale unei înregistrări secundare.
-                      } @else {
-                        {{ impact.combined }} înregistrări duplicate vor fi eliminate. Cantitățile se însumează în înregistrarea păstrată.
-                      }
-                    </span>
-                  }
-                </li>
-              }
-            </ul>
-          }
-        }
+        <ske-item-merge-impact-step [impacts]="preview.value()?.impacts ?? []"
+                                    [loading]="preview.isLoading()"
+                                    [errorMessage]="preview.error() ? previewError() : null"
+                                    (retry)="preview.reload()" />
       }
       @case (2) {
-        <nz-alert nzType="warning"
-                  nzShowIcon
-                  class="mb-4"
-                  nzMessage="Acțiune ireversibilă"
-                  nzDescription="Articolele secundare vor fi dezactivate, iar datele lor vor fi mutate definitiv pe articolul principal, în toate clasele." />
-        <p class="m-0! mb-3!">
-          Se păstrează: <strong>{{ primary()?.name }}</strong>
-        </p>
-        <p class="m-0!">Se dezactivează:</p>
-        <ul class="m-0! mb-3! list-disc pl-6">
-          @for (item of secondaries(); track item.id) {
-            <li>{{ item.name }}</li>
-          }
-        </ul>
-        <ske-error-display [problemDetail]="store.mergeProblemDetail()"
-                           [validationErrors]="store.mergeValidationErrors()" />
+        <ske-item-merge-confirm-step [primary]="primary()"
+                                     [secondaries]="secondaries()"
+                                     [problemDetail]="store.mergeProblemDetail()"
+                                     [validationErrors]="store.mergeValidationErrors()" />
       }
     }
-
     <div *nzModalFooter>
       <button nz-button
               type="button"
@@ -177,8 +94,6 @@ export class ItemMergeWizard {
   protected readonly store = inject(ItemListState);
   // Read from the store so row updates (e.g. a realtime disable) reach the wizard.
   protected readonly items = this.store.selectedItems;
-  protected readonly cardClasses = `m-0! flex! items-start p-3! ${CHECKABLE_CARD_CLASSES}`;
-  protected readonly labels = ITEM_MERGE_KIND_LABELS;
 
   private readonly _modalRef = inject(NzModalRef);
   private readonly _http = inject(ItemsHttp);
