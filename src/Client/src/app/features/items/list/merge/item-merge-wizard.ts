@@ -42,7 +42,7 @@ import { ItemMergePrimaryStep } from './steps/primary-step';
                                      (primaryIdChange)="primaryId.set($event)" />
       }
       @case (1) {
-        <ske-item-merge-impact-step [impacts]="preview.value()?.impacts ?? []"
+        <ske-item-merge-impact-step [impacts]="preview.error() ? [] : (preview.value()?.impacts ?? [])"
                                     [loading]="preview.isLoading()"
                                     [errorMessage]="preview.error() ? previewError() : null"
                                     (retry)="preview.reload()" />

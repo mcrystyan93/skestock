@@ -1,3 +1,4 @@
+using skestock.Application.Common.Errors;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using Shouldly;
@@ -95,6 +96,34 @@ public class ConfirmGoodsReceiptImportCommandHandlerTests
         var transaction = await context.StockTransactions.SingleAsync(CancellationToken.None);
         transaction.Type.ShouldBe(StockTransactionType.Order);
         transaction.UserId.ShouldBe(userProfile.IdentityId);
+    }
+
+    [Test]
+    public async Task Handle_WithInactiveExistingItem_FailsAndLeavesImportPending()
+    {
+        var (context, item, _, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        item.IsActive = false;
+        var import = await AddPendingImportAsync(context, schoolClass.Id);
+        var handler = new ConfirmGoodsReceiptImportCommandHandler(context, new FakeUser(userProfile.IdentityId));
+
+        var result = await handler.Handle(new ConfirmGoodsReceiptImportCommand
+        {
+            ImportId = import.Id,
+            Note = "Reviewed",
+            Lines =
+            [
+                new ConfirmGoodsReceiptImportLine
+                {
+                    ItemId = item.Id, LocationId = location.Id, Quantity = 12, UnitPrice = 2m, SourceLineIndex = 0
+                }
+            ]
+        }, CancellationToken.None);
+
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.Single().ShouldBeOfType<ItemErrors.ItemInactive>();
+        (await context.StockBatches.CountAsync(CancellationToken.None)).ShouldBe(0);
+        (await context.GoodsReceiptImports.SingleAsync(CancellationToken.None)).Status.ShouldBe(GoodsReceiptImportStatus.PendingReview);
     }
 
     [Test]

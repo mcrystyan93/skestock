@@ -161,6 +161,13 @@ public class MergeItemsCommandTests : TestBase
         return await context.Set<T>().AsNoTracking().ToListAsync();
     }
 
+    private static async Task ExecuteSqlAsync(string sql)
+    {
+        using var scope = FunctionalTestSetup.ScopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await context.Database.ExecuteSqlRawAsync(sql);
+    }
+
     private object Body(params Item[] items) => new { primaryItemId = _primary.Id, itemIds = items.Select(i => i.Id) };
 
     private static Dictionary<(Guid, Guid), int> StockByClassAndLocation(IEnumerable<StockBatch> batches) =>
@@ -265,6 +272,39 @@ public class MergeItemsCommandTests : TestBase
         (await QueryAsync<StockBatch>()).Select(b => b.ItemId).Distinct().Count().ShouldBe(3);
         (await QueryAsync<Item>()).Single(i => i.Id == _s1.Id).IsActive.ShouldBeTrue();
         (await QueryAsync<SupplyListLine>()).Count.ShouldBe(4);
+    }
+
+    // The re-points and deletes are issued before the item update that fails, so a partial commit would show up
+    // as moved batches or fewer supply lines in a fresh context.
+    [Test]
+    public async Task Merge_WhenTheDatabaseFailsMidWrite_RollsEverythingBack()
+    {
+        await SeedAsync();
+        var (client, userId) = await LoginAsync(administrator: true);
+        using var _ = client;
+        await SeedReferencesAsync(userId);
+        var stockBefore = StockByClassAndLocation(await QueryAsync<StockBatch>());
+        var supplyLinesBefore = (await QueryAsync<SupplyListLine>()).Count;
+        var balancesBefore = (await QueryAsync<ClassBalance>()).Count;
+        await ExecuteSqlAsync("CREATE TRIGGER [dbo].[TR_Items_FailMerge] ON [dbo].[Items] AFTER UPDATE AS THROW 50001, 'merge rollback test', 1;");
+        try
+        {
+            var response = await client.PostAsJsonAsync("/api/Items/merge", Body(_primary, _s1, _s2));
+
+            // 500, not a 4xx: proves the failure came from the database write and not from request validation.
+            response.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+        }
+        finally
+        {
+            await ExecuteSqlAsync("DROP TRIGGER [dbo].[TR_Items_FailMerge];");
+        }
+
+        (await QueryAsync<Item>()).Where(i => i.Id == _s1.Id || i.Id == _s2.Id).ShouldAllBe(i => i.IsActive);
+        var batches = await QueryAsync<StockBatch>();
+        batches.Select(b => b.ItemId).Distinct().Count().ShouldBe(3);
+        StockByClassAndLocation(batches).ShouldBe(stockBefore);
+        (await QueryAsync<SupplyListLine>()).Count.ShouldBe(supplyLinesBefore);
+        (await QueryAsync<ClassBalance>()).Count.ShouldBe(balancesBefore);
     }
 
     [Test]

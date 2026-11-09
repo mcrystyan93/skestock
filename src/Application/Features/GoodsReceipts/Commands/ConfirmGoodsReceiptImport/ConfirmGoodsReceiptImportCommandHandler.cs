@@ -55,8 +55,11 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
         var itemInfoById = await dbContext.Items
             .AsNoTracking()
             .Where(i => existingItemIds.Contains(i.Id))
-            .Select(i => new { i.Id, i.Name, i.IsPerishable, i.ShelfLifeDays })
+            .Select(i => new { i.Id, i.Name, i.IsPerishable, i.ShelfLifeDays, i.IsActive })
             .ToDictionaryAsync(i => i.Id, cancellationToken);
+        // Re-checked under the class lock: the validator runs before it, so an item merged meanwhile would slip through.
+        if (itemInfoById.Values.FirstOrDefault(i => !i.IsActive) is { } inactive)
+            return Result.Fail(new ItemErrors.ItemInactive(inactive.Id));
 
         var extraction = string.IsNullOrWhiteSpace(import.ExtractedDataJson)
             ? null
