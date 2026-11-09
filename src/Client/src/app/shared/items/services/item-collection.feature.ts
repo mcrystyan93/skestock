@@ -2,7 +2,7 @@ import {
   ItemDto,
   GetAllItemsRequest,
   PAGINATION_PAGE_SIZE,
-  PaginatedResponseData, buildItemListFilter
+  PaginatedResponseData, buildItemActiveFilter, buildItemListFilter
 } from '@ske/models';
 import { patchState, signalStoreFeature, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { withLoadingFeature } from '@ske/shared/loader';
@@ -27,7 +27,8 @@ const initialState: ItemCollectionState = {
   paginationData: null,
   filter: {
     sort: [],
-    filters: [],
+    // Merged and disabled items stay out of pickers and the default list; the list's segment can widen this.
+    filters: [buildItemActiveFilter('active')!],
     cursor: null,
     pageSize: PAGINATION_PAGE_SIZE,
     searchTerm: null

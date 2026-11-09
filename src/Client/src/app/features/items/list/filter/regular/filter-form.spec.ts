@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { GetAllItemsRequest, PAGINATION_PAGE_SIZE } from '@ske/models';
+import { buildItemActiveFilter, ColumnFilter, GetAllItemsRequest, PAGINATION_PAGE_SIZE } from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
@@ -13,7 +13,7 @@ describe('FilterForm', () => {
 
   const initialFilter: GetAllItemsRequest = {
     sort: [],
-    filters: [],
+    filters: [buildItemActiveFilter('active')!],
     cursor: null,
     pageSize: PAGINATION_PAGE_SIZE,
     searchTerm: null
@@ -65,7 +65,28 @@ describe('FilterForm', () => {
     await fixture.whenStable();
 
     expect(form.activeFilterCount()).toBe(0);
-    expect(emitted.at(-1)?.filters).toEqual([]);
+    expect(emitted.at(-1)?.filters).toEqual([buildItemActiveFilter('active')]);
+  });
+
+  it('counts a non-default status as an active filter and emits it', async () => {
+    const form = fixture.componentInstance;
+    emitted = [];
+
+    form.itemListFilterForm.active().value.set('inactive');
+    await fixture.whenStable();
+
+    expect(form.activeFilterCount()).toBe(1);
+    expect(emitted.at(-1)?.filters).toEqual([buildItemActiveFilter('inactive')]);
+  });
+
+  it('drops the status filter for "all"', async () => {
+    const form = fixture.componentInstance;
+    emitted = [];
+
+    form.itemListFilterForm.active().value.set('all');
+    await fixture.whenStable();
+
+    expect(emitted.at(-1)?.filters.some((f: ColumnFilter) => f.field === 'isActive')).toBe(false);
   });
 
   describe('merge button', () => {
