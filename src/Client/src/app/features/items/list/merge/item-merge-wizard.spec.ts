@@ -72,6 +72,20 @@ describe('ItemMergeWizard', () => {
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('Linii din liste de aprovizionare');
   });
 
+  it.each([
+    ['supplyListLines', 'Cantitățile se însumează'],
+    ['itemLocationThresholds', 'Se păstrează setările articolului principal']
+  ])('explains what happens to colliding %s rows', (kind, expected) => {
+    http.mergePreview.mockReturnValue(of({ impacts: [{ kind, relinked: 0, combined: 2 }] }));
+    const fixture = create();
+    fixture.componentInstance.primaryId.set('item-1');
+
+    fixture.componentInstance.next();
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(expected);
+  });
+
   it('confirms through the store and closes the modal on success', () => {
     const fixture = create();
     const wizard = fixture.componentInstance;
