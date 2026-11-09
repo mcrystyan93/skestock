@@ -31,6 +31,10 @@ public class AdjustStockCommandHandler(IApplicationDbContext dbContext, IUser us
             .ToListAsync(cancellationToken);
 
         var currentTotal = batches.Sum(b => b.Quantity);
+        // Re-checked under the class lock: the validator runs before it, so an item merged meanwhile would slip through.
+        if (request.ActualQuantity > currentTotal
+            && await StockAdjuster.FindInactiveItemAsync(dbContext, [request.ItemId], cancellationToken) is { } inactiveId)
+            return Result.Fail<StockItemDto>(new ItemErrors.ItemInactive(inactiveId));
         // delta == 0 is rejected by the validator (NoAdjustmentNeeded) before the handler runs,
         // so the helper always touches a batch here.
         var anchor = StockAdjuster.Apply(

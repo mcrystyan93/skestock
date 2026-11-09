@@ -71,6 +71,53 @@ public class AdjustStockCommandHandlerTests
     }
 
     [Test]
+    public async Task Handle_WithSurplusOnInactiveItem_FailsAndCreatesNothing()
+    {
+        var (context, item, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        item.IsActive = false;
+        await context.SaveChangesAsync(CancellationToken.None);
+        var handler = new AdjustStockCommandHandler(context, new FakeUser(userProfile.IdentityId));
+
+        var result = await handler.Handle(new AdjustStockCommand
+        {
+            ClassId = schoolClass.Id,
+            ItemId = item.Id,
+            LocationId = location.Id,
+            ActualQuantity = 5,
+            Reason = AdjustmentReason.Miscount
+        }, CancellationToken.None);
+
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.Single().ShouldBeOfType<ItemErrors.ItemInactive>();
+        (await context.StockBatches.CountAsync(CancellationToken.None)).ShouldBe(0);
+    }
+
+    [Test]
+    public async Task Handle_WithShortfallOnInactiveItem_StillDrawsDown()
+    {
+        var (context, item, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        var batch = CreateBatch(item, location, schoolClass, quantity: 20, expiryDate: null);
+        context.StockBatches.Add(batch);
+        item.IsActive = false;
+        await context.SaveChangesAsync(CancellationToken.None);
+        var handler = new AdjustStockCommandHandler(context, new FakeUser(userProfile.IdentityId));
+
+        var result = await handler.Handle(new AdjustStockCommand
+        {
+            ClassId = schoolClass.Id,
+            ItemId = item.Id,
+            LocationId = location.Id,
+            ActualQuantity = 10,
+            Reason = AdjustmentReason.Miscount
+        }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        (await context.StockBatches.FindAsync(batch.Id))!.Quantity.ShouldBe(10);
+    }
+
+    [Test]
     public async Task Handle_WithShortfallFromSingleBatch_ReducesBatchAndCreatesNegativeAdjustmentTransaction()
     {
         var (context, item, location, schoolClass, userProfile) = await CreateContextAsync();
