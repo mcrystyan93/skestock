@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { type ItemDto } from '@ske/models';
+import { buildItemActiveFilter, type ItemDto } from '@ske/models';
 import { of, throwError } from 'rxjs';
 import { ItemDropdownStore } from './item-dropdown.store';
 import { ItemsHttp } from './items.http';
@@ -40,6 +40,12 @@ describe('ItemDropdownStore', () => {
         { provide: ItemsHttp, useValue: http }
       ]
     });
+  });
+
+  it('searches only active items by default, so merged items stay out of pickers', () => {
+    const store = TestBed.inject(ItemDropdownStore);
+
+    expect(store.filter().filters).toEqual([buildItemActiveFilter('active')]);
   });
 
   it('hydrates an Id-only value into the selected item', () => {

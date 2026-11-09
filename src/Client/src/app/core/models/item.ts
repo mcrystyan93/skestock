@@ -32,6 +32,32 @@ export type GetAllItemsRequest = BasePaginationFilter & {
   filters: ColumnFilter[];
 };
 
+export type ItemActiveFilter = 'active' | 'inactive' | 'all';
+
+export const ITEM_ACTIVE_FILTER_FIELD = 'isActive';
+
+export function buildItemActiveFilter(active: ItemActiveFilter): ColumnFilter | null {
+  if (active === 'all')
+    return null;
+
+  return {
+    field: ITEM_ACTIVE_FILTER_FIELD,
+    operator: 'equals',
+    value: active === 'active',
+    fieldType: 'boolean',
+    displayValue: active === 'active' ? 'Active' : 'Inactive'
+  };
+}
+
+export function getItemActiveFilter(filters: ColumnFilter[]): ItemActiveFilter {
+  const filter = filters.find((f) => f.field === ITEM_ACTIVE_FILTER_FIELD);
+
+  if (!filter)
+    return 'all';
+
+  return filter.value === true || filter.value === 'true' ? 'active' : 'inactive';
+}
+
 /** Mirrors src/Application/Features/Items/Models/ItemRequests.cs. */
 export type CreateItemRequest = {
   sku?: string | null;
