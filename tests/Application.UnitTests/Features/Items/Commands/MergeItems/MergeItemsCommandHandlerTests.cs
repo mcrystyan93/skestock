@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using Shouldly;
 using skestock.Application.Common.Errors;
@@ -54,6 +55,27 @@ public class MergeItemsCommandHandlerTests
     private static MergeItemsCommand Cmd(Item primary, params Item[] secondaries) =>
         new(primary.Id, [primary.Id, .. secondaries.Select(s => s.Id)]);
 
+    // A transient SaveChanges failure makes the execution strategy rerun the handler on the same context, with the
+    // failed attempt's combined survivors and deleted rows still tracked.
+    [Test]
+    public async Task Handle_RerunAfterFailedAttempt_DoesNotCombineTwice()
+    {
+        var (db, primary, secondary) = await SeedAsync();
+        await using var _ = db;
+        var (classId, locationId) = (Guid.NewGuid(), Guid.NewGuid());
+        db.ClassBalances.RemoveRange(db.ClassBalances);
+        db.ClassBalances.AddRange(
+            new ClassBalance { ItemId = primary.Id, ClassId = classId, LocationId = locationId, OpeningQty = 5 },
+            new ClassBalance { ItemId = secondary.Id, ClassId = classId, LocationId = locationId, OpeningQty = 3 });
+        await db.SaveChangesAsync();
+        await new ClassBalanceItemMerger(db).MergeAsync(primary.Id, [secondary.Id], default);
+
+        var result = await HandlerFor(db).Handle(Cmd(primary, secondary), default);
+
+        result.IsSuccess.ShouldBeTrue();
+        db.ClassBalances.AsNoTracking().Single().OpeningQty.ShouldBe(8);
+    }
+
     [Test]
     public async Task Handle_RepointsEveryTableDisablesSecondaryAndRaisesEvent()
     {
@@ -73,10 +95,13 @@ public class MergeItemsCommandHandlerTests
         db.DailyItemConsumptions.Single().ItemId.ShouldBe(primary.Id);
         db.ClassBalances.Single().ItemId.ShouldBe(primary.Id);
         db.ItemPurchaseStatistics.Single().ItemId.ShouldBe(primary.Id);
-        (await db.Items.FindAsync(secondary.Id))!.IsActive.ShouldBeFalse();
-        (await db.Items.FindAsync(primary.Id))!.IsActive.ShouldBeTrue();
-        secondary.DomainEvents.OfType<ItemDisabledEvent>().ShouldHaveSingleItem().Item.ShouldBe(secondary);
-        primary.DomainEvents.OfType<ItemDisabledEvent>().ShouldBeEmpty();
+        // The handler clears the change tracker, so it works on freshly loaded instances.
+        var reloadedSecondary = (await db.Items.FindAsync(secondary.Id))!;
+        var reloadedPrimary = (await db.Items.FindAsync(primary.Id))!;
+        reloadedSecondary.IsActive.ShouldBeFalse();
+        reloadedPrimary.IsActive.ShouldBeTrue();
+        reloadedSecondary.DomainEvents.OfType<ItemDisabledEvent>().ShouldHaveSingleItem().Item.ShouldBe(reloadedSecondary);
+        reloadedPrimary.DomainEvents.OfType<ItemDisabledEvent>().ShouldBeEmpty();
     }
 
     [Test]

@@ -20,24 +20,18 @@
                                class="min-h-0 w-full grow [&_.cdk-virtual-scroll-content-wrapper]:w-full"
                                (scroll)="onScroll($event)">
     <div *cdkVirtualFor="let item of items(); trackBy: trackById"
-         class="box-border px-4 pb-2"
+         class="relative box-border px-4 pb-2"
          [style.height.px]="cardRowHeight">
       <nz-card nzSize="small"
                nzHoverable
                role="button"
                tabindex="0"
-               class="h-full cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+               class="h-full cursor-pointer [&_.ant-card-body]:ps-10! focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
                [attr.aria-label]="'Modifică articolul ' + item.name"
                (click)="onEdit.emit(item)"
                (keydown.enter)="onEdit.emit(item)"
                (keydown.space)="onSpace($event, item)">
         <div class="flex min-w-0 items-center gap-3">
-          <label nz-checkbox
-                 [nzChecked]="selectedIds().has(item.id)"
-                 (nzCheckedChange)="onToggleSelected.emit({ item, checked: $event })"
-                 (click)="$event.stopPropagation()"
-                 (keydown.enter)="$event.stopPropagation()"
-                 (keydown.space)="$event.stopPropagation()"><span class="sr-only">Selectează {{ item.name }}</span></label>
           <ske-item-thumbnail [itemId]="item.id"
                               [imageFileId]="item.imageFileId"
                               [uploadable]="true"
@@ -60,6 +54,10 @@
           </div>
         </div>
       </nz-card>
+      <label nz-checkbox
+             class="absolute start-7 top-1/2 z-10 -translate-y-1/2"
+             [nzChecked]="selectedIds().has(item.id)"
+             (nzCheckedChange)="onToggleSelected.emit({ item, checked: $event })"><span class="sr-only">Selectează {{ item.name }}</span></label>
     </div>
   </cdk-virtual-scroll-viewport>
 

@@ -16,12 +16,17 @@ public class MergeItemsCommandHandler(IApplicationDbContext dbContext, IEnumerab
     {
         // Not IRequiresOpenClass: the merge also rewrites closed classes. The exclusive lock waits for in-flight
         // class-scoped commands and holds new ones back until commit.
+        // A transient-failure retry reruns this on the same context: drop the failed attempt's tracked rows, or
+        // Combine would fold the same quantities in twice.
+        dbContext.ChangeTracker.Clear();
+
         await dbContext.ExclusiveLockAllClasses().ToListAsync(cancellationToken);
 
         var ids = request.ItemIds.Distinct().ToList();
         var items = await dbContext.Items.Where(item => ids.Contains(item.Id)).ToListAsync(cancellationToken);
 
-        if (ids.FirstOrDefault(id => items.All(item => item.Id != id)) is var missing && missing != Guid.Empty)
+        var missing = ids.Except(items.Select(item => item.Id)).FirstOrDefault();
+        if (missing != Guid.Empty)
             return Result.Fail(new ItemErrors.ItemNotFound(missing));
 
         if (!items.Single(item => item.Id == request.PrimaryItemId).IsActive)
@@ -31,7 +36,7 @@ public class MergeItemsCommandHandler(IApplicationDbContext dbContext, IEnumerab
         foreach (var merger in mergers)
             await merger.MergeAsync(request.PrimaryItemId, secondaryIds, cancellationToken);
 
-        foreach (var secondary in items.Where(item => item.Id != request.PrimaryItemId))
+        foreach (var secondary in items.Where(item => item.Id != request.PrimaryItemId && item.IsActive))
         {
             secondary.IsActive = false;
             secondary.AddDomainEvent(new ItemDisabledEvent(secondary));
