@@ -1,5 +1,31 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {InvitationSplitCard} from './invitation-split-card';
+import {InvitationSplitCard, invitationRange} from './invitation-split-card';
+
+describe('invitationRange', () => {
+  it('multiplies students by 28–30 and instructors by 2, and counts the other three as entered', () => {
+    expect(
+      invitationRange({
+        studentInvitationCount: 10,
+        instructorInvitationCount: 5,
+        openingPrayerInvitationCount: 2,
+        experienceInvitationCount: 3,
+        changeInvitationCount: 4,
+      }),
+    ).toEqual({min: 299, max: 319});
+  });
+
+  it('counts empty or invalid fields as 0', () => {
+    expect(
+      invitationRange({
+        studentInvitationCount: Number.NaN,
+        instructorInvitationCount: 1,
+        openingPrayerInvitationCount: null as unknown as number,
+        experienceInvitationCount: 1,
+        changeInvitationCount: 1,
+      }),
+    ).toEqual({min: 4, max: 4});
+  });
+});
 
 describe('InvitationSplitCard', () => {
   let fixture: ComponentFixture<InvitationSplitCard>;
@@ -39,26 +65,40 @@ describe('InvitationSplitCard', () => {
   });
 
   it('shows the hints under Cursanți and Instructori', () => {
-    expect(fixture.nativeElement.querySelector('#student-invitation-count-hint').textContent).toBe('De obicei în jur de 28–30.');
-    expect(fixture.nativeElement.querySelector('#instructor-invitation-count-hint').textContent).toBe('De obicei 2.');
+    expect(fixture.nativeElement.querySelector('#student-invitation-count-hint').textContent).toBe(
+      'Se înmulțește cu aprox. 28–30 cursanți.',
+    );
+    expect(fixture.nativeElement.querySelector('#instructor-invitation-count-hint').textContent).toBe(
+      'Se înmulțește cu 2 instructori.',
+    );
     expect(fixture.nativeElement.querySelectorAll('.ant-form-item-extra')).toHaveLength(2);
   });
 
-  it('multiplies the allocated sum by the invitation count and follows edits', () => {
-    expect(total()).toBe('Total: 24 × 30 = 720 invitații');
+  it('shows the total range against the maximum and follows edits', () => {
+    expect(total()).toBe('Total alocat: 299–319 din maximum 30 invitații Depășește maximul');
 
     fixture.componentInstance.splitForm.studentInvitationCount().value.set(Number.NaN);
     fixture.componentInstance.splitForm.changeInvitationCount().value.set(20);
     fixture.detectChanges();
 
-    expect(total()).toBe('Total: 30 × 30 = 900 invitații');
+    expect(total()).toBe('Total alocat: 35 din maximum 30 invitații Depășește maximul');
   });
 
-  it('shows only the sum while the invitation count is not set', () => {
+  it('flags the total only when its upper bound exceeds the maximum', () => {
+    fixture.componentRef.setInput('invitationCount', 319);
+    fixture.detectChanges();
+    expect(total()).toBe('Total alocat: 299–319 din maximum 319 invitații');
+
+    fixture.componentRef.setInput('invitationCount', 318);
+    fixture.detectChanges();
+    expect(total()).toBe('Total alocat: 299–319 din maximum 318 invitații Depășește maximul');
+  });
+
+  it('shows the total range with a hint while the invitation count is not set', () => {
     fixture.componentRef.setInput('invitationCount', 0);
     fixture.detectChanges();
 
-    expect(total()).toBe('Total: 24 (setați „Număr de invitații” pentru a calcula totalul)');
+    expect(total()).toBe('Total alocat: 299–319 invitații (setați „Număr de invitații” pentru a vedea totalul față de maxim)');
   });
 
   it('returns a complete payload', async () => {

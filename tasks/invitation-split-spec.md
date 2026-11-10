@@ -49,10 +49,10 @@ Backend ca `SaveRoomConfiguration` (nullable `int?` + `NotNull` + `GreaterThanOr
 - Never: edit pe migrații aplicate; Prettier pe client; commit pe `master`.
 
 ## Success Criteria
-1. Cele 5 câmpuri apar sub „Număr de invitații", cu valorile salvate, propriul buton „Salvează” și linia „Total alocat: X din Y”.
+1. Cele 5 câmpuri apar sub „Număr de invitații", cu valorile salvate, propriul buton „Salvează” și linia „Total alocat: X–Y din maximum Z invitații”.
 2. Admin salvează; valorile persistă după reload; non-admin nu poate scrie (403).
 3. Valori negative, zecimale, goale sau >200 sunt respinse în UI și în backend.
 4. Salvarea altor secțiuni nu modifică valorile (și invers).
 5. O clasă nouă sau inițializată primește cele 5 valori curente; schimbările ulterioare din configurare nu o afectează.
-6. Sub „Cursanți” apare indicația „De obicei în jur de 28–30.”, sub „Instructori” „De obicei 2.” (fără validare). Linia informativă devine „Total: S × Y = P invitații” (S = suma celor 5 câmpuri, Y = „Număr de invitații”); dacă Y nu e setat (0), se afișează doar S. Nu blochează salvarea.
+6. Sub „Cursanți” apare indicația „Se înmulțește cu aprox. 28–30 cursanți.”, sub „Instructori” „Se înmulțește cu 2 instructori.” (fără validare). Linia informativă afișează intervalul total: min = cursanți×28 + instructori×2 + celelalte trei; max = cursanți×30 + instructori×2 + celelalte trei (constantele sunt în `configuration.constants.ts`). „Număr de invitații” (salvat) este maximul, nu un multiplicator. Dacă maximul nu e setat (0), se afișează intervalul cu indicația să-l setezi; dacă max-ul intervalului depășește maximul, apare o etichetă de avertizare. Nu blochează salvarea.
 7. `dotnet build`, testele unit/functional/client și e2e trec; capturile desktop+mobil arată corect.
