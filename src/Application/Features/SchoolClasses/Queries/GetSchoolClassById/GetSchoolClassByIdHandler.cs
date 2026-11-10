@@ -21,6 +21,11 @@ public class GetSchoolClassByIdHandler(IApplicationDbContext dbContext)
                 EndDate = c.EndDate,
                 Status = c.Status,
                 InvitationCount = c.InvitationCount,
+                StudentInvitationCount = c.StudentInvitationCount,
+                InstructorInvitationCount = c.InstructorInvitationCount,
+                OpeningPrayerInvitationCount = c.OpeningPrayerInvitationCount,
+                ExperienceInvitationCount = c.ExperienceInvitationCount,
+                ChangeInvitationCount = c.ChangeInvitationCount,
                 IsConfigurationInitialized = c.InvitationCount.HasValue,
                 Departments = c.Departments.OrderBy(department => department.Name)
                     .Select(department => new ClassDepartmentDto(

@@ -10,6 +10,11 @@ public record SchoolClassDto
     public DateOnly EndDate { get; init; }
     public ClassStatus Status { get; init; }
     public int? InvitationCount { get; init; }
+    public int? StudentInvitationCount { get; init; }
+    public int? InstructorInvitationCount { get; init; }
+    public int? OpeningPrayerInvitationCount { get; init; }
+    public int? ExperienceInvitationCount { get; init; }
+    public int? ChangeInvitationCount { get; init; }
     public bool IsConfigurationInitialized { get; init; }
     public IReadOnlyList<ClassDepartmentDto> Departments { get; init; } = [];
     public string? CreatedByName { get; init; }

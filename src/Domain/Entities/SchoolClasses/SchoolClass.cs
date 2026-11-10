@@ -11,6 +11,11 @@ public class SchoolClass : BaseAuditableEntity, IKeysetEntity
     public DateOnly EndDate { get; set; }
     public ClassStatus Status { get; set; } = ClassStatus.Upcoming;
     public int? InvitationCount { get; set; }
+    public int? StudentInvitationCount { get; set; }
+    public int? InstructorInvitationCount { get; set; }
+    public int? OpeningPrayerInvitationCount { get; set; }
+    public int? ExperienceInvitationCount { get; set; }
+    public int? ChangeInvitationCount { get; set; }
 
     public ICollection<ClassDepartment> Departments { get; set; } = new List<ClassDepartment>();
     public ICollection<StockBatch> BatchesReceived { get; set; } = new List<StockBatch>();
