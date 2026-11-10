@@ -118,7 +118,12 @@ public class GetSchoolClassByIdHandlerTests
             Name = "Fall 2026",
             StartDate = new DateOnly(2026, 9, 1),
             EndDate = new DateOnly(2026, 12, 1),
-            Status = ClassStatus.Active
+            Status = ClassStatus.Active,
+            StudentInvitationCount = 10,
+            InstructorInvitationCount = 5,
+            OpeningPrayerInvitationCount = 2,
+            ExperienceInvitationCount = 3,
+            ChangeInvitationCount = 4
         };
         context.SchoolClasses.Add(schoolClass);
         await context.SaveChangesAsync(CancellationToken.None);
@@ -132,6 +137,11 @@ public class GetSchoolClassByIdHandlerTests
         result.Value.Status.ShouldBe(ClassStatus.Active);
         result.Value.StartDate.ShouldBe(new DateOnly(2026, 9, 1));
         result.Value.EndDate.ShouldBe(new DateOnly(2026, 12, 1));
+        result.Value.StudentInvitationCount.ShouldBe(10);
+        result.Value.InstructorInvitationCount.ShouldBe(5);
+        result.Value.OpeningPrayerInvitationCount.ShouldBe(2);
+        result.Value.ExperienceInvitationCount.ShouldBe(3);
+        result.Value.ChangeInvitationCount.ShouldBe(4);
     }
 
     [Test]

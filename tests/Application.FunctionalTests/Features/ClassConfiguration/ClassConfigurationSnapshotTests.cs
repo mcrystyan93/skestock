@@ -1,5 +1,6 @@
 using skestock.Application.Features.ClassConfiguration.Commands.SaveDepartment;
 using skestock.Application.Features.ClassConfiguration.Commands.SaveInvitationCount;
+using skestock.Application.Features.ClassConfiguration.Commands.SaveInvitationSplit;
 using skestock.Application.Features.SchoolClasses.Commands.CreateSchoolClass;
 using skestock.Application.Features.SchoolClasses.Commands.InitializeSchoolClassConfiguration;
 using skestock.Application.Features.SchoolClasses.Commands.UpdateClassDepartmentResponsiblePerson;
@@ -17,6 +18,7 @@ public sealed class ClassConfigurationTests : TestBase
     {
         await SetUpAdministratorAsync();
         await TestApp.SendAsync(new SaveInvitationCountCommand { InvitationCount = 24 });
+        await TestApp.SendAsync(Split(10, 5, 2, 3, 4));
         var initial = await TestApp.SendAsync(new SaveDepartmentCommand
         {
             Name = "Bibliotecă", Responsibilities = "Organizează împrumutul de cărți"
@@ -29,9 +31,12 @@ public sealed class ClassConfigurationTests : TestBase
             EndDate = new DateOnly(2027, 6, 1)
         });
         firstClass.Value.InvitationCount.ShouldBe(24);
+        firstClass.Value.StudentInvitationCount.ShouldBe(10);
+        firstClass.Value.ChangeInvitationCount.ShouldBe(4);
         firstClass.Value.Departments.Single().Name.ShouldBe("Bibliotecă");
 
         await TestApp.SendAsync(new SaveInvitationCountCommand { InvitationCount = 30 });
+        await TestApp.SendAsync(Split(20, 6, 1, 0, 9));
         await TestApp.SendAsync(new SaveDepartmentCommand
         {
             Id = initial.Value.Id, Name = "Bibliotecă nouă", Responsibilities = "Responsabilități noi"
@@ -45,8 +50,15 @@ public sealed class ClassConfigurationTests : TestBase
 
         var firstReloaded = await TestApp.SendAsync(new GetSchoolClassByIdQuery { Id = firstClass.Value.Id });
         firstReloaded.Value.InvitationCount.ShouldBe(24);
+        firstReloaded.Value.StudentInvitationCount.ShouldBe(10);
+        firstReloaded.Value.InstructorInvitationCount.ShouldBe(5);
+        firstReloaded.Value.OpeningPrayerInvitationCount.ShouldBe(2);
+        firstReloaded.Value.ExperienceInvitationCount.ShouldBe(3);
+        firstReloaded.Value.ChangeInvitationCount.ShouldBe(4);
         firstReloaded.Value.Departments.Single().Name.ShouldBe("Bibliotecă");
         secondClass.Value.InvitationCount.ShouldBe(30);
+        secondClass.Value.StudentInvitationCount.ShouldBe(20);
+        secondClass.Value.ChangeInvitationCount.ShouldBe(9);
         secondClass.Value.Departments.Single().Name.ShouldBe("Bibliotecă nouă");
     }
 
@@ -55,6 +67,7 @@ public sealed class ClassConfigurationTests : TestBase
     {
         await SetUpAdministratorAsync();
         await TestApp.SendAsync(new SaveInvitationCountCommand { InvitationCount = 18 });
+        await TestApp.SendAsync(Split(7, 6, 5, 4, 3));
         await TestApp.SendAsync(new SaveDepartmentCommand
         {
             Name = "Comunicare", Responsibilities = "Pregătește informările"
@@ -74,6 +87,11 @@ public sealed class ClassConfigurationTests : TestBase
         initialized.IsSuccess.ShouldBeTrue();
         var classDetails = await TestApp.SendAsync(new GetSchoolClassByIdQuery { Id = schoolClass.Id });
         classDetails.Value.InvitationCount.ShouldBe(18);
+        classDetails.Value.StudentInvitationCount.ShouldBe(7);
+        classDetails.Value.InstructorInvitationCount.ShouldBe(6);
+        classDetails.Value.OpeningPrayerInvitationCount.ShouldBe(5);
+        classDetails.Value.ExperienceInvitationCount.ShouldBe(4);
+        classDetails.Value.ChangeInvitationCount.ShouldBe(3);
         classDetails.Value.Departments.Single().ResponsiblePerson.ShouldBeNull();
 
         var repeated = await TestApp.SendAsync(new InitializeSchoolClassConfigurationCommand
@@ -82,7 +100,21 @@ public sealed class ClassConfigurationTests : TestBase
         });
         repeated.IsFailed.ShouldBeTrue();
         repeated.Errors.ShouldContain(error => error.Message.Contains("already has its initial configuration"));
+
+        await TestApp.SendAsync(Split(1, 1, 1, 1, 1));
+        (await TestApp.SendAsync(new GetSchoolClassByIdQuery { Id = schoolClass.Id }))
+            .Value.StudentInvitationCount.ShouldBe(7);
     }
+
+    private static SaveInvitationSplitCommand Split(int student, int instructor, int prayer, int experience,
+        int change) => new()
+    {
+        StudentInvitationCount = student,
+        InstructorInvitationCount = instructor,
+        OpeningPrayerInvitationCount = prayer,
+        ExperienceInvitationCount = experience,
+        ChangeInvitationCount = change
+    };
 
     // Every guarded command holds a shared class lock, and this one then updates the class row itself:
     // concurrent calls must end in one success and clean "already initialized" failures, never a deadlock error.
