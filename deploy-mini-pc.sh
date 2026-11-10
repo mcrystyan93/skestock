@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# for publishing aspire:  PublicOrigins=https://ske.cristian-cloud.com StoragePublicBlobEndpoint=https://blob.cristian-cloud.com aspire publish -o aspire-output
+# to deploy aspire: ./deploy-mini-pc.sh
+
 REMOTE='ssh://cristian@192.168.0.143:22/run/user/1000/podman/podman.sock'
 COMPOSE='aspire-output/docker-compose.yaml'
 SSH_KEY="${PODMAN_SSH_KEY:-$HOME/.ssh/id_ed25519}"

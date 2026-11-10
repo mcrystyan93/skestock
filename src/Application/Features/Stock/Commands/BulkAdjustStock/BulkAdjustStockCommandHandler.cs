@@ -41,6 +41,15 @@ public class BulkAdjustStockCommandHandler(IApplicationDbContext dbContext, IUse
                                        : 0)))
             return Result.Fail(new StockErrors.BulkConcurrencyConflict(request.ClassId));
 
+        // Re-checked under the class lock: a count opened before an item merge must not add surplus stock to the merged-away item.
+        var surplusItemIds = request.Lines
+            .Where(l => l.ActualQuantity > (byPair.TryGetValue((l.ItemId, l.LocationId), out var held) ? held.Sum(b => b.Quantity) : 0))
+            .Select(l => l.ItemId)
+            .Distinct()
+            .ToList();
+        if (surplusItemIds.Count > 0
+            && await StockAdjuster.FindInactiveItemAsync(dbContext, surplusItemIds, cancellationToken) is { } inactiveId)
+            return Result.Fail(new ItemErrors.ItemInactive(inactiveId));
         // One StockAdjustedEvent per touched location refreshes the list and summary over SignalR.
         var eventLocations = new HashSet<Guid>();
         foreach (var line in request.Lines)

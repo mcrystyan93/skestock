@@ -19,6 +19,9 @@
           </nz-form-control>
         </nz-form-item>
       </nz-col>
+      <nz-col>
+        <ng-container *ngTemplateOutlet="activeSegmented" />
+      </nz-col>
       <nz-col nzFlex="none">
         <button nz-button
                 type="button"
@@ -28,6 +31,11 @@
           Reseteaza
         </button>
       </nz-col>
+      @if (canMerge()) {
+        <nz-col nzFlex="none">
+          <ng-container *ngTemplateOutlet="mergeButton" />
+        </nz-col>
+      }
     </nz-row>
   </ng-container>
 
@@ -49,6 +57,9 @@
           Filtre
         </button>
       </nz-badge>
+      @if (canMerge()) {
+        <ng-container *ngTemplateOutlet="mergeButton" />
+      }
     </div>
 
     <nz-drawer nzTitle="Filtre"
@@ -63,6 +74,12 @@
              class="flex flex-col gap-2">
           <span id="itemFilterCategoryLabel">Categorie</span>
           <ng-container *ngTemplateOutlet="categoryDropdown" />
+        </div>
+        <div role="group"
+             aria-labelledby="itemFilterStatusLabel"
+             class="mt-4 flex flex-col gap-2">
+          <span id="itemFilterStatusLabel">Status</span>
+          <ng-container *ngTemplateOutlet="activeSegmented" />
         </div>
       </ng-container>
     </nz-drawer>
@@ -86,6 +103,15 @@
     </ng-template>
   </ng-template>
 
+  <ng-template #mergeButton>
+    <button nz-button
+            type="button"
+            nzType="primary"
+            (click)="onMerge.emit()">
+      Unește ({{ selectedCount() }})
+    </button>
+  </ng-template>
+
   <ng-template #searchInput>
     <nz-input-wrapper>
       <nz-icon nzInputPrefix
@@ -99,6 +125,18 @@
     </nz-input-wrapper>
   </ng-template>
 
+  <ng-template #activeSegmented>
+    <nz-segmented [formField]="itemListFilterForm.active"
+                  [nzBlock]="true"
+                  aria-label="Filtrează după status">
+      @for (option of activeSegmentOptions; track option.value) {
+        <label nz-segmented-item
+               [nzValue]="option.value">
+          {{ option.label }}
+        </label>
+      }
+    </nz-segmented>
+  </ng-template>
   <ng-template #categoryDropdown>
     <ske-category-dropdown [formField]="itemListFilterForm.category"
                            [allowClear]="true"

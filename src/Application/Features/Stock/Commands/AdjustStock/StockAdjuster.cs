@@ -9,6 +9,18 @@ namespace skestock.Application.Features.Stock.Commands.AdjustStock;
 internal static class StockAdjuster
 {
     /// <summary>
+    /// A surplus creates a new batch, which must not land on a disabled item (e.g. one merged after the count
+    /// opened). Drawing down a disabled item's remaining stock stays allowed, so callers pass only surplus items.
+    /// </summary>
+    public static Task<Guid?> FindInactiveItemAsync(
+        IApplicationDbContext dbContext, IReadOnlyCollection<Guid> surplusItemIds, CancellationToken cancellationToken) =>
+        dbContext.Items
+            .AsNoTracking()
+            .Where(i => surplusItemIds.Contains(i.Id) && !i.IsActive)
+            .Select(i => (Guid?)i.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
+    /// <summary>
     /// Reconciles <paramref name="actualQuantity"/> against the given batches (Quantity &gt; 0, same
     /// item/location/class, already ordered oldest expiry first). A shortfall is drawn down FIFO with one
     /// adjustment transaction per touched batch; a surplus adds a new unattributed batch. Returns the

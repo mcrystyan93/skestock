@@ -1,3 +1,4 @@
+using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.StockBatches.Models;
 using skestock.Domain.Entities;
@@ -17,6 +18,10 @@ public class CreateStockBatchCommandHandler(IApplicationDbContext dbContext, IUs
         // UserProfile.IdentityId (not UserProfile.Id), so the raw identity id can be stored
         // directly - same rationale as CreateGoodsReceiptCommandHandler/AdjustStockCommandHandler.
         var identityId = Guard.Against.Null(user.Id, message: "Creating a stock batch requires an authenticated user.");
+
+        // Re-checked under the class lock: the validator runs before it, so an item merged meanwhile would slip through.
+        if (!await dbContext.Items.AsNoTracking().AnyAsync(i => i.Id == request.ItemId && i.IsActive, cancellationToken))
+            return Result.Fail(new ItemErrors.ItemInactive(request.ItemId));
 
         // GoodsReceiptId is always null here: this is explicitly the "outside a receipt"
         // creation path (see StockBatch.GoodsReceiptId doc comment, e.g. manual entry/rollover).

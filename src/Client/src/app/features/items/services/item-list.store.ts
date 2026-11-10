@@ -1,9 +1,11 @@
-import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { Events, withEventHandlers } from '@ngrx/signals/events';
 import { withItemCollection } from '@ske/shared/items';
-import { ItemDto } from '@ske/models';
+import { ItemDto, MergeItemsRequest } from '@ske/models';
+import { withProblemDetailsFeature } from '@ske/shared/errors';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { filter, groupBy, mergeMap, pipe, switchMap, tap } from 'rxjs';
+import { exhaustMap, filter, groupBy, mergeMap, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
 import { inject } from '@angular/core';
 import { ItemsHttp } from '@ske/shared/items';
@@ -11,20 +13,38 @@ import { realtimeEvents } from '@ske/signalr';
 
 type ItemListState = {
   togglingItemId: string | null;
+  /** Snapshot of the selected rows, so they survive filter changes that unload them. */
+  selected: Record<string, ItemDto>;
+  merging: boolean;
 };
 const initialState: ItemListState = {
-  togglingItemId: null
+  togglingItemId: null,
+  selected: {},
+  merging: false
 };
 
 export const ItemListState = signalStore(
   withState(initialState),
   withItemCollection(),
+  withProblemDetailsFeature('merge'),
+  withComputed((store) => ({
+    selectedItems: () => Object.values(store.selected()),
+    selectedIds: () => new Set(Object.keys(store.selected())),
+    selectedCount: () => Object.keys(store.selected()).length
+  })),
   withMethods((store) => {
     const itemHttp = inject(ItemsHttp);
+    const message = inject(NzMessageService);
 
     const reload = () => {
       store.load(store.filter());
     };
+
+    // Row updates also refresh the selection snapshot so the merge wizard sees current isActive/name/sku.
+    const replaceRow = (updatedItem: ItemDto) => ({
+      items: store.items().map((i) => i.id === updatedItem.id ? updatedItem : i),
+      selected: updatedItem.id in store.selected() ? { ...store.selected(), [updatedItem.id]: updatedItem } : store.selected()
+    });
 
     const toggleActive = rxMethod<ItemDto>(
       pipe(
@@ -38,10 +58,7 @@ export const ItemListState = signalStore(
           return request$.pipe(
             mapResponse({
               next: (updatedItem) => {
-                patchState(store, {
-                  items: store.items().map((i) => i.id === updatedItem.id ? updatedItem : i),
-                  togglingItemId: null
-                });
+                patchState(store, { ...replaceRow(updatedItem), togglingItemId: null });
               },
               error: (error) => {
                 store.handleItemsError(error);
@@ -72,9 +89,7 @@ export const ItemListState = signalStore(
           }).pipe(
             mapResponse({
               next: (updatedItem) => {
-                patchState(store, {
-                  items: store.items().map((i) => i.id === updatedItem.id ? updatedItem : i)
-                });
+                patchState(store, replaceRow(updatedItem));
               },
               error: (error) => {
                 store.handleItemsError(error);
@@ -99,9 +114,7 @@ export const ItemListState = signalStore(
               itemHttp.getById(id).pipe(
                 mapResponse({
                   next: (updatedItem) => {
-                    patchState(store, {
-                      items: store.items().map((i) => i.id === updatedItem.id ? updatedItem : i)
-                    });
+                    patchState(store, replaceRow(updatedItem));
                   },
                   error: () => reload()
                 })
@@ -112,7 +125,54 @@ export const ItemListState = signalStore(
       )
     );
 
-    return { reload, toggleActive, setItemImage, patchItem };
+    const toggleSelected = (item: ItemDto, checked: boolean) => {
+      const { [item.id]: _, ...rest } = store.selected();
+
+      patchState(store, { selected: checked ? { ...rest, [item.id]: item } : rest });
+    };
+
+    // Applies to the loaded rows only; rows selected earlier and no longer loaded stay as they are.
+    const setLoadedSelected = (checked: boolean) => {
+      const selected = { ...store.selected() };
+
+      for (const item of store.items()) {
+        if (checked)
+          selected[item.id] = item;
+        else
+          delete selected[item.id];
+      }
+
+      patchState(store, { selected });
+    };
+
+    // exhaustMap: a second merge while one runs is ignored, so the same ids are never double-submitted.
+    const merge = rxMethod<{ request: MergeItemsRequest; onSuccess?: () => void }>(
+      pipe(
+        tap(() => {
+          store.clearMergeErrors();
+          patchState(store, { merging: true });
+        }),
+        exhaustMap(({ request, onSuccess }) =>
+          itemHttp.merge(request).pipe(
+            mapResponse({
+              next: () => {
+                patchState(store, { merging: false, selected: {} });
+                reload();
+                message.success('Itemele au fost unite.');
+                onSuccess?.();
+              },
+              error: (error) => {
+                store.handleMergeError(error);
+                patchState(store, { merging: false });
+                message.error('Itemele nu au putut fi unite.');
+              }
+            })
+          )
+        )
+      )
+    );
+
+    return { reload, toggleActive, setItemImage, patchItem, toggleSelected, setLoadedSelected, merge };
   }),
   withEventHandlers((store, events = inject(Events)) => ({
     itemListChanges: events.on(

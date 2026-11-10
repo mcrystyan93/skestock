@@ -1,3 +1,4 @@
+using skestock.Application.Common.Errors;
 using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.GoodsReceipts.Commands.CreateGoodsReceipt;
@@ -94,6 +95,28 @@ public class CreateGoodsReceiptCommandHandlerTests
         transaction.ClassId.ShouldBe(schoolClass.Id);
         transaction.GoodsReceiptId.ShouldBe(result.Value.Id);
         transaction.BatchId.ShouldBe(batch.Id);
+    }
+
+    [Test]
+    public async Task Handle_WithInactiveItem_FailsAndCreatesNothing()
+    {
+        var (context, item, _, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        item.IsActive = false;
+        await context.SaveChangesAsync(CancellationToken.None);
+        var handler = new CreateGoodsReceiptCommandHandler(context, new FakeUser(userProfile.IdentityId));
+
+        var result = await handler.Handle(new CreateGoodsReceiptCommand
+        {
+            ClassId = schoolClass.Id,
+            Note = "Weekly delivery",
+            Lines = [new CreateGoodsReceiptLine { ItemId = item.Id, LocationId = location.Id, Quantity = 25 }]
+        }, CancellationToken.None);
+
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.Single().ShouldBeOfType<ItemErrors.ItemInactive>();
+        (await context.StockBatches.CountAsync(CancellationToken.None)).ShouldBe(0);
+        (await context.GoodsReceipts.CountAsync(CancellationToken.None)).ShouldBe(0);
     }
 
     [Test]

@@ -18,6 +18,33 @@ public static class ItemErrors
         }
     }
 
+    /// <summary>Stock must not be created on a disabled item, e.g. one merged into another after the form was opened.</summary>
+    public sealed class ItemInactive : Error
+    {
+        public const string ErrorCode = "items.inactive";
+
+        public ItemInactive(Guid itemId) : base($"Item with id '{itemId}' is inactive.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
+            Metadata.Add(ErrorMetadataKeys.Title, "Item is inactive");
+            Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
+            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object> { ["itemId"] = itemId });
+        }
+    }
+
+    public sealed class MergePrimaryInactive : Error
+    {
+        public const string ErrorCode = "items.merge_primary_inactive";
+
+        public MergePrimaryInactive(Guid itemId) : base($"Item with id '{itemId}' is inactive and cannot be the merge target.")
+        {
+            Metadata.Add(ErrorMetadataKeys.StatusCode, StatusCodes.Status409Conflict);
+            Metadata.Add(ErrorMetadataKeys.Title, "Merge target item is inactive");
+            Metadata.Add(ErrorMetadataKeys.Code, ErrorCode);
+            Metadata.Add(ErrorMetadataKeys.Params, new Dictionary<string, object> { ["itemId"] = itemId });
+        }
+    }
+
     public sealed class ImageNotFound : Error
     {
         public const string ErrorCode = "items.image_not_found";

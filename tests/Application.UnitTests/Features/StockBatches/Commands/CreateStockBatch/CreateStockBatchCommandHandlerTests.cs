@@ -1,3 +1,4 @@
+using skestock.Application.Common.Errors;
 using Microsoft.EntityFrameworkCore;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.StockBatches.Commands.CreateStockBatch;
@@ -107,6 +108,30 @@ public class CreateStockBatchCommandHandlerTests
         var stockBatchCreatedEvent = batch.DomainEvents.Single().ShouldBeOfType<StockBatchCreatedEvent>();
         stockBatchCreatedEvent.ClassId.ShouldBe(schoolClass.Id);
         stockBatchCreatedEvent.LocationId.ShouldBe(location.Id);
+    }
+
+    [Test]
+    public async Task Handle_WithInactiveItem_FailsAndCreatesNothing()
+    {
+        var (context, item, _, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        item.IsActive = false;
+        await context.SaveChangesAsync(CancellationToken.None);
+        var handler = new CreateStockBatchCommandHandler(context, new FakeUser(userProfile.IdentityId));
+
+        var result = await handler.Handle(new CreateStockBatchCommand
+        {
+            ItemId = item.Id,
+            LocationId = location.Id,
+            ReceivedClassId = schoolClass.Id,
+            Quantity = 5,
+            ReceivedDate = new DateOnly(2026, 9, 5),
+            UnitPrice = 1m
+        }, CancellationToken.None);
+
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.Single().ShouldBeOfType<ItemErrors.ItemInactive>();
+        (await context.StockBatches.CountAsync(CancellationToken.None)).ShouldBe(0);
     }
 
     [TestCase(StockBatchSource.Order, StockTransactionType.Order)]

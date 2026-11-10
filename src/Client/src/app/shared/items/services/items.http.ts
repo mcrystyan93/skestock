@@ -5,6 +5,8 @@ import {
   EditItemRequest,
   GetAllItemsRequest,
   ItemDto,
+  ItemMergePreviewDto,
+  MergeItemsRequest,
   PaginatedResponse,
 } from '@ske/models';
 import { catchError, of, shareReplay, tap, throwError, type Observable } from 'rxjs';
@@ -65,6 +67,16 @@ export class ItemsHttp {
   public disable(id: string) {
     return this._httpClient.patch<ItemDto>(`/api/Items/${id}/disable`, {}).pipe(
       tap((item) => this.cacheItem(item))
+    );
+  }
+
+  public mergePreview(request: MergeItemsRequest) {
+    return this._httpClient.post<ItemMergePreviewDto>('/api/Items/merge-preview', request);
+  }
+
+  public merge(request: MergeItemsRequest) {
+    return this._httpClient.post<void>('/api/Items/merge', request).pipe(
+      tap(() => request.itemIds.forEach((id) => this._itemByIdCache.delete(id)))
     );
   }
 
