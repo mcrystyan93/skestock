@@ -25,3 +25,13 @@ export type RoomConfigurationDto = {
 };
 
 export type SaveRoomConfigurationRequest = RoomConfigurationDto;
+
+export type InvitationSplitDto = {
+  studentInvitationCount: number;
+  instructorInvitationCount: number;
+  openingPrayerInvitationCount: number;
+  experienceInvitationCount: number;
+  changeInvitationCount: number;
+};
+
+export type SaveInvitationSplitRequest = InvitationSplitDto;

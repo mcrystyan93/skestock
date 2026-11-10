@@ -5,9 +5,16 @@ import { DepartmentCardListContainer } from '../departments/department-card-list
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { InvitationsSection } from '../invitations/invitations-section';
 import { RoomsSection } from '../rooms/rooms-section';
+import { InvitationSplitSection } from '../invitation-split/invitation-split-section';
 
 @Component({
-  imports: [ConfigurationHeader, DepartmentCardListContainer, InvitationsSection, RoomsSection],
+  imports: [
+    ConfigurationHeader,
+    DepartmentCardListContainer,
+    InvitationsSection,
+    InvitationSplitSection,
+    RoomsSection,
+  ],
   selector: 'ske-class-configuration-page',
   templateUrl: './configuration.page.html',
   host: {
@@ -22,5 +29,6 @@ export class ConfigurationPage {
     this.store.loadInvitations();
     this.store.loadDepartments();
     this.store.loadRooms();
+    this.store.loadInvitationSplit();
   }
 }

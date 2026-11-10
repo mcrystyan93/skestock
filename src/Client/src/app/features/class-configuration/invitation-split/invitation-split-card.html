@@ -1,0 +1,70 @@
+<nz-card [nzTitle]="cardTitle"
+         class="min-w-0"
+         [attr.aria-busy]="loading()">
+  <ng-container *skeLoader="loading()">
+    <form nz-form
+          nzLayout="vertical"
+          nzNoColon
+          novalidate
+          class="mt-4 w-full"
+          (submit)="$event.preventDefault(); onSave.emit()">
+      <div class="grid grid-cols-1 gap-x-4 md:grid-cols-3">
+        @for (field of fields; track field.key) {
+          <nz-form-item>
+            <nz-form-label nzRequired
+                           [nzFor]="field.id">{{ field.label }}
+            </nz-form-label>
+            <nz-form-control [nzErrorTip]="errorTemplate">
+              <nz-input-number [nzId]="field.id"
+                               [formField]="splitForm[field.key]"
+                               [nzMin]="0"
+                               [nzMax]="maxCount"
+                               [nzStep]="1"
+                               class="w-full!"
+                               [attr.aria-invalid]="
+                  splitForm[field.key]().touched() && splitForm[field.key]().invalid() ? 'true' : null
+                "
+                               [attr.aria-describedby]="
+                  splitForm[field.key]().touched() && splitForm[field.key]().invalid()
+                    ? field.id + '-errors'
+                    : 'invitation-split-help'
+                "/>
+              <ng-template #errorTemplate>
+                <div [id]="field.id + '-errors'">
+                  @for (error of splitForm[field.key]().errors(); track $index) {
+                    <div class="ant-form-item-explain-error">{{ error.message }}</div>
+                  }
+                </div>
+              </ng-template>
+            </nz-form-control>
+          </nz-form-item>
+        }
+      </div>
+
+      <p id="invitation-split-help"
+         nz-typography
+         nzType="secondary"
+         class="-mt-2 mb-0!">
+        Introduceți un număr întreg între 0 și {{ maxCount }}.
+      </p>
+      <p class="mt-2 mb-0!"
+         aria-live="polite"
+         data-testid="invitation-split-total">
+        Total alocat: <strong>{{ allocatedTotal() }}</strong> din <strong>{{ invitationCount() }}</strong>
+      </p>
+      <button
+        nz-button
+        class="mt-3!"
+        nzType="primary"
+        type="submit"
+        [nzLoading]="loading() || splitForm().submitting()"
+      >
+        Salvează
+      </button>
+    </form>
+  </ng-container>
+</nz-card>
+
+<ng-template #cardTitle>
+  <h3 class="mb-0! text-base font-semibold">Împărțirea invitațiilor</h3>
+</ng-template>
