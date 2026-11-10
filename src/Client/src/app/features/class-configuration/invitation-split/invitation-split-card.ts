@@ -14,9 +14,14 @@ import {LoaderDirective} from '@ske/shared/loader';
 import {InvitationSplitDto, SaveInvitationSplitRequest} from '@ske/models';
 import {MAX_INVITATION_SPLIT_COUNT} from '../services/configuration.constants';
 
-const INVITATION_SPLIT_FIELDS: readonly { key: keyof SaveInvitationSplitRequest; id: string; label: string }[] = [
-  {key: 'studentInvitationCount', id: 'student-invitation-count', label: 'Cursanți'},
-  {key: 'instructorInvitationCount', id: 'instructor-invitation-count', label: 'Instructori'},
+const INVITATION_SPLIT_FIELDS: readonly {
+  key: keyof SaveInvitationSplitRequest;
+  id: string;
+  label: string;
+  hint?: string;
+}[] = [
+  {key: 'studentInvitationCount', id: 'student-invitation-count', label: 'Cursanți', hint: 'De obicei în jur de 28–30.'},
+  {key: 'instructorInvitationCount', id: 'instructor-invitation-count', label: 'Instructori', hint: 'De obicei 2.'},
   {key: 'openingPrayerInvitationCount', id: 'opening-prayer-invitation-count', label: 'Rugăciune deschidere'},
   {key: 'experienceInvitationCount', id: 'experience-invitation-count', label: 'Experiențe'},
   {key: 'changeInvitationCount', id: 'change-invitation-count', label: 'Schimbări'},
@@ -69,6 +74,8 @@ export class InvitationSplitCard {
       0,
     ),
   );
+
+  protected readonly invitationTotal = computed(() => this.allocatedTotal() * this.invitationCount());
 
   public async submit(): Promise<InvitationSplitFormSubmit> {
     let formData: SaveInvitationSplitRequest | null = null;

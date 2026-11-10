@@ -53,7 +53,7 @@ describe('InvitationSplitSection', () => {
 
   it('renders the heading and the saved invitation count in the total line', () => {
     expect(fixture.nativeElement.querySelector('h2').textContent).toContain('Împărțirea invitațiilor');
-    expect(fixture.nativeElement.textContent.replace(/\s+/g, ' ')).toContain('Total alocat: 24 din 30');
+    expect(fixture.nativeElement.textContent.replace(/\s+/g, ' ')).toContain('Total: 24 × 30 = 720 invitații');
   });
 
   it('submits all five values through the configuration store', async () => {

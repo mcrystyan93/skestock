@@ -38,14 +38,27 @@ describe('InvitationSplitCard', () => {
     expect(fixture.nativeElement.querySelector('button[type="submit"]').textContent).toContain('Salvează');
   });
 
-  it('shows the allocated total against the invitation count and follows edits', () => {
-    expect(total()).toBe('Total alocat: 24 din 30');
+  it('shows the hints under Cursanți and Instructori', () => {
+    expect(fixture.nativeElement.querySelector('#student-invitation-count-hint').textContent).toBe('De obicei în jur de 28–30.');
+    expect(fixture.nativeElement.querySelector('#instructor-invitation-count-hint').textContent).toBe('De obicei 2.');
+    expect(fixture.nativeElement.querySelectorAll('.ant-form-item-extra')).toHaveLength(2);
+  });
+
+  it('multiplies the allocated sum by the invitation count and follows edits', () => {
+    expect(total()).toBe('Total: 24 × 30 = 720 invitații');
 
     fixture.componentInstance.splitForm.studentInvitationCount().value.set(Number.NaN);
     fixture.componentInstance.splitForm.changeInvitationCount().value.set(20);
     fixture.detectChanges();
 
-    expect(total()).toBe('Total alocat: 30 din 30');
+    expect(total()).toBe('Total: 30 × 30 = 900 invitații');
+  });
+
+  it('shows only the sum while the invitation count is not set', () => {
+    fixture.componentRef.setInput('invitationCount', 0);
+    fixture.detectChanges();
+
+    expect(total()).toBe('Total: 24 (setați „Număr de invitații” pentru a calcula totalul)');
   });
 
   it('returns a complete payload', async () => {
