@@ -2,6 +2,7 @@ import { Component, input, output } from '@angular/core';
 import { BaseList } from '@ske/shared/tables';
 import { GetAllItemsRequest, ItemDto } from '@ske/models';
 import { NzCardComponent } from 'ng-zorro-antd/card';
+import { NzCheckboxComponent } from 'ng-zorro-antd/checkbox';
 import { NzEmptyComponent } from 'ng-zorro-antd/empty';
 import { NzSkeletonComponent } from 'ng-zorro-antd/skeleton';
 import { NzSpinComponent } from 'ng-zorro-antd/spin';
@@ -19,6 +20,7 @@ import { ItemThumbnail } from '@ske/shared/items';
   imports: [
     ItemThumbnail,
     NzCardComponent,
+    NzCheckboxComponent,
     NzEmptyComponent,
     NzSkeletonComponent,
     NzSpinComponent,
@@ -36,6 +38,8 @@ import { ItemThumbnail } from '@ske/shared/items';
 })
 export class ItemListSmall extends BaseList<ItemDto, GetAllItemsRequest> {
   public readonly loading = input.required<boolean>();
+  public readonly selectedIds = input<ReadonlySet<string>>(new Set());
+  public readonly onToggleSelected = output<{ item: ItemDto; checked: boolean }>();
   public readonly onEdit = output<ItemDto>();
   public readonly onImageUploaded = output<{ item: ItemDto; fileId: string }>();
 

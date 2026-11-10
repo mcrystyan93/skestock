@@ -44,6 +44,40 @@ public class BulkAdjustStockCommandHandlerTests
     }
 
     [Test]
+    public async Task Handle_WithSurplusOnInactiveItem_FailsAndSavesNothing()
+    {
+        var d = await BulkAdjustStockTestData.CreateAsync();
+        await using var _ = d.Context;
+        var flourBatch = d.AddBatch(d.Flour, d.Pantry, 5);
+        d.Rice.IsActive = false;
+        await d.Context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await Handler(d).Handle(
+            Command(d, new Line(d.Flour.Id, d.Pantry.Id, 2), new Line(d.Rice.Id, d.Pantry.Id, 9)), CancellationToken.None);
+
+        result.IsFailed.ShouldBeTrue();
+        result.Errors.Single().ShouldBeOfType<ItemErrors.ItemInactive>();
+        (await d.Context.StockBatches.CountAsync()).ShouldBe(1);
+        (await d.Context.StockBatches.FindAsync(flourBatch.Id))!.Quantity.ShouldBe(5);
+    }
+
+    [Test]
+    public async Task Handle_WithShortfallOnInactiveItem_StillDrawsDown()
+    {
+        var d = await BulkAdjustStockTestData.CreateAsync();
+        await using var _ = d.Context;
+        var batch = d.AddBatch(d.Rice, d.Pantry, 8);
+        d.Rice.IsActive = false;
+        await d.Context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await Handler(d).Handle(
+            Command(d, new Line(d.Rice.Id, d.Pantry.Id, 3)), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        (await d.Context.StockBatches.FindAsync(batch.Id))!.Quantity.ShouldBe(3);
+    }
+
+    [Test]
     public async Task Handle_WithSurplus_CreatesUnattributedBatch()
     {
         var d = await BulkAdjustStockTestData.CreateAsync();

@@ -1,3 +1,4 @@
+using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.GoodsReceipts.Models;
 using skestock.Domain.Entities;
@@ -34,8 +35,11 @@ public class CreateGoodsReceiptCommandHandler(IApplicationDbContext dbContext, I
         var itemInfoById = await dbContext.Items
             .AsNoTracking()
             .Where(i => itemIds.Contains(i.Id))
-            .Select(i => new { i.Id, i.IsPerishable, i.ShelfLifeDays })
-            .ToDictionaryAsync(i => i.Id, i => (i.IsPerishable, i.ShelfLifeDays), cancellationToken);
+            .Select(i => new { i.Id, i.IsPerishable, i.ShelfLifeDays, i.IsActive })
+            .ToDictionaryAsync(i => i.Id, i => (i.IsPerishable, i.ShelfLifeDays, i.IsActive), cancellationToken);
+        // Re-checked under the class lock: the validator runs before it, so an item merged meanwhile would slip through.
+        if (itemInfoById.Where(i => !i.Value.IsActive).Select(i => (Guid?)i.Key).FirstOrDefault() is { } inactiveId)
+            return Result.Fail(new ItemErrors.ItemInactive(inactiveId));
 
         foreach (var line in request.Lines)
         {

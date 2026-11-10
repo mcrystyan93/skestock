@@ -21,6 +21,7 @@ import { realtimeGroups, SignalRGroupManagerStore } from '@ske/signalr';
 import { NzTabComponent, NzTabsComponent } from 'ng-zorro-antd/tabs';
 import { ItemImportListTab } from './tabs/item-import-list-tab';
 import { ItemListTab } from './tabs/item-list-tab';
+import { ItemMergeWizard } from '../list/merge/item-merge-wizard';
 
 @Component({
   imports: [
@@ -83,6 +84,15 @@ export class ItemsPage implements OnInit, OnDestroy {
 
   public onImageUploaded(event: { item: ItemDto; fileId: string }) {
     this.listStore.setItemImage(event);
+  }
+
+  public onMerge() {
+    this._modalService.create({
+      nzContent: ItemMergeWizard,
+      nzCentered: true,
+      nzMaskClosable: false,
+      nzWrapClassName: 'modal-100 modal-lg-75'
+    });
   }
 
   public onAdd() {

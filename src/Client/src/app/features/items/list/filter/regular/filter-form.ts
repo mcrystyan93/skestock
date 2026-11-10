@@ -2,10 +2,14 @@ import { Component, computed, effect, input, linkedSignal, output, signal, untra
 import { NgTemplateOutlet } from '@angular/common';
 import {
   buildEqualsFilterForDropdown,
+  buildItemActiveFilter,
   CategoryDropdownValue,
   ColumnFilter,
   GetAllItemsRequest,
-  getDropdownFilterValue
+  getDropdownFilterValue,
+  getItemActiveFilter,
+  ITEM_ACTIVE_FILTER_FIELD,
+  ItemActiveFilter
 } from '@ske/models';
 import { debounce, form, FormField, submit } from '@angular/forms/signals';
 import { isEqual, isNil } from 'lodash-es';
@@ -19,6 +23,7 @@ import { CategoryDropdown } from '@ske/shared/categories';
 import { LayoutBreakpoint } from '@ske/shared/directives';
 import { NzBadgeComponent } from 'ng-zorro-antd/badge';
 import { NzDrawerComponent, NzDrawerContentDirective } from 'ng-zorro-antd/drawer';
+import { NzSegmentedComponent, NzSegmentedItemComponent } from 'ng-zorro-antd/segmented';
 
 @Component({
   imports: [
@@ -37,7 +42,9 @@ import { NzDrawerComponent, NzDrawerContentDirective } from 'ng-zorro-antd/drawe
     LayoutBreakpoint,
     NzBadgeComponent,
     NzDrawerComponent,
-    NzDrawerContentDirective
+    NzDrawerContentDirective,
+    NzSegmentedComponent,
+    NzSegmentedItemComponent
   ],
   selector: 'ske-item-filter-form',
   styles: ``,
@@ -47,7 +54,15 @@ export class FilterForm {
   public readonly loading = input.required<boolean>();
   public readonly filter = input.required<GetAllItemsRequest>();
 
+  public readonly selectedCount = input(0);
+
   public readonly onFilterChange = output<GetAllItemsRequest>();
+  public readonly onMerge = output<void>();
+  public readonly activeSegmentOptions: { label: string; value: ItemActiveFilter }[] = [
+    { label: 'Active', value: 'active' },
+    { label: 'Inactive', value: 'inactive' },
+    { label: 'Toate', value: 'all' }
+  ];
   private _initialFilterEmitted = false;
   private _initialFormChangeHandled = false;
 
@@ -55,7 +70,8 @@ export class FilterForm {
     source: () => this.filter(),
     computation: (filter) => (<ItemListFilterModel>{
       searchTerm: filter.searchTerm ?? '',
-      category: getDropdownFilterValue(filter.filters, 'categoryId') as CategoryDropdownValue
+      category: getDropdownFilterValue(filter.filters, 'categoryId') as CategoryDropdownValue,
+      active: getItemActiveFilter(filter.filters)
     })
   });
 
@@ -64,9 +80,11 @@ export class FilterForm {
   });
 
   public readonly filtersOpen = signal(false);
+  public readonly canMerge = computed(() => this.selectedCount() >= 2);
 
   public readonly activeFilterCount = computed(() =>
-    this.itemListFilterForm().value().category ? 1 : 0
+    (this.itemListFilterForm().value().category ? 1 : 0) +
+    (this.itemListFilterForm().value().active === DEFAULT_ACTIVE ? 0 : 1)
   );
 
   public readonly filtersButtonLabel = computed(() => {
@@ -128,7 +146,8 @@ export class FilterForm {
       filters: [
         ...this.filter().filters.filter(filter => !ITEM_FILTER_FIELDS.has(filter.field)),
         ...[
-          buildEqualsFilterForDropdown('categoryId', criteria.category)
+          buildEqualsFilterForDropdown('categoryId', criteria.category),
+          buildItemActiveFilter(criteria.active)
         ].filter((filter): filter is ColumnFilter => filter !== null)
       ]
     };
@@ -152,7 +171,8 @@ export class FilterForm {
   public clear() {
     this.itemListFilterForm().reset({
       searchTerm: '',
-      category: null
+      category: null,
+      active: DEFAULT_ACTIVE
     });
 
     this.onSubmit();
@@ -162,5 +182,7 @@ export class FilterForm {
 type ItemListFilterModel = {
   searchTerm: string;
   category: CategoryDropdownValue;
+  active: ItemActiveFilter;
 }
-const ITEM_FILTER_FIELDS = new Set(['categoryId']);
+const ITEM_FILTER_FIELDS = new Set(['categoryId', ITEM_ACTIVE_FILTER_FIELD])
+const DEFAULT_ACTIVE: ItemActiveFilter = 'active';
