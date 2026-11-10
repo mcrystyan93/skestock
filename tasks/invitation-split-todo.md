@@ -63,7 +63,7 @@ Field names (confirm before task 2): `StudentInvitationCount` (Cursanți), `Inst
   - Verify: commands above; `graphify update .` from repo root
   - Files: `graphify-out/` (generated)
 
-- [ ] 13. Commit, push, open PR
+- [x] 13. Commit, push, open PR
   - Acceptance: commits on `feature/invitation-split`; PR to `master` describing the change, migration (additive, temporal retention checked) and test results; ends with the Claude Code attribution line.
   - Verify: `gh pr view --web` / PR URL returned
   - Files: none
