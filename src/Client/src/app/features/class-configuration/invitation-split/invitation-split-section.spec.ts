@@ -1,10 +1,10 @@
-import { signal, WritableSignal } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { InvitationSplitDto } from '@ske/models';
-import { ConfigurationStore } from '../services/configuration.store';
-import { InvitationSplitCard } from './invitation-split-card';
-import { InvitationSplitSection } from './invitation-split-section';
+import {signal, WritableSignal} from '@angular/core';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
+import {InvitationSplitDto} from '@ske/models';
+import {ConfigurationStore} from '../services/configuration.store';
+import {InvitationSplitCard} from './invitation-split-card';
+import {InvitationSplitSection} from './invitation-split-section';
 
 describe('InvitationSplitSection', () => {
   let fixture: ComponentFixture<InvitationSplitSection>;
@@ -35,7 +35,7 @@ describe('InvitationSplitSection', () => {
     };
     TestBed.configureTestingModule({
       imports: [InvitationSplitSection],
-      providers: [{ provide: ConfigurationStore, useValue: store }],
+      providers: [{provide: ConfigurationStore, useValue: store}],
     });
     fixture = TestBed.createComponent(InvitationSplitSection);
     fixture.detectChanges();
@@ -47,13 +47,15 @@ describe('InvitationSplitSection', () => {
   const submitCardForm = async () => {
     fixture.nativeElement
       .querySelector('form')
-      .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      .dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
     await fixture.whenStable();
   };
 
   it('renders the heading and the saved invitation count in the total line', () => {
     expect(fixture.nativeElement.querySelector('h2').textContent).toContain('Împărțirea invitațiilor');
-    expect(fixture.nativeElement.textContent.replace(/\s+/g, ' ')).toContain('Total: 24 × 30 = 720 invitații');
+    expect(fixture.nativeElement.textContent.replace(/\s+/g, ' ')).toContain(
+      'Total alocat: 299–319 din maximum 30 invitații',
+    );
   });
 
   it('submits all five values through the configuration store', async () => {
@@ -62,7 +64,7 @@ describe('InvitationSplitSection', () => {
 
     await submitCardForm();
 
-    expect(store.saveInvitationSplit).toHaveBeenCalledWith({ ...split, changeInvitationCount: 9 });
+    expect(store.saveInvitationSplit).toHaveBeenCalledWith({...split, changeInvitationCount: 9});
   });
 
   it('does not send an invalid split to the store', async () => {

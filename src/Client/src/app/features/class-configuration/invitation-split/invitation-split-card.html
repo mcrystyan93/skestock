@@ -54,11 +54,14 @@
       <p class="mt-2 mb-0!"
          aria-live="polite"
          data-testid="invitation-split-total">
+        Total alocat: <strong>{{ rangeLabel() }}</strong>
         @if (invitationCount() > 0) {
-          Total: <strong>{{ allocatedTotal() }}</strong> × <strong>{{ invitationCount() }}</strong> =
-          <strong>{{ invitationTotal() }}</strong> invitații
+          din maximum <strong>{{ invitationCount() }}</strong> invitații
         } @else {
-          Total: <strong>{{ allocatedTotal() }}</strong> (setați „Număr de invitații” pentru a calcula totalul)
+          invitații (setați „Număr de invitații” pentru a vedea totalul față de maxim)
+        }
+        @if (exceedsMaximum()) {
+          <nz-tag nzColor="warning" class="ms-2">Depășește maximul</nz-tag>
         }
       </p>
       <button

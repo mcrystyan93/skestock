@@ -9,10 +9,16 @@ import {
   NzFormLabelComponent,
 } from 'ng-zorro-antd/form';
 import {NzInputNumberComponent} from 'ng-zorro-antd/input-number';
+import {NzTagComponent} from 'ng-zorro-antd/tag';
 import {NzTypographyComponent} from 'ng-zorro-antd/typography';
 import {LoaderDirective} from '@ske/shared/loader';
 import {InvitationSplitDto, SaveInvitationSplitRequest} from '@ske/models';
-import {MAX_INVITATION_SPLIT_COUNT} from '../services/configuration.constants';
+import {
+  INSTRUCTOR_HEADCOUNT,
+  MAX_INVITATION_SPLIT_COUNT,
+  MAX_STUDENT_HEADCOUNT,
+  MIN_STUDENT_HEADCOUNT,
+} from '../services/configuration.constants';
 
 const INVITATION_SPLIT_FIELDS: readonly {
   key: keyof SaveInvitationSplitRequest;
@@ -20,8 +26,18 @@ const INVITATION_SPLIT_FIELDS: readonly {
   label: string;
   hint?: string;
 }[] = [
-  {key: 'studentInvitationCount', id: 'student-invitation-count', label: 'Cursanți', hint: 'De obicei în jur de 28–30.'},
-  {key: 'instructorInvitationCount', id: 'instructor-invitation-count', label: 'Instructori', hint: 'De obicei 2.'},
+  {
+    key: 'studentInvitationCount',
+    id: 'student-invitation-count',
+    label: 'Cursanți',
+    hint: `Se înmulțește cu aprox. ${MIN_STUDENT_HEADCOUNT}–${MAX_STUDENT_HEADCOUNT} cursanți.`,
+  },
+  {
+    key: 'instructorInvitationCount',
+    id: 'instructor-invitation-count',
+    label: 'Instructori',
+    hint: `Se înmulțește cu ${INSTRUCTOR_HEADCOUNT} instructori.`,
+  },
   {key: 'openingPrayerInvitationCount', id: 'opening-prayer-invitation-count', label: 'Rugăciune deschidere'},
   {key: 'experienceInvitationCount', id: 'experience-invitation-count', label: 'Experiențe'},
   {key: 'changeInvitationCount', id: 'change-invitation-count', label: 'Schimbări'},
@@ -37,6 +53,7 @@ const INVITATION_SPLIT_FIELDS: readonly {
     NzFormItemComponent,
     NzFormLabelComponent,
     NzInputNumberComponent,
+    NzTagComponent,
     NzTypographyComponent,
     LoaderDirective,
   ],
@@ -67,15 +84,15 @@ export class InvitationSplitCard {
     }
   });
 
-  // Informational only: empty or invalid fields count as 0 so the line never shows NaN.
-  protected readonly allocatedTotal = computed(() =>
-    Object.values(this.splitForm().value()).reduce(
-      (total: number, value: unknown) => total + (Number.isFinite(value) ? (value as number) : 0),
-      0,
-    ),
+  protected readonly range = computed(() => invitationRange(this.splitForm().value()));
+  protected readonly rangeLabel = computed(() => {
+    const {min, max} = this.range();
+    return min === max ? `${min}` : `${min}–${max}`;
+  });
+  // Informational only: never blocks saving.
+  protected readonly exceedsMaximum = computed(
+    () => this.invitationCount() > 0 && this.range().max > this.invitationCount(),
   );
-
-  protected readonly invitationTotal = computed(() => this.allocatedTotal() * this.invitationCount());
 
   public async submit(): Promise<InvitationSplitFormSubmit> {
     let formData: SaveInvitationSplitRequest | null = null;
@@ -90,3 +107,20 @@ export type InvitationSplitFormSubmit = {
   isValid: boolean;
   formData: SaveInvitationSplitRequest | null;
 };
+
+export type InvitationRange = { min: number; max: number };
+
+// Empty or invalid fields count as 0 so the total never shows NaN.
+export function invitationRange(split: SaveInvitationSplitRequest): InvitationRange {
+  const count = (value: unknown) => (typeof value === 'number' && Number.isFinite(value) ? value : 0);
+  const students = count(split.studentInvitationCount);
+  const fixed =
+    count(split.instructorInvitationCount) * INSTRUCTOR_HEADCOUNT +
+    count(split.openingPrayerInvitationCount) +
+    count(split.experienceInvitationCount) +
+    count(split.changeInvitationCount);
+  return {
+    min: students * MIN_STUDENT_HEADCOUNT + fixed,
+    max: students * MAX_STUDENT_HEADCOUNT + fixed,
+  };
+}
