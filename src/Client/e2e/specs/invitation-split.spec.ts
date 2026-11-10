@@ -66,7 +66,9 @@ test('administrator edits, validates and saves the invitation split', async ({pa
   await openConfiguration(page);
   const inputs = LABELS.map((label) => section(page).getByLabel(label, {exact: true}));
   await expect(inputs[0]).toHaveValue('10');
-  await expect(total(page)).toHaveText(/Total alocat:\s*24\s*din\s*30/);
+  await expect(section(page).getByText('De obicei în jur de 28–30.')).toBeVisible();
+  await expect(section(page).getByText('De obicei 2.')).toBeVisible();
+  await expect(total(page)).toHaveText(/Total:\s*24\s*×\s*30\s*=\s*720\s*invitații/);
 
   await inputs[0].focus();
   for (const input of inputs.slice(1)) {
@@ -78,7 +80,7 @@ test('administrator edits, validates and saves the invitation split', async ({pa
   await inputs[0].fill('201');
   await inputs[0].blur();
   await expect(inputs[0]).toHaveValue('200');
-  await expect(total(page)).toHaveText(/Total alocat:\s*214\s*din\s*30/);
+  await expect(total(page)).toHaveText(/Total:\s*214\s*×\s*30\s*=\s*6420\s*invitații/);
 
   await inputs[0].fill('');
   await saveButton(page).click();
@@ -104,7 +106,7 @@ test('administrator edits, validates and saves the invitation split', async ({pa
     changeInvitationCount: 11,
   });
   await expect.poll(() => getRequests).toBe(2);
-  await expect(total(page)).toHaveText(/Total alocat:\s*30\s*din\s*30/);
+  await expect(total(page)).toHaveText(/Total:\s*30\s*×\s*30\s*=\s*900\s*invitații/);
 
   const viewportWidth = await page.evaluate(() => window.innerWidth);
   const boxes = await section(page).getByRole('spinbutton').evaluateAll((elements) =>

@@ -14,7 +14,8 @@
             <nz-form-label nzRequired
                            [nzFor]="field.id">{{ field.label }}
             </nz-form-label>
-            <nz-form-control [nzErrorTip]="errorTemplate">
+            <nz-form-control [nzErrorTip]="errorTemplate"
+                             [nzExtra]="field.hint ? hintTemplate : undefined">
               <nz-input-number [nzId]="field.id"
                                [formField]="splitForm[field.key]"
                                [nzMin]="0"
@@ -26,9 +27,12 @@
                 "
                                [attr.aria-describedby]="
                   splitForm[field.key]().touched() && splitForm[field.key]().invalid()
-                    ? field.id + '-errors'
-                    : 'invitation-split-help'
+                    ? field.id + '-errors' + (field.hint ? ' ' + field.id + '-hint' : '')
+                    : field.hint ? field.id + '-hint invitation-split-help' : 'invitation-split-help'
                 "/>
+              <ng-template #hintTemplate>
+                <span [id]="field.id + '-hint'">{{ field.hint }}</span>
+              </ng-template>
               <ng-template #errorTemplate>
                 <div [id]="field.id + '-errors'">
                   @for (error of splitForm[field.key]().errors(); track $index) {
@@ -50,7 +54,12 @@
       <p class="mt-2 mb-0!"
          aria-live="polite"
          data-testid="invitation-split-total">
-        Total alocat: <strong>{{ allocatedTotal() }}</strong> din <strong>{{ invitationCount() }}</strong>
+        @if (invitationCount() > 0) {
+          Total: <strong>{{ allocatedTotal() }}</strong> × <strong>{{ invitationCount() }}</strong> =
+          <strong>{{ invitationTotal() }}</strong> invitații
+        } @else {
+          Total: <strong>{{ allocatedTotal() }}</strong> (setați „Număr de invitații” pentru a calcula totalul)
+        }
       </p>
       <button
         nz-button

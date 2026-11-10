@@ -54,4 +54,5 @@ Backend ca `SaveRoomConfiguration` (nullable `int?` + `NotNull` + `GreaterThanOr
 3. Valori negative, zecimale, goale sau >200 sunt respinse în UI și în backend.
 4. Salvarea altor secțiuni nu modifică valorile (și invers).
 5. O clasă nouă sau inițializată primește cele 5 valori curente; schimbările ulterioare din configurare nu o afectează.
-6. `dotnet build`, testele unit/functional/client și e2e trec; capturile desktop+mobil arată corect.
+6. Sub „Cursanți” apare indicația „De obicei în jur de 28–30.”, sub „Instructori” „De obicei 2.” (fără validare). Linia informativă devine „Total: S × Y = P invitații” (S = suma celor 5 câmpuri, Y = „Număr de invitații”); dacă Y nu e setat (0), se afișează doar S. Nu blochează salvarea.
+7. `dotnet build`, testele unit/functional/client și e2e trec; capturile desktop+mobil arată corect.
