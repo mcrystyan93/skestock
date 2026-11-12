@@ -99,9 +99,9 @@ export class ReviewLine {
     });
   });
 
-  public unitPriceFormatter = (value: number) => this._currencyPipe.transform(value) ?? '0';
+  public unitPriceFormatter = (value: number) => this._currencyPipe.transform(value, 'RON', '') ?? '0';
 
-  public unitPriceParser = (value: string) => Number(value.replace(/[^0-9.-]+/g, ''));
+  public unitPriceParser = (value: string) => Number(value.replace(/[^0-9,-]+/g, '').replace(',', '.'));
 
   public createPrefill(line: ReviewEditableLine): Partial<ItemDto> {
     return {
