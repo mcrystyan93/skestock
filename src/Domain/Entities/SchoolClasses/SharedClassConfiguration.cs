@@ -9,5 +9,10 @@ public class SharedClassConfiguration
     public int Room4SeatCount { get; set; }
     public int Room2SeatCount { get; set; }
     public int Room6SeatCount { get; set; }
+    public int StudentInvitationCount { get; set; }
+    public int InstructorInvitationCount { get; set; }
+    public int OpeningPrayerInvitationCount { get; set; }
+    public int ExperienceInvitationCount { get; set; }
+    public int ChangeInvitationCount { get; set; }
     public ICollection<DepartmentTemplate> DepartmentTemplates { get; set; } = new List<DepartmentTemplate>();
 }

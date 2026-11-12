@@ -1,0 +1,18 @@
+<section class="min-w-0"
+         aria-labelledby="invitation-split-heading">
+  <div class="mb-4">
+    <h2 id="invitation-split-heading"
+        class="mb-1 text-lg font-semibold">Împărțirea invitațiilor</h2>
+    <p nz-typography
+       nzType="secondary"
+       class="mb-0!">
+      Configurați câte invitații revin fiecărei categorii.
+    </p>
+  </div>
+  <ske-error-display [problemDetail]="store.invitationSplitProblemDetail()"
+                     [validationErrors]="store.invitationSplitValidationErrors()" />
+  <ske-configuration-invitation-split-card [split]="store.invitationSplit()"
+                                           [invitationCount]="store.invitationCount()"
+                                           [loading]="store.invitationSplitLoading()"
+                                           (onSave)="save()" />
+</section>

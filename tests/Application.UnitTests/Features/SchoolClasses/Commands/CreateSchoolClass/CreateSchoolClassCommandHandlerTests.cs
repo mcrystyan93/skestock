@@ -118,7 +118,15 @@ public class CreateSchoolClassCommandHandlerTests
     public async Task Handle_WithValidData_PersistsSchoolClassAndReturnsDto()
     {
         await using var context = CreateContext();
-        context.SharedClassConfigurations.Add(new SharedClassConfiguration { InvitationCount = 24 });
+        context.SharedClassConfigurations.Add(new SharedClassConfiguration
+        {
+            InvitationCount = 24,
+            StudentInvitationCount = 10,
+            InstructorInvitationCount = 5,
+            OpeningPrayerInvitationCount = 2,
+            ExperienceInvitationCount = 3,
+            ChangeInvitationCount = 4
+        });
         await context.SaveChangesAsync(CancellationToken.None);
         var handler = new CreateSchoolClassCommandHandler(context);
 
@@ -140,9 +148,16 @@ public class CreateSchoolClassCommandHandlerTests
         result.Value.Id.ShouldNotBe(Guid.Empty);
         result.Value.InvitationCount.ShouldBe(24);
         result.Value.IsConfigurationInitialized.ShouldBeTrue();
+        result.Value.StudentInvitationCount.ShouldBe(10);
+        result.Value.InstructorInvitationCount.ShouldBe(5);
+        result.Value.OpeningPrayerInvitationCount.ShouldBe(2);
+        result.Value.ExperienceInvitationCount.ShouldBe(3);
+        result.Value.ChangeInvitationCount.ShouldBe(4);
 
         var persisted = await context.SchoolClasses.SingleAsync(c => c.Id == result.Value.Id, CancellationToken.None);
         persisted.Name.ShouldBe("Fall 2026 - Cycle 1");
+        persisted.StudentInvitationCount.ShouldBe(10);
+        persisted.ChangeInvitationCount.ShouldBe(4);
     }
 
     [Test]

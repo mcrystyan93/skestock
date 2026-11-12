@@ -1763,6 +1763,9 @@ namespace skestock.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("ChangeInvitationCount")
+                        .HasColumnType("int");
+
                     b.Property<Guid?>("CreatedById")
                         .HasColumnType("uniqueidentifier");
 
@@ -1771,6 +1774,12 @@ namespace skestock.Infrastructure.Data.Migrations
 
                     b.Property<DateOnly>("EndDate")
                         .HasColumnType("date");
+
+                    b.Property<int?>("ExperienceInvitationCount")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("InstructorInvitationCount")
+                        .HasColumnType("int");
 
                     b.Property<int?>("InvitationCount")
                         .HasColumnType("int");
@@ -1786,6 +1795,9 @@ namespace skestock.Infrastructure.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("OpeningPrayerInvitationCount")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("PeriodEnd")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("datetime2")
@@ -1800,6 +1812,9 @@ namespace skestock.Infrastructure.Data.Migrations
                         .HasColumnType("date");
 
                     b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("StudentInvitationCount")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -1827,11 +1842,31 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
+                    b.Property<int>("ChangeInvitationCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("ExperienceInvitationCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("InstructorInvitationCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
                     b.Property<int>("InvitationCount")
                         .HasColumnType("int");
 
                     b.Property<Guid?>("LastModifiedById")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("OpeningPrayerInvitationCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
 
                     b.Property<DateTime>("PeriodEnd")
                         .ValueGeneratedOnAddOrUpdate()
@@ -1854,6 +1889,11 @@ namespace skestock.Infrastructure.Data.Migrations
                         .HasDefaultValue(0);
 
                     b.Property<int>("Room6SeatCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("StudentInvitationCount")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(0);

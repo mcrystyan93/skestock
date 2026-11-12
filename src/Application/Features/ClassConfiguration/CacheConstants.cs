@@ -6,4 +6,5 @@ public static class CacheConstants
     public const string DepartmentListTag = "class_configuration:departments";
     public const string InvitationCountTag = "class_configuration:invitations";
     public const string RoomConfigurationTag = "class_configuration:rooms";
+    public const string InvitationSplitTag = "class_configuration:invitation_split";
 }

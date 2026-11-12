@@ -34,6 +34,11 @@ public sealed class InitializeSchoolClassConfigurationCommandHandler(IApplicatio
                     // ExecuteUpdate bypasses AuditableEntityInterceptor, so stamp the modifier for the history table.
                     update => update
                         .SetProperty(item => item.InvitationCount, configuration.InvitationCount)
+                        .SetProperty(item => item.StudentInvitationCount, configuration.StudentInvitationCount)
+                        .SetProperty(item => item.InstructorInvitationCount, configuration.InstructorInvitationCount)
+                        .SetProperty(item => item.OpeningPrayerInvitationCount, configuration.OpeningPrayerInvitationCount)
+                        .SetProperty(item => item.ExperienceInvitationCount, configuration.ExperienceInvitationCount)
+                        .SetProperty(item => item.ChangeInvitationCount, configuration.ChangeInvitationCount)
                         .SetProperty(item => item.LastModifiedById, user.Id)
                         .SetProperty(item => item.LastModifiedDate, timeProvider.GetUtcNow()),
                     cancellationToken);

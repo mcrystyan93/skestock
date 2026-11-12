@@ -16,5 +16,10 @@ public class SharedClassConfigurationConfiguration : IEntityTypeConfiguration<Sh
             .IsRequired()
             .HasDefaultValue(0);
         builder.Property(configuration => configuration.Room6SeatCount).IsRequired().HasDefaultValue(0);
+        builder.Property(configuration => configuration.StudentInvitationCount).IsRequired().HasDefaultValue(0);
+        builder.Property(configuration => configuration.InstructorInvitationCount).IsRequired().HasDefaultValue(0);
+        builder.Property(configuration => configuration.OpeningPrayerInvitationCount).IsRequired().HasDefaultValue(0);
+        builder.Property(configuration => configuration.ExperienceInvitationCount).IsRequired().HasDefaultValue(0);
+        builder.Property(configuration => configuration.ChangeInvitationCount).IsRequired().HasDefaultValue(0);
     }
 }
