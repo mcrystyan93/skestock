@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator } from '@playwright/test';
 import { saveScreenshotsAfterEach } from '../screenshots';
 
 saveScreenshotsAfterEach();
@@ -34,11 +34,21 @@ test('review unit price keeps the Romanian decimal comma and thousands dot', asy
   const price = page.locator('nz-input-number').filter({ hasText: 'RON' }).locator('input').filter({ visible: true }).last();
   await expect(price).toHaveValue('3,50');
 
-  await price.fill('1,5');
+  // Real keystrokes: nz-input-number re-formats after each one, which used to make "16,3" untypable.
+  await price.click();
+  await price.press('ControlOrMeta+a');
+  await typeKeys(price, '16,3');
+  await expect(price).toHaveValue('16,3');
   await price.blur();
-  await expect(price).toHaveValue('1,50');
+  await expect(price).toHaveValue('16,3');
 
-  await price.fill('1.234,50');
-  await price.blur();
+  await price.click();
+  await price.press('ControlOrMeta+a');
+  await typeKeys(price, '1.234,50');
   await expect(price).toHaveValue('1.234,50');
 });
+
+// One key at a time and awaited: pressSequentially is fast enough to hide the per-keystroke re-formatting.
+async function typeKeys(input: Locator, text: string) {
+  for (const char of text) await input.press(char === ',' ? 'Comma' : char);
+}
