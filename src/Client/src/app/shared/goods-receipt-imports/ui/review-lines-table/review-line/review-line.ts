@@ -99,9 +99,19 @@ export class ReviewLine {
     });
   });
 
-  public unitPriceFormatter = (value: number) => this._currencyPipe.transform(value, 'RON', '') ?? '0';
+  // nz-input-number re-formats on every keystroke, which would turn "16," into "16,00" and make 16,3 untypable:
+  // keep the raw text while it still parses to the current value.
+  private _typedPrice = '';
 
-  public unitPriceParser = (value: string) => Number(value.replace(/[^0-9,-]+/g, '').replace(',', '.'));
+  public unitPriceFormatter = (value: number) =>
+    this._typedPrice !== '' && parseUnitPrice(this._typedPrice) === value
+      ? this._typedPrice
+      : this._currencyPipe.transform(value, 'RON', '') ?? '0';
+
+  public unitPriceParser = (value: string) => {
+    this._typedPrice = value;
+    return parseUnitPrice(value);
+  };
 
   public createPrefill(line: ReviewEditableLine): Partial<ItemDto> {
     return {
@@ -110,4 +120,8 @@ export class ReviewLine {
       unit: line.extractedUnit ?? ''
     };
   }
+}
+
+function parseUnitPrice(value: string) {
+  return Number(value.replace(/[^0-9,-]+/g, '').replace(',', '.'));
 }
