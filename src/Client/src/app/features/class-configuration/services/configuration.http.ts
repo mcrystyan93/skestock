@@ -3,10 +3,12 @@ import { inject, Service } from '@angular/core';
 import {
   DepartmentTemplateDto,
   InvitationCountDto,
+  InvitationSplitDto,
   RoomConfigurationDto,
   SaveRoomConfigurationRequest,
   SaveDepartmentRequest,
   SaveInvitationCountRequest,
+  SaveInvitationSplitRequest,
 } from '@ske/models';
 
 const CONFIGURATION_ENDPOINT = '/api/ClassConfiguration';
@@ -48,6 +50,17 @@ export class ConfigurationHttp {
   public saveInvitationCount(request: SaveInvitationCountRequest) {
     return this._httpClient.put<InvitationCountDto>(
       `${CONFIGURATION_ENDPOINT}/invitations`,
+      request,
+    );
+  }
+
+  public getInvitationSplit() {
+    return this._httpClient.get<InvitationSplitDto>(`${CONFIGURATION_ENDPOINT}/invitation-split`);
+  }
+
+  public saveInvitationSplit(request: SaveInvitationSplitRequest) {
+    return this._httpClient.put<InvitationSplitDto>(
+      `${CONFIGURATION_ENDPOINT}/invitation-split`,
       request,
     );
   }

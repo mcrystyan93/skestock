@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { RoomConfigurationDto } from '@ske/models';
+import { InvitationSplitDto, RoomConfigurationDto } from '@ske/models';
 import { ConfigurationHttp } from './configuration.http';
 
 describe('ConfigurationHttp room configuration', () => {
@@ -37,6 +37,48 @@ describe('ConfigurationHttp room configuration', () => {
     expect(request.request.method).toBe('PUT');
     expect(request.request.body).toEqual(configuration);
     request.flush(configuration);
+  });
+});
+
+describe('ConfigurationHttp invitation split', () => {
+  let service: ConfigurationHttp;
+  let httpTestingController: HttpTestingController;
+  const split = {
+    studentInvitationCount: 10,
+    instructorInvitationCount: 5,
+    openingPrayerInvitationCount: 2,
+    experienceInvitationCount: 3,
+    changeInvitationCount: 4,
+  };
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    service = TestBed.inject(ConfigurationHttp);
+    httpTestingController = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => httpTestingController.verify());
+
+  it('loads the split from the configuration endpoint', () => {
+    let response: InvitationSplitDto | undefined;
+    service.getInvitationSplit().subscribe((result) => (response = result));
+
+    const request = httpTestingController.expectOne('/api/ClassConfiguration/invitation-split');
+    expect(request.request.method).toBe('GET');
+    request.flush(split);
+
+    expect(response).toEqual(split);
+  });
+
+  it('saves the split to the configuration endpoint', () => {
+    service.saveInvitationSplit(split).subscribe();
+
+    const request = httpTestingController.expectOne('/api/ClassConfiguration/invitation-split');
+    expect(request.request.method).toBe('PUT');
+    expect(request.request.body).toEqual(split);
+    request.flush(split);
   });
 });
 

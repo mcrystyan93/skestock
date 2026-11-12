@@ -5,10 +5,12 @@ using skestock.Application.Features.ClassConfiguration.Models;
 using skestock.Domain.Constants;
 using skestock.Application.Features.ClassConfiguration.Commands.SaveDepartment;
 using skestock.Application.Features.ClassConfiguration.Commands.SaveInvitationCount;
+using skestock.Application.Features.ClassConfiguration.Commands.SaveInvitationSplit;
 using skestock.Application.Features.ClassConfiguration.Commands.SaveRoomConfiguration;
 using skestock.Application.Features.ClassConfiguration.Queries.GetDepartments;
 using skestock.Application.Features.ClassConfiguration.Queries.GetDepartment;
 using skestock.Application.Features.ClassConfiguration.Queries.GetInvitationCount;
+using skestock.Application.Features.ClassConfiguration.Queries.GetInvitationSplit;
 using skestock.Application.Features.ClassConfiguration.Queries.GetRoomConfiguration;
 
 namespace skestock.Web.Endpoints;
@@ -23,6 +25,9 @@ public sealed class ClassConfiguration : IEndpointGroup
             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
         groupBuilder.MapGet(GetInvitations, "invitations").RequireAuthorization();
         groupBuilder.MapPut(SaveInvitations, "invitations")
+            .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
+        groupBuilder.MapGet(GetInvitationSplit, "invitation-split").RequireAuthorization();
+        groupBuilder.MapPut(SaveInvitationSplit, "invitation-split")
             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
         groupBuilder.MapGet(GetRooms, "rooms").RequireAuthorization();
         groupBuilder.MapPut(SaveRooms, "rooms").RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
@@ -60,6 +65,20 @@ public sealed class ClassConfiguration : IEndpointGroup
 
     public static async Task<Results<Ok<InvitationCountDto>, ProblemHttpResult>> SaveInvitations(
         ISender sender, [FromBody] SaveInvitationCountCommand command, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(command, cancellationToken);
+        return result.ToOk();
+    }
+
+    public static async Task<Results<Ok<InvitationSplitDto>, ProblemHttpResult>> GetInvitationSplit(
+        ISender sender, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetInvitationSplitQuery(), cancellationToken);
+        return result.ToOk();
+    }
+
+    public static async Task<Results<Ok<InvitationSplitDto>, ProblemHttpResult>> SaveInvitationSplit(
+        ISender sender, [FromBody] SaveInvitationSplitCommand command, CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken);
         return result.ToOk();

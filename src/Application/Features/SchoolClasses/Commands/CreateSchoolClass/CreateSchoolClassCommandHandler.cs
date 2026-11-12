@@ -26,6 +26,11 @@ public class CreateSchoolClassCommandHandler(IApplicationDbContext dbContext)
             EndDate = request.EndDate,
             Status = request.Status,
             InvitationCount = configuration.InvitationCount,
+            StudentInvitationCount = configuration.StudentInvitationCount,
+            InstructorInvitationCount = configuration.InstructorInvitationCount,
+            OpeningPrayerInvitationCount = configuration.OpeningPrayerInvitationCount,
+            ExperienceInvitationCount = configuration.ExperienceInvitationCount,
+            ChangeInvitationCount = configuration.ChangeInvitationCount,
             Departments = configuration.DepartmentTemplates.Select(template => new ClassDepartment
             {
                 Id = Guid.CreateVersion7(), Name = template.Name, Responsibilities = template.Responsibilities
@@ -46,6 +51,11 @@ public class CreateSchoolClassCommandHandler(IApplicationDbContext dbContext)
             EndDate = schoolClass.EndDate,
             Status = schoolClass.Status,
             InvitationCount = schoolClass.InvitationCount,
+            StudentInvitationCount = schoolClass.StudentInvitationCount,
+            InstructorInvitationCount = schoolClass.InstructorInvitationCount,
+            OpeningPrayerInvitationCount = schoolClass.OpeningPrayerInvitationCount,
+            ExperienceInvitationCount = schoolClass.ExperienceInvitationCount,
+            ChangeInvitationCount = schoolClass.ChangeInvitationCount,
             IsConfigurationInitialized = schoolClass.InvitationCount.HasValue,
             Departments = schoolClass.Departments.Select(department => new ClassDepartmentDto(
                 department.Id, department.Name, department.Responsibilities, department.ResponsiblePerson)).ToArray(),
