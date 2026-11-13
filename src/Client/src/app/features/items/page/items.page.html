@@ -24,7 +24,8 @@
                        (onLoadMore)="onLoadMore()"
                        (onEdit)="onEdit($event)"
                        (onToggleActive)="onToggleActive($event)"
-                       (onImageUploaded)="onImageUploaded($event)" />
+                       (onImageUploaded)="onImageUploaded($event)"
+                       (onLocationChanged)="listStore.setItemLocation($event)" />
   </nz-tab>
   <nz-tab>
     <ske-supply-list-tab [items]="supplyListStore.supplyLists()"

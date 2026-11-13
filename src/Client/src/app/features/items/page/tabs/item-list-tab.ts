@@ -32,6 +32,7 @@ import { LayoutBreakpoint } from '@ske/shared/directives';
           (onEdit)="onEdit.emit($event)"
           (onToggleActive)="onToggleActive.emit($event)"
           (onImageUploaded)="onImageUploaded.emit($event)"
+          (onLocationChanged)="onLocationChanged.emit($event)"
           [togglingItemId]="togglingItemId()"
           [selectedIds]="selectedIds()"
           (onToggleSelected)="onToggleSelected.emit($event)"
@@ -79,4 +80,5 @@ export class ItemListTab {
   public readonly onEdit = output<ItemDto>();
   public readonly onToggleActive = output<ItemDto>();
   public readonly onImageUploaded = output<{ item: ItemDto; fileId: string }>();
+  public readonly onLocationChanged = output<{ item: ItemDto; locationId: string | null }>();
 }
