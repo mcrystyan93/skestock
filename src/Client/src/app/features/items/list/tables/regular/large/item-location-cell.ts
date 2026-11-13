@@ -27,9 +27,6 @@ export class ItemLocationCell {
 
   protected select(location: LocationDropdownValue) {
     this.value.set(location);
-
-    const id = location?.id ?? null;
-    if (id !== (this.locationId() ?? null))
-      this.locationChange.emit(id);
+    this.locationChange.emit(location?.id ?? null);
   }
 }

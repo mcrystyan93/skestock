@@ -33,12 +33,4 @@ describe('ItemLocationCell', () => {
 
     expect(emitted).toEqual([null]);
   });
-
-  it('does not emit when the selection is unchanged', () => {
-    const { cell, emitted } = setup('a');
-
-    cell.select({ id: 'a' });
-
-    expect(emitted).toEqual([]);
-  });
 });
