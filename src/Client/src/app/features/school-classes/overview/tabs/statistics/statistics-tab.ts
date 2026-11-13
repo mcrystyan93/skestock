@@ -4,7 +4,6 @@ import { ClassStatisticsStore } from '../../../services/class-statistics.store';
 import { AllLocationsStockCard } from './all-locations-stock-card';
 import { ItemStockEvolutionCard } from './item-stock-evolution-card';
 import { DailyConsumptionCard } from './daily-consumption-card';
-import { TopDonationsCard } from './top-donations-card';
 import { TopPurchasesCard } from './top-purchases-card';
 
 @Component({
@@ -14,8 +13,7 @@ import { TopPurchasesCard } from './top-purchases-card';
     AllLocationsStockCard,
     ItemStockEvolutionCard,
     DailyConsumptionCard,
-    TopPurchasesCard,
-    TopDonationsCard
+    TopPurchasesCard
   ],
   selector: 'ske-school-class-overview-statistics-tab',
   templateUrl: './statistics-tab.html',

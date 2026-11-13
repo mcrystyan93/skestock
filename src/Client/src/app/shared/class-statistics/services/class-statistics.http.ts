@@ -67,21 +67,20 @@ export class ClassStatisticsHttp {
   }
 
   public getTopPurchases(filter: TopPurchasesFilter) {
-    let params = new HttpParams().set('scope', filter.scope);
-    if (filter.scope === 'Class' && filter.classId) params = params.set('classId', filter.classId);
-    if (filter.categoryId) params = params.set('categoryId', filter.categoryId);
-    if (filter.top) params = params.set('top', filter.top);
-
-    return this._httpClient.get<TopPurchasesDto>('/api/statistics/purchases/top', { params });
+    return this._getTop('/api/statistics/purchases/top', filter);
   }
 
   public getTopDonations(filter: TopPurchasesFilter) {
+    return this._getTop('/api/statistics/donations/top', filter);
+  }
+
+  private _getTop(url: string, filter: TopPurchasesFilter) {
     let params = new HttpParams().set('scope', filter.scope);
     if (filter.scope === 'Class' && filter.classId) params = params.set('classId', filter.classId);
     if (filter.categoryId) params = params.set('categoryId', filter.categoryId);
     if (filter.top) params = params.set('top', filter.top);
 
-    return this._httpClient.get<TopPurchasesDto>('/api/statistics/donations/top', { params });
+    return this._httpClient.get<TopPurchasesDto>(url, { params });
   }
 
   public getPurchaseSegments() {
