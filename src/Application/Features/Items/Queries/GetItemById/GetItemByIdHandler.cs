@@ -26,6 +26,7 @@ public class GetItemByIdHandler(IApplicationDbContext dbContext)
                 CategoryName = item.Category != null ? item.Category.Name : null,
                 ImageFileId = item.ImageFileId,
                 LocationId = item.LocationId,
+                LocationName = item.Location != null ? item.Location.Name : null,
                 CreatedByName = item.CreatedBy != null ? item.CreatedBy.FullName : null,
                 LastModifiedByName = item.LastModifiedBy != null ? item.LastModifiedBy.FullName : null,
                 CreatedDate = item.CreatedDate,

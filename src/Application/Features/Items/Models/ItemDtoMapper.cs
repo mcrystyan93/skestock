@@ -16,6 +16,14 @@ internal static class ItemDtoMapper
             .Select(category => category.Name)
             .SingleOrDefaultAsync(cancellationToken);
 
+        var locationName = item.LocationId is { } locationId
+            ? await dbContext.Locations
+                .AsNoTracking()
+                .Where(location => location.Id == locationId)
+                .Select(location => location.Name)
+                .SingleOrDefaultAsync(cancellationToken)
+            : null;
+
         var thresholds = await dbContext.ItemLocationThresholds
             .AsNoTracking()
             .Where(t => t.ItemId == item.Id)
@@ -37,6 +45,7 @@ internal static class ItemDtoMapper
             CategoryName = categoryName,
             ImageFileId = item.ImageFileId,
             LocationId = item.LocationId,
+            LocationName = locationName,
             CreatedByName = item.CreatedBy?.FullName,
             LastModifiedByName = item.LastModifiedBy?.FullName,
             CreatedDate = item.CreatedDate,

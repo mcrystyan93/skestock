@@ -25,6 +25,7 @@ import { NzSpinComponent } from 'ng-zorro-antd/spin';
                class="w-full"
                [compareWith]="(a, b) => a && b ? a.id === b.id : a === b"
                (nzOnSearch)="onSearch($event)"
+               (nzOpenChange)="onOpenChange($event)"
                [nzDropdownMatchSelectWidth]="false"
                [nzDropdownRender]="loadingMoreTemplate"
                (nzScrollToBottom)="loadMore()"
@@ -156,6 +157,12 @@ export class LocationDropdown implements FormValueControl<LocationDropdownValue>
 
   public loadMore() {
     this.store.loadMore();
+  }
+
+  // Lets a dropdown that is not loadOnInit (e.g. one per table row) fetch its options on first open.
+  public onOpenChange(open: boolean) {
+    if (open && this.store.locations().length === 0 && !this.store.loading())
+      this.store.load(this.buildFilter({ searchTerm: null }));
   }
 
   public onSearch(searchTerm: string) {
