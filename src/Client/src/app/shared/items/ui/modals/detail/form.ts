@@ -3,7 +3,18 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { catchError, of } from 'rxjs';
 import { CategoryDropdownValue, ItemDto, ItemLocationThreshold, LocationDropdownValue, LocationDto } from '@ske/models';
 import { LocationDropdown, LocationsHttp } from '@ske/shared/locations';
-import { applyEach, applyWhen, form, FormField, hidden, maxLength, min, required, submit, validate } from '@angular/forms/signals';
+import {
+  applyEach,
+  applyWhen,
+  form,
+  FormField,
+  hidden,
+  maxLength,
+  min,
+  required,
+  submit,
+  validate
+} from '@angular/forms/signals';
 import { NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
 import { SkeletonInputLoaderDirective } from '@ske/shared/loader';
 import {
@@ -18,6 +29,7 @@ import { NzSwitchComponent } from 'ng-zorro-antd/switch';
 import { ItemImageUpload } from '../../image-upload/item-image-upload';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 
 @Component({
   imports: [
@@ -39,6 +51,7 @@ import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
     NzInputAddonAfterDirective,
     ItemImageUpload,
     NzButtonComponent,
+    NzTypographyComponent
   ],
   selector: 'ske-item-form',
   styles: ``,
