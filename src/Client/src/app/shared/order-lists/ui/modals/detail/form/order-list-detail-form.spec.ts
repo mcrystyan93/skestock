@@ -102,6 +102,22 @@ describe('OrderListDetailForm', () => {
     expect(fixture.componentInstance.orderListForm.lines().value()[0].itemImageFileId).toBe('img-1');
   });
 
+  it('copies the catalog item description into the line notes', () => {
+    const item = { id: 'item-1', name: 'Creion', sku: null, unit: 'buc', description: 'HB, 12 buc' } as unknown as ItemAutocompleteValue;
+    const draft = { name: 'Articol nou' } as unknown as ItemAutocompleteValue;
+    const autocomplete = fixture.debugElement.query(
+      By.directive(ItemAutocomplete)
+    ).componentInstance as ItemAutocomplete;
+
+    autocomplete.value.set(item);
+    TestBed.tick();
+    autocomplete.value.set(draft);
+    TestBed.tick();
+
+    const lines = fixture.componentInstance.orderListForm.lines().value();
+    expect(lines.map((l) => l.notes)).toEqual(['', 'HB, 12 buc']);
+  });
+
   it('does not add an item that is already in the list', () => {
     const item = { id: 'item-1', name: 'Creion', sku: null, unit: 'buc' } as unknown as ItemAutocompleteValue;
     const autocomplete = fixture.debugElement.query(
