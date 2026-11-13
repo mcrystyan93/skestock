@@ -12,5 +12,5 @@ public class UpdateLocationCommand : IRequest<Result<LocationDto>>, ICacheInvali
 
     // Invalidate every cached GetAllLocations page/filter/sort combination - an updated location
     // can affect any of them (default sort, search matches, filters, etc.).
-    public IReadOnlyCollection<string> Tags => [CacheConstants.LocationListTag];
+    public IReadOnlyCollection<string> Tags => [CacheConstants.LocationListTag, Items.CacheConstants.ItemListTag];
 }

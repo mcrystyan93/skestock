@@ -49,7 +49,7 @@ export class ItemListSmall extends BaseList<ItemDto, GetAllItemsRequest> {
   protected readonly trackById = (_: number, item: ItemDto) => item.id;
 
   protected subtitle(item: ItemDto): string {
-    return [item.sku, item.categoryName || '—'].filter(Boolean).join(' · ');
+    return [item.sku, item.categoryName || '—', item.locationName].filter(Boolean).join(' · ');
   }
 
   protected onSpace(event: Event, item: ItemDto): void {
