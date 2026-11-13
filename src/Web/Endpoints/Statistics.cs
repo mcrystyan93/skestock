@@ -9,6 +9,7 @@ using skestock.Application.Features.Statistics.Queries.GetClassStockByCategory;
 using skestock.Application.Features.Statistics.Queries.GetDailyConsumptionAverages;
 using skestock.Application.Features.Statistics.Queries.GetItemsPurchaseHistory;
 using skestock.Application.Features.Statistics.Queries.GetPurchaseSegments;
+using skestock.Application.Features.Statistics.Queries.GetTopDonations;
 using skestock.Application.Features.Statistics.Queries.GetTopPurchases;
 using skestock.Domain.Constants;
 using skestock.Domain.Enums;
@@ -32,6 +33,7 @@ public class Statistics : IEndpointGroup
         groupBuilder.MapGet(GetDailyConsumptionAverages, "daily-consumption/averages");
         groupBuilder.MapGet(GetClassDailyConsumption, "class/{classId}/daily-consumption");
         groupBuilder.MapGet(GetTopPurchases, "purchases/top");
+        groupBuilder.MapGet(GetTopDonations, "donations/top");
         groupBuilder.MapGet(GetPurchaseSegments, "purchases/segments");
         groupBuilder.MapPost(GetItemsPurchaseHistory, "purchases/items-history");
         groupBuilder.MapPost(RecalculatePurchaseStatistics, "purchases/materialize")
@@ -182,6 +184,29 @@ public class Statistics : IEndpointGroup
                 ClassId = request.ClassId,
                 CategoryId = request.CategoryId,
                 Top = request.Top ?? GetTopPurchasesQuery.DefaultTop
+            },
+            cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Get top donated items")]
+    [EndpointDescription("Returns the items ranked by donated quantity, value and frequency for a scope " +
+                         "(Last90Days, Last365Days, or Class with classId), optionally filtered by category. " +
+                         "Computed live from donation transactions.")]
+    public static async Task<Results<Ok<TopPurchasesDto>, ProblemHttpResult>>
+        GetTopDonations(
+            ISender sender,
+            [AsParameters] StatisticsRequests.GetTopPurchasesRequest request,
+            CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new GetTopDonationsQuery
+            {
+                Scope = request.Scope ?? PurchaseStatisticsScope.Last365Days,
+                ClassId = request.ClassId,
+                CategoryId = request.CategoryId,
+                Top = request.Top ?? GetTopDonationsQuery.DefaultTop
             },
             cancellationToken);
 

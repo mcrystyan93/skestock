@@ -8,6 +8,8 @@ public static class CacheConstants
 
     public const string PurchaseStatisticsTag = $"{Statistics}:purchases";
 
+    public const string DonationStatisticsTag = $"{Statistics}:donations";
+
     public static string BuildClassGoodsReceiptCostTag(Guid classId) =>
         $"{Statistics}:class:{classId}:goods-receipt-cost";
 }
