@@ -45,4 +45,5 @@ public record GoodsReceiptImportReviewMatchDto
     public int? ShelfLifeDays { get; set; }
     public Guid CategoryId { get; init; }
     public string CategoryName { get; init; } = string.Empty;
+    public Guid? LocationId { get; init; }
 }

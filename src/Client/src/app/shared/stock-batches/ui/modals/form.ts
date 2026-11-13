@@ -100,6 +100,16 @@ export class Form {
     });
   });
 
+  // Prefill the item's default location only when the caller did not pass one.
+  private readonly _itemLocationEffectRef = effect(() => {
+    const item = this.stockBatchForm.item().value();
+
+    untracked(() => {
+      if (item?.locationId && isNil(this.location()?.id))
+        this.stockBatchForm.location().value.set({ id: item.locationId } as LocationDto);
+    });
+  });
+
   public incrementQuantity() {
     this.stockBatchForm.quantity().value.update(prev => (prev ?? 0) + 1);
   }

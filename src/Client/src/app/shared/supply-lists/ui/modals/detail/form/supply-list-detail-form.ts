@@ -165,7 +165,7 @@ export class SupplyListDetailForm {
         itemName: item.sku ? `(${item.sku}) ${name}` : name,
         quantity: 1,
         unit: item.unit ?? 'buc',
-        notes: ''
+        notes: item.description ?? ''
       }, ...lines];
     });
   }

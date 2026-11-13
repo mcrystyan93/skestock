@@ -1115,6 +1115,9 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("LastModifiedDate")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<Guid?>("LocationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("MinThreshold")
                         .HasColumnType("int");
 
@@ -1156,6 +1159,8 @@ namespace skestock.Infrastructure.Data.Migrations
                         .HasFilter("[ImageFileId] IS NOT NULL");
 
                     b.HasIndex("LastModifiedById");
+
+                    b.HasIndex("LocationId");
 
                     b.HasIndex("Sku")
                         .IsUnique()
@@ -3277,11 +3282,18 @@ namespace skestock.Infrastructure.Data.Migrations
                         .HasPrincipalKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("skestock.Domain.Entities.Locations.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Category");
 
                     b.Navigation("CreatedBy");
 
                     b.Navigation("LastModifiedBy");
+
+                    b.Navigation("Location");
                 });
 
             modelBuilder.Entity("skestock.Domain.Entities.Items.ItemImportBatch", b =>

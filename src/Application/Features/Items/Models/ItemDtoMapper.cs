@@ -36,6 +36,7 @@ internal static class ItemDtoMapper
             CategoryId = item.CategoryId,
             CategoryName = categoryName,
             ImageFileId = item.ImageFileId,
+            LocationId = item.LocationId,
             CreatedByName = item.CreatedBy?.FullName,
             LastModifiedByName = item.LastModifiedBy?.FullName,
             CreatedDate = item.CreatedDate,

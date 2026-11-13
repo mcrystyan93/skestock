@@ -98,7 +98,8 @@ public class Items : IEndpointGroup
             IsPerishable = request.IsPerishable,
             ShelfLifeDays = request.ShelfLifeDays,
             CategoryId = request.CategoryId,
-            ImageFileId = request.ImageFileId
+            ImageFileId = request.ImageFileId,
+            LocationId = request.LocationId
         };
 
         var result = await sender.Send(command, cancellationToken);
@@ -122,7 +123,8 @@ public class Items : IEndpointGroup
             IsPerishable = request.IsPerishable,
             ShelfLifeDays = request.ShelfLifeDays,
             CategoryId = request.CategoryId,
-            ImageFileId = request.ImageFileId
+            ImageFileId = request.ImageFileId,
+            LocationId = request.LocationId
         };
 
         var result = await sender.Send(command, cancellationToken);

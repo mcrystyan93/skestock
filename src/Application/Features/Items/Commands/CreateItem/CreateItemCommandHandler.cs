@@ -22,6 +22,7 @@ public class CreateItemCommandHandler(IApplicationDbContext dbContext, IUser use
             ShelfLifeDays = request.ShelfLifeDays,
             CategoryId = request.CategoryId,
             ImageFileId = request.ImageFileId,
+            LocationId = request.LocationId,
             IsActive = true
         };
 

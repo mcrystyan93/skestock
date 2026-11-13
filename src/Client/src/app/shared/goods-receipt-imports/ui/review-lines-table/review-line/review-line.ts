@@ -90,6 +90,12 @@ export class ReviewLine {
     if (isNil(item))
       return;
 
+    const locationId = item.locationId;
+
+    if (locationId) {
+      untracked(() => this.lineForm().location().value.set({ id: locationId }));
+    }
+
     // when the item changes and it's perishable, we want to set the expiration based on shelfLifeDays
     if (!item.isPerishable || !item.shelfLifeDays)
       return;

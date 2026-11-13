@@ -63,6 +63,7 @@ public class GetAllItemsHandler(IApplicationDbContext dbContext)
                     CategoryId = item.CategoryId,
                     CategoryName = item.Category != null ? item.Category.Name : null,
                     ImageFileId = item.ImageFileId,
+                    LocationId = item.LocationId,
                     CreatedByName = item.CreatedBy != null ? item.CreatedBy.FullName : null,
                     LastModifiedByName = item.LastModifiedBy != null ? item.LastModifiedBy.FullName : null,
                     CreatedDate = item.CreatedDate,
