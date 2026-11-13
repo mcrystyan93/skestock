@@ -110,7 +110,7 @@ What differs from categories:
 
 ### Errors
 
-`items.not_found` (404), `items.inactive` (409, raised by stock, goods receipt and supply list writes against an inactive item), `items.merge_primary_inactive` (409), `items.image_not_found` (404), `items.invalid_image` (400); import: `item_import_batches.not_found`, `.not_in_review`, `.items_not_found`, `.duplicate_items`, `.idempotency_conflict`.
+`items.not_found` (404), `items.inactive` (409, raised by stock, goods receipt and stock batch writes against an inactive item; supply lists use their own `supply_lists.item_inactive`, 400), `items.merge_primary_inactive` (409), `items.image_not_found` (404), `items.invalid_image` (400); import: `item_import_batches.not_found`, `.not_in_review`, `.items_not_found`, `.duplicate_items`, `.idempotency_conflict`.
 
 ### Tests
 
