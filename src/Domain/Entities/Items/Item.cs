@@ -1,4 +1,5 @@
 using skestock.Domain.Entities.Categories;
+using skestock.Domain.Entities.Locations;
 using skestock.Domain.Entities.Stock;
 
 namespace skestock.Domain.Entities.Items;
@@ -23,6 +24,10 @@ public class Item: BaseAuditableEntity, IKeysetEntity
 
     public Guid CategoryId { get; set; }
     public Category Category { get; set; } = null!;
+
+    // Optional default location, prefilled when receiving or adding stock.
+    public Guid? LocationId { get; set; }
+    public Location? Location { get; set; }
 
     public ICollection<StockBatch> Batches { get; set; } = new List<StockBatch>();
     public ICollection<StockTransaction> Transactions { get; set; } = new List<StockTransaction>();

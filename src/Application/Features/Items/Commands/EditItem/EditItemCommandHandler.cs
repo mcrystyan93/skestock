@@ -32,6 +32,7 @@ public class EditItemCommandHandler(
         item.IsPerishable = request.IsPerishable;
         item.ShelfLifeDays = request.ShelfLifeDays;
         item.CategoryId = request.CategoryId;
+        item.LocationId = request.LocationId;
         item.AddDomainEvent(new ItemUpdatedEvent(item));
 
         // Add/update only: locations not sent keep their value (list rows carry no thresholds).

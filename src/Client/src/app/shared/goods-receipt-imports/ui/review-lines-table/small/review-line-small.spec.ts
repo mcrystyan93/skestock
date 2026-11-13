@@ -41,4 +41,38 @@ describe('ReviewLineSmall', () => {
     expect(remove).toHaveBeenCalledWith(line);
     fixture.destroy();
   });
+
+  function setup(item: ReviewEditableLine['item']) {
+    const fixture = TestBed.createComponent(ReviewLineSmall);
+    const line: ReviewEditableLine = {
+      rowId: 'row-1',
+      sourceLineIndex: 0,
+      originalQuantity: 4,
+      item,
+      location: null,
+      quantity: 4,
+      expiryDate: null,
+      unitPrice: 0
+    };
+    const lineForm = TestBed.runInInjectionContext(() => form(signal(line)));
+
+    fixture.componentRef.setInput('line', line);
+    fixture.componentRef.setInput('lineForm', lineForm);
+    fixture.detectChanges();
+    return { fixture, lineForm };
+  }
+
+  it('prefills the location from an item default location', () => {
+    const { fixture, lineForm } = setup({ id: 'i1', locationId: 'l1' });
+
+    expect(lineForm.location().value()?.id).toBe('l1');
+    fixture.destroy();
+  });
+
+  it('leaves the location untouched for an item without a default location', () => {
+    const { fixture, lineForm } = setup({ id: 'i1', locationId: null });
+
+    expect(lineForm.location().value()).toBeNull();
+    fixture.destroy();
+  });
 });

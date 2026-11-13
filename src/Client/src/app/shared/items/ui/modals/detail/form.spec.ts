@@ -84,7 +84,7 @@ describe('Item Form location thresholds', () => {
     locations$ = of([loc('a', 'Sala A'), loc('b', 'Dulap', 'a')]);
     TestBed.configureTestingModule({
       providers: [
-        { provide: LocationsHttp, useValue: { getAllPages: () => locations$ } },
+        { provide: LocationsHttp, useValue: { getAllPages: () => locations$, getById: () => of(loc('b', 'Dulap', 'a')) } },
         provideNzIconsTesting(),
         provideNzIcons([
           { name: 'icons:pencil', icon: '<svg viewBox="0 0 24 24"></svg>' },
@@ -161,5 +161,21 @@ describe('Item Form location thresholds', () => {
 
     expect(isValid).toBe(true);
     expect(formData?.locationThresholds).toEqual([]);
+  });
+
+  it('loads the item default location into the form', async () => {
+    const fixture = create({ locationId: 'b' });
+    const { formData } = await fixture.componentInstance.submit();
+
+    expect(formData?.location?.id).toBe('b');
+  });
+
+  it('submits null location after clearing', async () => {
+    const fixture = create({ locationId: 'b' });
+    fixture.componentInstance.itemForm.location().value.set(null);
+    const { isValid, formData } = await fixture.componentInstance.submit();
+
+    expect(isValid).toBe(true);
+    expect(formData?.location).toBeNull();
   });
 });

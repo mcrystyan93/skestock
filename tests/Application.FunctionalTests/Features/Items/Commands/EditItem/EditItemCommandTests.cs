@@ -218,4 +218,49 @@ public class EditItemCommandTests : TestBase
         var exception = await act.ShouldThrowAsync<ValidationException>();
         exception.Errors.ShouldContainKey(nameof(EditItemCommand.CategoryId));
     }
+
+    private async Task<Location> SeedLocationAsync()
+    {
+        var location = new Location { Name = $"{_prefix}-Loc-{Guid.NewGuid():N}"[..30], Type = "Kitchen" };
+        await TestApp.AddAsync(location);
+        return location;
+    }
+
+    [Test]
+    public async Task Handle_WithDefaultLocation_ChangesAndClearsItRoundTrip()
+    {
+        var category = await SeedCategoryAsync();
+        var locationA = await SeedLocationAsync();
+        var locationB = await SeedLocationAsync();
+        var created = await TestApp.SendAsync(new CreateItemCommand
+        {
+            Name = $"{_prefix}-Item", Unit = "unit", CategoryId = category.Id, LocationId = locationA.Id
+        });
+
+        EditItemCommand Edit(Guid? locationId) => new()
+        {
+            Id = created.Value.Id, Name = $"{_prefix}-Item", Unit = "unit", CategoryId = category.Id, LocationId = locationId
+        };
+
+        (await TestApp.SendAsync(Edit(locationB.Id))).IsSuccess.ShouldBeTrue();
+        (await TestApp.SendAsync(new GetItemByIdQuery { Id = created.Value.Id })).Value.LocationId.ShouldBe(locationB.Id);
+
+        (await TestApp.SendAsync(Edit(null))).IsSuccess.ShouldBeTrue();
+        (await TestApp.SendAsync(new GetItemByIdQuery { Id = created.Value.Id })).Value.LocationId.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task Handle_WithNonExistentDefaultLocation_ThrowsValidationException()
+    {
+        var category = await SeedCategoryAsync();
+        var created = await TestApp.SendAsync(new CreateItemCommand { Name = $"{_prefix}-Item", Unit = "unit", CategoryId = category.Id });
+
+        var act = async () => await TestApp.SendAsync(new EditItemCommand
+        {
+            Id = created.Value.Id, Name = $"{_prefix}-Item", Unit = "unit", CategoryId = category.Id, LocationId = Guid.NewGuid()
+        });
+
+        var exception = await act.ShouldThrowAsync<ValidationException>();
+        exception.Errors.ShouldContainKey(nameof(EditItemCommand.LocationId));
+    }
 }

@@ -45,6 +45,30 @@ public class EditItemCommandValidatorTests
     }
 
     [Test]
+    public async Task ShouldNotHaveErrorWhenDefaultLocationIsNullOrExists()
+    {
+        var (context, category, item) = await CreateContextAsync();
+        await using var _ = context;
+        var locationId = await AddLocationAsync(context);
+        var validator = new EditItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
+
+        (await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", CategoryId = category.Id, LocationId = null })).IsValid.ShouldBeTrue();
+        (await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", CategoryId = category.Id, LocationId = locationId })).IsValid.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldHaveInvalidReferenceErrorWhenDefaultLocationDoesNotExist()
+    {
+        var (context, category, item) = await CreateContextAsync();
+        await using var _ = context;
+        var validator = new EditItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
+
+        var result = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", CategoryId = category.Id, LocationId = Guid.NewGuid() });
+
+        result.Errors.ShouldContain(e => e.PropertyName == nameof(EditItemCommand.LocationId) && e.ErrorCode == ValidationErrorCodes.InvalidReference);
+    }
+
+    [Test]
     public async Task ShouldHaveErrorWhenIdIsEmpty()
     {
         var (context, category, _) = await CreateContextAsync();

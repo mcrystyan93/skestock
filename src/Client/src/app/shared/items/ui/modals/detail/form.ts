@@ -1,8 +1,8 @@
 import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { catchError, of } from 'rxjs';
-import { CategoryDropdownValue, ItemDto, ItemLocationThreshold, LocationDto } from '@ske/models';
-import { LocationsHttp } from '@ske/shared/locations';
+import { CategoryDropdownValue, ItemDto, ItemLocationThreshold, LocationDropdownValue, LocationDto } from '@ske/models';
+import { LocationDropdown, LocationsHttp } from '@ske/shared/locations';
 import { applyEach, applyWhen, form, FormField, hidden, maxLength, min, required, submit, validate } from '@angular/forms/signals';
 import { NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent } from 'ng-zorro-antd/form';
 import { SkeletonInputLoaderDirective } from '@ske/shared/loader';
@@ -31,6 +31,7 @@ import { NzColDirective, NzRowDirective } from 'ng-zorro-antd/grid';
     NzInputDirective,
     NzInputNumberComponent,
     CategoryDropdown,
+    LocationDropdown,
     NzSwitchComponent,
     NzColDirective,
     NzRowDirective,
@@ -82,6 +83,7 @@ export class Form {
         shelfLifeDays: item.shelfLifeDays ?? null,
         imageFileId: item.imageFileId ?? null,
         category: !item.categoryId ? null : { id: item.categoryId, name: item.categoryName ?? '' },
+        location: !item.locationId ? null : { id: item.locationId },
       },
   });
 
@@ -170,6 +172,7 @@ export type ItemFormModel = {
   shelfLifeDays: number | null;
   imageFileId: string | null;
   category: CategoryDropdownValue;
+  location: LocationDropdownValue;
 };
 export type ItemFormSubmit = {
   isValid: boolean;

@@ -50,6 +50,12 @@ export class ReviewLineSmall {
   private readonly _itemChangeEffectRef = effect(() => {
     const item = this.lineForm().item().value();
 
+    const locationId = item?.locationId;
+
+    if (locationId) {
+      untracked(() => this.lineForm().location().value.set({ id: locationId }));
+    }
+
     if (!item?.isPerishable || !item.shelfLifeDays) {
       return;
     }
