@@ -15,6 +15,7 @@ public class EditItemCommand : IRequest<Result<ItemDto>>, ICacheInvalidation
     public int? ShelfLifeDays { get; init; }
     public Guid CategoryId { get; init; }
     public Guid? ImageFileId { get; init; }
+    public Guid? LocationId { get; init; }
 
     // Invalidate every cached GetAllItems page/filter/sort combination - an edited item can
     // affect any of them (default sort, search matches, filters, etc.) - plus this item's

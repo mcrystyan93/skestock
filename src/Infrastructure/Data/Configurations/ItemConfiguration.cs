@@ -59,6 +59,12 @@ public class ItemConfiguration : IEntityTypeConfiguration<Item>
             .HasForeignKey(i => i.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
         
+        builder.HasOne(i => i.Location)
+            .WithMany()
+            .HasForeignKey(i => i.LocationId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasOne(u => u.CreatedBy)
             .WithMany()
             .HasForeignKey(u => u.CreatedById)

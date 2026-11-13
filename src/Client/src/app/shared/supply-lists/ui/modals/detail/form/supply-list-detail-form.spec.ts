@@ -45,6 +45,24 @@ describe('SupplyListDetailForm', () => {
     ]);
   });
 
+  it('copies the item description into notes, keeping edited notes on duplicate add', () => {
+    const form = fixture.componentInstance;
+
+    form.addItem({ id: 'item-1', name: 'Hârtie', unit: 'top', description: 'A4, 80g' });
+    form.addItem({ id: 'item-2', name: 'Pix', unit: 'buc' });
+    expect(form.supplyListForm.lines().value().map((l) => [l.itemId, l.notes])).toEqual([
+      ['item-2', ''],
+      ['item-1', 'A4, 80g']
+    ]);
+    form.supplyListForm.lines().value.update((lines) =>
+      lines.map((l) => (l.itemId === 'item-1' ? { ...l, notes: 'editat' } : l))
+    );
+    form.addItem({ id: 'item-1', name: 'Hârtie', unit: 'top', description: 'A4, 80g' });
+
+    const notes = form.supplyListForm.lines().value().map((l) => [l.itemId, l.notes]);
+    expect(notes).toEqual([['item-2', ''], ['item-1', 'editat']]);
+  });
+
   it('clears the dropdown after an item is selected', async () => {
     const dropdown = fixture.debugElement.query(By.directive(ItemDropdown)).componentInstance as ItemDropdown;
 

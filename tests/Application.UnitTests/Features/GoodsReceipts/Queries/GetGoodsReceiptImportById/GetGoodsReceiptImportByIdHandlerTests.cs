@@ -53,7 +53,8 @@ public class GetGoodsReceiptImportByIdHandlerTests
         var (context, schoolClass, category) = await CreateContextAsync();
         await using var _ = context;
 
-        var item = new Item { Sku = "SKU-1", Name = "Rice", Unit = "kg", IsPerishable = false, Category = category };
+        var locationId = Guid.NewGuid();
+        var item = new Item { Sku = "SKU-1", Name = "Rice", Unit = "kg", IsPerishable = false, Category = category, LocationId = locationId };
         context.Items.Add(item);
         await context.SaveChangesAsync(CancellationToken.None);
 
@@ -73,6 +74,7 @@ public class GetGoodsReceiptImportByIdHandlerTests
         line.MatchedItem!.Id.ShouldBe(item.Id);
         line.MatchedItem.Name.ShouldBe("Rice");
         line.MatchedItem.CategoryName.ShouldBe("Pantry");
+        line.MatchedItem.LocationId.ShouldBe(locationId);
     }
 
     [Test]

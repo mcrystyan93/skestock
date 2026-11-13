@@ -248,6 +248,7 @@ export type GoodsReceiptImportReviewMatchDto = {
   shelfLifeDays?: number | null;
   categoryId: string;
   categoryName: string;
+  locationId?: string | null;
 };
 
 /** Mirrors src/Application/Features/GoodsReceipts/Models/GoodsReceiptImportReviewDto.cs. */

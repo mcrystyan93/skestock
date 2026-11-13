@@ -113,6 +113,36 @@ public class CreateItemCommandTests : TestBase
     }
 
     [Test]
+    public async Task Handle_WithDefaultLocation_RoundTripsThroughGetById()
+    {
+        var category = await SeedCategoryAsync();
+        var location = await SeedLocationAsync();
+
+        var result = await TestApp.SendAsync(new CreateItemCommand
+        {
+            Name = $"{_prefix}-Located", Unit = "unit", CategoryId = category.Id, LocationId = location.Id
+        });
+
+        result.IsSuccess.ShouldBeTrue();
+        var fetched = await TestApp.SendAsync(new GetItemByIdQuery { Id = result.Value.Id });
+        fetched.Value.LocationId.ShouldBe(location.Id);
+    }
+
+    [Test]
+    public async Task Handle_WithNonExistentDefaultLocation_ThrowsValidationException()
+    {
+        var category = await SeedCategoryAsync();
+
+        var act = async () => await TestApp.SendAsync(new CreateItemCommand
+        {
+            Name = $"{_prefix}-X", Unit = "unit", CategoryId = category.Id, LocationId = Guid.NewGuid()
+        });
+
+        var exception = await act.ShouldThrowAsync<ValidationException>();
+        exception.Errors.ShouldContainKey(nameof(CreateItemCommand.LocationId));
+    }
+
+    [Test]
     public async Task Handle_WithNegativeLocationThreshold_ThrowsValidationException()
     {
         var category = await SeedCategoryAsync();

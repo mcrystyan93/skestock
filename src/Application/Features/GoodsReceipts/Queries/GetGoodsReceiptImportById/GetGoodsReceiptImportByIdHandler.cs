@@ -64,7 +64,8 @@ public class GetGoodsReceiptImportByIdHandler(IApplicationDbContext dbContext)
                     IsPerishable = item.IsPerishable,
                     ShelfLifeDays = item.ShelfLifeDays,
                     CategoryId = item.CategoryId,
-                    CategoryName = item.Category.Name
+                    CategoryName = item.Category.Name,
+                    LocationId = item.LocationId
                 })
                 .ToListAsync(cancellationToken);
 

@@ -102,7 +102,8 @@ function buildEditableLine(line: GoodsReceiptImportReviewLineDto, sourceLineInde
         unit: matchedItem.unit,
         isPerishable: matchedItem.isPerishable,
         categoryId: matchedItem.categoryId,
-        categoryName: matchedItem.categoryName
+        categoryName: matchedItem.categoryName,
+        locationId: matchedItem.locationId
       }
       : null,
     location: null,

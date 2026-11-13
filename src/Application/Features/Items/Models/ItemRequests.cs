@@ -21,6 +21,7 @@ public static class ItemRequests
         public int? ShelfLifeDays { get; init; }
         public Guid CategoryId { get; init; }
         public Guid? ImageFileId { get; init; }
+        public Guid? LocationId { get; init; }
     }
 
     public class EditItemRequest
@@ -34,5 +35,6 @@ public static class ItemRequests
         public int? ShelfLifeDays { get; init; }
         public Guid CategoryId { get; init; }
         public Guid? ImageFileId { get; init; }
+        public Guid? LocationId { get; init; }
     }
 }
