@@ -166,6 +166,24 @@ public class GetItemByIdHandlerTests
     }
 
     [Test]
+    public async Task Handle_ReturnsLocationId()
+    {
+        await using var context = CreateContext();
+        var category = new Category { Name = "Stationery" };
+        var location = new Location { Name = "Shelf", Type = "Kitchen" };
+        context.Categories.Add(category);
+        context.Locations.Add(location);
+        await context.SaveChangesAsync(CancellationToken.None);
+        var item = new Item { Name = "Pencil", Unit = "unit", CategoryId = category.Id, LocationId = location.Id };
+        context.Items.Add(item);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var result = await new GetItemByIdHandler(context).Handle(new GetItemByIdQuery { Id = item.Id }, CancellationToken.None);
+
+        result.Value.LocationId.ShouldBe(location.Id);
+    }
+
+    [Test]
     public async Task Handle_WithNonExistentId_ReturnsFailedResult()
     {
         await using var context = CreateContext();

@@ -50,6 +50,16 @@ export class ReviewLineSmall {
   private readonly _itemChangeEffectRef = effect(() => {
     const item = this.lineForm().item().value();
 
+    const locationId = item?.locationId;
+
+    // Only prefill an empty location so a hand-picked one survives the row being re-created.
+    if (locationId) {
+      untracked(() => {
+        if (isNil(this.lineForm().location().value()))
+          this.lineForm().location().value.set({ id: locationId });
+      });
+    }
+
     if (!item?.isPerishable || !item.shelfLifeDays) {
       return;
     }

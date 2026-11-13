@@ -20,6 +20,7 @@ export type ItemDto = {
   isActive: boolean;
   categoryId: string;
   categoryName?: string | null;
+  locationId?: string | null;
   imageFileId?: string | null;
   createdByName?: string | null;
   lastModifiedByName?: string | null;
@@ -68,6 +69,7 @@ export type CreateItemRequest = {
   isPerishable: boolean;
   shelfLifeDays?: number | null;
   categoryId: string;
+  locationId?: string | null;
   imageFileId?: string | null;
 };
 
@@ -81,6 +83,7 @@ export type EditItemRequest = {
   isPerishable: boolean;
   shelfLifeDays?: number | null;
   categoryId: string;
+  locationId?: string | null;
   imageFileId?: string | null;
 };
 

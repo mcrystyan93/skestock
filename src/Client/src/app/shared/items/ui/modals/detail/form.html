@@ -96,6 +96,18 @@
         </nz-form-control>
       </nz-form-item>
     </nz-col>
+    <nz-col nzSpan="24">
+      <!--   location   -->
+      <nz-form-item *skeletonInputLoader="loading() || locationsLoading()">
+        <nz-form-label>
+          Locație implicită
+        </nz-form-label>
+        <nz-form-control>
+          <ske-location-dropdown [allowClear]="true"
+                                 [formField]="itemForm.location" />
+        </nz-form-control>
+      </nz-form-item>
+    </nz-col>
     <nz-col nzSpan="12">
       <!--   unit   -->
       <nz-form-item *skeletonInputLoader="loading() || locationsLoading()">

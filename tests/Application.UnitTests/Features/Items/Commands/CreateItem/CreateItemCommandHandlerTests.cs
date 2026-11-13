@@ -170,6 +170,25 @@ public class CreateItemCommandHandlerTests
     }
 
     [Test]
+    public async Task Handle_WithLocationId_PersistsDefaultLocation()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        var location = new Location { Name = "Shelf", Type = "Kitchen" };
+        context.Locations.Add(location);
+        await context.SaveChangesAsync(CancellationToken.None);
+        var handler = new CreateItemCommandHandler(context, ItemImageTestSupport.User());
+
+        var result = await handler.Handle(new CreateItemCommand
+        {
+            Name = "Pencil", Unit = "box", CategoryId = category.Id, LocationId = location.Id
+        }, CancellationToken.None);
+
+        result.Value.LocationId.ShouldBe(location.Id);
+        (await context.Items.SingleAsync(CancellationToken.None)).LocationId.ShouldBe(location.Id);
+    }
+
+    [Test]
     public async Task Handle_WithSkuAndDescription_PersistsTrimmedValues()
     {
         var (context, category) = await CreateContextAsync();

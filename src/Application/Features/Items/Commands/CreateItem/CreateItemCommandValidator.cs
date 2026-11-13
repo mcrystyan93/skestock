@@ -62,6 +62,12 @@ public class CreateItemCommandValidator : AbstractValidator<CreateItemCommand>
                 dbContext, blobStorage, thumbnailService, user, null, fileId!.Value, context, cancellationToken))
             .When(x => x.ImageFileId.HasValue);
 
+        RuleFor(x => x.LocationId)
+            .MustAsync((locationId, cancellationToken) => LocationExistsAsync(dbContext, locationId!.Value, cancellationToken))
+            .When(x => x.LocationId.HasValue)
+            .WithMessage("Location does not exist")
+            .WithErrorCode(ValidationErrorCodes.InvalidReference);
+
         RuleFor(x => x.CategoryId)
             .NotEmpty()
             .WithErrorCode(ValidationErrorCodes.Required)
@@ -90,5 +96,12 @@ public class CreateItemCommandValidator : AbstractValidator<CreateItemCommand>
         return await dbContext.Categories
             .AsNoTracking()
             .AnyAsync(c => c.Id == categoryId, cancellationToken);
+    }
+
+    private static async Task<bool> LocationExistsAsync(IApplicationDbContext dbContext, Guid locationId, CancellationToken cancellationToken)
+    {
+        return await dbContext.Locations
+            .AsNoTracking()
+            .AnyAsync(l => l.Id == locationId, cancellationToken);
     }
 }

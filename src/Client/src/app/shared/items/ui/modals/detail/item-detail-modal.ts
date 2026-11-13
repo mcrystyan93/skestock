@@ -108,6 +108,7 @@ export class ItemDetailModal {
       isPerishable: formData.isPerishable,
       shelfLifeDays: formData.isPerishable ? (formData.shelfLifeDays ?? null) : null,
       categoryId: formData.category?.id as string,
+      locationId: formData.location?.id ?? null,
       imageFileId: formData.imageFileId
     };
   }

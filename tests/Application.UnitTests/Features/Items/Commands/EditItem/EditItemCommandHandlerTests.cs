@@ -171,6 +171,26 @@ public class EditItemCommandHandlerTests
     }
 
     [Test]
+    public async Task Handle_SetsAndClearsDefaultLocation()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        var location = new Location { Name = "Shelf", Type = "Kitchen" };
+        var item = new Item { Name = "Pencil", Unit = "unit", CategoryId = category.Id };
+        context.Locations.Add(location);
+        context.Items.Add(item);
+        await context.SaveChangesAsync(CancellationToken.None);
+        var handler = new EditItemCommandHandler(context, ItemImageTestSupport.User(), ItemImageTestSupport.Blobs(), NullLogger<EditItemCommandHandler>.Instance);
+
+        var set = await handler.Handle(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", CategoryId = category.Id, LocationId = location.Id }, CancellationToken.None);
+        set.Value.LocationId.ShouldBe(location.Id);
+
+        var cleared = await handler.Handle(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", CategoryId = category.Id, LocationId = null }, CancellationToken.None);
+        cleared.Value.LocationId.ShouldBeNull();
+        (await context.Items.SingleAsync(CancellationToken.None)).LocationId.ShouldBeNull();
+    }
+
+    [Test]
     public async Task Handle_DoesNotChangeIsActive()
     {
         var (context, category) = await CreateContextAsync();
