@@ -17,6 +17,25 @@ type TopPurchasesFilterModel = {
   category: CategoryDropdownValue;
 };
 
+type TopKind = 'purchases' | 'donations';
+
+const TEXTS: Record<TopKind, { title: string; noun: string; quantity: string; value: string; frequency: string }> = {
+  purchases: {
+    title: 'Top achiziții',
+    noun: 'achiziții',
+    quantity: 'Articolele cumpărate în cea mai mare cantitate',
+    value: 'Articolele cu cea mai mare valoare de achiziție',
+    frequency: 'Articolele cumpărate cel mai des'
+  },
+  donations: {
+    title: 'Top donații',
+    noun: 'donații',
+    quantity: 'Articolele donate în cea mai mare cantitate',
+    value: 'Articolele cu cea mai mare valoare donată',
+    frequency: 'Articolele donate cel mai des'
+  }
+};
+
 const COMPUTED_AT_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'medium', timeStyle: 'short' });
 
 @Component({
@@ -37,7 +56,7 @@ const COMPUTED_AT_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'med
   selector: 'ske-top-purchases-card',
   template: `
     <nz-card class="min-h-110 flex-body has-chart"
-             nzTitle="Top achiziții">
+             [nzTitle]="text().title">
       <div class="mb-2 flex flex-wrap items-center gap-2 px-4 pt-2">
         <nz-segmented [formField]="filterForm.scope"
                       aria-label="Perioada analizată">
@@ -55,27 +74,30 @@ const COMPUTED_AT_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'med
                                aria-label="Filtrează după categorie" />
       </div>
 
-      <ng-container *skeLoader="store.topPurchasesLoading()">
-        @if (store.topPurchasesProblemDetail() || store.topPurchasesValidationErrors()) {
-          <ske-error-display [problemDetail]="store.topPurchasesProblemDetail()"
-                             [validationErrors]="store.topPurchasesValidationErrors()" />
+      <ng-container *skeLoader="loading()">
+        @if (problemDetail() || validationErrors()) {
+          <ske-error-display [problemDetail]="problemDetail()"
+                             [validationErrors]="validationErrors()" />
         } @else {
           <nz-tabs nzSize="small"
                    class="px-4!">
             <nz-tab nzTitle="Cantitate">
-              <ske-top-purchases-chart [items]="store.topPurchases()?.byQuantity ?? []"
+              <ske-top-purchases-chart [items]="data()?.byQuantity ?? []"
                                        metric="quantity"
-                                       ariaLabel="Articolele cumpărate în cea mai mare cantitate" />
+                                       [ariaLabel]="text().quantity"
+                                       [noun]="text().noun" />
             </nz-tab>
             <nz-tab nzTitle="Valoare">
-              <ske-top-purchases-chart [items]="store.topPurchases()?.byValue ?? []"
+              <ske-top-purchases-chart [items]="data()?.byValue ?? []"
                                        metric="value"
-                                       ariaLabel="Articolele cu cea mai mare valoare de achiziție" />
+                                       [ariaLabel]="text().value"
+                                       [noun]="text().noun" />
             </nz-tab>
             <nz-tab nzTitle="Frecvență">
-              <ske-top-purchases-chart [items]="store.topPurchases()?.byFrequency ?? []"
+              <ske-top-purchases-chart [items]="data()?.byFrequency ?? []"
                                        metric="frequency"
-                                       ariaLabel="Articolele cumpărate cel mai des" />
+                                       [ariaLabel]="text().frequency"
+                                       [noun]="text().noun" />
             </nz-tab>
           </nz-tabs>
           @if (computedAtLabel(); as computedAt) {
@@ -91,7 +113,9 @@ const COMPUTED_AT_FORMATTER = new Intl.DateTimeFormat('ro-RO', { dateStyle: 'med
     class: 'block h-full min-w-0'
   }
 })
+// Shows the top purchases or, with kind="donations", the top donations: same filters and charts, different store slice.
 export class TopPurchasesCard {
+  public readonly kind = input<TopKind>('purchases');
   public readonly classId = input.required<string | null>();
   public readonly active = input(false);
   public readonly store = inject(ClassStatisticsStore);
@@ -105,8 +129,20 @@ export class TopPurchasesCard {
   private readonly _formModel = signal<TopPurchasesFilterModel>({ scope: 'Class', category: null });
   public readonly filterForm = form(this._formModel);
 
+  private readonly _isDonations = computed(() => this.kind() === 'donations');
+
+  public readonly text = computed(() => TEXTS[this.kind()]);
+  public readonly data = computed(() => (this._isDonations() ? this.store.topDonations() : this.store.topPurchases()));
+  public readonly loading = computed(() =>
+    this._isDonations() ? this.store.topDonationsLoading() : this.store.topPurchasesLoading());
+  public readonly problemDetail = computed(() =>
+    this._isDonations() ? this.store.topDonationsProblemDetail() : this.store.topPurchasesProblemDetail());
+  public readonly validationErrors = computed(() =>
+    this._isDonations() ? this.store.topDonationsValidationErrors() : this.store.topPurchasesValidationErrors());
+
+  // Donations are computed live, so there is no "last updated" time to show.
   public readonly computedAtLabel = computed(() => {
-    const computedAt = this.store.topPurchases()?.computedAt;
+    const computedAt = this._isDonations() ? null : this.data()?.computedAt;
     return computedAt ? COMPUTED_AT_FORMATTER.format(new Date(computedAt)) : null;
   });
 
@@ -119,6 +155,7 @@ export class TopPurchasesCard {
       return;
     }
 
-    untracked(() => this.store.loadTopPurchases({ scope, classId, categoryId }));
+    const filter = { scope, classId, categoryId };
+    untracked(() => (this._isDonations() ? this.store.loadTopDonations(filter) : this.store.loadTopPurchases(filter)));
   });
 }

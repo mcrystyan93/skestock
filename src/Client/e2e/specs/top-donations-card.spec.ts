@@ -77,7 +77,7 @@ test('top donations card loads for the current class and switches scope', async 
   await page.setViewportSize({width: 1280, height: 900});
   await page.goto(`/school-classes/${classId}?tab=4`);
 
-  const card = page.locator('ske-top-donations-card');
+  const card = page.locator('ske-top-purchases-card').filter({hasText: 'Top donații'});
   await expect(card.getByText('Top donații')).toBeVisible();
   await expect(card.locator('apx-chart, .apexcharts-canvas').first()).toBeVisible();
   expect(requests[0]).toContain('scope=Class');
@@ -92,5 +92,5 @@ test('top donations card names donations in its empty state', async ({page}) => 
   await mockApi(page, [], emptyPurchases);
   await page.goto(`/school-classes/${classId}?tab=4`);
 
-  await expect(page.locator('ske-top-donations-card').getByText('Nu există donații pentru filtrele selectate.')).toBeVisible();
+  await expect(page.locator('ske-top-purchases-card').filter({hasText: 'Top donații'}).getByText('Nu există donații pentru filtrele selectate.')).toBeVisible();
 });
