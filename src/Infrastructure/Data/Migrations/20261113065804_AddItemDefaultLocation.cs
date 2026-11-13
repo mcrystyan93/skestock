@@ -32,7 +32,7 @@ namespace skestock.Infrastructure.Data.Migrations
 
             // Backfill: location holding the most remaining stock; items with no stock stay NULL.
             migrationBuilder.Sql("""
-                UPDATE i SET i.[LocationId] = x.[LocationId], i.[LastModifiedById] = NULL
+                UPDATE i SET i.[LocationId] = x.[LocationId]
                 FROM [Items] i
                 CROSS APPLY (
                     SELECT TOP 1 b.[LocationId] FROM [StockBatches] b

@@ -52,8 +52,12 @@ export class ReviewLineSmall {
 
     const locationId = item?.locationId;
 
+    // Only prefill an empty location so a hand-picked one survives the row being re-created.
     if (locationId) {
-      untracked(() => this.lineForm().location().value.set({ id: locationId }));
+      untracked(() => {
+        if (isNil(this.lineForm().location().value()))
+          this.lineForm().location().value.set({ id: locationId });
+      });
     }
 
     if (!item?.isPerishable || !item.shelfLifeDays) {
