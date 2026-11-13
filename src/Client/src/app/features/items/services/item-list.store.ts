@@ -100,6 +100,36 @@ export const ItemListState = signalStore(
       )
     );
 
+    // Same full-replace edit as the image; imageFileId must be sent back or the edit clears the image.
+    const setItemLocation = rxMethod<{ item: ItemDto; locationId: string | null }>(
+      pipe(
+        tap(() => store.clearItemsErrors()),
+        mergeMap(({ item, locationId }) =>
+          itemHttp.edit(item.id, {
+            sku: item.sku,
+            name: item.name,
+            description: item.description,
+            unit: item.unit,
+            locationThresholds: [],
+            isPerishable: item.isPerishable,
+            shelfLifeDays: item.shelfLifeDays,
+            categoryId: item.categoryId,
+            imageFileId: item.imageFileId,
+            locationId
+          }).pipe(
+            mapResponse({
+              next: (updatedItem) => {
+                patchState(store, replaceRow(updatedItem));
+              },
+              error: (error) => {
+                store.handleItemsError(error);
+              }
+            })
+          )
+        )
+      )
+    );
+
     // Realtime row events replace just that row, so the list keeps its loaded pages and scroll position.
     // A row that was edited out of its sort position or filter is corrected on the next load.
     const patchItem = rxMethod<string>(
@@ -172,7 +202,7 @@ export const ItemListState = signalStore(
       )
     );
 
-    return { reload, toggleActive, setItemImage, patchItem, toggleSelected, setLoadedSelected, merge };
+    return { reload, toggleActive, setItemImage, setItemLocation, patchItem, toggleSelected, setLoadedSelected, merge };
   }),
   withEventHandlers((store, events = inject(Events)) => ({
     itemListChanges: events.on(
