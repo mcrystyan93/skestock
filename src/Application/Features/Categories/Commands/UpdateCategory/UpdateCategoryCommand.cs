@@ -10,6 +10,8 @@ public class UpdateCategoryCommand : IRequest<Result<CategoryMutationDto>>, ICac
     public CategoryIconDto? Icon { get; init; }
 
     // Invalidate every cached GetAllCategories page/filter/sort combination - an updated category
-    // can affect any of them (default sort, search matches, filters, etc.).
-    public IReadOnlyCollection<string> Tags => [CacheConstants.CategoryListTag];
+    // can affect any of them (default sort, search matches, filters, etc.). The purchase tag covers the
+    // top purchases/donations lists, which show the category name.
+    public IReadOnlyCollection<string> Tags =>
+        [CacheConstants.CategoryListTag, Statistics.CacheConstants.PurchaseStatisticsTag];
 }

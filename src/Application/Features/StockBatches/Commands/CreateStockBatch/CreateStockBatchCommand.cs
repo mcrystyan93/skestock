@@ -32,6 +32,8 @@ public class CreateStockBatchCommand : IRequest<Result<StockBatchListItemDto>>, 
         [
             CacheConstants.StockBatchListTag,
             StockCacheConstants.BuildTag(ReceivedClassId, LocationId),
-            StockCacheConstants.BuildClassTag(ReceivedClassId)
+            StockCacheConstants.BuildClassTag(ReceivedClassId),
+            // Only donations feed the top donations list.
+            ..(Source == StockBatchSource.Donation ? new[] { Statistics.CacheConstants.DonationStatisticsTag } : [])
         ];
 }
