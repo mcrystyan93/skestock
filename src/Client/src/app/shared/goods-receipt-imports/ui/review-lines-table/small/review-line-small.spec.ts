@@ -42,14 +42,14 @@ describe('ReviewLineSmall', () => {
     fixture.destroy();
   });
 
-  function setup(item: ReviewEditableLine['item']) {
+  function setup(item: ReviewEditableLine['item'], location: ReviewEditableLine['location'] = null) {
     const fixture = TestBed.createComponent(ReviewLineSmall);
     const line: ReviewEditableLine = {
       rowId: 'row-1',
       sourceLineIndex: 0,
       originalQuantity: 4,
       item,
-      location: null,
+      location,
       quantity: 4,
       expiryDate: null,
       unitPrice: 0
@@ -66,6 +66,13 @@ describe('ReviewLineSmall', () => {
     const { fixture, lineForm } = setup({ id: 'i1', locationId: 'l1' });
 
     expect(lineForm.location().value()?.id).toBe('l1');
+    fixture.destroy();
+  });
+
+  it('keeps a location that is already set instead of overwriting it with the item default', () => {
+    const { fixture, lineForm } = setup({ id: 'i1', locationId: 'l1' }, { id: 'picked' });
+
+    expect(lineForm.location().value()?.id).toBe('picked');
     fixture.destroy();
   });
 
