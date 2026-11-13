@@ -189,13 +189,15 @@ export class OrderListDetailForm {
         itemId: lineItem.id,
         itemImageFileId: lineItem.imageFileId ?? null,
         productName: lineItem.sku ? `(${lineItem.sku}) ${lineItem.name ?? ''}` : lineItem.name ?? '',
-        unit: lineItem.unit ?? 'buc'
+        unit: lineItem.unit ?? 'buc',
+        notes: lineItem.description ?? ''
       }
       : {
         itemId: null,
         itemImageFileId: null,
         productName: lineItem.name,
-        unit: 'buc'
+        unit: 'buc',
+        notes: ''
       };
 
     untracked(() => {
@@ -209,7 +211,6 @@ export class OrderListDetailForm {
           id: null,
           ...line,
           quantity: 1,
-          notes: '',
           clientKey: this.createLineKey()
         }, ...lines]);
       }
