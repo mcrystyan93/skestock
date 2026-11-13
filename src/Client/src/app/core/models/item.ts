@@ -21,6 +21,7 @@ export type ItemDto = {
   categoryId: string;
   categoryName?: string | null;
   locationId?: string | null;
+  locationName?: string | null;
   imageFileId?: string | null;
   createdByName?: string | null;
   lastModifiedByName?: string | null;
@@ -141,6 +142,7 @@ export type ItemTableColumn =
   | 'isPerishable'
   | 'shelfLifeDays'
   | 'categoryName'
+  | 'locationName'
   | 'isActive'
   | 'createdDate'
   | 'lastModifiedDate'
@@ -176,6 +178,11 @@ export const ITEM_TABLE_COLUMNS: TableColumnDefinition<ItemTableColumn> = {
   categoryName: {
     label: 'Categorie',
     value: 'categoryName',
+    fieldType: 'string'
+  },
+  locationName: {
+    label: 'Locație',
+    value: 'locationName',
     fieldType: 'string'
   },
   isActive: {
