@@ -73,12 +73,10 @@
           {{ item.categoryName }}
         </div>
       </td>
-      <td>
-        <div nz-typography
-             nzType="secondary"
-             class="mb-0!">
-          {{ item.locationName }}
-        </div>
+      <td (click)="$event.stopPropagation()">
+        <ske-item-location-cell [locationId]="item.locationId"
+                                [locationName]="item.locationName"
+                                (locationChange)="onLocationChanged.emit({ item, locationId: $event })" />
       </td>
       <td>
         @if (item.isPerishable && !!item.shelfLifeDays) {

@@ -1,11 +1,11 @@
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { Events, withEventHandlers } from '@ngrx/signals/events';
 import { withItemCollection } from '@ske/shared/items';
-import { ItemDto, MergeItemsRequest } from '@ske/models';
+import { EditItemRequest, ItemDto, MergeItemsRequest } from '@ske/models';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { exhaustMap, filter, groupBy, mergeMap, pipe, switchMap, tap } from 'rxjs';
+import { concatMap, EMPTY, exhaustMap, filter, groupBy, mergeMap, Observable, OperatorFunction, pipe, switchMap, tap } from 'rxjs';
 import { mapResponse } from '@ngrx/operators';
 import { inject } from '@angular/core';
 import { ItemsHttp } from '@ske/shared/items';
@@ -71,34 +71,56 @@ export const ItemListState = signalStore(
     );
 
     // The edit endpoint replaces the whole item, so the row's current fields are sent back unchanged.
-    // mergeMap, not switchMap: saves for different rows must not cancel each other.
-    const setItemImage = rxMethod<{ item: ItemDto; fileId: string }>(
+    // The row is read at send time, not from the click-time snapshot, so a save never reverts a field
+    // changed by an earlier save. Saves are serialized per row (concatMap) so responses cannot land out of order,
+    // while different rows save in parallel.
+    const perRow = <T extends { item: ItemDto }>(save: (value: T) => Observable<unknown>): OperatorFunction<T, unknown> =>
+      pipe(
+        groupBy((value: T) => value.item.id),
+        mergeMap((row$) => row$.pipe(concatMap(save)))
+      );
+
+    const editRow = (itemId: string, changes: Partial<EditItemRequest>) => {
+      const item = store.items().find((i) => i.id === itemId);
+      if (!item) return EMPTY;
+
+      return itemHttp.edit(item.id, {
+        sku: item.sku,
+        name: item.name,
+        description: item.description,
+        unit: item.unit,
+        locationThresholds: [],
+        isPerishable: item.isPerishable,
+        shelfLifeDays: item.shelfLifeDays,
+        categoryId: item.categoryId,
+        imageFileId: item.imageFileId,
+        locationId: item.locationId,
+        ...changes
+      }).pipe(
+        mapResponse({
+          next: (updatedItem) => {
+            patchState(store, replaceRow(updatedItem));
+          },
+          error: (error) => {
+            store.handleItemsError(error);
+          }
+        })
+      );
+    };
+
+    // One shared pipeline, so image and location saves of the same row are serialized against each other.
+    const saveRow = rxMethod<{ item: ItemDto; changes: Partial<EditItemRequest> }>(
       pipe(
         tap(() => store.clearItemsErrors()),
-        mergeMap(({ item, fileId }) =>
-          itemHttp.edit(item.id, {
-            sku: item.sku,
-            name: item.name,
-            description: item.description,
-            unit: item.unit,
-            locationThresholds: [],
-            isPerishable: item.isPerishable,
-            shelfLifeDays: item.shelfLifeDays,
-            categoryId: item.categoryId,
-            imageFileId: fileId
-          }).pipe(
-            mapResponse({
-              next: (updatedItem) => {
-                patchState(store, replaceRow(updatedItem));
-              },
-              error: (error) => {
-                store.handleItemsError(error);
-              }
-            })
-          )
-        )
+        perRow(({ item, changes }: { item: ItemDto; changes: Partial<EditItemRequest> }) => editRow(item.id, changes))
       )
     );
+
+    const setItemImage = ({ item, fileId }: { item: ItemDto; fileId: string }) =>
+      saveRow({ item, changes: { imageFileId: fileId } });
+
+    const setItemLocation = ({ item, locationId }: { item: ItemDto; locationId: string | null }) =>
+      saveRow({ item, changes: { locationId } });
 
     // Realtime row events replace just that row, so the list keeps its loaded pages and scroll position.
     // A row that was edited out of its sort position or filter is corrected on the next load.
@@ -172,7 +194,7 @@ export const ItemListState = signalStore(
       )
     );
 
-    return { reload, toggleActive, setItemImage, patchItem, toggleSelected, setLoadedSelected, merge };
+    return { reload, toggleActive, setItemImage, setItemLocation, patchItem, toggleSelected, setLoadedSelected, merge };
   }),
   withEventHandlers((store, events = inject(Events)) => ({
     itemListChanges: events.on(

@@ -6,9 +6,10 @@ import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { TimeAgoPipe } from '@ske/shared/pipes';
 import { ItemThumbnail } from '@ske/shared/items';
+import { ItemLocationCell } from './item-location-cell';
 
 @Component({
-  imports: [ItemThumbnail, NzTableModule, NzTypographyComponent, NzIconDirective, TimeAgoPipe],
+  imports: [ItemLocationCell, ItemThumbnail, NzTableModule, NzTypographyComponent, NzIconDirective, TimeAgoPipe],
   selector: 'ske-item-table',
   styles: ``,
   templateUrl: './table.html',
@@ -27,6 +28,7 @@ export class Table extends BaseTableWithFilter<ItemDto, GetAllItemsRequest> {
   public readonly onEdit = output<ItemDto>();
   public readonly onToggleActive = output<ItemDto>();
   public readonly onImageUploaded = output<{ item: ItemDto; fileId: string }>();
+  public readonly onLocationChanged = output<{ item: ItemDto; locationId: string | null }>();
   public readonly columns = ITEM_TABLE_COLUMNS;
 
   protected readonly selectedLoadedCount = computed(() =>

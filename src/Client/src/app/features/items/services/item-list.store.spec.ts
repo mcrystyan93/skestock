@@ -77,6 +77,23 @@ describe('ItemListState', () => {
     ]);
   });
 
+  it('saves a location change on top of the latest row so an earlier image save is not reverted', () => {
+    const item = createItem('item-1');
+    const imageSave = new Subject<ItemDto>();
+    http.getAll.mockReturnValue(of({ data: [item], hasNextPage: false, nextCursor: null, sort: [] }));
+    http.edit.mockReturnValueOnce(imageSave).mockReturnValueOnce(of({ ...item, imageFileId: 'file-1', locationId: 'loc-1' }));
+    const store = TestBed.inject(ItemListState);
+
+    store.load(store.filter());
+    store.setItemImage({ item, fileId: 'file-1' });
+    store.setItemLocation({ item, locationId: 'loc-1' });
+    imageSave.next({ ...item, imageFileId: 'file-1' });
+    imageSave.complete();
+
+    expect(http.edit).toHaveBeenLastCalledWith('item-1', expect.objectContaining({ imageFileId: 'file-1', locationId: 'loc-1' }));
+    expect(store.items().map((i) => [i.imageFileId, i.locationId])).toEqual([['file-1', 'loc-1']]);
+  });
+
   it('keeps the row unchanged and reports the problem when the save fails', () => {
     const item = createItem('item-1');
     http.getAll.mockReturnValue(of({ data: [item], hasNextPage: false, nextCursor: null, sort: [] }));
