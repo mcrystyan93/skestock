@@ -40,6 +40,8 @@ type ClassStatisticsState = {
   dailyConsumption: ClassDailyConsumptionDto | null;
   topPurchasesFilter: TopPurchasesFilter | null;
   topPurchases: TopPurchasesDto | null;
+  topDonationsFilter: TopPurchasesFilter | null;
+  topDonations: TopPurchasesDto | null;
 };
 
 const initialState: ClassStatisticsState = {
@@ -53,7 +55,9 @@ const initialState: ClassStatisticsState = {
   dailyConsumptionFilter: null,
   dailyConsumption: null,
   topPurchasesFilter: null,
-  topPurchases: null
+  topPurchases: null,
+  topDonationsFilter: null,
+  topDonations: null
 };
 
 // Grouped because signalStore() only types a limited number of features.
@@ -74,7 +78,9 @@ const withAnalyticsRequestStatus = () =>
     withLoadingFeature('dailyConsumption'),
     withProblemDetailsFeature('dailyConsumption'),
     withLoadingFeature('topPurchases'),
-    withProblemDetailsFeature('topPurchases')
+    withProblemDetailsFeature('topPurchases'),
+    withLoadingFeature('topDonations'),
+    withProblemDetailsFeature('topDonations')
   );
 
 export const ClassStatisticsStore = signalStore(
@@ -263,6 +269,31 @@ export const ClassStatisticsStore = signalStore(
       )
     );
 
+    const loadTopDonations = rxMethod<TopPurchasesFilter>(
+      pipe(
+        tap((filter) => {
+          store.clearTopDonationsErrors();
+          store.setTopDonationsLoading();
+          patchState(store, { topDonationsFilter: filter });
+        }),
+        switchMap((filter) =>
+          store.classStatisticsHttp.getTopDonations(filter).pipe(
+            mapResponse({
+              next: (topDonations) => {
+                patchState(store, { topDonations });
+                store.setTopDonationsLoaded();
+              },
+              error: (error) => {
+                patchState(store, { topDonations: null });
+                store.handleTopDonationsError(error);
+                store.setTopDonationsLoaded();
+              }
+            })
+          )
+        )
+      )
+    );
+
     const deactivate = () => patchState(store, { active: false });
 
     const reload = () => {
@@ -284,6 +315,10 @@ export const ClassStatisticsStore = signalStore(
       if (topPurchasesFilter) {
         loadTopPurchases(topPurchasesFilter);
       }
+      const topDonationsFilter = store.topDonationsFilter();
+      if (topDonationsFilter) {
+        loadTopDonations(topDonationsFilter);
+      }
     };
 
     return {
@@ -293,6 +328,7 @@ export const ClassStatisticsStore = signalStore(
       loadItemEvolution,
       loadDailyConsumption,
       loadTopPurchases,
+      loadTopDonations,
       deactivate,
       reload
     };

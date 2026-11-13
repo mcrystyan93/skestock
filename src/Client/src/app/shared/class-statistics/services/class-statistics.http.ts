@@ -75,6 +75,15 @@ export class ClassStatisticsHttp {
     return this._httpClient.get<TopPurchasesDto>('/api/statistics/purchases/top', { params });
   }
 
+  public getTopDonations(filter: TopPurchasesFilter) {
+    let params = new HttpParams().set('scope', filter.scope);
+    if (filter.scope === 'Class' && filter.classId) params = params.set('classId', filter.classId);
+    if (filter.categoryId) params = params.set('categoryId', filter.categoryId);
+    if (filter.top) params = params.set('top', filter.top);
+
+    return this._httpClient.get<TopPurchasesDto>('/api/statistics/donations/top', { params });
+  }
+
   public getPurchaseSegments() {
     return this._httpClient.get<PurchaseSegmentsDto>('/api/statistics/purchases/segments');
   }
