@@ -95,12 +95,21 @@ public class ItemTestDbContext(DbContextOptions<ItemTestDbContext> options)
             b.HasOne(i => i.CreatedBy).WithMany().HasForeignKey(i => i.CreatedById);
             b.HasOne(i => i.LastModifiedBy).WithMany().HasForeignKey(i => i.LastModifiedById);
             b.HasOne(i => i.Category).WithMany(c => c.Items).HasForeignKey(i => i.CategoryId);
+            b.HasOne(i => i.Location).WithMany().HasForeignKey(i => i.LocationId);
             b.Ignore(i => i.Batches);
             b.Ignore(i => i.Transactions);
             b.Ignore(i => i.ClassBalances);
         });
 
-        builder.Ignore<Location>();
+        builder.Entity<Location>(b =>
+        {
+            b.HasOne(l => l.CreatedBy).WithMany().HasForeignKey(l => l.CreatedById);
+            b.HasOne(l => l.LastModifiedBy).WithMany().HasForeignKey(l => l.LastModifiedById);
+            b.HasOne(l => l.ParentLocation).WithMany(l => l.ChildLocations).HasForeignKey(l => l.ParentLocationId);
+            b.Ignore(l => l.Batches);
+            b.Ignore(l => l.Transactions);
+            b.Ignore(l => l.ClassBalances);
+        });
         builder.Ignore<SchoolClass>();
         builder.Ignore<StockBatch>();
         builder.Ignore<StockTransaction>();
@@ -316,6 +325,25 @@ public class GetAllItemsHandlerTests
         result.IsSuccess.ShouldBeTrue();
         var dto = result.Value.Data.Single();
         dto.CategoryName.ShouldBe("Stationery");
+    }
+
+    [Test]
+    public async Task Handle_WithItemLocation_ReturnsLocationNameInDto()
+    {
+        var location = new Location { Name = "Cămară", Type = "StorageRoom" };
+        await using var context = await SeedAsync(1, (i, category) => new Item
+        {
+            Name = "Item",
+            Unit = "buc",
+            CategoryId = category.Id,
+            Location = location
+        });
+        var handler = CreateHandler(context);
+
+        var result = await handler.Handle(new GetAllItemsQuery(), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.Data.Single().LocationName.ShouldBe("Cămară");
     }
 
     [Test]

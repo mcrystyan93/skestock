@@ -15,6 +15,7 @@ public record ItemDto
     public string? CategoryName { get; init; }
     public Guid? ImageFileId { get; init; }
     public Guid? LocationId { get; init; }
+    public string? LocationName { get; init; }
     public string? CreatedByName { get; init; }
     public string? LastModifiedByName { get; init; }
     public DateTimeOffset CreatedDate { get; init; }
