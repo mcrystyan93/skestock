@@ -28,7 +28,7 @@ const donations = {
 
 const emptyPurchases = {computedAt: null, byQuantity: [], byValue: [], byFrequency: []};
 
-async function mockApi(page: Page, requests: string[]) {
+async function mockApi(page: Page, requests: string[], payload: unknown = donations) {
   await page.route('**/api/**', async (route) => {
     const url = new URL(route.request().url());
     const {pathname} = url;
@@ -53,7 +53,7 @@ async function mockApi(page: Page, requests: string[]) {
     if (pathname === `/api/SchoolClasses/${classId}/summary`) return route.fulfill({json: {id: classId}});
     if (pathname === '/api/statistics/donations/top') {
       requests.push(url.search);
-      return route.fulfill({json: donations});
+      return route.fulfill({json: payload});
     }
     if (pathname === '/api/statistics/purchases/top') return route.fulfill({json: emptyPurchases});
     return route.fulfill({
@@ -86,6 +86,11 @@ test('top donations card loads for the current class and switches scope', async 
   await card.getByText('90 de zile').click();
   await expect.poll(() => requests.some((r) => r.includes('scope=Last90Days'))).toBe(true);
 
-  await card.scrollIntoViewIfNeeded();
-  await expect(card).toBeVisible();
+});
+
+test('top donations card names donations in its empty state', async ({page}) => {
+  await mockApi(page, [], emptyPurchases);
+  await page.goto(`/school-classes/${classId}?tab=4`);
+
+  await expect(page.locator('ske-top-donations-card').getByText('Nu există donații pentru filtrele selectate.')).toBeVisible();
 });

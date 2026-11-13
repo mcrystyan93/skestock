@@ -61,16 +61,19 @@ type TopDonationsFilterModel = {
             <nz-tab nzTitle="Cantitate">
               <ske-top-purchases-chart [items]="store.topDonations()?.byQuantity ?? []"
                                        metric="quantity"
+                                       noun="donații"
                                        ariaLabel="Articolele donate în cea mai mare cantitate" />
             </nz-tab>
             <nz-tab nzTitle="Valoare">
               <ske-top-purchases-chart [items]="store.topDonations()?.byValue ?? []"
                                        metric="value"
+                                       noun="donații"
                                        ariaLabel="Articolele cu cea mai mare valoare donată" />
             </nz-tab>
             <nz-tab nzTitle="Frecvență">
               <ske-top-purchases-chart [items]="store.topDonations()?.byFrequency ?? []"
                                        metric="frequency"
+                                       noun="donații"
                                        ariaLabel="Articolele donate cel mai des" />
             </nz-tab>
           </nz-tabs>

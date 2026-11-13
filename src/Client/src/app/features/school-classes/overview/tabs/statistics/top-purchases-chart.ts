@@ -14,6 +14,7 @@ const METRIC_COLORS: Record<TopPurchasesMetric, string> = {
   value: '#d48806',
   frequency: '#531dab'
 };
+const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 const QUANTITY_FORMATTER = new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 2 });
 const CURRENCY_FORMATTER = new Intl.NumberFormat('ro-RO', { style: 'currency', currency: 'RON' });
 const DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -38,7 +39,7 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month:
            role="status">
         <p class="max-w-sm text-sm"
            nz-typography
-           nzType="secondary">Nu există achiziții pentru filtrele selectate.</p>
+           nzType="secondary">Nu există {{ noun() }} pentru filtrele selectate.</p>
       </div>
     }
   `
@@ -47,6 +48,8 @@ export class TopPurchasesChart {
   public readonly items = input<PurchaseStatisticDto[]>([]);
   public readonly metric = input.required<TopPurchasesMetric>();
   public readonly ariaLabel = input.required<string>();
+  // What the items are called in empty-state and series text; the donations card reuses this chart.
+  public readonly noun = input('achiziții');
 
   private readonly _themeService = inject(ThemeService);
 
@@ -59,7 +62,7 @@ export class TopPurchasesChart {
   public readonly series = computed<ApexAxisChartSeries>(() => {
     const metric = this.metric();
     return [{
-      name: metric === 'quantity' ? 'Cantitate' : metric === 'value' ? 'Valoare' : 'Achiziții',
+      name: metric === 'quantity' ? 'Cantitate' : metric === 'value' ? 'Valoare' : capitalize(this.noun()),
       data: this.items().map((item) => ({
         x: `${item.itemName} (${item.unit})`,
         y: metric === 'quantity' ? item.totalQuantity : metric === 'value' ? item.totalValue : item.purchaseCount
