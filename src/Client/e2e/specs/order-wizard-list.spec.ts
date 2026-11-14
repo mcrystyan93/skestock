@@ -134,6 +134,9 @@ for (const viewport of viewports) {
     await expect(quantities).toHaveCount(2);
     await expect(modal.locator('nz-input-number[aria-label*="Creioane"] input')).toHaveValue('5');
     await expect(modal.locator('nz-input-number[aria-label*="Marker"] input')).toHaveValue('3');
+    // The editor sits right under the stepper: the wizard container must not keep a share of the free height.
+    const addBox = await modal.locator('input[placeholder="Cauta si adauga un articol"]:visible').first().boundingBox();
+    expect(addBox?.y ?? Infinity, 'gap between the stepper and the editor').toBeLessThan(260);
     // At desktop width the editor also lists suggestions, so only the order lines are checked.
     const orderLines = modal.locator('ske-order-list-line');
     await expect(orderLines).toHaveCount(2);

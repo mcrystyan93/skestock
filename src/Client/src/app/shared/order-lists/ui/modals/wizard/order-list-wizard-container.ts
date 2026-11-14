@@ -28,7 +28,11 @@ import { OrderListSupplyListStep } from './steps/supply-list-step';
   ],
   selector: 'ske-order-list-wizard-container',
   host: {
-    class: 'flex min-h-0 grow flex-col'
+    class: 'flex flex-col',
+    // Only the product list step fills the modal; elsewhere the stepper keeps its height and the editor below gets the rest.
+    '[class.min-h-0]': "wizard.step() === 'selection'",
+    '[class.grow]': "wizard.step() === 'selection'",
+    '[class.shrink-0]': "wizard.step() !== 'selection'"
   },
   template: `
     @if (direction() === 'horizontal') {
