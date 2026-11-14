@@ -17,13 +17,14 @@ const item = (itemId: string, name: string, over: Record<string, unknown> = {}) 
   unit: 'buc',
   lastQuantity: null,
   purchaseCount: 0,
+  lastPurchasedAt: null,
   averageIntervalDays: null,
   isFrequent: false,
   locations: [] as { locationId: string; locationName: string; isLowStock: boolean }[],
   ...over,
 });
-const depozitA = { locationId: 'loc-a', locationName: 'Depozit A' };
-const depozitB = { locationId: 'loc-b', locationName: 'Depozit B' };
+const depozitA = { locationId: 'loc-a', locationName: 'Depozit A', quantity: 8 };
+const depozitB = { locationId: 'loc-b', locationName: 'Depozit B', quantity: 8 };
 
 const filler = Array.from({ length: 14 }, (_, index) =>
   item(`f-${index}`, `Articol ${index + 1}`, { lastQuantity: 2, purchaseCount: 3, averageIntervalDays: 40 + index, locations: [{ ...depozitA, isLowStock: false }] }),
@@ -31,8 +32,8 @@ const filler = Array.from({ length: 14 }, (_, index) =>
 
 const catalog = [
   // Low in A, fine in B: one id, two groups.
-  item('low-1', 'Creioane', { sku: 'CR-1', lastQuantity: 5, purchaseCount: 9, averageIntervalDays: 12, isFrequent: true, locations: [{ ...depozitA, isLowStock: true }, { ...depozitB, isLowStock: false }] }),
-  item('w-1', 'Detergent', { unit: 'cutie', lastQuantity: 2, purchaseCount: 20, averageIntervalDays: 7, isFrequent: true, locations: [{ ...depozitA, isLowStock: false }] }),
+  item('low-1', 'Creioane', { sku: 'CR-1', lastQuantity: 5, purchaseCount: 9, lastPurchasedAt: '2026-02-02T10:00:00Z', averageIntervalDays: 12, isFrequent: true, locations: [{ ...depozitA, quantity: 2, isLowStock: true }, { ...depozitB, isLowStock: false }] }),
+  item('w-1', 'Detergent', { unit: 'cutie', lastQuantity: 2, purchaseCount: 20, lastPurchasedAt: '2026-03-14T10:00:00Z', averageIntervalDays: 7, isFrequent: true, locations: [{ ...depozitA, isLowStock: false }] }),
   item('m-1', 'Marker', { unit: 'cutie', lastQuantity: 3, purchaseCount: 12, averageIntervalDays: 30, locations: [{ ...depozitA, isLowStock: false }] }),
   item('m-2', longName, { unit: 'cutie', lastQuantity: 7, purchaseCount: 10, averageIntervalDays: 35, locations: [{ ...depozitB, isLowStock: false }] }),
   item('n-1', 'Hârtie A4', { unit: 'top', locations: [{ ...depozitB, isLowStock: true }] }),
@@ -92,9 +93,9 @@ for (const viewport of viewports) {
     expect(headings.at(-1)).toContain('Fără locație');
 
     // Icons are present for low stock and frequent items, and thumbnails load.
-    await expect(step.getByText('Stoc scăzut', { exact: true }).first()).toBeVisible();
+    await expect(step.getByText(/Stoc scăzut \(\d+\sbuc\)/).first()).toBeVisible();
     await expect(step.getByText('Comandat frecvent', { exact: true }).first()).toBeVisible();
-    await expect(step.getByText('Ultima cantitate: 5 buc').first()).toBeVisible();
+    await expect(step.getByText(/Ultima cantitate: 5\sbuc \(.*2026\)/).first()).toBeVisible();
     const thumbnails = step.locator('ske-item-thumbnail img');
     await expect(thumbnails.first()).toBeVisible();
     expect(await noHorizontalScroll(page), 'horizontal scroll').toBe(true);

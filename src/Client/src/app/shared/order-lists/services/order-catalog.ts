@@ -3,7 +3,8 @@ import { DEFAULT_UNIT, toProductName, wholeQuantity } from './order-list-wizard.
 
 export const NO_LOCATION_TITLE = 'Fără locație';
 
-export type CatalogRow = { item: OrderCatalogItemDto; isLowStock: boolean };
+/** `stock` is what that location currently holds (0 when the row is not tied to class stock). */
+export type CatalogRow = { item: OrderCatalogItemDto; isLowStock: boolean; stock: number };
 
 export type CatalogGroup = { key: string; title: string; rows: CatalogRow[] };
 
@@ -12,18 +13,18 @@ export function normalize(text: string): string {
   return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 }
 
-// Frequency is the order count (most first, never ordered last). The interval only separates equal counts; the name is the
-// last tiebreak so the order stays deterministic.
+// Frequency is the order count (most first, never ordered last); equal counts go to the most recent purchase first. The name
+// is only the last tiebreak so the order stays deterministic.
 function compareRows(a: CatalogRow, b: CatalogRow): number {
   if (a.item.purchaseCount !== b.item.purchaseCount) return b.item.purchaseCount - a.item.purchaseCount;
 
-  const left = a.item.averageIntervalDays;
-  const right = b.item.averageIntervalDays;
+  const left = a.item.lastPurchasedAt ? Date.parse(a.item.lastPurchasedAt) : null;
+  const right = b.item.lastPurchasedAt ? Date.parse(b.item.lastPurchasedAt) : null;
 
   if (left !== right) {
     if (left === null) return 1;
     if (right === null) return -1;
-    return left - right;
+    return right - left;
   }
 
   return a.item.name.localeCompare(b.item.name);
@@ -39,13 +40,13 @@ export function catalogGroups(items: OrderCatalogItemDto[], query: string): Cata
       continue;
 
     const places = item.locations.length > 0
-      ? item.locations.map((location) => ({ key: location.locationId, title: location.locationName, isLowStock: location.isLowStock }))
-      : [{ key: '', title: NO_LOCATION_TITLE, isLowStock: false }];
+      ? item.locations.map((location) => ({ key: location.locationId, title: location.locationName, isLowStock: location.isLowStock, stock: location.quantity }))
+      : [{ key: '', title: NO_LOCATION_TITLE, isLowStock: false, stock: 0 }];
 
     for (const place of places) {
       const group = groups.get(place.key) ?? { key: place.key, title: place.title, rows: [] };
 
-      group.rows.push({ item, isLowStock: place.isLowStock });
+      group.rows.push({ item, isLowStock: place.isLowStock, stock: place.stock });
       groups.set(place.key, group);
     }
   }

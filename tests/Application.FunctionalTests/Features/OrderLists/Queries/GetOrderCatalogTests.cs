@@ -122,7 +122,7 @@ public class GetOrderCatalogTests : TestBase
 
         var item = json.RootElement.EnumerateArray().Single(e => e.GetProperty("name").GetString()!.StartsWith(prefix));
         item.EnumerateObject().Select(p => p.Name).Order().ShouldBe(
-            ["averageIntervalDays", "imageFileId", "isFrequent", "itemId", "lastQuantity", "locations", "name", "purchaseCount", "sku", "unit"]);
+            ["averageIntervalDays", "imageFileId", "isFrequent", "itemId", "lastPurchasedAt", "lastQuantity", "locations", "name", "purchaseCount", "sku", "unit"]);
     }
 
     private static async Task<HttpClient> LoginAsync()

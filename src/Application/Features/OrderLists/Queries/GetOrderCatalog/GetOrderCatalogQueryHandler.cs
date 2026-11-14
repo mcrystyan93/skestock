@@ -38,6 +38,10 @@ public class GetOrderCatalogQueryHandler(IApplicationDbContext dbContext, TimePr
                     .Where(s => s.ItemId == i.Id && s.Scope == PurchaseStatisticsScope.Last365Days)
                     .Select(s => s.LastQuantity)
                     .FirstOrDefault(),
+                LastPurchasedAt = dbContext.ItemPurchaseStatistics
+                    .Where(s => s.ItemId == i.Id && s.Scope == PurchaseStatisticsScope.Last365Days)
+                    .Select(s => (DateTimeOffset?)s.LastPurchasedAt)
+                    .FirstOrDefault(),
                 PurchaseCount = dbContext.ItemPurchaseStatistics
                     .Where(s => s.ItemId == i.Id && s.Scope == PurchaseStatisticsScope.Last365Days)
                     .Select(s => s.PurchaseCount)
@@ -95,6 +99,7 @@ public class GetOrderCatalogQueryHandler(IApplicationDbContext dbContext, TimePr
                     {
                         LocationId = s.LocationId,
                         LocationName = s.LocationName,
+                        Quantity = s.Quantity,
                         // A missing threshold row means never low.
                         IsLowStock = thresholds.TryGetValue((i.Id, s.LocationId), out var min) && s.Quantity < min
                     })
@@ -113,6 +118,7 @@ public class GetOrderCatalogQueryHandler(IApplicationDbContext dbContext, TimePr
                     Unit = i.Unit,
                     LastQuantity = i.LastQuantity,
                     PurchaseCount = i.PurchaseCount,
+                    LastPurchasedAt = i.LastPurchasedAt,
                     AverageIntervalDays = i.AverageIntervalDays,
                     IsFrequent = frequentIds.Contains(i.Id),
                     Locations = locations
