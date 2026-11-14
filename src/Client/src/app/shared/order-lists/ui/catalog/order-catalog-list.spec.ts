@@ -9,7 +9,7 @@ const icon = (name: string) => ({ name, icon: '<svg viewBox="0 0 1 1"><path d="M
 const loc = (locationId: string, locationName: string, isLowStock = false) => ({ locationId, locationName, isLowStock });
 
 const item = (itemId: string, name: string, overrides: Partial<OrderCatalogItemDto> = {}): OrderCatalogItemDto => ({
-  itemId, name, sku: null, imageFileId: null, unit: 'buc', lastQuantity: 2, averageIntervalDays: null, isFrequent: false,
+  itemId, name, sku: null, imageFileId: null, unit: 'buc', lastQuantity: 2, purchaseCount: 0, averageIntervalDays: null, isFrequent: false,
   locations: [loc('a', 'Cămară')], ...overrides
 });
 

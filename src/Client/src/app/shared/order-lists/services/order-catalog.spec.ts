@@ -4,7 +4,7 @@ import { catalogGroups, catalogLine, catalogToLines } from './order-catalog';
 const loc = (locationId: string, locationName: string, isLowStock = false) => ({ locationId, locationName, isLowStock });
 
 const item = (itemId: string, name: string, overrides: Partial<OrderCatalogItemDto> = {}): OrderCatalogItemDto => ({
-  itemId, name, sku: null, imageFileId: null, unit: 'buc', lastQuantity: null, averageIntervalDays: null, isFrequent: false,
+  itemId, name, sku: null, imageFileId: null, unit: 'buc', lastQuantity: null, purchaseCount: 0, averageIntervalDays: null, isFrequent: false,
   locations: [loc('a', 'Cămară')], ...overrides
 });
 
@@ -21,15 +21,26 @@ describe('order catalog', () => {
     expect(groups[0].rows[0].item.itemId).toBe(groups[1].rows[0].item.itemId);
   });
 
-  it('sorts rows by interval ascending, nulls last, then by name', () => {
+  it('sorts rows by number of orders descending, then interval ascending, never-ordered last', () => {
     const [group] = catalogGroups([
-      item('1', 'B', { averageIntervalDays: null }),
-      item('2', 'A', { averageIntervalDays: null }),
-      item('3', 'Z', { averageIntervalDays: 14 }),
-      item('4', 'Y', { averageIntervalDays: 7 })
+      item('1', 'Zahăr', { purchaseCount: 0 }),
+      item('2', 'Apă', { purchaseCount: 1 }),
+      item('3', 'Lapte', { purchaseCount: 2 }),
+      item('4', 'Ouă', { purchaseCount: 12, averageIntervalDays: 14 }),
+      item('5', 'Pâine', { purchaseCount: 12, averageIntervalDays: 7 })
     ], '');
 
-    expect(group.rows.map((r) => r.item.itemId)).toEqual(['4', '3', '2', '1']);
+    // 12 orders first (shorter interval wins the tie), then 2, 1 and never ordered; names are not a sort key here.
+    expect(group.rows.map((r) => r.item.itemId)).toEqual(['5', '4', '3', '2', '1']);
+  });
+
+  it('breaks a tie in frequency by name only, so the order is deterministic', () => {
+    const [group] = catalogGroups([
+      item('1', 'Zahăr'),
+      item('2', 'Apă')
+    ], '');
+
+    expect(group.rows.map((r) => r.item.itemId)).toEqual(['2', '1']);
   });
 
   it('filters by name and SKU ignoring diacritics and drops empty groups', () => {

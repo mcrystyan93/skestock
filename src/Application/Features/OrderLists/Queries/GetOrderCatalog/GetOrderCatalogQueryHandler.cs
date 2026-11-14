@@ -38,6 +38,10 @@ public class GetOrderCatalogQueryHandler(IApplicationDbContext dbContext, TimePr
                     .Where(s => s.ItemId == i.Id && s.Scope == PurchaseStatisticsScope.Last365Days)
                     .Select(s => s.LastQuantity)
                     .FirstOrDefault(),
+                PurchaseCount = dbContext.ItemPurchaseStatistics
+                    .Where(s => s.ItemId == i.Id && s.Scope == PurchaseStatisticsScope.Last365Days)
+                    .Select(s => s.PurchaseCount)
+                    .FirstOrDefault(),
                 AverageIntervalDays = dbContext.ItemPurchaseStatistics
                     .Where(s => s.ItemId == i.Id && s.Scope == PurchaseStatisticsScope.Last365Days)
                     .Select(s => s.AverageIntervalDays)
@@ -108,6 +112,7 @@ public class GetOrderCatalogQueryHandler(IApplicationDbContext dbContext, TimePr
                     ImageFileId = i.ImageFileId,
                     Unit = i.Unit,
                     LastQuantity = i.LastQuantity,
+                    PurchaseCount = i.PurchaseCount,
                     AverageIntervalDays = i.AverageIntervalDays,
                     IsFrequent = frequentIds.Contains(i.Id),
                     Locations = locations

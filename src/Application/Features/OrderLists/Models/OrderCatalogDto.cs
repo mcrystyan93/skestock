@@ -9,6 +9,8 @@ public record OrderCatalogItemDto
     public Guid? ImageFileId { get; init; }
     public string Unit { get; init; } = string.Empty;
     public int? LastQuantity { get; init; }
+    // Receipts in the last year (0 when never ordered): the frequency the client sorts by.
+    public int PurchaseCount { get; init; }
     public decimal? AverageIntervalDays { get; init; }
     public bool IsFrequent { get; init; }
     public List<OrderCatalogLocationDto> Locations { get; init; } = [];

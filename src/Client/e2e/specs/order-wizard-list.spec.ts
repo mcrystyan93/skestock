@@ -16,6 +16,7 @@ const item = (itemId: string, name: string, over: Record<string, unknown> = {}) 
   imageFileId: `img-${itemId}`,
   unit: 'buc',
   lastQuantity: null,
+  purchaseCount: 0,
   averageIntervalDays: null,
   isFrequent: false,
   locations: [] as { locationId: string; locationName: string; isLowStock: boolean }[],
@@ -25,15 +26,15 @@ const depozitA = { locationId: 'loc-a', locationName: 'Depozit A' };
 const depozitB = { locationId: 'loc-b', locationName: 'Depozit B' };
 
 const filler = Array.from({ length: 14 }, (_, index) =>
-  item(`f-${index}`, `Articol ${index + 1}`, { lastQuantity: 2, averageIntervalDays: 40 + index, locations: [{ ...depozitA, isLowStock: false }] }),
+  item(`f-${index}`, `Articol ${index + 1}`, { lastQuantity: 2, purchaseCount: 3, averageIntervalDays: 40 + index, locations: [{ ...depozitA, isLowStock: false }] }),
 );
 
 const catalog = [
   // Low in A, fine in B: one id, two groups.
-  item('low-1', 'Creioane', { sku: 'CR-1', lastQuantity: 5, averageIntervalDays: 12, isFrequent: true, locations: [{ ...depozitA, isLowStock: true }, { ...depozitB, isLowStock: false }] }),
-  item('w-1', 'Detergent', { unit: 'cutie', lastQuantity: 2, averageIntervalDays: 7, isFrequent: true, locations: [{ ...depozitA, isLowStock: false }] }),
-  item('m-1', 'Marker', { unit: 'cutie', lastQuantity: 3, averageIntervalDays: 30, locations: [{ ...depozitA, isLowStock: false }] }),
-  item('m-2', longName, { unit: 'cutie', lastQuantity: 7, averageIntervalDays: 35, locations: [{ ...depozitB, isLowStock: false }] }),
+  item('low-1', 'Creioane', { sku: 'CR-1', lastQuantity: 5, purchaseCount: 9, averageIntervalDays: 12, isFrequent: true, locations: [{ ...depozitA, isLowStock: true }, { ...depozitB, isLowStock: false }] }),
+  item('w-1', 'Detergent', { unit: 'cutie', lastQuantity: 2, purchaseCount: 20, averageIntervalDays: 7, isFrequent: true, locations: [{ ...depozitA, isLowStock: false }] }),
+  item('m-1', 'Marker', { unit: 'cutie', lastQuantity: 3, purchaseCount: 12, averageIntervalDays: 30, locations: [{ ...depozitA, isLowStock: false }] }),
+  item('m-2', longName, { unit: 'cutie', lastQuantity: 7, purchaseCount: 10, averageIntervalDays: 35, locations: [{ ...depozitB, isLowStock: false }] }),
   item('n-1', 'Hârtie A4', { unit: 'top', locations: [{ ...depozitB, isLowStock: true }] }),
   item('x-1', 'Tablă magnetică', { unit: 'buc', lastQuantity: 1 }),
   ...filler,

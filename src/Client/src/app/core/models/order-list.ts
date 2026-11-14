@@ -27,6 +27,8 @@ export type OrderCatalogItemDto = {
   imageFileId: string | null;
   unit: string;
   lastQuantity: number | null;
+  /** Receipts in the last year, 0 when never ordered. */
+  purchaseCount: number;
   averageIntervalDays: number | null;
   isFrequent: boolean;
   locations: OrderCatalogLocationDto[];

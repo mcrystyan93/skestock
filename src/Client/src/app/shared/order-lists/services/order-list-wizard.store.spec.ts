@@ -13,6 +13,7 @@ const catalogItem = (itemId: string, lastQuantity: number | null = null): OrderC
   imageFileId: `img-${itemId}`,
   unit: 'buc',
   lastQuantity,
+  purchaseCount: 0,
   averageIntervalDays: null,
   isFrequent: false,
   locations: []

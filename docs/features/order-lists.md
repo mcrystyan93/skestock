@@ -50,7 +50,7 @@ The group requires an authenticated user (`src/Web/Infrastructure/WebApplication
 | Method + route | Use case | Notes |
 |---|---|---|
 | `POST get-all` | `GetAllOrderListsQuery` | Keyset-paginated list of `OrderListListItemDto`. Cached. |
-| `GET catalog/{classId}` | `GetOrderCatalogQuery` | Catalog for the order wizard: `OrderCatalogItemDto` list (`itemId`, `name`, `sku`, `imageFileId`, `unit`, `lastQuantity`, `averageIntervalDays`, `isFrequent`, `locations[{locationId, locationName, isLowStock}]`). `lastQuantity` and `averageIntervalDays` come from the Last365Days statistics row; `isFrequent` = weekly or every-two-weeks cadence. |
+| `GET catalog/{classId}` | `GetOrderCatalogQuery` | Catalog for the order wizard: `OrderCatalogItemDto` list (`itemId`, `name`, `sku`, `imageFileId`, `unit`, `lastQuantity`, `purchaseCount`, `averageIntervalDays`, `isFrequent`, `locations[{locationId, locationName, isLowStock}]`). `lastQuantity`, `purchaseCount` (0 when never ordered) and `averageIntervalDays` come from the Last365Days statistics row; the client lists rows by `purchaseCount` descending, then interval ascending, then name; `isFrequent` = weekly or every-two-weeks cadence. |
 | `GET {id}` | `GetOrderListByIdQuery` | Full `OrderListDto` with lines. Cached. |
 | `GET {id}/export?format=xlsx\|png` | `ExportOrderListQuery` | File download; `Submitted` lists only. Default `xlsx`. |
 | `POST` | `CreateOrderListCommand` | Draft with optional initial lines (201). |

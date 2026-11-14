@@ -92,6 +92,7 @@ public class GetOrderCatalogTests : TestBase
 
         var riceDto = catalog[0];
         riceDto.LastQuantity.ShouldBe(12);
+        riceDto.PurchaseCount.ShouldBe(6);
         riceDto.AverageIntervalDays.ShouldBe(7m);
         riceDto.IsFrequent.ShouldBeTrue();
         riceDto.Locations.Select(l => (l.LocationName, l.IsLowStock))
@@ -121,7 +122,7 @@ public class GetOrderCatalogTests : TestBase
 
         var item = json.RootElement.EnumerateArray().Single(e => e.GetProperty("name").GetString()!.StartsWith(prefix));
         item.EnumerateObject().Select(p => p.Name).Order().ShouldBe(
-            ["averageIntervalDays", "imageFileId", "isFrequent", "itemId", "lastQuantity", "locations", "name", "sku", "unit"]);
+            ["averageIntervalDays", "imageFileId", "isFrequent", "itemId", "lastQuantity", "locations", "name", "purchaseCount", "sku", "unit"]);
     }
 
     private static async Task<HttpClient> LoginAsync()
