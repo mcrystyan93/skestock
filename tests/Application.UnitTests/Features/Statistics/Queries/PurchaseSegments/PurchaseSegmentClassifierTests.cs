@@ -1,8 +1,8 @@
 using NUnit.Framework;
 using Shouldly;
-using skestock.Application.Features.Statistics.Queries.GetPurchaseSegments;
+using skestock.Application.Features.Statistics.Queries.PurchaseSegments;
 
-namespace skestock.Application.UnitTests.Features.Statistics.Queries.GetPurchaseSegments;
+namespace skestock.Application.UnitTests.Features.Statistics.Queries.PurchaseSegments;
 
 [TestFixture]
 public sealed class PurchaseSegmentClassifierTests

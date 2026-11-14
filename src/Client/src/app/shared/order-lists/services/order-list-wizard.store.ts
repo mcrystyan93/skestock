@@ -96,8 +96,8 @@ function loadInto<TInput, TResult>(
 
 export const OrderListWizardStore = signalStore(
   withState(initialState),
-  withLoadingFeature('suggestions'),
-  withProblemDetailsFeature('suggestions'),
+  withLoadingFeature('catalog'),
+  withProblemDetailsFeature('catalog'),
   withLoadingFeature('supplyLists'),
   withProblemDetailsFeature('supplyLists'),
   withLoadingFeature('selectedSupplyLists'),
@@ -140,7 +140,7 @@ export const OrderListWizardStore = signalStore(
               && store.selectedSupplyLists().length === store.supplyListIds().length
               && !store.selectedSupplyListsLoading();
 
-          return !store.suggestionsLoading() && !store.loadFailed();
+          return !store.catalogLoading() && !store.loadFailed();
         case 'products':
           return store.selectedProductIds().length > 0;
         case 'details':
@@ -154,10 +154,10 @@ export const OrderListWizardStore = signalStore(
     activeProblemDetail: computed(() =>
       store.fromSupplyList()
         ? store.supplyListsProblemDetail() ?? store.selectedSupplyListsProblemDetail()
-        : store.suggestionsProblemDetail()
+        : store.catalogProblemDetail()
     ),
     activeValidationErrors: computed(() =>
-      store.fromSupplyList() ? store.supplyListsValidationErrors() : store.suggestionsValidationErrors()
+      store.fromSupplyList() ? store.supplyListsValidationErrors() : store.catalogValidationErrors()
     ),
     /** Identifies what the editor would be pre-filled with, so unchanged choices never rebuild it. */
     prefillKey: computed(() =>
@@ -186,8 +186,8 @@ export const OrderListWizardStore = signalStore(
       }
     });
 
-    const loadSuggestions = loadInto(
-      slice(store.setSuggestionsLoading, store.clearSuggestionsErrors, store.setSuggestionsLoaded, store.handleSuggestionsError),
+    const loadCatalog = loadInto(
+      slice(store.setCatalogLoading, store.clearCatalogErrors, store.setCatalogLoaded, store.handleCatalogError),
       (classId: string) => store.orderListsHttp.getCatalog(classId),
       (catalog) => patchState(store, { catalog, catalogLoaded: true, selectedItemIds: [] })
     );
@@ -239,7 +239,7 @@ export const OrderListWizardStore = signalStore(
 
         if (store.step() === 'source') {
           if (store.source() === 'new' && !store.catalogLoaded() && !isNil(classId))
-            loadSuggestions(classId);
+            loadCatalog(classId);
 
           if (store.fromSupplyList() && !store.supplyListsLoaded())
             loadSupplyLists();
@@ -268,7 +268,7 @@ export const OrderListWizardStore = signalStore(
       retry(classId: string | null) {
         if (!store.fromSupplyList()) {
           if (!isNil(classId))
-            loadSuggestions(classId);
+            loadCatalog(classId);
 
           return;
         }

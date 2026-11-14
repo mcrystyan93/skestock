@@ -1,7 +1,7 @@
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Features.OrderLists.Models;
-using skestock.Application.Features.Statistics.Queries.GetPurchaseSegments;
+using skestock.Application.Features.Statistics.Queries.PurchaseSegments;
 using skestock.Domain.Enums;
 
 namespace skestock.Application.Features.OrderLists.Queries.GetOrderCatalog;

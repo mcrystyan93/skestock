@@ -79,7 +79,7 @@ import { OrderListSupplyListStep } from './steps/supply-list-step';
       } @else {
         <ske-order-list-suggestions-step [items]="wizard.catalog()"
                                          [selectedIds]="wizard.selectedItemIds()"
-                                         [loading]="wizard.suggestionsLoading()"
+                                         [loading]="wizard.catalogLoading()"
                                          (selectedIdsChange)="wizard.setSelectedItemIds($event)" />
       }
     } @else if (wizard.step() === 'products') {

@@ -1,4 +1,4 @@
-namespace skestock.Application.Features.Statistics.Queries.GetPurchaseSegments;
+namespace skestock.Application.Features.Statistics.Queries.PurchaseSegments;
 
 // Internal to the classifier (no longer an API contract).
 public record PurchaseSegmentItemDto

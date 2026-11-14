@@ -4,7 +4,7 @@ import { saveScreenshotsAfterEach, screenshotRoot } from '../screenshots';
 saveScreenshotsAfterEach();
 
 const classId = 'class-1';
-const shots = `${screenshotRoot}/order-wizard-segments`;
+const shots = `${screenshotRoot}/order-wizard-list`;
 // 1x1 PNG, enough for a thumbnail <img> to load.
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
 const longName = 'Articol cu un nume extrem de lung fără spații SuperCalifragilisticExpialidociousAbcdefghijklmnopqrstuvwxyz';
@@ -67,7 +67,7 @@ const noHorizontalScroll = (page: Page) =>
   page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
 
 for (const viewport of viewports) {
-  test(`order wizard segments at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+  test(`order wizard list at ${viewport.width}x${viewport.height}`, async ({ page }) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await mockApi(page);
     await page.goto(`/school-classes/${classId}?tab=1`);

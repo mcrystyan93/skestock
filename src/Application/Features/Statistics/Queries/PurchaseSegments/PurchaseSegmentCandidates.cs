@@ -1,7 +1,7 @@
 using skestock.Application.Common.Interfaces;
 using skestock.Domain.Enums;
 
-namespace skestock.Application.Features.Statistics.Queries.GetPurchaseSegments;
+namespace skestock.Application.Features.Statistics.Queries.PurchaseSegments;
 
 public static class PurchaseSegmentCandidates
 {

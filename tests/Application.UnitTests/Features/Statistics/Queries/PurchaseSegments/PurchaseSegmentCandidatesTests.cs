@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using Shouldly;
-using skestock.Application.Features.Statistics.Queries.GetPurchaseSegments;
+using skestock.Application.Features.Statistics.Queries.PurchaseSegments;
 using skestock.Application.UnitTests.Features.GoodsReceipts.Commands.CreateGoodsReceipt;
 using skestock.Domain.Entities;
 using skestock.Domain.Entities.Categories;
@@ -10,7 +10,7 @@ using skestock.Domain.Entities.SchoolClasses;
 using skestock.Domain.Entities.Statistics;
 using skestock.Domain.Enums;
 
-namespace skestock.Application.UnitTests.Features.Statistics.Queries.GetPurchaseSegments;
+namespace skestock.Application.UnitTests.Features.Statistics.Queries.PurchaseSegments;
 
 [TestFixture]
 public sealed class PurchaseSegmentCandidatesTests

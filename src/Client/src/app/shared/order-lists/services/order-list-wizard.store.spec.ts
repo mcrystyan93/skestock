@@ -305,7 +305,7 @@ describe('OrderListWizardStore', () => {
     expect(line.notes).toBe(long);
   });
 
-  it('blocks Continue while the suggestions failed to load and allows it after a retry', () => {
+  it('blocks Continue while the catalog failed to load and allows it after a retry', () => {
     orderListsHttp.getCatalog.mockReturnValueOnce(throwError(() => new Error('down')));
     const store = TestBed.inject(OrderListWizardStore);
 

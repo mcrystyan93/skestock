@@ -47,36 +47,36 @@ type GroupView = CatalogGroup & { selectedCount: number };
     }
 
     <div class="min-h-0 flex-1 overflow-y-auto">
-    @for (group of views(); track group.key) {
-      <section>
-      <div class="sticky top-0 z-20 flex items-center justify-between gap-2 border-0 border-b border-solid border-gray-200 bg-white pb-1 pt-3 dark:border-gray-700 dark:bg-slate-900">
-        <h4 class="m-0 min-w-0 text-sm font-semibold wrap-break-word">{{ group.title }}</h4>
-        @if (mode() === 'select') {
-          <label nz-checkbox
-                 class="shrink-0 text-sm"
-                 [nzChecked]="group.selectedCount === group.rows.length"
-                 [nzIndeterminate]="group.selectedCount > 0 && group.selectedCount < group.rows.length"
-                 (nzCheckedChange)="toggleGroup(group, $event)">
-            Selectează tot ({{ group.rows.length }})<span class="sr-only"> din {{ group.title }}</span>
-          </label>
-        }
-      </div>
-      <ul class="m-0 list-none p-0">
-        @for (row of group.rows; track row.item.itemId) {
-          <li>
-            <ske-order-catalog-row [item]="row.item"
-                                   [isLowStock]="row.isLowStock"
-                                   [mode]="mode()"
-                                   [marked]="mode() === 'select' ? selected().has(row.item.itemId) : addedItemIds().has(row.item.itemId)"
-                                   (toggle)="toggleItem(row.item.itemId, $event)"
-                                   (add)="add.emit(row.item)" />
-          </li>
-        }
-      </ul>
-      </section>
-    } @empty {
-      <nz-empty [nzNotFoundContent]="items().length > 0 ? 'Niciun rezultat.' : emptyText()" />
-    }
+      @for (group of views(); track group.key) {
+        <section>
+          <div class="sticky top-0 z-20 flex items-center justify-between gap-2 border-0 border-b border-solid border-gray-200 bg-white pb-1 pt-3 dark:border-gray-700 dark:bg-slate-900">
+            <h4 class="m-0 min-w-0 text-sm font-semibold wrap-break-word">{{ group.title }}</h4>
+            @if (mode() === 'select') {
+              <label nz-checkbox
+                     class="shrink-0 text-sm"
+                     [nzChecked]="group.selectedCount === group.rows.length"
+                     [nzIndeterminate]="group.selectedCount > 0 && group.selectedCount < group.rows.length"
+                     (nzCheckedChange)="toggleGroup(group, $event)">
+                Selectează tot ({{ group.rows.length }})<span class="sr-only"> din {{ group.title }}</span>
+              </label>
+            }
+          </div>
+          <ul class="m-0 list-none p-0">
+            @for (row of group.rows; track row.item.itemId) {
+              <li>
+                <ske-order-catalog-row [item]="row.item"
+                                       [isLowStock]="row.isLowStock"
+                                       [mode]="mode()"
+                                       [marked]="mode() === 'select' ? selected().has(row.item.itemId) : addedItemIds().has(row.item.itemId)"
+                                       (toggle)="toggleItem(row.item.itemId, $event)"
+                                       (add)="add.emit(row.item)" />
+              </li>
+            }
+          </ul>
+        </section>
+      } @empty {
+        <nz-empty [nzNotFoundContent]="items().length > 0 ? 'Niciun rezultat.' : emptyText()" />
+      }
     </div>
   `
 })
