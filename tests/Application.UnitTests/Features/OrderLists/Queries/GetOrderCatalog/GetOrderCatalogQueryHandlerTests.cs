@@ -31,7 +31,14 @@ public sealed class GetOrderCatalogQueryHandlerTests
             .Options);
 
     private static Item NewItem(string name, Location? location = null, bool active = true) =>
-        new() { Name = name, Unit = "kg", Category = new Category { Name = "Cat" }, IsActive = active, Location = location };
+        new()
+        {
+            Name = name,
+            Unit = "kg",
+            Category = new Category { Name = "Cat" },
+            IsActive = active,
+            Location = location
+        };
 
     private static Location NewLocation(string name) => new() { Name = name, Type = "Room" };
 
@@ -41,7 +48,10 @@ public sealed class GetOrderCatalogQueryHandlerTests
     private static StockBatch Batch(Item item, Location location, SchoolClass schoolClass, int quantity) =>
         new()
         {
-            Item = item, Location = location, ReceivedClass = schoolClass, Quantity = quantity,
+            Item = item,
+            Location = location,
+            ReceivedClass = schoolClass,
+            Quantity = quantity,
             ReceivedDate = new DateOnly(2026, 5, 1)
         };
 
@@ -52,12 +62,16 @@ public sealed class GetOrderCatalogQueryHandlerTests
         Item item, decimal? interval, int? lastQuantity = null, int daysSinceLast = 1) =>
         new()
         {
-            Scope = PurchaseStatisticsScope.Last365Days, Item = item, AverageIntervalDays = interval,
-            LastQuantity = lastQuantity, ComputedAt = Clock.GetUtcNow(),
+            Scope = PurchaseStatisticsScope.Last365Days,
+            Item = item,
+            AverageIntervalDays = interval,
+            LastQuantity = lastQuantity,
+            ComputedAt = Clock.GetUtcNow(),
             LastPurchasedAt = Clock.GetUtcNow().AddDays(-daysSinceLast)
         };
 
-    private static async Task<List<OrderCatalogItemDto>> RunAsync(GoodsReceiptTestDbContext context, SchoolClass schoolClass)
+    private static async Task<List<OrderCatalogItemDto>> RunAsync(GoodsReceiptTestDbContext context,
+        SchoolClass schoolClass)
     {
         await context.SaveChangesAsync(CancellationToken.None);
         var result = await new GetOrderCatalogQueryHandler(context, Clock)
@@ -106,6 +120,20 @@ public sealed class GetOrderCatalogQueryHandlerTests
         var dto = (await RunAsync(context, schoolClass)).ShouldHaveSingleItem();
 
         dto.Locations.Select(l => (l.LocationName, l.IsLowStock)).ShouldBe([("Bucatarie", true), ("Camara", false)]);
+    }
+
+    [Test]
+    public async Task Quantity_equal_to_the_threshold_is_not_low()
+    {
+        await using var context = CreateContext();
+        var schoolClass = NewClass();
+        var item = NewItem("Rice");
+        var location = NewLocation("A");
+        context.AddRange(schoolClass, Batch(item, location, schoolClass, 5));
+        context.Add(new ItemLocationThreshold { ItemId = item.Id, LocationId = location.Id, MinThreshold = 5 });
+
+        (await RunAsync(context, schoolClass)).ShouldHaveSingleItem().Locations.ShouldHaveSingleItem()
+            .IsLowStock.ShouldBeFalse();
     }
 
     [Test]
@@ -198,8 +226,11 @@ public sealed class GetOrderCatalogQueryHandlerTests
             schoolClass, withStats, NewItem("B"), Year(withStats, 7.5m, lastQuantity: 12),
             new ItemPurchaseStatistic
             {
-                Scope = PurchaseStatisticsScope.Last90Days, Item = withStats, LastQuantity = 99,
-                ComputedAt = Clock.GetUtcNow(), LastPurchasedAt = Clock.GetUtcNow()
+                Scope = PurchaseStatisticsScope.Last90Days,
+                Item = withStats,
+                LastQuantity = 99,
+                ComputedAt = Clock.GetUtcNow(),
+                LastPurchasedAt = Clock.GetUtcNow()
             });
 
         var catalog = await RunAsync(context, schoolClass);
