@@ -38,7 +38,6 @@ The group requires an authenticated user (`src/Web/Infrastructure/WebApplication
 | Method + route | Use case | Notes |
 |---|---|---|
 | `POST class/{classId}` | `GetClassLocationStockQuery` | The stock report. Body: `searchTerm`, `filters`, `includeHidden`, `lowStockOnly`, `expiredOnly`. |
-| `GET class/{classId}/low-stock` | same query with `LowStockOnly = true` | Projects to `LowStockItemDto` (item, SKU, image, unit, location name). |
 | `POST adjust` | `AdjustStockCommand` | Recount of one (class, item, location). Returns a `StockItemDto`. |
 | `POST class/{classId}/bulk-adjust` | `BulkAdjustStockCommand` | Recount of many lines, all or nothing. |
 | `POST remove-expired` | `RemoveExpiredStockCommand` | Zeroes expired batches of one (class, item, location). |

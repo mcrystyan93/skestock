@@ -61,7 +61,7 @@ export class OrderListDetailForm {
   public readonly orderList = input.required<Partial<OrderListDto>>();
   /** The wizard collects the name and note in its own step, so the editor hides them until the order is saved. */
   public readonly showDetails = input(true);
-  /** The class whose low stock feeds the suggestions panel; without it the panel is not shown. */
+  /** The class whose catalog feeds the suggestions panel; without it the panel is not shown. */
   public readonly classId = input<string | null>(null);
   protected readonly detailsOpen = signal(false);
   private readonly _readOnly = injectClassReadOnly();

@@ -12,8 +12,6 @@ import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
 import { NzBreakpointService } from 'ng-zorro-antd/core/services';
 import { ClassStatisticsHttp } from '@ske/shared/class-statistics';
-import { StockHttp } from '@ske/shared/stock';
-import { SupplyListsHttp } from '@ske/shared/supply-lists';
 import { OrderListSuggestionsPanel } from './suggestions/order-list-suggestions-panel';
 import { of } from 'rxjs';
 
@@ -309,9 +307,8 @@ describe('OrderListDetailForm suggestions panel', () => {
       providers: [
         ...providers(),
         { provide: NzBreakpointService, useValue: { subscribe: () => of({ md: true, lg: options.lg }) } },
-        { provide: StockHttp, useValue: { getLowStockItems: () => of([]) } },
-        { provide: ClassStatisticsHttp, useValue: { getPurchaseSegments: () => of({ weekly: [], everyTwoWeeks: [], monthly: [], oncePerClass: [] }), getItemsPurchaseHistory: () => of([]) } },
-        { provide: SupplyListsHttp, useValue: { getAllActive: () => of([]), getById: vi.fn() } }
+        { provide: OrderListsHttp, useValue: { getCatalog: () => of([]) } },
+        { provide: ClassStatisticsHttp, useValue: { getItemsPurchaseHistory: () => of([]) } }
       ]
     });
     const fixture = TestBed.createComponent(OrderListDetailForm);

@@ -1,3 +1,4 @@
+export * from './order-catalog';
 export * from './order-list-detail.store';
 export * from './order-list-export.service';
 export * from './order-list-wizard.store';

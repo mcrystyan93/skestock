@@ -1,33 +1,21 @@
 import { TestBed } from '@angular/core/testing';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { LowStockItemDto, PurchaseSegmentsDto, SupplyListDto } from '@ske/models';
-import { ClassStatisticsHttp } from '@ske/shared/class-statistics';
-import { StockHttp } from '@ske/shared/stock';
+import { OrderCatalogItemDto, SupplyListDto } from '@ske/models';
 import { SupplyListsHttp } from '@ske/shared/supply-lists';
 import { of, throwError } from 'rxjs';
 import { OrderListWizardStore } from './order-list-wizard.store';
+import { OrderListsHttp } from './order-lists.http';
 import { supplyListsToLines } from './order-list-wizard.utils';
 
-const lowStock = (itemId: string, locationName: string): LowStockItemDto => ({
-  itemId,
-  itemName: `Item ${itemId}`,
-  sku: `SKU-${itemId}`,
-  imageFileId: `img-${itemId}`,
-  unit: 'buc',
-  locationName
-});
-
-const emptySegments: PurchaseSegmentsDto = { weekly: [], everyTwoWeeks: [], monthly: [], oncePerClass: [] };
-
-const segmentItem = (itemId: string, averageQuantity: number) => ({
+const catalogItem = (itemId: string, lastQuantity: number | null = null): OrderCatalogItemDto => ({
   itemId,
   name: `Item ${itemId}`,
   sku: `SKU-${itemId}`,
   imageFileId: `img-${itemId}`,
-  unit: 'set',
-  averageQuantity,
-  purchaseCount: 4,
-  averageIntervalDays: 7
+  unit: 'buc',
+  lastQuantity,
+  averageIntervalDays: null,
+  isFrequent: false,
+  locations: []
 });
 
 const supplyList: SupplyListDto = {
@@ -53,9 +41,7 @@ const secondSupplyList: SupplyListDto = {
 };
 
 describe('OrderListWizardStore', () => {
-  let stockHttp: { getLowStockItems: ReturnType<typeof vi.fn> };
-  let message: { error: ReturnType<typeof vi.fn> };
-  let statisticsHttp: { getPurchaseSegments: ReturnType<typeof vi.fn> };
+  let orderListsHttp: { getCatalog: ReturnType<typeof vi.fn> };
   let supplyListsHttp: {
     getAll: ReturnType<typeof vi.fn>;
     getById: ReturnType<typeof vi.fn>;
@@ -63,22 +49,17 @@ describe('OrderListWizardStore', () => {
   };
 
   beforeEach(() => {
-    stockHttp = { getLowStockItems: vi.fn() };
-    statisticsHttp = { getPurchaseSegments: vi.fn().mockReturnValue(of(emptySegments)) };
+    orderListsHttp = { getCatalog: vi.fn() };
     supplyListsHttp = {
       getAll: vi.fn(),
       getById: vi.fn(),
       getAllActive: () => SupplyListsHttp.prototype.getAllActive.call(supplyListsHttp)
     };
 
-    message = { error: vi.fn() };
-
     TestBed.configureTestingModule({
       providers: [
         OrderListWizardStore,
-        { provide: NzMessageService, useValue: message },
-        { provide: StockHttp, useValue: stockHttp },
-        { provide: ClassStatisticsHttp, useValue: statisticsHttp },
+        { provide: OrderListsHttp, useValue: orderListsHttp },
         { provide: SupplyListsHttp, useValue: supplyListsHttp }
       ]
     });
@@ -95,83 +76,42 @@ describe('OrderListWizardStore', () => {
     expect(store.canGoNext()).toBe(true);
   });
 
-  it('suggests an item low in several locations once and selects everything by default', () => {
-    stockHttp.getLowStockItems.mockReturnValue(of([
-      lowStock('1', 'Depozit'),
-      lowStock('1', 'Birou'),
-      lowStock('2', 'Depozit')
-    ]));
+  it('loads the catalog once when leaving the source step and starts with nothing selected', () => {
+    orderListsHttp.getCatalog.mockReturnValue(of([catalogItem('1'), catalogItem('2')]));
     const store = TestBed.inject(OrderListWizardStore);
 
     store.setSource('new');
     store.advance('class-1');
 
     expect(store.step()).toBe('selection');
-    expect(stockHttp.getLowStockItems).toHaveBeenCalledWith('class-1');
-    expect(store.suggestions().map(item => item.itemId)).toEqual(['1', '2']);
-    expect(store.suggestions()[0].locations).toEqual(['Birou', 'Depozit']);
+    expect(orderListsHttp.getCatalog).toHaveBeenCalledTimes(1);
+    expect(orderListsHttp.getCatalog).toHaveBeenCalledWith('class-1');
+    expect(store.catalog().map((item) => item.itemId)).toEqual(['1', '2']);
     expect(store.selectedItemIds()).toEqual([]);
   });
 
-  it('builds prefill lines with quantity 1 only for the selected suggestions', () => {
-    stockHttp.getLowStockItems.mockReturnValue(of([lowStock('1', 'A'), lowStock('2', 'A')]));
+  it('builds prefill lines with the last quantity, or 1 without history, only for the selected items', () => {
+    orderListsHttp.getCatalog.mockReturnValue(of([catalogItem('1', 5), catalogItem('2', 3.4), catalogItem('3')]));
     const store = TestBed.inject(OrderListWizardStore);
 
     store.setSource('new');
     store.advance('class-1');
-    store.setSelectedItemIds(['2']);
+    store.setSelectedItemIds(['2', '3']);
 
-    const { lines } = store.buildPrefill();
-    expect(lines).toEqual([
-      { id: null, itemId: '2', itemImageFileId: 'img-2', productName: '(SKU-2) Item 2', quantity: 1, unit: 'buc', notes: '' }
+    expect(store.buildPrefill().lines).toEqual([
+      { id: null, itemId: '2', itemImageFileId: 'img-2', productName: '(SKU-2) Item 2', quantity: 3, unit: 'buc', notes: '' },
+      { id: null, itemId: '3', itemImageFileId: 'img-3', productName: '(SKU-3) Item 3', quantity: 1, unit: 'buc', notes: '' }
     ]);
   });
 
-  it('still loads low stock when the segments request fails', () => {
-    stockHttp.getLowStockItems.mockReturnValue(of([lowStock('1', 'A')]));
-    statisticsHttp.getPurchaseSegments.mockReturnValue(throwError(() => new Error('boom')));
-    const store = TestBed.inject(OrderListWizardStore);
-
-    store.setSource('new');
-    store.advance('class-1');
-
-    expect(store.loadFailed()).toBe(false);
-    expect(store.selectedItemIds()).toEqual([]);
-    expect(store.segments()).toBeNull();
-    expect(message.error).toHaveBeenCalledWith('Nu s-au putut încărca grupele de produse.');
-  });
-
-  it('merges low stock and purchase segments into one deduplicated order, segment quantity winning', () => {
-    stockHttp.getLowStockItems.mockReturnValue(of([lowStock('1', 'A'), lowStock('2', 'A')]));
-    statisticsHttp.getPurchaseSegments.mockReturnValue(of({
-      ...emptySegments,
-      weekly: [segmentItem('2', 6)],
-      monthly: [segmentItem('3', 2.5)]
-    }));
-    const store = TestBed.inject(OrderListWizardStore);
-
-    store.setSource('new');
-    store.advance('class-1');
-
-    expect(store.selectedItemIds()).toEqual([]);
-
-    store.setSelectedItemIds(['1', '2', '3']);
-
-    expect(store.buildPrefill().lines?.map((line) => [line.itemId, line.quantity, line.unit])).toEqual([
-      ['1', 1, 'buc'],
-      ['2', 6, 'set'],
-      ['3', 2, 'set']
-    ]);
-  });
-
-  it('does not load segments for the supply list source', () => {
+  it('does not load the catalog for the supply list source', () => {
     supplyListsHttp.getAll.mockReturnValue(of({ data: [], hasNextPage: false, sort: [] }));
     const store = TestBed.inject(OrderListWizardStore);
 
     store.setSource('supplyList');
     store.advance('class-1');
 
-    expect(statisticsHttp.getPurchaseSegments).not.toHaveBeenCalled();
+    expect(orderListsHttp.getCatalog).not.toHaveBeenCalled();
   });
 
   it('requires at least one supply list and merges the selected ones by item', () => {
@@ -260,8 +200,8 @@ describe('OrderListWizardStore', () => {
     expect(store.name()).toBe('Numele meu');
   });
 
-  it('skips the products step for the low-stock source', () => {
-    stockHttp.getLowStockItems.mockReturnValue(of([lowStock('1', 'A')]));
+  it('skips the products step for the catalog source', () => {
+    orderListsHttp.getCatalog.mockReturnValue(of([catalogItem('1')]));
     const store = TestBed.inject(OrderListWizardStore);
 
     store.setSource('new');
@@ -273,7 +213,7 @@ describe('OrderListWizardStore', () => {
   });
 
   it('needs a name on the details step and keeps what was typed when the selection is unchanged', () => {
-    stockHttp.getLowStockItems.mockReturnValue(of([]));
+    orderListsHttp.getCatalog.mockReturnValue(of([]));
     const store = TestBed.inject(OrderListWizardStore);
 
     store.setSource('new');
@@ -310,7 +250,7 @@ describe('OrderListWizardStore', () => {
     const store = TestBed.inject(OrderListWizardStore);
 
     store.setSource('new');
-    stockHttp.getLowStockItems.mockReturnValue(of([]));
+    orderListsHttp.getCatalog.mockReturnValue(of([]));
     store.advance('class-1');
     store.advance('class-1');
     store.setDetails({ name: 'Comandă', note: '' });
@@ -325,7 +265,7 @@ describe('OrderListWizardStore', () => {
   });
 
   it('keeps the prefill key stable until the selection changes', () => {
-    stockHttp.getLowStockItems.mockReturnValue(of([lowStock('1', 'A'), lowStock('2', 'A')]));
+    orderListsHttp.getCatalog.mockReturnValue(of([catalogItem('1'), catalogItem('2')]));
     const store = TestBed.inject(OrderListWizardStore);
 
     store.setSource('new');
@@ -365,8 +305,8 @@ describe('OrderListWizardStore', () => {
     expect(line.notes).toBe(long);
   });
 
-  it('blocks Continue while the suggestions failed to load and allows it after a retry', () => {
-    stockHttp.getLowStockItems.mockReturnValueOnce(throwError(() => new Error('down')));
+  it('blocks Continue while the catalog failed to load and allows it after a retry', () => {
+    orderListsHttp.getCatalog.mockReturnValueOnce(throwError(() => new Error('down')));
     const store = TestBed.inject(OrderListWizardStore);
 
     store.setSource('new');
@@ -374,7 +314,7 @@ describe('OrderListWizardStore', () => {
     expect(store.loadFailed()).toBe(true);
     expect(store.canGoNext()).toBe(false);
 
-    stockHttp.getLowStockItems.mockReturnValue(of([lowStock('1', 'A')]));
+    orderListsHttp.getCatalog.mockReturnValue(of([catalogItem('1')]));
     store.retry('class-1');
 
     expect(store.loadFailed()).toBe(false);

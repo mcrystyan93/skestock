@@ -17,11 +17,11 @@ public class ItemPurchaseStatisticItemMergerTests
 
     private static ItemPurchaseStatistic Stat(
         Guid item, int qty, decimal value, int count, DateTimeOffset last, decimal? interval = null,
-        Guid? classId = null, PurchaseStatisticsScope scope = PurchaseStatisticsScope.Last365Days) =>
+        Guid? classId = null, PurchaseStatisticsScope scope = PurchaseStatisticsScope.Last365Days, int? lastQuantity = null) =>
         new()
         {
             ItemId = item, Scope = scope, ClassId = classId, TotalQuantity = qty, TotalValue = value,
-            PurchaseCount = count, LastPurchasedAt = last, AverageIntervalDays = interval, ComputedAt = last
+            PurchaseCount = count, LastPurchasedAt = last, LastQuantity = lastQuantity, AverageIntervalDays = interval, ComputedAt = last
         };
 
     [Test]
@@ -29,8 +29,8 @@ public class ItemPurchaseStatisticItemMergerTests
     {
         await using var db = MergeTestData.NewContext();
         db.ItemPurchaseStatistics.AddRange(
-            Stat(Primary, 10, 20m, 2, Early, interval: 12.5m),
-            Stat(SecondaryA, 5, 10m, 1, Late, interval: 99m));
+            Stat(Primary, 10, 20m, 2, Early, interval: 12.5m, lastQuantity: 4),
+            Stat(SecondaryA, 5, 10m, 1, Late, interval: 99m, lastQuantity: 5));
         await db.SaveChangesAsync();
         var merger = new ItemPurchaseStatisticItemMerger(db);
 
@@ -48,6 +48,7 @@ public class ItemPurchaseStatisticItemMergerTests
         row.AverageUnitPrice.ShouldBe(2m);
         row.LastPurchasedAt.ShouldBe(Late);
         row.AverageIntervalDays.ShouldBe(12.5m);
+        row.LastQuantity.ShouldBe(5);
     }
 
     [Test]

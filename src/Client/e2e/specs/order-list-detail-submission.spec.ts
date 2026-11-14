@@ -249,15 +249,8 @@ async function openOrderList(page: Page, options: OpenOrderListOptions = {}) {
       return;
     }
 
-    if (pathname === `/api/Stock/class/${classId}/low-stock`) {
+    if (pathname === `/api/OrderLists/catalog/${classId}`) {
       await route.fulfill({ json: [] });
-      return;
-    }
-
-    if (pathname === '/api/statistics/purchases/segments') {
-      await route.fulfill({
-        json: { weekly: [], everyTwoWeeks: [], monthly: [], oncePerClass: [] },
-      });
       return;
     }
 

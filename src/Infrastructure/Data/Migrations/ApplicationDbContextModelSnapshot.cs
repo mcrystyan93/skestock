@@ -1994,6 +1994,9 @@ namespace skestock.Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("LastPurchasedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<int?>("LastQuantity")
+                        .HasColumnType("int");
+
                     b.Property<int>("PurchaseCount")
                         .HasColumnType("int");
 

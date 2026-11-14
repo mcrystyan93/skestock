@@ -27,9 +27,17 @@ import { OrderListSupplyListStep } from './steps/supply-list-step';
     OrderListSupplyListStep
   ],
   selector: 'ske-order-list-wizard-container',
+  host: {
+    class: 'flex flex-col',
+    // Only the product list step fills the modal; elsewhere the stepper keeps its height and the editor below gets the rest.
+    '[class.min-h-0]': "wizard.step() === 'selection'",
+    '[class.grow]': "wizard.step() === 'selection'",
+    '[class.shrink-0]': "wizard.step() !== 'selection'"
+  },
   template: `
     @if (direction() === 'horizontal') {
-      <nz-steps class="mb-4"
+      <!-- nowrap keeps "Articole comandă" on one line; the margin needs the important modifier because ant-steps resets it, and it clears the form pull-up (-mt-2) so the titles are not covered. -->
+      <nz-steps class="mb-7! [&_.ant-steps-item-title]:whitespace-nowrap"
                 nzSize="small"
                 [nzCurrent]="wizard.stepIndex()"
                 nzLabelPlacement="vertical">
@@ -74,10 +82,9 @@ import { OrderListSupplyListStep } from './steps/supply-list-step';
                                          [distinctItemCount]="wizard.distinctSelectedItemCount()"
                                          (selectedIdsChange)="wizard.selectSupplyLists($event)" />
       } @else {
-        <ske-order-list-suggestions-step [items]="wizard.suggestions()"
-                                         [segments]="wizard.segments()"
+        <ske-order-list-suggestions-step [items]="wizard.catalog()"
                                          [selectedIds]="wizard.selectedItemIds()"
-                                         [loading]="wizard.suggestionsLoading()"
+                                         [loading]="wizard.catalogLoading()"
                                          (selectedIdsChange)="wizard.setSelectedItemIds($event)" />
       }
     } @else if (wizard.step() === 'products') {
