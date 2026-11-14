@@ -61,6 +61,7 @@ async function mockApi(page: Page) {
 const viewports = [
   { name: 'phone', width: 360, height: 740 },
   { name: 'tablet', width: 768, height: 1024 },
+  { name: 'laptop', width: 1024, height: 768 },
   { name: 'desktop', width: 1280, height: 800 },
 ];
 
@@ -91,8 +92,9 @@ for (const viewport of viewports) {
     expect(headings.at(-1)).toContain('Fără locație');
 
     // Icons are present for low stock and frequent items, and thumbnails load.
-    await expect(step.getByRole('img', { name: 'Stoc redus' }).first()).toBeVisible();
-    await expect(step.getByRole('img', { name: 'Comandat frecvent' }).first()).toBeVisible();
+    await expect(step.getByText('Stoc scăzut', { exact: true }).first()).toBeVisible();
+    await expect(step.getByText('Comandat frecvent', { exact: true }).first()).toBeVisible();
+    await expect(step.getByText('Ultima cantitate: 5 buc').first()).toBeVisible();
     const thumbnails = step.locator('ske-item-thumbnail img');
     await expect(thumbnails.first()).toBeVisible();
     expect(await noHorizontalScroll(page), 'horizontal scroll').toBe(true);

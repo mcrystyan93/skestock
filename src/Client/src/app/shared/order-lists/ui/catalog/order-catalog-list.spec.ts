@@ -42,19 +42,25 @@ describe('OrderCatalogList', () => {
   const el = () => fixture.nativeElement as HTMLElement;
   const checkboxes = () => [...el().querySelectorAll('ske-order-catalog-row input[type=checkbox]')] as HTMLInputElement[];
 
-  it('shows low-stock and frequent icons per flag and the last quantity', async () => {
+  it('writes out what each indicator means next to its icon', async () => {
     await create([
       item('1', 'Făină', { locations: [loc('a', 'Cămară', true)], isFrequent: true }),
-      item('2', 'Orez')
+      item('2', 'Orez'),
+      item('3', 'Sare', { lastQuantity: null })
     ], 'select');
 
-    const rows = el().querySelectorAll('ske-order-catalog-row');
+    const text = (index: number) => el().querySelectorAll('ske-order-catalog-row')[index].textContent?.replace(/\s+/g, ' ');
 
-    expect(rows[0].querySelector('[aria-label="Stoc redus"]')).not.toBeNull();
-    expect(rows[0].querySelector('[aria-label="Comandat frecvent"]')).not.toBeNull();
-    expect(rows[1].querySelector('[aria-label="Stoc redus"]')).toBeNull();
-    expect(rows[1].querySelector('[aria-label="Comandat frecvent"]')).toBeNull();
-    expect(rows[1].textContent).toContain('2 buc');
+    expect(text(0)).toContain('Stoc scăzut');
+    expect(text(0)).toContain('Comandat frecvent');
+    expect(text(0)).toContain('Ultima cantitate: 2 buc');
+    expect(text(1)).not.toContain('Stoc scăzut');
+    expect(text(1)).not.toContain('Comandat frecvent');
+    expect(text(1)).toContain('Ultima cantitate: 2 buc');
+    // Never ordered: no "last quantity" claim, just the default of 1.
+    expect(text(2)).not.toContain('Ultima cantitate');
+    expect(text(2)).toContain('Cantitate: 1 buc');
+    expect(el().querySelectorAll('ske-order-catalog-row')[0].querySelectorAll('nz-icon[aria-hidden="true"]').length).toBeGreaterThanOrEqual(2);
   });
 
   it('emits the ticked id and shows an item in two groups checked in both', async () => {
