@@ -137,6 +137,8 @@ for (const viewport of viewports) {
     // The editor sits right under the stepper: the wizard container must not keep a share of the free height.
     const addBox = await modal.locator('input[placeholder="Cauta si adauga un articol"]:visible').first().boundingBox();
     expect(addBox?.y ?? Infinity, 'gap between the stepper and the editor').toBeLessThan(260);
+    // With the suggestions panel on the left (lg), the add-item input sits in the right column.
+    if (viewport.width >= 1024) expect(addBox?.x ?? 0, 'add-item input position').toBeGreaterThan(viewport.width / 3);
     // At desktop width the editor also lists suggestions, so only the order lines are checked.
     const orderLines = modal.locator('ske-order-list-line');
     await expect(orderLines).toHaveCount(2);
@@ -150,6 +152,12 @@ for (const viewport of viewports) {
       await expect(modal.locator('nz-input-number[aria-label*="Detergent"] input')).toHaveValue('2');
       await expect(modal.getByText('Adăugat').first()).toBeVisible();
       await page.screenshot({ path: `${shots}/order-wizard-editor-${viewport.width}.png` });
+      for (let index = 1; index <= 6; index++) {
+        await modal.getByRole('button', { name: `Adaugă Articol ${index}` }).first().click();
+      }
+      await modal.locator('ske-order-list-lines-container > div').evaluate((element) => element.scrollTo(0, element.scrollHeight));
+      await expect(modal.locator('input[placeholder="Cauta si adauga un articol"]:visible').first()).toBeInViewport();
+      await page.screenshot({ path: `${shots}/order-wizard-lines-scrolled-${viewport.width}.png` });
       await modal.locator('ske-order-list-suggestions-panel .overflow-y-auto').evaluate((element) => element.scrollTo(0, element.scrollHeight));
       await page.waitForTimeout(200);
       await page.screenshot({ path: `${shots}/order-wizard-editor-scrolled-${viewport.width}.png` });
