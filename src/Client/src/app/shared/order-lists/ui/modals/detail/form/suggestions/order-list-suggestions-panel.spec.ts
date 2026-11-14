@@ -13,6 +13,7 @@ const catalogItem = (itemId: string, name: string, lastQuantity: number | null, 
   imageFileId: null,
   unit: 'buc',
   lastQuantity,
+  purchaseCount: 0,
   averageIntervalDays: null,
   isFrequent: false,
   locations: [{ locationId: locationName, locationName, isLowStock: false }]
