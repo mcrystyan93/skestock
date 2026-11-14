@@ -94,7 +94,9 @@ describe('OrderCatalogList', () => {
     fixture.detectChanges();
 
     expect(el().querySelectorAll('ske-order-catalog-row')).toHaveLength(1);
-    expect(el().querySelector('.sticky input[type=search]')).not.toBeNull();
+    // The search sits outside the scrolling area and each group heading is pinned inside it.
+    expect(el().querySelector('.overflow-y-auto input[type=search]')).toBeNull();
+    expect(el().querySelector('.overflow-y-auto section h4')?.parentElement?.classList).toContain('sticky');
   });
 
   it('add mode emits the item and shows "Adăugat" for added ids', async () => {

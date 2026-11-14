@@ -14,7 +14,7 @@ import { OrderCatalogList } from '../../../../catalog/order-catalog-list';
     class: 'relative min-h-0 -mb-6'
   },
   template: `
-    <div class="absolute inset-0 overflow-y-auto pb-4">
+    <div class="absolute inset-0 flex flex-col pb-4">
       @if (catalog.isLoading()) {
         <nz-skeleton aria-busy="true"
                      [nzActive]="true"
@@ -24,7 +24,8 @@ import { OrderCatalogList } from '../../../../catalog/order-catalog-list';
                   nzShowIcon
                   nzMessage="Nu am putut încărca produsele." />
       } @else {
-        <ske-order-catalog-list mode="add"
+        <ske-order-catalog-list class="min-h-0 flex-1"
+                                mode="add"
                                 [items]="catalog.hasValue() ? catalog.value() : []"
                                 [addedItemIds]="addedItemIds()"
                                 (add)="addItem($event)" />

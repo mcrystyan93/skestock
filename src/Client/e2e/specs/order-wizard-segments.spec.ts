@@ -116,6 +116,15 @@ for (const viewport of viewports) {
     await page.screenshot({ path: `${shots}/order-wizard-list-${viewport.width}.png` });
     expect(await noHorizontalScroll(page)).toBe(true);
 
+    // Only the list scrolls; the search stays and the location heading pins to the top of the scroll area.
+    const scroller = step.locator('.overflow-y-auto');
+    await scroller.evaluate((element) => element.scrollTo(0, element.scrollHeight));
+    await expect(search).toBeInViewport();
+    const pinned = step.locator('h4').last();
+    await expect(pinned).toBeInViewport();
+    await page.waitForTimeout(200);
+    await page.screenshot({ path: `${shots}/order-wizard-list-scrolled-${viewport.width}.png` });
+
     // Details step, then the editor.
     await modal.getByRole('button', { name: 'Continuă' }).click();
     await modal.getByPlaceholder('Numele comenzii').fill('Comandă segmente');
@@ -138,6 +147,9 @@ for (const viewport of viewports) {
       await expect(modal.locator('nz-input-number[aria-label*="Detergent"] input')).toHaveValue('2');
       await expect(modal.getByText('Adăugat').first()).toBeVisible();
       await page.screenshot({ path: `${shots}/order-wizard-editor-${viewport.width}.png` });
+      await modal.locator('ske-order-list-suggestions-panel .overflow-y-auto').evaluate((element) => element.scrollTo(0, element.scrollHeight));
+      await page.waitForTimeout(200);
+      await page.screenshot({ path: `${shots}/order-wizard-editor-scrolled-${viewport.width}.png` });
     }
   });
 }

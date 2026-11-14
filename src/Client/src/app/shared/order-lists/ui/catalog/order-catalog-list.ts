@@ -10,7 +10,10 @@ import { OrderCatalogRow } from './order-catalog-row';
 
 type GroupView = CatalogGroup & { selectedCount: number };
 
-/** The whole active catalog grouped by location, with a search that stays pinned while the list scrolls. */
+/**
+ * The whole active catalog grouped by location. The search stays put and only the list below it scrolls,
+ * with each location heading pinned to the top of that scroll area. The host needs a bounded height.
+ */
 @Component({
   imports: [
     FormField,
@@ -24,11 +27,13 @@ type GroupView = CatalogGroup & { selectedCount: number };
   ],
   selector: 'ske-order-catalog-list',
   host: {
-    class: 'block'
+    class: 'flex min-h-0 flex-col',
+    // Breathing room between the picker and the order lines next to it (and its scrollbar).
+    '[class.pe-3]': "mode() === 'add'"
   },
   template: `
     @if (items().length > 0) {
-      <div class="sticky top-0 z-30 bg-white pb-2 dark:bg-slate-900">
+      <div class="shrink-0 pb-2">
         <nz-input-wrapper>
           <nz-icon nzType="icons:magnifying-glass"
                    nzInputPrefix></nz-icon>
@@ -41,8 +46,10 @@ type GroupView = CatalogGroup & { selectedCount: number };
       </div>
     }
 
+    <div class="min-h-0 flex-1 overflow-y-auto">
     @for (group of views(); track group.key) {
-      <div class="mt-3 flex items-center justify-between gap-2 border-0 border-b border-solid border-gray-200 pb-1 dark:border-gray-700">
+      <section>
+      <div class="sticky top-0 z-20 flex items-center justify-between gap-2 border-0 border-b border-solid border-gray-200 bg-white pb-1 pt-3 dark:border-gray-700 dark:bg-slate-900">
         <h4 class="m-0 min-w-0 text-sm font-semibold wrap-break-word">{{ group.title }}</h4>
         @if (mode() === 'select') {
           <label nz-checkbox
@@ -66,9 +73,11 @@ type GroupView = CatalogGroup & { selectedCount: number };
           </li>
         }
       </ul>
+      </section>
     } @empty {
       <nz-empty [nzNotFoundContent]="items().length > 0 ? 'Niciun rezultat.' : emptyText()" />
     }
+    </div>
   `
 })
 export class OrderCatalogList {

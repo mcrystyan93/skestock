@@ -18,10 +18,13 @@ import { NzSkeletonComponent } from 'ng-zorro-antd/skeleton';
            aria-live="polite">
         {{ selectedIds().length }} selectate
       </div>
-      <ske-order-catalog-list mode="select"
-                              [items]="items()"
-                              [selectedIds]="selectedIds()"
-                              (selectedIdsChange)="selectedIdsChange.emit($event)" />
+      <div class="flex h-[55dvh] min-h-72 flex-col">
+        <ske-order-catalog-list class="min-h-0 flex-1"
+                                mode="select"
+                                [items]="items()"
+                                [selectedIds]="selectedIds()"
+                                (selectedIdsChange)="selectedIdsChange.emit($event)" />
+      </div>
     }
   `
 })
