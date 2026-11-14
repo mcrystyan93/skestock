@@ -6,10 +6,10 @@ import { OrderCatalogList } from './order-catalog-list';
 
 const icon = (name: string) => ({ name, icon: '<svg viewBox="0 0 1 1"><path d="M0 0h1v1H0z"/></svg>' });
 
-const loc = (locationId: string, locationName: string, isLowStock = false) => ({ locationId, locationName, isLowStock });
+const loc = (locationId: string, locationName: string, isLowStock = false, quantity = 3) => ({ locationId, locationName, quantity, isLowStock });
 
 const item = (itemId: string, name: string, overrides: Partial<OrderCatalogItemDto> = {}): OrderCatalogItemDto => ({
-  itemId, name, sku: null, imageFileId: null, unit: 'buc', lastQuantity: 2, purchaseCount: 0, averageIntervalDays: null, isFrequent: false,
+  itemId, name, sku: null, imageFileId: null, unit: 'buc', lastQuantity: 2, purchaseCount: 0, lastPurchasedAt: null, averageIntervalDays: null, isFrequent: false,
   locations: [loc('a', 'Cămară')], ...overrides
 });
 
@@ -44,19 +44,22 @@ describe('OrderCatalogList', () => {
 
   it('writes out what each indicator means next to its icon', async () => {
     await create([
-      item('1', 'Făină', { locations: [loc('a', 'Cămară', true)], isFrequent: true }),
+      item('1', 'Făină', { locations: [loc('a', 'Cămară', true, 4)], isFrequent: true, lastPurchasedAt: '2026-03-14T10:00:00Z' }),
       item('2', 'Orez'),
       item('3', 'Sare', { lastQuantity: null })
     ], 'select');
 
     const text = (index: number) => el().querySelectorAll('ske-order-catalog-row')[index].textContent?.replace(/\s+/g, ' ');
 
-    expect(text(0)).toContain('Stoc scăzut');
+    // Current stock of that location in brackets after the low-stock label, the purchase date after the last quantity.
+    expect(text(0)).toContain('Stoc scăzut (4 buc)');
     expect(text(0)).toContain('Comandat frecvent');
-    expect(text(0)).toContain('Ultima cantitate: 2 buc');
+    expect(text(0)).toMatch(/Ultima cantitate: 2 buc \(.*2026\)/);
     expect(text(1)).not.toContain('Stoc scăzut');
     expect(text(1)).not.toContain('Comandat frecvent');
+    // No purchase date known: no empty brackets.
     expect(text(1)).toContain('Ultima cantitate: 2 buc');
+    expect(text(1)).not.toContain('(');
     // Never ordered: no "last quantity" claim, just the default of 1.
     expect(text(2)).not.toContain('Ultima cantitate');
     expect(text(2)).toContain('Cantitate: 1 buc');

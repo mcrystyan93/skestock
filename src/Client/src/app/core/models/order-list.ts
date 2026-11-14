@@ -16,6 +16,8 @@ export type OrderListLineDto = {
 export type OrderCatalogLocationDto = {
   locationId: string;
   locationName: string;
+  /** Quantity currently in stock at this location (0 for a default-location fallback). */
+  quantity: number;
   isLowStock: boolean;
 };
 
@@ -29,6 +31,8 @@ export type OrderCatalogItemDto = {
   lastQuantity: number | null;
   /** Receipts in the last year, 0 when never ordered. */
   purchaseCount: number;
+  /** Date of the last receipt in the last year; null when never ordered. */
+  lastPurchasedAt: string | null;
   averageIntervalDays: number | null;
   isFrequent: boolean;
   locations: OrderCatalogLocationDto[];
