@@ -74,8 +74,7 @@ import { OrderListSupplyListStep } from './steps/supply-list-step';
                                          [distinctItemCount]="wizard.distinctSelectedItemCount()"
                                          (selectedIdsChange)="wizard.selectSupplyLists($event)" />
       } @else {
-        <ske-order-list-suggestions-step [items]="wizard.suggestions()"
-                                         [segments]="wizard.segments()"
+        <ske-order-list-suggestions-step [items]="wizard.catalog()"
                                          [selectedIds]="wizard.selectedItemIds()"
                                          [loading]="wizard.suggestionsLoading()"
                                          (selectedIdsChange)="wizard.setSelectedItemIds($event)" />

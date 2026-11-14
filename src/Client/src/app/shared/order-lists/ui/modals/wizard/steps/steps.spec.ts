@@ -14,7 +14,7 @@ describe('order list wizard steps', () => {
     TestBed.configureTestingModule({
       providers: [
         provideNzIconsTesting(),
-        provideNzIcons([icon('icons:triangle-exclamation'), icon('icons:clipboard-list'), icon('icons:circle-check'), icon('icons:box')])
+        provideNzIcons([icon('icons:triangle-exclamation'), icon('icons:arrows-rotate'), icon('icons:magnifying-glass'), icon('icons:clipboard-list'), icon('icons:circle-check'), icon('icons:box')])
       ]
     });
   });
@@ -32,67 +32,46 @@ describe('order list wizard steps', () => {
     expect(emitted).toEqual(['supplyList']);
   });
 
-  describe('segments step', () => {
-    const seg = (itemId: string, name: string, averageQuantity: number) => ({
-      itemId, name, sku: null, imageFileId: null, unit: 'buc', averageQuantity, purchaseCount: 5, averageIntervalDays: 7
+  describe('catalog step', () => {
+    const locations = [{ locationId: 'a', locationName: 'Cămară', isLowStock: false }];
+    const catalogItem = (itemId: string, name: string) => ({
+      itemId, name, sku: null, imageFileId: null, unit: 'buc', lastQuantity: 2, averageIntervalDays: null, isFrequent: false, locations
     });
 
-    function createSegments() {
+    async function createCatalog(loading = false) {
       const fixture = TestBed.createComponent(OrderListSuggestionsStep);
       const emitted: string[][] = [];
       fixture.componentInstance.selectedIdsChange.subscribe((ids) => emitted.push(ids));
-      fixture.componentRef.setInput('items', [
-        { itemId: '1', itemName: 'Hârtie', sku: null, imageFileId: null, unit: 'top', locations: ['A', 'B'] },
-        { itemId: '2', itemName: 'Creion', sku: null, imageFileId: null, unit: 'buc', locations: ['A'] }
-      ]);
-      fixture.componentRef.setInput('segments', {
-        weekly: [seg('3', 'Lipici', 2.5)],
-        everyTwoWeeks: [],
-        monthly: [seg('4', 'Foarfecă', 1)],
-        oncePerClass: []
-      });
-      fixture.componentRef.setInput('selectedIds', ['1', '4']);
+      fixture.componentRef.setInput('items', [catalogItem('1', 'Hârtie'), catalogItem('2', 'Creion')]);
+      fixture.componentRef.setInput('selectedIds', ['1']);
+      fixture.componentRef.setInput('loading', loading);
       fixture.detectChanges();
-      return { fixture, emitted, step: fixture.componentInstance as unknown as { toggleTab(tab: unknown, checked: boolean): void; tabs(): { key: string; ids: string[] }[] } };
+      await fixture.whenStable();
+      fixture.detectChanges();
+      return { fixture, emitted };
     }
 
-    it('renders five tabs with their counts', () => {
-      const { fixture } = createSegments();
-      const titles = [...fixture.nativeElement.querySelectorAll('.ant-tabs-tab')].map((tab) => (tab as HTMLElement).textContent?.replace(/\s+/g, ' ').trim());
-
-      expect(titles).toEqual(['Stoc redus 2', 'Comandate săptămânal 1', 'La 2 săptămâni 0', 'Lunar 1', 'O dată pe clasă 0']);
-    });
-
-    it('groups low stock by location and repeats an item low in two places', () => {
-      const { fixture } = createSegments();
+    it('shows one list without tabs and the selected count', async () => {
+      const { fixture } = await createCatalog();
       const root = fixture.nativeElement as HTMLElement;
 
-      expect([...root.querySelectorAll('h4')].map((h) => h.textContent?.trim())).toEqual(['A', 'B']);
-      expect(root.querySelectorAll('ske-item-thumbnail')).toHaveLength(3);
-      expect(root.textContent).toContain('1 din 2 selectate');
+      expect(root.querySelector('.ant-tabs')).toBeNull();
+      expect(root.querySelectorAll('ske-order-catalog-row')).toHaveLength(2);
+      expect(root.textContent).toContain('1 selectate');
     });
 
-    it('select-all only touches the tab ids and keeps ticks made in other tabs', () => {
-      const { emitted, step } = createSegments();
-      const [lowStock, weekly] = step.tabs();
+    it('forwards a tick from the list', async () => {
+      const { fixture, emitted } = await createCatalog();
 
-      step.toggleTab(weekly, true);
-      expect(emitted.at(-1)).toEqual(['1', '4', '3']);
+      (fixture.nativeElement.querySelectorAll('ske-order-catalog-row input[type=checkbox]')[0] as HTMLInputElement).click();
 
-      step.toggleTab(lowStock, false);
-      expect(emitted.at(-1)).toEqual(['4']);
+      expect(emitted).toEqual([['1', '2']]);
     });
 
-    it('shows the quantity of purchase rows and an empty state for tabs without data', () => {
-      const { fixture, step } = createSegments();
-      const root = fixture.nativeElement as HTMLElement;
+    it('shows a skeleton instead of the list while loading', async () => {
+      const { fixture } = await createCatalog(true);
 
-      // Tabs render lazily; switch to the second one.
-      (root.querySelectorAll('.ant-tabs-tab')[1] as HTMLElement).click();
-      fixture.detectChanges();
-      expect(root.textContent).toContain('2 buc');
-
-      expect(step.tabs()[2].ids).toEqual([]);
+      expect(fixture.nativeElement.querySelector('ske-order-catalog-list')).toBeNull();
     });
   });
 

@@ -10,6 +10,7 @@ using skestock.Application.Features.OrderLists.Commands.UpdateOrderList;
 using skestock.Application.Features.OrderLists.Models;
 using skestock.Application.Features.OrderLists.Queries.ExportOrderList;
 using skestock.Application.Features.OrderLists.Queries.GetAllOrderLists;
+using skestock.Application.Features.OrderLists.Queries.GetOrderCatalog;
 using skestock.Application.Features.OrderLists.Queries.GetOrderListById;
 
 namespace skestock.Web.Endpoints;
@@ -19,6 +20,7 @@ public class OrderLists : IEndpointGroup
     public static void Map(RouteGroupBuilder groupBuilder)
     {
         groupBuilder.MapPost(GetAllOrderLists, "get-all");
+        groupBuilder.MapGet(GetOrderCatalog, "catalog/{classId}");
         groupBuilder.MapGet(GetOrderListById, "{id}");
         groupBuilder.MapGet(ExportOrderList, "{id}/export");
         groupBuilder.MapPost(CreateOrderList, "");
@@ -45,6 +47,17 @@ public class OrderLists : IEndpointGroup
         };
 
         var result = await sender.Send(query, cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Get the order catalog for a class")]
+    [EndpointDescription(
+        "Retrieves every active item with its class locations (and per-location low-stock flag), last ordered quantity and purchase cadence.")]
+    public static async Task<Results<Ok<List<OrderCatalogItemDto>>, ProblemHttpResult>> GetOrderCatalog(
+        ISender sender, Guid classId, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetOrderCatalogQuery { ClassId = classId }, cancellationToken);
 
         return result.ToOk();
     }

@@ -1,6 +1,6 @@
 # Order lists
 
-An order list is a class's shopping list: a draft that staff build (by hand, from low-stock suggestions, or from predefined supply lists), approve into a submitted order, and export as an Excel sheet or a PNG image to send to a supplier. It is a planning document only: submitting a list changes no stock, and nothing links an order list to the goods receipt that later records the delivery ([goods-receipts.md](goods-receipts.md)).
+An order list is a class's shopping list: a draft that staff build (by hand, from the suggestions catalog, or from predefined supply lists), approve into a submitted order, and export as an Excel sheet or a PNG image to send to a supplier. It is a planning document only: submitting a list changes no stock, and nothing links an order list to the goods receipt that later records the delivery ([goods-receipts.md](goods-receipts.md)).
 
 UI copy is Romanian. Everything below was read from source; anything not traced is marked as such, and gaps and oddities are listed under [Open points](#open-points), not fixed. Related: [stock.md](stock.md), [items.md](items.md), [goods-receipts.md](goods-receipts.md), [locations.md](locations.md), [categories.md](categories.md), and the supply lists feature (`supply-lists.md`, documented separately), each on its own PR until merged.
 
@@ -50,6 +50,7 @@ The group requires an authenticated user (`src/Web/Infrastructure/WebApplication
 | Method + route | Use case | Notes |
 |---|---|---|
 | `POST get-all` | `GetAllOrderListsQuery` | Keyset-paginated list of `OrderListListItemDto`. Cached. |
+| `GET catalog/{classId}` | `GetOrderCatalogQuery` | Catalog for the order wizard: `OrderCatalogItemDto` list (`itemId`, `name`, `sku`, `imageFileId`, `unit`, `lastQuantity`, `averageIntervalDays`, `isFrequent`, `locations[{locationId, locationName, isLowStock}]`). `lastQuantity` and `averageIntervalDays` come from the Last365Days statistics row; `isFrequent` = weekly or every-two-weeks cadence. |
 | `GET {id}` | `GetOrderListByIdQuery` | Full `OrderListDto` with lines. Cached. |
 | `GET {id}/export?format=xlsx\|png` | `ExportOrderListQuery` | File download; `Submitted` lists only. Default `xlsx`. |
 | `POST` | `CreateOrderListCommand` | Draft with optional initial lines (201). |
@@ -188,10 +189,10 @@ Order lists have no route of their own. They appear as a tab of the school class
 
 - **Editable** only when the class is not read-only (`injectClassReadOnly`) and the status is `Draft`; the approve action ("Aprobați comanda?" confirmation) shows for a saved draft; export shows for a `Submitted` list.
 - **Wizard steps** (`OrderListWizardStore`): `source` → `selection` → (`products` for supply lists only) → `details` → `edit`. The source is either "new" (suggestions) or "supplyList". Titles: for a new list "Sursă, Produse, Detalii, Articole comandă"; for a supply list "Sursă, Listă predefinită, Produse, Detalii, Articole comandă".
-  - **Suggestions source:** loads the class's low-stock items (`GET /api/Stock/class/{classId}/low-stock`, [stock.md](stock.md#endpoints-apistock) (the low-stock route)) grouped by item (an item low in several locations is suggested once), plus the purchase segments (`GET /api/Statistics/purchases/segments`, weekly / every two weeks / monthly / once per class). A failed segments request shows an error message but does not block the low-stock list. Suggested lines default to quantity 1; an item that appears in a purchase segment takes that segment's average quantity rounded down to a whole number, never below 1. Product names are prefixed with the SKU as "(SKU) name".
+  - **Suggestions source:** one searchable list built from `GET /api/OrderLists/catalog/{classId}` (`GetOrderCatalogQuery`): every active item, grouped by location (an item stocked in several locations appears in each group; items without class stock fall back to their default location, else "Fără locație" last). Rows show a low-stock icon per location (`qty < threshold`) and are ordered by purchase cadence. Suggested lines default to the item's last received quantity (`LastQuantity`), else 1. Product names are prefixed with the SKU as "(SKU) name".
   - **Supply list source:** picks one or more supply lists, lets the user untick products, and merges the lines by item (quantities add up, distinct notes are joined with " · " within a 1000-character limit). This conversion happens only in the browser; the backend has no link between supply lists and order lists.
   - **Details:** a name is required in the wizard (max 200) and the note is optional (max 1000), although the API treats both as optional.
-- **Suggestions panel** (large screens, inside the editor): the same low-stock and purchase-segment suggestions as a side panel, with an "add" action per line; segment failures do not blank the low-stock tab.
+- **Suggestions panel** (large screens, inside the editor): the same catalog list (`GET /api/OrderLists/catalog/{classId}`, no tabs) as a side panel, with an "add" action per line.
 - **Add to order from stock:** `StockAddToOrderModal` (opened from the stock list) asks for a target (an existing draft or a new name) and a quantity (>= 0.01, < 1,000,000), then calls `add-item`.
 
 Types and status labels, icons and colours are in `core/models/order-list.ts`.

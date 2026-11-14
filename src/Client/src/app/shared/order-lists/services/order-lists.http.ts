@@ -4,6 +4,7 @@ import {
   AddItemToOrderListRequest,
   CreateOrderListRequest,
   GetAllOrderListsRequest,
+  OrderCatalogItemDto,
   OrderListDto,
   OrderListListItemDto,
   PaginatedResponse,
@@ -24,6 +25,10 @@ export class OrderListsHttp {
 
   public getAll(request: GetAllOrderListsRequest | Partial<GetAllOrderListsRequest>) {
     return this._httpClient.post<PaginatedResponse<OrderListListItemDto>>('/api/OrderLists/get-all', request);
+  }
+
+  public getCatalog(classId: string) {
+    return this._httpClient.get<OrderCatalogItemDto[]>(`/api/OrderLists/catalog/${classId}`);
   }
 
   public getById(id: string) {

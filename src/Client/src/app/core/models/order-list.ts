@@ -12,6 +12,26 @@ export type OrderListLineDto = {
   notes: string;
 };
 
+/** Mirrors src/Application/Features/OrderLists/Models/OrderCatalogItemDto.cs. */
+export type OrderCatalogLocationDto = {
+  locationId: string;
+  locationName: string;
+  isLowStock: boolean;
+};
+
+/** An empty `locations` means the item has no stock in the class and no default location. */
+export type OrderCatalogItemDto = {
+  itemId: string;
+  name: string;
+  sku: string | null;
+  imageFileId: string | null;
+  unit: string;
+  lastQuantity: number | null;
+  averageIntervalDays: number | null;
+  isFrequent: boolean;
+  locations: OrderCatalogLocationDto[];
+};
+
 /** Mirrors src/Domain/Enums/OrderListStatus.cs. */
 export type OrderListStatus = 'All' | 'Draft' | 'Submitted' | 'Cancelled';
 

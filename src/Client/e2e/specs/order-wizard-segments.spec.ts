@@ -9,28 +9,35 @@ const shots = `${screenshotRoot}/order-wizard-segments`;
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
 const longName = 'Articol cu un nume extrem de lung fără spații SuperCalifragilisticExpialidociousAbcdefghijklmnopqrstuvwxyz';
 
-const lowStock = [
-  { itemId: 'low-1', itemName: 'Creioane', sku: 'CR-1', imageFileId: 'f1', unit: 'buc', locationName: 'Depozit A' },
-  { itemId: 'low-2', itemName: 'Hârtie A4', sku: null, imageFileId: 'f2', unit: 'top', locationName: 'Depozit B' },
-];
-
-const segmentItem = (itemId: string, name: string, averageQuantity: number) => ({
+const item = (itemId: string, name: string, over: Record<string, unknown> = {}) => ({
   itemId,
   name,
   sku: null,
   imageFileId: `img-${itemId}`,
-  unit: 'cutie',
-  averageQuantity,
-  purchaseCount: 5,
-  averageIntervalDays: 30,
+  unit: 'buc',
+  lastQuantity: null,
+  averageIntervalDays: null,
+  isFrequent: false,
+  locations: [] as { locationId: string; locationName: string; isLowStock: boolean }[],
+  ...over,
 });
+const depozitA = { locationId: 'loc-a', locationName: 'Depozit A' };
+const depozitB = { locationId: 'loc-b', locationName: 'Depozit B' };
 
-const segments = {
-  weekly: [segmentItem('w-1', 'Detergent', 2)],
-  everyTwoWeeks: [segmentItem('b-1', 'Săpun lichid', 4)],
-  monthly: [segmentItem('m-1', 'Marker', 3), segmentItem('m-2', longName, 7)],
-  oncePerClass: [segmentItem('o-1', 'Tablă magnetică', 1)],
-};
+const filler = Array.from({ length: 14 }, (_, index) =>
+  item(`f-${index}`, `Articol ${index + 1}`, { lastQuantity: 2, averageIntervalDays: 40 + index, locations: [{ ...depozitA, isLowStock: false }] }),
+);
+
+const catalog = [
+  // Low in A, fine in B: one id, two groups.
+  item('low-1', 'Creioane', { sku: 'CR-1', lastQuantity: 5, averageIntervalDays: 12, isFrequent: true, locations: [{ ...depozitA, isLowStock: true }, { ...depozitB, isLowStock: false }] }),
+  item('w-1', 'Detergent', { unit: 'cutie', lastQuantity: 2, averageIntervalDays: 7, isFrequent: true, locations: [{ ...depozitA, isLowStock: false }] }),
+  item('m-1', 'Marker', { unit: 'cutie', lastQuantity: 3, averageIntervalDays: 30, locations: [{ ...depozitA, isLowStock: false }] }),
+  item('m-2', longName, { unit: 'cutie', lastQuantity: 7, averageIntervalDays: 35, locations: [{ ...depozitB, isLowStock: false }] }),
+  item('n-1', 'Hârtie A4', { unit: 'top', locations: [{ ...depozitB, isLowStock: true }] }),
+  item('x-1', 'Tablă magnetică', { unit: 'buc', lastQuantity: 1 }),
+  ...filler,
+];
 
 async function mockApi(page: Page) {
   await page.route('**/api/**', async (route) => {
@@ -43,8 +50,7 @@ async function mockApi(page: Page) {
       });
     }
     if (pathname === `/api/SchoolClasses/${classId}/summary`) return route.fulfill({ json: { id: classId } });
-    if (pathname === `/api/Stock/class/${classId}/low-stock`) return route.fulfill({ json: lowStock });
-    if (pathname === '/api/statistics/purchases/segments') return route.fulfill({ json: segments });
+    if (pathname === `/api/OrderLists/catalog/${classId}`) return route.fulfill({ json: catalog });
     if (pathname === '/api/statistics/purchases/items-history') return route.fulfill({ json: [] });
     if (/^\/api\/Items\/[^/]+\/image$/.test(pathname)) return route.fulfill({ body: png, contentType: 'image/png' });
     return route.fulfill({ json: { data: [], hasNextPage: false, sort: [], id: classId, name: 'Clasa E2E' } });
@@ -70,60 +76,44 @@ for (const viewport of viewports) {
     const modal = page.getByRole('dialog').first();
     await modal.locator('fieldset').getByText('Comandă nouă').click();
     await modal.getByRole('button', { name: 'Continuă' }).click();
-    await expect(modal.getByText('Alege produsele pentru comandă')).toBeVisible();
+    await expect(modal.getByText('Bifează produsele pentru comandă')).toBeVisible();
 
-    const tabs = modal.getByRole('tab');
-    await expect(tabs).toHaveCount(5);
-    const tab = (title: string) => tabs.filter({ hasText: title });
-    // A tab clipped by the narrow tab bar is clicked where it peeks out, or reached through the "..." menu when fully hidden.
-    const selectTab = async (title: string) => {
-      // Scoped through the tab itself: the modal also holds another tab bar at desktop width.
-      const nav = tab(title).locator('xpath=ancestor::nz-tabs-nav');
-      // Both rects are read in one evaluate so the modal's open animation cannot skew one against the other.
-      const fullyHidden = await tab(title).evaluate((element) => {
-        const bar = element.closest('.ant-tabs-nav-wrap')?.getBoundingClientRect();
-        const box = element.getBoundingClientRect();
-        return !bar || box.left >= bar.right || box.right <= bar.left;
-      });
-      if (!fullyHidden) return tab(title).dispatchEvent('click');
-      const item = page.locator('.ant-tabs-dropdown-menu-item').filter({ hasText: title });
-      // The "..." menu opens on mouseenter (a click only toggles it, racing that), so re-enter the button until the item shows.
-      await expect(async () => {
-        await page.mouse.move(0, 0);
-        await nav.locator('.ant-tabs-nav-more').hover();
-        await expect(item).toBeVisible({ timeout: 1_000 });
-        // Inside the retry: the menu closes on mouseleave, so the item can vanish between check and click.
-        await item.dispatchEvent('click', undefined, { timeout: 1_000 });
-      }).toPass();
-    };
+    // At desktop width the editor (and its panel) is already mounted behind this step, so the step is scoped explicitly.
+    const step = modal.locator('ske-order-list-suggestions-step');
+    await expect(modal.getByRole('tab')).toHaveCount(0);
+    const search = step.getByRole('searchbox', { name: /Caută/ });
+    await expect(search).toBeVisible();
 
-    // Every tab is reachable and shows its thumbnails.
-    for (const title of ['Stoc redus', 'Comandate săptămânal', 'La 2 săptămâni', 'Lunar', 'O dată pe clasă']) {
-      await selectTab(title);
-      await expect(tab(title)).toHaveAttribute('aria-selected', 'true');
-      const thumbnails = modal.locator('[role="tabpanel"]:visible ske-item-thumbnail img');
-      await expect(thumbnails.first()).toBeVisible();
-      await expect
-        .poll(() => thumbnails.evaluateAll((images) => images.every((img) => (img as HTMLImageElement).naturalWidth > 0)))
-        .toBe(true);
-      expect(await noHorizontalScroll(page), `horizontal scroll on ${title}`).toBe(true);
-    }
+    // Groups: Depozit A, Depozit B, then "Fără locație" last.
+    const headings = await step.locator('h4').allTextContents();
+    expect(headings.map((text) => text.trim()).filter(Boolean)[0]).toContain('Depozit A');
+    expect(headings.at(-1)).toContain('Fără locație');
 
-    // Inactive tab panels stay in the DOM (and two overlap mid-slide), so counts and checkboxes are read from the named panel.
-    const panel = (title: string) => modal.getByRole('tabpanel', { name: title });
+    // Icons are present for low stock and frequent items, and thumbnails load.
+    await expect(step.getByRole('img', { name: 'Stoc redus' }).first()).toBeVisible();
+    await expect(step.getByRole('img', { name: 'Comandat frecvent' }).first()).toBeVisible();
+    const thumbnails = step.locator('ske-item-thumbnail img');
+    await expect(thumbnails.first()).toBeVisible();
+    expect(await noHorizontalScroll(page), 'horizontal scroll').toBe(true);
 
-    // Stoc redus: nothing starts ticked; tick Creioane only.
-    await selectTab('Stoc redus');
-    await expect(panel('Stoc redus').getByText('0 din 2 selectate')).toBeVisible();
-    await panel('Stoc redus').getByRole('checkbox', { name: /Creioane/ }).check();
-    await expect(panel('Stoc redus').getByText('1 din 2 selectate')).toBeVisible();
+    // The search stays in view after scrolling the list.
+    await step.locator('h4').filter({ hasText: 'Fără locație' }).scrollIntoViewIfNeeded();
+    await expect(search).toBeInViewport();
 
-    // Lunar: tick Marker only.
-    await selectTab('Lunar');
-    await panel('Lunar').getByRole('checkbox', { name: /Marker/ }).check();
-    await expect(panel('Lunar').getByText('1 din 2 selectate')).toBeVisible();
-    await page.waitForTimeout(600); // let the tab slide animation settle for the screenshot
-    await page.screenshot({ path: `${shots}/order-wizard-segments-${viewport.width}.png` });
+    // A multi-location item ticks together in both groups.
+    const creioane = step.getByRole('checkbox', { name: /Creioane/ });
+    await expect(creioane).toHaveCount(2);
+    await creioane.first().check();
+    await expect(creioane.nth(1)).toBeChecked();
+
+    await step.getByRole('checkbox', { name: /Marker/ }).check();
+    await search.fill('marker');
+    await expect(step.getByRole('checkbox', { name: /Creioane/ })).toHaveCount(0);
+    await search.fill('');
+    await step.scrollIntoViewIfNeeded();
+    await page.evaluate(() => document.querySelector('.ant-modal-body')?.scrollTo(0, 0));
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: `${shots}/order-wizard-list-${viewport.width}.png` });
     expect(await noHorizontalScroll(page)).toBe(true);
 
     // Details step, then the editor.
@@ -133,7 +123,7 @@ for (const viewport of viewports) {
 
     const quantities = modal.locator('nz-input-number input');
     await expect(quantities).toHaveCount(2);
-    await expect(modal.locator('nz-input-number[aria-label*="Creioane"] input')).toHaveValue('1');
+    await expect(modal.locator('nz-input-number[aria-label*="Creioane"] input')).toHaveValue('5');
     await expect(modal.locator('nz-input-number[aria-label*="Marker"] input')).toHaveValue('3');
     // At desktop width the editor also lists suggestions, so only the order lines are checked.
     const orderLines = modal.locator('ske-order-list-line');
@@ -141,5 +131,13 @@ for (const viewport of viewports) {
     await expect(orderLines.getByText('Hârtie A4')).toHaveCount(0);
     await expect(orderLines.getByText('Detergent')).toHaveCount(0);
     expect(await noHorizontalScroll(page)).toBe(true);
+
+    // Panel is lg-only: add Detergent with its last quantity (2) and see "Adăugat".
+    if (viewport.width >= 1024) {
+      await modal.getByRole('button', { name: 'Adaugă Detergent' }).first().click();
+      await expect(modal.locator('nz-input-number[aria-label*="Detergent"] input')).toHaveValue('2');
+      await expect(modal.getByText('Adăugat').first()).toBeVisible();
+      await page.screenshot({ path: `${shots}/order-wizard-editor-${viewport.width}.png` });
+    }
   });
 }

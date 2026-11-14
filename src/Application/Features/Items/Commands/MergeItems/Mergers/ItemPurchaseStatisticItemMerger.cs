@@ -30,7 +30,10 @@ public sealed class ItemPurchaseStatisticItemMerger(IApplicationDbContext dbCont
             ? 0m
             : Math.Round(survivor.TotalValue / survivor.TotalQuantity, 2);
         if (other.LastPurchasedAt > survivor.LastPurchasedAt)
+        {
             survivor.LastPurchasedAt = other.LastPurchasedAt;
+            survivor.LastQuantity = other.LastQuantity;
+        }
         if (other.ComputedAt > survivor.ComputedAt)
             survivor.ComputedAt = other.ComputedAt;
     }
