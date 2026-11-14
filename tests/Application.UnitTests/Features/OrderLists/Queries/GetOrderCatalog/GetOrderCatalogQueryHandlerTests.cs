@@ -59,13 +59,13 @@ public sealed class GetOrderCatalogQueryHandlerTests
         new() { ClassId = schoolClass.Id, ItemId = item.Id, LocationId = location.Id, HideWhenZeroStock = true };
 
     private static ItemPurchaseStatistic Year(
-        Item item, decimal? interval, int? lastQuantity = null, int daysSinceLast = 1) =>
+        Item item, decimal? interval, int? lastQuantity = null, int daysSinceLast = 1, int purchaseCount = 0) =>
         new()
         {
             Scope = PurchaseStatisticsScope.Last365Days,
             Item = item,
             AverageIntervalDays = interval,
-            LastQuantity = lastQuantity,
+            LastQuantity = lastQuantity, PurchaseCount = purchaseCount,
             ComputedAt = Clock.GetUtcNow(),
             LastPurchasedAt = Clock.GetUtcNow().AddDays(-daysSinceLast)
         };
@@ -240,6 +240,29 @@ public sealed class GetOrderCatalogQueryHandlerTests
         catalog[1].LastQuantity.ShouldBeNull();
         catalog[1].AverageIntervalDays.ShouldBeNull();
         catalog[1].IsFrequent.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task Purchase_count_comes_from_the_last_365_days_row_and_is_zero_for_never_ordered_items()
+    {
+        await using var context = CreateContext();
+        var schoolClass = NewClass();
+        var ordered = NewItem("A");
+        context.AddRange(
+            schoolClass, ordered, NewItem("B"), Year(ordered, 7m, purchaseCount: 12),
+            new ItemPurchaseStatistic
+            {
+                Scope = PurchaseStatisticsScope.Last90Days,
+                Item = ordered,
+                PurchaseCount = 50,
+                ComputedAt = Clock.GetUtcNow(),
+                LastPurchasedAt = Clock.GetUtcNow()
+            });
+
+        var catalog = await RunAsync(context, schoolClass);
+
+        catalog.Single(i => i.Name == "A").PurchaseCount.ShouldBe(12);
+        catalog.Single(i => i.Name == "B").PurchaseCount.ShouldBe(0);
     }
 
     [Test]

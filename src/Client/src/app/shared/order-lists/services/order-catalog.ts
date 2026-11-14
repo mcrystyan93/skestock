@@ -12,7 +12,11 @@ export function normalize(text: string): string {
   return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 }
 
+// Frequency is the order count (most first, never ordered last). The interval only separates equal counts; the name is the
+// last tiebreak so the order stays deterministic.
 function compareRows(a: CatalogRow, b: CatalogRow): number {
+  if (a.item.purchaseCount !== b.item.purchaseCount) return b.item.purchaseCount - a.item.purchaseCount;
+
   const left = a.item.averageIntervalDays;
   const right = b.item.averageIntervalDays;
 
