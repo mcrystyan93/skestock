@@ -66,6 +66,7 @@ type GroupView = CatalogGroup & { selectedCount: number };
               <li>
                 <ske-order-catalog-row [item]="row.item"
                                        [isLowStock]="row.isLowStock"
+                                     [stock]="row.stock"
                                        [mode]="mode()"
                                        [marked]="mode() === 'select' ? selected().has(row.item.itemId) : addedItemIds().has(row.item.itemId)"
                                        (toggle)="toggleItem(row.item.itemId, $event)"

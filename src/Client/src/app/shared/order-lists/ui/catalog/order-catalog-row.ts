@@ -1,4 +1,4 @@
-import { NgTemplateOutlet } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 import type { OrderCatalogItemDto } from '@ske/models';
 import { ItemThumbnail } from '@ske/shared/items';
@@ -11,7 +11,7 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
  * `marked` is the ticked state in `select` mode and "already added" in `add` mode.
  */
 @Component({
-  imports: [ItemThumbnail, NgTemplateOutlet, NzCheckboxComponent, NzIconDirective],
+  imports: [DatePipe, ItemThumbnail, NgTemplateOutlet, NzCheckboxComponent, NzIconDirective],
   selector: 'ske-order-catalog-row',
   host: {
     class: 'flex items-center gap-3 py-2'
@@ -60,7 +60,7 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
               <nz-icon nzType="icons:triangle-exclamation"
                        class="text-yellow-500!"
                        aria-hidden="true"></nz-icon>
-              Stoc scăzut
+              Stoc scăzut ({{ stock() }}&nbsp;{{ item().unit }})
             </span>
           }
           @if (item().isFrequent) {
@@ -71,7 +71,7 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
               Comandat frecvent
             </span>
           }
-          <span>{{ item().lastQuantity === null ? 'Cantitate' : 'Ultima cantitate' }}: {{ quantity() }}&nbsp;{{ item().unit }}</span>
+          <span>{{ item().lastQuantity === null ? 'Cantitate' : 'Ultima cantitate' }}: {{ quantity() }}&nbsp;{{ item().unit }}@if (item().lastPurchasedAt; as purchasedAt) {&ngsp;<span class="whitespace-nowrap">({{ purchasedAt | date }})</span>}</span>
         </span>
       </span>
     </ng-template>
@@ -80,6 +80,8 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 export class OrderCatalogRow {
   public readonly item = input.required<OrderCatalogItemDto>();
   public readonly isLowStock = input(false);
+  /** Current stock at the location the row sits under; shown next to the low-stock label. */
+  public readonly stock = input(0);
   public readonly mode = input.required<'select' | 'add'>();
   public readonly marked = input(false);
   public readonly toggle = output<boolean>();

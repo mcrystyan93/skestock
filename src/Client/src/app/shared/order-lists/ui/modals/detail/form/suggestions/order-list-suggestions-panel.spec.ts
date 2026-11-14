@@ -14,9 +14,10 @@ const catalogItem = (itemId: string, name: string, lastQuantity: number | null, 
   unit: 'buc',
   lastQuantity,
   purchaseCount: 0,
+  lastPurchasedAt: null,
   averageIntervalDays: null,
   isFrequent: false,
-  locations: [{ locationId: locationName, locationName, isLowStock: false }]
+  locations: [{ locationId: locationName, locationName, quantity: 5, isLowStock: false }]
 });
 
 function createIcon(name: string) {

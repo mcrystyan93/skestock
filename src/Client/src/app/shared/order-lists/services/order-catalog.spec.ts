@@ -1,10 +1,10 @@
 import type { OrderCatalogItemDto } from '@ske/models';
 import { catalogGroups, catalogLine, catalogToLines } from './order-catalog';
 
-const loc = (locationId: string, locationName: string, isLowStock = false) => ({ locationId, locationName, isLowStock });
+const loc = (locationId: string, locationName: string, isLowStock = false) => ({ locationId, locationName, quantity: 0, isLowStock });
 
 const item = (itemId: string, name: string, overrides: Partial<OrderCatalogItemDto> = {}): OrderCatalogItemDto => ({
-  itemId, name, sku: null, imageFileId: null, unit: 'buc', lastQuantity: null, purchaseCount: 0, averageIntervalDays: null, isFrequent: false,
+  itemId, name, sku: null, imageFileId: null, unit: 'buc', lastQuantity: null, purchaseCount: 0, lastPurchasedAt: null, averageIntervalDays: null, isFrequent: false,
   locations: [loc('a', 'Cămară')], ...overrides
 });
 
@@ -21,17 +21,26 @@ describe('order catalog', () => {
     expect(groups[0].rows[0].item.itemId).toBe(groups[1].rows[0].item.itemId);
   });
 
-  it('sorts rows by number of orders descending, then interval ascending, never-ordered last', () => {
+  it('sorts rows by number of orders descending, then last purchase date descending, never-ordered last', () => {
     const [group] = catalogGroups([
       item('1', 'Zahăr', { purchaseCount: 0 }),
-      item('2', 'Apă', { purchaseCount: 1 }),
-      item('3', 'Lapte', { purchaseCount: 2 }),
-      item('4', 'Ouă', { purchaseCount: 12, averageIntervalDays: 14 }),
-      item('5', 'Pâine', { purchaseCount: 12, averageIntervalDays: 7 })
+      item('2', 'Apă', { purchaseCount: 1, lastPurchasedAt: '2026-01-10T00:00:00Z' }),
+      item('3', 'Lapte', { purchaseCount: 2, lastPurchasedAt: '2026-02-01T00:00:00Z' }),
+      item('4', 'Ouă', { purchaseCount: 12, lastPurchasedAt: '2026-03-01T00:00:00Z' }),
+      item('5', 'Pâine', { purchaseCount: 12, lastPurchasedAt: '2026-04-01T00:00:00Z' })
     ], '');
 
-    // 12 orders first (shorter interval wins the tie), then 2, 1 and never ordered; names are not a sort key here.
+    // 12 orders first (the more recent purchase wins the tie), then 2, 1 and never ordered; names are not a sort key here.
     expect(group.rows.map((r) => r.item.itemId)).toEqual(['5', '4', '3', '2', '1']);
+  });
+
+  it('puts an equal count without a purchase date after the dated ones', () => {
+    const [group] = catalogGroups([
+      item('1', 'A', { purchaseCount: 3 }),
+      item('2', 'B', { purchaseCount: 3, lastPurchasedAt: '2026-01-01T00:00:00Z' })
+    ], '');
+
+    expect(group.rows.map((r) => r.item.itemId)).toEqual(['2', '1']);
   });
 
   it('breaks a tie in frequency by name only, so the order is deterministic', () => {

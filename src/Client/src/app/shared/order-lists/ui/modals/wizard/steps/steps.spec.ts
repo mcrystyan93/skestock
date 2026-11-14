@@ -33,9 +33,9 @@ describe('order list wizard steps', () => {
   });
 
   describe('catalog step', () => {
-    const locations = [{ locationId: 'a', locationName: 'Cămară', isLowStock: false }];
+    const locations = [{ locationId: 'a', locationName: 'Cămară', quantity: 5, isLowStock: false }];
     const catalogItem = (itemId: string, name: string) => ({
-      itemId, name, sku: null, imageFileId: null, unit: 'buc', lastQuantity: 2, purchaseCount: 0, averageIntervalDays: null, isFrequent: false, locations
+      itemId, name, sku: null, imageFileId: null, unit: 'buc', lastQuantity: 2, purchaseCount: 0, lastPurchasedAt: null, averageIntervalDays: null, isFrequent: false, locations
     });
 
     async function createCatalog(loading = false) {

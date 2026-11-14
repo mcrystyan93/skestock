@@ -14,6 +14,7 @@ const catalogItem = (itemId: string, lastQuantity: number | null = null): OrderC
   unit: 'buc',
   lastQuantity,
   purchaseCount: 0,
+  lastPurchasedAt: null,
   averageIntervalDays: null,
   isFrequent: false,
   locations: []

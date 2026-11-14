@@ -120,6 +120,7 @@ public sealed class GetOrderCatalogQueryHandlerTests
         var dto = (await RunAsync(context, schoolClass)).ShouldHaveSingleItem();
 
         dto.Locations.Select(l => (l.LocationName, l.IsLowStock)).ShouldBe([("Bucatarie", true), ("Camara", false)]);
+        dto.Locations.Select(l => l.Quantity).ShouldBe([2, 20]);
     }
 
     [Test]
@@ -163,6 +164,7 @@ public sealed class GetOrderCatalogQueryHandlerTests
 
         location.LocationName.ShouldBe("Home");
         location.IsLowStock.ShouldBeFalse();
+        location.Quantity.ShouldBe(0);
     }
 
     [Test]
@@ -237,6 +239,8 @@ public sealed class GetOrderCatalogQueryHandlerTests
 
         catalog[0].LastQuantity.ShouldBe(12);
         catalog[0].AverageIntervalDays.ShouldBe(7.5m);
+        catalog[0].LastPurchasedAt.ShouldBe(Clock.GetUtcNow().AddDays(-1));
+        catalog[1].LastPurchasedAt.ShouldBeNull();
         catalog[1].LastQuantity.ShouldBeNull();
         catalog[1].AverageIntervalDays.ShouldBeNull();
         catalog[1].IsFrequent.ShouldBeFalse();
