@@ -36,7 +36,8 @@ import { OrderListSupplyListStep } from './steps/supply-list-step';
   },
   template: `
     @if (direction() === 'horizontal') {
-      <nz-steps class="mb-4"
+      <!-- nowrap keeps "Articole comandă" on one line; the margin needs the important modifier because ant-steps resets it, and it clears the form pull-up (-mt-2) so the titles are not covered. -->
+      <nz-steps class="mb-7! [&_.ant-steps-item-title]:whitespace-nowrap"
                 nzSize="small"
                 [nzCurrent]="wizard.stepIndex()"
                 nzLabelPlacement="vertical">

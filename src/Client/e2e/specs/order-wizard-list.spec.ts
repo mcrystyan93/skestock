@@ -137,6 +137,13 @@ for (const viewport of viewports) {
     // The editor sits right under the stepper: the wizard container must not keep a share of the free height.
     const addBox = await modal.locator('input[placeholder="Cauta si adauga un articol"]:visible').first().boundingBox();
     expect(addBox?.y ?? Infinity, 'gap between the stepper and the editor').toBeLessThan(260);
+    // The last step title ("Articole comandă") stays on one line and is not covered by the input below the stepper.
+    const lastTitle = modal.locator('.ant-steps-item-title:visible').last();
+    if (await lastTitle.count()) {
+      const titleBox = await lastTitle.boundingBox();
+      expect(titleBox?.height ?? 0, 'last step title on one line').toBeLessThan(30);
+      expect((titleBox?.y ?? 0) + (titleBox?.height ?? 0), 'step title covered by the input').toBeLessThanOrEqual((addBox?.y ?? 0) + 1);
+    }
     // With the suggestions panel on the left (lg), the add-item input sits in the right column.
     if (viewport.width >= 1024) expect(addBox?.x ?? 0, 'add-item input position').toBeGreaterThan(viewport.width / 3);
     // At desktop width the editor also lists suggestions, so only the order lines are checked.
