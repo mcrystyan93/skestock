@@ -70,9 +70,21 @@ public static class PurchaseStatisticsCalculator
             AverageIntervalDays = scope == PurchaseStatisticsScope.Last365Days
                 ? AverageIntervalDays(lines, purchaseCount, timeZone, classPeriods)
                 : null,
+            LastQuantity = LastReceiptQuantity(lines),
             LastPurchasedAt = lines.Max(line => line.PurchasedAt),
             ComputedAt = computedAt
         };
+    }
+
+    // Ties on the receipt date go to the max PurchaseKey so the result is deterministic.
+    private static int LastReceiptQuantity(List<PurchaseLine> lines)
+    {
+        var latest = lines
+            .GroupBy(line => line.PurchaseKey)
+            .OrderByDescending(g => g.Min(line => line.PurchasedAt))
+            .ThenByDescending(g => g.Key)
+            .First();
+        return latest.Sum(line => line.Quantity);
     }
 
     // Receipt date = earliest PurchasedAt per receipt; instants are UTC so DST does not skew the span.

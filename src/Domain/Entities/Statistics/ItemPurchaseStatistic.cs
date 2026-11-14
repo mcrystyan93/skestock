@@ -33,6 +33,9 @@ public class ItemPurchaseStatistic : BaseEntity
     // Mean days between distinct goods receipts, excluding breaks between classes; Last365Days only, null with fewer than 3 receipts.
     public decimal? AverageIntervalDays { get; set; }
 
+    // Units on the latest goods receipt in this scope; null until the next statistics run after the column was added.
+    public int? LastQuantity { get; set; }
+
     public DateTimeOffset LastPurchasedAt { get; set; }
 
     public DateTimeOffset ComputedAt { get; set; }

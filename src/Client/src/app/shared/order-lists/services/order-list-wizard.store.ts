@@ -2,21 +2,17 @@ import { computed, inject } from '@angular/core';
 import { mapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withComputed, withMethods, withProps, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { OrderListDto, PurchaseSegmentsDto, SupplyListDto, SupplyListListItemDto } from '@ske/models';
-import { ClassStatisticsHttp } from '@ske/shared/class-statistics';
+import { OrderCatalogItemDto, OrderListDto, SupplyListDto, SupplyListListItemDto } from '@ske/models';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
 import { withLoadingFeature } from '@ske/shared/loader';
-import { StockHttp } from '../../stock/services/stock.http';
 import { SupplyListsHttp } from '@ske/shared/supply-lists';
 import { isNil } from 'lodash-es';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { catchError, forkJoin, Observable, of, pipe, switchMap, tap } from 'rxjs';
+import { forkJoin, Observable, of, pipe, switchMap, tap } from 'rxjs';
+import { catalogToLines } from './order-catalog';
+import { OrderListsHttp } from './order-lists.http';
 import {
-  groupLowStockItems,
   MAX_ORDER_LIST_NAME_LENGTH,
   MAX_ORDER_LIST_NOTE_LENGTH,
-  SuggestedItem,
-  suggestionsToLines,
   supplyListsToLines,
   supplyListsToName,
   supplyListsToProducts
@@ -30,9 +26,8 @@ export type OrderListWizardStep = typeof ORDER_LIST_WIZARD_STEPS[number];
 type OrderListWizardState = {
   step: OrderListWizardStep;
   source: OrderListSource | null;
-  suggestions: SuggestedItem[];
-  suggestionsLoaded: boolean;
-  segments: PurchaseSegmentsDto | null;
+  catalog: OrderCatalogItemDto[];
+  catalogLoaded: boolean;
   selectedItemIds: string[];
   supplyLists: SupplyListListItemDto[];
   supplyListsLoaded: boolean;
@@ -51,9 +46,8 @@ type OrderListWizardState = {
 const initialState: OrderListWizardState = {
   step: 'source',
   source: null,
-  suggestions: [],
-  suggestionsLoaded: false,
-  segments: null,
+  catalog: [],
+  catalogLoaded: false,
   selectedItemIds: [],
   supplyLists: [],
   supplyListsLoaded: false,
@@ -102,17 +96,15 @@ function loadInto<TInput, TResult>(
 
 export const OrderListWizardStore = signalStore(
   withState(initialState),
-  withLoadingFeature('suggestions'),
-  withProblemDetailsFeature('suggestions'),
+  withLoadingFeature('catalog'),
+  withProblemDetailsFeature('catalog'),
   withLoadingFeature('supplyLists'),
   withProblemDetailsFeature('supplyLists'),
   withLoadingFeature('selectedSupplyLists'),
   withProblemDetailsFeature('selectedSupplyLists'),
   withProps(() => ({
-    stockHttp: inject(StockHttp),
-    statisticsHttp: inject(ClassStatisticsHttp),
-    supplyListsHttp: inject(SupplyListsHttp),
-    nzMessageService: inject(NzMessageService)
+    orderListsHttp: inject(OrderListsHttp),
+    supplyListsHttp: inject(SupplyListsHttp)
   })),
   withComputed((store) => ({
     fromSupplyList: computed(() => store.source() === 'supplyList'),
@@ -121,7 +113,7 @@ export const OrderListWizardStore = signalStore(
     )
   })),
   withComputed((store) => ({
-    // Only the supply list source reviews products; the low-stock source already ticks its items in `selection`.
+    // Only the supply list source reviews products; the catalog source already ticks its items in `selection`.
     steps: computed((): readonly OrderListWizardStep[] =>
       store.fromSupplyList() ? ORDER_LIST_WIZARD_STEPS : ORDER_LIST_WIZARD_STEPS.filter((step) => step !== 'products')
     ),
@@ -148,7 +140,7 @@ export const OrderListWizardStore = signalStore(
               && store.selectedSupplyLists().length === store.supplyListIds().length
               && !store.selectedSupplyListsLoading();
 
-          return !store.suggestionsLoading() && !store.loadFailed();
+          return !store.catalogLoading() && !store.loadFailed();
         case 'products':
           return store.selectedProductIds().length > 0;
         case 'details':
@@ -162,10 +154,10 @@ export const OrderListWizardStore = signalStore(
     activeProblemDetail: computed(() =>
       store.fromSupplyList()
         ? store.supplyListsProblemDetail() ?? store.selectedSupplyListsProblemDetail()
-        : store.suggestionsProblemDetail()
+        : store.catalogProblemDetail()
     ),
     activeValidationErrors: computed(() =>
-      store.fromSupplyList() ? store.supplyListsValidationErrors() : store.suggestionsValidationErrors()
+      store.fromSupplyList() ? store.supplyListsValidationErrors() : store.catalogValidationErrors()
     ),
     /** Identifies what the editor would be pre-filled with, so unchanged choices never rebuild it. */
     prefillKey: computed(() =>
@@ -194,26 +186,10 @@ export const OrderListWizardStore = signalStore(
       }
     });
 
-    const loadSuggestions = loadInto(
-      slice(store.setSuggestionsLoading, store.clearSuggestionsErrors, store.setSuggestionsLoaded, store.handleSuggestionsError),
-      (classId: string) => forkJoin({
-        lowStock: store.stockHttp.getLowStockItems(classId),
-        // Segments are an extra: a failure must not block the low-stock tab.
-        segments: store.statisticsHttp.getPurchaseSegments().pipe(catchError(() => {
-          store.nzMessageService.error('Nu s-au putut încărca grupele de produse.');
-          return of(null);
-        }))
-      }),
-      ({ lowStock, segments }) => {
-        const suggestions = groupLowStockItems(lowStock);
-
-        patchState(store, {
-          suggestions,
-          segments,
-          suggestionsLoaded: true,
-          selectedItemIds: []
-        });
-      }
+    const loadCatalog = loadInto(
+      slice(store.setCatalogLoading, store.clearCatalogErrors, store.setCatalogLoaded, store.handleCatalogError),
+      (classId: string) => store.orderListsHttp.getCatalog(classId),
+      (catalog) => patchState(store, { catalog, catalogLoaded: true, selectedItemIds: [] })
     );
 
     const loadSupplyLists = loadInto(
@@ -262,8 +238,8 @@ export const OrderListWizardStore = signalStore(
           return false;
 
         if (store.step() === 'source') {
-          if (store.source() === 'new' && !store.suggestionsLoaded() && !isNil(classId))
-            loadSuggestions(classId);
+          if (store.source() === 'new' && !store.catalogLoaded() && !isNil(classId))
+            loadCatalog(classId);
 
           if (store.fromSupplyList() && !store.supplyListsLoaded())
             loadSupplyLists();
@@ -292,7 +268,7 @@ export const OrderListWizardStore = signalStore(
       retry(classId: string | null) {
         if (!store.fromSupplyList()) {
           if (!isNil(classId))
-            loadSuggestions(classId);
+            loadCatalog(classId);
 
           return;
         }
@@ -310,7 +286,7 @@ export const OrderListWizardStore = signalStore(
       buildPrefill(): Partial<OrderListDto> {
         const lines = store.fromSupplyList()
           ? supplyListsToLines(store.selectedSupplyLists()).filter((line) => !store.excludedItemIds().includes(line.itemId ?? ''))
-          : suggestionsToLines(store.suggestions(), store.segments(), store.selectedItemIds());
+          : catalogToLines(store.catalog(), store.selectedItemIds());
 
         return { name: store.name().trim(), note: store.note(), lines };
       }

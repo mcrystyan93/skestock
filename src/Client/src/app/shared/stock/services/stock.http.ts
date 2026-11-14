@@ -4,7 +4,6 @@ import {
   AdjustStockRequest,
   BulkAdjustStockRequest,
   GetClassLocationStockRequest,
-  LowStockItemDto,
   MoveStockRequest,
   ExtendExpiredStockExpiryRequest,
   RemoveExpiredStockRequest,
@@ -24,10 +23,6 @@ export class StockHttp {
     const { classId, ...body } = request;
 
     return this._httpClient.post<StockReportDto>(`/api/Stock/class/${classId}`, body);
-  }
-
-  public getLowStockItems(classId: string) {
-    return this._httpClient.get<LowStockItemDto[]>(`/api/Stock/class/${classId}/low-stock`);
   }
 
   public adjustStock(request: AdjustStockRequest) {

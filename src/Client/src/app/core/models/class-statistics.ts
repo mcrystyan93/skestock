@@ -70,24 +70,6 @@ export type TopPurchasesDto = {
   byFrequency: PurchaseStatisticDto[];
 };
 
-export type PurchaseSegmentItemDto = {
-  itemId: string;
-  name: string;
-  sku: string | null;
-  imageFileId: string | null;
-  unit: string;
-  averageQuantity: number;
-  purchaseCount: number;
-  averageIntervalDays: number | null;
-};
-
-export type PurchaseSegmentsDto = {
-  weekly: PurchaseSegmentItemDto[];
-  everyTwoWeeks: PurchaseSegmentItemDto[];
-  monthly: PurchaseSegmentItemDto[];
-  oncePerClass: PurchaseSegmentItemDto[];
-};
-
 export type TopPurchasesFilter = {
   scope: PurchaseStatisticsScope;
   classId: string | null;

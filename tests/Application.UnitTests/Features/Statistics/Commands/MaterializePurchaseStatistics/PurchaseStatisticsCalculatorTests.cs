@@ -183,4 +183,69 @@ public sealed class PurchaseStatisticsCalculatorTests
     {
         PurchaseStatisticsCalculator.Calculate([], Today, TimeZone, ComputedAt, []).ShouldBeEmpty();
     }
+
+    private static int? LastQuantity(PurchaseStatisticsScope scope, Guid? classId, params PurchaseLine[] lines) =>
+        PurchaseStatisticsCalculator.Calculate(lines, Today, TimeZone, ComputedAt, [])
+            .Single(s => s.Scope == scope && s.ClassId == classId).LastQuantity;
+
+    [Test]
+    public void LastQuantity_single_receipt_is_its_quantity()
+    {
+        var line = Line(ItemA, ClassA, Guid.NewGuid(), 7, 1m, Day0);
+        LastQuantity(PurchaseStatisticsScope.Last365Days, null, line).ShouldBe(7);
+    }
+
+    [Test]
+    public void LastQuantity_is_the_latest_receipt_not_the_average()
+    {
+        LastQuantity(PurchaseStatisticsScope.Last365Days, null,
+            Line(ItemA, ClassA, Guid.NewGuid(), 100, 1m, Day0),
+            Line(ItemA, ClassA, Guid.NewGuid(), 4, 1m, Day0.AddDays(10)),
+            Line(ItemA, ClassA, Guid.NewGuid(), 50, 1m, Day0.AddDays(5))).ShouldBe(4);
+    }
+
+    [Test]
+    public void LastQuantity_sums_lines_on_the_latest_receipt()
+    {
+        var last = Guid.NewGuid();
+        LastQuantity(PurchaseStatisticsScope.Last365Days, null,
+            Line(ItemA, ClassA, Guid.NewGuid(), 100, 1m, Day0),
+            Line(ItemA, ClassA, last, 3, 1m, Day0.AddDays(10)),
+            Line(ItemA, ClassA, last, 2, 1m, Day0.AddDays(10).AddHours(1))).ShouldBe(5);
+    }
+
+    [Test]
+    public void LastQuantity_picks_the_same_receipt_in_90_and_365_day_windows()
+    {
+        PurchaseLine[] lines =
+        [
+            Line(ItemA, ClassA, Guid.NewGuid(), 9, 1m, Today.AddDays(-200).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)),
+            Line(ItemA, ClassA, Guid.NewGuid(), 6, 1m, Day0)
+        ];
+        LastQuantity(PurchaseStatisticsScope.Last90Days, null, lines).ShouldBe(6);
+        LastQuantity(PurchaseStatisticsScope.Last365Days, null, lines).ShouldBe(6);
+    }
+
+    [Test]
+    public void LastQuantity_class_scope_uses_that_class_latest_receipt()
+    {
+        PurchaseLine[] lines =
+        [
+            Line(ItemA, ClassA, Guid.NewGuid(), 2, 1m, Day0),
+            Line(ItemA, ClassB, Guid.NewGuid(), 8, 1m, Day0.AddDays(3))
+        ];
+        LastQuantity(PurchaseStatisticsScope.Class, ClassA, lines).ShouldBe(2);
+        LastQuantity(PurchaseStatisticsScope.Class, ClassB, lines).ShouldBe(8);
+        LastQuantity(PurchaseStatisticsScope.Last365Days, null, lines).ShouldBe(8);
+    }
+
+    [Test]
+    public void LastQuantity_breaks_receipt_date_ties_with_the_max_purchase_key()
+    {
+        var low = new Guid("00000000-0000-0000-0000-000000000001");
+        var high = new Guid("00000000-0000-0000-0000-000000000002");
+        LastQuantity(PurchaseStatisticsScope.Last365Days, null,
+            Line(ItemA, ClassA, high, 5, 1m, Day0),
+            Line(ItemA, ClassA, low, 1, 1m, Day0)).ShouldBe(5);
+    }
 }

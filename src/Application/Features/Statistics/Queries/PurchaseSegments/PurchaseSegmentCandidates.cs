@@ -1,14 +1,12 @@
 using skestock.Application.Common.Interfaces;
-using skestock.Application.Features.Statistics.Models;
 using skestock.Domain.Enums;
 
-namespace skestock.Application.Features.Statistics.Queries.GetPurchaseSegments;
+namespace skestock.Application.Features.Statistics.Queries.PurchaseSegments;
 
-public class GetPurchaseSegmentsQueryHandler(IApplicationDbContext dbContext, TimeProvider timeProvider)
-    : IRequestHandler<GetPurchaseSegmentsQuery, Result<PurchaseSegmentsDto>>
+public static class PurchaseSegmentCandidates
 {
-    public async ValueTask<Result<PurchaseSegmentsDto>> Handle(
-        GetPurchaseSegmentsQuery request,
+    public static async Task<List<PurchaseSegmentCandidate>> LoadAsync(
+        IApplicationDbContext dbContext,
         CancellationToken cancellationToken)
     {
         var rows = await dbContext.ItemPurchaseStatistics
@@ -56,8 +54,9 @@ public class GetPurchaseSegmentsQueryHandler(IApplicationDbContext dbContext, Ti
 
                 return new PurchaseSegmentCandidate(
                     item, year?.LastPurchasedAt, classRows.Select(r => r.PurchaseCount).ToList());
-            });
+            })
+            .ToList();
 
-        return Result.Ok(PurchaseSegmentClassifier.Classify(candidates, timeProvider.GetUtcNow()));
+        return candidates;
     }
 }

@@ -8,7 +8,6 @@ using skestock.Application.Features.Statistics.Queries.GetClassDailyConsumption;
 using skestock.Application.Features.Statistics.Queries.GetClassStockByCategory;
 using skestock.Application.Features.Statistics.Queries.GetDailyConsumptionAverages;
 using skestock.Application.Features.Statistics.Queries.GetItemsPurchaseHistory;
-using skestock.Application.Features.Statistics.Queries.GetPurchaseSegments;
 using skestock.Application.Features.Statistics.Queries.GetTopDonations;
 using skestock.Application.Features.Statistics.Queries.GetTopPurchases;
 using skestock.Domain.Constants;
@@ -34,7 +33,6 @@ public class Statistics : IEndpointGroup
         groupBuilder.MapGet(GetClassDailyConsumption, "class/{classId}/daily-consumption");
         groupBuilder.MapGet(GetTopPurchases, "purchases/top");
         groupBuilder.MapGet(GetTopDonations, "donations/top");
-        groupBuilder.MapGet(GetPurchaseSegments, "purchases/segments");
         groupBuilder.MapPost(GetItemsPurchaseHistory, "purchases/items-history");
         groupBuilder.MapPost(RecalculatePurchaseStatistics, "purchases/materialize")
             .RequireAuthorization(policy => policy.RequireRole(Roles.Administrator));
@@ -150,19 +148,6 @@ public class Statistics : IEndpointGroup
                 CategoryId = request.CategoryId
             },
             cancellationToken);
-
-        return result.ToOk();
-    }
-
-    [EndpointSummary("Get purchase segments")]
-    [EndpointDescription("Returns active items grouped by purchase cadence (Weekly, EveryTwoWeeks, Monthly) " +
-                         "or bought about once per class (OncePerClass). Figures come from the daily " +
-                         "purchase statistics job, so the lists are empty until its first run.")]
-    public static async Task<Results<Ok<PurchaseSegmentsDto>, ProblemHttpResult>> GetPurchaseSegments(
-        ISender sender,
-        CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(new GetPurchaseSegmentsQuery(), cancellationToken);
 
         return result.ToOk();
     }

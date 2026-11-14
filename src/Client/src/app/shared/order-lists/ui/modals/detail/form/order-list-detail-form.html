@@ -30,30 +30,6 @@
       </span>
     </ng-template>
   }
-  <nz-row [nzGutter]="[16, 0]">
-    <nz-col [nzLg]="24"
-            [nzXs]="24">
-      <div class="flex flex-col items-stretch gap-1 md:flex-row md:flex-wrap md:items-start md:gap-2">
-        <nz-form-item *skeletonInputLoader="loading()"
-                      class="mb-1! md:mb-2! md:min-w-60 md:grow md:basis-60">
-          <nz-form-control>
-            <ske-item-autocomplete [formField]="orderListForm.lineItem"
-                                   placeholder="Cauta si adauga un articol" />
-          </nz-form-control>
-        </nz-form-item>
-      </div>
-    </nz-col>
-  </nz-row>
-
-  @if (orderListForm.lines().touched()) {
-    @for (error of orderListForm.lines().errors(); track $index) {
-      <p nz-typography
-         nzType="danger">
-        <nz-icon nzType="icons:circle-exclamation"></nz-icon>
-        {{ error.message }}
-      </p>
-    }
-  }
   <div class="grow flex flex-col"
        [class]="withSuggestions() ? 'lg:grid lg:grid-cols-3 lg:gap-x-4' : ''">
     @if (withSuggestions()) {
@@ -62,10 +38,37 @@
                                         [addedItemIds]="addedItemIds()"
                                         (add)="addSuggestion($event)" />
     }
-    <ske-order-list-lines-container class="lg:col-span-2 lg:ms-0!"
-                                    [lines]="orderListForm.lines"
-                                    [disabled]="loading() || !editable()"
-                                    [narrow]="withSuggestions()"
-                                    (remove)="removeLine($event)" />
+    <!-- The add-item input stays pinned at the top of this column while only the lines below it scroll. -->
+    <div class="flex min-h-0 grow flex-col lg:col-span-2">
+      <nz-row [nzGutter]="[16, 0]">
+        <nz-col [nzLg]="24"
+                [nzXs]="24">
+          <div class="flex flex-col items-stretch gap-1 md:flex-row md:flex-wrap md:items-start md:gap-2">
+            <nz-form-item *skeletonInputLoader="loading()"
+                          class="mb-1! md:mb-2! md:min-w-60 md:grow md:basis-60">
+              <nz-form-control>
+                <ske-item-autocomplete [formField]="orderListForm.lineItem"
+                                       placeholder="Cauta si adauga un articol" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </nz-col>
+      </nz-row>
+
+      @if (orderListForm.lines().touched()) {
+        @for (error of orderListForm.lines().errors(); track $index) {
+          <p nz-typography
+             nzType="danger">
+            <nz-icon nzType="icons:circle-exclamation"></nz-icon>
+            {{ error.message }}
+          </p>
+        }
+      }
+      <ske-order-list-lines-container class="lg:ms-0!"
+                                      [lines]="orderListForm.lines"
+                                      [disabled]="loading() || !editable()"
+                                      [narrow]="withSuggestions()"
+                                      (remove)="removeLine($event)" />
+    </div>
   </div>
 </form>
