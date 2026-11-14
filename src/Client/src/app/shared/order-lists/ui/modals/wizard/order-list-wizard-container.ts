@@ -27,6 +27,9 @@ import { OrderListSupplyListStep } from './steps/supply-list-step';
     OrderListSupplyListStep
   ],
   selector: 'ske-order-list-wizard-container',
+  host: {
+    class: 'flex min-h-0 grow flex-col'
+  },
   template: `
     @if (direction() === 'horizontal') {
       <nz-steps class="mb-4"

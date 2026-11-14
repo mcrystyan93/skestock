@@ -57,7 +57,7 @@ import { OrderListWizardContainer } from '../wizard/order-list-wizard-container'
   selector: 'ske-order-list-detail-modal',
   templateUrl: './order-list-detail-modal.html',
   host: {
-    class: 'grow flex flex-col'
+    class: 'min-h-0 grow flex flex-col'
   },
   providers: [provideDispatcher(), OrderListDetailState, OrderListWizardStore]
 })

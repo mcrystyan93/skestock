@@ -6,6 +6,10 @@ import { NzSkeletonComponent } from 'ng-zorro-antd/skeleton';
 @Component({
   imports: [NzSkeletonComponent, OrderCatalogList],
   selector: 'ske-order-list-suggestions-step',
+  host: {
+    // Fills the modal down to its bottom edge (the -mb-6 cancels the body padding), so only the list scrolls.
+    class: 'flex min-h-0 grow flex-col -mb-6'
+  },
   template: `
     <p class="mb-3 mt-0 opacity-80">
       Bifează produsele pentru comandă; vor avea ultima cantitate achiziționată. Le poți ajusta în pasul următor.
@@ -18,13 +22,11 @@ import { NzSkeletonComponent } from 'ng-zorro-antd/skeleton';
            aria-live="polite">
         {{ selectedIds().length }} selectate
       </div>
-      <div class="flex h-[55dvh] min-h-72 flex-col">
-        <ske-order-catalog-list class="min-h-0 flex-1"
-                                mode="select"
-                                [items]="items()"
-                                [selectedIds]="selectedIds()"
-                                (selectedIdsChange)="selectedIdsChange.emit($event)" />
-      </div>
+      <ske-order-catalog-list class="min-h-72 flex-1"
+                              mode="select"
+                              [items]="items()"
+                              [selectedIds]="selectedIds()"
+                              (selectedIdsChange)="selectedIdsChange.emit($event)" />
     }
   `
 })

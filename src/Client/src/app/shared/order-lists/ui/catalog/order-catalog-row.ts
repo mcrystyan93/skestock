@@ -57,7 +57,7 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
         <span class="flex flex-wrap items-center gap-x-3 text-sm opacity-80">
           @if (isLowStock()) {
             <nz-icon nzType="icons:triangle-exclamation"
-                     class="text-amber-600"
+                     class="text-yellow-500!"
                      role="img"
                      aria-label="Stoc redus"
                      title="Stoc redus"></nz-icon>
