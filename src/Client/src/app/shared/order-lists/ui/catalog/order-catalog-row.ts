@@ -54,22 +54,24 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
             <span class="ml-1 text-sm font-normal opacity-60">({{ item().sku }})</span>
           }
         </span>
-        <span class="flex flex-wrap items-center gap-x-3 text-sm opacity-80">
+        <span class="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm opacity-80">
           @if (isLowStock()) {
-            <nz-icon nzType="icons:triangle-exclamation"
-                     class="text-yellow-500!"
-                     role="img"
-                     aria-label="Stoc redus"
-                     title="Stoc redus"></nz-icon>
+            <span class="inline-flex items-center gap-1">
+              <nz-icon nzType="icons:triangle-exclamation"
+                       class="text-yellow-500!"
+                       aria-hidden="true"></nz-icon>
+              Stoc scăzut
+            </span>
           }
           @if (item().isFrequent) {
-            <nz-icon nzType="icons:arrows-rotate"
-                     class="text-primary-600 dark:text-primary-400"
-                     role="img"
-                     aria-label="Comandat frecvent"
-                     title="Comandat frecvent"></nz-icon>
+            <span class="inline-flex items-center gap-1">
+              <nz-icon nzType="icons:arrows-rotate"
+                       class="text-primary-600 dark:text-primary-400"
+                       aria-hidden="true"></nz-icon>
+              Comandat frecvent
+            </span>
           }
-          <span>{{ quantity() }} {{ item().unit }}</span>
+          <span>{{ item().lastQuantity === null ? 'Cantitate' : 'Ultima cantitate' }}: {{ quantity() }}&nbsp;{{ item().unit }}</span>
         </span>
       </span>
     </ng-template>
