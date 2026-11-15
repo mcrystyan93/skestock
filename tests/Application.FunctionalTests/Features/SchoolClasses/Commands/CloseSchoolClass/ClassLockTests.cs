@@ -48,7 +48,7 @@ public class ClassLockTests : TestBase
         var other = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await using var inFlight = await other.Database.BeginTransactionAsync();
         // What a guarded command holds until it commits.
-        await other.Database.ExecuteSqlInterpolatedAsync(
+        await other.Database.ExecuteSqlAsync(
             $"SELECT * FROM [SchoolClasses] WITH (HOLDLOCK) WHERE [Id] = {source.Id}");
 
         var close = TestApp.SendAsync(new CloseSchoolClassCommand { Id = source.Id, TargetClassId = target.Id });
@@ -68,7 +68,7 @@ public class ClassLockTests : TestBase
         using var scope = FunctionalTestSetup.ScopeFactory.CreateScope();
         var closing = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await using var transaction = await closing.Database.BeginTransactionAsync();
-        await closing.Database.ExecuteSqlInterpolatedAsync(
+        await closing.Database.ExecuteSqlAsync(
             $"UPDATE [SchoolClasses] SET [Status] = {(int)ClassStatus.Closed} WHERE [Id] = {source.Id}");
 
         var change = TestApp.SendAsync(new AdjustStockCommand { ClassId = source.Id });

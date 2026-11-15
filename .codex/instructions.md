@@ -117,7 +117,7 @@ These are repository pins, not upgrade recommendations. Change versions only thr
 
 | Area | Repository version/source |
 |---|---|
-| .NET | SDK `10.0.110`, `latestFeature`; `net10.0` target |
+| .NET | SDK `11.0.100`, `latestFeature`; `net11.0` target |
 | EF Core and ASP.NET Core Identity EF | `10.0.11` in `Directory.Packages.props` |
 | Mediator | `3.0.2` source generator + abstractions; **not MediatR** |
 | FluentValidation DI | `12.1.1` |
