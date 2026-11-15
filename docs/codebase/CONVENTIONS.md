@@ -18,7 +18,7 @@ Command naming is feature-specific: `Items` uses `Edit/Disable/Enable`, Location
 ### 2) Formatting and Linting
 
 - Root `.editorconfig` specifies LF, final newline, four-space C# indentation, sorted System usings, file-scoped namespaces, and naming rules.
-- `Directory.Build.props` enables nullable reference types, implicit usings, `net10.0`, and `TreatWarningsAsErrors=true`.
+- `Directory.Build.props` enables nullable reference types, implicit usings, `net11.0`, and `TreatWarningsAsErrors=true`.
 - All NuGet versions belong in `Directory.Packages.props`; do not add inline versions to project files.
 - No standalone .NET lint command is configured; `dotnet build` is the warning gate.
 - Angular uses strict TypeScript compiler options in `src/Client/tsconfig.json`; package scripts provide build/test/watch commands but no dedicated lint script.

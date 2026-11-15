@@ -2,7 +2,7 @@
 
 ## Source of truth
 
-- This is a .NET 10 solution (`global.json` SDK `10.0.110`, roll-forward `latestFeature`) using the XML solution `skestock.slnx`; it is not a classic `.sln`.
+- This is a .NET 11 solution (`global.json` SDK `11.0.100`, roll-forward `latestFeature`) using the XML solution `skestock.slnx`; it is not a classic `.sln`.
 - `Directory.Build.props` enables nullable/implicit usings and `TreatWarningsAsErrors`; central NuGet versions belong in `Directory.Packages.props`, never in project files.
 - `CLAUDE.md` contains the repo's graphify workflow. For broader coding conventions, storage/queue details, and Angular rules, consult `.github/copilot-instructions.md` rather than duplicating them here.
 

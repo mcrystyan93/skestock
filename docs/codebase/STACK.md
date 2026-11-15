@@ -6,8 +6,8 @@
 
 | Area | Value | Evidence |
 |------|-------|----------|
-| Backend language/runtime | C# on .NET 10 (`net10.0`) | `Directory.Build.props`, `global.json` |
-| SDK | `10.0.110`, `rollForward: latestFeature` | `global.json` |
+| Backend language/runtime | C# on .NET 11 (`net11.0`) | `Directory.Build.props`, `global.json` |
+| SDK | `11.0.100`, `rollForward: latestFeature` | `global.json` |
 | .NET package manager | NuGet Central Package Management | `Directory.Packages.props` |
 | Frontend | Angular `^22.2.0`, TypeScript `~6.0.3`, npm `11.16.0` | `src/Client/package.json` |
 | .NET solution/build | MSBuild XML solution (`skestock.slnx`) | `skestock.slnx` |
@@ -17,7 +17,7 @@
 
 | Dependency | Version | Role | Evidence |
 |------------|---------|------|----------|
-| ASP.NET Core / Web SDK | .NET 10 / `10.0.11` packages | Minimal API host | `src/Web/Web.csproj`, `src/Web/Program.cs` |
+| ASP.NET Core / Web SDK | .NET 11 / `11.0.0` packages | Minimal API host | `src/Web/Web.csproj`, `src/Web/Program.cs` |
 | EF Core + SQL Server Aspire integration | `10.0.11` / `13.5.2` | Persistence, migrations, SQL Server resource | `src/Infrastructure/Infrastructure.csproj`, `src/Infrastructure/Data/ApplicationDbContext.cs` |
 | ASP.NET Core Identity | `10.0.11` | Guid-keyed users/roles and Identity API endpoints | `src/Infrastructure/Data/ApplicationDbContext.cs`, `src/Infrastructure/DependencyInjection.cs` |
 | Mediator source generator | `3.0.2` | CQRS dispatch and pipeline behaviors; not MediatR | `Directory.Packages.props`, `src/Application/DependencyInjection.cs` |
@@ -66,7 +66,7 @@ cd src/Client && npm test
 - Aspire secret parameters include SQL and Redis passwords; OpenAI settings are injected by AppHost or deployment.
 - Worker binds and validates `DailyStatistics` schedule, time zone, and backfill options at startup.
 - Production configuration is rendered from GitHub Environment variables/secrets into a protected runtime env file; see `deploy/production.env.example`.
-- Web and Worker Dockerfiles use Node 22 for the Angular build (Web image) and .NET 10 SDK/ASP.NET runtime images.
+- Web and Worker Dockerfiles use Node 22 for the Angular build (Web image) and .NET 11 SDK/ASP.NET runtime images.
 
 ### 6) Evidence
 

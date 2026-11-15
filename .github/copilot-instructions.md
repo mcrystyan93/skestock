@@ -23,7 +23,7 @@ conventions. If this file and `AGENTS.md` disagree, follow `AGENTS.md` and verif
 ## Overview
 
 `skestock` is a school inventory/stock system based on Jason Taylor's Clean Architecture
-template `10.8.0`. It targets .NET 10 (`global.json` pins SDK `10.0.110`) and is orchestrated
+template `10.8.0`. It targets .NET 11 (`global.json` pins SDK `11.0.100`) and is orchestrated
 with .NET Aspire `13.5.2`.
 
 The backend includes SQL Server, Redis, Azure Blob/Queue clients with Azurite for local
@@ -33,7 +33,7 @@ an Angular 22 SPA under `src/Client`, served by Aspire/Vite in development and c
 Web image's `wwwroot` during the production Docker build.
 
 The solution is `skestock.slnx`, not a classic `.sln`. `Directory.Build.props` applies
-`net10.0`, nullable reference types, implicit usings, and `TreatWarningsAsErrors=true`.
+`net11.0`, nullable reference types, implicit usings, and `TreatWarningsAsErrors=true`.
 All NuGet versions belong in `Directory.Packages.props`.
 
 ## Architecture & Layer Responsibilities
