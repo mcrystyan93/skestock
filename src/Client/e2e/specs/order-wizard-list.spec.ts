@@ -95,7 +95,7 @@ for (const viewport of viewports) {
     // Icons are present for low stock and frequent items, and thumbnails load.
     await expect(step.getByText(/Stoc scăzut \(\d+\sbuc\)/).first()).toBeVisible();
     await expect(step.getByText('Comandat frecvent', { exact: true }).first()).toBeVisible();
-    await expect(step.getByText(/Ultima cantitate: 5\sbuc \(.*2026\)/).first()).toBeVisible();
+    await expect(step.getByText(/Ultima comandă: 5\sbuc \(.*2026\)/).first()).toBeVisible();
     const thumbnails = step.locator('ske-item-thumbnail img');
     await expect(thumbnails.first()).toBeVisible();
     expect(await noHorizontalScroll(page), 'horizontal scroll').toBe(true);

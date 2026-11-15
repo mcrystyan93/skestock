@@ -62,6 +62,8 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
                        aria-hidden="true"></nz-icon>
               Stoc scăzut ({{ stock() }}&nbsp;{{ item().unit }})
             </span>
+          } @else {
+            <span>Stoc curent ({{ stock() }}&nbsp;{{ item().unit }})</span>
           }
           @if (item().isFrequent) {
             <span class="inline-flex items-center gap-1">
@@ -71,7 +73,7 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
               Comandat frecvent
             </span>
           }
-          <span>{{ item().lastQuantity === null ? 'Cantitate' : 'Ultima cantitate' }}: {{ quantity() }}&nbsp;{{ item().unit }}@if (item().lastPurchasedAt; as purchasedAt) {&ngsp;<span class="whitespace-nowrap">({{ purchasedAt | date }})</span>}</span>
+          <span>{{ item().lastQuantity === null ? 'Cantitate' : 'Ultima comandă' }}: {{ quantity() }}&nbsp;{{ item().unit }}@if (item().lastPurchasedAt; as purchasedAt) {&ngsp;<span class="whitespace-nowrap">({{ purchasedAt | date }})</span>}</span>
         </span>
       </span>
     </ng-template>
