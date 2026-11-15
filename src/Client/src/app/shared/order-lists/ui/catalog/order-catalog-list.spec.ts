@@ -54,14 +54,15 @@ describe('OrderCatalogList', () => {
     // Current stock of that location in brackets after the low-stock label, the purchase date after the last quantity.
     expect(text(0)).toContain('Stoc scăzut (4 buc)');
     expect(text(0)).toContain('Comandat frecvent');
-    expect(text(0)).toMatch(/Ultima cantitate: 2 buc \(.*2026\)/);
+    expect(text(0)).toMatch(/Ultima comandă: 2 buc \(.*2026\)/);
     expect(text(1)).not.toContain('Stoc scăzut');
+    expect(text(1)).toMatch(/Stoc curent \(\d+ buc\)/);
     expect(text(1)).not.toContain('Comandat frecvent');
     // No purchase date known: no empty brackets.
-    expect(text(1)).toContain('Ultima cantitate: 2 buc');
-    expect(text(1)).not.toContain('(');
+    expect(text(1)).toContain('Ultima comandă: 2 buc');
+    expect(text(1)).not.toMatch(/Ultima comandă: 2 buc \(/);
     // Never ordered: no "last quantity" claim, just the default of 1.
-    expect(text(2)).not.toContain('Ultima cantitate');
+    expect(text(2)).not.toContain('Ultima comandă');
     expect(text(2)).toContain('Cantitate: 1 buc');
     expect(el().querySelectorAll('ske-order-catalog-row')[0].querySelectorAll('nz-icon[aria-hidden="true"]').length).toBeGreaterThanOrEqual(2);
   });
