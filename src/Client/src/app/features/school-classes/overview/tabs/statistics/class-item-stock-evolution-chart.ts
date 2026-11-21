@@ -6,7 +6,7 @@ import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { ThemeService } from '@ske/theme';
 import { CHART_AXIS_CHROME, CHART_FONT, CHART_GRID, barGradient } from './chart-style';
 
-const CHART_HEIGHT = 360;
+const CHART_HEIGHT = 440;
 const STOCK_COLOR = '#1f6c72';
 const QUANTITY_FORMATTER = new Intl.NumberFormat('ro-RO');
 
