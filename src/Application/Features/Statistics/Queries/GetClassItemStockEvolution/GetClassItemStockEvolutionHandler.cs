@@ -18,20 +18,24 @@ public class GetClassItemStockEvolutionHandler(IApplicationDbContext dbContext)
         if (!classExists)
             return Result.Fail(new SchoolClassErrors.SchoolClassNotFound(request.ClassId));
 
-        var item = await dbContext.Items
-            .AsNoTracking()
-            .Where(item => item.Id == request.ItemId)
-            .Select(item => new { item.Id, item.Name, item.Sku, item.Unit })
-            .SingleOrDefaultAsync(cancellationToken);
+        // No item selected: the series is the whole class (across all items).
+        var item = request.ItemId is { } itemId
+            ? await dbContext.Items
+                .AsNoTracking()
+                .Where(item => item.Id == itemId)
+                .Select(item => new { item.Id, item.Name, item.Sku, item.Unit })
+                .SingleOrDefaultAsync(cancellationToken)
+            : null;
 
-        if (item is null)
-            return Result.Fail(new ItemErrors.ItemNotFound(request.ItemId));
+        if (request.ItemId is { } requestedItemId && item is null)
+            return Result.Fail(new ItemErrors.ItemNotFound(requestedItemId));
 
         var transactions = await dbContext.StockTransactions
             .AsNoTracking()
             .Where(transaction =>
                 transaction.ClassId == request.ClassId &&
-                transaction.ItemId == request.ItemId)
+                (request.ItemId == null || transaction.ItemId == request.ItemId) &&
+                (request.LocationId == null || transaction.LocationId == request.LocationId))
             .OrderBy(transaction => transaction.CreatedAt)
             .Select(transaction => new { transaction.CreatedAt, transaction.QuantityChange })
             .ToListAsync(cancellationToken);
@@ -56,10 +60,10 @@ public class GetClassItemStockEvolutionHandler(IApplicationDbContext dbContext)
 
         return Result.Ok(new ClassItemStockEvolutionDto
         {
-            ItemId = item.Id,
-            ItemName = item.Name,
-            Sku = item.Sku,
-            Unit = item.Unit,
+            ItemId = item?.Id,
+            ItemName = item?.Name,
+            Sku = item?.Sku,
+            Unit = item?.Unit,
             Points = points
         });
     }

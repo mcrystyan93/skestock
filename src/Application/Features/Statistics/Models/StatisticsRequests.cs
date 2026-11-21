@@ -17,6 +17,12 @@ public static class StatisticsRequests
         public Guid? CategoryId { get; init; }
     }
 
+    public class GetClassItemStockEvolutionRequest
+    {
+        public Guid? ItemId { get; init; }
+        public Guid? LocationId { get; init; }
+    }
+
     public class GetDailyConsumptionAveragesRequest
     {
         public Guid? ItemId { get; init; }

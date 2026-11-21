@@ -4,6 +4,7 @@ import {
   ClassDailyConsumptionDto,
   ClassDailyConsumptionFilter,
   ClassItemStockEvolutionDto,
+  ClassStockEvolutionFilter,
   ClassStockByCategoryChartDto,
   GetClassLocationStockRequest,
   PurchaseStatisticDto,
@@ -47,9 +48,14 @@ export class ClassStatisticsHttp {
     );
   }
 
-  public getItemStockEvolution(classId: string, itemId: string) {
+  public getStockEvolution(classId: string, filter: ClassStockEvolutionFilter) {
+    let params = new HttpParams();
+    if (filter.itemId) params = params.set('itemId', filter.itemId);
+    if (filter.locationId) params = params.set('locationId', filter.locationId);
+
     return this._httpClient.get<ClassItemStockEvolutionDto>(
-      `/api/statistics/class/${classId}/item/${itemId}/stock-evolution`
+      `/api/statistics/class/${classId}/stock-evolution`,
+      { params }
     );
   }
 
