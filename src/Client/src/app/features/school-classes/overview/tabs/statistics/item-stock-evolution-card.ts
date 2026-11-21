@@ -3,16 +3,18 @@ import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { form, FormField } from '@angular/forms/signals';
 import { NzCardComponent } from 'ng-zorro-antd/card';
-import { ItemDropdownValue } from '@ske/models';
+import { ItemDropdownValue, LocationDropdownValue } from '@ske/models';
 import { ErrorAlert } from '@ske/shared/errors';
 import { ItemDropdown } from '@ske/shared/items';
 import { LoaderDirective } from '@ske/shared/loader';
+import { LocationDropdown } from '@ske/shared/locations';
 import { ClassStatisticsStore } from '../../../services/class-statistics.store';
 import { ClassItemStockEvolutionChart } from './class-item-stock-evolution-chart';
 import { LayoutBreakpoint } from '@ske/shared/directives';
 
 type ItemSelectionModel = {
   item: ItemDropdownValue;
+  location: LocationDropdownValue;
 };
 
 @Component({
@@ -21,6 +23,7 @@ type ItemSelectionModel = {
     FormField,
     NzCardComponent,
     ItemDropdown,
+    LocationDropdown,
     ErrorAlert,
     LoaderDirective,
     ClassItemStockEvolutionChart,
@@ -30,12 +33,12 @@ type ItemSelectionModel = {
   selector: 'ske-item-stock-evolution-card',
   template: `
     <nz-card class="min-h-110 flex-body has-chart"
-             [nzExtra]="itemDropdownExtra"
+             [nzExtra]="filtersExtra"
              nzTitle="Evoluția stocului">
-      <ng-container *skeLayoutBreakpoint="'lg'; else mobileItemDropdown"></ng-container>
-      <ng-template #mobileItemDropdown>
+      <ng-container *skeLayoutBreakpoint="'lg'; else mobileFilters"></ng-container>
+      <ng-template #mobileFilters>
         <div class="px-4 pt-2">
-          <ng-container *ngTemplateOutlet="itemDropdown" />
+          <ng-container *ngTemplateOutlet="filters" />
         </div>
       </ng-template>
 
@@ -47,26 +50,34 @@ type ItemSelectionModel = {
         } @else {
           <ske-class-item-stock-evolution-chart [data]="store.itemEvolution()"
                                                 [emptyMessage]="emptyMessage()"
-                                                ariaLabel="Evoluția stocului pentru articolul selectat" />
+                                                ariaLabel="Evoluția stocului" />
         }
       </ng-container>
 
-      <ng-template #itemDropdownExtra>
-        <ng-container *skeLayoutBreakpoint="'lg'; else noDesktopItemDropdown">
-          <div class="w-44 sm:w-56">
-            <ng-container *ngTemplateOutlet="itemDropdown" />
+      <ng-template #filtersExtra>
+        <ng-container *skeLayoutBreakpoint="'lg'; else noDesktopFilters">
+          <div class="w-96">
+            <ng-container *ngTemplateOutlet="filters" />
           </div>
         </ng-container>
-        <ng-template #noDesktopItemDropdown></ng-template>
+        <ng-template #noDesktopFilters></ng-template>
       </ng-template>
 
-      <ng-template #itemDropdown>
-        <ske-item-dropdown [formField]="itemForm.item"
-                           [itemIds]="store.itemIds()"
-                           [allowClear]="true"
-                           [allowEdit]="false"
-                           [allowCreate]="false"
-                           placeholder="Alegeți un articol" />
+      <ng-template #filters>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <ske-item-dropdown [formField]="itemForm.item"
+                             [itemIds]="store.itemIds()"
+                             [allowClear]="true"
+                             [allowEdit]="false"
+                             [allowCreate]="false"
+                             placeholder="Articol"
+                             aria-label="Filtrează după articol" />
+          <ske-location-dropdown [formField]="itemForm.location"
+                                 [allowClear]="true"
+                                 [loadOnInit]="active()"
+                                 placeholder="Locație"
+                                 aria-label="Filtrează după locație" />
+        </div>
       </ng-template>
     </nz-card>
   `,
@@ -79,30 +90,26 @@ export class ItemStockEvolutionCard {
   public readonly active = input(false);
   public readonly store = inject(ClassStatisticsStore);
 
-  private readonly _formModel = signal<ItemSelectionModel>({ item: null });
+  private readonly _formModel = signal<ItemSelectionModel>({ item: null, location: null });
   public readonly itemForm = form(this._formModel);
 
   public readonly emptyMessage = computed(() => {
-    if (this.itemForm.item().value()?.id) {
-      return 'Nu există tranzacții de stoc pentru acest articol în această clasă.';
-    }
-
-    return this.store.itemIds().length > 0
-      ? 'Selectați un articol pentru a vedea evoluția stocului.'
-      : 'Nu există articole în raportul de stoc al acestei clase.';
+    return this.itemForm.item().value()?.id || this.itemForm.location().value()?.id
+      ? 'Nu există tranzacții de stoc pentru filtrele selectate.'
+      : 'Nu există tranzacții de stoc în această clasă.';
   });
 
   private readonly _loadItemEvolutionEffectRef = effect(() => {
     const classId = this.classId();
     const isActive = this.active();
     const itemId = this.itemForm.item().value()?.id ?? null;
-    const itemIds = this.store.itemIds();
+    const locationId = this.itemForm.location().value()?.id ?? null;
 
-    if (!isActive || !classId || !itemId || !itemIds.includes(itemId)) {
+    if (!isActive || !classId) {
       untracked(() => this.store.loadItemEvolution(null));
       return;
     }
 
-    untracked(() => this.store.loadItemEvolution({ classId, itemId }));
+    untracked(() => this.store.loadItemEvolution({ classId, filter: { itemId, locationId } }));
   });
 }

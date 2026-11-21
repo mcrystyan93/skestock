@@ -84,11 +84,11 @@ describe('ClassStatisticsHttp', () => {
     expect(itemIds).toEqual(['positive-item', 'zero-item', 'negative-item']);
   });
 
-  it('requests stock evolution for one item in a class', () => {
-    service.getItemStockEvolution('class-id', 'item-id').subscribe();
+  it('requests stock evolution filtered by item and location', () => {
+    service.getStockEvolution('class-id', { itemId: 'item-id', locationId: 'location-id' }).subscribe();
 
     const request = httpTestingController.expectOne(
-      '/api/statistics/class/class-id/item/item-id/stock-evolution'
+      '/api/statistics/class/class-id/stock-evolution?itemId=item-id&locationId=location-id'
     );
     expect(request.request.method).toBe('GET');
     request.flush({

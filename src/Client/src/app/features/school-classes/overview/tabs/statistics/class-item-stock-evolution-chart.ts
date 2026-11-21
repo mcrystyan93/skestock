@@ -56,7 +56,7 @@ export class ClassItemStockEvolutionChart {
     }
 
     return [{
-      name: `${data.itemName} (${data.unit})`,
+      name: data.itemName ? `${data.itemName} (${data.unit})` : 'Toate articolele',
       data: data.points.map((point) => ({
         x: Date.parse(`${point.date}T00:00:00Z`),
         y: point.cumulativeQuantity

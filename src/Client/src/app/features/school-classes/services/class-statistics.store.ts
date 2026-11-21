@@ -15,6 +15,7 @@ import {
   ClassDailyConsumptionFilter,
   ClassItemStockEvolutionDto,
   ClassStockByCategoryChartDto,
+  ClassStockEvolutionFilter,
   TopPurchasesDto,
   TopPurchasesFilter
 } from '@ske/models';
@@ -145,7 +146,7 @@ export const ClassStatisticsStore = signalStore(
       )
     );
 
-    const loadItemEvolution = rxMethod<{ classId: string; itemId: string } | null>(
+    const loadItemEvolution = rxMethod<{ classId: string; filter: ClassStockEvolutionFilter } | null>(
       pipe(
         tap((request) => {
           store.clearItemEvolutionErrors();
@@ -162,7 +163,7 @@ export const ClassStatisticsStore = signalStore(
           }
 
           return store.classStatisticsHttp
-            .getItemStockEvolution(request.classId, request.itemId)
+            .getStockEvolution(request.classId, request.filter)
             .pipe(
               mapResponse({
                 next: (itemEvolution) => {

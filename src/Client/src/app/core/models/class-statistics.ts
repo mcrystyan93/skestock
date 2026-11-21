@@ -17,10 +17,11 @@ export type ClassItemStockEvolutionPointDto = {
 };
 
 export type ClassItemStockEvolutionDto = {
-  itemId: string;
-  itemName: string;
+  /** Item fields are null when the series covers all items. */
+  itemId: string | null;
+  itemName: string | null;
   sku: string | null;
-  unit: string;
+  unit: string | null;
   points: ClassItemStockEvolutionPointDto[];
 };
 
@@ -39,6 +40,11 @@ export type ClassDailyConsumptionDto = {
   totalValue: number;
   averageQuantity: number;
   averageValue: number;
+};
+
+export type ClassStockEvolutionFilter = {
+  itemId: string | null;
+  locationId: string | null;
 };
 
 export type ClassDailyConsumptionFilter = {

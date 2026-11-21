@@ -46,10 +46,11 @@ public record ClassItemStockEvolutionPointDto
 
 public record ClassItemStockEvolutionDto
 {
-    public Guid ItemId { get; init; }
-    public string ItemName { get; init; } = string.Empty;
+    // Item fields are null when the series covers all items.
+    public Guid? ItemId { get; init; }
+    public string? ItemName { get; init; }
     public string? Sku { get; init; }
-    public string Unit { get; init; } = string.Empty;
+    public string? Unit { get; init; }
     public List<ClassItemStockEvolutionPointDto> Points { get; init; } = [];
 }
 
