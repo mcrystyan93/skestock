@@ -12,6 +12,12 @@ public class GetClassItemStockEvolutionQueryValidator : AbstractValidator<GetCla
 
         RuleFor(query => query.ItemId)
             .NotEmpty()
+            .When(query => query.ItemId.HasValue)
+            .WithErrorCode(ValidationErrorCodes.Required);
+
+        RuleFor(query => query.LocationId)
+            .NotEmpty()
+            .When(query => query.LocationId.HasValue)
             .WithErrorCode(ValidationErrorCodes.Required);
     }
 }

@@ -107,6 +107,33 @@ public class GetClassItemStockEvolutionHandlerTests
     }
 
     [Test]
+    public async Task Handle_WithoutItem_SumsAllItemsAndFiltersByLocation()
+    {
+        await using var context = CreateContext();
+        var (schoolClass, item, location, user) = await SeedBaseData(context);
+        var otherItem = new Item { Name = "Pens", Sku = "PEN-001", Unit = "box", Category = item.Category };
+        var otherLocation = new Location { Name = "Storage", Type = "StorageRoom" };
+        context.AddRange(otherItem, otherLocation);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var day = new DateTimeOffset(2026, 9, 2, 10, 0, 0, TimeSpan.Zero);
+        context.StockTransactions.AddRange(
+            Transaction(schoolClass, item, location, user, day, 3),
+            Transaction(schoolClass, otherItem, location, user, day, 2),
+            Transaction(schoolClass, otherItem, otherLocation, user, day, 7));
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new GetClassItemStockEvolutionHandler(context);
+        var all = await handler.Handle(new() { ClassId = schoolClass.Id }, CancellationToken.None);
+        var atLocation = await handler.Handle(
+            new() { ClassId = schoolClass.Id, LocationId = location.Id }, CancellationToken.None);
+
+        all.Value.ItemId.ShouldBeNull();
+        all.Value.Points.Select(point => point.CumulativeQuantity).ShouldBe([12]);
+        atLocation.Value.Points.Select(point => point.CumulativeQuantity).ShouldBe([5]);
+    }
+
+    [Test]
     public async Task Handle_NetsTransferTransactionsAcrossClassLocations()
     {
         await using var context = CreateContext();

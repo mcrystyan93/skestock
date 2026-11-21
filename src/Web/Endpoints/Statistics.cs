@@ -28,7 +28,7 @@ public class Statistics : IEndpointGroup
         groupBuilder.MapGet(GetClassGoodsReceiptCosts, "class/{classId}/goods-receipt-costs");
         groupBuilder.MapGet(
             GetClassItemStockEvolution,
-            "class/{classId}/item/{itemId}/stock-evolution");
+            "class/{classId}/stock-evolution");
         groupBuilder.MapGet(GetDailyConsumptionAverages, "daily-consumption/averages");
         groupBuilder.MapGet(GetClassDailyConsumption, "class/{classId}/daily-consumption");
         groupBuilder.MapGet(GetTopPurchases, "purchases/top");
@@ -90,18 +90,24 @@ public class Statistics : IEndpointGroup
         return result.ToOk();
     }
 
-    [EndpointSummary("Get an item's stock evolution for a class")]
-    [EndpointDescription("Returns the cumulative, class-wide stock level for an item, starting with its first " +
-                         "transaction in the class and grouping changes by UTC calendar day.")]
+    [EndpointSummary("Get a class's stock evolution")]
+    [EndpointDescription("Returns the cumulative stock level for a class, starting with its first " +
+                         "transaction and grouping changes by UTC calendar day. Optionally filtered by item " +
+                         "and location; without filters it covers all items.")]
     public static async Task<Results<Ok<ClassItemStockEvolutionDto>, ProblemHttpResult>>
         GetClassItemStockEvolution(
             ISender sender,
             Guid classId,
-            Guid itemId,
+            [AsParameters] StatisticsRequests.GetClassItemStockEvolutionRequest request,
             CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new GetClassItemStockEvolutionQuery { ClassId = classId, ItemId = itemId },
+            new GetClassItemStockEvolutionQuery
+            {
+                ClassId = classId,
+                ItemId = request.ItemId,
+                LocationId = request.LocationId
+            },
             cancellationToken);
 
         return result.ToOk();

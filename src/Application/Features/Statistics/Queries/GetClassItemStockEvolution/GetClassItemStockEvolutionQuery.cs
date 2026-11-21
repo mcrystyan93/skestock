@@ -9,7 +9,8 @@ namespace skestock.Application.Features.Statistics.Queries.GetClassItemStockEvol
 public class GetClassItemStockEvolutionQuery : IRequest<Result<ClassItemStockEvolutionDto>>, ICacheableQuery
 {
     public Guid ClassId { get; init; }
-    public Guid ItemId { get; init; }
+    public Guid? ItemId { get; init; }
+    public Guid? LocationId { get; init; }
 
     public IReadOnlyCollection<string> Tags =>
     [
@@ -23,5 +24,5 @@ public class GetClassItemStockEvolutionQuery : IRequest<Result<ClassItemStockEvo
         SlidingExpirationHelper.GetRandomizedSlidingExpiration(TimeSpan.FromMinutes(5), 30);
 
     public string BuildCacheKey() =>
-        $"{CacheConstants.Statistics}:class:{ClassId}:item:{ItemId}:stock-evolution:all-history";
+        $"{CacheConstants.Statistics}:class:{ClassId}:item:{ItemId}:location:{LocationId}:stock-evolution:all-history";
 }
