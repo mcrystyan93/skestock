@@ -99,7 +99,7 @@ var seedAdminPassword = builder.AddParameter($"{Services.SeedAdministrator}{Serv
 // The default "https" launch profile makes UseHttpsRedirection answer the SPA proxy's http calls with a 307 to
 // a self-signed https origin, which breaks cookie login. Always use the http-only profile: webfrontend reads the
 // "http" endpoint, and a non-e2e run without an explicit profile left webapi with no endpoints.
-var web = builder.AddProject<Projects.Web>(Services.WebApi, "http")
+var web = builder.AddDotnetProject(Services.WebApi, "../Web/Web.csproj", o => o.LaunchProfileName = "http")
     .PublishAsDockerFile(container =>
         container.WithDockerfile("../..", "src/Web/Dockerfile", "final"))
     .PublishAsDockerComposeService((resource, service) =>
@@ -148,7 +148,7 @@ var web = builder.AddProject<Projects.Web>(Services.WebApi, "http")
         url.Url = "/scalar";
     });
 
-var worker = builder.AddProject<Projects.Worker>(Services.Worker)
+var worker = builder.AddDotnetProject(Services.Worker, "../Worker/Worker.csproj")
     .PublishAsDockerFile(container =>
         container.WithDockerfile("../..", "src/Worker/Dockerfile", "final"))
     .PublishAsDockerComposeService((resource, service) =>
@@ -202,7 +202,7 @@ if (builder.ExecutionContext.IsPublishMode)
 
     // One-shot step: provisions the least-privilege logins as sa, then applies EF migrations as the
     // migrator login. It is the only service (besides dbserver) that receives the sa credentials.
-    var migrator = builder.AddProject<Projects.Web>(Services.DatabaseMigrator)
+    var migrator = builder.AddDotnetProject(Services.DatabaseMigrator, "../Web/Web.csproj")
         .PublishAsDockerFile(container =>
             container.WithDockerfile("../..", "src/Web/Dockerfile", "final"))
         .PublishAsDockerComposeService((resource, service) =>

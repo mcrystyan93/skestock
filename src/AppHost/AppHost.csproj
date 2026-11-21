@@ -1,15 +1,16 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.6.5">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>skestock.AppHost</RootNamespace>
     <AssemblyName>skestock.AppHost</AssemblyName>
     <UserSecretsId>8526f8e0-e8b9-4cea-ba45-2015be416119</UserSecretsId>
-    <AspireUseCliBundle>true</AspireUseCliBundle>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.Dotnet" />
     <PackageReference Include="Aspire.Hosting.Azure.AppContainers" />
     <PackageReference Include="Aspire.Hosting.Docker" />
     <PackageReference Include="Aspire.Hosting.JavaScript" />
@@ -19,8 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Shared\Shared.csproj" IsAspireProjectResource="false" />
-    <ProjectReference Include="..\Web\Web.csproj" />
-    <ProjectReference Include="..\Worker\Worker.csproj" />
   </ItemGroup>
 
 </Project>

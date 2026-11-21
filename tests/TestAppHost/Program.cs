@@ -21,7 +21,7 @@ public class Program
         var blobService = storage.AddBlobs(Services.BlobService);
         var queues = storage.AddQueues(Services.Queues);
 
-        builder.AddProject<Projects.Worker>(Services.Worker)
+        builder.AddDotnetProject(Services.Worker, "../../src/Worker/Worker.csproj")
             .WithEnvironment($"{Services.OpenApiSettings}__{Services.OpenApiKey}", "functional-test-api-key")
             .WithEnvironment($"{Services.OpenApiSettings}__{Services.OpenApiModel}", "functional-test-model")
             .WithReference(database)
