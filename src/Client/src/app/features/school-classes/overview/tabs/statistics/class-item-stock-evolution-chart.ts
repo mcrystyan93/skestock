@@ -4,6 +4,7 @@ import type { ApexAxisChartSeries, ApexChart, ApexOptions } from 'apexcharts';
 import { ChartComponent } from 'ng-apexcharts';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { ThemeService } from '@ske/theme';
+import { CHART_AXIS_CHROME, CHART_FONT, CHART_GRID, barGradient } from './chart-style';
 
 const CHART_HEIGHT = 360;
 const STOCK_COLOR = '#1f6c72';
@@ -17,6 +18,8 @@ const QUANTITY_FORMATTER = new Intl.NumberFormat('ro-RO');
       <apx-chart [series]="series()"
                  [chart]="chart()"
                  [stroke]="stroke()"
+                 [fill]="fill()"
+                 [grid]="grid"
                  [dataLabels]="dataLabels()"
                  [markers]="markers()"
                  [xaxis]="xaxis()"
@@ -65,15 +68,23 @@ export class ClassItemStockEvolutionChart {
   });
 
   public readonly chart = computed<ApexChart>(() => ({
-    type: 'line',
+    type: 'area',
     height: CHART_HEIGHT,
+    fontFamily: CHART_FONT,
     toolbar: { show: false },
     zoom: { enabled: false }
   }));
 
   public readonly stroke = computed<ApexOptions['stroke']>(() => ({
     curve: 'smooth',
-    width: 3
+    width: 2.5
+  }));
+
+  public readonly grid = CHART_GRID;
+
+  public readonly fill = computed<ApexOptions['fill']>(() => ({
+    type: 'gradient',
+    gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.02, stops: [0, 95, 100] }
   }));
 
   public readonly dataLabels = computed<ApexOptions['dataLabels']>(() => ({
@@ -85,13 +96,19 @@ export class ClassItemStockEvolutionChart {
     hover: { size: 5 }
   }));
 
-  public readonly xaxis = computed<ApexOptions['xaxis']>(() => ({
-    type: 'datetime',
-    labels: {
-      datetimeUTC: true,
-      format: 'dd MMM'
-    }
-  }));
+  public readonly xaxis = computed<ApexOptions['xaxis']>(() => {
+    const pointCount = this.data()?.points.length ?? 0;
+    return {
+      type: 'datetime',
+      // Few points would otherwise repeat the same day label on the auto-generated ticks.
+      tickAmount: pointCount > 1 ? Math.min(pointCount, 8) : undefined,
+      ...CHART_AXIS_CHROME,
+      labels: {
+        datetimeUTC: true,
+        format: 'dd MMM'
+      }
+    };
+  });
 
   public readonly yaxis = computed<ApexOptions['yaxis']>(() => ({
     labels: {

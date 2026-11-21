@@ -4,6 +4,7 @@ import type { ApexAxisChartSeries, ApexChart, ApexOptions } from 'apexcharts';
 import { ChartComponent } from 'ng-apexcharts';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { ThemeService } from '@ske/theme';
+import { CHART_AXIS_CHROME, CHART_FONT, CHART_GRID, barGradient } from './chart-style';
 
 export type TopPurchasesMetric = 'quantity' | 'value' | 'frequency';
 
@@ -26,7 +27,9 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month:
     @if (items().length > 0) {
       <apx-chart [series]="series()"
                  [chart]="chart()"
-                 [plotOptions]="{ bar: { horizontal: true, barHeight: '70%' } }"
+                 [plotOptions]="{ bar: { horizontal: true, barHeight: '70%', borderRadius: 6, borderRadiusApplication: 'end' } }"
+                 [fill]="fill"
+                 [grid]="grid"
                  [dataLabels]="dataLabels()"
                  [xaxis]="xaxis()"
                  [tooltip]="tooltip()"
@@ -57,6 +60,9 @@ export class TopPurchasesChart {
     this._themeService.currentTheme() === 'dark' ? 'dark' : 'light'
   );
 
+  public readonly grid = CHART_GRID;
+  public readonly fill = barGradient(true);
+
   public readonly colors = computed(() => [METRIC_COLORS[this.metric()]]);
 
   public readonly series = computed<ApexAxisChartSeries>(() => {
@@ -72,6 +78,7 @@ export class TopPurchasesChart {
 
   public readonly chart = computed<ApexChart>(() => ({
     type: 'bar',
+    fontFamily: CHART_FONT,
     height: Math.max(MIN_CHART_HEIGHT, this.items().length * BAR_HEIGHT + 60),
     toolbar: { show: false },
     zoom: { enabled: false }
@@ -83,6 +90,7 @@ export class TopPurchasesChart {
   }));
 
   public readonly xaxis = computed<ApexOptions['xaxis']>(() => ({
+    ...CHART_AXIS_CHROME,
     labels: { formatter: (value) => this.formatMetric(Number(value)) }
   }));
 
