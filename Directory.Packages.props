@@ -5,12 +5,14 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Transitive via Aspire hosting; 2.5.302 has GHSA-qhrr-8q5h-9q3h. Drop once Aspire ships a patched version. -->
+    <!-- Transitive via Aspire hosting; 2.5.302 has GHSA-qhrr-8q5h-9q3h. Kept as a guard: Aspire 17 only floors it at 2.5.307. -->
     <PackageVersion Include="MessagePack" Version="2.5.307" />
     <PackageVersion Include="Ardalis.GuardClauses" Version="5.0.0" />
-    <PackageVersion Include="Aspire.Azure.Storage.Blobs" Version="13.6.5" />
-    <PackageVersion Include="Aspire.Azure.Storage.Queues" Version="13.6.5" />
-    <PackageVersion Include="Aspire.Hosting.Docker" Version="13.6.5" />
+    <PackageVersion Include="Aspire.Azure.Storage.Blobs" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Azure.Storage.Queues" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Hosting.Dotnet" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Hosting.Docker" Version="17.0.0" />
     <PackageVersion Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.5.2" />
     <PackageVersion Include="Azure.Identity" Version="1.21.0" />
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.30.1" />
@@ -49,16 +51,14 @@
     <PackageVersion Include="Scalar.AspNetCore" Version="3.1.1" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
-    <PackageVersion Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="13.6.5" />
-    <!-- Transitive via Aspire 13.6.5 (no net11 asset); drop once Aspire targets net11. -->
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="11.0.0" />
-    <PackageVersion Include="Aspire.Hosting.Azure.Sql" Version="13.6.5" />
-    <PackageVersion Include="Aspire.Hosting.Azure.AppContainers" Version="13.6.5" />
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.5" />
-    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.6.5" />
-    <PackageVersion Include="Aspire.Hosting.Redis" Version="13.6.5" />
-    <PackageVersion Include="Aspire.StackExchange.Redis" Version="13.6.5" />
-    <PackageVersion Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.6.5" />
+    <PackageVersion Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Hosting.Azure.Sql" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Hosting.Azure.AppContainers" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="17.0.0" />
+    <PackageVersion Include="Aspire.Hosting.Redis" Version="17.0.0" />
+    <PackageVersion Include="Aspire.StackExchange.Redis" Version="17.0.0" />
+    <PackageVersion Include="Aspire.StackExchange.Redis.DistributedCaching" Version="17.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="11.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="11.0.1" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="11.0.1" />
