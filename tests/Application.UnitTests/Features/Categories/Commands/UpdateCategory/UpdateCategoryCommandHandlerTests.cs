@@ -211,4 +211,41 @@ public class UpdateCategoryCommandHandlerTests
         result.IsFailed.ShouldBeTrue();
         result.Errors.ShouldContain(e => e is CategoryErrors.CategoryNotFound);
     }
+
+    [Test]
+    public async Task Handle_WithParentId_UpdatesRelationshipAndReturnsParentName()
+    {
+        await using var context = CreateContext();
+        var parent = new Category { Name = "Dairy" };
+        var category = new Category { Name = "Milk" };
+        context.Categories.AddRange(parent, category);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new UpdateCategoryCommandHandler(context);
+        var result = await handler.Handle(
+            new UpdateCategoryCommand { Id = category.Id, Name = "Milk", ParentId = parent.Id }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ParentId.ShouldBe(parent.Id);
+        result.Value.ParentName.ShouldBe("Dairy");
+    }
+
+    [Test]
+    public async Task Handle_WithParentIdRemoved_ClearsRelationship()
+    {
+        await using var context = CreateContext();
+        var parent = new Category { Name = "Dairy" };
+        context.Categories.Add(parent);
+        await context.SaveChangesAsync(CancellationToken.None);
+        var category = new Category { Name = "Milk", ParentId = parent.Id };
+        context.Categories.Add(category);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new UpdateCategoryCommandHandler(context);
+        var result = await handler.Handle(
+            new UpdateCategoryCommand { Id = category.Id, Name = "Milk", ParentId = null }, CancellationToken.None);
+
+        result.Value.ParentId.ShouldBeNull();
+        result.Value.ParentName.ShouldBeNull();
+    }
 }

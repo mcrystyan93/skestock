@@ -210,6 +210,36 @@ public class ConfirmGoodsReceiptImportCommandHandlerTests
     }
 
     [Test]
+    public async Task Handle_WithNewItemInParentCategory_ThrowsAndDoesNotPersistConfirmation()
+    {
+        var (context, _, category, location, schoolClass, userProfile) = await CreateContextAsync();
+        await using var _ = context;
+        context.Categories.Add(new Category { Name = "Beans", ParentId = category.Id });
+        await context.SaveChangesAsync(CancellationToken.None);
+        var import = await AddPendingImportAsync(context, schoolClass.Id);
+        var handler = new ConfirmGoodsReceiptImportCommandHandler(context, new FakeUser(userProfile.IdentityId));
+
+        var exception = Should.Throw<skestock.Application.Common.Exceptions.ValidationException>(async () =>
+            await handler.Handle(new ConfirmGoodsReceiptImportCommand
+            {
+                ImportId = import.Id,
+                Lines =
+                [
+                    new ConfirmGoodsReceiptImportLine
+                    {
+                        Name = "Lentils", Unit = "kg", CategoryName = category.Name,
+                        LocationId = location.Id, Quantity = 2, UnitPrice = 3m
+                    }
+                ]
+            }, CancellationToken.None));
+
+        exception.Errors.ShouldContainKey(nameof(ConfirmGoodsReceiptImportCommand.Lines));
+        context.ChangeTracker.Clear();
+        (await context.Items.AnyAsync(i => i.Name == "Lentils", CancellationToken.None)).ShouldBeFalse();
+        (await context.GoodsReceiptImports.SingleAsync()).Status.ShouldBe(GoodsReceiptImportStatus.PendingReview);
+    }
+
+    [Test]
     public async Task Handle_WithNewItem_CreatesMissingCategory()
     {
         var (context, _, _, location, schoolClass, userProfile) = await CreateContextAsync();

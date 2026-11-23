@@ -43,6 +43,8 @@ public class GetAllCategoriesHandler(IApplicationDbContext dbContext)
                 {
                     Id = category.Id,
                     Name = category.Name,
+                    ParentId = category.ParentId,
+                    ParentName = category.Parent != null ? category.Parent.Name : null,
                     ItemCount = category.Items.Count,
                     Icon = category.Icon == null
                         ? null

@@ -5,6 +5,8 @@ import type { IconPickerValue } from '@ske/shared/icons';
 export type CategoryDto = {
   id: string;
   name: string;
+  parentId?: string | null;
+  parentName?: string | null;
   itemCount: number;
   createdByName?: string | null;
   lastModifiedByName?: string | null;
@@ -17,6 +19,8 @@ export type CategoryDto = {
 export type CategoryMutationDto = {
   id: string;
   name: string;
+  parentId?: string | null;
+  parentName?: string | null;
   icon?: IconPickerValue | null;
 };
 
@@ -28,12 +32,14 @@ export type GetAllCategoriesRequest = BasePaginationFilter & {
 /** Mirrors src/Application/Features/Categories/Models/CategoryRequests.cs. */
 export type CreateCategoryRequest = {
   name: string;
+  parentId?: string | null;
   icon?: IconPickerValue | null;
 };
 
 /** Mirrors src/Application/Features/Categories/Models/CategoryRequests.cs. */
 export type UpdateCategoryRequest = {
   name: string;
+  parentId?: string | null;
   icon?: IconPickerValue | null;
 };
 export const PAGINATION_PAGE_SIZE = 50;
@@ -53,6 +59,7 @@ export function buildCategoryListFilter(
 
 export type CategoryTableColumn =
   | 'name'
+  | 'parentName'
   | 'itemCount'
   | 'createdDate'
   | 'lastModifiedDate'
@@ -64,6 +71,11 @@ export const CATEGORY_TABLE_COLUMNS: TableColumnDefinition<CategoryTableColumn> 
   name: {
     label: 'Nume',
     value: 'name',
+    fieldType: 'string'
+  },
+  parentName: {
+    label: 'Categorie părinte',
+    value: 'parentName',
     fieldType: 'string'
   },
   itemCount: {

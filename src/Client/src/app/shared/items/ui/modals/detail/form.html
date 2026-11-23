@@ -85,7 +85,8 @@
           Categorie
         </nz-form-label>
         <nz-form-control [nzErrorTip]="categoryErrorTemplate">
-          <ske-category-dropdown [formField]="itemForm.category" />
+          <ske-category-dropdown [formField]="itemForm.category"
+                                 [leafOnly]="true" />
 
           <ng-template #categoryErrorTemplate>
             @if (itemForm.category().errors(); as errors) {

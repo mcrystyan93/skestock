@@ -212,4 +212,30 @@ public class ItemImportBatchHandlersTests
 
         result.Value.Files.Single().OriginalName.ShouldBe(file.OriginalName);
     }
+
+    [Test]
+    public async Task ResolveSuggestions_DoesNotMatchParentCategories()
+    {
+        await using var context = CreateContext();
+        var parent = new Category { Name = "Dairy" };
+        var leaf = new Category { Name = "Milk" };
+        context.Categories.AddRange(parent, leaf);
+        await context.SaveChangesAsync(CancellationToken.None);
+        leaf.ParentId = parent.Id;
+        await context.SaveChangesAsync(CancellationToken.None);
+        var json = System.Text.Json.JsonSerializer.Serialize(new ItemExtractionResult
+        {
+            Items =
+            [
+                new ExtractedItem { Name = "Cheese", CategoryName = "Dairy" },
+                new ExtractedItem { Name = "Semi-skimmed", CategoryName = "Milk" }
+            ]
+        });
+
+        var lines = await skestock.Application.Features.Items.ItemImportSuggestionResolver
+            .ResolveSuggestionsAsync(context, json, CancellationToken.None);
+
+        lines.Single(l => l.Name == "Cheese").MatchedCategory.ShouldBeNull();
+        lines.Single(l => l.Name == "Semi-skimmed").MatchedCategory.ShouldNotBeNull();
+    }
 }

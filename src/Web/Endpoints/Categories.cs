@@ -52,7 +52,7 @@ public class Categories : IEndpointGroup
     public static async Task<Results<Created<CategoryMutationDto>, ProblemHttpResult>> CreateCategory(
         ISender sender, CategoryRequests.CreateCategoryRequest request, CancellationToken cancellationToken)
     {
-        var command = new CreateCategoryCommand { Name = request.Name, Icon = request.Icon };
+        var command = new CreateCategoryCommand { Name = request.Name, ParentId = request.ParentId, Icon = request.Icon };
 
         var result = await sender.Send(command, cancellationToken);
 
@@ -64,7 +64,7 @@ public class Categories : IEndpointGroup
     public static async Task<Results<Ok<CategoryMutationDto>, ProblemHttpResult>> UpdateCategory(
         ISender sender, Guid id, CategoryRequests.UpdateCategoryRequest request, CancellationToken cancellationToken)
     {
-        var command = new UpdateCategoryCommand { Id = id, Name = request.Name, Icon = request.Icon };
+        var command = new UpdateCategoryCommand { Id = id, Name = request.Name, ParentId = request.ParentId, Icon = request.Icon };
 
         var result = await sender.Send(command, cancellationToken);
 

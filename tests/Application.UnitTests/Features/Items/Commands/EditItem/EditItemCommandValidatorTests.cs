@@ -213,4 +213,18 @@ public class EditItemCommandValidatorTests
         zeroResult.Errors.ShouldContain(e => e.PropertyName == nameof(EditItemCommand.ShelfLifeDays) && e.ErrorCode == ValidationErrorCodes.GreaterThan);
         negativeResult.Errors.ShouldContain(e => e.PropertyName == nameof(EditItemCommand.ShelfLifeDays) && e.ErrorCode == ValidationErrorCodes.GreaterThan);
     }
+
+    [Test]
+    public async Task ShouldHaveCategoryHasChildrenErrorWhenCategoryIsAParent()
+    {
+        var (context, category, item) = await CreateContextAsync();
+        await using var _ = context;
+        context.Categories.Add(new Category { Name = "Pens", ParentId = category.Id });
+        await context.SaveChangesAsync(CancellationToken.None);
+        var validator = new EditItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
+
+        var result = await validator.ValidateAsync(new EditItemCommand { Id = item.Id, Name = "Pencil", Unit = "unit", CategoryId = category.Id });
+
+        result.Errors.ShouldContain(e => e.PropertyName == nameof(EditItemCommand.CategoryId) && e.ErrorCode == ValidationErrorCodes.CategoryHasChildren);
+    }
 }

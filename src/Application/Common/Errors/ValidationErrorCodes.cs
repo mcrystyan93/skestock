@@ -34,6 +34,10 @@ public class ValidationErrorCodes
     public const string SelfReference = "validation.self_reference";
     /// <summary>Applying the requested change would create a circular reference (e.g. in a self-referencing hierarchy).</summary>
     public const string CircularReference = "validation.circular_reference";
+    /// <summary>An item was assigned to a category that has child categories (items belong to leaf categories only).</summary>
+    public const string CategoryHasChildren = "validation.category_has_children";
+    /// <summary>A category was made the parent of another while it already has items (items belong to leaf categories only).</summary>
+    public const string ParentCategoryHasItems = "validation.parent_category_has_items";
     /// <summary>A date range is invalid (e.g. StartDate is not strictly before EndDate).</summary>
     public const string InvalidDateRange = "validation.invalid_date_range";
 

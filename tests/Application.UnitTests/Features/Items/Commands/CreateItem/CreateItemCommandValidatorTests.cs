@@ -278,4 +278,18 @@ public class CreateItemCommandValidatorTests
 
         result.Errors.ShouldContain(e => e.PropertyName == nameof(CreateItemCommand.ShelfLifeDays) && e.ErrorCode == ValidationErrorCodes.GreaterThan);
     }
+
+    [Test]
+    public async Task ShouldHaveCategoryHasChildrenErrorWhenCategoryIsAParent()
+    {
+        var (context, category) = await CreateContextAsync();
+        await using var _ = context;
+        context.Categories.Add(new Category { Name = "Pens", ParentId = category.Id });
+        await context.SaveChangesAsync(CancellationToken.None);
+        var validator = new CreateItemCommandValidator(context, ItemImageTestSupport.Blobs(), ItemImageTestSupport.Thumbnails(), ItemImageTestSupport.User());
+
+        var result = await validator.ValidateAsync(new CreateItemCommand { Name = "Pencil", Unit = "unit", CategoryId = category.Id });
+
+        result.Errors.ShouldContain(e => e.PropertyName == nameof(CreateItemCommand.CategoryId) && e.ErrorCode == ValidationErrorCodes.CategoryHasChildren);
+    }
 }

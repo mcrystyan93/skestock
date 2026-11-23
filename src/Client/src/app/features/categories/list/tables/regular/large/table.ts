@@ -34,6 +34,7 @@ export class Table extends BaseTableWithFilter<CategoryDto, GetAllCategoriesRequ
   public readonly columns = CATEGORY_TABLE_COLUMNS;
   public readonly columnLayout = {
     name: { width: '300px' },
+    parentName: { width: '220px' },
     itemCount: { width: '110px' },
     createdDate: { width: '150px' },
     createdByName: { width: '180px' },

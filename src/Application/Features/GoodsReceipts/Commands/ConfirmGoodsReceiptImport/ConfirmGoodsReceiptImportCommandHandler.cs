@@ -213,6 +213,8 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
             : existingQuery.Where(c => upperNames.Contains(c.Name.Trim().ToUpper()));
         var existing = await existingQuery.ToListAsync(cancellationToken);
 
+        await EnsureNoParentCategoriesAsync(existing, cancellationToken);
+
         var byName = existing.ToDictionary(c => c.Name.Trim().ToLowerInvariant(), c => c);
 
         foreach (var name in names)
@@ -227,6 +229,30 @@ public class ConfirmGoodsReceiptImportCommandHandler(IApplicationDbContext dbCon
         }
 
         return byName;
+    }
+
+    // Items belong to leaf categories only: a name that matches a parent category must not receive new items.
+    private async Task EnsureNoParentCategoriesAsync(List<Category> categories, CancellationToken cancellationToken)
+    {
+        var ids = categories.Select(c => c.Id).ToList();
+        var parentIds = await dbContext.Categories
+            .AsNoTracking()
+            .Where(c => c.ParentId != null && ids.Contains(c.ParentId.Value))
+            .Select(c => c.ParentId!.Value)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        if (parentIds.Count == 0)
+            return;
+
+        var names = string.Join(", ", categories.Where(c => parentIds.Contains(c.Id)).Select(c => c.Name));
+        throw new Common.Exceptions.ValidationException([
+            new ValidationFailure(nameof(ConfirmGoodsReceiptImportCommand.Lines),
+                $"Items cannot be assigned to categories that have subcategories: {names}")
+            {
+                ErrorCode = ValidationErrorCodes.CategoryHasChildren
+            }
+        ]);
     }
 
     // De-dup key for a new item within one request: SKU when present (globally unique intent),
