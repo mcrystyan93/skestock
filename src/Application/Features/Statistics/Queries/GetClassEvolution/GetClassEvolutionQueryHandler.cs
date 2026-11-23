@@ -64,17 +64,19 @@ public class GetClassEvolutionQueryHandler(IApplicationDbContext dbContext)
             return Result.Ok(new ClassEvolutionDto());
 
         // First to last order, donation or expense; weeks in between are zero-filled.
-        var points = new List<ClassEvolutionPointDto>();
-        for (var week = weeks.Min(); week <= weeks.Max(); week = week.AddDays(7))
-        {
-            points.Add(new ClassEvolutionPointDto
+        var first = weeks.Min();
+        // Index-based so a week near DateOnly.MaxValue cannot overflow AddDays after the last point.
+        var weekCount = (weeks.Max().DayNumber - first.DayNumber) / 7 + 1;
+        var points = Enumerable.Range(0, weekCount)
+            .Select(i => first.AddDays(i * 7))
+            .Select(week => new ClassEvolutionPointDto
             {
                 WeekStart = week,
                 Orders = ordersByWeek.GetValueOrDefault(week),
                 Donations = Math.Round(donationsByWeek.GetValueOrDefault(week), 2),
                 Expenses = expensesByWeek.GetValueOrDefault(week)
-            });
-        }
+            })
+            .ToList();
 
         return Result.Ok(new ClassEvolutionDto { Points = points });
     }
