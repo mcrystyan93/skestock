@@ -5,7 +5,9 @@ using skestock.Application.Features.Statistics.Queries.GetClassGoodsReceiptCosts
 using skestock.Application.Features.Statistics.Queries.GetClassItemStockEvolution;
 using skestock.Application.Features.Statistics.Queries.GetClassLocationStockByItem;
 using skestock.Application.Features.Statistics.Queries.GetClassDailyConsumption;
+using skestock.Application.Features.Statistics.Queries.GetClassEvolution;
 using skestock.Application.Features.Statistics.Queries.GetClassStockByCategory;
+using skestock.Application.Features.Statistics.Queries.GetClassSummary;
 using skestock.Application.Features.Statistics.Queries.GetDailyConsumptionAverages;
 using skestock.Application.Features.Statistics.Queries.GetItemsPurchaseHistory;
 using skestock.Application.Features.Statistics.Queries.GetTopDonations;
@@ -25,6 +27,8 @@ public class Statistics : IEndpointGroup
         groupBuilder.MapGet(
             GetClassLocationStockByItem,
             "class/{classId}/location/{locationId}/stock-by-item");
+        groupBuilder.MapGet(GetClassSummary, "class/{classId}/summary");
+        groupBuilder.MapGet(GetClassEvolution, "class/{classId}/evolution");
         groupBuilder.MapGet(GetClassGoodsReceiptCosts, "class/{classId}/goods-receipt-costs");
         groupBuilder.MapGet(
             GetClassItemStockEvolution,
@@ -67,6 +71,33 @@ public class Statistics : IEndpointGroup
         var result = await sender.Send(
             new GetClassLocationStockByItemQuery { ClassId = classId, LocationId = locationId },
             cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Get a class's headline totals")]
+    [EndpointDescription("Returns order count and total, donated value, processed expenses and the " +
+                         "current value of the class's stock.")]
+    public static async Task<Results<Ok<ClassSummaryDto>, ProblemHttpResult>> GetClassSummary(
+        ISender sender,
+        Guid classId,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetClassSummaryQuery { ClassId = classId }, cancellationToken);
+
+        return result.ToOk();
+    }
+
+    [EndpointSummary("Get a class's evolution")]
+    [EndpointDescription("Returns order, donation and processed expense totals per week (starting Monday), " +
+                         "from the class's first order, donation or expense to its last. " +
+                         "Weeks without activity are zero.")]
+    public static async Task<Results<Ok<ClassEvolutionDto>, ProblemHttpResult>> GetClassEvolution(
+        ISender sender,
+        Guid classId,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetClassEvolutionQuery { ClassId = classId }, cancellationToken);
 
         return result.ToOk();
     }

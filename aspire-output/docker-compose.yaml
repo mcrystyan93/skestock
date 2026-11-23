@@ -1,7 +1,8 @@
 services:
   env-dashboard:
-    image: "mcr.microsoft.com/dotnet/nightly/aspire-dashboard:13.6"
+    image: "mcr.microsoft.com/aspire/nightly/dashboard:17.0"
     environment:
+      ASPIRE_DASHBOARD_TELEMETRY_OPTOUT: "true"
       ASPIRE_DASHBOARD_FORWARDEDHEADERS_ENABLED: "true"
     ports:
       - "127.0.0.1:18080:18888"
@@ -28,7 +29,7 @@ services:
     networks:
       - "aspire"
   skestock-cache:
-    image: "docker.io/library/redis:8.6"
+    image: "docker.io/library/redis:8.10"
     command:
       - "-c"
       - "redis-server --requirepass $$REDIS_PASSWORD --save 60 1"

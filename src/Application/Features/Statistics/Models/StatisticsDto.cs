@@ -38,6 +38,30 @@ public record ClassGoodsReceiptCostsDto
     public decimal AverageAmount { get; init; }
 }
 
+public record ClassSummaryDto
+{
+    public int OrderCount { get; init; }
+    public decimal TotalOrders { get; init; }
+    public int DonationCount { get; init; }
+    public decimal TotalDonations { get; init; }
+    public decimal TotalExpenses { get; init; }
+    public decimal CurrentStockValue { get; init; }
+}
+
+public record ClassEvolutionPointDto
+{
+    /// <summary>Monday of the week.</summary>
+    public DateOnly WeekStart { get; init; }
+    public decimal Orders { get; init; }
+    public decimal Donations { get; init; }
+    public decimal Expenses { get; init; }
+}
+
+public record ClassEvolutionDto
+{
+    public List<ClassEvolutionPointDto> Points { get; init; } = [];
+}
+
 public record ClassItemStockEvolutionPointDto
 {
     public DateOnly Date { get; init; }

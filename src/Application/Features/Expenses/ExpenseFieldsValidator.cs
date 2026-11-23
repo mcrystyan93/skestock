@@ -1,5 +1,6 @@
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
+using skestock.Domain.Entities.Expenses;
 
 namespace skestock.Application.Features.Expenses;
 
@@ -26,6 +27,10 @@ public abstract class ExpenseFieldsValidator<T> : AbstractValidator<T> where T :
         RuleFor(x => x.VatAmount).GreaterThanOrEqualTo(0).When(x => x.VatAmount.HasValue);
         RuleFor(x => x.VatAmount).LessThanOrEqualTo(x => x.TotalAmount!.Value)
             .When(x => x.VatAmount.HasValue && x.TotalAmount.HasValue);
+        RuleFor(x => x.ExpenseDate!.Value)
+            .InclusiveBetween(Expense.MinExpenseDate, Expense.MaxExpenseDate)
+            .When(x => x.ExpenseDate.HasValue)
+            .WithErrorCode(ValidationErrorCodes.Between);
         RuleFor(x => x.ExpenseCategoryId!.Value)
             .MustAsync((id, ct) => dbContext.ExpenseCategories.AsNoTracking().AnyAsync(c => c.Id == id, ct))
             .When(x => x.ExpenseCategoryId.HasValue)
