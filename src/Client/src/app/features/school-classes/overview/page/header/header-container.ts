@@ -3,6 +3,7 @@ import { SchoolClassOverviewStore } from '../../../services/school-class-overvie
 import { Header } from './header';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { AddGoodsReceiptModal } from '@ske/shared/goods-receipts';
+import { ADD_EXPENSE_MANUALLY, AddExpenseModal, ExpenseModal, ExpenseModalData } from '@ske/shared/expenses';
 import { Router } from '@angular/router';
 import { isNil } from 'lodash-es';
 import { OrderListDetailModal } from '@ske/shared/order-lists';
@@ -43,6 +44,37 @@ export class HeaderContainer {
       nzCentered: true,
       nzClosable: false
     });
+  }
+
+  public addExpense() {
+    const classId = this.classId();
+
+    if (isNil(classId) || classId.trim().length === 0) {
+      this._nzMessageService.error('Clasa nu este disponibilă pentru adăugarea cheltuielii.');
+      return;
+    }
+
+    const uploadRef = this._nzModalService.create({
+      nzContent: AddExpenseModal,
+      nzData: { classId },
+      nzWrapClassName: 'modal-100 modal-lg-75',
+      nzCentered: true,
+      nzClosable: false
+    });
+
+    // "Introdu manual" closes the upload modal and opens the form for a new expense.
+    uploadRef.afterClose
+      .pipe(
+        filter((result) => result === ADD_EXPENSE_MANUALLY),
+        takeUntilDestroyed(this._destroyRef)
+      )
+      .subscribe(() => this._nzModalService.create({
+        nzContent: ExpenseModal,
+        nzData: <ExpenseModalData>{ classId, expenseId: null, readOnly: false },
+        nzWrapClassName: 'modal-w-90 modal-w-md-75 modal-w-xl-50',
+        nzCentered: true,
+        nzMaskClosable: false
+      }));
   }
 
   public onAddProduct() {

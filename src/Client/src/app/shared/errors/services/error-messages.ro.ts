@@ -144,6 +144,10 @@ export const RO_ERROR_MESSAGES: Readonly<Record<string, RoMessageEntry>> = {
   [ErrorCodes.validation.selfReference]: 'O înregistrare nu se poate referi la ea însăși.',
   [ErrorCodes.validation.circularReference]:
     'Modificarea ar crea o referință circulară și nu este permisă.',
+  [ErrorCodes.validation.categoryHasChildren]:
+    'Articolele se pot adăuga doar în categorii fără subcategorii.',
+  [ErrorCodes.validation.parentCategoryHasItems]:
+    'Categoria părinte nu poate conține articole. Mută mai întâi articolele într-o subcategorie.',
   [ErrorCodes.validation.invalidDateRange]:
     'Intervalul de date nu este valid: data de început trebuie să fie înainte de data de sfârșit.',
 

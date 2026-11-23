@@ -11,6 +11,7 @@ public class CategoryFilterConfiguration: IFilterConfiguration<Category>
     {
         ["id"] = new((Expression<Func<Category, Guid>>)(d => d.Id), typeof(Guid)),
         ["name"] = new((Expression<Func<Category, string>>)(d => d.Name), typeof(string)),
+        ["hasChildren"] = new((Expression<Func<Category, bool>>)(d => d.Children.Any()), typeof(bool)),
         ["createdDate"] = new((Expression<Func<Category, DateTimeOffset>>)(d => d.CreatedDate), typeof(DateTimeOffset)),
         ["lastModifiedDate"] = new((Expression<Func<Category, DateTimeOffset>>)(d => d.LastModifiedDate), typeof(DateTimeOffset))
     };

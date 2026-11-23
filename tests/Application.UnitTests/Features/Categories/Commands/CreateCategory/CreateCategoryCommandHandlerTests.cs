@@ -46,6 +46,8 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
     public DbSet<SchoolClass> SchoolClasses => Set<SchoolClass>();
     public DbSet<StockBatch> StockBatches => Set<StockBatch>();
     public DbSet<StockTransaction> StockTransactions => Set<StockTransaction>();
+    public DbSet<skestock.Domain.Entities.Expenses.Expense> Expenses => Set<skestock.Domain.Entities.Expenses.Expense>();
+    public DbSet<skestock.Domain.Entities.Expenses.ExpenseCategory> ExpenseCategories => Set<skestock.Domain.Entities.Expenses.ExpenseCategory>();
     public DbSet<GoodsReceipt> GoodsReceipts => Set<GoodsReceipt>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();
@@ -87,11 +89,19 @@ public class CategoryTestDbContext(DbContextOptions<CategoryTestDbContext> optio
             b.HasOne(c => c.CreatedBy).WithMany().HasForeignKey(c => c.CreatedById);
             b.HasOne(c => c.LastModifiedBy).WithMany().HasForeignKey(c => c.LastModifiedById);
             b.OwnsOne(c => c.Icon);
-            b.Ignore(c => c.Items);
+        });
+
+        builder.Entity<Item>(b =>
+        {
+            b.HasOne(i => i.Category).WithMany(c => c.Items).HasForeignKey(i => i.CategoryId);
+            b.Ignore(i => i.Batches);
+            b.Ignore(i => i.Transactions);
+            b.Ignore(i => i.ClassBalances);
+            b.Ignore(i => i.CreatedBy);
+            b.Ignore(i => i.LastModifiedBy);
         });
 
         builder.Ignore<ClassBalance>();
-        builder.Ignore<Item>();
         builder.Ignore<Location>();
         builder.Ignore<SchoolClass>();
         builder.Ignore<StockBatch>();
@@ -167,5 +177,22 @@ public class CreateCategoryCommandHandlerTests
 
         first.Value.Id.ShouldNotBe(second.Value.Id);
         (await context.Categories.CountAsync(CancellationToken.None)).ShouldBe(2);
+    }
+
+    [Test]
+    public async Task Handle_WithParentId_PersistsParentAndReturnsParentName()
+    {
+        await using var context = CreateContext();
+        var parent = new Category { Name = "Dairy" };
+        context.Categories.Add(parent);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new CreateCategoryCommandHandler(context);
+        var result = await handler.Handle(new CreateCategoryCommand { Name = "Milk", ParentId = parent.Id }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ParentId.ShouldBe(parent.Id);
+        result.Value.ParentName.ShouldBe("Dairy");
+        (await context.Categories.SingleAsync(c => c.Id == result.Value.Id)).ParentId.ShouldBe(parent.Id);
     }
 }

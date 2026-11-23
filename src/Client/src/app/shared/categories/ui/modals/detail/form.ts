@@ -1,9 +1,10 @@
-import {Component, input, linkedSignal} from '@angular/core';
-import {CategoryDto} from '@ske/models';
+import {Component, forwardRef, input, linkedSignal} from '@angular/core';
+import {CategoryDropdownValue, CategoryDto} from '@ske/models';
 import {form, FormField, maxLength, required, submit} from '@angular/forms/signals';
 import {NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormLabelComponent} from 'ng-zorro-antd/form';
 import {SkeletonInputLoaderDirective} from '@ske/shared/loader';
 import {NzInputDirective, NzInputWrapperComponent} from 'ng-zorro-antd/input';
+import {CategoryDropdown} from '../../dropdown/category-dropdown';
 import {IconPicker, type IconPickerValue} from '@ske/shared/icons';
 
 @Component({
@@ -16,7 +17,9 @@ import {IconPicker, type IconPickerValue} from '@ske/shared/icons';
     NzInputWrapperComponent,
     FormField,
     NzInputDirective,
-    IconPicker
+    IconPicker,
+    // The dropdown opens CategoryDetailModal, which contains this form: break the import cycle.
+    forwardRef(() => CategoryDropdown)
   ],
   selector: 'ske-form',
   styles: ``,
@@ -31,6 +34,7 @@ export class Form {
     computation: (category) => (<CategoryFormModel>{
       id: category.id ?? null,
       name: category.name ?? '',
+      parent: category.parentId ? { id: category.parentId, name: category.parentName ?? '' } : null,
       icon: category.icon ?? null
     })
   });
@@ -57,6 +61,7 @@ export class Form {
 export type CategoryFormModel = {
   id: string | null;
   name: string;
+  parent: CategoryDropdownValue;
   icon: IconPickerValue | null;
 };
 export type CategoryFormSubmit = {

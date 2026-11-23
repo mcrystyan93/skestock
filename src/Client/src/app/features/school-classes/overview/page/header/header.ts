@@ -68,6 +68,7 @@ export class Header {
   public selectedTabIndex = model<number>(0);
 
   public onAddGoodsReceipt = output<void>();
+  public onAddExpense = output<void>();
   public onOrderCreate = output<void>();
   public onAddStock = output<void>();
   public onStockCount = output<void>();
@@ -89,7 +90,8 @@ export class Header {
     {label: 'Statistici', compactLabel: 'Stat.'},
     {label: 'Departamente', compactLabel: 'Dept.'},
     {label: 'Invitații'},
-    {label: 'Fructe și desert', compactLabel: 'Fructe'}
+    {label: 'Fructe și desert', compactLabel: 'Fructe'},
+    {label: 'Cheltuieli'}
   ];
 
   public readonly isClosed = computed(() => this.schoolClass().status === ClassStatus.Closed);
@@ -123,6 +125,13 @@ export class Header {
           label: 'Șabloane mesaje',
           icon: 'icons:comment-dots',
           run: () => this.openTemplates()
+        };
+      case 8:
+        return {
+          text: 'Adaugă cheltuială',
+          label: 'Adaugă cheltuială',
+          icon: 'icons:plus',
+          run: () => this.onAddExpense.emit()
         };
       default:
         return null;

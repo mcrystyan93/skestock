@@ -21,3 +21,4 @@ export * from './order-list';
 export * from './supply-list';
 export * from './class-configuration';
 export * from './fruit-dessert';
+export * from './expense';

@@ -81,4 +81,34 @@ public class CreateCategoryCommandTests : TestBase
         after.Value.Data.Count().ShouldBe(1);
         after.Value.Data.Single().Name.ShouldBe(name);
     }
+
+    [Test]
+    public async Task Handle_WithParentId_PersistsParentAndReturnsParentName()
+    {
+        var parent = await TestApp.SendAsync(new CreateCategoryCommand { Name = $"{_prefix}-Parent" });
+
+        var result = await TestApp.SendAsync(new CreateCategoryCommand
+        {
+            Name = $"{_prefix}-Child",
+            ParentId = parent.Value.Id
+        });
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ParentId.ShouldBe(parent.Value.Id);
+        result.Value.ParentName.ShouldBe($"{_prefix}-Parent");
+        (await TestApp.FindAsync<Category>(result.Value.Id))!.ParentId.ShouldBe(parent.Value.Id);
+    }
+
+    [Test]
+    public async Task Handle_WithNonExistentParentId_ThrowsValidationException()
+    {
+        var act = async () => await TestApp.SendAsync(new CreateCategoryCommand
+        {
+            Name = $"{_prefix}-Orphan",
+            ParentId = Guid.NewGuid()
+        });
+
+        var exception = await act.ShouldThrowAsync<ValidationException>();
+        exception.Errors.ShouldContainKey(nameof(CreateCategoryCommand.ParentId));
+    }
 }

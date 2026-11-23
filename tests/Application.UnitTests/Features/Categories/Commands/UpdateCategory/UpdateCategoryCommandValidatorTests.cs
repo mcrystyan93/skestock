@@ -131,4 +131,84 @@ public class UpdateCategoryCommandValidatorTests
 
         result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.DuplicateName);
     }
+
+    [Test]
+    public async Task ShouldHaveSelfReferenceErrorWhenParentIdEqualsOwnId()
+    {
+        await using var context = CreateContext();
+        var category = new Category { Name = "Dairy" };
+        context.Categories.Add(category);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var validator = new UpdateCategoryCommandValidator(context);
+        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = category.Id, Name = "Dairy", ParentId = category.Id });
+
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.SelfReference);
+    }
+
+    [Test]
+    public async Task ShouldHaveInvalidReferenceErrorWhenParentDoesNotExist()
+    {
+        await using var context = CreateContext();
+        var category = new Category { Name = "Dairy" };
+        context.Categories.Add(category);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var validator = new UpdateCategoryCommandValidator(context);
+        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = category.Id, Name = "Dairy", ParentId = Guid.NewGuid() });
+
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.InvalidReference);
+    }
+
+    [Test]
+    public async Task ShouldHaveCircularReferenceErrorWhenParentIsADescendant()
+    {
+        // Hierarchy: A -> B -> C. Setting A's parent to C (its own grandchild) is circular.
+        await using var context = CreateContext();
+        var a = new Category { Name = "A" };
+        context.Categories.Add(a);
+        await context.SaveChangesAsync(CancellationToken.None);
+        var b = new Category { Name = "B", ParentId = a.Id };
+        context.Categories.Add(b);
+        await context.SaveChangesAsync(CancellationToken.None);
+        var c = new Category { Name = "C", ParentId = b.Id };
+        context.Categories.Add(c);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var validator = new UpdateCategoryCommandValidator(context);
+        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = a.Id, Name = "A", ParentId = c.Id });
+
+        result.Errors.ShouldContain(e => e.ErrorCode == ValidationErrorCodes.CircularReference);
+    }
+
+    [Test]
+    public async Task ShouldNotHaveErrorWhenParentIsUnrelated()
+    {
+        await using var context = CreateContext();
+        var a = new Category { Name = "A" };
+        var unrelated = new Category { Name = "Unrelated" };
+        context.Categories.AddRange(a, unrelated);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var validator = new UpdateCategoryCommandValidator(context);
+        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = a.Id, Name = "A", ParentId = unrelated.Id });
+
+        result.IsValid.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldHaveParentCategoryHasItemsErrorWhenParentAlreadyHasItems()
+    {
+        await using var context = CreateContext();
+        var parent = new Category { Name = "Dairy" };
+        context.Categories.Add(parent);
+        await context.SaveChangesAsync(CancellationToken.None);
+        context.Items.Add(new skestock.Domain.Entities.Items.Item { Name = "Cheese", Unit = "kg", CategoryId = parent.Id });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var validator = new UpdateCategoryCommandValidator(context);
+        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = Guid.NewGuid(), Name = "Milk", ParentId = parent.Id });
+
+        result.Errors.ShouldContain(e => e.PropertyName == nameof(UpdateCategoryCommand.ParentId) && e.ErrorCode == ValidationErrorCodes.ParentCategoryHasItems);
+    }
 }

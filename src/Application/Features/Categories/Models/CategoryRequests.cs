@@ -13,12 +13,14 @@ public static class CategoryRequests
     public class CreateCategoryRequest
     {
         public string Name { get; init; } = string.Empty;
+        public Guid? ParentId { get; init; }
         public CategoryIconDto? Icon { get; init; }
     }
 
     public class UpdateCategoryRequest
     {
         public string Name { get; init; } = string.Empty;
+        public Guid? ParentId { get; init; }
         public CategoryIconDto? Icon { get; init; }
     }
 }

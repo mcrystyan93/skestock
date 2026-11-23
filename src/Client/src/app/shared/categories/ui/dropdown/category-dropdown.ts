@@ -14,6 +14,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { disabled, form, FormField, type FormValueControl } from '@angular/forms/signals';
 import {
   type CategoryDropdownValue,
+  type ColumnFilter,
   type CategoryDto,
   GetAllCategoriesRequest,
   PAGINATION_PAGE_SIZE
@@ -108,6 +109,8 @@ export class CategoryDropdown implements FormValueControl<CategoryDropdownValue>
   public readonly allowClear = input<boolean>(false);
   public readonly allowEdit = input<boolean>(true);
   public readonly allowCreate = input<boolean>(true);
+  /** Only categories without subcategories: items are assigned to leaf categories. */
+  public readonly leafOnly = input<boolean>(false);
   public readonly placeholder = input<string>('Selectați o categorie');
   public readonly createPrefill = input<Partial<CategoryDto> | null>(null);
   public readonly createButtonTemplate = input<TemplateRef<any> | null>(null);
@@ -209,10 +212,15 @@ export class CategoryDropdown implements FormValueControl<CategoryDropdownValue>
   }
 
   private buildFilter(partialFilter: Partial<GetAllCategoriesRequest>): GetAllCategoriesRequest {
+    const filters = (partialFilter.filters ?? untracked(() => this.store.filter().filters))
+      .filter((filter) => filter.field !== 'hasChildren');
+
     return {
       ...partialFilter,
       pageSize: partialFilter.pageSize ?? PAGINATION_PAGE_SIZE,
-      filters: partialFilter.filters ?? untracked(() => this.store.filter().filters),
+      filters: this.leafOnly()
+        ? [...filters, <ColumnFilter>{ field: 'hasChildren', operator: 'equals', value: false, fieldType: 'boolean' }]
+        : filters,
       sort: [
         {
           value: 'ascend',

@@ -23,7 +23,23 @@ public class CreateCategoryCommandValidator : AbstractValidator<CreateCategoryCo
                     .WithMessage("A category with this name already exists")
                     .WithErrorCode(ValidationErrorCodes.DuplicateName);
             });
+
+        RuleFor(x => x.ParentId)
+            .MustAsync((parentId, cancellationToken) => ParentExistsAsync(dbContext, parentId, cancellationToken))
+            .When(x => x.ParentId.HasValue)
+            .WithMessage("Parent category does not exist")
+            .WithErrorCode(ValidationErrorCodes.InvalidReference);
+
+        RuleFor(x => x.ParentId)
+            .MustAsync(async (parentId, cancellationToken) =>
+                !await dbContext.Items.AsNoTracking().AnyAsync(i => i.CategoryId == parentId, cancellationToken))
+            .When(x => x.ParentId.HasValue)
+            .WithMessage("A category that has items cannot be a parent")
+            .WithErrorCode(ValidationErrorCodes.ParentCategoryHasItems);
     }
+
+    private static Task<bool> ParentExistsAsync(IApplicationDbContext dbContext, Guid? parentId, CancellationToken cancellationToken) =>
+        dbContext.Categories.AsNoTracking().AnyAsync(c => c.Id == parentId, cancellationToken);
 
     private static async Task<bool> IsNameUniqueAsync(IApplicationDbContext dbContext, string name, CancellationToken cancellationToken)
     {

@@ -94,6 +94,7 @@ export class CategoryDetailModal {
   private mapSaveRequest(formData: CategoryFormModel): CreateCategoryRequest | UpdateCategoryRequest {
     return {
       name: formData.name,
+      parentId: formData.parent?.id ?? null,
       icon: formData.icon
     };
   }

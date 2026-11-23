@@ -27,6 +27,12 @@ public class CategoryConfiguration: IEntityTypeConfiguration<Category>
         builder.HasIndex(c => new { c.LastModifiedDate, c.Id }).HasDatabaseName("IX_Categories_LastModifiedDate_Id");
         builder.HasIndex(c => new { c.Name, c.Id }).HasDatabaseName("IX_Categories_Name_Id");
         
+        // Self-referencing hierarchy - SQL Server does not allow cascade delete here (would create a cycle).
+        builder.HasOne(c => c.Parent)
+            .WithMany(c => c.Children)
+            .HasForeignKey(c => c.ParentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasOne(u => u.CreatedBy)
             .WithMany()
             .HasForeignKey(u => u.CreatedById)

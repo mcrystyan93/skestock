@@ -38,4 +38,11 @@ public sealed class QueueMessageDispositionPolicyTests
                 QueueMessageDispositionPolicy.MaxDequeueCount)
             .ShouldBe(QueueMessageDisposition.MoveToPoison);
     }
+
+    [Test]
+    public void IsFinalAttempt_IsTrueExactlyWhenARetryableFailureWouldBePoisoned()
+    {
+        QueueMessageDispositionPolicy.IsFinalAttempt(QueueMessageDispositionPolicy.MaxDequeueCount - 1).ShouldBeFalse();
+        QueueMessageDispositionPolicy.IsFinalAttempt(QueueMessageDispositionPolicy.MaxDequeueCount).ShouldBeTrue();
+    }
 }

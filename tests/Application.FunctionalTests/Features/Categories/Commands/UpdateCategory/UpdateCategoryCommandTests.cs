@@ -3,6 +3,7 @@ using skestock.Application.Features.Categories.Commands.CreateCategory;
 using skestock.Application.Features.Categories.Commands.UpdateCategory;
 using skestock.Application.Features.Categories.Models;
 using skestock.Application.Features.Categories.Queries.GetAllCategories;
+using skestock.Application.Features.Categories.Queries.GetCategoryById;
 using skestock.Domain.Entities;
 using skestock.Domain.Entities.Categories;
 
@@ -138,5 +139,44 @@ public class UpdateCategoryCommandTests : TestBase
         // return the stale cached page with the old name.
         var after = await TestApp.SendAsync(new GetAllCategoriesQuery { SearchTerm = _prefix });
         after.Value.Data.Single().Name.ShouldBe(newName);
+    }
+
+    [Test]
+    public async Task Handle_WithParent_PersistsParentAndGetByIdReturnsParentName()
+    {
+        var parent = await TestApp.SendAsync(new CreateCategoryCommand { Name = $"{_prefix}-Parent" });
+        var child = await TestApp.SendAsync(new CreateCategoryCommand { Name = $"{_prefix}-Child" });
+
+        var result = await TestApp.SendAsync(new UpdateCategoryCommand
+        {
+            Id = child.Value.Id,
+            Name = $"{_prefix}-Child",
+            ParentId = parent.Value.Id
+        });
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ParentName.ShouldBe($"{_prefix}-Parent");
+        (await TestApp.FindAsync<Category>(child.Value.Id))!.ParentId.ShouldBe(parent.Value.Id);
+
+        var fetched = await TestApp.SendAsync(new GetCategoryByIdQuery { Id = child.Value.Id });
+        fetched.Value.ParentId.ShouldBe(parent.Value.Id);
+        fetched.Value.ParentName.ShouldBe($"{_prefix}-Parent");
+    }
+
+    [Test]
+    public async Task Handle_WhenParentIsADescendant_ThrowsValidationException()
+    {
+        var a = await TestApp.SendAsync(new CreateCategoryCommand { Name = $"{_prefix}-A" });
+        var b = await TestApp.SendAsync(new CreateCategoryCommand { Name = $"{_prefix}-B", ParentId = a.Value.Id });
+
+        var act = async () => await TestApp.SendAsync(new UpdateCategoryCommand
+        {
+            Id = a.Value.Id,
+            Name = $"{_prefix}-A",
+            ParentId = b.Value.Id
+        });
+
+        var exception = await act.ShouldThrowAsync<ValidationException>();
+        exception.Errors.ShouldContainKey(nameof(UpdateCategoryCommand.ParentId));
     }
 }

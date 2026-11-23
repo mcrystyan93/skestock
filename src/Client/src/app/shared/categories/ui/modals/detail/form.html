@@ -26,6 +26,20 @@
     </nz-form-control>
   </nz-form-item>
 
+  <!--   parent   -->
+  <nz-form-item *skeletonInputLoader="loading()">
+    <nz-form-label>
+      Categorie părinte
+    </nz-form-label>
+    <nz-form-control>
+      <ske-category-dropdown [formField]="categoryForm.parent"
+                             [allowClear]="true"
+                             [allowCreate]="false"
+                             [allowEdit]="false"
+                             placeholder="Fără categorie părinte" />
+    </nz-form-control>
+  </nz-form-item>
+
   <nz-form-item *skeletonInputLoader="loading()">
     <nz-form-label>
       Pictogramă
