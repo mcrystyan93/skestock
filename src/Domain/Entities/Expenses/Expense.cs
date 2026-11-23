@@ -13,6 +13,9 @@ public class Expense : BaseAuditableEntity, IKeysetEntity
     /// <summary>Largest value the decimal(18,2) amount columns hold.</summary>
     public const decimal MaxAmount = 9_999_999_999_999_999.99m;
     public const int MaxDocumentNumberLength = 100;
+    // Keeps the class evolution chart (first to last entry) from spanning absurd ranges.
+    public static readonly DateOnly MinExpenseDate = new(2000, 1, 1);
+    public static readonly DateOnly MaxExpenseDate = new(2100, 12, 31);
 
     public Guid SchoolClassId { get; set; }
     public SchoolClass SchoolClass { get; set; } = null!;
@@ -92,7 +95,7 @@ public class Expense : BaseAuditableEntity, IKeysetEntity
         // AI output is untrusted: clamp to the column sizes so a long value can't fail the save and loop in the queue.
         SupplierName = supplierName?.Trim() is { Length: > MaxSupplierNameLength } s ? s[..MaxSupplierNameLength] : supplierName?.Trim();
         DocumentNumber = documentNumber?.Trim() is { Length: > MaxDocumentNumberLength } d ? d[..MaxDocumentNumberLength] : documentNumber?.Trim();
-        ExpenseDate = expenseDate;
+        ExpenseDate = ValidDateOrNull(expenseDate);
         Currency = currency?.Trim() is { Length: 3 } c ? c.ToUpperInvariant() : DefaultCurrency;
         TotalAmount = ValidAmountOrNull(totalAmount);
         VatAmount = ValidAmountOrNull(vatAmount);
@@ -102,6 +105,10 @@ public class Expense : BaseAuditableEntity, IKeysetEntity
 
         AddDomainEvent(new ExpenseProcessedEvent(Id, SchoolClassId));
     }
+
+    // A date outside the accepted range is dropped for the user to fill in, like an invalid amount.
+    private static DateOnly? ValidDateOrNull(DateOnly? date) =>
+        date >= MinExpenseDate && date <= MaxExpenseDate ? date : null;
 
     // An amount the column cannot hold (or a negative one) is dropped for the user to fill in, not saved.
     private static decimal? ValidAmountOrNull(decimal? amount) =>

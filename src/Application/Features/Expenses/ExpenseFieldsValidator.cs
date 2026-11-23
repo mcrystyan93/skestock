@@ -1,5 +1,6 @@
 using skestock.Application.Common.Errors;
 using skestock.Application.Common.Interfaces;
+using skestock.Domain.Entities.Expenses;
 
 namespace skestock.Application.Features.Expenses;
 
@@ -17,10 +18,6 @@ public interface IExpenseFields
 // Rules shared by the manual create and update commands.
 public abstract class ExpenseFieldsValidator<T> : AbstractValidator<T> where T : IExpenseFields
 {
-    // Keeps the class evolution chart (first to last entry) from spanning absurd ranges.
-    public static readonly DateOnly MinExpenseDate = new(2000, 1, 1);
-    public static readonly DateOnly MaxExpenseDate = new(2100, 12, 31);
-
     protected ExpenseFieldsValidator(IApplicationDbContext dbContext)
     {
         RuleFor(x => x.SupplierName).MaximumLength(300);
@@ -31,7 +28,7 @@ public abstract class ExpenseFieldsValidator<T> : AbstractValidator<T> where T :
         RuleFor(x => x.VatAmount).LessThanOrEqualTo(x => x.TotalAmount!.Value)
             .When(x => x.VatAmount.HasValue && x.TotalAmount.HasValue);
         RuleFor(x => x.ExpenseDate!.Value)
-            .InclusiveBetween(MinExpenseDate, MaxExpenseDate)
+            .InclusiveBetween(Expense.MinExpenseDate, Expense.MaxExpenseDate)
             .When(x => x.ExpenseDate.HasValue)
             .WithErrorCode(ValidationErrorCodes.Between);
         RuleFor(x => x.ExpenseCategoryId!.Value)
