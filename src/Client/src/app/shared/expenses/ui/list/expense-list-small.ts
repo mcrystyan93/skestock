@@ -9,6 +9,7 @@ import { NzSkeletonComponent } from 'ng-zorro-antd/skeleton';
 import { NzSpinComponent } from 'ng-zorro-antd/spin';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+import { StopClick } from '@ske/shared/directives';
 import { BaseList } from '@ske/shared/tables';
 import {
   EXPENSE_SOURCE_LABELS,
@@ -32,7 +33,8 @@ import {
     CdkVirtualForOf,
     CdkVirtualScrollViewport,
     DatePipe,
-    DecimalPipe
+    DecimalPipe,
+    StopClick
   ],
   selector: 'ske-expense-list-small',
   templateUrl: './expense-list-small.html',

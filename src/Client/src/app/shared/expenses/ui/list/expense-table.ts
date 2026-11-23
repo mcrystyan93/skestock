@@ -5,6 +5,7 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzBadgeComponent } from 'ng-zorro-antd/badge';
 import { NzPopconfirmDirective } from 'ng-zorro-antd/popconfirm';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+import { StopClick } from '@ske/shared/directives';
 import { BaseTableWithFilter } from '@ske/shared/tables';
 import {
   EXPENSE_SOURCE_LABELS,
@@ -22,7 +23,8 @@ import {
     NzPopconfirmDirective,
     NzTypographyComponent,
     DatePipe,
-    DecimalPipe
+    DecimalPipe,
+    StopClick
   ],
   selector: 'ske-expense-table',
   templateUrl: './expense-table.html',

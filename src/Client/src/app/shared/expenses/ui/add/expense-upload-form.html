@@ -1,4 +1,6 @@
-<p class="mb-2 text-sm text-gray-500">
+<p nz-typography
+   nzType="secondary"
+   class="mb-2! text-sm">
   Încarcă un bon sau o factură (poză sau PDF). Documentul este citit automat, iar cheltuiala apare cu starea „În procesare”.
 </p>
 
@@ -11,12 +13,18 @@
                [nzFormat]="format" />
 
   @if (currentFileName(); as currentFileName) {
-    <p class="mt-2 text-sm text-gray-500">Se încarcă {{ currentFileName }}</p>
+    <p nz-typography
+       nzType="secondary"
+       class="mt-2 mb-0! text-sm">Se încarcă {{ currentFileName }}</p>
   }
 
   @if (failedFileNames().length > 0) {
-    <p class="mt-2 text-sm text-red-500">Fișiere ce nu au putut fi încărcate:</p>
-    <ul class="text-sm text-red-500">
+    <p nz-typography
+       nzType="danger"
+       class="mt-2 mb-0! text-sm">Fișiere ce nu au putut fi încărcate:</p>
+    <ul nz-typography
+        nzType="danger"
+        class="text-sm">
       @for (name of failedFileNames(); track name) {
         <li>{{ name }}</li>
       }

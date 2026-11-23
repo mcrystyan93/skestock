@@ -4,6 +4,7 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { NzBadgeComponent } from 'ng-zorro-antd/badge';
 import { NzAlertComponent } from 'ng-zorro-antd/alert';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { ErrorAlert } from '@ske/shared/errors';
 import { FileStorageState } from '@ske/shared/storage';
 import { EXPENSE_SOURCE_LABELS, EXPENSE_STATUS_COLORS, EXPENSE_STATUS_LABELS } from '@ske/models';
@@ -26,6 +27,7 @@ export type ExpenseModalData = {
     NzSpaceItemDirective,
     NzBadgeComponent,
     NzAlertComponent,
+    NzTypographyComponent,
     ExpenseForm,
     ErrorAlert
   ],

@@ -1,10 +1,11 @@
 import { Component, input, output } from '@angular/core';
 import { NzProgressComponent, NzProgressStatusType } from 'ng-zorro-antd/progress';
 import { NzUploadFile } from 'ng-zorro-antd/upload';
+import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { FileUpload } from '@ske/shared/storage';
 
 @Component({
-  imports: [NzProgressComponent, FileUpload],
+  imports: [NzProgressComponent, NzTypographyComponent, FileUpload],
   selector: 'ske-expense-upload-form',
   templateUrl: './expense-upload-form.html'
 })

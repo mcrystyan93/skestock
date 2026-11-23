@@ -44,7 +44,7 @@
           }
         </div>
         <div class="mt-1 flex min-w-0 items-center justify-between gap-2"
-             (click)="$event.stopPropagation()">
+             skeStopClick>
           <span class="shrink-0">
             @if (expense.totalAmount !== null && expense.totalAmount !== undefined) {
               {{ expense.totalAmount | number: '1.2-2' }} {{ expense.currency }}
