@@ -16,7 +16,7 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261123123132_AddExpenses";
+    public override string LastMigrationId => "20261123132319_AddExpenses";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -690,26 +690,16 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
 
                 b.HasIndex("CreatedById");
 
+                b.HasIndex("ExpenseCategoryId");
+
                 b.HasIndex("FileMetadataId");
 
                 b.HasIndex("LastModifiedById");
 
                 b.HasIndex("UploadedByUserId");
 
-                b.HasIndex("ExpenseCategoryId", "ExpenseDate")
-                    .HasDatabaseName("IX_Expenses_Category_ExpenseDate");
-
-                b.HasIndex("SupplierName", "ExpenseDate")
-                    .HasDatabaseName("IX_Expenses_Supplier_ExpenseDate");
-
                 b.HasIndex("SchoolClassId", "CreatedDate", "Id")
                     .HasDatabaseName("IX_Expenses_Class_CreatedDate_Id");
-
-                b.HasIndex("SchoolClassId", "ExpenseDate", "Id")
-                    .HasDatabaseName("IX_Expenses_Class_ExpenseDate_Id");
-
-                b.HasIndex("SchoolClassId", "Status", "CreatedDate", "Id")
-                    .HasDatabaseName("IX_Expenses_Class_Status_CreatedDate_Id");
 
                 b.ToTable("Expenses");
 

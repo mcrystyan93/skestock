@@ -12,8 +12,8 @@ using skestock.Infrastructure.Data;
 namespace skestock.Infrastructure.Data.Migrations;
 
 [DbContext(typeof(ApplicationDbContext))]
-[Migration("20261123123132_AddExpenses")]
-partial class _20261123123132_AddExpenses
+[Migration("20261123132319_AddExpenses")]
+partial class _20261123132319_AddExpenses
 {
     /// <inheritdoc />
     protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -688,26 +688,16 @@ partial class _20261123123132_AddExpenses
 
                 b.HasIndex("CreatedById");
 
+                b.HasIndex("ExpenseCategoryId");
+
                 b.HasIndex("FileMetadataId");
 
                 b.HasIndex("LastModifiedById");
 
                 b.HasIndex("UploadedByUserId");
 
-                b.HasIndex("ExpenseCategoryId", "ExpenseDate")
-                    .HasDatabaseName("IX_Expenses_Category_ExpenseDate");
-
-                b.HasIndex("SupplierName", "ExpenseDate")
-                    .HasDatabaseName("IX_Expenses_Supplier_ExpenseDate");
-
                 b.HasIndex("SchoolClassId", "CreatedDate", "Id")
                     .HasDatabaseName("IX_Expenses_Class_CreatedDate_Id");
-
-                b.HasIndex("SchoolClassId", "ExpenseDate", "Id")
-                    .HasDatabaseName("IX_Expenses_Class_ExpenseDate_Id");
-
-                b.HasIndex("SchoolClassId", "Status", "CreatedDate", "Id")
-                    .HasDatabaseName("IX_Expenses_Class_Status_CreatedDate_Id");
 
                 b.ToTable("Expenses");
 

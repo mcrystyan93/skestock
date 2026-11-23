@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace skestock.Infrastructure.Data.Migrations;
 
 /// <inheritdoc />
-public partial class _20261123123132_AddExpenses : Migration
+public partial class _20261123132319_AddExpenses : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
@@ -142,29 +142,19 @@ public partial class _20261123123132_AddExpenses : Migration
             unique: true);
 
         migrationBuilder.CreateIndex(
-            name: "IX_Expenses_Category_ExpenseDate",
-            table: "Expenses",
-            columns: new[] { "ExpenseCategoryId", "ExpenseDate" });
-
-        migrationBuilder.CreateIndex(
             name: "IX_Expenses_Class_CreatedDate_Id",
             table: "Expenses",
             columns: new[] { "SchoolClassId", "CreatedDate", "Id" });
 
         migrationBuilder.CreateIndex(
-            name: "IX_Expenses_Class_ExpenseDate_Id",
-            table: "Expenses",
-            columns: new[] { "SchoolClassId", "ExpenseDate", "Id" });
-
-        migrationBuilder.CreateIndex(
-            name: "IX_Expenses_Class_Status_CreatedDate_Id",
-            table: "Expenses",
-            columns: new[] { "SchoolClassId", "Status", "CreatedDate", "Id" });
-
-        migrationBuilder.CreateIndex(
             name: "IX_Expenses_CreatedById",
             table: "Expenses",
             column: "CreatedById");
+
+        migrationBuilder.CreateIndex(
+            name: "IX_Expenses_ExpenseCategoryId",
+            table: "Expenses",
+            column: "ExpenseCategoryId");
 
         migrationBuilder.CreateIndex(
             name: "IX_Expenses_FileMetadataId",
@@ -177,16 +167,11 @@ public partial class _20261123123132_AddExpenses : Migration
             column: "LastModifiedById");
 
         migrationBuilder.CreateIndex(
-            name: "IX_Expenses_Supplier_ExpenseDate",
-            table: "Expenses",
-            columns: new[] { "SupplierName", "ExpenseDate" });
-
-        migrationBuilder.CreateIndex(
             name: "IX_Expenses_UploadedByUserId",
             table: "Expenses",
             column: "UploadedByUserId");
 
-        // EF cannot set temporal history retention; see SetTemporalRetention.
+        // EF cannot set temporal history retention or the history index; see SetTemporalRetention.
         migrationBuilder.Sql("ALTER TABLE [dbo].[ExpenseCategories] SET (SYSTEM_VERSIONING = ON (HISTORY_RETENTION_PERIOD = 2 YEARS));");
         migrationBuilder.Sql("CREATE INDEX [IX_ExpenseCategoriesHistory_Id] ON [dbo].[ExpenseCategoriesHistory] ([Id], [PeriodStart] DESC);");
         migrationBuilder.Sql("ALTER TABLE [dbo].[Expenses] SET (SYSTEM_VERSIONING = ON (HISTORY_RETENTION_PERIOD = 2 YEARS));");

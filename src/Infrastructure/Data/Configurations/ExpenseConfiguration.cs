@@ -53,11 +53,7 @@ public class ExpenseConfiguration : IEntityTypeConfiguration<Expense>
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Listing (keyset by CreatedDate, Id) and the aggregation paths planned for statistics.
+        // Listing (keyset by CreatedDate, Id). Statistics indexes (date/category/supplier) come with that feature.
         builder.HasIndex(e => new { e.SchoolClassId, e.CreatedDate, e.Id }).HasDatabaseName("IX_Expenses_Class_CreatedDate_Id");
-        builder.HasIndex(e => new { e.SchoolClassId, e.Status, e.CreatedDate, e.Id }).HasDatabaseName("IX_Expenses_Class_Status_CreatedDate_Id");
-        builder.HasIndex(e => new { e.SchoolClassId, e.ExpenseDate, e.Id }).HasDatabaseName("IX_Expenses_Class_ExpenseDate_Id");
-        builder.HasIndex(e => new { e.ExpenseCategoryId, e.ExpenseDate }).HasDatabaseName("IX_Expenses_Category_ExpenseDate");
-        builder.HasIndex(e => new { e.SupplierName, e.ExpenseDate }).HasDatabaseName("IX_Expenses_Supplier_ExpenseDate");
     }
 }
