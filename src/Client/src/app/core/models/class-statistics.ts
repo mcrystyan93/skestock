@@ -82,3 +82,24 @@ export type TopPurchasesFilter = {
   categoryId: string | null;
   top?: number;
 };
+
+export type ClassSummaryDto = {
+  orderCount: number;
+  totalOrders: number;
+  donationCount: number;
+  totalDonations: number;
+  totalExpenses: number;
+  currentStockValue: number;
+};
+
+export type ClassEvolutionPointDto = {
+  /** Monday of the week, `yyyy-MM-dd`. */
+  weekStart: string;
+  orders: number;
+  donations: number;
+  expenses: number;
+};
+
+export type ClassEvolutionDto = {
+  points: ClassEvolutionPointDto[];
+};
