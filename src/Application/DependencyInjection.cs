@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using skestock.Application.Common.Behaviours;
@@ -19,6 +19,7 @@ public static class DependencyInjection
             builder.Services.AddScoped(typeof(IItemReferenceMerger), merger);
 
         builder.Services.AddSingleton<IMessageEnvelopeSerializer, MessageEnvelopeSerializer>();
+        builder.Services.AddScoped<MessageDeliveryContext>();
 
         builder.Services.AddMediator(options =>
         {

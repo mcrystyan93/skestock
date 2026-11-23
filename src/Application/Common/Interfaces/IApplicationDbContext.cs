@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using skestock.Domain.Entities;
 using skestock.Domain.Entities.Categories;
 using skestock.Domain.Entities.Congregations;
+using skestock.Domain.Entities.Expenses;
 using skestock.Domain.Entities.FruitDessert;
 using skestock.Domain.Entities.GoodsReceipts;
 using skestock.Domain.Entities.Items;
@@ -56,6 +57,8 @@ public interface IApplicationDbContext
 
     DbSet<StockBatch> StockBatches { get; }
     DbSet<StockTransaction> StockTransactions { get; }
+    DbSet<Expense> Expenses { get; }
+    DbSet<ExpenseCategory> ExpenseCategories { get; }
     DbSet<GoodsReceipt> GoodsReceipts { get; }
     DbSet<GoodsReceiptImport> GoodsReceiptImports { get; }
     DbSet<GoodsReceiptImportLine> GoodsReceiptImportLines { get; }

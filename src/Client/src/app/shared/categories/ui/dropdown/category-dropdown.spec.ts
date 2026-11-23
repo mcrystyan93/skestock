@@ -83,4 +83,27 @@ describe('CategoryDropdown', () => {
     expect(http.getById).not.toHaveBeenCalled();
     fixture.destroy();
   });
+
+  it('requests only categories without subcategories when leafOnly is set', async () => {
+    vi.useFakeTimers();
+    http.getAll.mockReturnValue(of({ data: [], hasNextPage: false, sort: [] }));
+
+    const fixture = TestBed.createComponent(CategoryDropdown);
+    fixture.componentRef.setInput('leafOnly', true);
+    fixture.componentRef.setInput('allowEdit', false);
+    fixture.componentRef.setInput('allowCreate', false);
+    fixture.detectChanges();
+
+    try {
+      fixture.componentInstance.onSearch('lapte');
+      await vi.advanceTimersByTimeAsync(300);
+
+      expect(http.getAll).toHaveBeenCalledWith(expect.objectContaining({
+        filters: [{ field: 'hasChildren', operator: 'equals', value: false, fieldType: 'boolean' }],
+      }));
+    } finally {
+      vi.useRealTimers();
+      fixture.destroy();
+    }
+  });
 });

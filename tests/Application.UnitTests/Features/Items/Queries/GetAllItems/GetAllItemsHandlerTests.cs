@@ -47,6 +47,8 @@ public class ItemTestDbContext(DbContextOptions<ItemTestDbContext> options)
     public DbSet<SchoolClass> SchoolClasses => Set<SchoolClass>();
     public DbSet<StockBatch> StockBatches => Set<StockBatch>();
     public DbSet<StockTransaction> StockTransactions => Set<StockTransaction>();
+    public DbSet<skestock.Domain.Entities.Expenses.Expense> Expenses => Set<skestock.Domain.Entities.Expenses.Expense>();
+    public DbSet<skestock.Domain.Entities.Expenses.ExpenseCategory> ExpenseCategories => Set<skestock.Domain.Entities.Expenses.ExpenseCategory>();
     public DbSet<GoodsReceipt> GoodsReceipts => Set<GoodsReceipt>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
     public DbSet<FileMetadata> FileMetadata => Set<FileMetadata>();

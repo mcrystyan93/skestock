@@ -241,4 +241,21 @@ public class CreateItemCommandTests : TestBase
         var exception = await act.ShouldThrowAsync<ValidationException>();
         exception.Errors.ShouldContainKey(nameof(CreateItemCommand.ShelfLifeDays));
     }
+
+    [Test]
+    public async Task Handle_WithParentCategory_ThrowsValidationException()
+    {
+        var parent = await SeedCategoryAsync();
+        await TestApp.AddAsync(new Category { Name = $"{_prefix}-Child", ParentId = parent.Id });
+
+        var act = async () => await TestApp.SendAsync(new CreateItemCommand
+        {
+            Name = $"{_prefix}-Pencil",
+            Unit = "box",
+            CategoryId = parent.Id
+        });
+
+        var exception = await act.ShouldThrowAsync<ValidationException>();
+        exception.Errors.ShouldContainKey(nameof(CreateItemCommand.CategoryId));
+    }
 }

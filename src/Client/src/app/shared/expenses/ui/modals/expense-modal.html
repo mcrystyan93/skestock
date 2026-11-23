@@ -1,0 +1,72 @@
+<div *nzModalTitle>{{ title() }}</div>
+
+@if (expense(); as expense) {
+  <div class="mb-3 flex flex-wrap items-center gap-3">
+    <nz-badge [nzStatus]="statusColor()"
+              [nzText]="statusLabel()"/>
+    <span nz-typography
+          nzType="secondary"
+          class="text-sm">{{ sourceLabel() }}</span>
+    @if (expense.fileMetadataId) {
+      <button nz-button
+              nzType="link"
+              type="button"
+              (click)="downloadFile()">
+        Descarcă documentul
+      </button>
+    }
+  </div>
+
+  @if (expense.status === 'failed') {
+    <nz-alert nzType="error"
+              class="mb-3"
+              nzShowIcon
+              [nzMessage]="'Documentul nu a putut fi citit'"
+              [nzDescription]="expense.errorMessage || 'Completează datele manual sau reîncearcă.'"/>
+  } @else if (expense.status === 'processing') {
+    <nz-alert nzType="info"
+              class="mb-3"
+              nzShowIcon
+              nzMessage="Documentul este în curs de procesare. Datele vor apărea automat."/>
+  }
+}
+
+<ske-expense-form [expense]="expense()"
+                  [locked]="locked()" />
+
+@if (store.expenseDetailProblemDetail(); as problemDetail) {
+  <ske-error-display [problemDetail]="problemDetail"
+                     [validationErrors]="store.expenseDetailValidationErrors()"/>
+}
+
+<div *nzModalFooter>
+  <nz-space>
+    <button nz-button
+            *nzSpaceItem
+            nzType="default"
+            type="button"
+            (click)="close()">
+      Închide
+    </button>
+    @if (canRetry()) {
+      <button nz-button
+              *nzSpaceItem
+              nzType="default"
+              type="button"
+              [nzLoading]="store.expenseDetailLoading()"
+              (click)="retry()">
+        Reîncearcă procesarea
+      </button>
+    }
+    @if (canSave()) {
+      <button nz-button
+              *nzSpaceItem
+              nzType="primary"
+              type="button"
+              [nzLoading]="store.expenseDetailLoading()"
+              (click)="save()">
+        Salvează
+      </button>
+    }
+  </nz-space>
+</div>

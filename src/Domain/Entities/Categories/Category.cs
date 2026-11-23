@@ -8,5 +8,9 @@ public class Category: BaseAuditableEntity, IKeysetEntity
 
     public CategoryIcon? Icon { get; set; }
 
+    public Guid? ParentId { get; set; }
+    public Category? Parent { get; set; }
+    public ICollection<Category> Children { get; set; } = new List<Category>();
+
     public ICollection<Item> Items { get; set; } = new List<Item>();
 }

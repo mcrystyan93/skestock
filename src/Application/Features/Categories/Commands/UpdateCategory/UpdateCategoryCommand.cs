@@ -7,6 +7,7 @@ public class UpdateCategoryCommand : IRequest<Result<CategoryMutationDto>>, ICac
 {
     public Guid Id { get; init; }
     public string Name { get; init; } = string.Empty;
+    public Guid? ParentId { get; init; }
     public CategoryIconDto? Icon { get; init; }
 
     // Invalidate every cached GetAllCategories page/filter/sort combination - an updated category

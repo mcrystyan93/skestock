@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
@@ -17,6 +17,7 @@ using skestock.Application.Documents.Interfaces;
 using skestock.Application.Documents.Models;
 using skestock.Application.Documents.Schemas;
 using skestock.Application.Features.FruitDessertPlans.Abstractions;
+using skestock.Application.Features.Expenses.Models;
 using skestock.Application.Features.GoodsReceipts.Models;
 using skestock.Application.Queues.Interfaces;
 using skestock.Application.Storage.Interfaces;
@@ -131,6 +132,9 @@ public static class DependencyInjection
         builder.Services
             .AddScoped<IExtractionSchemaFactory<GoodsReceiptExtractionResult>,
                 GoodsReceiptExtractionSchemaFactory>();
+        builder.Services
+            .AddScoped<IExtractionSchemaFactory<ExpenseExtractionResult>,
+                ExpenseExtractionSchemaFactory>();
         builder.Services
             .AddScoped<IExtractionSchemaFactory<CategoryExtractionResult>,
                 CategoryExtractionSchemaFactory>();

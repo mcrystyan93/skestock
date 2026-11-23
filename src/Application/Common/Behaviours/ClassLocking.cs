@@ -61,7 +61,7 @@ internal static class ClassLocking
     public static async Task<Guid?> ResolveClassIdAsync(
         this IApplicationDbContext dbContext, IRequiresOpenClass request, CancellationToken cancellationToken)
     {
-        if (new object?[] { request.ClassId, request.OrderListId, request.GoodsReceiptImportId }.Count(v => v is not null) > 1)
+        if (new object?[] { request.ClassId, request.OrderListId, request.GoodsReceiptImportId, request.ExpenseId }.Count(v => v is not null) > 1)
             throw new InvalidOperationException(
                 $"{request.GetType().Name} must implement exactly one {nameof(IRequiresOpenClass)} member.");
 
@@ -81,6 +81,11 @@ internal static class ClassLocking
             resolved = await dbContext.GoodsReceiptImports.AsNoTracking()
                 .Where(i => i.Id == importId)
                 .Select(i => (Guid?)i.ClassId)
+                .SingleOrDefaultAsync(cancellationToken);
+        else if (request.ExpenseId is { } expenseId)
+            resolved = await dbContext.Expenses.AsNoTracking()
+                .Where(e => e.Id == expenseId)
+                .Select(e => (Guid?)e.SchoolClassId)
                 .SingleOrDefaultAsync(cancellationToken);
 
         if (resolved is { } id)

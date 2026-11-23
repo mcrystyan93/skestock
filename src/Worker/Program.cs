@@ -65,6 +65,7 @@ builder.Services
     .ValidateOnStart();
 
 builder.Services.AddHostedService<GoodsReceiptImportQueueProcessingService>();
+builder.Services.AddHostedService<ExpenseQueueProcessingService>();
 builder.Services.AddHostedService<CategoryImportBatchQueueProcessingService>();
 builder.Services.AddHostedService<ItemImportQueueProcessingService>();
 builder.Services.AddHostedService<ItemImageThumbnailQueueProcessingService>();

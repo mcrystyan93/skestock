@@ -92,6 +92,8 @@ export const ErrorCodes = {
     invalidReference: 'validation.invalid_reference',
     selfReference: 'validation.self_reference',
     circularReference: 'validation.circular_reference',
+    categoryHasChildren: 'validation.category_has_children',
+    parentCategoryHasItems: 'validation.parent_category_has_items',
     invalidDateRange: 'validation.invalid_date_range',
 
     // Goods receipt codes

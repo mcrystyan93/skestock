@@ -17,6 +17,9 @@
     <th [nzWidth]="columnLayout.name.width">
       {{ columns.name.label }}
     </th>
+    <th [nzWidth]="columnLayout.parentName.width">
+      {{ columns.parentName.label }}
+    </th>
     <th [nzWidth]="columnLayout.itemCount.width"
         class="text-right!">
       {{ columns.itemCount.label }}
@@ -43,6 +46,12 @@
             {{ category.name }}
           </span>
         </div>
+      </td>
+      <td>
+        <span nz-typography
+              nzType="secondary"
+              class="mb-0! block truncate"
+              [attr.title]="category.parentName">{{ category.parentName || '-' }}</span>
       </td>
       <td class="text-right">
         <nz-tag>

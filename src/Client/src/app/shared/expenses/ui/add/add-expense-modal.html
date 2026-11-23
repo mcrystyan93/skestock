@@ -1,0 +1,43 @@
+<div *nzModalTitle>Adaugă cheltuială</div>
+
+<ske-expense-upload-form [showProgress]="showProgress()"
+                         [percent]="fileStorage.uploadPercent()"
+                         [status]="progressStatus()"
+                         [progressLabel]="progressLabel()"
+                         [currentFileName]="fileStorage.currentFileName()"
+                         [failedFileNames]="failedFileNames()"
+                         (onFileListChange)="onFileListChange($event)" />
+
+@if (store.expenseUploadProblemDetail(); as problemDetail) {
+  <ske-error-display [problemDetail]="problemDetail"/>
+}
+
+<div *nzModalFooter>
+  <nz-space>
+    <button nz-button
+            *nzSpaceItem
+            nzType="default"
+            type="button"
+            [disabled]="fileStorage.uploadLoading() || store.expenseUploadLoading()"
+            (click)="close()">
+      Închide
+    </button>
+    <button nz-button
+            *nzSpaceItem
+            nzType="default"
+            type="button"
+            [disabled]="fileStorage.uploadLoading() || store.expenseUploadLoading()"
+            (click)="addManually()">
+      Introdu manual
+    </button>
+    <button nz-button
+            *nzSpaceItem
+            nzType="primary"
+            type="button"
+            [disabled]="!hasFiles() || store.expenseUploadLoading()"
+            [nzLoading]="fileStorage.uploadLoading() || store.expenseUploadLoading()"
+            (click)="loadFiles()">
+      Încarcă fișierele
+    </button>
+  </nz-space>
+</div>

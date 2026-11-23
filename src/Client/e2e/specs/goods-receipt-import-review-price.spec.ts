@@ -29,7 +29,8 @@ test('review unit price keeps the Romanian decimal comma and thousands dot', asy
   });
 
   await page.goto('/school-classes/class-1?tab=3');
-  await page.getByRole('button', { name: 'Revizuieste importul' }).filter({ visible: true }).first().click();
+  // The desktop table says "Revizuieste importul", the mobile card "Revizuiește importul <file>".
+  await page.getByRole('button', { name: /Revizui\S* importul/ }).filter({ visible: true }).first().click();
 
   const price = page.locator('nz-input-number').filter({ hasText: 'RON' }).locator('input').filter({ visible: true }).last();
   await expect(price).toHaveValue('3,50');

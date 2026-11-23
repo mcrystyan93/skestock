@@ -46,6 +46,18 @@ describe('CategoryListSmall', () => {
     fixture.destroy();
   });
 
+  it('puts the parent category first in the subtitle', () => {
+    const fixture = createFixture();
+    const subtitle = (fixture.componentInstance as unknown as { subtitle(c: CategoryDto): string }).subtitle;
+
+    const withParent = subtitle.call(fixture.componentInstance, { itemCount: 2, parentName: 'Lactate' } as CategoryDto);
+    const root = subtitle.call(fixture.componentInstance, { itemCount: 1 } as CategoryDto);
+
+    expect(withParent.startsWith('Lactate · 2 articole')).toBe(true);
+    expect(root.startsWith('1 articol')).toBe(true);
+    fixture.destroy();
+  });
+
   it('emits onEdit on space without scrolling the page', () => {
     const fixture = createFixture();
     const emit = vi.spyOn(fixture.componentInstance.onEdit, 'emit');

@@ -1,0 +1,31 @@
+<ske-error-display [problemDetail]="store.expensesProblemDetail()"
+                   [validationErrors]="store.expensesValidationErrors()" />
+
+<div class="grow relative">
+  <ng-container *skeLayoutBreakpoint="'lg'; else smallScreenListTemplate">
+    <ske-expense-table [items]="store.expenses()"
+                       [filter]="store.filter()"
+                       [loading]="store.expensesLoading()"
+                       [hasNextPage]="store.hasNextPage()"
+                       [isLoadingMore]="store.isLoadingMore()"
+                       [readOnly]="readOnly()"
+                       (onLoadMore)="store.loadMore()"
+                       (onOpen)="open($event)"
+                       (onDownload)="download($event)"
+                       (onRetry)="store.retry($event.id)"
+                       (onRemove)="store.remove($event.id)" />
+  </ng-container>
+  <ng-template #smallScreenListTemplate>
+    <ske-expense-list-small [items]="store.expenses()"
+                            [filter]="store.filter()"
+                            [loading]="store.expensesLoading()"
+                            [hasNextPage]="store.hasNextPage()"
+                            [isLoadingMore]="store.isLoadingMore()"
+                            [readOnly]="readOnly()"
+                            (onLoadMore)="store.loadMore()"
+                            (onOpen)="open($event)"
+                            (onDownload)="download($event)"
+                            (onRetry)="store.retry($event.id)"
+                            (onRemove)="store.remove($event.id)" />
+  </ng-template>
+</div>

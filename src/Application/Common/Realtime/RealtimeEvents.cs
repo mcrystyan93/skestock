@@ -10,6 +10,9 @@ public static class RealtimeEvents
     public const string CategoryImportBatchCreated = "CategoryImportBatchCreated";
     public const string CategoryImportBatchProcessed = "CategoryImportBatchProcessed";
     public const string CategoryImportBatchConfirmed = "CategoryImportBatchConfirmed";
+    public const string ExpenseCreated = "ExpenseCreated";
+    public const string ExpenseProcessed = "ExpenseProcessed";
+    public const string ExpenseFailed = "ExpenseFailed";
     public const string GoodsReceiptImportCreated = "GoodsReceiptImportCreated";
     public const string GoodsReceiptImportProcessed = "GoodsReceiptImportProcessed";
     public const string GoodsReceiptImportConfirmed = "GoodsReceiptImportConfirmed";

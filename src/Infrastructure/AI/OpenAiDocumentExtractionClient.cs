@@ -27,12 +27,7 @@ public sealed class OpenAiDocumentExtractionClient(
 
         var content = new JsonArray
         {
-            new JsonObject
-            {
-                ["type"] = "input_file",
-                ["filename"] = "document",
-                ["file_data"] = $"data:{mimeType};base64,{base64}"
-            },
+            BuildFileContent("document", mimeType, base64),
             new JsonObject
             {
                 ["type"] = "input_text",
@@ -68,12 +63,7 @@ public sealed class OpenAiDocumentExtractionClient(
             var base64 = await ToBase64Async(file.Stream, cancellationToken);
             var filename = string.IsNullOrWhiteSpace(file.FileName) ? $"document-{i + 1}" : file.FileName;
 
-            content.Add(new JsonObject
-            {
-                ["type"] = "input_file",
-                ["filename"] = filename,
-                ["file_data"] = $"data:{file.MimeType};base64,{base64}"
-            });
+            content.Add(BuildFileContent(filename, file.MimeType, base64));
         }
 
         content.Add(new JsonObject
@@ -86,6 +76,21 @@ public sealed class OpenAiDocumentExtractionClient(
 
         return await SendAsync<TResult>(requestBody, cancellationToken);
     }
+
+    // The Responses API rejects images as input_file ("unsupported MIME type 'image/jpeg'"): they go in as input_image.
+    internal static JsonObject BuildFileContent(string filename, string mimeType, string base64) =>
+        mimeType.StartsWith("image/", StringComparison.OrdinalIgnoreCase)
+            ? new JsonObject
+            {
+                ["type"] = "input_image",
+                ["image_url"] = $"data:{mimeType};base64,{base64}"
+            }
+            : new JsonObject
+            {
+                ["type"] = "input_file",
+                ["filename"] = filename,
+                ["file_data"] = $"data:{mimeType};base64,{base64}"
+            };
 
     private IExtractionSchemaFactory<TResult> GetSchemaFactory<TResult>() where TResult : class =>
         serviceProvider.GetService<IExtractionSchemaFactory<TResult>>()

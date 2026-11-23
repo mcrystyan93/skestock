@@ -63,8 +63,9 @@ public static class ItemImportSuggestionResolver
         {
             var upperNames = categoryNames.Select(n => n.ToUpperInvariant()).ToList();
 
+            // Parent categories are never suggested: items belong to leaf categories only.
+            var matchedCategoriesQuery = dbContext.Categories.AsNoTracking().Where(c => !c.Children.Any());
             // Apply an accent-insensitive collation so the "already exists" flag ignores diacritics.
-            var matchedCategoriesQuery = dbContext.Categories.AsNoTracking().AsQueryable();
             matchedCategoriesQuery = TextSearchCollation.IsSqlServer(dbContext.Database)
                 ? matchedCategoriesQuery.Where(c => upperNames.Contains(
                     EF.Functions.Collate(c.Name.Trim(), TextSearchCollation.AccentInsensitive)))
