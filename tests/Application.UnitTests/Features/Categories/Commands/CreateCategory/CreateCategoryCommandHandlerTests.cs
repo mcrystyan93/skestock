@@ -170,4 +170,21 @@ public class CreateCategoryCommandHandlerTests
         first.Value.Id.ShouldNotBe(second.Value.Id);
         (await context.Categories.CountAsync(CancellationToken.None)).ShouldBe(2);
     }
+
+    [Test]
+    public async Task Handle_WithParentId_PersistsParentAndReturnsParentName()
+    {
+        await using var context = CreateContext();
+        var parent = new Category { Name = "Dairy" };
+        context.Categories.Add(parent);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var handler = new CreateCategoryCommandHandler(context);
+        var result = await handler.Handle(new CreateCategoryCommand { Name = "Milk", ParentId = parent.Id }, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ParentId.ShouldBe(parent.Id);
+        result.Value.ParentName.ShouldBe("Dairy");
+        (await context.Categories.SingleAsync(c => c.Id == result.Value.Id)).ParentId.ShouldBe(parent.Id);
+    }
 }

@@ -6,6 +6,7 @@ namespace skestock.Application.Features.Categories.Commands.CreateCategory;
 public class CreateCategoryCommand : IRequest<Result<CategoryMutationDto>>, ICacheInvalidation
 {
     public string Name { get; init; } = string.Empty;
+    public Guid? ParentId { get; init; }
     public CategoryIconDto? Icon { get; init; }
 
     // Invalidate every cached GetAllCategories page/filter/sort combination - a new category

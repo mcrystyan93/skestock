@@ -19,6 +19,7 @@ public class UpdateCategoryCommandHandler(IApplicationDbContext dbContext)
             return Result.Fail(new CategoryErrors.CategoryNotFound(request.Id));
 
         category.Name = request.Name.Trim();
+        category.ParentId = request.ParentId;
         category.Icon = request.Icon is null
             ? null
             : new CategoryIcon(request.Icon.Name, request.Icon.FileName, request.Icon.Path);
@@ -27,10 +28,21 @@ public class UpdateCategoryCommandHandler(IApplicationDbContext dbContext)
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
+        // Parent navigation isn't loaded on the tracked entity (only the FK is set), so its name is resolved here.
+        var parentName = request.ParentId.HasValue
+            ? await dbContext.Categories
+                .AsNoTracking()
+                .Where(c => c.Id == request.ParentId)
+                .Select(c => c.Name)
+                .SingleOrDefaultAsync(cancellationToken)
+            : null;
+
         return Result.Ok(new CategoryMutationDto
         {
             Id = category.Id,
             Name = category.Name,
+            ParentId = category.ParentId,
+            ParentName = parentName,
             Icon = category.Icon is null
                 ? null
                 : new CategoryIconDto

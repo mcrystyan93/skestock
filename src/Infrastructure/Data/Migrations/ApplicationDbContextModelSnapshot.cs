@@ -16,7 +16,7 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261123132319_AddExpenses";
+    public override string LastMigrationId => "20261123171634_AddCategoryParent";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -302,6 +302,9 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                     .HasMaxLength(100)
                     .HasColumnType("nvarchar(100)");
 
+                b.Property<Guid?>("ParentId")
+                    .HasColumnType("uniqueidentifier");
+
                 b.Property<DateTime>("PeriodEnd")
                     .ValueGeneratedOnAddOrUpdate()
                     .HasColumnType("datetime2")
@@ -317,6 +320,8 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.HasIndex("CreatedById");
 
                 b.HasIndex("LastModifiedById");
+
+                b.HasIndex("ParentId");
 
                 b.HasIndex("CreatedDate", "Id")
                     .HasDatabaseName("IX_Categories_CreatedDate_Id");
@@ -3052,6 +3057,11 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                     .HasPrincipalKey("IdentityId")
                     .OnDelete(DeleteBehavior.Restrict);
 
+                b.HasOne("skestock.Domain.Entities.Categories.Category", "Parent")
+                    .WithMany("Children")
+                    .HasForeignKey("ParentId")
+                    .OnDelete(DeleteBehavior.Restrict);
+
                 b.OwnsOne("skestock.Domain.Entities.Categories.CategoryIcon", "Icon", b1 =>
                     {
                         b1.Property<Guid>("CategoryId");
@@ -3085,6 +3095,8 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.Navigation("Icon");
 
                 b.Navigation("LastModifiedBy");
+
+                b.Navigation("Parent");
             });
 
         modelBuilder.Entity("skestock.Domain.Entities.Categories.CategoryImportBatch", b =>
@@ -4150,6 +4162,8 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
 
         modelBuilder.Entity("skestock.Domain.Entities.Categories.Category", b =>
             {
+                b.Navigation("Children");
+
                 b.Navigation("Items");
             });
 

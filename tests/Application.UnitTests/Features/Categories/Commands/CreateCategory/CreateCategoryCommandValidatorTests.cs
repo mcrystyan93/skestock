@@ -138,4 +138,29 @@ public class CreateCategoryCommandValidatorTests
 
         result.Errors.ShouldNotContain(e => e.ErrorCode == ValidationErrorCodes.DuplicateName);
     }
+
+    [Test]
+    public async Task ShouldNotHaveErrorWhenParentExists()
+    {
+        await using var context = CreateContext();
+        var parent = new Category { Name = "Dairy" };
+        context.Categories.Add(parent);
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var validator = new CreateCategoryCommandValidator(context);
+        var result = await validator.ValidateAsync(new CreateCategoryCommand { Name = "Milk", ParentId = parent.Id });
+
+        result.IsValid.ShouldBeTrue();
+    }
+
+    [Test]
+    public async Task ShouldHaveInvalidReferenceErrorWhenParentDoesNotExist()
+    {
+        await using var context = CreateContext();
+        var validator = new CreateCategoryCommandValidator(context);
+
+        var result = await validator.ValidateAsync(new CreateCategoryCommand { Name = "Milk", ParentId = Guid.NewGuid() });
+
+        result.Errors.ShouldContain(e => e.PropertyName == nameof(CreateCategoryCommand.ParentId) && e.ErrorCode == ValidationErrorCodes.InvalidReference);
+    }
 }
