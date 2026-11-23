@@ -10,6 +10,8 @@ public class Expense : BaseAuditableEntity, IKeysetEntity
 {
     public const string DefaultCurrency = "RON";
     public const int MaxSupplierNameLength = 300;
+    /// <summary>Largest value the decimal(18,2) amount columns hold.</summary>
+    public const decimal MaxAmount = 9_999_999_999_999_999.99m;
     public const int MaxDocumentNumberLength = 100;
 
     public Guid SchoolClassId { get; set; }
@@ -92,14 +94,18 @@ public class Expense : BaseAuditableEntity, IKeysetEntity
         DocumentNumber = documentNumber?.Trim() is { Length: > MaxDocumentNumberLength } d ? d[..MaxDocumentNumberLength] : documentNumber?.Trim();
         ExpenseDate = expenseDate;
         Currency = currency?.Trim() is { Length: 3 } c ? c.ToUpperInvariant() : DefaultCurrency;
-        TotalAmount = totalAmount;
-        VatAmount = vatAmount;
+        TotalAmount = ValidAmountOrNull(totalAmount);
+        VatAmount = ValidAmountOrNull(vatAmount);
         ErrorMessage = null;
         Status = ExpenseStatus.Processed;
         ProcessedAt = DateTimeOffset.UtcNow;
 
         AddDomainEvent(new ExpenseProcessedEvent(Id, SchoolClassId));
     }
+
+    // An amount the column cannot hold (or a negative one) is dropped for the user to fill in, not saved.
+    private static decimal? ValidAmountOrNull(decimal? amount) =>
+        amount is >= 0 and <= MaxAmount ? amount : null;
 
     public void MarkAsFailed(string errorMessage)
     {

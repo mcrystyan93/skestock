@@ -84,4 +84,30 @@ public class ExpenseTests
         expense.DocumentNumber!.Length.ShouldBe(Expense.MaxDocumentNumberLength);
         expense.Currency.ShouldBe("RON");
     }
+
+    [TestCase(-1)]
+    [TestCase(10_000_000_000_000_000)]
+    public void ApplyExtractionResult_DropsAmountsTheColumnsCannotHold(double amount)
+    {
+        var expense = NewDocumentExpense();
+
+        expense.ApplyExtractionResult("{}", ExpenseSource.Receipt, "ACME", "F-1",
+            null, "RON", (decimal)amount, (decimal)amount);
+
+        expense.Status.ShouldBe(ExpenseStatus.Processed);
+        expense.TotalAmount.ShouldBeNull();
+        expense.VatAmount.ShouldBeNull();
+    }
+
+    [Test]
+    public void ApplyExtractionResult_KeepsAmountsAtTheBoundaries()
+    {
+        var expense = NewDocumentExpense();
+
+        expense.ApplyExtractionResult("{}", ExpenseSource.Receipt, null, null,
+            null, "RON", Expense.MaxAmount, 0m);
+
+        expense.TotalAmount.ShouldBe(Expense.MaxAmount);
+        expense.VatAmount.ShouldBe(0m);
+    }
 }
