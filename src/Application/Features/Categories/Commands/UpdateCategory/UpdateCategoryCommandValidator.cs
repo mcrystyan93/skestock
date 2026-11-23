@@ -40,6 +40,13 @@ public class UpdateCategoryCommandValidator : AbstractValidator<UpdateCategoryCo
             .WithErrorCode(ValidationErrorCodes.SelfReference);
 
         RuleFor(x => x.ParentId)
+            .MustAsync(async (parentId, cancellationToken) =>
+                !await dbContext.Items.AsNoTracking().AnyAsync(i => i.CategoryId == parentId, cancellationToken))
+            .When(x => x.ParentId.HasValue)
+            .WithMessage("A category that has items cannot be a parent")
+            .WithErrorCode(ValidationErrorCodes.ParentCategoryHasItems);
+
+        RuleFor(x => x.ParentId)
             .MustAsync((parentId, cancellationToken) => ParentExistsAsync(dbContext, parentId, cancellationToken))
             .When(x => x.ParentId.HasValue)
             .WithMessage("Parent category does not exist")

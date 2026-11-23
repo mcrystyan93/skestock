@@ -312,4 +312,16 @@ public class GetAllCategoriesQueryTests : TestBase
         child.ParentName.ShouldBe($"{_prefix}-Parent");
         result.Value.Data.Single(c => c.Name.EndsWith("Parent")).ParentId.ShouldBeNull();
     }
+
+    [Test]
+    public async Task Handle_WithHasChildrenFalseFilter_ReturnsOnlyLeafCategories()
+    {
+        var parent = new Category { Name = $"{_prefix}-Parent" };
+        await TestApp.AddAsync(parent);
+        await TestApp.AddAsync(new Category { Name = $"{_prefix}-Child", ParentId = parent.Id });
+
+        var result = await TestApp.SendAsync(Query(_prefix, filters: [new ColumnFilter("hasChildren", FilterOperator.Equals, false)]));
+
+        result.Value.Data.Select(c => c.Name).ShouldBe([$"{_prefix}-Child"]);
+    }
 }

@@ -195,4 +195,20 @@ public class UpdateCategoryCommandValidatorTests
 
         result.IsValid.ShouldBeTrue();
     }
+
+    [Test]
+    public async Task ShouldHaveParentCategoryHasItemsErrorWhenParentAlreadyHasItems()
+    {
+        await using var context = CreateContext();
+        var parent = new Category { Name = "Dairy" };
+        context.Categories.Add(parent);
+        await context.SaveChangesAsync(CancellationToken.None);
+        context.Items.Add(new skestock.Domain.Entities.Items.Item { Name = "Cheese", Unit = "kg", CategoryId = parent.Id });
+        await context.SaveChangesAsync(CancellationToken.None);
+
+        var validator = new UpdateCategoryCommandValidator(context);
+        var result = await validator.ValidateAsync(new UpdateCategoryCommand { Id = Guid.NewGuid(), Name = "Milk", ParentId = parent.Id });
+
+        result.Errors.ShouldContain(e => e.PropertyName == nameof(UpdateCategoryCommand.ParentId) && e.ErrorCode == ValidationErrorCodes.ParentCategoryHasItems);
+    }
 }

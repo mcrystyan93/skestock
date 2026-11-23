@@ -82,6 +82,12 @@ public class EditItemCommandValidator : AbstractValidator<EditItemCommand>
                     .MustAsync((categoryId, cancellationToken) => CategoryExistsAsync(dbContext, categoryId, cancellationToken))
                     .WithMessage("Category does not exist")
                     .WithErrorCode(ValidationErrorCodes.InvalidReference);
+
+                RuleFor(x => x.CategoryId)
+                    .MustAsync(async (categoryId, cancellationToken) =>
+                        !await dbContext.Categories.AsNoTracking().AnyAsync(c => c.ParentId == categoryId, cancellationToken))
+                    .WithMessage("Items cannot be assigned to a category that has subcategories")
+                    .WithErrorCode(ValidationErrorCodes.CategoryHasChildren);
             });
     }
 

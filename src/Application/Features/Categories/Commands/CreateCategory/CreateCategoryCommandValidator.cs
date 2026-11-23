@@ -29,6 +29,13 @@ public class CreateCategoryCommandValidator : AbstractValidator<CreateCategoryCo
             .When(x => x.ParentId.HasValue)
             .WithMessage("Parent category does not exist")
             .WithErrorCode(ValidationErrorCodes.InvalidReference);
+
+        RuleFor(x => x.ParentId)
+            .MustAsync(async (parentId, cancellationToken) =>
+                !await dbContext.Items.AsNoTracking().AnyAsync(i => i.CategoryId == parentId, cancellationToken))
+            .When(x => x.ParentId.HasValue)
+            .WithMessage("A category that has items cannot be a parent")
+            .WithErrorCode(ValidationErrorCodes.ParentCategoryHasItems);
     }
 
     private static Task<bool> ParentExistsAsync(IApplicationDbContext dbContext, Guid? parentId, CancellationToken cancellationToken) =>
