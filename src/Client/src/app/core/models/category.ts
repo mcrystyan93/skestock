@@ -59,6 +59,7 @@ export function buildCategoryListFilter(
 
 export type CategoryTableColumn =
   | 'name'
+  | 'parentName'
   | 'itemCount'
   | 'createdDate'
   | 'lastModifiedDate'
@@ -70,6 +71,11 @@ export const CATEGORY_TABLE_COLUMNS: TableColumnDefinition<CategoryTableColumn> 
   name: {
     label: 'Nume',
     value: 'name',
+    fieldType: 'string'
+  },
+  parentName: {
+    label: 'Categorie părinte',
+    value: 'parentName',
     fieldType: 'string'
   },
   itemCount: {

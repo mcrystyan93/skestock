@@ -43,7 +43,7 @@ export class CategoryListSmall extends BaseList<CategoryDto, GetAllCategoriesReq
   protected subtitle(item: CategoryDto): string {
     const count = `${item.itemCount} ${item.itemCount === 1 ? 'articol' : 'articole'}`;
     const date = this._datePipe.transform(item.lastModifiedDate, 'short');
-    return date ? `${count} · ${date}` : count;
+    return [item.parentName, count, date].filter(Boolean).join(' · ');
   }
 
   protected onSpace(event: Event, item: CategoryDto): void {
