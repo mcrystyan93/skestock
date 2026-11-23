@@ -9,6 +9,8 @@ public static class QueueMessageDispositionPolicy
     /// <summary>Deliveries after which a still-failing message is given up on.</summary>
     public const int MaxDequeueCount = 5;
 
+    public static bool IsFinalAttempt(long dequeueCount) => dequeueCount >= MaxDequeueCount;
+
     /// <param name="dequeueCount">How many times Azure Queue has delivered this message, including now.</param>
     public static QueueMessageDisposition Decide(QueueMessageProcessingStatus status, long dequeueCount) =>
         status switch

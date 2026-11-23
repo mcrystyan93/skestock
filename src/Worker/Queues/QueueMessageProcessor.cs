@@ -27,6 +27,7 @@ public sealed class QueueMessageProcessor(
     IApplicationDbContext dbContext,
     ISender mediator,
     AmbientUser ambientUser,
+    MessageDeliveryContext deliveryContext,
     IMessageEnvelopeSerializer envelopeSerializer,
     ILogger<QueueMessageProcessor> logger,
     TimeProvider timeProvider) : IQueueMessageProcessor
@@ -59,6 +60,7 @@ public sealed class QueueMessageProcessor(
         activity?.SetTag(MessagingTelemetry.DestinationNameTag, queueName);
         activity?.SetTag(MessagingTelemetry.MessageIdTag, envelope.MessageId.ToString());
 
+        deliveryContext.IsFinalAttempt = QueueMessageDispositionPolicy.IsFinalAttempt(message.DequeueCount);
         var result = await ProcessEnvelopeAsync(envelope, cancellationToken);
 
         if (result.Status is QueueMessageProcessingStatus.PermanentFailure or QueueMessageProcessingStatus.RetryableFailure)

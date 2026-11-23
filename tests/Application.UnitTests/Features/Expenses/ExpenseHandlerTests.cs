@@ -13,6 +13,7 @@ using skestock.Application.Features.Expenses.Commands.ProcessExpenseDocument;
 using skestock.Application.Features.Expenses.Commands.RetryExpenseProcessing;
 using skestock.Application.Features.Expenses.Commands.UpdateExpense;
 using skestock.Application.Features.Expenses.Models;
+using skestock.Application.Queues;
 using skestock.Application.Storage.DTOs;
 using skestock.Application.Storage.Interfaces;
 using skestock.Domain.Entities.Expenses;
@@ -74,13 +75,14 @@ public class ExpenseHandlerTests
     }
 
     private static ProcessExpenseDocumentCommandHandler CreateProcessHandler(
-        ExpenseTestDbContext context, Mock<IStockDocumentExtractionService> extraction)
+        ExpenseTestDbContext context, Mock<IStockDocumentExtractionService> extraction, bool finalAttempt = false)
     {
         var blob = new Mock<IBlobStorageService>();
         blob.Setup(b => b.DownloadAsync(It.IsAny<DownloadDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MemoryStream());
         return new ProcessExpenseDocumentCommandHandler(
-            context, blob.Object, extraction.Object, NullLogger<ProcessExpenseDocumentCommandHandler>.Instance);
+            context, blob.Object, extraction.Object, new MessageDeliveryContext { IsFinalAttempt = finalAttempt },
+            NullLogger<ProcessExpenseDocumentCommandHandler>.Instance);
     }
 
     [Test]
@@ -166,6 +168,25 @@ public class ExpenseHandlerTests
             .Handle(new ProcessExpenseDocumentCommand(expense.Id), CancellationToken.None).AsTask());
 
         (await context.Expenses.SingleAsync()).Status.ShouldBe(ExpenseStatus.Processing);
+    }
+
+    [Test]
+    public async Task Process_WhenTransientFailureOnFinalAttempt_MarksFailedInsteadOfLeavingProcessing()
+    {
+        await using var context = CreateContext();
+        var expense = await SeedDocumentExpenseAsync(context);
+        var extraction = new Mock<IStockDocumentExtractionService>();
+        extraction.Setup(e => e.ExtractAsync<ExpenseExtractionResult>(
+                It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new TransientExtractionException("503"));
+
+        var result = await CreateProcessHandler(context, extraction, finalAttempt: true)
+            .Handle(new ProcessExpenseDocumentCommand(expense.Id), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        var saved = await context.Expenses.SingleAsync();
+        saved.Status.ShouldBe(ExpenseStatus.Failed);
+        saved.ErrorMessage.ShouldNotBeNullOrWhiteSpace();
     }
 
     [Test]

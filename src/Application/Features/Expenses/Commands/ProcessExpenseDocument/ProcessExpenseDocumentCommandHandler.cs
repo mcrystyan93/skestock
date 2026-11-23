@@ -4,6 +4,7 @@ using skestock.Application.Common.Exceptions;
 using skestock.Application.Common.Interfaces;
 using skestock.Application.Documents.Interfaces;
 using skestock.Application.Features.Expenses.Models;
+using skestock.Application.Queues;
 using skestock.Application.Storage.Interfaces;
 using skestock.Domain.Enums;
 
@@ -13,6 +14,7 @@ public class ProcessExpenseDocumentCommandHandler(
     IApplicationDbContext dbContext,
     IBlobStorageService blobStorageService,
     IStockDocumentExtractionService documentExtractionService,
+    MessageDeliveryContext deliveryContext,
     ILogger<ProcessExpenseDocumentCommandHandler> logger) : IRequestHandler<ProcessExpenseDocumentCommand, Result>
 {
     public async ValueTask<Result> Handle(ProcessExpenseDocumentCommand request, CancellationToken cancellationToken)
@@ -57,7 +59,14 @@ public class ProcessExpenseDocumentCommandHandler(
             logger.LogError(ex, "Unprocessable expense document: {ExpenseId}", expense.Id);
             expense.MarkAsFailed(ex.Message);
         }
-        // Transient failures propagate so the queue processor decides whether to retry.
+        catch (TransientExtractionException ex) when (deliveryContext.IsFinalAttempt)
+        {
+            // Retries are exhausted: the message is about to be poisoned, so surface the failure to the user
+            // instead of leaving the expense "In procesare" forever.
+            logger.LogError(ex, "Expense extraction kept failing, giving up: {ExpenseId}", expense.Id);
+            expense.MarkAsFailed("Serviciul de citire a documentelor nu a răspuns. Reîncearcă sau completează datele manual.");
+        }
+        // Earlier transient failures propagate so the queue processor retries.
 
         await dbContext.SaveChangesAsync(cancellationToken);
         return Result.Ok();

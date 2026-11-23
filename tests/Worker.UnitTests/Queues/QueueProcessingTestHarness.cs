@@ -79,6 +79,7 @@ internal sealed class QueueProcessingTestHarness : IDisposable
             AmbientUsers.Add(ambientUser);
             return ambientUser;
         });
+        services.AddScoped<MessageDeliveryContext>();
         services.AddScoped<IQueueMessageProcessor, QueueMessageProcessor>();
         services.AddSingleton(TimeProvider.System);
         _serviceProvider = services.BuildServiceProvider();
