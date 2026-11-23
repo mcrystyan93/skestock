@@ -3,7 +3,7 @@ import { patchState, signalStore, withComputed, withMethods, withProps, withStat
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { Events, withEventHandlers } from '@ngrx/signals/events';
 import { mapResponse } from '@ngrx/operators';
-import { EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
+import { concatMap, EMPTY, filter, map, pipe, switchMap, tap } from 'rxjs';
 import {
   buildExpenseListFilter,
   ExpenseDto,
@@ -117,7 +117,7 @@ export const ExpenseListStore = signalStore(
 
     const remove = rxMethod<string>(
       pipe(
-        switchMap((id) =>
+        concatMap((id) =>
           store.expensesHttp.delete(id).pipe(
             mapResponse({
               next: () => reload(),
@@ -130,7 +130,7 @@ export const ExpenseListStore = signalStore(
 
     const retry = rxMethod<string>(
       pipe(
-        switchMap((id) =>
+        concatMap((id) =>
           store.expensesHttp.retry(id).pipe(
             mapResponse({
               next: () => reload(),
