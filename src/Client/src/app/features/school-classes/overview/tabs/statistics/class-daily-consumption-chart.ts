@@ -4,9 +4,10 @@ import type { ApexAxisChartSeries, ApexChart, ApexOptions } from 'apexcharts';
 import { ChartComponent } from 'ng-apexcharts';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { ThemeService } from '@ske/theme';
+import { CHART_AXIS_CHROME, CHART_FONT, CHART_GRID, barGradient } from './chart-style';
 import { ConsumptionPeriod, summarizeConsumption } from './class-consumption-periods';
 
-const CHART_HEIGHT = 320;
+const CHART_HEIGHT = 360;
 const USAGE_COLOR = '#1f6c72';
 const AVERAGE_COLOR = '#d4380d';
 const QUANTITY_FORMATTER = new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 2 });
@@ -40,6 +41,8 @@ const PERIOD_ADVERBS: Record<ConsumptionPeriod, string> = {
                  [chart]="chart()"
                  [dataLabels]="{ enabled: false }"
                  [plotOptions]="plotOptions()"
+                 [fill]="fill"
+                 [grid]="grid"
                  [xaxis]="xaxis()"
                  [yaxis]="yaxis()"
                  [tooltip]="tooltip()"
@@ -66,6 +69,8 @@ export class ClassDailyConsumptionChart {
   private readonly _themeService = inject(ThemeService);
 
   public readonly colors = [USAGE_COLOR];
+  public readonly grid = CHART_GRID;
+  public readonly fill = barGradient(false);
 
   public readonly mode = computed(() =>
     this._themeService.currentTheme() === 'dark' ? 'dark' : 'light'
@@ -102,16 +107,18 @@ export class ClassDailyConsumptionChart {
   public readonly chart = computed<ApexChart>(() => ({
     type: 'bar',
     height: CHART_HEIGHT,
+    fontFamily: CHART_FONT,
     toolbar: { show: false },
     zoom: { enabled: false }
   }));
 
   public readonly plotOptions = computed<ApexOptions['plotOptions']>(() => ({
-    bar: { columnWidth: '80%' }
+    bar: { columnWidth: '70%', borderRadius: 4 }
   }));
 
   public readonly xaxis = computed<ApexOptions['xaxis']>(() => ({
     type: 'datetime',
+    ...CHART_AXIS_CHROME,
     labels: { datetimeUTC: true, format: this.period() === 'monthly' ? 'MMM yyyy' : 'dd MMM' }
   }));
 

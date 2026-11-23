@@ -5,6 +5,7 @@ import type {ApexAxisChartSeries, ApexChart, ApexOptions} from 'apexcharts';
 import {ChartComponent} from 'ng-apexcharts';
 import {NzTypographyComponent} from 'ng-zorro-antd/typography';
 import {ThemeService} from '@ske/theme';
+import { CHART_AXIS_CHROME, CHART_FONT, CHART_GRID, barGradient } from './chart-style';
 import {gridResponsiveMap, NzBreakpointService} from 'ng-zorro-antd/core/services';
 
 const MIN_CHART_HEIGHT = 360;
@@ -27,6 +28,7 @@ export type ClassStockByCategoryBar = { id: string; label: string };
       <apx-chart [series]="series()"
                  [chart]="chart()"
                  [plotOptions]="plotOptions()"
+                 [grid]="grid"
                  [dataLabels]="dataLabels()"
                  [xaxis]="xaxis()"
                  [yaxis]="yaxis()"
@@ -95,10 +97,13 @@ export class ClassStockByCategoryChart {
     return !!data?.labels.length && !!data.series.length;
   });
 
+  public readonly grid = CHART_GRID;
+
   public readonly series = computed<ApexAxisChartSeries>(() => this.data()?.series ?? []);
 
   public readonly chart = computed<ApexChart>(() => ({
     type: 'bar',
+    fontFamily: CHART_FONT,
     height: Math.max(MIN_CHART_HEIGHT, (this.data()?.labels.length ?? 0) * BAR_ROW_HEIGHT + CHART_CHROME_HEIGHT),
     stacked: true,
     toolbar: {show: false},
@@ -116,7 +121,9 @@ export class ClassStockByCategoryChart {
   public readonly plotOptions = computed<ApexOptions['plotOptions']>(() => ({
     bar: {
       horizontal: true,
-      borderRadius: 3,
+      borderRadius: 6,
+      borderRadiusApplication: 'end',
+      borderRadiusWhenStacked: 'last',
       barHeight: '65%'
     }
   }));
@@ -127,6 +134,7 @@ export class ClassStockByCategoryChart {
 
   public readonly xaxis = computed<ApexOptions['xaxis']>(() => ({
     categories: this.data()?.labels ?? [],
+    ...CHART_AXIS_CHROME,
     labels: {
       formatter: (value) => QUANTITY_FORMATTER.format(Number(value))
     }
