@@ -143,7 +143,7 @@ public class ExpenseHandlerTests
         var extraction = new Mock<IStockDocumentExtractionService>();
         extraction.Setup(e => e.ExtractAsync<ExpenseExtractionResult>(
                 It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new UnprocessableDocumentException("unreadable"));
+            .ThrowsAsync(new UnprocessableDocumentException("OpenAI rejected the request: " + new string('x', 5000)));
 
         var result = await CreateProcessHandler(context, extraction)
             .Handle(new ProcessExpenseDocumentCommand(expense.Id), CancellationToken.None);
@@ -151,7 +151,8 @@ public class ExpenseHandlerTests
         result.IsSuccess.ShouldBeTrue();
         var saved = await context.Expenses.SingleAsync();
         saved.Status.ShouldBe(ExpenseStatus.Failed);
-        saved.ErrorMessage.ShouldBe("unreadable");
+        // The provider's error body (here longer than the 2000-char column) must never reach ErrorMessage.
+        saved.ErrorMessage.ShouldBe("Documentul nu a putut fi citit. Completează datele manual sau reîncearcă.");
     }
 
     [Test]

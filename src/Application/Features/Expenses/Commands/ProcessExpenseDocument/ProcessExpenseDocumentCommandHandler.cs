@@ -56,8 +56,10 @@ public class ProcessExpenseDocumentCommandHandler(
         catch (UnprocessableDocumentException ex)
         {
             // Permanent failure: retrying the same input would fail identically.
+            // ex.Message can hold the provider's raw error body: keep it in the log, never in the user-visible
+            // (and 2000-char-limited) ErrorMessage.
             logger.LogError(ex, "Unprocessable expense document: {ExpenseId}", expense.Id);
-            expense.MarkAsFailed(ex.Message);
+            expense.MarkAsFailed("Documentul nu a putut fi citit. Completează datele manual sau reîncearcă.");
         }
         catch (TransientExtractionException ex) when (deliveryContext.IsFinalAttempt)
         {
