@@ -4,7 +4,9 @@ import {
   ClassDailyConsumptionDto,
   ClassDailyConsumptionFilter,
   ClassItemStockEvolutionDto,
+  ClassEvolutionDto,
   ClassStockEvolutionFilter,
+  ClassSummaryDto,
   ClassStockByCategoryChartDto,
   GetClassLocationStockRequest,
   PurchaseStatisticDto,
@@ -19,6 +21,16 @@ import { map } from 'rxjs';
 export class ClassStatisticsHttp {
   private readonly _httpClient = inject(HttpClient);
   private readonly _stockHttp = inject(StockHttp);
+
+  public getEvolution(classId: string) {
+    return this._httpClient.get<ClassEvolutionDto>(
+      `/api/statistics/class/${classId}/evolution`
+    );
+  }
+
+  public getSummary(classId: string) {
+    return this._httpClient.get<ClassSummaryDto>(`/api/statistics/class/${classId}/summary`);
+  }
 
   public getStockByCategoryAllLocations(classId: string) {
     return this._httpClient.get<ClassStockByCategoryChartDto>(

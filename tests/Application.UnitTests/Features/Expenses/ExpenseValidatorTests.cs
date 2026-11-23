@@ -42,6 +42,21 @@ public class ExpenseValidatorTests
         result.IsValid.ShouldBeFalse();
     }
 
+    [TestCase(1999, 12, 31, false)]
+    [TestCase(2101, 1, 1, false)]
+    [TestCase(1, 1, 1, false)]
+    [TestCase(2000, 1, 1, true)]
+    [TestCase(2026, 11, 23, true)]
+    public async Task ExpenseDate_MustBeWithinSaneRange(int year, int month, int day, bool valid)
+    {
+        var result = await CreateValidator().ValidateAsync(new UpdateExpenseCommand
+        {
+            Id = Guid.NewGuid(), Currency = "RON", ExpenseDate = new DateOnly(year, month, day)
+        });
+
+        result.IsValid.ShouldBe(valid);
+    }
+
     [Test]
     public async Task NegativeTotal_Fails()
     {

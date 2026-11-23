@@ -85,6 +85,20 @@ public class ExpenseTests
         expense.Currency.ShouldBe("RON");
     }
 
+    [TestCase(1999, 12, 31)]
+    [TestCase(2101, 1, 1)]
+    [TestCase(1, 1, 1)]
+    public void ApplyExtractionResult_DropsDatesOutsideTheAcceptedRange(int year, int month, int day)
+    {
+        var expense = NewDocumentExpense();
+
+        expense.ApplyExtractionResult("{}", ExpenseSource.Receipt, null, null,
+            new DateOnly(year, month, day), null, 1m, null);
+
+        expense.ExpenseDate.ShouldBeNull();
+        expense.Status.ShouldBe(ExpenseStatus.Processed);
+    }
+
     [TestCase(-1)]
     [TestCase(10_000_000_000_000_000)]
     public void ApplyExtractionResult_DropsAmountsTheColumnsCannotHold(double amount)
