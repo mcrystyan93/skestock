@@ -1,15 +1,17 @@
 import { Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import { NZ_MODAL_DATA, NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zorro-antd/modal';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
-import { NzProgressComponent, NzProgressStatusType } from 'ng-zorro-antd/progress';
+import { NzProgressStatusType } from 'ng-zorro-antd/progress';
 import { NzUploadFile } from 'ng-zorro-antd/upload';
 import { Events } from '@ngrx/signals/events';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { tap } from 'rxjs';
 import { ErrorAlert } from '@ske/shared/errors';
-import { fileStorageApiEvents, FileStorageState, FileUpload } from '@ske/shared/storage';
+import { fileStorageApiEvents, FileStorageState } from '@ske/shared/storage';
 import { ExpenseUploadStore } from '../../services/expense-upload.store';
+import { ExpenseUploadForm } from './expense-upload-form';
 
 export type AddExpenseModalData = {
   classId: string;
@@ -25,8 +27,7 @@ export const ADD_EXPENSE_MANUALLY = 'manual';
     NzButtonComponent,
     NzSpaceComponent,
     NzSpaceItemDirective,
-    NzProgressComponent,
-    FileUpload,
+    ExpenseUploadForm,
     ErrorAlert
   ],
   selector: 'ske-add-expense-modal',
@@ -41,6 +42,7 @@ export class AddExpenseModal {
   private readonly _nzModalRef = inject(NzModalRef);
   private readonly _events = inject(Events);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _nzMessageService = inject(NzMessageService);
 
   public readonly progressStatus = computed<NzProgressStatusType>(() => {
     if (this.fileStorage.hasUploadFailures())
@@ -52,8 +54,13 @@ export class AddExpenseModal {
     return 'active';
   });
 
-  public readonly progressFormat = (): string =>
-    `${this.fileStorage.completedCount()} din ${this.fileStorage.totalCount()}`;
+  public readonly progressLabel = computed(() =>
+    `${this.fileStorage.completedCount()} din ${this.fileStorage.totalCount()}`);
+
+  public readonly showProgress = computed(() =>
+    this.fileStorage.uploadLoading() || this.fileStorage.hasUploadFailures());
+
+  public readonly failedFileNames = computed(() => this.fileStorage.failedFiles().map((file) => file.name));
 
   private readonly _uploadSuccessRef = this._events.on(fileStorageApiEvents.uploadSuccess)
     .pipe(
@@ -70,8 +77,15 @@ export class AddExpenseModal {
   private readonly _closeAfterCreate = effect(() => {
     const expenses = this.store.expenses();
 
-    if (expenses.length > 0)
-      this._nzModalRef.close(expenses);
+    if (expenses.length === 0)
+      return;
+
+    if (this.store.failedCount() > 0)
+      this._nzMessageService.warning(this.store.failedCount() === 1
+        ? 'Un fișier nu a putut fi transformat în cheltuială.'
+        : `${this.store.failedCount()} fișiere nu au putut fi transformate în cheltuieli.`);
+
+    this._nzModalRef.close(expenses);
   });
 
   private readonly _fileList = signal<NzUploadFile[]>([]);

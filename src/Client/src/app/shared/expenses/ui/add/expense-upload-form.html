@@ -1,0 +1,25 @@
+<p class="mb-2 text-sm text-gray-500">
+  Încarcă un bon sau o factură (poză sau PDF). Documentul este citit automat, iar cheltuiala apare cu starea „În procesare”.
+</p>
+
+<ske-file-upload [multiple]="true"
+                 (onFileListChange)="onFileListChange.emit($event)" />
+
+@if (showProgress()) {
+  <nz-progress [nzPercent]="percent()"
+               [nzStatus]="status()"
+               [nzFormat]="format" />
+
+  @if (currentFileName(); as currentFileName) {
+    <p class="mt-2 text-sm text-gray-500">Se încarcă {{ currentFileName }}</p>
+  }
+
+  @if (failedFileNames().length > 0) {
+    <p class="mt-2 text-sm text-red-500">Fișiere ce nu au putut fi încărcate:</p>
+    <ul class="text-sm text-red-500">
+      @for (name of failedFileNames(); track name) {
+        <li>{{ name }}</li>
+      }
+    </ul>
+  }
+}

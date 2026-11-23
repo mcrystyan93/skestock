@@ -1,0 +1,108 @@
+@if (items().length === 0) {
+  @if (loading()) {
+    <div class="flex flex-col gap-2 px-4"
+         aria-busy="true"
+         aria-label="Se încarcă cheltuielile">
+      @for (placeholder of skeletonPlaceholders; track placeholder) {
+        <nz-card nzSize="small">
+          <nz-skeleton [nzActive]="true"
+                       [nzTitle]="{ width: '60%' }"
+                       [nzParagraph]="{ rows: 1, width: '40%' }" />
+        </nz-card>
+      }
+    </div>
+  } @else {
+    <nz-empty class="mt-8"
+              nzNotFoundContent="Nu există cheltuieli" />
+  }
+} @else {
+  <cdk-virtual-scroll-viewport [itemSize]="cardRowHeight"
+                               class="min-h-0 w-full grow [&_.cdk-virtual-scroll-content-wrapper]:w-full"
+                               (scroll)="onScroll($event)">
+    <div *cdkVirtualFor="let expense of items(); trackBy: trackById"
+         class="box-border px-4 pb-2"
+         [style.height.px]="cardRowHeight">
+      <nz-card nzSize="small"
+               nzHoverable
+               class="h-full cursor-pointer"
+               (click)="onOpen.emit(expense)">
+        <div class="flex min-w-0 items-center justify-between gap-2">
+          <strong nz-typography
+                  class="mb-0! min-w-0 truncate"
+                  [attr.title]="expense.supplierName || null">{{ expense.supplierName || '-' }}</strong>
+          <nz-tag class="me-0! shrink-0"
+                  [nzColor]="statusColors[expense.status]">
+            {{ statusLabels[expense.status] }}
+          </nz-tag>
+        </div>
+        <div nz-typography
+             nzType="secondary"
+             class="mb-0! mt-1 truncate">
+          {{ subtitle(expense) }}
+          @if (expense.expenseDate) {
+            · {{ expense.expenseDate | date: 'dd.MM.yyyy' }}
+          }
+        </div>
+        <div class="mt-1 flex min-w-0 items-center justify-between gap-2"
+             (click)="$event.stopPropagation()">
+          <span class="shrink-0">
+            @if (expense.totalAmount !== null && expense.totalAmount !== undefined) {
+              {{ expense.totalAmount | number: '1.2-2' }} {{ expense.currency }}
+            } @else {
+              -
+            }
+          </span>
+          <span class="flex shrink-0 items-center">
+            <button nz-button
+                    nzType="text"
+                    nzSize="small"
+                    type="button"
+                    (click)="onOpen.emit(expense)">
+              Detalii
+            </button>
+            @if (expense.fileMetadataId) {
+              <button nz-button
+                      nzType="text"
+                      nzSize="small"
+                      type="button"
+                      (click)="onDownload.emit(expense)">
+                Descarcă
+              </button>
+            }
+            @if (!readOnly()) {
+              @if (expense.status === 'failed' && expense.fileMetadataId) {
+                <button nz-button
+                        nzType="text"
+                        nzSize="small"
+                        type="button"
+                        (click)="onRetry.emit(expense)">
+                  Reîncearcă
+                </button>
+              }
+              <button nz-button
+                      nzType="text"
+                      nzSize="small"
+                      nzDanger
+                      type="button"
+                      nz-popconfirm
+                      nzPopconfirmTitle="Ștergi cheltuiala?"
+                      nzOkText="Șterge"
+                      nzCancelText="Anulează"
+                      (nzOnConfirm)="onRemove.emit(expense)">
+                Șterge
+              </button>
+            }
+          </span>
+        </div>
+      </nz-card>
+    </div>
+  </cdk-virtual-scroll-viewport>
+
+  @if (isLoadingMore()) {
+    <div class="flex justify-center py-2">
+      <nz-spin nzSimple
+               nzSize="small"
+               nzTip="Se încarcă..." />
+    </div>
+  }
+}

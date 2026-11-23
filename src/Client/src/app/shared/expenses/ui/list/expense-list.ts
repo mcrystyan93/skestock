@@ -1,39 +1,23 @@
 import { Component, effect, inject, input, untracked } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { NzBadgeComponent } from 'ng-zorro-antd/badge';
-import { NzPopconfirmDirective } from 'ng-zorro-antd/popconfirm';
 import { isNil } from 'lodash-es';
-import {
-  ColumnFilter,
-  EXPENSE_SOURCE_LABELS,
-  EXPENSE_STATUS_COLORS,
-  EXPENSE_STATUS_LABELS,
-  ExpenseDto
-} from '@ske/models';
+import { ColumnFilter, ExpenseDto } from '@ske/models';
 import { ErrorAlert } from '@ske/shared/errors';
 import { FileStorageState } from '@ske/shared/storage';
 import { injectClassReadOnly } from '@ske/shared/school-classes';
+import { LayoutBreakpoint } from '@ske/shared/directives';
 import { ExpenseListStore } from '../../services/expense-list.store';
 import { ExpenseModal, ExpenseModalData } from '../modals/expense-modal';
+import { ExpenseTable } from './expense-table';
+import { ExpenseListSmall } from './expense-list-small';
 
 @Component({
-  imports: [
-    NzTableModule,
-    NzButtonComponent,
-    NzBadgeComponent,
-    NzPopconfirmDirective,
-    DatePipe,
-    DecimalPipe,
-    ErrorAlert
-  ],
+  imports: [ErrorAlert, LayoutBreakpoint, ExpenseTable, ExpenseListSmall],
   selector: 'ske-expense-list',
   templateUrl: './expense-list.html',
   providers: [ExpenseListStore, FileStorageState, NzModalService],
   host: {
-    class: 'absolute block inset-0 overflow-auto pt-4'
+    class: 'absolute flex flex-col inset-0 pt-4'
   }
 })
 export class ExpenseList {
@@ -53,18 +37,6 @@ export class ExpenseList {
     const classFilter: ColumnFilter = { value: classId, operator: 'equals', fieldType: 'string', field: 'classId' };
     untracked(() => this.store.load({ filters: [classFilter] }));
   });
-
-  public statusLabel(expense: ExpenseDto): string {
-    return EXPENSE_STATUS_LABELS[expense.status];
-  }
-
-  public statusColor(expense: ExpenseDto): string {
-    return EXPENSE_STATUS_COLORS[expense.status];
-  }
-
-  public sourceLabel(expense: ExpenseDto): string {
-    return EXPENSE_SOURCE_LABELS[expense.source];
-  }
 
   public download(expense: ExpenseDto) {
     if (expense.fileMetadataId)

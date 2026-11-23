@@ -1,30 +1,12 @@
 <div *nzModalTitle>Adaugă cheltuială</div>
 
-<p class="mb-2 text-sm text-gray-500">
-  Încarcă un bon sau o factură (poză sau PDF). Documentul este citit automat, iar cheltuiala apare cu starea „În procesare”.
-</p>
-
-<ske-file-upload [multiple]="true"
-                 (onFileListChange)="onFileListChange($event)"/>
-
-@if (fileStorage.uploadLoading() || fileStorage.hasUploadFailures()) {
-  <nz-progress [nzPercent]="fileStorage.uploadPercent()"
-               [nzStatus]="progressStatus()"
-               [nzFormat]="progressFormat"/>
-
-  @if (fileStorage.currentFileName(); as currentFileName) {
-    <p class="mt-2 text-sm text-gray-500">Se încarcă {{ currentFileName }}</p>
-  }
-
-  @if (fileStorage.hasUploadFailures()) {
-    <p class="mt-2 text-sm text-red-500">Fișiere ce nu au putut fi încărcate:</p>
-    <ul class="text-sm text-red-500">
-      @for (failedFile of fileStorage.failedFiles(); track failedFile.name) {
-        <li>{{ failedFile.name }}</li>
-      }
-    </ul>
-  }
-}
+<ske-expense-upload-form [showProgress]="showProgress()"
+                         [percent]="fileStorage.uploadPercent()"
+                         [status]="progressStatus()"
+                         [progressLabel]="progressLabel()"
+                         [currentFileName]="fileStorage.currentFileName()"
+                         [failedFileNames]="failedFileNames()"
+                         (onFileListChange)="onFileListChange($event)" />
 
 @if (store.expenseUploadProblemDetail(); as problemDetail) {
   <ske-error-display [problemDetail]="problemDetail"/>

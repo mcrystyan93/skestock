@@ -1,8 +1,7 @@
 import { inject } from '@angular/core';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { mapResponse } from '@ngrx/operators';
 import { patchState, signalStore, withMethods, withProps, withState } from '@ngrx/signals';
-import { concatMap, from, pipe, tap, toArray } from 'rxjs';
+import { catchError, concatMap, from, map, of, pipe, tap, toArray } from 'rxjs';
 import { ExpenseDto, FileMetadataDto } from '@ske/models';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
@@ -15,11 +14,13 @@ export type ExpenseUploadFiles = {
 
 type ExpenseUploadState = {
   expenses: ExpenseDto[];
+  /** Files whose expense could not be created while others succeeded. */
+  failedCount: number;
 };
 
 // One uploaded file becomes one expense (created as "În procesare" and queued for AI extraction).
 export const ExpenseUploadStore = signalStore(
-  withState<ExpenseUploadState>({ expenses: [] }),
+  withState<ExpenseUploadState>({ expenses: [], failedCount: 0 }),
   withLoadingFeature('expenseUpload'),
   withProblemDetailsFeature('expenseUpload'),
   withProps(() => ({
@@ -31,23 +32,29 @@ export const ExpenseUploadStore = signalStore(
         tap(() => {
           store.clearExpenseUploadErrors();
           store.setExpenseUploadLoading();
-          patchState(store, { expenses: [] });
+          patchState(store, { expenses: [], failedCount: 0 });
         }),
         concatMap(({ files, classId }) =>
           from(files).pipe(
-            concatMap((file) => store.expensesHttp.createFromDocument({ classId, fileMetadataId: file.id })),
+            // A failing file must not discard the expenses already created: a retry would duplicate them.
+            concatMap((file) => store.expensesHttp.createFromDocument({ classId, fileMetadataId: file.id }).pipe(
+              map((expense) => ({ expense, error: null })),
+              catchError((error: unknown) => of({ expense: null, error }))
+            )),
             toArray()
           )
         ),
-        mapResponse({
-          next: (expenses) => {
-            patchState(store, { expenses });
-            store.setExpenseUploadLoaded();
-          },
-          error: (error) => {
-            store.handleExpenseUploadError(error);
-            store.setExpenseUploadLoaded();
+        tap((results) => {
+          const expenses = results.flatMap((result) => (result.expense ? [result.expense] : []));
+          const firstError = results.find((result) => result.error)?.error;
+
+          if (expenses.length === 0 && firstError) {
+            store.handleExpenseUploadError(firstError);
+          } else {
+            patchState(store, { expenses, failedCount: results.length - expenses.length });
           }
+
+          store.setExpenseUploadLoaded();
         })
       )
     );

@@ -11,6 +11,7 @@ import { ExpensesHttp } from './expenses.http';
 type ExpenseDetailState = {
   expense: ExpenseDto | null;
   saved: ExpenseDto | null;
+  retried: boolean;
 };
 
 export type SaveExpenseRequest = {
@@ -20,7 +21,7 @@ export type SaveExpenseRequest = {
 };
 
 export const ExpenseDetailStore = signalStore(
-  withState<ExpenseDetailState>({ expense: null, saved: null }),
+  withState<ExpenseDetailState>({ expense: null, saved: null, retried: false }),
   withLoadingFeature('expenseDetail'),
   withProblemDetailsFeature('expenseDetail'),
   withProps(() => ({
@@ -76,6 +77,29 @@ export const ExpenseDetailStore = signalStore(
       )
     );
 
-    return { load, save };
+    const retry = rxMethod<string>(
+      pipe(
+        tap(() => {
+          store.clearExpenseDetailErrors();
+          store.setExpenseDetailLoading();
+        }),
+        switchMap((id) =>
+          store.expensesHttp.retry(id).pipe(
+            mapResponse({
+              next: () => {
+                patchState(store, { retried: true });
+                store.setExpenseDetailLoaded();
+              },
+              error: (error) => {
+                store.handleExpenseDetailError(error);
+                store.setExpenseDetailLoaded();
+              }
+            })
+          )
+        )
+      )
+    );
+
+    return { load, save, retry };
   })
 );

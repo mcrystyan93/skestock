@@ -29,64 +29,8 @@
   }
 }
 
-<form nz-form
-      nzLayout="vertical"
-      (ngSubmit)="save()">
-  <nz-form-item>
-    <nz-form-label nzFor="expenseSupplier">Furnizor</nz-form-label>
-    <nz-form-control>
-      <input nz-input
-             id="expenseSupplier"
-             [formField]="expenseForm.supplierName"/>
-    </nz-form-control>
-  </nz-form-item>
-
-  <nz-form-item>
-    <nz-form-label nzFor="expenseDocumentNumber">Număr document</nz-form-label>
-    <nz-form-control>
-      <input nz-input
-             id="expenseDocumentNumber"
-             [formField]="expenseForm.documentNumber"/>
-    </nz-form-control>
-  </nz-form-item>
-
-  <nz-form-item>
-    <nz-form-label nzFor="expenseDate">Data</nz-form-label>
-    <nz-form-control>
-      <input nz-input
-             id="expenseDate"
-             type="date"
-             [formField]="expenseForm.expenseDate"/>
-    </nz-form-control>
-  </nz-form-item>
-
-  <nz-form-item>
-    <nz-form-label nzFor="expenseTotal">Total (cu TVA)</nz-form-label>
-    <nz-form-control>
-      <nz-input-number nzId="expenseTotal"
-                       class="w-full!"
-                       [formField]="expenseForm.totalAmount"/>
-    </nz-form-control>
-  </nz-form-item>
-
-  <nz-form-item>
-    <nz-form-label nzFor="expenseVat">TVA</nz-form-label>
-    <nz-form-control>
-      <nz-input-number nzId="expenseVat"
-                       class="w-full!"
-                       [formField]="expenseForm.vatAmount"/>
-    </nz-form-control>
-  </nz-form-item>
-
-  <nz-form-item>
-    <nz-form-label nzFor="expenseCurrency">Monedă</nz-form-label>
-    <nz-form-control>
-      <input nz-input
-             id="expenseCurrency"
-             [formField]="expenseForm.currency"/>
-    </nz-form-control>
-  </nz-form-item>
-</form>
+<ske-expense-form [expense]="expense()"
+                  [locked]="locked()" />
 
 @if (store.expenseDetailProblemDetail(); as problemDetail) {
   <ske-error-display [problemDetail]="problemDetail"
@@ -107,7 +51,7 @@
               *nzSpaceItem
               nzType="default"
               type="button"
-              [nzLoading]="retrying()"
+              [nzLoading]="store.expenseDetailLoading()"
               (click)="retry()">
         Reîncearcă procesarea
       </button>

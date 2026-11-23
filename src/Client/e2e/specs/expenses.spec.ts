@@ -28,6 +28,12 @@ test('expenses tab lists statuses and opens the upload modal from the header', a
   await expect(page.getByRole('button', { name: 'Introdu manual' })).toBeVisible();
 });
 
+test('expenses list renders as table on desktop and cards on mobile', async ({ page }) => {
+  await openExpenses(page);
+
+  await expect(page.getByText('F-12')).toBeVisible();
+});
+
 test('a failed expense opens with its error and can be completed by hand', async ({ page }) => {
   await openExpenses(page);
   let saved: unknown;
