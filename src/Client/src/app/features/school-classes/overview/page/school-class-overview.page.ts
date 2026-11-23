@@ -15,6 +15,7 @@ import {CLASS_READ_ONLY} from '@ske/shared/school-classes';
 import {ClassDepartmentsTab} from '../tabs/departments/class-departments-tab';
 import {ClassInvitationsTab} from '../tabs/invitations/class-invitations-tab';
 import {FruitDessertTab} from '../tabs/fruit-dessert/fruit-dessert-tab';
+import {ExpensesTab} from '../tabs/expenses/expenses-tab';
 
 @Component({
   imports: [
@@ -29,7 +30,8 @@ import {FruitDessertTab} from '../tabs/fruit-dessert/fruit-dessert-tab';
     ErrorAlert,
     ClassDepartmentsTab,
     ClassInvitationsTab,
-    FruitDessertTab
+    FruitDessertTab,
+    ExpensesTab
   ],
   selector: 'ske-school-class-overview-page',
   styles: ``,

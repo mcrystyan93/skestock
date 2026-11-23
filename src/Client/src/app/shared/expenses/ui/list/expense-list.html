@@ -1,0 +1,90 @@
+<ske-error-display [problemDetail]="store.expensesProblemDetail()"
+                   [validationErrors]="store.expensesValidationErrors()"/>
+
+<nz-table #table
+          nzSize="small"
+          [nzData]="store.expenses()"
+          [nzLoading]="store.expensesLoading()"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          nzTableLayout="auto">
+  <thead>
+  <tr>
+    <th>Stare</th>
+    <th>Furnizor</th>
+    <th>Document</th>
+    <th>Data</th>
+    <th nzAlign="right">Total</th>
+    <th nzRight>Acțiuni</th>
+  </tr>
+  </thead>
+  <tbody>
+    @for (expense of table.data; track expense.id) {
+      <tr class="cursor-pointer"
+          (click)="open(expense)">
+        <td>
+          <nz-badge [nzStatus]="statusColor(expense)"
+                    [nzText]="statusLabel(expense)"/>
+        </td>
+        <td>{{ expense.supplierName || '-' }}</td>
+        <td>
+          {{ sourceLabel(expense) }}
+          @if (expense.documentNumber) {
+            <span class="text-gray-500"> · {{ expense.documentNumber }}</span>
+          }
+        </td>
+        <td>{{ expense.expenseDate ? (expense.expenseDate | date: 'dd.MM.yyyy') : '-' }}</td>
+        <td nzAlign="right">
+          @if (expense.totalAmount !== null && expense.totalAmount !== undefined) {
+            {{ expense.totalAmount | number: '1.2-2' }} {{ expense.currency }}
+          } @else {
+            -
+          }
+        </td>
+        <td nzRight>
+          @if (expense.fileMetadataId) {
+            <button nz-button
+                    nzType="text"
+                    type="button"
+                    (click)="$event.stopPropagation(); download(expense)">
+              Descarcă
+            </button>
+          }
+          @if (!readOnly()) {
+            @if (expense.status === 'failed' && expense.fileMetadataId) {
+              <button nz-button
+                      nzType="text"
+                      type="button"
+                      (click)="$event.stopPropagation(); store.retry(expense.id)">
+                Reîncearcă
+              </button>
+            }
+            <button nz-button
+                    nzType="text"
+                    nzDanger
+                    type="button"
+                    nz-popconfirm
+                    nzPopconfirmTitle="Ștergi cheltuiala?"
+                    nzOkText="Șterge"
+                    nzCancelText="Anulează"
+                    (click)="$event.stopPropagation()"
+                    (nzOnConfirm)="store.remove(expense.id)">
+              Șterge
+            </button>
+          }
+        </td>
+      </tr>
+    }
+  </tbody>
+</nz-table>
+
+@if (store.hasNextPage()) {
+  <div class="mt-3 text-center">
+    <button nz-button
+            type="button"
+            [nzLoading]="store.isLoadingMore()"
+            (click)="store.loadMore()">
+      Încarcă mai multe
+    </button>
+  </div>
+}

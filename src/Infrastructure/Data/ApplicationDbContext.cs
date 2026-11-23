@@ -10,6 +10,7 @@ using skestock.Application.Common.Filtering;
 using skestock.Domain.Entities;
 using skestock.Domain.Entities.Categories;
 using skestock.Domain.Entities.Congregations;
+using skestock.Domain.Entities.Expenses;
 using skestock.Domain.Entities.FruitDessert;
 using skestock.Domain.Entities.GoodsReceipts;
 using skestock.Domain.Entities.Items;
@@ -52,6 +53,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<SharedClassConfiguration> SharedClassConfigurations => Set<SharedClassConfiguration>();
     public DbSet<StockBatch> StockBatches => Set<StockBatch>();
     public DbSet<StockTransaction> StockTransactions => Set<StockTransaction>();
+    public DbSet<Expense> Expenses => Set<Expense>();
+    public DbSet<ExpenseCategory> ExpenseCategories => Set<ExpenseCategory>();
     public DbSet<GoodsReceipt> GoodsReceipts => Set<GoodsReceipt>();
     public DbSet<GoodsReceiptImport> GoodsReceiptImports => Set<GoodsReceiptImport>();
     public DbSet<GoodsReceiptImportLine> GoodsReceiptImportLines => Set<GoodsReceiptImportLine>();

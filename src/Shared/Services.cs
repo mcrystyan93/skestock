@@ -65,6 +65,7 @@ public static class Services
     public const string BlobService = "blobservice";
     public const string Queues = "queues";
     public const string GoodsReceiptImportQueue = "goods-receipt-import";
+    public const string ExpenseQueue = "expense-import";
     public const string CategoryImportQueue = "category-import";
     public const string ItemImportQueue = "item-import";
     public const string ItemImageThumbnailQueue = "item-image-thumbnail";

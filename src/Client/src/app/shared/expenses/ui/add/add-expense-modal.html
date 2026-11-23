@@ -1,0 +1,61 @@
+<div *nzModalTitle>Adaugă cheltuială</div>
+
+<p class="mb-2 text-sm text-gray-500">
+  Încarcă un bon sau o factură (poză sau PDF). Documentul este citit automat, iar cheltuiala apare cu starea „În procesare”.
+</p>
+
+<ske-file-upload [multiple]="true"
+                 (onFileListChange)="onFileListChange($event)"/>
+
+@if (fileStorage.uploadLoading() || fileStorage.hasUploadFailures()) {
+  <nz-progress [nzPercent]="fileStorage.uploadPercent()"
+               [nzStatus]="progressStatus()"
+               [nzFormat]="progressFormat"/>
+
+  @if (fileStorage.currentFileName(); as currentFileName) {
+    <p class="mt-2 text-sm text-gray-500">Se încarcă {{ currentFileName }}</p>
+  }
+
+  @if (fileStorage.hasUploadFailures()) {
+    <p class="mt-2 text-sm text-red-500">Fișiere ce nu au putut fi încărcate:</p>
+    <ul class="text-sm text-red-500">
+      @for (failedFile of fileStorage.failedFiles(); track failedFile.name) {
+        <li>{{ failedFile.name }}</li>
+      }
+    </ul>
+  }
+}
+
+@if (store.expenseUploadProblemDetail(); as problemDetail) {
+  <ske-error-display [problemDetail]="problemDetail"/>
+}
+
+<div *nzModalFooter>
+  <nz-space>
+    <button nz-button
+            *nzSpaceItem
+            nzType="default"
+            type="button"
+            [disabled]="fileStorage.uploadLoading() || store.expenseUploadLoading()"
+            (click)="close()">
+      Închide
+    </button>
+    <button nz-button
+            *nzSpaceItem
+            nzType="default"
+            type="button"
+            [disabled]="fileStorage.uploadLoading() || store.expenseUploadLoading()"
+            (click)="addManually()">
+      Introdu manual
+    </button>
+    <button nz-button
+            *nzSpaceItem
+            nzType="primary"
+            type="button"
+            [disabled]="!hasFiles() || store.expenseUploadLoading()"
+            [nzLoading]="fileStorage.uploadLoading() || store.expenseUploadLoading()"
+            (click)="loadFiles()">
+      Încarcă fișierele
+    </button>
+  </nz-space>
+</div>

@@ -50,6 +50,8 @@ public class FruitDessertTestDbContext(DbContextOptions<FruitDessertTestDbContex
     DbSet<Location> IApplicationDbContext.Locations => throw new NotSupportedException();
     DbSet<StockBatch> IApplicationDbContext.StockBatches => throw new NotSupportedException();
     DbSet<StockTransaction> IApplicationDbContext.StockTransactions => throw new NotSupportedException();
+    DbSet<skestock.Domain.Entities.Expenses.Expense> IApplicationDbContext.Expenses => throw new NotSupportedException();
+    DbSet<skestock.Domain.Entities.Expenses.ExpenseCategory> IApplicationDbContext.ExpenseCategories => throw new NotSupportedException();
     DbSet<GoodsReceipt> IApplicationDbContext.GoodsReceipts => throw new NotSupportedException();
     DbSet<GoodsReceiptImport> IApplicationDbContext.GoodsReceiptImports => throw new NotSupportedException();
     DbSet<GoodsReceiptImportLine> IApplicationDbContext.GoodsReceiptImportLines => throw new NotSupportedException();

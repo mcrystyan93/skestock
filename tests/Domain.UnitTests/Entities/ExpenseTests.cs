@@ -1,0 +1,87 @@
+using NUnit.Framework;
+using Shouldly;
+using skestock.Domain.Entities.Expenses;
+using skestock.Domain.Enums;
+using skestock.Domain.Events.Expenses;
+
+namespace skestock.Domain.UnitTests.Entities;
+
+public class ExpenseTests
+{
+    private static Expense NewDocumentExpense() =>
+        Expense.CreateFromDocument(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+
+    [Test]
+    public void CreateFromDocument_StartsProcessingAndRaisesCreatedEvent()
+    {
+        var expense = NewDocumentExpense();
+
+        expense.Status.ShouldBe(ExpenseStatus.Processing);
+        expense.Currency.ShouldBe("RON");
+        expense.DomainEvents.OfType<ExpenseCreatedEvent>().ShouldHaveSingleItem();
+    }
+
+    [Test]
+    public void CreateManual_IsProcessedWithoutFile()
+    {
+        var expense = Expense.CreateManual(Guid.NewGuid(), Guid.NewGuid());
+
+        expense.Status.ShouldBe(ExpenseStatus.Processed);
+        expense.Source.ShouldBe(ExpenseSource.Manual);
+        expense.FileMetadataId.ShouldBeNull();
+    }
+
+    [Test]
+    public void ApplyExtractionResult_FillsFieldsKeepsRawJsonAndDefaultsCurrency()
+    {
+        var expense = NewDocumentExpense();
+
+        expense.ApplyExtractionResult("{}", ExpenseSource.Invoice, "ACME", "F-1",
+            new DateOnly(2026, 10, 1), null, 119m, 19m);
+
+        expense.Status.ShouldBe(ExpenseStatus.Processed);
+        expense.Currency.ShouldBe("RON");
+        expense.ExtractedDataJson.ShouldBe("{}");
+        expense.ProcessedAt.ShouldNotBeNull();
+        expense.DomainEvents.OfType<ExpenseProcessedEvent>().ShouldHaveSingleItem();
+    }
+
+    [Test]
+    public void MarkAsFailed_ThenUpdate_CompletesManuallyAndClearsError()
+    {
+        var expense = NewDocumentExpense();
+        expense.MarkAsFailed("unreadable");
+        expense.Status.ShouldBe(ExpenseStatus.Failed);
+
+        expense.Update("Shop", null, null, "eur", 10m, null, null);
+
+        expense.Status.ShouldBe(ExpenseStatus.Processed);
+        expense.ErrorMessage.ShouldBeNull();
+        expense.Currency.ShouldBe("EUR");
+    }
+
+    [Test]
+    public void Retry_ReturnsFailedExpenseToProcessing()
+    {
+        var expense = NewDocumentExpense();
+        expense.MarkAsFailed("boom");
+
+        expense.Retry();
+
+        expense.Status.ShouldBe(ExpenseStatus.Processing);
+        expense.ErrorMessage.ShouldBeNull();
+    }
+
+    [Test]
+    public void ApplyExtractionResult_ClampsOversizedAiValuesToColumnSizes()
+    {
+        var expense = NewDocumentExpense();
+
+        expense.ApplyExtractionResult("{}", ExpenseSource.Receipt, new string('a', 500), new string('1', 200),
+            null, "Romanian leu", 1m, null);
+
+        expense.SupplierName!.Length.ShouldBe(Expense.MaxSupplierNameLength);
+        expense.DocumentNumber!.Length.ShouldBe(Expense.MaxDocumentNumberLength);
+        expense.Currency.ShouldBe("RON");
+    }
+}
