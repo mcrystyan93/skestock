@@ -52,7 +52,7 @@ describe('StockCategoryItemsSmall', () => {
     const element = fixture.nativeElement as HTMLElement;
 
     element.querySelector<HTMLButtonElement>('button[aria-label="Adaugă stoc pentru Papetărie"]')!.click();
-    element.querySelector<HTMLButtonElement>('button[aria-label^="Ajustează stocul pentru Caiet"]')!.click();
+    element.querySelector<HTMLButtonElement>('button[aria-label^="Ajustează stocul pentru Caiet dictando la"]')!.click();
 
     expect(add).toHaveBeenCalledWith({ id: 'category-1', name: 'Papetărie' });
     expect(adjust).toHaveBeenCalledWith(item);
