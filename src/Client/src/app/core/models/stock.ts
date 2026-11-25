@@ -35,6 +35,8 @@ export type StockItemGroup = {
   item: StockItemDto;
   locations: StockItemDto[];
   totalQuantity: number;
+  /** Most recent update across the locations. */
+  lastUpdatedAt: string | null;
   isLowStock: boolean;
   isExpired: boolean;
 };
@@ -47,6 +49,8 @@ export function groupStockByItem(items: readonly StockItemDto[]): StockItemGroup
     if (group) {
       group.locations.push(line);
       group.totalQuantity += line.quantity;
+      if (line.lastUpdatedAt && (!group.lastUpdatedAt || line.lastUpdatedAt > group.lastUpdatedAt))
+        group.lastUpdatedAt = line.lastUpdatedAt;
       group.isLowStock ||= line.isLowStock;
       group.isExpired ||= line.isExpired;
     } else {
@@ -55,6 +59,7 @@ export function groupStockByItem(items: readonly StockItemDto[]): StockItemGroup
         item: line,
         locations: [line],
         totalQuantity: line.quantity,
+        lastUpdatedAt: line.lastUpdatedAt,
         isLowStock: line.isLowStock,
         isExpired: line.isExpired
       });

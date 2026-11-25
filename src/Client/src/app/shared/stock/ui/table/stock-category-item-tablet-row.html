@@ -6,7 +6,7 @@
   <div nz-typography
        nzType="secondary"
        class="mb-0! text-xs">
-    {{ item.sku ?? '-' }} · <nz-icon nzType="icons:clock" /> {{ item.lastUpdatedAt ? (item.lastUpdatedAt | timeAgo) : '-' }}
+    {{ item.sku ?? '-' }} · <nz-icon nzType="icons:clock" /> {{ g.lastUpdatedAt ? (g.lastUpdatedAt | timeAgo) : '-' }}
   </div>
   @if (item.isPerishable || g.isExpired) {
     <div class="mt-1 flex flex-wrap gap-1">

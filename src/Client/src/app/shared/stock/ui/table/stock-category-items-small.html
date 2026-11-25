@@ -88,7 +88,7 @@
                     <span aria-hidden="true"> · </span>
                     <nz-icon nzType="icons:clock"
                              aria-hidden="true" />
-                    {{ stockItem.lastUpdatedAt ? (stockItem.lastUpdatedAt | timeAgo) : '—' }}
+                    {{ group.lastUpdatedAt ? (group.lastUpdatedAt | timeAgo) : '—' }}
                   </div>
                 </div>
                 @if (!readOnly()) {
