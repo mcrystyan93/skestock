@@ -34,7 +34,7 @@ async function mockApi(page: Page) {
   });
 }
 
-for (const width of [360, 768, 1024, 1440]) {
+for (const width of [360, 900, 1440]) {
   test(`stock tab lists an item once with its locations at ${width}px`, async ({page}) => {
     await mockApi(page);
     await page.setViewportSize({width, height: 900});
@@ -44,7 +44,7 @@ for (const width of [360, 768, 1024, 1440]) {
     await expect(stockTab.getByText('Mere', {exact: true})).toHaveCount(1);
     await expect(stockTab.getByText('Cămară').first()).toBeVisible();
     await expect(stockTab.getByText('Frigider')).toBeVisible();
-    await expect(stockTab.getByText('Posibil expirat (3)')).toBeVisible();
+    await expect(stockTab.getByText('Expiră (3)')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
 }

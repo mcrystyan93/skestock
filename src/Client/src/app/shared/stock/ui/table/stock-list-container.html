@@ -1,4 +1,4 @@
-<ng-container *skeLayoutBreakpoint="'lg'; else small">
+<ng-container *skeLayoutBreakpoint="'lg'; else medium">
   <ske-stock-category-items-table [items]="store.groupedStockItems()"
                                   [filter]="{}"
                                   [isLoadingMore]="false"
@@ -12,6 +12,23 @@
                                   (addToOrder)="onAddToOrder($event)"
                                   (visibilityChange)="onVisibilityChange($event)" />
 </ng-container>
+
+<ng-template #medium>
+  <ng-container *skeLayoutBreakpoint="'md'; else small">
+    <ske-stock-category-items-table [items]="store.groupedStockItems()"
+                                    [filter]="{}"
+                                    [isLoadingMore]="false"
+                                    [hasNextPage]="false"
+                                    [loading]="store.stockItemsLoading()"
+                                    [compact]="true"
+                                    (adjust)="onAdjust($event)"
+                                    (move)="onMove($event)"
+                                    (removeExpired)="onRemoveExpired($event)"
+                                    (extendExpiry)="onExtendExpiry($event)"
+                                    (addToOrder)="onAddToOrder($event)"
+                                    (visibilityChange)="onVisibilityChange($event)" />
+  </ng-container>
+</ng-template>
 
 <ng-template #small>
   <ske-stock-category-items-small [items]="store.groupedStockItems()"

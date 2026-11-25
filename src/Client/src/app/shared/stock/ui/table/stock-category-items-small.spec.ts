@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { CLASS_READ_ONLY } from '@ske/shared/school-classes';
-import { StockItemCategoryGroup, StockItemDto } from '@ske/models';
+import { groupStockByItem, StockItemCategoryGroup, StockItemDto } from '@ske/models';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
 import { StockCategoryItemsSmall } from './stock-category-items-small';
@@ -16,7 +16,7 @@ describe('StockCategoryItemsSmall', () => {
           { name: 'icons:box', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:plus', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:clock', icon: '<svg viewBox="0 0 24 24"></svg>' },
-          { name: 'icons:ellipsis-vertical', icon: '<svg viewBox="0 0 24 24"></svg>' },
+          { name: 'icons:ellipsis', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:arrow-right-arrow-left', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:trash', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:cart-plus', icon: '<svg viewBox="0 0 24 24"></svg>' },
@@ -83,16 +83,18 @@ describe('StockCategoryItemsSmall', () => {
     expect(element.querySelectorAll('li').length).toBe(2);
     expect(text).toContain('7 buc');
     expect(text).toContain('Stoc redus');
-    expect(text).toContain('Posibil expirat (3)');
+    expect(text).toContain('Expiră (3)');
     fixture.destroy();
   });
 
-  it('applies low-stock tone in preference to expired tone', () => {
+  it('tints the item card red when any location is expired, otherwise amber for low stock', () => {
     const fixture = createFixture();
     const component = fixture.componentInstance;
+    const group = (...items: StockItemDto[]) => groupStockByItem(items)[0];
 
-    expect(component.cardToneClass(createStockItem({ isLowStock: true, isExpired: true }))).toBe('!bg-amber-500/10');
-    expect(component.cardToneClass(createStockItem({ isExpired: true }))).toBe('!bg-red-500/15');
+    expect(component.cardToneClass(group(createStockItem({ isLowStock: true, isExpired: true })))).toBe('!bg-red-500/15');
+    expect(component.cardToneClass(group(createStockItem({ isLowStock: true })))).toBe('!bg-amber-500/10');
+    expect(component.cardToneClass(group(createStockItem()))).toBe('');
     fixture.destroy();
   });
 

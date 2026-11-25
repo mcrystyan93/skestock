@@ -1,4 +1,4 @@
-<td colspan="4">
+<td [attr.colspan]="columnCount() - 1">
   <div class="flex items-center gap-2">
     <nz-icon [nzType]="category().categoryIcon?.fileName
               ? ('icons:' + category().categoryIcon?.fileName)

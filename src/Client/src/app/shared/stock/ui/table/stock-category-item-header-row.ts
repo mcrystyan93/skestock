@@ -23,6 +23,7 @@ export class StockCategoryItemHeaderRow {
   public readonly readOnly = injectClassReadOnly();
   public readonly category = input.required<StockItemCategoryGroup>();
   public readonly items = input.required<StockItemDto[]>();
+  public readonly columnCount = input(5);
 
   public readonly add = output<StockItemCategoryGroup>();
 
