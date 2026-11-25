@@ -2,24 +2,31 @@
 @let item = g.item;
 
 <td>
-  <div class="font-semibold">{{ item.itemName }}</div>
-  <div nz-typography
-       nzType="secondary"
-       class="mb-0! text-xs">
-    {{ item.sku ?? '-' }} · <nz-icon nzType="icons:clock" /> {{ g.lastUpdatedAt ? (g.lastUpdatedAt | timeAgo) : '-' }}
-  </div>
-  @if (item.isPerishable || g.isExpired) {
-    <div class="mt-1 flex flex-wrap gap-1">
-      @if (item.isPerishable) {
-        <nz-tag nzColor="orange"
-                class="me-0!">Perisabil</nz-tag>
-      }
-      @if (g.isExpired) {
-        <nz-tag nzColor="red"
-                class="me-0!">Posibil expirat ({{ expiredQuantity() }})</nz-tag>
+  <div class="flex items-start gap-3">
+    <ske-item-thumbnail [itemId]="item.itemId"
+                        [imageFileId]="item.imageFileId"
+                        [large]="true" />
+    <div class="min-w-0">
+      <div class="font-semibold">{{ item.itemName }}</div>
+      <div nz-typography
+           nzType="secondary"
+           class="mb-0! text-xs">
+        {{ item.sku ?? '-' }} · <nz-icon nzType="icons:clock" /> {{ g.lastUpdatedAt ? (g.lastUpdatedAt | timeAgo) : '-' }}
+      </div>
+      @if (item.isPerishable || g.isExpired) {
+        <div class="mt-1 flex flex-wrap gap-1">
+          @if (item.isPerishable) {
+            <nz-tag nzColor="orange"
+                    class="me-0!">Perisabil</nz-tag>
+          }
+          @if (g.isExpired) {
+            <nz-tag nzColor="red"
+                    class="me-0!">Posibil expirat ({{ expiredQuantity() }})</nz-tag>
+          }
+        </div>
       }
     </div>
-  }
+  </div>
 </td>
 <td>
   <div class="flex flex-col items-start gap-1">

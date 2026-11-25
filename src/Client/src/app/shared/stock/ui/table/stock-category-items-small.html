@@ -72,7 +72,10 @@
             <nz-card nzSize="small"
                      class="min-w-0"
                      [class]="cardToneClass(group)">
-              <div class="flex min-w-0 items-start gap-2">
+              <div class="flex min-w-0 items-start gap-3">
+                <ske-item-thumbnail [itemId]="stockItem.itemId"
+                                    [imageFileId]="stockItem.imageFileId"
+                                    [large]="true" />
                 <div class="min-w-0 grow">
                   <h3 class="mb-0! text-base font-semibold">
                     <button type="button"
