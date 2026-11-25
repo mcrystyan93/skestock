@@ -34,7 +34,7 @@ async function mockApi(page: Page) {
   });
 }
 
-for (const width of [360, 768, 900, 1440]) {
+for (const width of [360, 768, 900, 1100, 1440]) {
   test(`stock tab lists an item once with its locations at ${width}px`, async ({page}) => {
     await mockApi(page);
     await page.setViewportSize({width, height: 900});
