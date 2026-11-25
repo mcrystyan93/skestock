@@ -92,7 +92,7 @@ describe('StockCategoryItemsSmall', () => {
     const openItem = vi.spyOn(fixture.componentInstance.openItem, 'emit');
 
     (fixture.nativeElement as HTMLElement)
-      .querySelector<HTMLButtonElement>('button[aria-label="Alege locația pentru Caiet dictando"]')!.click();
+      .querySelector<HTMLButtonElement>('button[aria-label="Ajustează stocul pentru Caiet dictando"]')!.click();
 
     expect(openItem).toHaveBeenCalledWith(expect.objectContaining({ itemId: 'item-1' }));
     fixture.destroy();
