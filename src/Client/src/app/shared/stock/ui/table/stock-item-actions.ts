@@ -1,4 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
@@ -7,7 +7,10 @@ import { NzPopconfirmDirective } from 'ng-zorro-antd/popconfirm';
 import { StockItemDto, StockItemGroup } from '@ske/models';
 import { StopClick } from '@ske/shared/directives';
 
-/** "⋯" menu with the item's stock actions; with several locations each action asks for the location. */
+/**
+ * "⋯" menu with the item's stock actions; with several locations each action asks for the location.
+ * The dropdown is only created on first use: a long phone list would otherwise instantiate one per card.
+ */
 @Component({
   imports: [
     NzButtonComponent,
@@ -32,9 +35,17 @@ export class StockItemActions {
   public readonly addToOrder = output<StockItemDto>();
   public readonly visibilityChange = output<StockItemDto>();
 
+  protected readonly activated = signal(false);
+  protected readonly visible = signal(false);
+
   public readonly isSingle = computed(() => this.group().locations.length === 1);
   public readonly movable = computed(() => this.group().locations.filter(l => l.quantity > 0));
   public readonly expired = computed(() => this.group().locations.filter(l => l.expiredQuantity > 0));
+
+  protected openMenu(): void {
+    this.activated.set(true);
+    this.visible.set(true);
+  }
 
   public hideLabel(location: StockItemDto): string {
     return location.hideWhenZeroStock ? 'Nu mai ascunde la stoc 0' : 'Ascunde la stoc 0';

@@ -15,7 +15,7 @@ const line = (itemId: string, itemName: string, locationId: string, locationName
 const stock = {
   hasExpiredItems: true,
   items: [
-    line('i1', 'Mere', 'l1', 'Cămară', 2, {isLowStock: true}),
+    line('i1', 'Mere', 'l1', 'Cămară', 2, {isLowStock: true, imageFileId: 'f1'}),
     line('i1', 'Mere', 'l2', 'Frigider', 8, {isExpired: true, expiredQuantity: 3}),
     line('i1', 'Mere', 'l3', 'Magazie', 5),
     line('i2', 'Făină', 'l1', 'Cămară', 10),
@@ -45,6 +45,8 @@ for (const width of [360, 768, 900, 1100, 1440]) {
     await expect(stockTab.getByText('Cămară').first()).toBeVisible();
     await expect(stockTab.getByText('Frigider')).toBeVisible();
     await expect(stockTab.getByText('Expiră (3)')).toBeVisible();
+    // thumbnails stay on every layout, they are what makes a product recognisable at a glance
+    await expect(stockTab.locator('img[src*="/api/Items/i1/image"]')).toHaveCount(1);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
 }
@@ -55,7 +57,7 @@ test('clicking an item row asks for the location only when there are several', a
   await page.goto(`/school-classes/${classId}?tab=0`);
 
   const stockTab = page.locator('ske-class-stock');
-  await stockTab.locator('tr', {hasText: 'Mere'}).click({position: {x: 20, y: 20}});
+  await stockTab.locator('tr', {hasText: 'Mere'}).click({position: {x: 140, y: 20}});
   const picker = page.locator('.ant-modal').filter({hasText: 'Alege locația'});
   await expect(picker).toBeVisible();
   await expect(picker.getByText('Frigider')).toBeVisible();
@@ -70,7 +72,16 @@ test('clicking a single-location item row opens the adjustment modal directly', 
   await page.setViewportSize({width: 1440, height: 900});
   await page.goto(`/school-classes/${classId}?tab=0`);
 
-  await page.locator('ske-class-stock tr', {hasText: 'Făină'}).click({position: {x: 20, y: 20}});
+  await page.locator('ske-class-stock tr', {hasText: 'Făină'}).click({position: {x: 140, y: 20}});
   await expect(page.locator('ske-stock-adjustment-modal')).toBeVisible();
   await expect(page.getByText('Alege locația')).toHaveCount(0);
+});
+
+test('phone actions menu opens on first tap and offers a location per action', async ({page}) => {
+  await mockApi(page);
+  await page.setViewportSize({width: 390, height: 844});
+  await page.goto(`/school-classes/${classId}?tab=0`);
+
+  await page.getByRole('button', {name: 'Acțiuni pentru Mere'}).click();
+  await expect(page.getByText('Mută stocul')).toBeVisible();
 });
