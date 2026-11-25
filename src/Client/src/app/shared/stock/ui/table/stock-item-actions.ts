@@ -42,9 +42,23 @@ export class StockItemActions {
   public readonly movable = computed(() => this.group().locations.filter(l => l.quantity > 0));
   public readonly expired = computed(() => this.group().locations.filter(l => l.expiredQuantity > 0));
 
-  protected openMenu(): void {
+  private _lastPress = 0;
+
+  protected press(): void {
+    this._lastPress = performance.now();
+  }
+
+  protected toggleMenu(): void {
     this.activated.set(true);
-    this.visible.set(true);
+    this.visible.set(!this.visible());
+  }
+
+  protected onVisibleChange(visible: boolean): void {
+    // ng-zorro treats a press on our own button as an outside click and closes after a short delay;
+    // the click that follows toggles, so ignoring that close keeps a second tap from reopening the menu.
+    if (!visible && performance.now() - this._lastPress < 400) return;
+
+    this.visible.set(visible);
   }
 
   public hideLabel(location: StockItemDto): string {

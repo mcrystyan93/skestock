@@ -84,4 +84,14 @@ test('phone actions menu opens on first tap and offers a location per action', a
 
   await page.getByRole('button', {name: 'Acțiuni pentru Mere'}).click();
   await expect(page.getByText('Mută stocul')).toBeVisible();
+
+  // a second tap closes it (and does not bounce it open again)
+  await page.getByRole('button', {name: 'Acțiuni pentru Mere'}).click();
+  await page.waitForTimeout(500);
+  await expect(page.getByText('Mută stocul')).toBeHidden();
+
+  await page.getByRole('button', {name: 'Acțiuni pentru Mere'}).click();
+  await expect(page.getByText('Mută stocul')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByText('Mută stocul')).toBeHidden();
 });

@@ -6,11 +6,11 @@
           nzType="default"
           type="button"
           skeStopClick
-          aria-haspopup="menu"
           [attr.aria-expanded]="visible()"
           [attr.aria-label]="'Acțiuni pentru ' + item.itemName"
           class="h-10! min-h-10! w-10! min-w-10! p-0!"
-          (click)="openMenu()">
+          (pointerdown)="press()"
+          (click)="toggleMenu()">
     <nz-icon nzType="icons:ellipsis" />
   </button>
   @if (activated()) {
@@ -20,7 +20,7 @@
           class="pointer-events-none absolute inset-0"
           [nzDropdownMenu]="menu"
           [nzVisible]="visible()"
-          (nzVisibleChange)="visible.set($event)"></span>
+          (nzVisibleChange)="onVisibleChange($event)"></span>
   <nz-dropdown-menu #menu="nzDropdownMenu">
     <ul nz-menu>
       @if (isSingle()) {
