@@ -6,7 +6,8 @@ import {
   CategoryDto,
   STOCK_TABLE_COLUMNS,
   StockItemCategoryGroup,
-  StockItemDto
+  StockItemDto,
+  StockItemGroup
 } from '@ske/models';
 import { BaseTableWithFilter } from '@ske/shared/tables';
 import { StockCategoryItemHeaderRow } from './stock-category-item-header-row';
@@ -34,6 +35,7 @@ export class StockCategoryItemsTable extends BaseTableWithFilter<StockItemCatego
 
   public readonly add = output<Partial<CategoryDto> | null>();
   public readonly adjust = output<StockItemDto>();
+  public readonly openItem = output<StockItemGroup>();
   public readonly move = output<StockItemDto>();
   public readonly removeExpired = output<StockItemDto>();
   public readonly extendExpiry = output<StockItemDto>();

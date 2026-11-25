@@ -40,7 +40,8 @@ import { ItemThumbnail } from '@ske/shared/items';
   selector: 'tr[ske-stock-category-item-row]',
   templateUrl: './stock-category-item-row.html',
   host: {
-    '[class]': 'rowClass()'
+    '[class]': 'rowClass()',
+    '(click)': 'open.emit(group())'
   }
 })
 export class StockCategoryItemRow {
@@ -48,6 +49,7 @@ export class StockCategoryItemRow {
   public readonly group = input.required<StockItemGroup>();
 
   public readonly adjust = output<StockItemDto>();
+  public readonly open = output<StockItemGroup>();
   public readonly move = output<StockItemDto>();
   public readonly removeExpired = output<StockItemDto>();
   public readonly extendExpiry = output<StockItemDto>();
@@ -62,11 +64,12 @@ export class StockCategoryItemRow {
 
   public readonly rowClass = computed(() => {
     const group = this.group();
-
-    return group.isExpired
+    const tone = group.isExpired
       ? '[&>td]:!bg-red-500/15'
       : group.isLowStock
         ? '[&>td]:!bg-amber-500/10'
         : '';
+
+    return this.readOnly() ? tone : `cursor-pointer ${tone}`;
   });
 }

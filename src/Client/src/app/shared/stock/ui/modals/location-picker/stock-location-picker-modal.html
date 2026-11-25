@@ -1,0 +1,65 @@
+<div *nzModalTitle>
+  <h4 nz-typography
+      class="mb-0!">Alege locația</h4>
+  <div nz-typography
+       nzType="secondary"
+       class="mb-0!">
+    {{ modalData.group.item.itemName }}
+  </div>
+</div>
+
+<fieldset class="m-0 border-0 p-0">
+  <legend class="sr-only">Locație</legend>
+  <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+    @for (loc of modalData.group.locations; track loc.locationId) {
+      <label class="group flex items-center gap-2 px-3 py-2"
+             [class]="cardClasses">
+        <input type="radio"
+               name="stock-location"
+               class="sr-only"
+               [value]="loc.locationId"
+               [checked]="selected()?.locationId === loc.locationId"
+               (change)="selected.set(loc)">
+        <span class="flex min-w-0 grow flex-col">
+          <span class="truncate font-medium">{{ loc.locationName }}</span>
+          <span nz-typography
+                nzType="secondary"
+                class="text-sm">{{ loc.quantity }} {{ loc.unit }}</span>
+          @if (loc.isLowStock || loc.isExpired) {
+            <span class="mt-1 flex flex-wrap gap-1">
+              @if (loc.isLowStock) {
+                <nz-tag nzColor="orange"
+                        class="me-0!">Stoc redus</nz-tag>
+              }
+              @if (loc.isExpired) {
+                <nz-tag nzColor="red"
+                        class="me-0!">Expiră ({{ loc.expiredQuantity }})</nz-tag>
+              }
+            </span>
+          }
+        </span>
+        <nz-icon nzType="icons:circle-check"
+                 class="invisible shrink-0 text-xl text-primary-600 group-has-checked:visible dark:text-primary-400"
+                 aria-hidden="true" />
+      </label>
+    }
+  </div>
+</fieldset>
+
+<div *nzModalFooter>
+  <div class="flex flex-wrap justify-end gap-2">
+    <button nz-button
+            nzType="default"
+            type="button"
+            (click)="close()">
+      Anulează
+    </button>
+    <button nz-button
+            nzType="primary"
+            type="button"
+            [disabled]="!selected()"
+            (click)="confirm()">
+      Continuă
+    </button>
+  </div>
+</div>

@@ -74,7 +74,13 @@
                      [class]="cardToneClass(group)">
               <div class="flex min-w-0 items-start gap-2">
                 <div class="min-w-0 grow">
-                  <h3 class="mb-0! text-base font-semibold">{{ stockItem.itemName }}</h3>
+                  <h3 class="mb-0! text-base font-semibold">
+                    <button type="button"
+                            class="text-left font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 enabled:cursor-pointer"
+                            [attr.aria-label]="'Alege locația pentru ' + stockItem.itemName"
+                            [disabled]="readOnly()"
+                            (click)="openItem.emit(group)">{{ stockItem.itemName }}</button>
+                  </h3>
                   <div nz-typography
                        nzType="secondary"
                        class="mb-0! text-xs">

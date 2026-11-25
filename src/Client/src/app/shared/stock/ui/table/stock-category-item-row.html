@@ -37,6 +37,7 @@
               class="inline-flex max-w-full items-center gap-1.5 rounded border border-slate-300 bg-white/60 px-2 py-0.5 text-xs enabled:cursor-pointer enabled:hover:border-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:border-slate-600 dark:bg-slate-900/60"
               [attr.aria-label]="'Ajustează stocul pentru ' + loc.itemName + ' la ' + loc.locationName + ': ' + loc.quantity + ' ' + loc.unit + (loc.isLowStock ? ', stoc redus' : '') + (loc.isExpired ? ', posibil expirat ' + loc.expiredQuantity : '')"
               [disabled]="readOnly()"
+              skeStopClick
               (click)="adjust.emit(loc)">
         <span class="truncate font-medium">{{ loc.locationName }}</span>
         @if (!isSingle()) {

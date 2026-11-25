@@ -4,16 +4,18 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { StockItemDto, StockItemGroup } from '@ske/models';
+import { StopClick } from '@ske/shared/directives';
 import { TimeAgoPipe } from '@ske/shared/pipes';
 import { StockItemActions } from './stock-item-actions';
 
 /** Tablet layout of an item row: tags under the name, stacked location chips, one actions menu. */
 @Component({
-  imports: [NzIconDirective, NzTagComponent, NzTypographyComponent, StockItemActions, TimeAgoPipe],
+  imports: [NzIconDirective, NzTagComponent, NzTypographyComponent, StockItemActions, StopClick, TimeAgoPipe],
   selector: 'tr[ske-stock-category-item-tablet-row]',
   templateUrl: './stock-category-item-tablet-row.html',
   host: {
-    '[class]': 'rowClass()'
+    '[class]': 'rowClass()',
+    '(click)': 'open.emit(group())'
   }
 })
 export class StockCategoryItemTabletRow {
@@ -21,6 +23,7 @@ export class StockCategoryItemTabletRow {
   public readonly group = input.required<StockItemGroup>();
 
   public readonly adjust = output<StockItemDto>();
+  public readonly open = output<StockItemGroup>();
   public readonly move = output<StockItemDto>();
   public readonly removeExpired = output<StockItemDto>();
   public readonly extendExpiry = output<StockItemDto>();
@@ -33,11 +36,12 @@ export class StockCategoryItemTabletRow {
 
   public readonly rowClass = computed(() => {
     const group = this.group();
-
-    return group.isExpired
+    const tone = group.isExpired
       ? '[&>td]:!bg-red-500/15'
       : group.isLowStock
         ? '[&>td]:!bg-amber-500/10'
         : '';
+
+    return this.readOnly() ? tone : `cursor-pointer ${tone}`;
   });
 }

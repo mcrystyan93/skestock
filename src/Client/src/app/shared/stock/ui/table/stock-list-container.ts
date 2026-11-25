@@ -1,10 +1,11 @@
 import { Component, DestroyRef, inject } from '@angular/core';
 import { StockStore } from '../../services/stock.store';
-import { CategoryDto, getDropdownFilterValue, StockItemDto } from '@ske/models';
+import { CategoryDto, getDropdownFilterValue, StockItemDto, StockItemGroup } from '@ske/models';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { StockAdjustmentModal, StockAdjustmentModalData } from '../modals/adjust/stock-adjustment-modal';
 import { StockExtendExpiryModal, StockExtendExpiryModalData } from '../modals/extend-expiry/stock-extend-expiry-modal';
 import { StockAddToOrderModal, StockAddToOrderModalData } from '../modals/add-to-order/stock-add-to-order-modal';
+import { StockLocationPickerModal, StockLocationPickerModalData } from '../modals/location-picker/stock-location-picker-modal';
 import { StockMoveModal, StockMoveModalData } from '../modals/move/stock-move-modal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AddStockBatchModal } from '@ske/shared/stock-batches';
@@ -47,6 +48,28 @@ export class StockListContainer {
   private readonly _refreshEvents = this._events.on(StockEvents.refresh)
     .pipe(takeUntilDestroyed(this._destroyRef))
     .subscribe(() => this.store.load(this.store.filter()));
+
+  /** Row click: adjust straight away for one location, otherwise ask which location first. */
+  public onOpenItem(group: StockItemGroup): void {
+    if (this._readOnly()) return;
+
+    if (group.locations.length === 1) {
+      this.onAdjust(group.item);
+      return;
+    }
+
+    this._nzModalService.create<StockLocationPickerModal, StockLocationPickerModalData, StockItemDto>({
+      nzContent: StockLocationPickerModal,
+      nzData: { group },
+      nzWrapClassName: 'modal-w-90 modal-w-md-50 modal-w-xl-30',
+      nzCentered: true,
+      nzMaskClosable: false
+    }).afterClose.pipe(
+      takeUntilDestroyed(this._destroyRef)
+    ).subscribe((location) => {
+      if (location) this.onAdjust(location);
+    });
+  }
 
   public onAdjust(item: StockItemDto) {
     if (this._readOnly()) return;

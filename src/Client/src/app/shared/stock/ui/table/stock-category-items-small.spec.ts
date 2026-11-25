@@ -87,6 +87,17 @@ describe('StockCategoryItemsSmall', () => {
     fixture.destroy();
   });
 
+  it('emits the whole item when its name is clicked so the location can be chosen', () => {
+    const fixture = createFixture([createCategory([createStockItem()])]);
+    const openItem = vi.spyOn(fixture.componentInstance.openItem, 'emit');
+
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('button[aria-label="Alege locația pentru Caiet dictando"]')!.click();
+
+    expect(openItem).toHaveBeenCalledWith(expect.objectContaining({ itemId: 'item-1' }));
+    fixture.destroy();
+  });
+
   it('tints the item card red when any location is expired, otherwise amber for low stock', () => {
     const fixture = createFixture();
     const component = fixture.componentInstance;

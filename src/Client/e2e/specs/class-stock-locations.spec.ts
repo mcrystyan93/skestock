@@ -48,3 +48,30 @@ for (const width of [360, 768, 900, 1100, 1440]) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   });
 }
+
+test('clicking an item row asks for the location only when there are several', async ({page}) => {
+  await mockApi(page);
+  await page.setViewportSize({width: 1440, height: 900});
+  await page.goto(`/school-classes/${classId}?tab=0`);
+
+  const stockTab = page.locator('ske-class-stock');
+  await stockTab.locator('tr', {hasText: 'Mere'}).click({position: {x: 20, y: 20}});
+  const picker = page.locator('.ant-modal').filter({hasText: 'Alege locația'});
+  await expect(picker).toBeVisible();
+  await expect(picker.getByText('Frigider')).toBeVisible();
+
+  await picker.getByText('Frigider').click();
+  await picker.getByRole('button', {name: 'Continuă'}).click();
+  await expect(page.locator('.ant-modal').filter({hasText: 'Alege locația'})).toHaveCount(0);
+  await expect(page.locator('ske-stock-adjustment-modal')).toBeVisible();
+});
+
+test('clicking a single-location item row opens the adjustment modal directly', async ({page}) => {
+  await mockApi(page);
+  await page.setViewportSize({width: 1440, height: 900});
+  await page.goto(`/school-classes/${classId}?tab=0`);
+
+  await page.locator('ske-class-stock tr', {hasText: 'Făină'}).click({position: {x: 20, y: 20}});
+  await expect(page.locator('ske-stock-adjustment-modal')).toBeVisible();
+  await expect(page.getByText('Alege locația')).toHaveCount(0);
+});

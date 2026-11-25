@@ -45,6 +45,7 @@ export class StockCategoryItemsSmall {
 
   public readonly add = output<Partial<CategoryDto> | null>();
   public readonly adjust = output<StockItemDto>();
+  public readonly openItem = output<StockItemGroup>();
   public readonly move = output<StockItemDto>();
   public readonly removeExpired = output<StockItemDto>();
   public readonly extendExpiry = output<StockItemDto>();
