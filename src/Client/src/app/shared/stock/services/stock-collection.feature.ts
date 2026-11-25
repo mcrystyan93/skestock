@@ -73,29 +73,19 @@ export function withStockCollection() {
               .pipe(
                 mapResponse({
                   next: (result) => {
-                    // flat table rows: category header, then one row per item (plus one row per location when an item is in several)
+                    // flat table rows: a category header followed by one row per item
                     const sortedGroupedStockItems: StockItemCategoryGroup[] = [];
                     const byCategory = Object.values(groupBy(result.items, i => i.categoryId))
                       .sort((a, b) => a[0].categoryName.localeCompare(b[0].categoryName));
 
                     for (const items of byCategory) {
                       const { categoryId, categoryName, categoryIcon } = items[0];
-                      const row = (r: Pick<StockItemCategoryGroup, 'items' | 'item' | 'locations' | 'variant' | 'trackKey'>) =>
+                      const row = (r: Pick<StockItemCategoryGroup, 'items' | 'group' | 'isHeader' | 'trackKey'>) =>
                         sortedGroupedStockItems.push({ categoryId, categoryName, categoryIcon, ...r });
 
-                      row({ items, item: null, locations: [], variant: 'header', trackKey: `${categoryId}_header` });
-
-                      for (const group of groupStockByItem(items)) {
-                        const key = `${categoryId}-${group.itemId}`;
-                        if (group.locations.length === 1) {
-                          row({ items: [], item: group.item, locations: [], variant: 'single', trackKey: `${key}-${group.item.locationId}` });
-                          continue;
-                        }
-
-                        row({ items: [], item: group.item, locations: group.locations, variant: 'summary', trackKey: `${key}_summary` });
-                        for (const location of group.locations)
-                          row({ items: [], item: location, locations: [], variant: 'location', trackKey: `${key}-${location.locationId}` });
-                      }
+                      row({ items, group: null, isHeader: true, trackKey: `${categoryId}_header` });
+                      for (const group of groupStockByItem(items))
+                        row({ items: [], group, isHeader: false, trackKey: `${categoryId}-${group.itemId}` });
                     }
 
                     patchState(store, {

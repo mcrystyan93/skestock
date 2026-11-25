@@ -63,7 +63,7 @@ export class StockCategoryItemsSmall {
 
   public readonly categories = computed<StockCategoryView[]>(() =>
     this.items()
-      .filter(group => group.variant === 'header')
+      .filter(group => group.isHeader)
       .map(({ categoryId, categoryName, categoryIcon, items }) => {
         const groups = groupStockByItem(items);
         return {

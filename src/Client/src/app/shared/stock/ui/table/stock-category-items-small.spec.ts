@@ -110,9 +110,8 @@ function createCategory(items: StockItemDto[]): StockItemCategoryGroup {
     categoryId: 'category-1',
     categoryName: 'Papetărie',
     items,
-    item: null,
-    locations: [],
-    variant: 'header',
+    group: null,
+    isHeader: true,
     trackKey: 'category-1_header'
   };
 }

@@ -64,19 +64,16 @@ export function groupStockByItem(items: readonly StockItemDto[]): StockItemGroup
   return Array.from(groups.values());
 }
 
-/**
- * Flat row of the desktop stock table. `single` is an item stocked in one location,
- * `summary` + `location` rows are an item stocked in several.
- */
+/** Row of the desktop stock table: a category header, or one item with all its locations. */
 export type StockItemCategoryGroup = {
   categoryId: string;
   categoryName: string;
   categoryIcon?: IconPickerValue | null;
+  /** Every stock line of the category (header rows only). */
   items: StockItemDto[];
-  item: StockItemDto | null;
-  /** Every location line of a `summary` row. */
-  locations: StockItemDto[];
-  variant: 'header' | 'single' | 'summary' | 'location';
+  /** The item with its locations (item rows only). */
+  group: StockItemGroup | null;
+  isHeader: boolean;
   trackKey: string;
 };
 

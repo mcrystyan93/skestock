@@ -11,50 +11,41 @@
           [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
           [nzVirtualForTrackBy]="(index, item) => item.trackKey ?? item.index"
           nzSize="small"
-          [nzScroll]="{x:dimensions.width, y:dimensions.height}">
+          [nzScroll]="{x:'max(' + dimensions.width + ', 1100px)', y:dimensions.height}">
   <thead>
   <tr>
     <th nzColumnKey="itemName">
       <strong>Articol</strong>
     </th>
     <th nzColumnKey="quantity"
-        nzWidth="150px"
+        nzWidth="130px"
         class="text-right!">
       <strong>Cantitate</strong>
     </th>
-    <th nzColumnKey="locationName"
-        nzWidth="150px">
-      <strong>Locatie</strong>
+    <th nzWidth="34%">
+      <strong>Locații</strong>
     </th>
-    <th nzColumnKey="isPerishable"
-        nzWidth="150px">
-      <strong>Expira</strong>
+    <th nzWidth="220px">
+      <strong>Stare</strong>
     </th>
-    <th nzWidth="200px">
-      <strong>Actiuni</strong>
+    <th nzWidth="190px">
+      <strong>Acțiuni</strong>
     </th>
   </tr>
   </thead>
   <tbody>
   <ng-template nz-virtual-scroll
                let-category>
-    @if (category.variant === 'header') {
+    @if (category.isHeader) {
       <tr ske-stock-category-item-header-row
           [category]="category"
-          [items]="category.items ?? []"
+          [items]="category.items"
           (add)="addStock($event)">
-      </tr>
-    } @else if (category.variant === 'summary') {
-      <tr ske-stock-category-item-summary-row
-          [item]="category.item"
-          [locations]="category.locations">
       </tr>
     } @else {
       <tr ske-stock-category-item-row
-          [nested]="category.variant === 'location'"
-          [class.cursor-pointer]="!readOnly()"
-          [item]="category.item"
-          (click)="readOnly() || adjust.emit(category.item)"
+          [group]="category.group"
+          (adjust)="adjust.emit($event)"
           (move)="move.emit($event)"
           (removeExpired)="removeExpired.emit($event)"
           (extendExpiry)="extendExpiry.emit($event)"
