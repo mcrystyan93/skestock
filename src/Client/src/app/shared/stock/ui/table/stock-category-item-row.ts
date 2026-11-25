@@ -53,10 +53,12 @@ export class StockCategoryItemRow {
   public readonly rowClass = computed(() => {
     const item = this.item();
 
-    return item.isLowStock
+    const tone = item.isLowStock
       ? '[&>td]:!bg-amber-500/10'
       : item.isExpired
         ? '[&>td]:!bg-red-500/15'
         : '';
+
+    return this.nested() ? `${tone} [&>td]:!py-1` : tone;
   });
 }
