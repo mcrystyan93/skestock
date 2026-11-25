@@ -61,7 +61,6 @@ test('clicking an item row asks for the location only when there are several', a
   await expect(picker.getByText('Frigider')).toBeVisible();
 
   await picker.getByText('Frigider').click();
-  await picker.getByRole('button', {name: 'Continuă'}).click();
   await expect(page.locator('.ant-modal').filter({hasText: 'Alege locația'})).toHaveCount(0);
   await expect(page.locator('ske-stock-adjustment-modal')).toBeVisible();
 });

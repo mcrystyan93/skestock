@@ -18,7 +18,7 @@ describe('StockLocationPickerModal', () => {
     TestBed.configureTestingModule({
       providers: [
         provideNzIconsTesting(),
-        provideNzIcons([{ name: 'icons:circle-check', icon: '<svg viewBox="0 0 24 24"></svg>' }]),
+        provideNzIcons([{ name: 'icons:chevron-right', icon: '<svg viewBox="0 0 24 24"></svg>' }]),
         { provide: NZ_MODAL_DATA, useValue: { group } },
         { provide: NzModalRef, useValue: { close, updateConfig: vi.fn() } }
       ]
@@ -28,25 +28,20 @@ describe('StockLocationPickerModal', () => {
     return { fixture, close };
   }
 
-  it('lists every location and does not close until one is chosen', () => {
+  it('lists every location', () => {
     const { fixture, close } = create();
     const element = fixture.nativeElement as HTMLElement;
 
-    expect(element.querySelectorAll('input[type="radio"]').length).toBe(2);
+    expect(element.querySelectorAll('button').length).toBe(2);
     expect(element.textContent).toContain('Stoc redus');
-    // the footer lives in the modal shell, so confirming without a choice must simply do nothing
-    (fixture.componentInstance as unknown as { confirm(): void }).confirm();
     expect(close).not.toHaveBeenCalled();
     fixture.destroy();
   });
 
-  it('closes with the chosen location', () => {
+  it('closes with the location as soon as it is chosen', () => {
     const { fixture, close } = create();
-    const element = fixture.nativeElement as HTMLElement;
 
-    element.querySelectorAll<HTMLInputElement>('input[type="radio"]')[1].click();
-    fixture.detectChanges();
-    (fixture.componentInstance as unknown as { confirm(): void }).confirm();
+    (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('button')[1].click();
 
     expect(close).toHaveBeenCalledWith(expect.objectContaining({ locationId: 'l2' }));
     fixture.destroy();

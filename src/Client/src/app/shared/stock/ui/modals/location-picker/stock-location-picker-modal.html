@@ -8,18 +8,14 @@
   </div>
 </div>
 
-<fieldset class="m-0 border-0 p-0">
-  <legend class="sr-only">Locație</legend>
-  <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+<div role="group"
+     aria-label="Locație"
+     class="grid grid-cols-1 gap-2 sm:grid-cols-2">
     @for (loc of modalData.group.locations; track loc.locationId) {
-      <label class="group flex items-center gap-2 px-3 py-2"
-             [class]="cardClasses">
-        <input type="radio"
-               name="stock-location"
-               class="sr-only"
-               [value]="loc.locationId"
-               [checked]="selected()?.locationId === loc.locationId"
-               (change)="selected.set(loc)">
+      <button type="button"
+              class="flex w-full items-center gap-2 bg-transparent px-3 py-2 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+              [class]="cardClasses"
+              (click)="select(loc)">
         <span class="flex min-w-0 grow flex-col">
           <span class="truncate font-medium">{{ loc.locationName }}</span>
           <span nz-typography
@@ -38,13 +34,13 @@
             </span>
           }
         </span>
-        <nz-icon nzType="icons:circle-check"
-                 class="invisible shrink-0 text-xl text-primary-600 group-has-checked:visible dark:text-primary-400"
+        <nz-icon nzType="icons:chevron-right"
+                 class="shrink-0 text-base opacity-50"
                  aria-hidden="true" />
-      </label>
+      </button>
     }
   </div>
-</fieldset>
+
 
 <div *nzModalFooter>
   <div class="flex flex-wrap justify-end gap-2">
@@ -53,13 +49,6 @@
             type="button"
             (click)="close()">
       Anulează
-    </button>
-    <button nz-button
-            nzType="primary"
-            type="button"
-            [disabled]="!selected()"
-            (click)="confirm()">
-      Continuă
     </button>
   </div>
 </div>
