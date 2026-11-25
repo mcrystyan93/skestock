@@ -9,6 +9,7 @@ import { NzSkeletonComponent } from 'ng-zorro-antd/skeleton';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
 import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
+import { ItemThumbnail } from '@ske/shared/items';
 import { TimeAgoPipe } from '@ske/shared/pipes';
 import { StockItemActions } from './stock-item-actions';
 
@@ -21,6 +22,7 @@ interface StockCategoryView extends Pick<StockItemCategoryGroup, 'categoryId' | 
 
 @Component({
   imports: [
+    ItemThumbnail,
     NzButtonComponent,
     NzCardComponent,
     NzEmptyComponent,
