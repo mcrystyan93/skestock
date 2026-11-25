@@ -28,14 +28,65 @@ export type StockReportDto = {
   hasExpiredItems: boolean;
 };
 
+/** Accessible description of one location's stock line. */
+export function stockLocationLabel(location: StockItemDto): string {
+  return `Ajustează stocul pentru ${location.itemName} la ${location.locationName}: ${location.quantity} ${location.unit}`
+    + (location.isLowStock ? ', stoc redus' : '')
+    + (location.isExpired ? `, posibil expirat ${location.expiredQuantity}` : '');
+}
+
+/** One item with its per-location stock lines, in the order received. */
+export type StockItemGroup = {
+  itemId: string;
+  /** Identity fields (name, sku, unit, image) are the same on every location line. */
+  item: StockItemDto;
+  locations: StockItemDto[];
+  totalQuantity: number;
+  /** Most recent update across the locations. */
+  lastUpdatedAt: string | null;
+  isLowStock: boolean;
+  isExpired: boolean;
+};
+
+export function groupStockByItem(items: readonly StockItemDto[]): StockItemGroup[] {
+  const groups = new Map<string, StockItemGroup>();
+
+  for (const line of items) {
+    const group = groups.get(line.itemId);
+    if (group) {
+      group.locations.push(line);
+      group.totalQuantity += line.quantity;
+      if (line.lastUpdatedAt && (!group.lastUpdatedAt || line.lastUpdatedAt > group.lastUpdatedAt))
+        group.lastUpdatedAt = line.lastUpdatedAt;
+      group.isLowStock ||= line.isLowStock;
+      group.isExpired ||= line.isExpired;
+    } else {
+      groups.set(line.itemId, {
+        itemId: line.itemId,
+        item: line,
+        locations: [line],
+        totalQuantity: line.quantity,
+        lastUpdatedAt: line.lastUpdatedAt,
+        isLowStock: line.isLowStock,
+        isExpired: line.isExpired
+      });
+    }
+  }
+
+  return Array.from(groups.values());
+}
+
+/** Row of the desktop stock table: a category header, or one item with all its locations. */
 export type StockItemCategoryGroup = {
   categoryId: string;
   categoryName: string;
   categoryIcon?: IconPickerValue | null;
-  items: StockItemDto[];
-  item: StockItemDto | null;
-  isHeader:boolean;
-  trackKey:string
+  /** The category's items (header rows only). */
+  groups: StockItemGroup[];
+  /** The item with its locations (item rows only). */
+  group: StockItemGroup | null;
+  isHeader: boolean;
+  trackKey: string;
 };
 
 /**

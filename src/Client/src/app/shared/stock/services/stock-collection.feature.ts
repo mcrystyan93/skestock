@@ -4,8 +4,10 @@ import {
   RemoveExpiredStockRequest,
   SetClassItemStockVisibilityRequest,
   StockItemCategoryGroup,
-  StockItemDto
+  StockItemDto,
+  groupStockByItem
 } from '@ske/models';
+import { groupBy } from 'lodash-es';
 import { patchState, signalStoreFeature, withMethods, withProps, withState } from '@ngrx/signals';
 import { withLoadingFeature } from '@ske/shared/loader';
 import { withProblemDetailsFeature } from '@ske/shared/errors';
@@ -71,36 +73,21 @@ export function withStockCollection() {
               .pipe(
                 mapResponse({
                   next: (result) => {
-                    // create a list of StockItemCategoryGroup. If the category appears for the first time, it's a header, otherwise it's an item and we put the item there
-                    const groupedStockItems = new Map<string, StockItemCategoryGroup>();
-                    for (const item of result.items) {
-                      if (!groupedStockItems.has(item.categoryId)) {
-                        groupedStockItems.set(item.categoryId, {
-                          categoryId: item.categoryId,
-                          categoryName: item.categoryName,
-                          categoryIcon: item.categoryIcon,
-                          // all items for this category
-                          items: result.items.filter(i => i.categoryId === item.categoryId),
-                          item: null,
-                          isHeader: true,
-                          trackKey: `${item.categoryId}_header`
-                        });
-                      }
-                      groupedStockItems.set(`${item.categoryId}-${item.itemId}-${item.locationId}`, {
-                        categoryId: item.categoryId,
-                        categoryName: item.categoryName,
-                        categoryIcon: item.categoryIcon,
-                        items: [],
-                        item: item,
-                        isHeader: false,
-                        trackKey: `${item.categoryId}-${item.itemId}-${item.locationId}`
-                      });
-                    }
+                    // flat table rows: a category header followed by one row per item
+                    const sortedGroupedStockItems: StockItemCategoryGroup[] = [];
+                    const byCategory = Object.values(groupBy(result.items, i => i.categoryId))
+                      .sort((a, b) => a[0].categoryName.localeCompare(b[0].categoryName));
 
-                    // sort the groups by category name
-                    const sortedGroupedStockItems = Array.from(groupedStockItems.values()).sort((a, b) =>
-                      a.categoryName.localeCompare(b.categoryName)
-                    );
+                    for (const items of byCategory) {
+                      const { categoryId, categoryName, categoryIcon } = items[0];
+                      const row = (r: Pick<StockItemCategoryGroup, 'groups' | 'group' | 'isHeader' | 'trackKey'>) =>
+                        sortedGroupedStockItems.push({ categoryId, categoryName, categoryIcon, ...r });
+
+                      const groups = groupStockByItem(items);
+                      row({ groups, group: null, isHeader: true, trackKey: `${categoryId}_header` });
+                      for (const group of groups)
+                        row({ groups: [], group, isHeader: false, trackKey: `${categoryId}-${group.itemId}` });
+                    }
 
                     patchState(store, {
                       stockItems: result.items,

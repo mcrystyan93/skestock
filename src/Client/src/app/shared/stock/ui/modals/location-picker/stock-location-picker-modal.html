@@ -1,0 +1,54 @@
+<div *nzModalTitle>
+  <h4 nz-typography
+      class="mb-0!">Alege locația</h4>
+  <div nz-typography
+       nzType="secondary"
+       class="mb-0!">
+    {{ modalData.group.item.itemName }}
+  </div>
+</div>
+
+<div role="group"
+     aria-label="Locație"
+     class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+    @for (loc of modalData.group.locations; track loc.locationId) {
+      <button type="button"
+              class="flex w-full items-center gap-2 bg-transparent px-3 py-2 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
+              [class]="cardClasses"
+              (click)="select(loc)">
+        <span class="flex min-w-0 grow flex-col">
+          <span class="truncate font-medium">{{ loc.locationName }}</span>
+          <span nz-typography
+                nzType="secondary"
+                class="text-sm">{{ loc.quantity }} {{ loc.unit }}</span>
+          @if (loc.isLowStock || loc.isExpired) {
+            <span class="mt-1 flex flex-wrap gap-1">
+              @if (loc.isLowStock) {
+                <nz-tag nzColor="orange"
+                        class="me-0!">Stoc redus</nz-tag>
+              }
+              @if (loc.isExpired) {
+                <nz-tag nzColor="red"
+                        class="me-0!">Expiră ({{ loc.expiredQuantity }})</nz-tag>
+              }
+            </span>
+          }
+        </span>
+        <nz-icon nzType="icons:chevron-right"
+                 class="shrink-0 text-base opacity-50"
+                 aria-hidden="true" />
+      </button>
+    }
+  </div>
+
+
+<div *nzModalFooter>
+  <div class="flex flex-wrap justify-end gap-2">
+    <button nz-button
+            nzType="default"
+            type="button"
+            (click)="close()">
+      Anulează
+    </button>
+  </div>
+</div>

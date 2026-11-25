@@ -1,4 +1,4 @@
-<ng-container *skeLayoutBreakpoint="'lg'; else small">
+<ng-container *skeLayoutBreakpoint="'xl'; else medium">
   <ske-stock-category-items-table [items]="store.groupedStockItems()"
                                   [filter]="{}"
                                   [isLoadingMore]="false"
@@ -6,6 +6,7 @@
                                   [loading]="store.stockItemsLoading()"
                                   (add)="addStock($event)"
                                   (adjust)="onAdjust($event)"
+                                  (openItem)="onOpenItem($event)"
                                   (move)="onMove($event)"
                                   (removeExpired)="onRemoveExpired($event)"
                                   (extendExpiry)="onExtendExpiry($event)"
@@ -13,11 +14,30 @@
                                   (visibilityChange)="onVisibilityChange($event)" />
 </ng-container>
 
+<ng-template #medium>
+  <ng-container *skeLayoutBreakpoint="'md'; else small">
+    <ske-stock-category-items-table [items]="store.groupedStockItems()"
+                                    [filter]="{}"
+                                    [isLoadingMore]="false"
+                                    [hasNextPage]="false"
+                                    [loading]="store.stockItemsLoading()"
+                                    [compact]="true"
+                                    (adjust)="onAdjust($event)"
+                                  (openItem)="onOpenItem($event)"
+                                    (move)="onMove($event)"
+                                    (removeExpired)="onRemoveExpired($event)"
+                                    (extendExpiry)="onExtendExpiry($event)"
+                                    (addToOrder)="onAddToOrder($event)"
+                                    (visibilityChange)="onVisibilityChange($event)" />
+  </ng-container>
+</ng-template>
+
 <ng-template #small>
   <ske-stock-category-items-small [items]="store.groupedStockItems()"
                                   [loading]="store.stockItemsLoading()"
                                   (add)="addStock($event)"
                                   (adjust)="onAdjust($event)"
+                                  (openItem)="onOpenItem($event)"
                                   (move)="onMove($event)"
                                   (removeExpired)="onRemoveExpired($event)"
                                   (extendExpiry)="onExtendExpiry($event)"

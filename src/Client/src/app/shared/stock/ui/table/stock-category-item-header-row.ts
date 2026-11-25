@@ -4,7 +4,7 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzTableCellDirective } from 'ng-zorro-antd/table';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
-import { StockItemCategoryGroup, StockItemDto } from '@ske/models';
+import { StockItemCategoryGroup } from '@ske/models';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
 
 @Component({
@@ -22,10 +22,11 @@ import { NzTagComponent } from 'ng-zorro-antd/tag';
 export class StockCategoryItemHeaderRow {
   public readonly readOnly = injectClassReadOnly();
   public readonly category = input.required<StockItemCategoryGroup>();
-  public readonly items = input.required<StockItemDto[]>();
+  public readonly columnCount = input(5);
 
   public readonly add = output<StockItemCategoryGroup>();
 
-  public readonly numberOfLowStockItems = computed(() => this.items().filter(item => item.isLowStock).length);
-  public readonly numberOfExpiredItems = computed(() => this.items().filter(item => item.isExpired).length);
+  public readonly numberOfItems = computed(() => this.category().groups.length);
+  public readonly numberOfLowStockItems = computed(() => this.category().groups.filter(g => g.isLowStock).length);
+  public readonly numberOfExpiredItems = computed(() => this.category().groups.filter(g => g.isExpired).length);
 }

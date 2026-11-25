@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { CLASS_READ_ONLY } from '@ske/shared/school-classes';
-import { StockItemCategoryGroup, StockItemDto } from '@ske/models';
+import { groupStockByItem, StockItemCategoryGroup, StockItemDto } from '@ske/models';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
 import { StockCategoryItemsSmall } from './stock-category-items-small';
@@ -16,7 +16,7 @@ describe('StockCategoryItemsSmall', () => {
           { name: 'icons:box', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:plus', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:clock', icon: '<svg viewBox="0 0 24 24"></svg>' },
-          { name: 'icons:ellipsis-vertical', icon: '<svg viewBox="0 0 24 24"></svg>' },
+          { name: 'icons:ellipsis', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:arrow-right-arrow-left', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:trash', icon: '<svg viewBox="0 0 24 24"></svg>' },
           { name: 'icons:cart-plus', icon: '<svg viewBox="0 0 24 24"></svg>' },
@@ -52,7 +52,7 @@ describe('StockCategoryItemsSmall', () => {
     const element = fixture.nativeElement as HTMLElement;
 
     element.querySelector<HTMLButtonElement>('button[aria-label="Adaugă stoc pentru Papetărie"]')!.click();
-    element.querySelector<HTMLButtonElement>('button[aria-label^="Ajustează stocul pentru Caiet"]')!.click();
+    element.querySelector<HTMLButtonElement>('button[aria-label^="Ajustează stocul pentru Caiet dictando la"]')!.click();
 
     expect(add).toHaveBeenCalledWith({ id: 'category-1', name: 'Papetărie' });
     expect(adjust).toHaveBeenCalledWith(item);
@@ -71,12 +71,41 @@ describe('StockCategoryItemsSmall', () => {
     fixture.destroy();
   });
 
-  it('applies low-stock tone in preference to expired tone', () => {
+  it('shows an item stocked in several locations once, with each location and its flags', () => {
+    const fixture = createFixture([createCategory([
+      createStockItem({ locationId: 'l1', locationName: 'Sala 1', quantity: 2, isLowStock: true }),
+      createStockItem({ locationId: 'l2', locationName: 'Sala 2', quantity: 5, isExpired: true, expiredQuantity: 3 })
+    ])]);
+    const element = fixture.nativeElement as HTMLElement;
+    const text = element.textContent ?? '';
+
+    expect(element.querySelectorAll('h3').length).toBe(1);
+    expect(element.querySelectorAll('li').length).toBe(2);
+    expect(text).toContain('7 buc');
+    expect(text).toContain('Stoc redus');
+    expect(text).toContain('Expiră (3)');
+    fixture.destroy();
+  });
+
+  it('emits the whole item when its name is clicked so the location can be chosen', () => {
+    const fixture = createFixture([createCategory([createStockItem()])]);
+    const openItem = vi.spyOn(fixture.componentInstance.openItem, 'emit');
+
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('button[aria-label="Ajustează stocul pentru Caiet dictando"]')!.click();
+
+    expect(openItem).toHaveBeenCalledWith(expect.objectContaining({ itemId: 'item-1' }));
+    fixture.destroy();
+  });
+
+  it('tints the item card red when any location is expired, otherwise amber for low stock', () => {
     const fixture = createFixture();
     const component = fixture.componentInstance;
+    const group = (...items: StockItemDto[]) => groupStockByItem(items)[0];
 
-    expect(component.cardToneClass(createStockItem({ isLowStock: true, isExpired: true }))).toBe('!bg-amber-500/10');
-    expect(component.cardToneClass(createStockItem({ isExpired: true }))).toBe('!bg-red-500/15');
+    expect(component.cardToneClass(group(createStockItem({ isLowStock: true, isExpired: true })))).toBe('!bg-red-500/15');
+    expect(component.cardToneClass(group(createStockItem({ isLowStock: true })))).toBe('!bg-amber-500/10');
+    expect(component.cardToneClass(group(createStockItem()))).toBe('');
     fixture.destroy();
   });
 
@@ -93,8 +122,8 @@ function createCategory(items: StockItemDto[]): StockItemCategoryGroup {
   return {
     categoryId: 'category-1',
     categoryName: 'Papetărie',
-    items,
-    item: null,
+    groups: groupStockByItem(items),
+    group: null,
     isHeader: true,
     trackKey: 'category-1_header'
   };

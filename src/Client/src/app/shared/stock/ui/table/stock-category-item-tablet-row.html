@@ -1,0 +1,52 @@
+@let g = group();
+@let item = g.item;
+
+<td>
+  <div class="font-semibold">{{ item.itemName }}</div>
+  <div nz-typography
+       nzType="secondary"
+       class="mb-0! text-xs">
+    {{ item.sku ?? '-' }} · <nz-icon nzType="icons:clock" /> {{ g.lastUpdatedAt ? (g.lastUpdatedAt | timeAgo) : '-' }}
+  </div>
+  @if (item.isPerishable || g.isExpired) {
+    <div class="mt-1 flex flex-wrap gap-1">
+      @if (item.isPerishable) {
+        <nz-tag nzColor="orange"
+                class="me-0!">Perisabil</nz-tag>
+      }
+      @if (g.isExpired) {
+        <nz-tag nzColor="red"
+                class="me-0!">Posibil expirat ({{ expiredQuantity() }})</nz-tag>
+      }
+    </div>
+  }
+</td>
+<td>
+  <div class="flex flex-col items-start gap-1">
+    @for (loc of g.locations; track loc.locationId) {
+      <ske-stock-location-chip [location]="loc"
+                               [showQuantity]="!isSingle()"
+                               [disabled]="readOnly()"
+                               (adjust)="adjust.emit($event)" />
+    }
+  </div>
+</td>
+<td class="text-right!">
+  <h5 nz-typography
+      class="mb-0!">{{ g.totalQuantity }} {{ item.unit }}</h5>
+  @if (!isSingle()) {
+    <span nz-typography
+          nzType="secondary"
+          class="text-xs">total</span>
+  }
+</td>
+<td class="text-right!">
+  @if (!readOnly()) {
+    <ske-stock-item-actions [group]="g"
+                            (move)="move.emit($event)"
+                            (removeExpired)="removeExpired.emit($event)"
+                            (extendExpiry)="extendExpiry.emit($event)"
+                            (addToOrder)="addToOrder.emit($event)"
+                            (visibilityChange)="visibilityChange.emit($event)" />
+  }
+</td>

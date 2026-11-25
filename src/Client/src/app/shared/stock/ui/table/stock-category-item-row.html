@@ -1,121 +1,183 @@
-@let stockItem = item();
+@let g = group();
+@let item = g.item;
 
-<td nzRight>
+<td>
   <div class="flex items-center gap-3">
-    <ske-item-thumbnail [itemId]="stockItem.itemId"
-                        [imageFileId]="stockItem.imageFileId" />
-  <div class="flex flex-col">
-    <strong>{{ stockItem.itemName }}</strong>
-    <div>
-      <span nz-typography
-            nzType="secondary"
-            class="mb-0!">{{ stockItem.sku ?? '-' }}</span>
-      <span> - </span>
-      <strong nz-typography
+    <ske-item-thumbnail [itemId]="item.itemId"
+                        [imageFileId]="item.imageFileId" />
+    <div class="flex min-w-0 flex-col">
+      <strong>{{ item.itemName }}</strong>
+      <div>
+        <span nz-typography
+              nzType="secondary"
+              class="mb-0!">{{ item.sku ?? '-' }}</span>
+        <span> · </span>
+        <span nz-typography
               nzType="secondary">
-        <nz-icon nzType="icons:clock"></nz-icon>
-        {{ stockItem.lastUpdatedAt ? (stockItem.lastUpdatedAt | timeAgo) : '-' }}
-      </strong>
+          <nz-icon nzType="icons:clock" />
+          {{ g.lastUpdatedAt ? (g.lastUpdatedAt | timeAgo) : '-' }}
+        </span>
+      </div>
     </div>
-  </div>
   </div>
 </td>
 <td class="text-right!">
   <h5 nz-typography
-      class="mb-0!">{{ stockItem.quantity }} {{ stockItem.unit }}</h5>
-  @if (stockItem.isLowStock) {
+      class="mb-0!">{{ g.totalQuantity }} {{ item.unit }}</h5>
+  @if (!isSingle()) {
     <span nz-typography
-          nzType="warning">stoc redus</span>
+          nzType="secondary"
+          class="text-xs">total</span>
   }
 </td>
 <td>
-  <span>{{ stockItem.locationName }}</span>
+  <div class="flex flex-wrap gap-1">
+    @for (loc of g.locations; track loc.locationId) {
+      <ske-stock-location-chip [location]="loc"
+                               [showQuantity]="!isSingle()"
+                               [disabled]="readOnly()"
+                               (adjust)="adjust.emit($event)" />
+    }
+  </div>
 </td>
 <td>
   <div class="flex flex-wrap gap-1">
-    @if (stockItem.isPerishable) {
+    @if (item.isPerishable) {
       <nz-tag nzColor="orange">Perisabil</nz-tag>
-      @if (stockItem.isExpired) {
-        <nz-tag nzColor="red">Posibil expirat ({{ stockItem.expiredQuantity }})</nz-tag>
-      }
-    } @else {
-      <nz-tag>Nu</nz-tag>
+    }
+    @if (g.isExpired) {
+      <nz-tag nzColor="red">Posibil expirat ({{ expiredQuantity() }})</nz-tag>
+    }
+    @if (g.isLowStock) {
+      <nz-tag nzColor="orange">Stoc redus</nz-tag>
     }
   </div>
 </td>
 <td class="whitespace-nowrap">
   @if (!readOnly()) {
-  <button nz-button
-          nzType="text"
-          type="button"
-          nz-tooltip
-          skeStopClick
-          [nzTooltipTitle]="stockItem.quantity > 0
-              ? 'Mută stocul pentru ' + stockItem.itemName
-              : 'Mutarea nu este disponibilă pentru stoc 0 sau negativ'"
-          [attr.aria-label]="stockItem.quantity > 0
-              ? 'Mută stocul pentru ' + stockItem.itemName
-              : 'Mutarea nu este disponibilă pentru stoc 0 sau negativ'"
-          [disabled]="stockItem.quantity <= 0"
-          (click)="move.emit(stockItem)">
-    <nz-icon nzType="icons:arrow-right-arrow-left"></nz-icon>
-  </button>
-  <button nz-button
-          nzType="text"
-          type="button"
-          nz-tooltip
-          skeStopClick
-          nzTooltipTitle="Adaugă în comandă"
-          [attr.aria-label]="'Adaugă ' + stockItem.itemName + ' într-o comandă'"
-          (click)="addToOrder.emit(stockItem)">
-    <nz-icon nzType="icons:cart-plus"></nz-icon>
-  </button>
-  @if (stockItem.expiredQuantity > 0) {
     <button nz-button
             nzType="text"
             type="button"
+            nz-tooltip
+            nz-dropdown
+            nzTrigger="click"
+            skeStopClick
+            [nzDisabled]="isSingle()"
+            [nzDropdownMenu]="moveMenu"
+            [nzTooltipTitle]="movable().length ? 'Mută stocul' : 'Mutarea nu este disponibilă pentru stoc 0 sau negativ'"
+            [attr.aria-label]="'Mută stocul pentru ' + item.itemName"
+            [disabled]="movable().length === 0"
+            (click)="isSingle() && move.emit(item)">
+      <nz-icon nzType="icons:arrow-right-arrow-left" />
+    </button>
+    <nz-dropdown-menu #moveMenu="nzDropdownMenu">
+      <ul nz-menu>
+        @for (loc of movable(); track loc.locationId) {
+          <li nz-menu-item
+              (click)="move.emit(loc)">{{ loc.locationName }} · {{ loc.quantity }} {{ loc.unit }}</li>
+        }
+      </ul>
+    </nz-dropdown-menu>
+
+    <button nz-button
+            nzType="text"
+            type="button"
+            nz-tooltip
+            nz-dropdown
+            nzTrigger="click"
+            skeStopClick
+            nzTooltipTitle="Adaugă în comandă"
+            [nzDisabled]="isSingle()"
+            [nzDropdownMenu]="orderMenu"
+            [attr.aria-label]="'Adaugă ' + item.itemName + ' într-o comandă'"
+            (click)="isSingle() && addToOrder.emit(item)">
+      <nz-icon nzType="icons:cart-plus" />
+    </button>
+    <nz-dropdown-menu #orderMenu="nzDropdownMenu">
+      <ul nz-menu>
+        @for (loc of g.locations; track loc.locationId) {
+          <li nz-menu-item
+              (click)="addToOrder.emit(loc)">{{ loc.locationName }}</li>
+        }
+      </ul>
+    </nz-dropdown-menu>
+
+    <button nz-button
+            nzType="text"
+            type="button"
+            nz-tooltip
             nz-dropdown
             nzTrigger="click"
             nzPlacement="bottomRight"
             skeStopClick
-            nz-tooltip
             nzTooltipTitle="Acțiuni pentru articole expirate"
+            [class.invisible]="expired().length === 0"
+            [disabled]="expired().length === 0"
             [nzDropdownMenu]="expiredMenu"
-            [attr.aria-label]="'Acțiuni pentru articolele expirate ale ' + stockItem.itemName">
-      <nz-icon nzType="icons:calendar-exclamation"></nz-icon>
+            [attr.aria-label]="'Acțiuni pentru articolele expirate ale ' + item.itemName">
+      <nz-icon nzType="icons:calendar-exclamation" />
     </button>
     <nz-dropdown-menu #expiredMenu="nzDropdownMenu">
       <ul nz-menu>
-        <li nz-menu-item
-            (click)="extendExpiry.emit(stockItem)">
-          <nz-icon nzType="icons:calendar-plus" class="me-2" />
-          Prelungește expirarea
-        </li>
-        <li nz-menu-item
-            nzDanger
-            nz-popconfirm
-            nzPopconfirmPlacement="topRight"
-            [nzPopconfirmTitle]="'Elimini cele ' + stockItem.expiredQuantity + ' articole expirate pentru ' + stockItem.itemName + '?'"
-            (nzOnConfirm)="removeExpired.emit(stockItem)">
-          <nz-icon nzType="icons:trash" class="me-2" />
-          Elimină articolele expirate
-        </li>
+        @for (loc of expired(); track loc.locationId) {
+          @if (isSingle()) {
+            <ng-container *ngTemplateOutlet="expiredActions; context: { $implicit: loc }" />
+          } @else {
+            <li nz-submenu
+                [nzTitle]="loc.locationName + ' · ' + loc.expiredQuantity + ' expirate'">
+              <ul>
+                <ng-container *ngTemplateOutlet="expiredActions; context: { $implicit: loc }" />
+              </ul>
+            </li>
+          }
+        }
       </ul>
     </nz-dropdown-menu>
-  }
-  <button nz-button
-          skeStopClick
-          nzType="text"
-          type="button"
-          nz-tooltip
-          [nzTooltipTitle]="(stockItem.hideWhenZeroStock
-            ? 'Nu mai ascunde la stoc 0 pentru '
-            : 'Ascunde când stocul ajunge la 0 pentru ') + stockItem.itemName + ' la ' + stockItem.locationName"
-          [attr.aria-label]="(stockItem.hideWhenZeroStock
-            ? 'Nu mai ascunde la stoc 0 pentru '
-            : 'Ascunde când stocul ajunge la 0 pentru ') + stockItem.itemName + ' la ' + stockItem.locationName"
-          (click)="visibilityChange.emit(stockItem)">
-    <nz-icon [nzType]="stockItem.hideWhenZeroStock ? 'icons:eye' : 'icons:eye-slash'"></nz-icon>
-  </button>
+
+    <button nz-button
+            nzType="text"
+            type="button"
+            nz-tooltip
+            nz-dropdown
+            nzTrigger="click"
+            nzPlacement="bottomRight"
+            skeStopClick
+            [nzDisabled]="isSingle()"
+            [nzDropdownMenu]="visibilityMenu"
+            [nzTooltipTitle]="isSingle()
+              ? (item.hideWhenZeroStock ? 'Nu mai ascunde la stoc 0' : 'Ascunde când stocul ajunge la 0')
+              : 'Ascunde la stoc 0'"
+            [attr.aria-label]="'Vizibilitate la stoc 0 pentru ' + item.itemName"
+            (click)="isSingle() && visibilityChange.emit(item)">
+      <nz-icon [nzType]="isSingle() && item.hideWhenZeroStock ? 'icons:eye' : 'icons:eye-slash'" />
+    </button>
+    <nz-dropdown-menu #visibilityMenu="nzDropdownMenu">
+      <ul nz-menu>
+        @for (loc of g.locations; track loc.locationId) {
+          <li nz-menu-item
+              (click)="visibilityChange.emit(loc)">
+            {{ loc.locationName }} · {{ loc.hideWhenZeroStock ? 'nu mai ascunde la stoc 0' : 'ascunde la stoc 0' }}
+          </li>
+        }
+      </ul>
+    </nz-dropdown-menu>
+
+    <ng-template #expiredActions
+                 let-loc>
+      <li nz-menu-item
+          (click)="extendExpiry.emit(loc)">
+        <nz-icon nzType="icons:calendar-plus" class="me-2" />
+        Prelungește expirarea
+      </li>
+      <li nz-menu-item
+          nzDanger
+          nz-popconfirm
+          nzPopconfirmPlacement="topRight"
+          [nzPopconfirmTitle]="'Elimini cele ' + loc.expiredQuantity + ' articole expirate pentru ' + loc.itemName + ' la ' + loc.locationName + '?'"
+          (nzOnConfirm)="removeExpired.emit(loc)">
+        <nz-icon nzType="icons:trash" class="me-2" />
+        Elimină articolele expirate
+      </li>
+    </ng-template>
   }
 </td>
