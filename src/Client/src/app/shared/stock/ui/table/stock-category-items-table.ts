@@ -11,12 +11,14 @@ import {
 import { BaseTableWithFilter } from '@ske/shared/tables';
 import { StockCategoryItemHeaderRow } from './stock-category-item-header-row';
 import { StockCategoryItemRow } from './stock-category-item-row';
+import { StockCategoryItemSummaryRow } from './stock-category-item-summary-row';
 
 @Component({
   imports: [
     NzTableModule,
     StockCategoryItemHeaderRow,
-    StockCategoryItemRow
+    StockCategoryItemRow,
+    StockCategoryItemSummaryRow
   ],
   selector: 'ske-stock-category-items-table',
   templateUrl: './stock-category-items-table.html',

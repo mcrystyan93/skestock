@@ -28,14 +28,56 @@ export type StockReportDto = {
   hasExpiredItems: boolean;
 };
 
+/** One item with its per-location stock lines, in the order received. */
+export type StockItemGroup = {
+  itemId: string;
+  /** Identity fields (name, sku, unit, image) are the same on every location line. */
+  item: StockItemDto;
+  locations: StockItemDto[];
+  totalQuantity: number;
+  isLowStock: boolean;
+  isExpired: boolean;
+};
+
+export function groupStockByItem(items: readonly StockItemDto[]): StockItemGroup[] {
+  const groups = new Map<string, StockItemGroup>();
+
+  for (const line of items) {
+    const group = groups.get(line.itemId);
+    if (group) {
+      group.locations.push(line);
+      group.totalQuantity += line.quantity;
+      group.isLowStock ||= line.isLowStock;
+      group.isExpired ||= line.isExpired;
+    } else {
+      groups.set(line.itemId, {
+        itemId: line.itemId,
+        item: line,
+        locations: [line],
+        totalQuantity: line.quantity,
+        isLowStock: line.isLowStock,
+        isExpired: line.isExpired
+      });
+    }
+  }
+
+  return Array.from(groups.values());
+}
+
+/**
+ * Flat row of the desktop stock table. `single` is an item stocked in one location,
+ * `summary` + `location` rows are an item stocked in several.
+ */
 export type StockItemCategoryGroup = {
   categoryId: string;
   categoryName: string;
   categoryIcon?: IconPickerValue | null;
   items: StockItemDto[];
   item: StockItemDto | null;
-  isHeader:boolean;
-  trackKey:string
+  /** Every location line of a `summary` row. */
+  locations: StockItemDto[];
+  variant: 'header' | 'single' | 'summary' | 'location';
+  trackKey: string;
 };
 
 /**

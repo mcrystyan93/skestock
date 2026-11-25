@@ -71,6 +71,22 @@ describe('StockCategoryItemsSmall', () => {
     fixture.destroy();
   });
 
+  it('shows an item stocked in several locations once, with each location and its flags', () => {
+    const fixture = createFixture([createCategory([
+      createStockItem({ locationId: 'l1', locationName: 'Sala 1', quantity: 2, isLowStock: true }),
+      createStockItem({ locationId: 'l2', locationName: 'Sala 2', quantity: 5, isExpired: true, expiredQuantity: 3 })
+    ])]);
+    const element = fixture.nativeElement as HTMLElement;
+    const text = element.textContent ?? '';
+
+    expect(element.querySelectorAll('h3').length).toBe(1);
+    expect(element.querySelectorAll('li').length).toBe(2);
+    expect(text).toContain('7 buc');
+    expect(text).toContain('Stoc redus');
+    expect(text).toContain('Posibil expirat (3)');
+    fixture.destroy();
+  });
+
   it('applies low-stock tone in preference to expired tone', () => {
     const fixture = createFixture();
     const component = fixture.componentInstance;
@@ -95,7 +111,8 @@ function createCategory(items: StockItemDto[]): StockItemCategoryGroup {
     categoryName: 'Papetărie',
     items,
     item: null,
-    isHeader: true,
+    locations: [],
+    variant: 'header',
     trackKey: 'category-1_header'
   };
 }

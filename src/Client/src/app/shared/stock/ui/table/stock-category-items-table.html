@@ -38,14 +38,20 @@
   <tbody>
   <ng-template nz-virtual-scroll
                let-category>
-    @if (category.isHeader) {
+    @if (category.variant === 'header') {
       <tr ske-stock-category-item-header-row
           [category]="category"
           [items]="category.items ?? []"
           (add)="addStock($event)">
       </tr>
+    } @else if (category.variant === 'summary') {
+      <tr ske-stock-category-item-summary-row
+          [item]="category.item"
+          [locations]="category.locations">
+      </tr>
     } @else {
       <tr ske-stock-category-item-row
+          [nested]="category.variant === 'location'"
           [class.cursor-pointer]="!readOnly()"
           [item]="category.item"
           (click)="readOnly() || adjust.emit(category.item)"

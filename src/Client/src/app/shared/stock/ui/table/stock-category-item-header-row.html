@@ -9,7 +9,7 @@
     </strong>
     <div nz-typography
          nzType="secondary"
-         class="mb-0!">{{ items().length ?? 0 }} articol(e)
+         class="mb-0!">{{ numberOfItems() }} articol(e)
     </div>
     @if (numberOfExpiredItems() > 0) {
       <nz-tag nzColor="red">{{ numberOfExpiredItems() }} expirate</nz-tag>

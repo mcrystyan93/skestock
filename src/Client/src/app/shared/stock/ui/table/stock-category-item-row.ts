@@ -41,6 +41,8 @@ import { ItemThumbnail } from '@ske/shared/items';
 export class StockCategoryItemRow {
   public readonly readOnly = injectClassReadOnly();
   public readonly item = input.required<StockItemDto>();
+  /** One of several location lines under an item summary row: item details live on that row. */
+  public readonly nested = input(false);
 
   public readonly move = output<StockItemDto>();
   public readonly removeExpired = output<StockItemDto>();
