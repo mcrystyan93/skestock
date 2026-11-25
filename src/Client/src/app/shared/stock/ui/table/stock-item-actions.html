@@ -1,0 +1,111 @@
+@let g = group();
+@let item = g.item;
+
+<button nz-button
+        nzType="default"
+        type="button"
+        nz-dropdown
+        nzTrigger="click"
+        nzPlacement="bottomRight"
+        skeStopClick
+        [nzDropdownMenu]="menu"
+        [attr.aria-label]="'Acțiuni pentru ' + item.itemName"
+        class="h-10! min-h-10! w-10! min-w-10! p-0!">
+  <nz-icon nzType="icons:ellipsis" />
+</button>
+<nz-dropdown-menu #menu="nzDropdownMenu">
+  <ul nz-menu>
+    @if (isSingle()) {
+      <li nz-menu-item
+          [nzDisabled]="item.quantity <= 0"
+          (click)="move.emit(item)">
+        <nz-icon nzType="icons:arrow-right-arrow-left" class="me-2" />
+        Mută stocul
+      </li>
+      <li nz-menu-item
+          (click)="addToOrder.emit(item)">
+        <nz-icon nzType="icons:cart-plus" class="me-2" />
+        Adaugă în comandă
+      </li>
+      @if (item.expiredQuantity > 0) {
+        <li nz-menu-item
+            (click)="extendExpiry.emit(item)">
+          <nz-icon nzType="icons:calendar-plus" class="me-2" />
+          Prelungește expirarea
+        </li>
+        <li nz-menu-item
+            nzDanger
+            nz-popconfirm
+            nzPopconfirmPlacement="topRight"
+            [nzPopconfirmTitle]="'Elimini cele ' + item.expiredQuantity + ' articole expirate pentru ' + item.itemName + '?'"
+            (nzOnConfirm)="removeExpired.emit(item)">
+          <nz-icon nzType="icons:trash" class="me-2" />
+          Elimină articolele expirate
+        </li>
+      }
+      <li nz-menu-item
+          (click)="visibilityChange.emit(item)">
+        <nz-icon [nzType]="item.hideWhenZeroStock ? 'icons:eye' : 'icons:eye-slash'" class="me-2" />
+        {{ hideLabel(item) }}
+      </li>
+    } @else {
+      <li nz-submenu
+          nzTitle="Mută stocul"
+          nzIcon="icons:arrow-right-arrow-left"
+          [nzDisabled]="movable().length === 0">
+        <ul>
+          @for (loc of movable(); track loc.locationId) {
+            <li nz-menu-item
+                (click)="move.emit(loc)">{{ loc.locationName }} · {{ loc.quantity }} {{ loc.unit }}</li>
+          }
+        </ul>
+      </li>
+      <li nz-submenu
+          nzTitle="Adaugă în comandă"
+          nzIcon="icons:cart-plus">
+        <ul>
+          @for (loc of g.locations; track loc.locationId) {
+            <li nz-menu-item
+                (click)="addToOrder.emit(loc)">{{ loc.locationName }}</li>
+          }
+        </ul>
+      </li>
+      @if (expired().length > 0) {
+        <li nz-submenu
+            nzTitle="Prelungește expirarea"
+            nzIcon="icons:calendar-plus">
+          <ul>
+            @for (loc of expired(); track loc.locationId) {
+              <li nz-menu-item
+                  (click)="extendExpiry.emit(loc)">{{ loc.locationName }} · {{ loc.expiredQuantity }} expirate</li>
+            }
+          </ul>
+        </li>
+        <li nz-submenu
+            nzTitle="Elimină articolele expirate"
+            nzIcon="icons:trash">
+          <ul>
+            @for (loc of expired(); track loc.locationId) {
+              <li nz-menu-item
+                  nzDanger
+                  nz-popconfirm
+                  nzPopconfirmPlacement="topRight"
+                  [nzPopconfirmTitle]="'Elimini cele ' + loc.expiredQuantity + ' articole expirate pentru ' + loc.itemName + ' la ' + loc.locationName + '?'"
+                  (nzOnConfirm)="removeExpired.emit(loc)">{{ loc.locationName }} · {{ loc.expiredQuantity }} expirate</li>
+            }
+          </ul>
+        </li>
+      }
+      <li nz-submenu
+          nzTitle="Ascunde la stoc 0"
+          nzIcon="icons:eye-slash">
+        <ul>
+          @for (loc of g.locations; track loc.locationId) {
+            <li nz-menu-item
+                (click)="visibilityChange.emit(loc)">{{ loc.locationName }} · {{ hideLabel(loc).toLowerCase() }}</li>
+          }
+        </ul>
+      </li>
+    }
+  </ul>
+</nz-dropdown-menu>

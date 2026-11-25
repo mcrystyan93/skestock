@@ -1,40 +1,36 @@
 import { injectClassReadOnly } from '@ske/shared/school-classes';
 import { Component, computed, input, output } from '@angular/core';
-import { CategoryDto, StockItemCategoryGroup, StockItemDto } from '@ske/models';
+import { CategoryDto, StockItemCategoryGroup, stockLocationLabel, StockItemDto, StockItemGroup } from '@ske/models';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzCardComponent } from 'ng-zorro-antd/card';
 import { NzEmptyComponent } from 'ng-zorro-antd/empty';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
-import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
-import { NzMenuDirective, NzMenuItemComponent } from 'ng-zorro-antd/menu';
-import { NzPopconfirmDirective } from 'ng-zorro-antd/popconfirm';
 import { NzSkeletonComponent } from 'ng-zorro-antd/skeleton';
 import { NzTagComponent } from 'ng-zorro-antd/tag';
 import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { TimeAgoPipe } from '@ske/shared/pipes';
-import { StopClick } from '@ske/shared/directives';
+import { StockItemActions } from './stock-item-actions';
 
-import { ItemThumbnail } from '@ske/shared/items';
+
+interface StockCategoryView extends Pick<StockItemCategoryGroup, 'categoryId' | 'categoryName' | 'categoryIcon'> {
+  readonly groups: StockItemGroup[];
+  readonly expiredCount: number;
+  readonly lowStockCount: number;
+}
 
 @Component({
   imports: [
-    ItemThumbnail,
     NzButtonComponent,
     NzCardComponent,
     NzEmptyComponent,
     NzIconDirective,
-    NzDropdownDirective,
-    NzDropdownMenuComponent,
-    NzMenuDirective,
-    NzMenuItemComponent,
-    NzPopconfirmDirective,
     NzSkeletonComponent,
     NzTagComponent,
     NzTooltipDirective,
     NzTypographyComponent,
     TimeAgoPipe,
-    StopClick
+    StockItemActions
   ],
   selector: 'ske-stock-category-items-small',
   templateUrl: './stock-category-items-small.html',
@@ -49,38 +45,34 @@ export class StockCategoryItemsSmall {
 
   public readonly add = output<Partial<CategoryDto> | null>();
   public readonly adjust = output<StockItemDto>();
+  public readonly openItem = output<StockItemGroup>();
   public readonly move = output<StockItemDto>();
   public readonly removeExpired = output<StockItemDto>();
   public readonly extendExpiry = output<StockItemDto>();
   public readonly addToOrder = output<StockItemDto>();
   public readonly visibilityChange = output<StockItemDto>();
 
-  public readonly categories = computed(() => this.items().filter(group => group.isHeader));
+  public readonly categories = computed<StockCategoryView[]>(() =>
+    this.items()
+      .filter(group => group.isHeader)
+      .map(({ categoryId, categoryName, categoryIcon, groups }) => ({
+        categoryId,
+        categoryName,
+        categoryIcon,
+        groups,
+        expiredCount: groups.filter(g => g.isExpired).length,
+        lowStockCount: groups.filter(g => g.isLowStock).length
+      }))
+  );
   protected readonly skeletonPlaceholders = [0, 1, 2, 3];
 
-  public addStock(category: StockItemCategoryGroup): void {
+  public addStock(category: StockCategoryView): void {
     this.add.emit({ id: category.categoryId, name: category.categoryName });
   }
 
-  public cardToneClass(item: StockItemDto): string {
-    return item.isLowStock ? '!bg-amber-500/10' : item.isExpired ? '!bg-red-500/15' : '';
-  }
+  protected readonly locationLabel = stockLocationLabel;
 
-  public expiredItemsCount(category: StockItemCategoryGroup): number {
-    return category.items.filter(item => item.isExpired).length;
-  }
-
-  public lowStockItemsCount(category: StockItemCategoryGroup): number {
-    return category.items.filter(item => item.isLowStock).length;
-  }
-
-  public actionLabel(item: StockItemDto): string {
-    return `Acțiuni pentru ${item.itemName}`;
-  }
-
-  public visibilityLabel(item: StockItemDto): string {
-    const action = item.hideWhenZeroStock ? 'Nu mai ascunde la stoc 0' : 'Ascunde când stocul ajunge la 0';
-
-    return `${action} pentru ${item.itemName} la ${item.locationName}`;
+  public cardToneClass(group: StockItemGroup): string {
+    return group.isExpired ? '!bg-red-500/15' : group.isLowStock ? '!bg-amber-500/10' : '';
   }
 }

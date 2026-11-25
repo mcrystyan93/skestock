@@ -1,0 +1,25 @@
+@let loc = location();
+
+<button type="button"
+        class="inline-flex max-w-full items-center gap-1.5 rounded border border-slate-300 bg-white/60 px-2 py-0.5 text-sm enabled:cursor-pointer enabled:hover:border-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:border-slate-600 dark:bg-slate-900/60"
+        skeStopClick
+        [attr.aria-label]="label(loc)"
+        [disabled]="disabled()"
+        (click)="adjust.emit(loc)">
+  <span class="truncate font-medium">{{ loc.locationName }}</span>
+  @if (showQuantity()) {
+    <span class="font-semibold">{{ loc.quantity }}</span>
+  }
+  @if (loc.isLowStock) {
+    <nz-tag nzColor="orange"
+            class="m-0! text-xs">
+      <nz-icon nzType="icons:arrow-trend-down" /> Stoc redus
+    </nz-tag>
+  }
+  @if (loc.isExpired) {
+    <nz-tag nzColor="red"
+            class="m-0! text-xs">
+      <nz-icon nzType="icons:clock" /> Expiră ({{ loc.expiredQuantity }})
+    </nz-tag>
+  }
+</button>

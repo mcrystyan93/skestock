@@ -1,4 +1,4 @@
-<td colspan="4">
+<td [attr.colspan]="columnCount() - 1">
   <div class="flex items-center gap-2">
     <nz-icon [nzType]="category().categoryIcon?.fileName
               ? ('icons:' + category().categoryIcon?.fileName)
@@ -9,7 +9,7 @@
     </strong>
     <div nz-typography
          nzType="secondary"
-         class="mb-0!">{{ items().length ?? 0 }} articol(e)
+         class="mb-0!">{{ numberOfItems() }} articol(e)
     </div>
     @if (numberOfExpiredItems() > 0) {
       <nz-tag nzColor="red">{{ numberOfExpiredItems() }} expirate</nz-tag>

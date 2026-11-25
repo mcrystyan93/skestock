@@ -11,29 +11,43 @@
           [nzVirtualMaxBufferPx]="virtualMaxBufferPx()"
           [nzVirtualForTrackBy]="(index, item) => item.trackKey ?? item.index"
           nzSize="small"
-          [nzScroll]="{x:dimensions.width, y:dimensions.height}">
+          [nzScroll]="{x: compact() ? dimensions.width : 'max(' + dimensions.width + ', 1100px)', y: dimensions.height}">
   <thead>
-  <tr>
-    <th nzColumnKey="itemName">
-      <strong>Articol</strong>
-    </th>
-    <th nzColumnKey="quantity"
-        nzWidth="150px"
-        class="text-right!">
-      <strong>Cantitate</strong>
-    </th>
-    <th nzColumnKey="locationName"
-        nzWidth="150px">
-      <strong>Locatie</strong>
-    </th>
-    <th nzColumnKey="isPerishable"
-        nzWidth="150px">
-      <strong>Expira</strong>
-    </th>
-    <th nzWidth="200px">
-      <strong>Actiuni</strong>
-    </th>
-  </tr>
+  @if (compact()) {
+    <tr>
+      <th>
+        <strong>Articol</strong>
+      </th>
+      <th nzWidth="38%">
+        <strong>Locații</strong>
+      </th>
+      <th nzWidth="120px"
+          class="text-right!">
+        <strong>Cantitate</strong>
+      </th>
+      <th nzWidth="120px"></th>
+    </tr>
+  } @else {
+    <tr>
+      <th nzColumnKey="itemName">
+        <strong>Articol</strong>
+      </th>
+      <th nzColumnKey="quantity"
+          nzWidth="130px"
+          class="text-right!">
+        <strong>Cantitate</strong>
+      </th>
+      <th nzWidth="300px">
+        <strong>Locații</strong>
+      </th>
+      <th nzWidth="220px">
+        <strong>Stare</strong>
+      </th>
+      <th nzWidth="190px">
+        <strong>Acțiuni</strong>
+      </th>
+    </tr>
+  }
   </thead>
   <tbody>
   <ng-template nz-virtual-scroll
@@ -41,14 +55,25 @@
     @if (category.isHeader) {
       <tr ske-stock-category-item-header-row
           [category]="category"
-          [items]="category.items ?? []"
+          [columnCount]="compact() ? 4 : 5"
           (add)="addStock($event)">
+      </tr>
+    } @else if (compact()) {
+      <tr ske-stock-category-item-tablet-row
+          [group]="category.group"
+          (adjust)="adjust.emit($event)"
+          (open)="openItem.emit($event)"
+          (move)="move.emit($event)"
+          (removeExpired)="removeExpired.emit($event)"
+          (extendExpiry)="extendExpiry.emit($event)"
+          (addToOrder)="addToOrder.emit($event)"
+          (visibilityChange)="visibilityChange.emit($event)">
       </tr>
     } @else {
       <tr ske-stock-category-item-row
-          [class.cursor-pointer]="!readOnly()"
-          [item]="category.item"
-          (click)="readOnly() || adjust.emit(category.item)"
+          [group]="category.group"
+          (adjust)="adjust.emit($event)"
+          (open)="openItem.emit($event)"
           (move)="move.emit($event)"
           (removeExpired)="removeExpired.emit($event)"
           (extendExpiry)="extendExpiry.emit($event)"
