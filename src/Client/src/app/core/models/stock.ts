@@ -28,6 +28,13 @@ export type StockReportDto = {
   hasExpiredItems: boolean;
 };
 
+/** Accessible description of one location's stock line. */
+export function stockLocationLabel(location: StockItemDto): string {
+  return `Ajustează stocul pentru ${location.itemName} la ${location.locationName}: ${location.quantity} ${location.unit}`
+    + (location.isLowStock ? ', stoc redus' : '')
+    + (location.isExpired ? `, posibil expirat ${location.expiredQuantity}` : '');
+}
+
 /** One item with its per-location stock lines, in the order received. */
 export type StockItemGroup = {
   itemId: string;
@@ -74,8 +81,8 @@ export type StockItemCategoryGroup = {
   categoryId: string;
   categoryName: string;
   categoryIcon?: IconPickerValue | null;
-  /** Every stock line of the category (header rows only). */
-  items: StockItemDto[];
+  /** The category's items (header rows only). */
+  groups: StockItemGroup[];
   /** The item with its locations (item rows only). */
   group: StockItemGroup | null;
   isHeader: boolean;

@@ -1,6 +1,6 @@
 import { injectClassReadOnly } from '@ske/shared/school-classes';
 import { Component, computed, input, output } from '@angular/core';
-import { CategoryDto, groupStockByItem, StockItemCategoryGroup, StockItemDto, StockItemGroup } from '@ske/models';
+import { CategoryDto, StockItemCategoryGroup, stockLocationLabel, StockItemDto, StockItemGroup } from '@ske/models';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzCardComponent } from 'ng-zorro-antd/card';
 import { NzEmptyComponent } from 'ng-zorro-antd/empty';
@@ -55,23 +55,22 @@ export class StockCategoryItemsSmall {
   public readonly categories = computed<StockCategoryView[]>(() =>
     this.items()
       .filter(group => group.isHeader)
-      .map(({ categoryId, categoryName, categoryIcon, items }) => {
-        const groups = groupStockByItem(items);
-        return {
-          categoryId,
-          categoryName,
-          categoryIcon,
-          groups,
-          expiredCount: groups.filter(g => g.isExpired).length,
-          lowStockCount: groups.filter(g => g.isLowStock).length
-        };
-      })
+      .map(({ categoryId, categoryName, categoryIcon, groups }) => ({
+        categoryId,
+        categoryName,
+        categoryIcon,
+        groups,
+        expiredCount: groups.filter(g => g.isExpired).length,
+        lowStockCount: groups.filter(g => g.isLowStock).length
+      }))
   );
   protected readonly skeletonPlaceholders = [0, 1, 2, 3];
 
   public addStock(category: StockCategoryView): void {
     this.add.emit({ id: category.categoryId, name: category.categoryName });
   }
+
+  protected readonly locationLabel = stockLocationLabel;
 
   public cardToneClass(group: StockItemGroup): string {
     return group.isExpired ? '!bg-red-500/15' : group.isLowStock ? '!bg-amber-500/10' : '';

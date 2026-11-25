@@ -33,29 +33,10 @@
 <td>
   <div class="flex flex-wrap gap-1">
     @for (loc of g.locations; track loc.locationId) {
-      <button type="button"
-              class="inline-flex max-w-full items-center gap-1.5 rounded border border-slate-300 bg-white/60 px-2 py-0.5 text-xs enabled:cursor-pointer enabled:hover:border-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:border-slate-600 dark:bg-slate-900/60"
-              [attr.aria-label]="'Ajustează stocul pentru ' + loc.itemName + ' la ' + loc.locationName + ': ' + loc.quantity + ' ' + loc.unit + (loc.isLowStock ? ', stoc redus' : '') + (loc.isExpired ? ', posibil expirat ' + loc.expiredQuantity : '')"
-              [disabled]="readOnly()"
-              skeStopClick
-              (click)="adjust.emit(loc)">
-        <span class="truncate font-medium">{{ loc.locationName }}</span>
-        @if (!isSingle()) {
-          <span class="font-semibold">{{ loc.quantity }}</span>
-        }
-        @if (loc.isLowStock) {
-          <nz-tag nzColor="orange"
-                  class="m-0! text-xs">
-            <nz-icon nzType="icons:arrow-trend-down" /> Stoc redus
-          </nz-tag>
-        }
-        @if (loc.isExpired) {
-          <nz-tag nzColor="red"
-                  class="m-0! text-xs">
-            <nz-icon nzType="icons:clock" /> Expiră ({{ loc.expiredQuantity }})
-          </nz-tag>
-        }
-      </button>
+      <ske-stock-location-chip [location]="loc"
+                               [showQuantity]="!isSingle()"
+                               [disabled]="readOnly()"
+                               (adjust)="adjust.emit($event)" />
     }
   </div>
 </td>

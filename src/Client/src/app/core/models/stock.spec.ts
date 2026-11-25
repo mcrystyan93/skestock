@@ -1,4 +1,4 @@
-import { groupStockByItem, StockItemDto } from './stock';
+import { groupStockByItem, StockItemDto, stockLocationLabel } from './stock';
 
 const line = (itemId: string, locationId: string, overrides: Partial<StockItemDto> = {}): StockItemDto => ({
   itemId, itemName: itemId, categoryId: 'c', categoryName: 'Alimente', locationId, locationName: locationId,
@@ -31,5 +31,13 @@ describe('groupStockByItem', () => {
     ]);
 
     expect(group.lastUpdatedAt).toBe('2026-09-20T10:00:00Z');
+  });
+});
+
+describe('stockLocationLabel', () => {
+  it('announces quantity and flags so assistive tech does not lose them', () => {
+    expect(stockLocationLabel(line('mere', 'Frigider', { quantity: 8, isLowStock: true, isExpired: true, expiredQuantity: 3 })))
+      .toBe('Ajustează stocul pentru mere la Frigider: 8 kg, stoc redus, posibil expirat 3');
+    expect(stockLocationLabel(line('mere', 'Frigider'))).toBe('Ajustează stocul pentru mere la Frigider: 1 kg');
   });
 });

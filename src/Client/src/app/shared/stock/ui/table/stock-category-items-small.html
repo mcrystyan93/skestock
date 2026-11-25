@@ -121,7 +121,7 @@
                   <li>
                     <button type="button"
                             class="flex w-full min-w-0 items-center gap-2 rounded-md border border-slate-300 bg-white/60 px-3 py-2 text-left enabled:cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:border-slate-600 dark:bg-slate-900/60"
-                            [attr.aria-label]="'Ajustează stocul pentru ' + item.itemName + ' la ' + item.locationName + ': ' + item.quantity + ' ' + item.unit + (item.isLowStock ? ', stoc redus' : '') + (item.isExpired ? ', posibil expirat ' + item.expiredQuantity : '')"
+                            [attr.aria-label]="locationLabel(item)"
                             [disabled]="readOnly()"
                             (click)="adjust.emit(item)">
                       <span class="min-w-0 truncate font-medium">{{ item.locationName }}</span>

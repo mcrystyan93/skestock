@@ -55,7 +55,6 @@
     @if (category.isHeader) {
       <tr ske-stock-category-item-header-row
           [category]="category"
-          [items]="category.items"
           [columnCount]="compact() ? 4 : 5"
           (add)="addStock($event)">
       </tr>

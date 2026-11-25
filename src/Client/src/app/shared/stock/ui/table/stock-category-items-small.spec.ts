@@ -122,7 +122,7 @@ function createCategory(items: StockItemDto[]): StockItemCategoryGroup {
   return {
     categoryId: 'category-1',
     categoryName: 'Papetărie',
-    items,
+    groups: groupStockByItem(items),
     group: null,
     isHeader: true,
     trackKey: 'category-1_header'

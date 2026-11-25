@@ -80,12 +80,13 @@ export function withStockCollection() {
 
                     for (const items of byCategory) {
                       const { categoryId, categoryName, categoryIcon } = items[0];
-                      const row = (r: Pick<StockItemCategoryGroup, 'items' | 'group' | 'isHeader' | 'trackKey'>) =>
+                      const row = (r: Pick<StockItemCategoryGroup, 'groups' | 'group' | 'isHeader' | 'trackKey'>) =>
                         sortedGroupedStockItems.push({ categoryId, categoryName, categoryIcon, ...r });
 
-                      row({ items, group: null, isHeader: true, trackKey: `${categoryId}_header` });
-                      for (const group of groupStockByItem(items))
-                        row({ items: [], group, isHeader: false, trackKey: `${categoryId}-${group.itemId}` });
+                      const groups = groupStockByItem(items);
+                      row({ groups, group: null, isHeader: true, trackKey: `${categoryId}_header` });
+                      for (const group of groups)
+                        row({ groups: [], group, isHeader: false, trackKey: `${categoryId}-${group.itemId}` });
                     }
 
                     patchState(store, {
