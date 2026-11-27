@@ -3,15 +3,43 @@
   <form nz-form
         nzNoColon
         *nzSpaceItem>
-    <nz-form-item>
+    <nz-form-item class="pb-5!">
       <nz-form-label nzRequired>
         Locație destinație
       </nz-form-label>
       <nz-form-control [nzErrorTip]="destinationErrorTemplate">
-        <ske-location-dropdown [formField]="stockMoveForm.destination"
-                               [excludedLocationId]="item().locationId"
-                               [loadOnInit]="true"
-                               placeholder="Selectați locația destinație" />
+        <nz-radio-group [formField]="stockMoveForm.destination"
+                        aria-label="Locație destinație"
+                        class="grid! grid-cols-2 gap-3 md:grid-cols-3">
+          @for (location of destinations(); track location.id) {
+            <label nz-radio
+                   [nzValue]="location"
+                   class="group relative m-0! flex! min-h-20 flex-col justify-center gap-0.5 rounded-xl border-2 border-solid border-gray-200 bg-white px-4! py-3! transition-colors hover:border-primary-400 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary-400 dark:border-gray-700 dark:bg-gray-900 [&.ant-radio-wrapper-checked]:border-primary-600 [&.ant-radio-wrapper-checked]:bg-primary-500/10 [&>.ant-radio]:absolute! [&>.ant-radio]:inset-0 [&>.ant-radio]:overflow-hidden [&>.ant-radio]:opacity-0 [&>span:last-child]:flex [&>span:last-child]:flex-1 [&>span:last-child]:flex-col [&>span:last-child]:justify-center [&>span:last-child]:p-0!">
+              <nz-icon nzType="icons:circle-check"
+                       class="absolute right-2 top-2 text-lg text-primary-600 opacity-0 transition-opacity group-[.ant-radio-wrapper-checked]:opacity-100" />
+              <span class="block wrap-break-word pr-5 text-base font-semibold leading-snug">{{ location.name }}</span>
+              @if (location.parentLocationName; as parent) {
+                <span class="block wrap-break-word pr-5 text-sm text-gray-500">{{ parent }}</span>
+              }
+            </label>
+          } @empty {
+            @if (!locationStore.loading()) {
+              <nz-empty nzNotFoundContent="Nu există alte locații." />
+            }
+          }
+        </nz-radio-group>
+
+        @if (locationStore.loading()) {
+          <nz-spin class="block py-2 text-center" />
+        } @else if (locationStore.hasNextPage()) {
+          <button type="button"
+                  nz-button
+                  nzBlock
+                  nzSize="large"
+                  class="mt-2"
+                  [nzLoading]="locationStore.isLoadingMore()"
+                  (click)="locationStore.loadMore()">Încarcă mai multe</button>
+        }
 
         <ng-template #destinationErrorTemplate>
           @if (stockMoveForm.destination().errors(); as errors) {
@@ -25,16 +53,40 @@
       </nz-form-control>
     </nz-form-item>
 
-    <nz-form-item>
+    <nz-form-item class="pb-5!">
       <nz-form-label nzRequired>
         Cantitate
       </nz-form-label>
       <nz-form-control [nzErrorTip]="quantityErrorTemplate">
-        <nz-input-number [formField]="stockMoveForm.quantity"
-                         [nzMin]="1"
-                         [nzMax]="item().quantity"
-                         [nzStep]="1"
-                         class="w-full!" />
+        <div class="flex items-center gap-3">
+          <button type="button"
+                  nz-button
+                  nzSize="large"
+                  nzShape="circle"
+                  class="h-14! w-14! min-w-14! shrink-0 p-0! text-xl!"
+                  aria-label="Scade cantitatea"
+                  [disabled]="(stockMoveForm.quantity().value() ?? 0) <= 1"
+                  (click)="step(-1)">
+            <nz-icon nzType="icons:minus" />
+          </button>
+          <nz-input-number [formField]="stockMoveForm.quantity"
+                           nzSize="large"
+                           class="min-w-0 grow [&_.ant-input-number-handler-wrap]:hidden! [&_input]:h-14! [&_input]:text-center! [&_input]:text-2xl! [&_input]:font-semibold!"
+                           [nzMin]="1"
+                           [nzMax]="item().quantity"
+                           [nzPrecision]="0" />
+          <button type="button"
+                  nz-button
+                  nzType="primary"
+                  nzSize="large"
+                  nzShape="circle"
+                  class="h-14! w-14! min-w-14! shrink-0 p-0! text-xl!"
+                  aria-label="Crește cantitatea"
+                  [disabled]="(stockMoveForm.quantity().value() ?? 0) >= item().quantity"
+                  (click)="step(1)">
+            <nz-icon nzType="icons:plus" />
+          </button>
+        </div>
 
         <ng-template #quantityErrorTemplate>
           @if (stockMoveForm.quantity().errors(); as errors) {
