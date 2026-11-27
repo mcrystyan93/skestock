@@ -1,5 +1,6 @@
 import { injectClassReadOnly } from '@ske/shared/school-classes';
-import { Component, computed, input, output } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { Component, computed, input, output, signal, viewChild } from '@angular/core';
 import { CdkVirtualForOf, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { CategoryDto, StockItemCategoryGroup, stockLocationLabel, StockItemDto, StockItemGroup } from '@ske/models';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
@@ -22,7 +23,9 @@ interface StockCategoryView extends Pick<StockItemCategoryGroup, 'categoryId' | 
   readonly lowStockCount: number;
 }
 
-type StockRow = { kind: 'header'; category: StockCategoryView } | { kind: 'item'; group: StockItemGroup };
+type StockRow =
+  | { kind: 'header'; category: StockCategoryView }
+  | { kind: 'item'; category: StockCategoryView; group: StockItemGroup };
 
 @Component({
   imports: [
@@ -30,6 +33,7 @@ type StockRow = { kind: 'header'; category: StockCategoryView } | { kind: 'item'
     CdkVirtualForOf,
     CdkVirtualScrollViewport,
     DynamicVirtualScrollItem,
+    NgTemplateOutlet,
     ItemThumbnail,
     NzButtonComponent,
     NzCardComponent,
@@ -74,14 +78,35 @@ export class StockCategoryItemsSmall {
         lowStockCount: groups.filter(g => g.isLowStock).length
       }))
   );
-  // Flat header/item rows so each can be measured and virtualised on its own (sticky category headers are not possible inside the viewport).
+  // Flat header/item rows so each can be measured and virtualised on its own (sticky headers are an overlay, see stickyCategory).
   protected readonly rows = computed<StockRow[]>(() =>
     this.categories().flatMap(category => [
       <StockRow>{ kind: 'header', category },
-      ...category.groups.map(group => <StockRow>{ kind: 'item', group })
+      ...category.groups.map(group => <StockRow>{ kind: 'item', category, group })
     ])
   );
+  private readonly _viewport = viewChild(CdkVirtualScrollViewport);
+  private readonly _dynamicScroll = viewChild(CdkDynamicSizeVirtualScroll);
+  private readonly _top = signal({ index: 0, offset: 0 });
+
+  // Native `position: sticky` cannot work inside the virtual-scroll content wrapper, so the category of the row at the top is overlaid once scrolled.
+  protected readonly stickyCategory = computed(() => {
+    const { index, offset } = this._top();
+
+    return offset > 0 ? (this.rows()[index]?.category ?? null) : null;
+  });
   protected readonly skeletonPlaceholders = [0, 1, 2, 3];
+
+  protected onScroll(): void {
+    const viewport = this._viewport();
+    const dynamicScroll = this._dynamicScroll();
+
+    if (!viewport || !dynamicScroll)
+      return;
+
+    const offset = viewport.measureScrollOffset();
+    this._top.set({ index: dynamicScroll.scrollStrategy.indexAtOffset(offset), offset });
+  }
 
   protected trackRow(_: number, row: StockRow): string {
     return row.kind === 'header' ? `h${row.category.categoryId}` : `i${row.group.itemId}`;

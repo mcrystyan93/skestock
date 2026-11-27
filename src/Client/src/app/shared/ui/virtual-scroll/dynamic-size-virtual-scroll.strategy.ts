@@ -93,6 +93,18 @@ export class DynamicSizeVirtualScrollStrategy implements VirtualScrollStrategy {
     this.viewport.scrollToOffset(this.offsetAt(clamped), behavior);
   }
 
+  /** Index of the item that contains the given scroll offset (the last item when past the end). */
+  public indexAtOffset(offset: number): number {
+    let top = 0;
+    for (let i = 0; i < this.sizes.length; i++) {
+      top += this.sizeAt(i);
+      if (offset < top) {
+        return i;
+      }
+    }
+    return Math.max(0, this.sizes.length - 1);
+  }
+
   /** Records the measured height of a rendered item and reflows if it changed. */
   public updateItemSize(index: number, size: number): void {
     if (!this.viewport || index < 0 || index >= this.sizes.length || size <= 0) {

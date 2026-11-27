@@ -20,57 +20,13 @@
                                [estimatedItemSize]="170"
                                [minBufferPx]="400"
                                [maxBufferPx]="800"
-                               class="min-h-0 w-full grow [&_.cdk-virtual-scroll-content-wrapper]:w-full">
+                               class="min-h-0 w-full grow [&_.cdk-virtual-scroll-content-wrapper]:w-full"
+                               (scroll)="onScroll()">
     <div *cdkVirtualFor="let row of rows(); let i = index; trackBy: trackRow"
          [skeVirtualItem]="i"
          class="min-w-0 pb-2">
       @if (row.kind === 'header') {
-        @let category = row.category;
-      <div class="sticky top-0 z-20 mb-2 flex min-w-0 items-center gap-2 bg-slate-50 dark:bg-slate-950 py-1">
-        <nz-icon [nzType]="category.categoryIcon?.fileName
-          ? ('icons:' + category.categoryIcon.fileName)
-          : 'icons:box'"
-                 class="shrink-0 text-lg text-primary-600! dark:text-primary-400!" />
-        <h2 [id]="'stock-category-' + category.categoryId"
-            class="mb-0! min-w-0 truncate text-sm font-semibold"
-            [attr.title]="category.categoryName">
-          {{ category.categoryName }}
-        </h2>
-        <span nz-typography
-              nzType="secondary"
-              class="mb-0! shrink-0 text-xs">
-          {{ category.groups.length }}
-        </span>
-        <div class="ms-auto flex shrink-0 items-center gap-1">
-          @if (category.expiredCount > 0) {
-            <nz-tag nzColor="red"
-                    class="me-0!"
-                    [attr.aria-label]="category.expiredCount + ' expirate'">
-              {{ category.expiredCount }} exp.
-            </nz-tag>
-          }
-          @if (category.lowStockCount > 0) {
-            <nz-tag nzColor="orange"
-                    class="me-0!"
-                    [attr.aria-label]="category.lowStockCount + ' stoc redus'">
-              {{ category.lowStockCount }} redus
-            </nz-tag>
-          }
-          @if (!readOnly()) {
-          <button nz-button
-                  nzType="text"
-                  nzShape="circle"
-                  type="button"
-                  nz-tooltip
-                  [nzTooltipTitle]="'Adaugă stoc pentru ' + category.categoryName"
-                  [attr.aria-label]="'Adaugă stoc pentru ' + category.categoryName"
-                  class="h-8! min-h-8! w-8! min-w-8! p-0!"
-                  (click)="addStock(category)">
-            <nz-icon nzType="icons:plus" />
-          </button>
-          }
-        </div>
-      </div>
+        <ng-container *ngTemplateOutlet="categoryHeader; context: { $implicit: row.category }" />
       } @else {
         @let group = row.group;
         @let stockItem = group.item;
@@ -154,4 +110,55 @@
       }
     </div>
   </cdk-virtual-scroll-viewport>
+  @if (stickyCategory(); as category) {
+    <div class="absolute inset-x-3 top-0 z-20">
+      <ng-container *ngTemplateOutlet="categoryHeader; context: { $implicit: category }" />
+    </div>
+  }
+  <ng-template #categoryHeader let-category>
+        <div class="mb-2 flex min-w-0 items-center gap-2 bg-slate-50 dark:bg-slate-950 py-1">
+          <nz-icon [nzType]="category.categoryIcon?.fileName
+            ? ('icons:' + category.categoryIcon.fileName)
+            : 'icons:box'"
+                   class="shrink-0 text-lg text-primary-600! dark:text-primary-400!" />
+          <h2 class="mb-0! min-w-0 truncate text-sm font-semibold"
+              [attr.title]="category.categoryName">
+            {{ category.categoryName }}
+          </h2>
+          <span nz-typography
+                nzType="secondary"
+                class="mb-0! shrink-0 text-xs">
+            {{ category.groups.length }}
+          </span>
+          <div class="ms-auto flex shrink-0 items-center gap-1">
+            @if (category.expiredCount > 0) {
+              <nz-tag nzColor="red"
+                      class="me-0!"
+                      [attr.aria-label]="category.expiredCount + ' expirate'">
+                {{ category.expiredCount }} exp.
+              </nz-tag>
+            }
+            @if (category.lowStockCount > 0) {
+              <nz-tag nzColor="orange"
+                      class="me-0!"
+                      [attr.aria-label]="category.lowStockCount + ' stoc redus'">
+                {{ category.lowStockCount }} redus
+              </nz-tag>
+            }
+            @if (!readOnly()) {
+            <button nz-button
+                    nzType="text"
+                    nzShape="circle"
+                    type="button"
+                    nz-tooltip
+                    [nzTooltipTitle]="'Adaugă stoc pentru ' + category.categoryName"
+                    [attr.aria-label]="'Adaugă stoc pentru ' + category.categoryName"
+                    class="h-8! min-h-8! w-8! min-w-8! p-0!"
+                    (click)="addStock(category)">
+              <nz-icon nzType="icons:plus" />
+            </button>
+            }
+          </div>
+        </div>
+  </ng-template>
 }
