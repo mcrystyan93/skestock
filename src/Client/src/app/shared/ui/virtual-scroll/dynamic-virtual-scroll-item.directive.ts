@@ -1,4 +1,4 @@
-import { DestroyRef, Directive, ElementRef, effect, inject, input } from '@angular/core';
+import { DestroyRef, Directive, ElementRef, afterRenderEffect, inject, input } from '@angular/core';
 import { VIRTUAL_SCROLL_STRATEGY } from '@angular/cdk/scrolling';
 import { DynamicSizeVirtualScrollStrategy } from './dynamic-size-virtual-scroll.strategy';
 
@@ -22,7 +22,9 @@ export class DynamicVirtualScrollItem {
 
   constructor() {
     this.observer.observe(this.host);
-    effect(() => this.report(this.index()));
+    // After render, not in a plain effect: that runs before the row's content exists and measures only its padding,
+    // which makes the strategy render ever more rows per change-detection pass (NG0103).
+    afterRenderEffect(() => this.report(this.index()));
     inject(DestroyRef).onDestroy(() => this.observer.disconnect());
   }
 
