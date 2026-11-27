@@ -2,7 +2,6 @@ import { Component, DestroyRef, inject, signal, viewChild } from '@angular/core'
 import { Events } from '@ngrx/signals/events';
 import { NZ_MODAL_DATA, NzModalFooterDirective, NzModalRef, NzModalTitleDirective } from 'ng-zorro-antd/modal';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { NzCardComponent } from 'ng-zorro-antd/card';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSpaceComponent, NzSpaceItemDirective } from 'ng-zorro-antd/space';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
@@ -20,7 +19,6 @@ import { StockMoveForm, StockMoveFormModel } from './stock-move-form';
     NzModalTitleDirective,
     NzModalFooterDirective,
     NzButtonComponent,
-    NzCardComponent,
     NzSpaceComponent,
     NzSpaceItemDirective,
     NzTypographyComponent,

@@ -23,25 +23,21 @@
 
 <nz-space nzDirection="vertical"
           class="w-full">
-  <nz-card nzSize="small"
-           *nzSpaceItem>
-    <div class="flex items-center justify-between">
-      <h4 nz-typography
-          class="mb-0!">Locație sursă</h4>
-      <strong nz-typography
-              class="mb-0!">
-        {{ modalData().item.locationName }}
-      </strong>
+  <div *nzSpaceItem
+       class="flex flex-col items-center gap-3 pb-2">
+    <div class="w-full rounded-xl border-2 border-solid border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
+      <div class="text-xs uppercase tracking-wide text-gray-500">Din locația</div>
+      <div class="mt-0.5 flex items-baseline justify-between gap-3">
+        <strong class="min-w-0 wrap-break-word text-lg leading-snug">{{ modalData().item.locationName }}</strong>
+        <span class="shrink-0 text-base">
+          <strong>{{ modalData().item.quantity | number:'1.0-2' }}</strong>
+          <span class="text-gray-500"> {{ modalData().item.unit }} disponibil</span>
+        </span>
+      </div>
     </div>
-    <div class="mt-2 flex items-center justify-between">
-      <h4 nz-typography
-          class="mb-0!">Cantitatea curentă</h4>
-      <strong nz-typography
-              class="mb-0!">
-        {{ modalData().item.quantity | number:'1.0-2' }}
-      </strong>
-    </div>
-  </nz-card>
+    <nz-icon nzType="icons:arrow-down"
+             class="text-2xl text-primary-600" />
+  </div>
 
   <ske-stock-move-form *nzSpaceItem
                        [loading]="store.stockMoveLoading()"
