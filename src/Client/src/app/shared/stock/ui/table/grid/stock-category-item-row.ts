@@ -12,7 +12,7 @@ import { TimeAgoPipe } from '@ske/shared/pipes';
 
 import { ItemThumbnail } from '@ske/shared/items';
 import { StockItemRowBase } from './stock-item-row-base';
-import { StockLocationChip } from './stock-location-chip';
+import { StockLocationChip } from '../common/stock-location-chip';
 
 /**
  * One item with all its locations. Item-level actions act on the only location,

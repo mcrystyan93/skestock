@@ -11,7 +11,7 @@ import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
 import { NzTypographyComponent } from 'ng-zorro-antd/typography';
 import { ItemThumbnail } from '@ske/shared/items';
 import { TimeAgoPipe } from '@ske/shared/pipes';
-import { StockItemActions } from './stock-item-actions';
+import { StockItemActions } from '../common/stock-item-actions';
 
 
 interface StockCategoryView extends Pick<StockItemCategoryGroup, 'categoryId' | 'categoryName' | 'categoryIcon'> {
