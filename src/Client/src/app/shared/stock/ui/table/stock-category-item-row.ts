@@ -1,4 +1,3 @@
-import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed } from '@angular/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzDropdownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
@@ -33,7 +32,6 @@ import { StockLocationChip } from './stock-location-chip';
     NzTagComponent,
     NzTooltipDirective,
     NzTypographyComponent,
-    NgTemplateOutlet,
     StockLocationChip,
     StopClick,
     TimeAgoPipe
