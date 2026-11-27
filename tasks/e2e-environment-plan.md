@@ -8,7 +8,7 @@ Spec: `tasks/e2e-environment-spec.md`. Todo: `tasks/e2e-environment-todo.md`. Wr
 - `/health` is mapped in all environments (`ServiceDefaults/Extensions.cs:126-130`); seeding finishes before `app.Run`, so healthy webapi = seeded. Run mode only lacks `WithHttpHealthCheck`.
 - Aspire CLI 13.6.1 has `start`, `wait <res> --status healthy --timeout N`, `stop`; `wait` names the failing resource.
 - `src/Client/.gitignore` already ignores `/playwright/.auth/`.
-- AppHost host ports are fixed (1433, 6379, 8081, 7001, 10000-10002) and Azurite is `Persistent` + `storage-data`: without a guard e2e would write into the dev Azurite volume.
+- AppHost host ports are fixed (1433, 16379, 8081, 7001, 10000-10002) and Azurite is `Persistent` + `storage-data`: without a guard e2e would write into the dev Azurite volume.
 
 ## Design
 1. **E2E flag**: constant `Services.E2EMode = "E2E"`. When set, AppHost skips `WithDataVolume` on SQL/Redis, uses session lifetime and no volume for Azurite, adds `WithHttpHealthCheck` on web (`/health`) and webfrontend (`/`), passes `E2E=true` to web. Ports stay fixed; script fails fast if 7001/1433 busy.
