@@ -1,6 +1,6 @@
 import { injectClassReadOnly } from '@ske/shared/school-classes';
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, computed, input, output, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, input, output, signal, untracked, viewChild } from '@angular/core';
 import { CdkVirtualForOf, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { CategoryDto, StockItemCategoryGroup, stockLocationLabel, StockItemDto, StockItemGroup } from '@ske/models';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
@@ -88,6 +88,13 @@ export class StockCategoryItemsSmall {
   private readonly _viewport = viewChild(CdkVirtualScrollViewport);
   private readonly _dynamicScroll = viewChild(CdkDynamicSizeVirtualScroll);
   private readonly _top = signal({ index: 0, offset: 0 });
+
+  // Also runs when the viewport is recreated (empty state -> list starts at scroll 0 without a scroll event) or the rows change under the scroll position.
+  private readonly _refreshTopEffect = effect(() => {
+    this._viewport();
+    this.rows();
+    untracked(() => this.onScroll());
+  });
 
   // Native `position: sticky` cannot work inside the virtual-scroll content wrapper, so the category of the row at the top is overlaid once scrolled.
   protected readonly stickyCategory = computed(() => {

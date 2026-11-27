@@ -129,6 +129,11 @@ test('phone list overlays the current category header once scrolled', async ({pa
 
   await viewport.evaluate((e) => e.scrollTo(0, 800));
   await expect(overlay.getByText('Alimente')).toBeVisible();
+  // the overlay must not swallow touches/wheel meant for the list underneath
+  expect(await viewport.evaluate((e) => {
+    const {left, top} = e.getBoundingClientRect();
+    return e.contains(document.elementFromPoint(left + 40, top + 10));
+  })).toBe(true);
 
   await viewport.evaluate((e) => e.scrollTo(0, e.scrollHeight));
   await expect(overlay.getByText('Curățenie')).toBeVisible();
