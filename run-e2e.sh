@@ -27,7 +27,7 @@ fi
 export DOCKER_HOST="unix://${PODMAN_SOCK}"
 export DOTNET_ASPIRE_CONTAINER_RUNTIME="podman"
 
-for port in 7001 1433 6379 8081 10000 10001 10002; do
+for port in 7001 1433 16379 8081 10000 10001 10002; do
     if [[ -n "$(ss -ltnH "sport = :$port")" ]]; then
         echo "ERROR: port $port is busy (dev stack running?). Stop it first (aspire stop); e2e and dev share fixed ports." >&2
         exit 1

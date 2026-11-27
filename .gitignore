@@ -506,3 +506,7 @@ graphify-out/
 
 # Playwright check screenshots, one folder per spec
 /screenshot-checks/
+
+# Rider data sources hold connection credentials
+.idea/**/dataSources.xml
+.idea/**/dataSources.local.xml

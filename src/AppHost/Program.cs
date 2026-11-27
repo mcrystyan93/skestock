@@ -83,13 +83,19 @@ var cache = builder
     })
     .WithComputeEnvironment(compose)
     .WithPassword(redisPassword);
+// A trusted dev cert makes Aspire serve TLS on 6379 and move plain TCP to 6380, which breaks the fixed
+// "tcp" endpoint below and the plain-TCP connection string.
+#pragma warning disable ASPIRECERTIFICATES001
+cache.WithoutHttpsCertificate();
+#pragma warning restore ASPIRECERTIFICATES001
 if (!e2eMode)
 {
     cache.WithDataVolume(Services.CacheVolumes);
 }
 if (builder.ExecutionContext.IsRunMode)
 {
-    cache.WithEndpoint(targetPort: 6379, port: 6379, name: "tcp", isExternal: true);
+    // Not 6379: Windows Hyper-V/WinNAT can reserve 6350-6449, leaving the proxy unable to bind.
+    cache.WithEndpoint(targetPort: 6379, port: 16379, name: "tcp", isExternal: true);
 }
 
 var openAiApiKey = builder.AddParameter($"{Services.OpenApiSettings}{Services.OpenApiKey}", secret:true);
