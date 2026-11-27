@@ -1,4 +1,5 @@
 import { signal } from '@angular/core';
+import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { TestBed } from '@angular/core/testing';
 import { CLASS_READ_ONLY } from '@ske/shared/school-classes';
 import { groupStockByItem, StockItemCategoryGroup, StockItemDto } from '@ske/models';
@@ -7,7 +8,13 @@ import { provideNzIconsTesting } from 'ng-zorro-antd/icon/testing';
 import { StockCategoryItemsSmall } from './stock-category-items-small';
 
 describe('StockCategoryItemsSmall', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
   beforeEach(() => {
+    vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} });
     TestBed.configureTestingModule({
       imports: [StockCategoryItemsSmall],
       providers: [
@@ -28,24 +35,60 @@ describe('StockCategoryItemsSmall', () => {
     });
   });
 
-  it('shows skeleton cards while the stock list is loading', () => {
-    const fixture = createFixture([], true);
+  it('shows skeleton cards while the stock list is loading', async () => {
+    const fixture = await createFixture([], true);
 
     expect((fixture.nativeElement as HTMLElement).querySelectorAll('nz-skeleton').length).toBe(4);
     expect((fixture.nativeElement as HTMLElement).querySelector('nz-empty')).toBeNull();
     fixture.destroy();
   });
 
-  it('shows an empty state when the class has no stock', () => {
-    const fixture = createFixture();
+  it('shows an empty state when the class has no stock', async () => {
+    const fixture = await createFixture();
 
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('Nu există stoc');
     fixture.destroy();
   });
 
-  it('emits category add and item adjustment actions', () => {
+  it('renders only a window of a long list', async () => {
+    const items = Array.from({ length: 100 }, (_, i) => createStockItem({ itemId: `item-${i}`, itemName: `Articol ${i}` }));
+    const fixture = await createFixture([createCategory(items)]);
+
+    const cards = (fixture.nativeElement as HTMLElement).querySelectorAll('nz-card').length;
+    expect(cards).toBeGreaterThan(0);
+    expect(cards).toBeLessThan(20);
+    fixture.destroy();
+  });
+
+  it('overlays the current category once scrolled and drops it when the list is replaced by the empty state', async () => {
+    const items = Array.from({ length: 10 }, (_, i) => createStockItem({ itemId: `item-${i}`, itemName: `Articol ${i}` }));
+    const fixture = await createFixture([createCategory(items)]);
+    const element = fixture.nativeElement as HTMLElement;
+    const overlay = () => element.querySelector('cdk-virtual-scroll-viewport + div.absolute');
+
+    expect(overlay()).toBeNull();
+
+    const scrollOffset = vi.spyOn(CdkVirtualScrollViewport.prototype, 'measureScrollOffset').mockReturnValue(500);
+    element.querySelector('cdk-virtual-scroll-viewport')!.dispatchEvent(new Event('scroll'));
+    fixture.detectChanges();
+    expect(overlay()?.textContent).toContain('Papetărie');
+
+    // a search with no results destroys the viewport; the next one starts again at the top
+    fixture.componentRef.setInput('items', []);
+    fixture.detectChanges();
+    scrollOffset.mockReturnValue(0);
+    fixture.componentRef.setInput('items', [createCategory(items)]);
+    fixture.detectChanges();
+    await new Promise(resolve => setTimeout(resolve));
+    fixture.detectChanges();
+
+    expect(overlay()).toBeNull();
+    fixture.destroy();
+  });
+
+  it('emits category add and item adjustment actions', async () => {
     const item = createStockItem();
-    const fixture = createFixture([createCategory([item])]);
+    const fixture = await createFixture([createCategory([item])]);
     const component = fixture.componentInstance;
     const add = vi.spyOn(component.add, 'emit');
     const adjust = vi.spyOn(component.adjust, 'emit');
@@ -59,9 +102,9 @@ describe('StockCategoryItemsSmall', () => {
     fixture.destroy();
   });
 
-  it('hides every stock action and cannot adjust when the class is closed', () => {
+  it('hides every stock action and cannot adjust when the class is closed', async () => {
     TestBed.configureTestingModule({ providers: [{ provide: CLASS_READ_ONLY, useValue: signal(true) }] });
-    const fixture = createFixture([createCategory([createStockItem()])]);
+    const fixture = await createFixture([createCategory([createStockItem()])]);
     const element = fixture.nativeElement as HTMLElement;
 
     expect(element.querySelector('button[aria-label="Adaugă stoc pentru Papetărie"]')).toBeNull();
@@ -71,8 +114,8 @@ describe('StockCategoryItemsSmall', () => {
     fixture.destroy();
   });
 
-  it('shows an item stocked in several locations once, with each location and its flags', () => {
-    const fixture = createFixture([createCategory([
+  it('shows an item stocked in several locations once, with each location and its flags', async () => {
+    const fixture = await createFixture([createCategory([
       createStockItem({ locationId: 'l1', locationName: 'Sala 1', quantity: 2, isLowStock: true }),
       createStockItem({ locationId: 'l2', locationName: 'Sala 2', quantity: 5, isExpired: true, expiredQuantity: 3 })
     ])]);
@@ -87,8 +130,8 @@ describe('StockCategoryItemsSmall', () => {
     fixture.destroy();
   });
 
-  it('emits the whole item when its name is clicked so the location can be chosen', () => {
-    const fixture = createFixture([createCategory([createStockItem()])]);
+  it('emits the whole item when its name is clicked so the location can be chosen', async () => {
+    const fixture = await createFixture([createCategory([createStockItem()])]);
     const openItem = vi.spyOn(fixture.componentInstance.openItem, 'emit');
 
     (fixture.nativeElement as HTMLElement)
@@ -98,8 +141,8 @@ describe('StockCategoryItemsSmall', () => {
     fixture.destroy();
   });
 
-  it('tints the item card red when any location is expired, otherwise amber for low stock', () => {
-    const fixture = createFixture();
+  it('tints the item card red when any location is expired, otherwise amber for low stock', async () => {
+    const fixture = await createFixture();
     const component = fixture.componentInstance;
     const group = (...items: StockItemDto[]) => groupStockByItem(items)[0];
 
@@ -109,10 +152,13 @@ describe('StockCategoryItemsSmall', () => {
     fixture.destroy();
   });
 
-  function createFixture(items: StockItemCategoryGroup[] = [], loading = false) {
+  async function createFixture(items: StockItemCategoryGroup[] = [], loading = false) {
     const fixture = TestBed.createComponent(StockCategoryItemsSmall);
     fixture.componentRef.setInput('items', items);
     fixture.componentRef.setInput('loading', loading);
+    fixture.detectChanges();
+    // the virtual-scroll viewport renders its window asynchronously
+    await new Promise(resolve => setTimeout(resolve));
     fixture.detectChanges();
     return fixture;
   }
