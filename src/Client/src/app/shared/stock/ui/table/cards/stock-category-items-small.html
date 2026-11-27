@@ -16,139 +16,142 @@
               nzNotFoundContent="Nu există stoc" />
   }
 } @else {
-  <div class="flex flex-col gap-3 py-2">
-    @for (category of categories(); track category.categoryId) {
-      <section class="min-w-0"
-               [attr.aria-labelledby]="'stock-category-' + category.categoryId">
-        <div class="sticky top-0 z-20 mb-2 flex min-w-0 items-center gap-2 bg-slate-50 dark:bg-slate-950 py-1">
-          <nz-icon [nzType]="category.categoryIcon?.fileName
-            ? ('icons:' + category.categoryIcon.fileName)
-            : 'icons:box'"
-                   class="shrink-0 text-lg text-primary-600! dark:text-primary-400!" />
-          <h2 [id]="'stock-category-' + category.categoryId"
-              class="mb-0! min-w-0 truncate text-sm font-semibold"
-              [attr.title]="category.categoryName">
-            {{ category.categoryName }}
-          </h2>
-          <span nz-typography
-                nzType="secondary"
-                class="mb-0! shrink-0 text-xs">
-            {{ category.groups.length }}
-          </span>
-          <div class="ms-auto flex shrink-0 items-center gap-1">
-            @if (category.expiredCount > 0) {
-              <nz-tag nzColor="red"
-                      class="me-0!"
-                      [attr.aria-label]="category.expiredCount + ' expirate'">
-                {{ category.expiredCount }} exp.
-              </nz-tag>
-            }
-            @if (category.lowStockCount > 0) {
-              <nz-tag nzColor="orange"
-                      class="me-0!"
-                      [attr.aria-label]="category.lowStockCount + ' stoc redus'">
-                {{ category.lowStockCount }} redus
-              </nz-tag>
-            }
-            @if (!readOnly()) {
-            <button nz-button
-                    nzType="text"
-                    nzShape="circle"
-                    type="button"
-                    nz-tooltip
-                    [nzTooltipTitle]="'Adaugă stoc pentru ' + category.categoryName"
-                    [attr.aria-label]="'Adaugă stoc pentru ' + category.categoryName"
-                    class="h-8! min-h-8! w-8! min-w-8! p-0!"
-                    (click)="addStock(category)">
-              <nz-icon nzType="icons:plus" />
-            </button>
-            }
-          </div>
-        </div>
-
-        <div class="flex min-w-0 flex-col gap-2">
-          @for (group of category.groups; track group.itemId) {
-            @let stockItem = group.item;
-            <nz-card nzSize="small"
-                     class="min-w-0"
-                     [class]="cardToneClass(group)">
-              <div class="flex min-w-0 items-start gap-3">
-                <ske-item-thumbnail [itemId]="stockItem.itemId"
-                                    [imageFileId]="stockItem.imageFileId"
-                                    [large]="true" />
-                <div class="min-w-0 grow">
-                  <h3 class="mb-0! text-base font-semibold">
-                    <button type="button"
-                            class="text-left font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 enabled:cursor-pointer"
-                            [attr.aria-label]="(group.locations.length > 1 ? 'Alege locația pentru ' : 'Ajustează stocul pentru ') + stockItem.itemName"
-                            [disabled]="readOnly()"
-                            (click)="openItem.emit(group)">{{ stockItem.itemName }}</button>
-                  </h3>
-                  <div nz-typography
-                       nzType="secondary"
-                       class="mb-0! text-xs">
-                    {{ stockItem.sku || 'Fără cod' }}
-                    <span aria-hidden="true"> · </span>
-                    <nz-icon nzType="icons:clock"
-                             aria-hidden="true" />
-                    {{ group.lastUpdatedAt ? (group.lastUpdatedAt | timeAgo) : '—' }}
-                  </div>
-                </div>
-                @if (!readOnly()) {
-                  <ske-stock-item-actions [group]="group"
-                                          class="shrink-0"
-                                          (move)="move.emit($event)"
-                                          (removeExpired)="removeExpired.emit($event)"
-                                          (extendExpiry)="extendExpiry.emit($event)"
-                                          (addToOrder)="addToOrder.emit($event)"
-                                          (visibilityChange)="visibilityChange.emit($event)" />
-                }
-              </div>
-
-              <div class="mt-1 flex min-w-0 items-center gap-2">
-                <strong class="text-xl">{{ group.totalQuantity }} {{ stockItem.unit }}</strong>
-                @if (group.locations.length > 1) {
-                  <span nz-typography
-                        nzType="secondary"
-                        class="text-xs">total</span>
-                }
-                @if (stockItem.isPerishable) {
-                  <nz-tag nzColor="orange"
-                          class="ms-auto! me-0!">Perisabil</nz-tag>
-                }
-              </div>
-
-              <ul role="list"
-                  class="m-0 mt-2 flex min-w-0 list-none flex-col gap-2 p-0">
-                @for (item of group.locations; track item.locationId) {
-                  <li>
-                    <button type="button"
-                            class="flex w-full min-w-0 items-center gap-2 rounded-md border border-slate-300 bg-white/60 px-3 py-2 text-left enabled:cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:border-slate-600 dark:bg-slate-900/60"
-                            [attr.aria-label]="locationLabel(item)"
-                            [disabled]="readOnly()"
-                            (click)="adjust.emit(item)">
-                      <span class="min-w-0 truncate font-medium">{{ item.locationName }}</span>
-                      @if (group.locations.length > 1) {
-                        <strong>{{ item.quantity }}</strong>
-                      }
-                      <span class="ms-auto flex shrink-0 flex-wrap justify-end gap-1">
-                        @if (item.isLowStock) {
-                          <nz-tag nzColor="orange"
-                                  class="me-0!">Stoc redus</nz-tag>
-                        }
-                        @if (item.isExpired) {
-                          <nz-tag nzColor="red"
-                                  class="me-0!">Expiră ({{ item.expiredQuantity }})</nz-tag>
-                        }
-                      </span>
-                    </button>
-                  </li>
-                }
-              </ul>
-            </nz-card>
+  <cdk-virtual-scroll-viewport dynamicItemSize
+                               [estimatedItemSize]="170"
+                               [minBufferPx]="400"
+                               [maxBufferPx]="800"
+                               class="min-h-0 w-full grow [&_.cdk-virtual-scroll-content-wrapper]:w-full">
+    <div *cdkVirtualFor="let row of rows(); let i = index; trackBy: trackRow"
+         [skeVirtualItem]="i"
+         class="min-w-0 pb-2">
+      @if (row.kind === 'header') {
+        @let category = row.category;
+      <div class="sticky top-0 z-20 mb-2 flex min-w-0 items-center gap-2 bg-slate-50 dark:bg-slate-950 py-1">
+        <nz-icon [nzType]="category.categoryIcon?.fileName
+          ? ('icons:' + category.categoryIcon.fileName)
+          : 'icons:box'"
+                 class="shrink-0 text-lg text-primary-600! dark:text-primary-400!" />
+        <h2 [id]="'stock-category-' + category.categoryId"
+            class="mb-0! min-w-0 truncate text-sm font-semibold"
+            [attr.title]="category.categoryName">
+          {{ category.categoryName }}
+        </h2>
+        <span nz-typography
+              nzType="secondary"
+              class="mb-0! shrink-0 text-xs">
+          {{ category.groups.length }}
+        </span>
+        <div class="ms-auto flex shrink-0 items-center gap-1">
+          @if (category.expiredCount > 0) {
+            <nz-tag nzColor="red"
+                    class="me-0!"
+                    [attr.aria-label]="category.expiredCount + ' expirate'">
+              {{ category.expiredCount }} exp.
+            </nz-tag>
+          }
+          @if (category.lowStockCount > 0) {
+            <nz-tag nzColor="orange"
+                    class="me-0!"
+                    [attr.aria-label]="category.lowStockCount + ' stoc redus'">
+              {{ category.lowStockCount }} redus
+            </nz-tag>
+          }
+          @if (!readOnly()) {
+          <button nz-button
+                  nzType="text"
+                  nzShape="circle"
+                  type="button"
+                  nz-tooltip
+                  [nzTooltipTitle]="'Adaugă stoc pentru ' + category.categoryName"
+                  [attr.aria-label]="'Adaugă stoc pentru ' + category.categoryName"
+                  class="h-8! min-h-8! w-8! min-w-8! p-0!"
+                  (click)="addStock(category)">
+            <nz-icon nzType="icons:plus" />
+          </button>
           }
         </div>
-      </section>
-    }
-  </div>
+      </div>
+      } @else {
+        @let group = row.group;
+        @let stockItem = group.item;
+      <nz-card nzSize="small"
+               class="min-w-0"
+               [class]="cardToneClass(group)">
+        <div class="flex min-w-0 items-start gap-3">
+          <ske-item-thumbnail [itemId]="stockItem.itemId"
+                              [imageFileId]="stockItem.imageFileId"
+                              [large]="true" />
+          <div class="min-w-0 grow">
+            <h3 class="mb-0! text-base font-semibold">
+              <button type="button"
+                      class="text-left font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 enabled:cursor-pointer"
+                      [attr.aria-label]="(group.locations.length > 1 ? 'Alege locația pentru ' : 'Ajustează stocul pentru ') + stockItem.itemName"
+                      [disabled]="readOnly()"
+                      (click)="openItem.emit(group)">{{ stockItem.itemName }}</button>
+            </h3>
+            <div nz-typography
+                 nzType="secondary"
+                 class="mb-0! text-xs">
+              {{ stockItem.sku || 'Fără cod' }}
+              <span aria-hidden="true"> · </span>
+              <nz-icon nzType="icons:clock"
+                       aria-hidden="true" />
+              {{ group.lastUpdatedAt ? (group.lastUpdatedAt | timeAgo) : '—' }}
+            </div>
+          </div>
+          @if (!readOnly()) {
+            <ske-stock-item-actions [group]="group"
+                                    class="shrink-0"
+                                    (move)="move.emit($event)"
+                                    (removeExpired)="removeExpired.emit($event)"
+                                    (extendExpiry)="extendExpiry.emit($event)"
+                                    (addToOrder)="addToOrder.emit($event)"
+                                    (visibilityChange)="visibilityChange.emit($event)" />
+          }
+        </div>
+
+        <div class="mt-1 flex min-w-0 items-center gap-2">
+          <strong class="text-xl">{{ group.totalQuantity }} {{ stockItem.unit }}</strong>
+          @if (group.locations.length > 1) {
+            <span nz-typography
+                  nzType="secondary"
+                  class="text-xs">total</span>
+          }
+          @if (stockItem.isPerishable) {
+            <nz-tag nzColor="orange"
+                    class="ms-auto! me-0!">Perisabil</nz-tag>
+          }
+        </div>
+
+        <ul role="list"
+            class="m-0 mt-2 flex min-w-0 list-none flex-col gap-2 p-0">
+          @for (item of group.locations; track item.locationId) {
+            <li>
+              <button type="button"
+                      class="flex w-full min-w-0 items-center gap-2 rounded-md border border-slate-300 bg-white/60 px-3 py-2 text-left enabled:cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:border-slate-600 dark:bg-slate-900/60"
+                      [attr.aria-label]="locationLabel(item)"
+                      [disabled]="readOnly()"
+                      (click)="adjust.emit(item)">
+                <span class="min-w-0 truncate font-medium">{{ item.locationName }}</span>
+                @if (group.locations.length > 1) {
+                  <strong>{{ item.quantity }}</strong>
+                }
+                <span class="ms-auto flex shrink-0 flex-wrap justify-end gap-1">
+                  @if (item.isLowStock) {
+                    <nz-tag nzColor="orange"
+                            class="me-0!">Stoc redus</nz-tag>
+                  }
+                  @if (item.isExpired) {
+                    <nz-tag nzColor="red"
+                            class="me-0!">Expiră ({{ item.expiredQuantity }})</nz-tag>
+                  }
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+      </nz-card>
+      }
+    </div>
+  </cdk-virtual-scroll-viewport>
 }
