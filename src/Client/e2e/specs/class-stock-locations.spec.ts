@@ -95,3 +95,14 @@ test('phone actions menu opens on first tap and offers a location per action', a
   await page.keyboard.press('Escape');
   await expect(page.getByText('Mută stocul')).toBeHidden();
 });
+
+test('desktop expired menu opens the extend-expiry modal', async ({page}) => {
+  await mockApi(page);
+  await page.setViewportSize({width: 1440, height: 900});
+  await page.goto(`/school-classes/${classId}?tab=0`);
+
+  await page.getByRole('button', {name: 'Acțiuni pentru articolele expirate ale Mere'}).click();
+  await page.getByText('Frigider · 3 expirate').hover();
+  await page.getByText('Prelungește expirarea').click();
+  await expect(page.locator('.ant-modal')).toBeVisible();
+});
