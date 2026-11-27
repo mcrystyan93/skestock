@@ -112,6 +112,24 @@ describe('DynamicSizeVirtualScrollStrategy', () => {
     expect(viewport.scrolledTo).toEqual([]);
   });
 
+  it('setKeys moves measured heights with their key and re-estimates new rows', () => {
+    const viewport = new FakeViewport();
+    viewport.dataLength = 3;
+    const strategy = attach(viewport);
+    strategy.setKeys(['a', 'b', 'c']);
+    strategy.updateItemSize(0, 40);
+    strategy.updateItemSize(2, 60);
+
+    viewport.dataLength = 3;
+    strategy.setKeys(['c', 'x', 'a']);
+
+    // c=60, x=estimate(100), a=40
+    expect(viewport.totalContentSize).toBe(200);
+    expect(strategy.indexAtOffset(59)).toBe(0);
+    expect(strategy.indexAtOffset(60)).toBe(1);
+    expect(strategy.indexAtOffset(160)).toBe(2);
+  });
+
   it('indexAtOffset maps a scroll offset to the item containing it, using measured heights', () => {
     const viewport = new FakeViewport();
     viewport.dataLength = 3;

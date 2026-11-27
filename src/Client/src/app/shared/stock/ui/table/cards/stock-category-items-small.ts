@@ -89,11 +89,14 @@ export class StockCategoryItemsSmall {
   private readonly _dynamicScroll = viewChild(CdkDynamicSizeVirtualScroll);
   private readonly _top = signal({ index: 0, offset: 0 });
 
-  // Also runs when the viewport is recreated (empty state -> list starts at scroll 0 without a scroll event) or the rows change under the scroll position.
+  // Keeps measured heights attached to their rows when the rows change. Also runs when the viewport is recreated (empty state -> list starts at scroll 0 without a scroll event) or the rows change under the scroll position.
   private readonly _refreshTopEffect = effect(() => {
     this._viewport();
-    this.rows();
-    untracked(() => this.onScroll());
+    const rows = this.rows();
+    untracked(() => {
+      this._dynamicScroll()?.scrollStrategy.setKeys(rows.map(row => this.trackRow(0, row)));
+      this.onScroll();
+    });
   });
 
   // Native `position: sticky` cannot work inside the virtual-scroll content wrapper, so the category of the row at the top is overlaid once scrolled.

@@ -23,6 +23,7 @@ export class DynamicSizeVirtualScrollStrategy implements VirtualScrollStrategy {
   private viewport: CdkVirtualScrollViewport | null = null;
   private sizes: number[] = [];
   private measured: boolean[] = [];
+  private keys: string[] = [];
   private lastScrolledIndex = -1;
 
   constructor(
@@ -91,6 +92,28 @@ export class DynamicSizeVirtualScrollStrategy implements VirtualScrollStrategy {
 
     const clamped = Math.max(0, Math.min(index, this.dataLength));
     this.viewport.scrollToOffset(this.offsetAt(clamped), behavior);
+  }
+
+  /**
+   * Declares the identity of each item, in order. Measured heights follow their key to the new index,
+   * so reordering, filtering or inserting rows does not leave stale heights on unrendered rows.
+   */
+  public setKeys(keys: string[]): void {
+    const known = new Map<string, number>();
+    this.keys.forEach((key, i) => {
+      if (this.measured[i]) {
+        known.set(key, this.sizes[i]);
+      }
+    });
+
+    this.keys = keys;
+    this.sizes = keys.map(key => known.get(key) ?? this.estimatedItemSize);
+    this.measured = keys.map(key => known.has(key));
+
+    if (this.viewport) {
+      this.viewport.setTotalContentSize(this.totalSize());
+      this.updateRenderedRange();
+    }
   }
 
   /** Index of the item that contains the given scroll offset (the last item when past the end). */
