@@ -106,3 +106,36 @@ test('desktop expired menu opens the extend-expiry modal', async ({page}) => {
   await page.getByText('Prelungește expirarea').click();
   await expect(page.locator('.ant-modal')).toBeVisible();
 });
+
+test('phone list overlays the current category header once scrolled', async ({page}) => {
+  const many = Array.from({length: 60}, (_, i) =>
+    line(`n${i}`, `Produs ${i}`, 'l1', 'Cămară', 1, {categoryId: `cat-${i < 30 ? 1 : 2}`, categoryName: i < 30 ? 'Alimente' : 'Curățenie'}));
+  await page.route('**/api/**', async (route) => {
+    const {pathname} = new URL(route.request().url());
+    if (pathname === '/api/Users/manage/info') return route.fulfill({json: {email: 'test@example.com', isEmailConfirmed: true}});
+    if (pathname === `/api/SchoolClasses/${classId}`) {
+      return route.fulfill({json: {id: classId, name: 'Clasa E2E', startDate: '2026-09-01T00:00:00Z', endDate: '2027-06-15T00:00:00Z', status: 'active'}});
+    }
+    if (pathname === `/api/Stock/class/${classId}`) return route.fulfill({json: {hasExpiredItems: false, items: many}});
+    return route.fulfill({json: {data: [], hasNextPage: false, sort: [], labels: [], series: [], points: [], id: classId, name: 'Clasa E2E'}});
+  });
+  await page.setViewportSize({width: 390, height: 844});
+  await page.goto(`/school-classes/${classId}?tab=0`);
+
+  const viewport = page.locator('ske-class-stock cdk-virtual-scroll-viewport');
+  const overlay = page.locator('ske-class-stock .absolute.top-0.z-20');
+  await expect(viewport.getByText('Alimente')).toBeVisible();
+  await expect(overlay).toHaveCount(0);
+
+  await viewport.evaluate((e) => e.scrollTo(0, 800));
+  await expect(overlay.getByText('Alimente')).toBeVisible();
+  // the overlay must not swallow touches/wheel meant for the list underneath
+  expect(await viewport.evaluate((e) => {
+    const {left, top} = e.getBoundingClientRect();
+    return e.contains(document.elementFromPoint(left + 40, top + 10));
+  })).toBe(true);
+
+  await viewport.evaluate((e) => e.scrollTo(0, e.scrollHeight));
+  await expect(overlay.getByText('Curățenie')).toBeVisible();
+  expect(await page.locator('ske-class-stock nz-card').count()).toBeLessThan(30);
+});
