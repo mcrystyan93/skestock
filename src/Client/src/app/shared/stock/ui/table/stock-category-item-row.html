@@ -121,12 +121,38 @@
       <ul nz-menu>
         @for (loc of expired(); track loc.locationId) {
           @if (isSingle()) {
-            <ng-container *ngTemplateOutlet="expiredActions; context: { $implicit: loc }" />
+            <li nz-menu-item
+                (click)="extendExpiry.emit(loc)">
+              <nz-icon nzType="icons:calendar-plus" class="me-2" />
+              Prelungește expirarea
+            </li>
+            <li nz-menu-item
+                nzDanger
+                nz-popconfirm
+                nzPopconfirmPlacement="topRight"
+                [nzPopconfirmTitle]="'Elimini cele ' + loc.expiredQuantity + ' articole expirate pentru ' + loc.itemName + ' la ' + loc.locationName + '?'"
+                (nzOnConfirm)="removeExpired.emit(loc)">
+              <nz-icon nzType="icons:trash" class="me-2" />
+              Elimină articolele expirate
+            </li>
           } @else {
             <li nz-submenu
                 [nzTitle]="loc.locationName + ' · ' + loc.expiredQuantity + ' expirate'">
               <ul>
-                <ng-container *ngTemplateOutlet="expiredActions; context: { $implicit: loc }" />
+                <li nz-menu-item
+                    (click)="extendExpiry.emit(loc)">
+                  <nz-icon nzType="icons:calendar-plus" class="me-2" />
+                  Prelungește expirarea
+                </li>
+                <li nz-menu-item
+                    nzDanger
+                    nz-popconfirm
+                    nzPopconfirmPlacement="topRight"
+                    [nzPopconfirmTitle]="'Elimini cele ' + loc.expiredQuantity + ' articole expirate pentru ' + loc.itemName + ' la ' + loc.locationName + '?'"
+                    (nzOnConfirm)="removeExpired.emit(loc)">
+                  <nz-icon nzType="icons:trash" class="me-2" />
+                  Elimină articolele expirate
+                </li>
               </ul>
             </li>
           }
@@ -161,23 +187,5 @@
         }
       </ul>
     </nz-dropdown-menu>
-
-    <ng-template #expiredActions
-                 let-loc>
-      <li nz-menu-item
-          (click)="extendExpiry.emit(loc)">
-        <nz-icon nzType="icons:calendar-plus" class="me-2" />
-        Prelungește expirarea
-      </li>
-      <li nz-menu-item
-          nzDanger
-          nz-popconfirm
-          nzPopconfirmPlacement="topRight"
-          [nzPopconfirmTitle]="'Elimini cele ' + loc.expiredQuantity + ' articole expirate pentru ' + loc.itemName + ' la ' + loc.locationName + '?'"
-          (nzOnConfirm)="removeExpired.emit(loc)">
-        <nz-icon nzType="icons:trash" class="me-2" />
-        Elimină articolele expirate
-      </li>
-    </ng-template>
   }
 </td>
