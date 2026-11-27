@@ -9,8 +9,8 @@ import { StockLocationPickerModal, StockLocationPickerModalData } from '../modal
 import { StockMoveModal, StockMoveModalData } from '../modals/move/stock-move-modal';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AddStockBatchModal } from '@ske/shared/stock-batches';
-import { StockCategoryItemsTable } from './stock-category-items-table';
-import { StockCategoryItemsSmall } from './stock-category-items-small';
+import { StockCategoryItemsTable } from './grid/stock-category-items-table';
+import { StockCategoryItemsSmall } from './cards/stock-category-items-small';
 import { LayoutBreakpoint } from '@ske/shared/directives';
 import { Events } from '@ngrx/signals/events';
 import { StockEvents } from '../../services/stock.events';
